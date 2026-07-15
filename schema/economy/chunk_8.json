@@ -1,0 +1,338 @@
+{
+  "chunkIndex": 8,
+  "functions": [
+    {
+      "address": "108fc780",
+      "currentName": "FUN_108fc780",
+      "proposedName": "CGiftPackUIModel::RegisterHandlers",
+      "purpose": "GUI/Flash model init for the gift-pack subsystem. Binds named RPC/callback slots via FUN_104d13b0 so the client model can query/request gift data. Guarded by in_stack_00000014==1 (one-time init flag).",
+      "subsystem": "rewards/gift",
+      "serverRelevance": "client-only. Enumerates the gift command surface the server must implement/authorize: GetConsectiveLoginGiftItemList->108fdb10, GetOnlineTimeGiftItemList->108fdf30, GetNewerUpgradeGiftItemList->108fe3b0, ReqGetGift->108fe7d0, GetCanFetchedGiftPackNum->108fd970, GetGroupInfoData->108fc8b0, GetGiftPackData->108fccc0, GetOnlineGiftTimeData->108fd700.",
+      "formulas": ["callback bit-flag check: (flags>>6 & 1) tests smart-ref ownership before invoking release vtbl+8 (stock ref-counted string/handle idiom, repeated throughout chunk)"],
+      "costs": [],
+      "confidence": "high",
+      "notes": "'Consective' is the game's own misspelling of Consecutive (consecutive-login reward). ReqGetGift is the actual claim command."
+    },
+    {
+      "address": "108fccc0",
+      "currentName": "FUN_108fccc0",
+      "proposedName": "CGiftPackUIModel::BuildGiftPackData",
+      "purpose": "Builds the client display VO array 'giftListArray' for the gift-pack panel from server-pushed/config data. Iterates gift entries (FUN_108fc5a0 count, FUN_108fc510 by index), matches CONSECTIVE_LOGIN/ONLINE_TIME/NEWER_UPGRADE/WEAPON item classnames, and emits per-entry fields.",
+      "subsystem": "rewards/gift",
+      "serverRelevance": "client-only display builder; the currency/state values it emits (boundGold, unboundGold, state, totalTime) are read from server-authoritative structures. Server owns the real gift state and grant.",
+      "formulas": [
+        "nOnlineTime = ((*(int*)(giftObj+0x3c) - *(int*)(giftObj+0x40)) + _time64(0)) * 1000  (converts server epoch-delta seconds to ms)",
+        "boundGold = FUN_117faa00() ; unboundGold = FUN_117fac50()  (current player wallet snapshot)",
+        "state = giftEntry+0xc field, or 0 if lookup (vtbl+0x20)(entryId) == 0",
+        "if gift type (iVar3+0x2c) == 2: totalTime = FUN_117fac90() * 1000 (online-time gift)",
+        "if gift type == 1: consecutive-login gift, builds subItemList from SUB_ITEM_CLASSNAME entries (itemID via vtbl+0x18, itemCnt=entry+8, itemIconPathName=itemDef+0xb4)",
+        "sentinel/uninitialized marker = -0x21524151 (0xDEADBEAF) when a TLV field tag &0x8f is not 3 (int) or 4"
+      ],
+      "costs": ["boundGold/unboundGold = dual-currency wallet (bound vs tradable gold)"],
+      "confidence": "medium",
+      "notes": "Heavy decompiler stack-var aliasing; TLV field-tag test (byte & 0x8f) == 3/4/6/9/10 recurs throughout (3/4=int, 6=ref/string, 9=array, 10=object)."
+    },
+    {
+      "address": "108fe3b0",
+      "currentName": "FUN_108fe3b0",
+      "proposedName": "CGiftPackUIModel::BuildNewPlayerGiftList",
+      "purpose": "Builds 'newPlayerGiftList' VO for the newbie/upgrade gift panel. Iterates gift entries filtering type (iVar2+0x2c)==3 (NEWER_UPGRADE), emits per-entry item rows and wallet/state.",
+      "subsystem": "rewards/gift",
+      "serverRelevance": "client-only display builder; emitted boundGold/unboundGold/state are server-authoritative snapshots.",
+      "formulas": [
+        "filter: gift type *(iVar2+0x2c) == 3",
+        "boundGold = FUN_117faa00(); unboundGold = FUN_117fac50()",
+        "per reward item: itemID = (itemDef vtbl+0x18)(), itemCnt = entry+8, itemIconPathName = itemDef+0xb4",
+        "state = (vtbl+0x20)(entryId)+0xc, else 0"
+      ],
+      "costs": [],
+      "confidence": "medium"
+    },
+    {
+      "address": "109082d0",
+      "currentName": "FUN_109082d0",
+      "proposedName": "CPvpUIModel::RegisterHandlers",
+      "purpose": "GUI model init for PVP room/agreement panel. Registers PVP query callbacks and pushes a few enforce-time/rate config scalars to the Flash model.",
+      "subsystem": "pvp (not economy core)",
+      "serverRelevance": "client-only. Not a currency path. enforceSpecialTime and rateX/Y begin/end are UI layout/rate config scalars fetched from FUN_117424xx accessors.",
+      "formulas": [
+        "enforceSpecialTime = FUN_117424f0()",
+        "rateXBegin=FUN_117424a0(), rateXEnd=FUN_117424b0(), rateYBegin=FUN_117424c0(), rateYEnd=FUN_117424d0() (each preceded by FUN_117423e0 selector)"
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "Included only because it sits in the economy chunk; primarily PVP UI plumbing."
+    },
+    {
+      "address": "1090bea0",
+      "currentName": "FUN_1090bea0",
+      "proposedName": "CRankUIModel::RegisterHandlers",
+      "purpose": "GUI model init for the leaderboard/ranking + rapid-hunt reward panel. Binds rank data and reward-fetch callbacks.",
+      "subsystem": "rewards/ranking",
+      "serverRelevance": "client-only. Command surface: GetRankTitleList->1090bfa0, ReqRankDataList->1090c460, UpdateRankDataList->1090cd20, FetchReward->1090d680 (server must authorize reward grant), UpdateRapidHuntDataList->1090c690, UpdateRapidHuntAwardData->1090d730, FetchHuntRapidHuntReward->1090db70 (claim).",
+      "formulas": [],
+      "costs": [],
+      "confidence": "high"
+    },
+    {
+      "address": "1090cd20",
+      "currentName": "FUN_1090cd20",
+      "proposedName": "CRankUIModel::BuildRankDataList",
+      "purpose": "Builds RANK_BASE_DATA_VO array 'arrDataList' for the leaderboard from server-pushed rank rows. Emits rank, name, guild/clan, two data columns with type/unit, reward item id/name/fetched flag, level name, and viewer's own position.",
+      "subsystem": "rewards/ranking",
+      "serverRelevance": "client-only display builder. Reward eligibility (bRewardFetched) and reward item id are server-authoritative; client only renders.",
+      "formulas": [
+        "row stride = 0xa0 bytes; entry count = ((int)piStack_164 - iStack_168) / 0xa0",
+        "record header stride from ppiStack_120 blocks = >>5 (0x20)",
+        "column meta from FUN_1090b6c0(rankType): nColumn1Type=+0x14, nColumn2Type=+0x18, nColumn1Unit=+0x1c, nColumn2Unit=+0x20",
+        "reward emitted only if row index (unaff_EDI) < uStack_180 (reward-count cap); else nRewardItemID=0",
+        "nMyPostion = *(int*)(rankState+0x24)  (server-provided own rank)"
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "'nMyPostion' is the game's spelling. Uses FUN_100ecfd0/FUN_100ed090 UTF conversion for name strings."
+    },
+    {
+      "address": "1091a1f0",
+      "currentName": "FUN_1091a1f0",
+      "proposedName": "CBuildUpSkillLeagueUIModel::RegisterHandlers",
+      "purpose": "GUI model init that registers a large table of callbacks for the character build-up / skill-unlock / league-registration panel via repeated FUN_100b62c0 (bind name) + FUN_1091d8d0 (register slot) pairs.",
+      "subsystem": "progression/skill+leveling",
+      "serverRelevance": "client-only. Server-relevant command surface: GetBuildUpData, LevelUpBuild (server must validate cost & apply level), GetFundData, GetUnlockData, GetCandidateSkillData, GetSkillViewData, GetLeagueRegistrationViewData, UnlockItem (server validates unlock cost), LearnSkill (server validates & grants skill), ReqLeagueRegistration, GiveUpLeagueRegistration, sendGuildMatchSignUpList.",
+      "formulas": [],
+      "costs": [],
+      "confidence": "high",
+      "notes": "LevelUpBuild/UnlockItem/LearnSkill are the authoritative mutation commands; their handlers (FUN_1091a730..FUN_1091cec0) are elsewhere. This function only wires names to handler addresses."
+    },
+    {
+      "address": "1092d480",
+      "currentName": "FUN_1092d480",
+      "proposedName": "CPlayerVIPLevelUpInfo::GetEntryAt",
+      "purpose": "Static-config accessor: returns element[param_1] from the CPlayerVIPLevelUpInfo singleton's contiguous array (the VIP level-up requirement/reward table). Lazy-inits the info manager via CInfoManager::FindByName.",
+      "subsystem": "progression/vip",
+      "serverRelevance": "config lookup used by both sides; server should treat this table as authoritative source of VIP level-up thresholds.",
+      "formulas": [
+        "count = (base[6] - base[5]) >> 2  (array of 4-byte entries)",
+        "return valid iff 0 <= param_1 < count, value = *(base[5] + param_1*4), else 0",
+        "base = manager[0] or fallback singleton &DAT_123bff0c"
+      ],
+      "costs": [],
+      "confidence": "high"
+    },
+    {
+      "address": "1092d510",
+      "currentName": "FUN_1092d510",
+      "proposedName": "CPlayerVIPLevelUpInfo::ReleaseManagerRef",
+      "purpose": "Resolves the CPlayerVIPLevelUpInfo singleton (lazy-init) and invokes its vtbl+0x28 method (ref release / RAII teardown helper).",
+      "subsystem": "progression/vip",
+      "serverRelevance": "client-only plumbing.",
+      "formulas": [],
+      "costs": [],
+      "confidence": "medium"
+    },
+    {
+      "address": "1092d870",
+      "currentName": "FUN_1092d870",
+      "proposedName": "CMartShopUIModel::RegisterHandlers",
+      "purpose": "GUI model init for the cash-shop / mart panel. Registers the full mart command table (bind-name FUN_100b62c0 + register FUN_10935d40 pairs) and wires several C2AS/AS2C net notify handlers via FUN_10d17440/FUN_10d17870. Clears mart model state fields at the end.",
+      "subsystem": "transactions/shop",
+      "serverRelevance": "client-only registration, but the most economy-critical command surface in the chunk. Server must be authoritative over: RequestBuy (FUN_10930720), GetCurPrice (FUN_10930a60), RequestOpenVip (FUN_1092fbb0), FetchOpenVipData/FetchExtendVipData, RapidBuyVip (FUN_10931830), RequestWorldPay_Face/RequestWorldPay_Sex (paid appearance/gender change), C2AS_GetMartItemData, C2AS_OpenWeiXinWindow (WeChat recharge), AS2C_RequestRefreshNum, OpenMartVipPanelNotify. GoodsListReq/GetMartData/GetSelItemGroupData/GetCharCreditData/GetPurchaseItemData are read queries.",
+      "formulas": [
+        "on teardown: model+0x20=0, +0x24=0, +0xb8=0; frees +0xbc buffer; +0xbc..+0xc4=0, +0xc8=0"
+      ],
+      "costs": ["RequestBuy is the authoritative purchase command; RapidBuyVip/RequestOpenVip are VIP purchase commands; WorldPay_Face/Sex are premium currency sinks (paid character customization)."],
+      "confidence": "high",
+      "notes": "Enormous stack-relay decompilation is the standard bind/register idiom repeated ~50x; only the name->handler mapping matters. Server-side price computation lives in the RequestBuy/GetCurPrice handlers, not here."
+    },
+    {
+      "address": "109480a0",
+      "currentName": "FUN_109480a0",
+      "proposedName": "CSpoorTaskUIModel::BuildEventList",
+      "purpose": "Builds the achievement/'spoor' (footprint/track) task event VO list for the client panel. Iterates event definitions (FUN_10947810 count, FUN_10947780 by index) and emits per-event display fields plus completion timestamp breakdown.",
+      "subsystem": "progression/achievement",
+      "serverRelevance": "client-only display builder; progress (eventCurrent/eventFinish), reward value and completion time come from server-authoritative event state.",
+      "formulas": [
+        "eventRewardValue = def+0x2ab0 style field (iStack_84)",
+        "spoorGroupID: when def[6]==2, scan group table (base+0x2d10) matching index==def[7] -> value at +4",
+        "finish date: local_58 = completion epoch, _localtime64 -> finishDay=tm_mday, finishYear=tm_year, finishMonth=tm_mon",
+        "hunterStarLevel = def[7]",
+        "newClear/newDetailClear flag uVar1 set if event id present in global cleared-set [DAT_123bd2a8..DAT_123bd2ac)"
+      ],
+      "costs": [],
+      "confidence": "low",
+      "notes": "CPet__SetName calls here are misattributed by the decompiler to a shared std::string assign thunk, not actual pet naming."
+    },
+    {
+      "address": "10948b40",
+      "currentName": "FUN_10948b40",
+      "proposedName": "CSpoorTaskUIModel::BuildRewardList",
+      "purpose": "Builds the spoor/achievement reward-claim list (FUN_10923e00 count, FUN_10923d70 by index). Emits ItemID, fetched/claimable flags, contribution value, reward index, prize id, and the player's current spoor points.",
+      "subsystem": "rewards/achievement",
+      "serverRelevance": "client-only display; isFetch/canFetch and currentSpoorValue are server-authoritative (FUN_11504c20 claimable, FUN_11504d90 fetched-state, FUN_11504d20 current points).",
+      "formulas": [
+        "ItemID = rewardEntry[5]",
+        "contributeValue = rewardEntry[8]  (spoor points threshold for this reward)",
+        "canFetch = FUN_11504c20(prizeId); isFetch from FUN_11504d90",
+        "prizeID = (rewardEntry vtbl+0x18)()",
+        "currentSpoorValue = FUN_11504d20()"
+      ],
+      "costs": ["contributeValue = accumulated contribution/spoor points required to unlock each reward tier"],
+      "confidence": "medium"
+    },
+    {
+      "address": "10948d90",
+      "currentName": "FUN_10948d90",
+      "proposedName": "CSpoorTaskUIModel::BuildRewardPreviewWithPrice",
+      "purpose": "Builds 'rewardItemArray' preview (itemID/itemName/itemCounts) for a spoor prize pack and computes the two-currency purchase price of the pack for display, applying a rank-based discount multiplier.",
+      "subsystem": "transactions/pricing",
+      "serverRelevance": "client-only PRICE DISPLAY. Server must independently compute/validate the true bound & unbound price; client discount rates come from CPlayer hunt-rank accessors and must not be trusted.",
+      "formulas": [
+        "base price record = FUN_109478c0(packId); baseBoundPrice = record+0x18, baseUnboundPrice = record+0x1c",
+        "boundMoneyPrice = (int)((float)*(record+0x18) * fStack_98)",
+        "moneyPrice = (int)((float)*(record+0x1c) * fStack_9c)",
+        "discount multipliers: if FUN_10947a30(mailId)==0 -> fStack_98 = fStack_9c = DAT_11de9918 (default rate, likely 1.0f)",
+        "else fStack_98 (bound-rate) = FUN_11860ff0(huntRank), fStack_9c (unbound-rate) = FUN_11861030(huntRank)  (per-hunt-rank price scalars)",
+        "reward preview loop stride 0x14 over prize groups (FUN_1052c520/FUN_1052c6a0), inner item stride 9 dwords; itemID=*puVar6, itemCounts=puVar6[2]",
+        "uninitialized-field sentinel = 0xdeadbeaf"
+      ],
+      "costs": ["dual-currency pack price: bound gold price (record+0x18) and unbound/tradable gold price (record+0x1c), each scaled by a hunt-rank discount factor"],
+      "confidence": "medium",
+      "notes": "This is the clearest cost formula in the chunk: server-side must reproduce base*rate with the correct hunt-rank rate table and NOT accept client-sent totals."
+    },
+    {
+      "address": "1094c980",
+      "currentName": "FUN_1094c980",
+      "proposedName": "CLeagueRewardInfo::GetRewardAt",
+      "purpose": "Static-config accessor into the CLeagueRewardInfo 2D reward table (rank-tier -> reward). Lazy-inits the info manager. Returns the reward id for a linear rank index.",
+      "subsystem": "rewards/league",
+      "serverRelevance": "config lookup for both sides; server-authoritative league reward table.",
+      "formulas": [
+        "idx = param_1 - base+0x30 (rank offset)",
+        "valid iff idx>=0 and idx < base+0x24 (total count) and base+0x28 (cols/stride) != 0",
+        "row = *(int*)(base+0x20 + (idx / cols)*4); return *(row + (idx % cols)*4)",
+        "special: param_1==-1 rejected; param_1==0 only valid when base+0x30 (offset)==0"
+      ],
+      "costs": [],
+      "confidence": "high"
+    },
+    {
+      "address": "1094caf0",
+      "currentName": "FUN_1094caf0",
+      "proposedName": "CLeagueRankUIModel::RegisterHandlers",
+      "purpose": "GUI model init for the league/guild-match ranking panel. Registers InitModel/doSearch/GetInfo/GetMyReward/GetTeamMates callbacks and two net notify handlers.",
+      "subsystem": "rewards/league",
+      "serverRelevance": "client-only. GetMyReward is the reward-preview query; server owns reward eligibility.",
+      "formulas": [],
+      "costs": [],
+      "confidence": "high"
+    },
+    {
+      "address": "1094ccf0",
+      "currentName": "FUN_1094ccf0",
+      "proposedName": "CLeagueRankUIModel::RegisterRankHandlers",
+      "purpose": "Secondary registration (called from InitModel) binding the league leaderboard command set. Guarded by DAT_1202e818+0x209 flag (spectator/disabled mode).",
+      "subsystem": "rewards/league",
+      "serverRelevance": "client-only. Commands: GetRankTitleList, ReqRankDataList, UpdateRankDataList->1094ddf0, FetchReward->1094e840 (server authorizes grant), ReqRankTitleList, ReqTeamMatesList.",
+      "formulas": [],
+      "costs": [],
+      "confidence": "high"
+    },
+    {
+      "address": "1094ddf0",
+      "currentName": "FUN_1094ddf0",
+      "proposedName": "CLeagueRankUIModel::BuildRankDataList",
+      "purpose": "League variant of the rank-list builder: emits RANK_BASE_DATA_VO 'arrDataList' plus league-specific fields (bGetReward from a claimed-bitmask, strStartTimeStr, strMyRewardStr).",
+      "subsystem": "rewards/league",
+      "serverRelevance": "client-only display; bGetReward (claimed) derives from a server-provided bitmask, reward strings from server reward table.",
+      "formulas": [
+        "row stride 0xa0; count = (uStack_1a8 - piStack_1ac) / 0xa0",
+        "column meta from FUN_1090b6c0: nColumn1Type=+0x14, nColumn2Type=+0x18",
+        "reward: if uStack_1fc(no-reward flag)==0 and FUN_1094ed10 returns >0 -> nRewardItemID=1, bRewardFetched=0; else nRewardItemID=0, bRewardFetched=1",
+        "bGetReward = (*(uint*)(state+0x7c) & (1 << (rewardIndex & 0x1f))) != 0  (claimed-reward bitmask)",
+        "nMyPostion = *(int*)(state+0x24)"
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "The 1<<idx bitmask for claimed rewards is a server-authoritative anti-double-claim structure worth mirroring."
+    },
+    {
+      "address": "109544b0",
+      "currentName": "FUN_109544b0",
+      "proposedName": "CWeaponAwakenUIModel::BuildAwakenData",
+      "purpose": "Builds the weapon 'wake'/awaken (enchant-upgrade) panel data for the currently selected weapon: current/max level & layer, next-level money cost & success probability, wake-times usage, VIP gate, and current/next attribute names/descriptions.",
+      "subsystem": "crafting/upgrade (weapon awaken)",
+      "serverRelevance": "client-only display of server-config awaken costs/probabilities. Server MUST authoritatively charge nNextMoney / nWakeCostMoney, roll nNextProbability, enforce nMaxWakeTimes and nVipNeedLevel on the actual awaken command.",
+      "formulas": [
+        "requires param_5 >= 3 (arg-count guard)",
+        "weapon record via FUN_113f9bb0; weaponLevel = record[0x6b], nPreNextMoney = piStack_6c = weapon current-tier field(+0x18)",
+        "nCurLevel = CVipCutOffInfo::GetVipCutOffIndex(...) result (ppiStack_90); nCurLayer = uStack_9c",
+        "nMaxLevel = *(cfg+0x18); nMaxLayer = *(cfg+0x1c)  (cfg = tier config iStack_98)",
+        "nNextMoney = FUN_1159a210(...)  (next awaken attempt cost)",
+        "nNextProbability = FUN_117442d0(...)  (next awaken success chance)",
+        "nCurWakeTimes = weapon[0x6e]; nMaxWakeTimes = *(cfg+0x78)",
+        "nWakeCostMoney = record(FUN_117441f0(FUN_1166dfb0(weaponLevel-1)))+0x7c, else 0",
+        "nVipNeedLevel = pcStack_94 (from FUN_11744280 / FUN_1159a4a0)",
+        "bIsVip = (player charm/level FUN_1025b060() >= nVipNeedLevel) when weapon+11000 set and FUN_11549b10(10) true",
+        "nWakeAttr: if current awaken attr (FUN_116c4f30 at level iStack_98)==0 -> 0xffffffff, else attr = attrDef+0xb4; strNextName/strNextDesc from next tier (FUN_116c4f30 at +1)"
+      ],
+      "costs": [
+        "nNextMoney: gold cost of next awaken attempt",
+        "nWakeCostMoney: gold cost per wake-times consumption tier (record+0x7c)",
+        "nNextProbability: success probability of next awaken",
+        "nMaxWakeTimes / nCurWakeTimes: per-weapon attempt limit",
+        "nVipNeedLevel: VIP level gate for the operation"
+      ],
+      "confidence": "medium",
+      "notes": "'Wake'/'awaken' = the weapon strengthen/enchant-upgrade system (CVipCutOffInfo threshold table + FUN_11744xxx cost/probability lookups). Highest-value economy formulas in chunk after 10948d90."
+    },
+    {
+      "address": "10954b00",
+      "currentName": "FUN_10954b00",
+      "proposedName": "CWeaponAwakenUIModel::BuildWakePointData",
+      "purpose": "Builds the wake-point / awaken-progress sub-panel: max & current wake points, current/max wake times, per-attempt money cost, and a two-value 'collumn' pair.",
+      "subsystem": "crafting/upgrade (weapon awaken)",
+      "serverRelevance": "client-only display; server owns wake-point balance, wake-times, and cost.",
+      "formulas": [
+        "nMaxWakePoint = *(cfg(FUN_10953ad0)+0x14)",
+        "nCurWakePoint = FUN_1025b060()  (player accumulated wake points)",
+        "nCurWakeTimes = *(playerState+0x1b8); nMaxWakeTimes = *(weaponCfg+0x78)",
+        "nWakeCostMoney = record(FUN_117441f0(weaponId, *(state+0x1ac)-1))+0x7c, else 0",
+        "collumn + &DAT_11dbfe78 pair filled from FUN_11669710() decomposed 64-bit result"
+      ],
+      "costs": ["nWakeCostMoney: gold per wake attempt indexed by current wake-times-1; nMaxWakePoint: point cap"],
+      "confidence": "medium",
+      "notes": "'collumn' is the game's spelling."
+    },
+    {
+      "address": "109582f0",
+      "currentName": "FUN_109582f0",
+      "proposedName": "CCharmFoundUIModel::RegisterHandlers",
+      "purpose": "GUI model init for the charm-found (charm forging/appraisal) + item-decompose panel. Binds the charm/decompose command callbacks. Guarded by init flag (in_stack_00000014==1).",
+      "subsystem": "crafting/forge + item decompose",
+      "serverRelevance": "client-only. Server-authoritative commands: GetCharmFoundData, ReqCharmFound (charm forge attempt - server charges cost & rolls result), CheckCharmFound, RefreshMoneyData, ReqItemDecompose (server removes items & grants decompose yield), GetItemDecomposeResultData->10959760, CheckBindStateAfterCharmFound.",
+      "formulas": [],
+      "costs": [],
+      "confidence": "high",
+      "notes": "Ties to CCharmFoundCostInfo / CCharmFoundLockCostInfo / CCharmFoundTimesCostInfo config family documented in schema/docs/economy.md (cost tables for charm 'found')."
+    },
+    {
+      "address": "10959760",
+      "currentName": "FUN_10959760",
+      "proposedName": "CItemDecomposeUIModel::BuildDecomposeResult",
+      "purpose": "Builds the item-decompose preview/result VO. Emits three source lists (itemBagList, itemStoreList, itemMailList) of DECOMPOSE_ITEM_VO entries and a bIsBonus flag. Reads candidate items from bag (base+0), store (base+0x64), and mail (playerObj+0x70) containers.",
+      "subsystem": "item decompose",
+      "serverRelevance": "client-only display builder; the actual item removal and reward grant happen server-side on ReqItemDecompose. Server must validate quantities, bind-type and rarity.",
+      "formulas": [
+        "each list built by walking a container array (count = (-basePtr>>2) or (end-begin)>>2, stride 4 = item pointers)",
+        "per item: itemID = *puVar1 (=&DAT_11dbb0b4 key), count = puVar1[1], m_nBindType = puVar1[2]",
+        "asset (icon) = itemDef+0xb4 for bag; store: itemDef+0xb4; mail: iVar6+0xb4",
+        "m_nRareType = itemDef+0x13 (bag) / +0x4c (store/mail)",
+        "itemDef resolved via FUN_10254130(itemID)",
+        "bIsBonus flag emitted from uStack_b4"
+      ],
+      "costs": ["m_nBindType (bound/unbound) and m_nRareType (rarity) gate what is decomposable and the yield tier"],
+      "confidence": "medium",
+      "notes": "DECOMPOSE_ITEM_VO_CLASSNANE is the game's misspelling of CLASSNAME. _DAT_00000000 vtbl deref is a decompiler artifact (null-based struct field), not a real null-call."
+    }
+  ]
+}

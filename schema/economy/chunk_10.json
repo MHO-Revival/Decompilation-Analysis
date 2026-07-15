@@ -1,0 +1,411 @@
+{
+  "chunkIndex": 10,
+  "functions": [
+    {
+      "address": "1099a1f0",
+      "currentName": "FUN_1099a1f0",
+      "proposedName": "QuenchModel::BuildQuenchBillMo",
+      "purpose": "Builds the client-side data::QuenchBillMo displayed in the weapon quench/temper (淬炼) UI: previews the money + material cost of quenching an item to a given quench-level index. Parses the variant arg array (param_4) to extract item GUID (two dwords) and a quench-level index, resolves the item, then fills the mo with cost/material fields.",
+      "subsystem": "crafting/quench",
+      "serverRelevance": "client-only (cost preview for UI). Server is authoritative on the actual quench mutation and must re-validate money+material cost from the same cost tables; this only mirrors them.",
+      "confidence": "medium",
+      "formulas": [
+        "Arg extraction from variant array param_4 (stride: each variant = 6 dwords; tag byte at param_4[7],[0xd],[0x13],[0x19] masked &0x8f, tag 3/4=int, 2=byte): item GUID lo = param_4[8], item GUID hi = param_4[0xe], flag byte cVar6 = *(param_4+0x14), quench-level index uVar7 = param_4[0x1a] (guarded uVar7<10).",
+        "Item resolve: iVar3 = FindItemByGuid(uVar8=guidLo, local_4c=guidHi) [FUN_113f9bb0]; slot check FUN_115c3cc0(item, *(ushort*)(item+0x1f8) + (cVar6!=0?1:0)).",
+        "currentMoney = GetMoneyA()+GetMoneyB() [two FUN_1025b060 calls summed] (two currency components).",
+        "Branch cStack_51==0 (no-cost path): iCostMoney=0; iMaterialA=*(costStruct+0x80); iMaterialACount=*(item+0x214).",
+        "Branch cStack_51!=0 (cost path, indexed by quench level uVar7): iCostMoney = *(int*)(costStruct + 0x58 + uVar7*4); iMaterialA = *(int*)(costStruct + 0x08 + uVar7*4); iMaterialACount = *(int*)(costStruct + 0x30 + uVar7*4).",
+        "Cost struct layout (base = uStack_50): materialId[] @ +0x08 (stride 4), materialCount[] @ +0x30 (stride 4), costMoney[] @ +0x58 (stride 4); all indexed by quench-level 0..9."
+      ],
+      "costs": [
+        "iCostMoney: per-quench-level money cost from table costMoney[level] @ struct+0x58",
+        "iMaterialA / iMaterialACount: material id + qty from tables @ struct+0x08 / +0x30 indexed by level",
+        "quench level index capped < 10"
+      ],
+      "notes": "data::QuenchBillMo fields: iCostMoney, iCurrentMoney, iMaterialA, iMaterialACount. FUN_1025b060 = money/currency component getter (called twice and summed for player total; same getter appears throughout this chunk). FUN_113f9bb0 = resolve item by 64-bit GUID."
+    },
+    {
+      "address": "1099afa0",
+      "currentName": "data__QuenchEffectMo_1099afa0",
+      "proposedName": "QuenchModel::BuildQuenchEffectMo",
+      "purpose": "Builds data::QuenchEffectMo (mh.data::QuenchEffectMo) with an arrProperty list of QuenchEffectPropertyMo for the quench-effect UI: lists the property (iType/iValue/strName) bonuses granted by a quench effect. Selects an effect either by scanning the item's quench-effect table or by resolving an item GUID.",
+      "subsystem": "crafting/quench",
+      "serverRelevance": "client-only (displays effect properties). Values come from item struct/config; server owns the real stat grant.",
+      "confidence": "medium",
+      "formulas": [
+        "Effect selection when flag byte==0: base = *(item+0x56c)()+0x16cc; iterate 6-dword-stride records, matching effect index iVar7 against the record's 6 candidate slots (offsets -1..+4), stop when loop counter reaches 0x18.",
+        "Else (flag!=0): iVar4 = FindItemByGuid(local_a0, uVar6) [FUN_113f9bb0].",
+        "arrProperty loop: piVar3 = item_effect+0xb0, 10 iterations (uStack_a4=10, stride 4). Per property with *piVar3>0: iType = *piVar3, iValue = FUN_1166d9a0(*piVar3), strName = FUN_100e5aa0 (localized name). iPoint written as 0."
+      ],
+      "costs": [],
+      "notes": "Property array: 10 slots at effect+0xb0 stride 4. iValue via FUN_1166d9a0(typeId). No cost logic — pure effect enumeration."
+    },
+    {
+      "address": "1099e840",
+      "currentName": "FUN_1099e840",
+      "proposedName": "MatchModel::RegisterScriptHandlers",
+      "purpose": "Registers the matchmaking/ranked-match model script callbacks (C++ -> Flash/AS bindings) via FUN_104d13b0(name, fnptr). Gated on DAT_1202e818 subsystem being present and flag byte at +0x209 == 0.",
+      "subsystem": "match/ranked-rewards",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handlers: _getMatchNodeList->FUN_1099e990, _reqMatchNodeList->FUN_1099f570, _reqMatchDetailDecs->FUN_1099f610, _reqMatchStartMatch->FUN_109a0220, _reqMatchQuickJoinTeam->FUN_109a0300, _reqSaveCheckFlag->FUN_109a03f0, _canShowMsg->FUN_109a0530, _reqMatchPlayerHornors->FUN_1099f9b0, _reqMatchLevelInfo->FUN_1099fb50, _reqMatchRankRewardInfo->FUN_109a0760, _getMatchRankReward->FUN_109a0c90."
+    },
+    {
+      "address": "1099fb50",
+      "currentName": "FUN_1099fb50",
+      "proposedName": "MatchModel::GetMatchLevelInfo",
+      "purpose": "Handler for _reqMatchLevelInfo: builds ranked-match level/grade info for the UI (grade name, win/loss stats, success rate, current/remain score, remaining vs limit reward count, match rank). Dispatches on a request-type selector float (values 1..4).",
+      "subsystem": "match/ranked-rewards",
+      "serverRelevance": "client-only (display). Reward counts and scores are read from client-cached match structs mirrored from server.",
+      "confidence": "medium",
+      "formulas": [
+        "Only runs when param_5 == 4. Request-type selector fStack_40 read as float from raw int bits: 0x00000001->1 (1.4013e-45), 0x00000002->2 (2.8026e-45), 0x00000003->3 (4.2039e-45), 0x00000004->4 (5.60519e-45).",
+        "remainRewardCount (type 1/2): usedCount iStack_38 = (FUN_1156c6b0()==0 ? 0 : FUN_1156c660(5)); limit iStack_34 = *(*(cfg+0x24)+0x6c); remain = iStack_34 - iStack_38 (nRemainRewardCount=remain, nLimitRewardCount=limit).",
+        "Type 4 branch: totalGames iVar3 = *(stats+0x24); wins iStack_3c = *(stats+0x1c); nTotalNum = wins; succRate fStack_40 = (float)wins / (float)totalGames (only if totalGames>0).",
+        "Grade band code iStack_44 = *(cfg+0xc); nRemainScore iStack_28 = (score/100 + 1)*100 - score  (score = iStack_44) — score-to-next-100 remainder.",
+        "nMatchRank written as 0xffffffff (-1) in the placeholder/type1/type2 branches."
+      ],
+      "costs": [
+        "nRemainRewardCount / nLimitRewardCount = per-period ranked reward claim quota (limit @ cfg+0x6c)"
+      ],
+      "notes": "Fields: strGradeName, strClassName, strShowName, nSuccRate, nWinNum, nLoseNum, nTotalNum, nCurScore, nRemainScore, nRemainRewardCount, nLimitRewardCount, nLevelPicName, nMatchRank. FUN_1156c660(5)/FUN_1156c6b0 = ranked reward-count accessors."
+    },
+    {
+      "address": "109a0760",
+      "currentName": "FUN_109a0760",
+      "proposedName": "MatchModel::GetMatchRankRewardInfo",
+      "purpose": "Handler for _reqMatchRankRewardInfo: builds the ranked reward tier info (nLevel, nMedal, and arrItem[5] of nItemId/nCountItem) shown for the player's current match rank. Uses reward-tier config resolved from the player's score/medal, with a fallback tier when the primary lookup fails.",
+      "subsystem": "match/ranked-rewards",
+      "serverRelevance": "client-only (display). Server grants the actual reward.",
+      "confidence": "medium",
+      "formulas": [
+        "Only runs when param_5 == 1.",
+        "Primary tier: iStack_3c = FUN_115b7100(*(ctx+0x30), *(ctx+0x10)) where ctx = playerMatchState (*(iVar4)). nLevel=rewardData[0], nMedal=rewardData[1]. arrItem: 5 entries starting rewardData+7, per-entry itemId=piVar5[-5], count=*piVar5 (emit only if both >0).",
+        "Fallback tier when primary==0: iVar4 = FUN_1099e490(*(ctx+0x30)/100 + 2)  (tier index = score/100 + 2). nLevel=*(iVar4+0x34), nMedal=*(iVar4+0x38). arrItem 5 entries from iVar4+0x50: itemId=piVar5[-5], count=*piVar5."
+      ],
+      "costs": [
+        "reward tier fallback index = score/100 + 2",
+        "arrItem: up to 5 reward item id/count pairs per tier"
+      ],
+      "notes": "Fields: nLevel, nMedal, arrItem[{nItemId,nCountItem}]. Reward-item AS class MATCH_ENTRY_REWARD_ITEM_CLASSNAME. Config record item pairs stride 4 (interleaved id/count arrays)."
+    },
+    {
+      "address": "109a2a10",
+      "currentName": "FUN_109a2a10",
+      "proposedName": "QCoinExchangeModel::RegisterScriptHandlers",
+      "purpose": "Registers the Q-coin exchange model callbacks: GetExchangeData->FUN_109a2ac0, ReqExchangeReward->FUN_109a3300.",
+      "subsystem": "reward/exchange",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Runs only when selector arg (in_stack_00000014) == 1."
+    },
+    {
+      "address": "109a36c0",
+      "currentName": "data__QCoinRewardMo",
+      "proposedName": "data::QCoinRewardMo::ctor",
+      "purpose": "Constructor for mh.data::QCoinRewardMo (a serialization mo). Zeroes fields, stores flag at +6, and if param_2!=0 registers the type name with the reflection system (FUN_11a98de0).",
+      "subsystem": "reward/exchange",
+      "serverRelevance": "client-only (data mo scaffolding).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock mo constructor pattern (recurs across chunk)."
+    },
+    {
+      "address": "109a38a0",
+      "currentName": "FUN_109a38a0",
+      "proposedName": "QCoinRewardActivityModel::RegisterScriptHandlers",
+      "purpose": "Registers Q-coin reward-activity model handlers using the FUN_100b62c0/FUN_109a46d0 (make-string + register-delegate) boilerplate pattern.",
+      "subsystem": "reward/exchange",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handlers: InitModel, IsActivityOpen->FUN_109a3a80, IsActivityRewardOpen->FUN_109a3b80, FetchActivityUserData->FUN_109a3d00, DrawReward->FUN_109a3c80, HasRewardUnDrawed->FUN_109a4120."
+    },
+    {
+      "address": "109a3d00",
+      "currentName": "FUN_109a3d00",
+      "proposedName": "QCoinRewardActivityModel::FetchActivityUserData",
+      "purpose": "Builds the Q-coin reward activity user data (arrayReward of reward entries with strName, iNeedScore, iEntryId, iItemId, bCanDraw, bIsDraw, exchangeRate, plus player point). Iterates the activity's reward-entry table and computes draw eligibility from the player's accumulated point.",
+      "subsystem": "reward/exchange",
+      "serverRelevance": "client-only (display + draw eligibility hint). Server must re-validate iNeedScore<=point and claim state on DrawReward.",
+      "confidence": "medium",
+      "formulas": [
+        "Activity data present: iVar3=player(...+0xb4); activityData iStack_64 = *(player+0x2acc); entry-table iVar4 = FUN_109a4400().",
+        "Player point playerPoint = *FUN_11348ac0() ; cap compare bVar2 = playerPoint < DAT_120e8240 (global point cap). If under cap, iStack_c4 = playerPoint; else uses aiStack_40 accumulation path (sum of two FUN_11348ac0 point sources).",
+        "Reward-entry iteration: entry stride = 0x423 bytes, count = *(byte*)(iStack_84+0xad2); entry base piVar8 = activity+0xae9. Process entry only if state byte *(piVar8-0x15)=='0'.",
+        "iNeedScore = *(piVar8-1) + *piVar8 (two dword score parts summed).",
+        "iEntryId = *(byte*)(piVar8-0x16); iItemId = *(dword*)(piVar8-0x13); exchangeRate = *(byte*)(piVar8-5).",
+        "bCanDraw = (iNeedScore <= playerPoint).",
+        "bIsDraw computed from claimed-count vs *(short*)(piVar8[9]): drawn if claimedCount(uVar7=(int)piVar8+0x26) >= threshold."
+      ],
+      "costs": [
+        "iNeedScore = accumulated-point threshold per reward entry (needScore = part1+part2)",
+        "exchangeRate byte @ entry-5",
+        "player point cap = DAT_120e8240"
+      ],
+      "notes": "Fields: strName, iNeedScore, iEntryId, iItemId, bCanDraw, bIsDraw, exchangeRate, arrayReward, point. Entry record stride 0x423 also used by the astrolabe activity (109a9190)."
+    },
+    {
+      "address": "109a4530",
+      "currentName": "FUN_109a4530",
+      "proposedName": "ActivityMgr::FindActivityIdByName_QCoinReward",
+      "purpose": "Looks up the 'QCoinReward' activity in the activity registry (an ordered/red-black-tree map keyed by name string) and returns the matching activity id (*(node+0x10)); returns 0 if not found or subsystem absent.",
+      "subsystem": "reward/exchange",
+      "serverRelevance": "client-only (registry lookup helper).",
+      "confidence": "high",
+      "formulas": [
+        "Standard std::map<string,...>::find over the RB-tree at activityMgr+0x260fc; strcmp against literal 'QCoinReward'; on match returns node value at +0x10. Name string field at node+0x14 offset +0x2d."
+      ],
+      "costs": [],
+      "notes": "Tree iteration via FUN_1122ba70 (map begin/end)."
+    },
+    {
+      "address": "109a88b0",
+      "currentName": "data__RewardItemMo",
+      "proposedName": "data::RewardItemMo::ctor",
+      "purpose": "Constructor for mh.data::RewardItemMo (reward-item serialization mo). Zeroes fields, stores flag at +6, registers type name if param_2!=0.",
+      "subsystem": "reward",
+      "serverRelevance": "client-only (data mo scaffolding).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock mo constructor. RewardItemMo fields (seen elsewhere): iItemId, iItemDataId, iItemCount, bClaimed, bEnabled, strItemName."
+    },
+    {
+      "address": "109a8b00",
+      "currentName": "FUN_109a8b00",
+      "proposedName": "RewardMo::SetRewardID",
+      "purpose": "Trivial setter: writes the 'iRewardID' field into the current serialization context (FUN_104d1550).",
+      "subsystem": "reward",
+      "serverRelevance": "client-only.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "One-liner field writer."
+    },
+    {
+      "address": "109a8b20",
+      "currentName": "FUN_109a8b20",
+      "proposedName": "RewardMo::SetRewardCount",
+      "purpose": "Trivial setter: writes the 'iRewardCount' field into the current serialization context.",
+      "subsystem": "reward",
+      "serverRelevance": "client-only.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "One-liner field writer."
+    },
+    {
+      "address": "109a8bf0",
+      "currentName": "FUN_109a8bf0",
+      "proposedName": "AstrolabeActivityModel::RegisterScriptHandlers",
+      "purpose": "Registers the astrolabe/divination activity model handlers (star-lighting + quest/task divination minigame) via the make-string/register-delegate boilerplate.",
+      "subsystem": "activity/astrolabe",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handlers: InitModel, FetchActivityData->data__RewardItemMo_109a9190, DrawReward->FUN_109aa450, LightenStar->FUN_109aa4d0, AnswerQuestion->FUN_109aa550, RequestQuestion->LAB_109aa5d0, GetQuestion->LAB_109aa740, ResetDivination->data__AstrolabeTaskMo_109a9a90, FetchQuestData->FUN_109a9040, AcceptTask->FUN_109a90b0, GiveUpTask->FUN_109a9120, SubmitTask->LAB_109a9000, RefreshTask->?, BuyDivination->LAB_109aa780. (Handler->name pairing is order-shifted in this boilerplate; verify individual bindings.)"
+    },
+    {
+      "address": "109a9190",
+      "currentName": "data__RewardItemMo_109a9190",
+      "proposedName": "AstrolabeActivityModel::FetchActivityData",
+      "purpose": "Builds astrolabe activity data for the UI: counts lit star-rows (activeStar), emits activity start/end dates, the current claimable reward entry (rewardID/rewardCount/entryID/entryState/entryClaimed/entryOpened), divination material costs (specific + random material id/count), timers (remainTime/maxTime/canResetTime), consumeCredit, and a rewardArray of RewardItemMo.",
+      "subsystem": "activity/astrolabe",
+      "serverRelevance": "client-only (display). Server owns star state, reward claims, and reset/consume-credit charges.",
+      "confidence": "medium",
+      "formulas": [
+        "activeStar count: outer iVar7 in [0,0x38) step 5, inner iVar5 in [0,5). node = FUN_1152edc0(iVar7+iVar5); a star is lit iff node!=0 && node[1]==1. A row counts toward activeStar only if all 5 stars in it are lit. (=> up to 11 rows of 5.)",
+        "start date: (iStack_64+0x76c) year / (iStack_68+1) month / uStack_6c day  [0x76c=1900 base year, month is 0-based+1]. end date similarly (iStack_34+0x76c)/(iStack_38+1)/uStack_3c.",
+        "reward entry table stride 0x423, count *(byte*)(activity+0xad2); entry base activity+0xb0d region; entryOpened = *(entry+0xae5) <= playerTime; entryClaimed = claimedCount < *(short*)(entry+0xb0d).",
+        "specificMaterialID=*(cfg+0x38), specificMaterialCount=*(cfg+0x3c), randomMaterialID=*(cfg+0x30), randomMaterialCount=*(cfg+0x34) [cfg=FUN_11806ee0()].",
+        "remainTime=FUN_1152ec90(); maxTime=*(cfg+0x40); canResetTime = FUN_1152eca0() - FUN_1152f030() (reset-quota remaining); cosumeCredit=*(cfg+0x68).",
+        "rewardArray entries: iItemId=*(byte)(entry-0x3a), iItemDataId=*(entry-0x37), iItemCount=*(short)(entry-0x33), bClaimed, bEnabled = *(uint)(entry-0x24) <= activeStarCount, strItemName."
+      ],
+      "costs": [
+        "specificMaterialID/Count and randomMaterialID/Count = divination cost per draw",
+        "cosumeCredit @ cfg+0x68 = credit cost",
+        "canResetTime = remaining free resets (resetQuota - usedResets)"
+      ],
+      "notes": "Reward entry record stride 0x423 (shared layout with 109a3d00 / 109bc160). Year base 0x76c=1900."
+    },
+    {
+      "address": "109a9a90",
+      "currentName": "data__AstrolabeTaskMo_109a9a90",
+      "proposedName": "AstrolabeActivityModel::FetchQuestData",
+      "purpose": "Builds astrolabe divination quest/task data: finishTaskCount, refreshTaskCount, maxTaskCount, buyCount, consumeCount, and a taskArray of AstrolabeTaskMo (iTaskId, strName, iRewardID/iRewardCount, bCanAccept, bCanSubmit, arrTargets[5] with target ids/names/op-type/cur/max counts).",
+      "subsystem": "activity/astrolabe",
+      "serverRelevance": "client-only (display). Server authoritative on task accept/submit, refresh/buy counts and consume charges.",
+      "confidence": "low",
+      "formulas": [
+        "finishTaskCount = FUN_1152ecb0().",
+        "refreshTaskCount = *(cfg+0x6c) - FUN_1152ef60()  [cfg=FUN_11806ee0(); = maxFreeRefresh - usedRefresh].",
+        "maxTaskCount = FUN_1152ed00().",
+        "consumeCount = *(cfg+0x74) + *(cfg+0x78) (two consume components summed).",
+        "buyCount = clamp0( boughtBase - (sumRefreshTimers%1000 accumulations + remainder) ): computed from per-task refresh timers (each /1000 and %1000) over uStack_e4 tasks; result clamped to >=0. Exact accumulation is convoluted in the decompile — treat as approximate.",
+        "bCanAccept = (mgr->CanAccept(taskId)[vtbl+0x4c] == 0); bCanSubmit = (task->state[+0x14] == 4).",
+        "arrTargets: nTargetID1..5 = puVar13[-2..+2], strTarget1..5 = puVar13[0xb,0x11,0x17,0x1d,0x23], nOpType=puVar13[3], nCurCount=puVar13[4], nMaxCount=puVar13[5]; target record stride 0x3b dwords."
+      ],
+      "costs": [
+        "refreshTaskCount = remaining free task refreshes",
+        "consumeCount = consumed refresh/buy resources (cfg+0x74 + cfg+0x78)",
+        "maxTaskCount = task slot cap"
+      ],
+      "notes": "Fields: finishTaskCount, refreshTaskCount, maxTaskCount, buyCount, consumeCount, taskArray[AstrolabeTaskMo{iTaskId,strName,iRewardID,iRewardCount,bCanAccept,bCanSubmit,arrTargets}]. buyCount formula uncertain."
+    },
+    {
+      "address": "109aca80",
+      "currentName": "FUN_109aca80",
+      "proposedName": "WeaponTrialModel::BuildDetailVO",
+      "purpose": "Builds the large WEAPONTRIAL_DETAILVO (weapon-trial / hunt level detail view): level id/mode/target/boss/area/entrust text, hire-NPC item+good ids, entry requirements (needLev/needItemId/needItemCount/needHunterLev/needGoldenHunterLev/needCard), player current levels, limit member/time, match CD, material-ticket id + owned count, and pre/current boss & reward arrays.",
+      "subsystem": "quest/level-detail",
+      "serverRelevance": "validation. Displays entry requirements the server must enforce on level entry (item/hunter-level/card gates, member limits, material-ticket cost). Values read from level config + player state.",
+      "confidence": "low",
+      "formulas": [
+        "Runs only when param_5 == 4.",
+        "Config columns via FUN_1130bb80(col): col1=nLevelMode(*+4), col0xe=nLimitTime(*+4), col8=mLimitMember(*+4)/mLimitMemberMax(*+8), col3=needItemId(*+4)/needItemCount(*+8), col2 (if *+4>0)=needLev-ish pair, col5=needHunterLev(*+4) [nCurrentHunterLev = player->GetLevelInfo()[0x46c]->GetHunterLev vtbl+0x18], col4=needGoldenHunterLev [nCurrentGoldernLev via FUN_114dfc10], col0xd=needGoldenHunterLev pair, col9=strNeedCardDes gate, col6=? , col7/col3/col4/col5/col6 via FUN_1130cb50 = nLimitEnterType etc.",
+        "nHireNpcItemId=*(FUN_1181d450()+0x78); nHireNpcGoodId=*(+0x74).",
+        "bMatchCD = max over 4 CD sources FUN_1141bcc0 vs config values at (FUN_1184c850()+0x30/0x34/0x38/0x40).",
+        "bNeedHRLev via CMHLevelInfo::CheckLevelProgressThreshold + FUN_107d7930 (level!=0x4b2 special case zeros it).",
+        "materialTicketID=*(FUN_116bd200()+0x40); materialTicketNum = FUN_113fa380(ticketID) = player-owned count (only if piVar3[0xb47]!=0).",
+        "IsShowMaterialTicket = 1 when piStack_1d8[0x97]!=0 && !player->flag(vtbl+0x394) && party->GetMemberCount(vtbl+0xa4) < 2.",
+        "preBossArr / curBossArr / preRewardArr / curRewardArr built by iterating level context boss/reward tables (2D table lookups)."
+      ],
+      "costs": [
+        "needItemId/needItemCount = entry item cost",
+        "needHunterLev / needGoldenHunterLev = level gates",
+        "materialTicketID + materialTicketNum = material-ticket entry cost & owned count",
+        "mLimitMember/mLimitMemberMax = party size limits; nLimitTime = time limit"
+      ],
+      "notes": "Very large stack-heavy VO builder; decompile flattens the register-delegate calls into stack thrash. Individual FUN_1130bb80 column indices verified from control flow but semantic labels are best-effort. FUN_113fa380(currencyId)=owned currency/material count (recurs)."
+    },
+    {
+      "address": "109b5360",
+      "currentName": "FUN_109b5360",
+      "proposedName": "EquipRecastModel::BuildSourceInfo",
+      "purpose": "Builds the 'source equipment' info block for the equip recast/reforge (重铸) UI: isWeapon, roleLevel, srcEquipEnforceLv, awakeningLevel, roleHunterStarLv, sourceRare, itemLevel, ItemRank, sourceItemName, then delegates to BuildDestArray (109b5990) and 109b6810 to fill dest equipment options.",
+      "subsystem": "crafting/recast",
+      "serverRelevance": "client-only (display). Server owns the recast mutation.",
+      "confidence": "medium",
+      "formulas": [
+        "Gate piVar7[0xb47] != 0 (recast feature enabled).",
+        "Resolve source item: FUN_113f9bb0(guidLo,guidHi) -> item; itemInst = FUN_1052bdd0(*(itemMeta+0x10)).",
+        "isWeapon = FUN_116c5290(); roleLevel = CPlayer::GetHuntRankOrCount(); srcEquipEnforceLv = FUN_1166c160() (enforce/enhance level); awakeningLevel = item[0x6b].",
+        "roleHunterStarLv = player->GetLevelInfo(vtbl+0x46c)->GetStar(vtbl+0x18); sourceRare = *(itemInst+0x4c); itemLevel = item->GetLevel(vtbl+0x18); ItemRank = FUN_11669840().",
+        "destArrayLength read from AS, then FUN_109b5990 (dest equip array) and FUN_109b6810 populate options."
+      ],
+      "costs": [],
+      "notes": "Fields: isWeapon, roleLevel, srcEquipEnforceLv, awakeningLevel, roleHunterStarLv, sourceRare, itemLevel, ItemRank, sourceItemName, destArrayLength. FUN_1166c160=enforce level getter, FUN_1166c400=break level getter (used in 109b5990)."
+    },
+    {
+      "address": "109b5990",
+      "currentName": "FUN_109b5990",
+      "proposedName": "EquipRecastModel::BuildDestEquipArray",
+      "purpose": "Builds destEquipArray entries for equip recast: per candidate target equip, emits equipID/name/rare/itemLevel, player-use level range, recast money cost, current money, craft-credit id/owned/max, craft money, enforce/break levels, canBreak flag, and material data array.",
+      "subsystem": "crafting/recast",
+      "serverRelevance": "validation. Exposes recastMoney/nCraftMoney/craft-credit costs and canBreak requirement the server must re-check on the actual recast.",
+      "confidence": "medium",
+      "formulas": [
+        "Gate: player+0x2d1c != 0 (recast unlocked). recastCfg iVar5 = FUN_1183d500(0).",
+        "recastMoney = *(recastCfg+4).",
+        "currentMoney = GetMoneyA()+GetMoneyB() [two FUN_1025b060 summed].",
+        "playerUseLevelMin = *(itemInst+0x40); playerUseLevelMax = 500 (constant cap).",
+        "enforceLevel = FUN_1166c160(); breakLevel = FUN_1166c400().",
+        "canBreak = (*(itemInst+0x144) > 0) && (*(itemInst+0x144) <= FUN_1166c160()) [break requires enforce level >= threshold @ item+0x144].",
+        "nCraftCreditID=*(recastCfg+8); nOwnCraftCredit=FUN_113fa380(creditID); nCraftCreditMax=*(recastCfg+0xc); nCraftMoney=*(recastCfg+0x10).",
+        "equipCounts=0, enforceRequirement=0, hunterstarRequirement=0, rankDownLevel=0, enforceDownLevel=0, newRankLevel=0, bBindState=1, enforceRuleID=0, equipHasEnoughMaterial=0 (placeholders).",
+        "arrayMaterialData filled via FUN_109b5db0 when the nested AS array read succeeds."
+      ],
+      "costs": [
+        "recastMoney = *(recastCfg+4) money cost",
+        "nCraftMoney = *(recastCfg+0x10) craft money cost",
+        "nCraftCreditID/nCraftCreditMax = craft-credit currency id and cap; nOwnCraftCredit = owned amount",
+        "playerUseLevelMax capped at constant 500"
+      ],
+      "notes": "Fields as listed in header. Same two-component money getter (FUN_1025b060) and owned-currency getter (FUN_113fa380) as elsewhere."
+    },
+    {
+      "address": "109bb850",
+      "currentName": "FUN_109bb850",
+      "proposedName": "DiceBoardActivityModel::RegisterScriptHandlers",
+      "purpose": "Registers the dice/board-game activity model handlers (a Monopoly-style board minigame with node/rank/block data and dice rolls).",
+      "subsystem": "activity/dice-board",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handlers: InitModel, FetchActivityData->FUN_109bc160, FetchNodeData->FUN_109bbb90, FetchRankData->data__RankDataMo_109bbe80, FetchBlockInfo->FUN_109bc7b0, DrawReward->FUN_109bc950, RequestDice->LAB_109bc9d0, RequestRandomDice->FUN_109bca10, RequestRankData->LAB_109bbe30, PayForBlock->LAB_109bca70, GetCurrentRound->FUN_109bcab0."
+    },
+    {
+      "address": "109bc160",
+      "currentName": "FUN_109bc160",
+      "proposedName": "DiceBoardActivityModel::FetchActivityData",
+      "purpose": "Builds dice/board-game activity data: start/end dates, a rewardArray of RewardItemMo, current board state (currentNode, currentAccStep, currentRound, currentDice), round reward + roundRewardArray, fixedTime (guaranteed-dice cost tier) and its needCredit cost.",
+      "subsystem": "activity/dice-board",
+      "serverRelevance": "validation. Exposes the fixed-dice needCredit cost the server must charge; board position/round are server-authoritative state.",
+      "confidence": "medium",
+      "formulas": [
+        "Dates: (iStack_64+0x76c)/(iStack_68+1)/uStack_6c start, (iStack_34+0x76c)/(iStack_38+1)/uStack_3c end (year base 1900, month 0-based+1).",
+        "Reward entries stride 0x423, count *(byte)(activity+0xad2); state byte *(entry-0x11)=='0'; bEnabled = (playerPoint >= *(short)(entry+0x28)); item fields itemId=*(byte)(entry-0x12), itemDataId=*(entry-0xf), itemCount=*(short)(entry-0xb).",
+        "currentNode = FUN_1025b060() - 1; currentAccStep = FUN_1025b060(); currentRound = FUN_1025b060().",
+        "currentDice = FUN_113fa150(*(cfg+0x30), 0xffffffff); roundReward = *(cfg+0x34)  [cfg=FUN_11800150()].",
+        "fixedTime = FUN_1151a480() + 1; needCredit = FUN_117ff580(fixedTime) (credit cost for the fixed/guaranteed dice at that tier)."
+      ],
+      "costs": [
+        "needCredit = FUN_117ff580(fixedTime) = credit cost of buying a fixed dice roll",
+        "roundReward = per-round reward item id @ cfg+0x34"
+      ],
+      "notes": "Fields: dates, rewardArray[RewardItemMo], currentNode, currentAccStep, currentRound, currentDice, roundReward, roundRewardArray, fixedTime, needCredit. FUN_113fa150 = clamped currency/dice getter."
+    },
+    {
+      "address": "109c0c00",
+      "currentName": "FUN_109c0c00",
+      "proposedName": "TowerDefenseModel::RegisterScriptHandlers",
+      "purpose": "Registers the tower-defense activity model handlers, then wires up three sub-controllers (via FUN_10d17440/FUN_10d17870 gates -> FUN_109c47a0/109c47f0/109c4840) and initializes state (FUN_109c1590).",
+      "subsystem": "activity/tower-defense",
+      "serverRelevance": "client-only (handler registration + controller wiring).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handlers: InitModel->FUN_109c0f80, TowerLevelUp->FUN_109c1680, TowerDefenseDestroy->FUN_109c1b30, TowerDefenseRecover->FUN_109c1ad0, TowerDefenseEncourage->FUN_109c1a70, TowerDefenseDragonAtt->FUN_109c1a10, TowerDefenseFlying->FUN_109c19b0, TowerDefenseUpdate->FUN_109c1d70, TowerDefenseCommanderApply->FUN_109c2540, TowerDefenseCommanderQuit->FUN_109c25a0. (Name/fn pairing order-shifted in boilerplate; verify.)"
+    },
+    {
+      "address": "109cf8a0",
+      "currentName": "FUN_109cf8a0",
+      "proposedName": "EquipQuickLevelUpModel::RegisterScriptHandlers",
+      "purpose": "Registers the equip quick-level-up (batch equipment upgrade) handlers: C2AS_GetCostItemId->FUN_109cfa30, C2AS_GetUpgradeData->FUN_109cfa70, C2AS_UpgradeItem->FUN_109d0130.",
+      "subsystem": "crafting/upgrade",
+      "serverRelevance": "client-only (handler registration plumbing).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "notes": "C2AS_ prefix = client-to-application-server request names. Actual upgrade goes through C2AS_UpgradeItem->FUN_109d0130 (server-side upgrade)."
+    },
+    {
+      "address": "109cfa70",
+      "currentName": "FUN_109cfa70",
+      "proposedName": "EquipQuickLevelUpModel::GetUpgradeData",
+      "purpose": "Computes the equip quick-level-up preview data (EquipQuickLevelUp_UpgradeData): resolves source & destination items, applies the upgrade step-list (CEquipUpgrade::ApplyStepList) to determine the upgrade path, and emits ItemId, ItemLevel and instanceChannelNumber per resulting step.",
+      "subsystem": "crafting/upgrade",
+      "serverRelevance": "validation. Client-side preview of the upgrade path/steps; the authoritative upgrade + material/cost consumption happens server-side in C2AS_UpgradeItem. Server must recompute the step list.",
+      "confidence": "low",
+      "formulas": [
+        "Runs only when param_6 == 1.",
+        "Reads AS args: m_nFactItemLevel, collumn, item id (DAT_11dbb0b4 field).",
+        "Resolve src item: FUN_113f99c0(*(this+0x20), &uStack_1b8) -> piVar6; itemLevel via FUN_11669710/vtbl+0xc. Resolve dest via FUN_113f9bb0.",
+        "Feature gate: found equip iVar5=*(player+0x260e8) with player+0x2d1c!=0.",
+        "Upgrade path: FUN_115c4920/FUN_109d0040/FUN_109d17f0 build step candidates; per step CEquipUpgrade::ApplyStepList(&stepCtx, out, ...) — on success emit an EquipQuickLevelUp_UpgradeData row {ItemId=iVar5, ItemLevel=ppuStack_224, instanceChannelNumber=FUN_11669710()}; on failure invoke vtbl[0xe] rollback.",
+        "Dedup: skips a step whose (itemDataId@+4, itemDataId@+8) pair already appears in the accumulated result list."
+      ],
+      "costs": [],
+      "notes": "Fields: ItemId, ItemLevel, instanceChannelNumber (plus m_nFactItemLevel/collumn read as inputs). Cost/material consumption not in this preview builder — handled server-side. Decompile is heavily register-aliased; step-loop semantics are best-effort."
+    }
+  ]
+}

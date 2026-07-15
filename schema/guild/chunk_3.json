@@ -1,0 +1,297 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "0x10835cb0",
+      "currentName": "FUN_10835cb0",
+      "proposedName": "CMHUI_Settings::BuildClientSettingsVO",
+      "purpose": "Reads a large set of console CVars (camera/mouse/gamepad/name-pad/social-remind flags) via the console system (DAT_1202e818+0x2c -> GetCVar vtbl+0x54, value via vtbl+8/int or +0xc/float) and packs them into a Flash/UI value-object using FUN_104d1550/104d15e0/104d14d0/104d1670. Iterates gamepad weapon bindings g_Gamepad_WeaponType_%d -> weapon_type_%d for indices 1..12.",
+      "subsystem": "settings-ui",
+      "confidence": "medium",
+      "formulas": [
+        "gamepad weapon-type loop: iVar8 from 1 while iVar8 < 0xd (1..12 inclusive)",
+        "mouse sensitivities: mouse=i_mouse_accel*DAT_11de9a30, mouseV=i_mouse_accel_v*DAT_11de9a30, mouseJ=cl_MHFpsRotSpeed*DAT_11de9a30 (DAT_11de9a30 = float scale constant)",
+        "isWindowsMode = (r_Fullscreen==0); hidetitle = (cl_ShowLocalPlayerTitle ptr==0); hideHRLevel = (r_ShowHrLevel ptr==0)",
+        "helmet/fashion/taojian read from player-visual object at (player+0x25ddc): vtbl+4/+0xc/+0x14"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (local client display/config snapshot; includes social-related CVars g_refuseTeamInvite/g_FriendRemind/g_GuilderRemind/g_OtherGuildName/g_selfGuildName/g_refuseGuildRequest/g_refuseClanRequest but only mirrors local CVar state)",
+      "notes": "Stock UI-settings plumbing; social CVars present but purely client-side toggles."
+    },
+    {
+      "address": "0x10836b50",
+      "currentName": "FUN_10836b50",
+      "proposedName": "CMHUI_Settings::ApplyClientSettingsVO",
+      "purpose": "Inverse of BuildClientSettingsVO: reads a settings struct (param_3) at fixed 0x10-stride offsets and writes each value into the matching console CVar (GetCVar vtbl+0x54, Set vtbl+0x14, then a notify call vtbl+0x21c). Handles the social 'refuse/remind' flags among many display flags.",
+      "subsystem": "settings-ui",
+      "confidence": "medium",
+      "formulas": [
+        "struct field map (param_3): +0x08 g_refuseTeamInvite, +0x18 g_FriendRemind, +0x28 g_refuseTradeRequest, +0x38 g_refuseTeamRequest, +0x48 g_GuilderRemind, +0x58 cl_ShowHeroNamePadMode, +0x68 cl_ShowPlayerNamePadMode, +0x78 e_ChatDialogRendering, +0x88 cl_ShowHeroPetName(inverted: set = byte==0), +0x98 g_refuseGuildRequest, +0xa8 g_refuseClanRequest, +0xb8 cl_ShowPlayerPetName(byte==0), +0xc8 cl_ShowBossDeadGlow(byte==0), +0xd8 g_NPCName_hide(byte==0), +0xe8 cl_TaskTraceMode(int), +0xf8 g_DInputKeyboard, +0x108 g_UseEmbeddedIME, +0x118 g_hideEmoji, +0x128 r_HideC2PlaeyerEffect, +0x138 r_HideSelfPlaeyerEffect, +0x148 cl_iHideBreakEffect",
+        "if cl_TaskTraceMode changed (bVar24) and quest-tracker active -> notifies handler via vtbl+4 with cmd 0x231"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Confirms client settings-struct layout; refuseGuild/refuseClan flags are pure client UI prefs."
+    },
+    {
+      "address": "0x10840690",
+      "currentName": "FUN_10840690",
+      "proposedName": "CMHUI_Trade::BuildFriendSaleItemVO",
+      "purpose": "Builds the value-object for a friend/player-to-player sale (mail-with-goods) UI. Reads a sale config record (ppiVar5 from FUN_117dadb0) plus the item being sold and populates hunter-rank/friend gating, price, bind flag, seller name and the exchange-item list.",
+      "subsystem": "trade-social",
+      "confidence": "medium",
+      "formulas": [
+        "hunterRankValid = (int)requiredHunterRank(ppiVar5[0xe]) <= (int)playerHunterRank(iStack_7c)  [iStack_7c from guild/player obj vtbl+0x46c ->+0x18]",
+        "friendValid = (int)requiredFriendValue(piStack_74=ppiVar5[0x11]) <= (int)currentFriendValue(piStack_80)",
+        "hunterRankLimit = ppiVar5[0xe]; saleItemNumber = ppiVar5[0xb]",
+        "isBindMoney = (*(char*)(ppiVar5+0xd) == 0)",
+        "moneyCount = FUN_10841be0(FUN_114b74e0(ppiVar5,1)); allMoneyValue = FUN_10841be0(FUN_114b74e0(ppiVar5,0))",
+        "saleBindType = CItemBaseInfo::ResolveRewardAmount(local_9c, sale.field[0x14]); saleIsBind = 0",
+        "specialPoint loop specialPoint%dValue/%dType/%dName for index 1..12 (iVar4<0xd)",
+        "arrayExchangeItem entries: itemName, itemCount=puVar7[1], itemID=*puVar7 (iterates piVar3[0x21]..piVar3[0x22])"
+      ],
+      "costs": [
+        "sale price: moneyCount / allMoneyValue (bound vs unbound currency split via FUN_114b74e0 arg 0/1)",
+        "saleItemNumber = quantity offered (config offset 0xb)"
+      ],
+      "serverRelevance": "validation (client mirrors server-side hunter-rank and friend-value gates for display; server is authoritative on the actual sale/exchange)",
+      "notes": "friend/rank fields align with recovered social gating; hunterRankLimit at record+0x38(ppiVar5[0xe]), friend requirement at record+0x44(ppiVar5[0x11])."
+    },
+    {
+      "address": "0x10863ab0",
+      "currentName": "FUN_10863ab0",
+      "proposedName": "CMHUI::BuildPlayerBasicVO",
+      "purpose": "Populates a small UI VO with the local player's basic state: guild-membership flag, level and current map id.",
+      "subsystem": "player-info-ui",
+      "confidence": "medium",
+      "formulas": [
+        "isPlayerJoinGuild = FUN_1139ab70() (bool: player is in a guild)",
+        "playerLevel = CPlayer::GetHuntRankOrCount()",
+        "playerMapId = player(DAT_1202e818+0xd0) vtbl+0x6c"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (reads local player object)",
+      "notes": "FUN_1139ab70 = 'is in guild' predicate, reusable elsewhere."
+    },
+    {
+      "address": "0x10895a20",
+      "currentName": "FUN_10895a20",
+      "proposedName": "CMHUI_Chat::RegisterGetChatMessCallback",
+      "purpose": "Registers the Flash-facing '_getChatMess' getter callback (FUN_108964e0) and caches the calling UI movie handle (DAT_123bd0c0/c4/c8) when param count == 1.",
+      "subsystem": "chat-ui",
+      "confidence": "medium",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Callback-registration boilerplate; stores movie ref for later chat pushes."
+    },
+    {
+      "address": "0x10895af0",
+      "currentName": "FUN_10895af0",
+      "proposedName": "CMHUI_Chat::PushChatMessageToUI",
+      "purpose": "Converts a received chat-message struct (param_1) into a CHATMESS_CLASS_NAME VO, appends it to 'chatArray' on the cached chat movie, and (when e_ChatDialogRendering enabled) parses embedded item-link tokens ('ITEMID_[' ... ']' and '......') to render clickable item links.",
+      "subsystem": "chat-ui",
+      "confidence": "high",
+      "formulas": [
+        "chat-message struct offsets: [0]=m_nChannelType, [1]=m_nSrcId, m_nSrcDBId, (param_1+4)=m_sSrcName (wstr @+0x10), (param_1+0xc)=m_sMsg (wstr @+0x30), [0x8c]=m_bSrcTeamLeader, byte@(param_1+0x231)=m_bSrcSelf, [0x8d]=m_nColor, [0x8f]=m_nLineID, [0x90]=m_nVip, [0x91]=m_nQQMask, [0x92]=m_nWorldSvrID",
+        "m_nWorldSvrID normalized: if param_1[0x92] == *(guild/world obj+0x2d78) then reported as 0 (own-server -> 0)",
+        "append gating: retrieved-array length uVar4 checked against 0x12d (301). Appends unless (uVar4 < 0x12d) is false for channel types 1 or 5 (system/guild?) -> i.e. cap ~301 lines",
+        "channel constants used: *param_1==1 and *param_1==5 treated specially (whisper/system link handling); item-link token 'ITEMID_[' parsed, numeric id via wcstol(...,10)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (renders server-delivered chat; server owns channel routing/anti-spam)",
+      "notes": "Rich chat-message struct layout recovered; 0x12d line cap and channel ids 1/5 are load-bearing for chat rendering. m_nQQMask/m_nVip indicate Tencent QQ integration fields."
+    },
+    {
+      "address": "0x10896e80",
+      "currentName": "FUN_10896e80",
+      "proposedName": "CMHUI_Chat::GetChatAlpha",
+      "purpose": "Reads the e_ChatAlpha console variable and returns it into the caller's variant out-slot (in_stack_00000018).",
+      "subsystem": "chat-ui",
+      "confidence": "medium",
+      "formulas": ["out = GetCVar('e_ChatAlpha') vtbl+8"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "CVar getter shim."
+    },
+    {
+      "address": "0x10896ed0",
+      "currentName": "FUN_10896ed0",
+      "proposedName": "CMHUI_Chat::SetChatAlpha",
+      "purpose": "Writes the e_ChatAlpha console variable from the first argument variant (when param count == 1).",
+      "subsystem": "chat-ui",
+      "confidence": "medium",
+      "formulas": ["SetCVar('e_ChatAlpha', arg) vtbl+0x14"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "CVar setter shim."
+    },
+    {
+      "address": "0x108a3ee0",
+      "currentName": "FUN_108a3ee0",
+      "proposedName": "CMHUI_Depot::OnUnionGuildItemDrop",
+      "purpose": "Drag-drop / context-action handler for moving items between personal bag and the guild (union) depot. Distinguishes personal slots (slot type < 100) from guild-depot slots (>=100, real index = type-100), runs equip/unequip and bind checks, and raises the appropriate confirm dialogs before issuing the move request.",
+      "subsystem": "guild-depot",
+      "confidence": "medium",
+      "formulas": [
+        "param_5 must == 4 (arg count)",
+        "slot classification: iVar3 = *(param_4+8); if iVar3 < 100 -> personal-bag path; else guild-depot path with depot index = *(local_70+8) - 100, page/tab = *(local_70+0x18)",
+        "equip-all confirm dialog id 0x1fb7 ('UnEquipALL_OK'/'UnEquipALL_No') when moving an equipped set",
+        "union item transfer confirm dialog id 0x2024 ('UnionItemRespondOkHandler') with bound-count formatted via FUN_1024e9b0(name,10)",
+        "bind check FUN_1122fc50 gates whether item may enter depot"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/client (client pre-checks bind/equip state and confirms; server is authoritative on the actual bag<->depot move). Dialog ids 0x1fb7/0x2024 are request opcodes to server confirm flow.",
+      "notes": "100 is the personal/guild-depot slot-space boundary; useful for server slot indexing."
+    },
+    {
+      "address": "0x108ae290",
+      "currentName": "FUN_108ae290",
+      "proposedName": "CMHUI_HunterGroup::InitSubModel",
+      "purpose": "Second-stage init for the HunterGroup (guild) UI model: binds Flash->native callbacks and native->Flash list getters, and seeds config-driven values. Establishes the guild member/title/apply data flow.",
+      "subsystem": "guild-ui",
+      "confidence": "high",
+      "formulas": [
+        "ImpeachMoney = *(int*)(FUN_11720120() + 0xac)  -> config cost to launch a leader-impeachment vote (guild global config record, offset 0xac)",
+        "binds callbacks: AddGuilderRight->FUN_108aeef0, ReqJoinGroup->FUN_108afe10, QuitHunterGroup->FUN_108afd90, NoteSetting->FUN_108afbf0, CanImpeachLeader->FUN_108b67c0, HasImpeachMoney->FUN_108b6890, ImpeachLeader->LAB_108b6930, OnGetMembers->FUN_108b38a0, RemoveUselessFormat->FUN_108b6a00(AS2C_GetRecordData), AS2C_RequestRecordData->FUN_108b69a0",
+        "registers list getters: _getSearchGroupList->FUN_108b07d0, _getReqJoinGroupList->FUN_108aefc0, _getGroupMemberList->FUN_108aee10, _getGuildTitleList->FUN_108ae900"
+      ],
+      "costs": [
+        "ImpeachMoney = guild-config[0xac] (currency to impeach the guild leader)"
+      ],
+      "serverRelevance": "validation/client (ImpeachMoney is a config value the server also enforces; UI wiring only)",
+      "notes": "Impeachment (leader recall) is a modeled guild feature; cost sourced from FUN_11720120() config +0xac."
+    },
+    {
+      "address": "0x108ae990",
+      "currentName": "FUN_108ae990",
+      "proposedName": "CMHUI_HunterGroup::BuildGuildTitleArrayVO",
+      "purpose": "Builds the guildTitleArray VO describing each guild title/rank (GUILDTITLEVO_CLASS_NAME, with per-title depot sub-object GUILDTITLEVODepots_CLASS_NAME) and pushes it to Flash via UpdataTitleArray.",
+      "subsystem": "guild-ui",
+      "confidence": "medium",
+      "formulas": [
+        "per title row (iVar2): m_Title = *(iVar2+4); m_Name via FUN_108adbe0/108b9da0; m_Rights (FUN_104d12b0); m_cfg = FUN_114f7690() (3-slot int obj); m_DepotFetchCount = *(iVar2+0x40)",
+        "iterates title list piStack_11c..piStack_118 (stride 4 = ptr array)"
+      ],
+      "costs": [
+        "m_DepotFetchCount (title+0x40) = per-title guild-depot withdrawal allowance"
+      ],
+      "serverRelevance": "client-only display (server owns the authoritative title/rights table -> TlvGuildTitleData: title/name/rights/depotRights/depotOpCount)",
+      "notes": "Aligns with TlvGuildTitleData (field depotOpCount == m_DepotFetchCount)."
+    },
+    {
+      "address": "0x108b0070",
+      "currentName": "FUN_108b0070",
+      "proposedName": "CMHUI_HunterGroup::OnTitleSettingSubmit",
+      "purpose": "'TitleSetting' handler: reads the guildTitleArray back from Flash (per-title m_Name, m_Rights bitmask, m_DepotFetchCount), assembles a title-list request and sends it to the server as either a create-titles or edit-titles request.",
+      "subsystem": "guild-ui",
+      "confidence": "medium",
+      "formulas": [
+        "per-title parse: m_Name (string), m_Rights (rights bitmask via FUN_104d12b0), m_DepotFetchCount (FUN_104d4800)",
+        "iterates count = obj vtbl+0x28 (GetCount)",
+        "dispatch: if in_stack_00000010 flag/guildId == 0 -> FUN_11478e40 (create titles) else FUN_11478af0 (edit titles); both pass playerHuntRank (guild obj vtbl+0xb4)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server persists guild title definitions, rights masks and depot withdrawal counts; client only marshals the request)",
+      "notes": "Request builder for guild rank/rights editing."
+    },
+    {
+      "address": "0x108b0970",
+      "currentName": "FUN_108b0970",
+      "proposedName": "CMHUI_HunterGroup::InitModel",
+      "purpose": "Top-level HunterGroup (guild) UI model init: binds the full guild command surface from Flash to native handlers. Enumerates every player-facing guild operation.",
+      "subsystem": "guild-ui",
+      "confidence": "high",
+      "formulas": [
+        "command->handler binds: InitModel->FUN_108ae290, CheckGroupName->FUN_108b5bb0, RenameGroup->FUN_108b5e60, GetGuildName->FUN_108b5d50, RefreshGuildDetail->LAB_108b5fc0, UpdataState->FUN_108b5550, UpdataSelf->FUN_108b52e0, UpdataTitleRights->FUN_108b5090, SubmitCreateHunterGroup->FUN_108b6430, CreateCondition->FUN_108b5770, InviteJoinHunterGroup->FUN_108b6010, HandlerRequestJoin->FUN_108b6310, AssignmentGroupLeaderTo->FUN_108b61b0, RemoveHunterGroupMember->FUN_108b6260, EditMemberRights->FUN_108b4e10, EditMemberUpDownRights->FUN_108b4f90, TitleSetting->FUN_108b0070, UpGuildLevel->LAB_108b05f0, EditIcon->FUN_108b0640, TakeWage->LAB_108b0780, EditBaseName->FUN_108b06b0, ResetRight->FUN_108b5020, DisBandGuild->LAB_108b4dc0, BanGuilder->FUN_108b6970"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (dispatch table); each bound handler issues an authoritative server request",
+      "notes": "Complete guild operation surface: create/rename/disband, invite/apply/kick, leader transfer, member rights & up/down, title settings, level-up, wage withdrawal (TakeWage), icon/name edit, ban. Guides which server RPCs must exist."
+    },
+    {
+      "address": "0x108b3300",
+      "currentName": "FUN_108b3300",
+      "proposedName": "CMHUI_HunterGroup::BuildGuildDetailVO",
+      "purpose": "Builds the RefreshGuildDetail VO: current guild stats plus the next-level-up requirement preview (testUpArray / lm_* fields sourced from CGuildLevelUpInfo). This function recovers the previously-unknown CGuildLevelUpInfo row layout.",
+      "subsystem": "guild-levelup",
+      "confidence": "high",
+      "formulas": [
+        "guild object piVar8 = guildMgr(player+0xd0 obj vtbl+0xb4)[0xaaf] -> vtbl+0xc (current guild)",
+        "guild fields: m_level = piVar8[0x11]; guildId(&DAT_11dbf768) = piVar8[10]; m_Repute = piVar8[0x13]; m_Fund = FUN_114a8610(); guildersCount = vtbl+0x18; m_dwGuilderCountMax = piVar8[0x8a] (member cap); m_nMemberAvgLevel = vtbl+0x20; m_nRankNum = FUN_114a8110(); m_nReqLevel = piVar8[0x2c]; m_nOnlineGuildersCount = vtbl+0x1c; IsLevelFull = FUN_114a96e0(); inHunterGroup = vtbl+8",
+        "CGuildLevelUpInfo row = CGuildLevelUpInfo::GetValueForLevel(currentLevel). Row struct offsets: +0x10 lm_ID, +0x14 lm_Exp (guild exp required for next level), +0x18 lm_GuildersCount (member-count requirement), +0x1c lm_Repute (reputation requirement), +0x20 lm_Fund (fund cost), +0x24 lm_ResA, +0x28 lm_ResB, +0x2c lm_Item1 (item id required), +0x30 lm_Item1Count (item qty required)",
+        "lm_preExp = 0 by default; if currentLevel > 1 then lm_preExp = GetValueForLevel(currentLevel-1) field +0x14 (previous-level exp threshold)",
+        "lm_OwnItem1Count = FUN_113f9300(0,lm_Item1,0) + FUN_113f9300(2,lm_Item1,0) + FUN_113f9300(10,lm_Item1,0)  (owned count of Item1 summed over bag types 0, 2, 10)"
+      ],
+      "costs": [
+        "guild level-up cost per level (from CGuildLevelUpInfo row): lm_Exp (exp), lm_Fund (guild fund), lm_ResA, lm_ResB (two guild resource pools), lm_Item1 x lm_Item1Count (material item)",
+        "level-up gating: lm_GuildersCount (min members), lm_Repute (min reputation)",
+        "m_dwGuilderCountMax = current guild member cap (guild+0x88a? actually piVar8[0x8a])"
+      ],
+      "serverRelevance": "authoritative (server enforces guild level-up exp/fund/resource/item/member/reputation requirements from CGuildLevelUpInfo; this VO is the client-side preview). CGuildLevelUpInfo row offsets recovered here were 'unknown' in prior schema.",
+      "notes": "KEY FINDING: fills in CGuildLevelUpInfo field layout (schema had it as unknown). Bag types 0/2/10 are the storages searched for the material item."
+    },
+    {
+      "address": "0x108b38a0",
+      "currentName": "FUN_108b38a0",
+      "proposedName": "CMHUI_HunterGroup::BuildGroupMemberListVO",
+      "purpose": "OnGetMembers handler: builds the paged group-member list VO (GROUPMEMBER_CLASS_NAME array) and pushes it to Flash via UpdataGROUPMEMBER. Reads per-member contribution/level/title/state fields.",
+      "subsystem": "guild-ui",
+      "confidence": "medium",
+      "formulas": [
+        "GroupMemberMaxPageNum = *(memberMgr(iVar4+0x2abc parent)+0x2a8); GroupMemberCurrentPage = *(...+0x2a4)",
+        "per member piVar10: name_member from piVar10[6]/[7] (string); level_member = vtbl+8; HRlevel_member = vtbl+0x3c; currentP (current contribution) = vtbl+0x14; growLevel = vtbl+0x28; hunterNum = vtbl+0x2c; weekP (weekly contribution) = vtbl+0x24; taskNum = vtbl+0x30; isBaned = byte@(piVar10+0x32); titleName via FUN_114b0f80 lookup(+0x18/+0x1c); otherMess = vtbl+0x20 formatted via _i64toa base 10",
+        "online state = vtbl+0x10 (bool). offlineTimeSpan: if offline, = serverNow (FUN_111f8d20 low dword) - piVar10[0x25] (last-online timestamp); clamped to >= 0; 0 while online",
+        "isCanBanGuilder computed via memberMgr vtbl+0x208"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display (server owns member roster -> TlvGuildMemberInfo/TlvGuildMemberData; currentP/weekP are server-tracked contribution points)",
+      "notes": "currentP=total contribution, weekP=weekly contribution, taskNum=guild-task count, growLevel=member grow/rank. Aligns with TlvGuildMemberInfo (id/role/level/hunterStar/note/time/hRLevel)."
+    },
+    {
+      "address": "0x108b4790",
+      "currentName": "FUN_108b4790",
+      "proposedName": "CMHUI_HunterGroup::BuildSearchGroupListVO",
+      "purpose": "_getSearchGroupList / OnSearchResult: builds the paged guild-search results VO (SEARCHGROUP_CLASS_NAME array) and pushes it to Flash via UpdataSEARCHGROUP.",
+      "subsystem": "guild-ui",
+      "confidence": "medium",
+      "formulas": [
+        "GroupListMaxPageNum = *(searchMgr(pcStack_130)+0x54); GroupListCurrentPage = *(...+0x50)",
+        "per result entry ppiVar1: guildId = ppiVar1[8]; name from ppiVar1[6]/[7]; level = ppiVar1[0xf]; leader name from ppiVar1[0xe]/[0xd]; prestige = ppiVar1[0x10]; (&DAT_11dbdc0c current members?) = ppiVar1[0x17]; Maxnum = ppiVar1[0x17]; AVGLevel = ppiVar1[0x18]; REQLevel = ppiVar1[0x19]",
+        "iterates *ppppiVar5 .. ppppiVar5[1] (vector of entry ptrs)"
+      ],
+      "costs": [
+        "Maxnum = guild member capacity; REQLevel = required hunter level to apply; AVGLevel = average member level"
+      ],
+      "serverRelevance": "client-only display (server owns the guild directory / search index)",
+      "notes": "Search-list field map: guildId[8], level[0xf], prestige/reputation[0x10], maxMembers[0x17], avgLevel[0x18], reqLevel[0x19]."
+    },
+    {
+      "address": "0x108ca7e0",
+      "currentName": "FUN_108ca7e0",
+      "proposedName": "CMHUI_Task::BuildTaskDetailVO",
+      "purpose": "Builds the quest/guild-task detail VO: task name/level/status, team/repeat flags, and the full reward set (money, gold, farm points, hunter exp/fund/contribution, npc friendship), plus the award-item list and target list. Reward magnitudes are scaled by hunter-rank multipliers from CPlayer::GetHuntRankOrCount.",
+      "subsystem": "guild-task-rewards",
+      "confidence": "high",
+      "formulas": [
+        "guard: only runs when DAT_123bbaac > 0 (task subsystem active)",
+        "reward entries fetched by type-id from the task's reward table (param_2+0x4c): id 0x19=silver/money, 0x18=gold, 0x1f=item award list, 0x21=hunter(guild) exp/fund/contribution. Others: FUN_10804980=farm actuarial point, FUN_10804a00=npc friend value",
+        "money (m_Money &DAT_11dbfbc8) = (int)((float)entry19[+8] * rankMul); rankMul = CPlayer::GetHuntRankOrCount out-param #4 (local_30) keyed by entry19[+4]",
+        "gold (&DAT_11dc0944) = (int)((float)entry18[+8] * rankMul); gold_bind = (int)((float)entry18[+0xc] * rankMul2); rankMul/rankMul2 = GetHuntRankOrCount out #2/#3 keyed by entry18[+4]",
+        "farm_actuarialpoint = (int)((float)entry_farm[+8] * rankMul5); rankMul5 = GetHuntRankOrCount out #5",
+        "hunter_exp = entry21[+8] (guild exp reward); hunter_fund = entry21[+0xc] (guild fund reward); hunter_contribution = entry21[+4] (personal guild-contribution reward)",
+        "npcfriendvalue = entry_npc[+8]",
+        "bTeam = 1 if task team-size (FUN_10804c90 -> *(+4) deref) >= 2 else 0; bRepeat = (byte@(param_2+0x80) != 0)",
+        "queststatus = (accepted ? questObj+0x14 : (canAccept? 10 : 0))",
+        "task_awardList entries (type 0x1f): itemIconPathName=item+0xb4, slotid=running index, ItemID=item vtbl+0x18, count=entry+8, (&DAT_11dca14c)=item+0x10; empty entry -> icon '', slotid 10, ItemID 0, count 0",
+        "task_targets (TASK_TARGET_VO_NAME): nTargetID1..5, strTarget1..5, nOpType, nCurCount, nMaxCount, nQuestType (target struct stride 0x3b dwords)"
+      ],
+      "costs": [
+        "guild-task rewards (rank-scaled): money = base*rankMul, gold = base*rankMul (+ gold_bind bound portion), farm point = base*rankMul, hunter_exp (guild exp), hunter_fund (guild fund), hunter_contribution (personal contribution), npcfriendvalue",
+        "reward-entry type ids: 0x18 gold, 0x19 money, 0x1f item-list, 0x21 hunter/guild exp+fund+contribution, plus farm-point and npc-friend entries"
+      ],
+      "serverRelevance": "authoritative (server computes and grants the actual task/guild-task rewards; this VO is a client preview using the same rank-multiplier formula reward=base*rankMultiplier). Reward type-ids and per-entry offsets (+4 contribution, +8 primary amount, +0xc fund/bind) are the load-bearing data.",
+      "notes": "KEY for guild-task rewards: hunter_exp->guild exp, hunter_fund->guild fund, hunter_contribution->member contribution. Amounts are base_value * hunter-rank multiplier; server must apply the same scaling."
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x108cce00",
+      "currentName": "FUN_108cce00",
+      "proposedName": "CPetShopUI::RegisterHandlers",
+      "purpose": "Registers the pet-shop Lua/UI request dispatch handlers and pushes shop money fields to the UI VO. Not quest logic; pet/NPC shop UI plumbing.",
+      "subsystem": "shop-ui",
+      "confidence": "medium",
+      "formulas": [
+        "DAT_123bbab1 = (param_5 == 2)  // flag: shop opened in mode 2",
+        "Registers via FUN_104d13b0(name, fn): _requestBuyItem->FUN_108cd070, _requestNpcSales->FUN_108cd400, _requestSoldList->FUN_108ce7d0, _requestSellItem->FUN_108cef10, _requestGetBuyStackCounts->FUN_108cfa10; and _requestBuyBackItem VO-built inline",
+        "Emits FUN_104d1550(\"CurrentBindMoney\", uVar4) and (\"CurrentUnbindMoney\", uVar3) from two FUN_1025b060() reads (bound/unbound currency balances)",
+        "strPetShopTitle string field set only when pet-shop record present: DAT_1202e818+0xd0 -> +0x90 -> vtbl+0xb4 != 0"
+      ],
+      "costs": ["CurrentBindMoney / CurrentUnbindMoney (bound & unbound wallet balances) shown in shop UI"],
+      "serverRelevance": "client-only (UI dispatch registration; balances are display copies)",
+      "notes": "Wallet fields mirror server-authoritative currency; the shop request handlers (buy/sell/buyback) are the client entry points whose server counterparts do the authoritative debits."
+    },
+    {
+      "address": "0x108f32b0",
+      "currentName": "FUN_108f32b0",
+      "proposedName": "CLevelEntrustUI::RegisterHandlers",
+      "purpose": "Registers all entrust/commission (\"level entrust\") UI request handlers and VO builders. Pure dispatch-table registration for the entrust/bounty browser.",
+      "subsystem": "entrust-ui",
+      "confidence": "high",
+      "formulas": [
+        "Each block: FUN_100b62c0() builds a name string, then FUN_108f84a0()/FUN_108f83e0() registers handler fn; handlers: GetEntrustListData->CLevelEntrustUI::BuildEntrustListVO, GetLevelUnlockInfo->FUN_108f63e0, GetGroupUnlockInfo->FUN_108f6610, UnlockInstance->FUN_108f6840, UnlockSubGroup->FUN_108f68b0, UpdateGuildMemberData->FUN_108f6f70, GetLevelInstanceGoData->FUN_108f77f0, GetHunterBoxData->FUN_108f69a0, GetAvalidActionPoint->FUN_108f6920, GetLocalPlayerIsCoach->FUN_108f8110, SelHuntPacket->FUN_108f3a00, EntrustReady->FUN_108f3a50, RequestEntrustList->FUN_108f3880, ReqOpenEntrustGoView->FUN_108f38e0, ReqOpenWeaponTrialGoView->FUN_108f3970, ReqLevelTrackData->FUN_108f7c90, ReqOpenEntrustInfoByTrack->FUN_108f8040, FetechGuildInstanceMemberData->FUN_108f72f0, RequestLeagueList->LAB_108f80d0, IsShowCountDown->FUN_108f8250"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI callback registration table)",
+      "notes": "Names map client UI verbs to their VO-builders / request senders for the entrust (commission/bounty) system; useful as an index of entrust opcodes."
+    },
+    {
+      "address": "0x108f72f0",
+      "currentName": "FUN_108f72f0",
+      "proposedName": "CLevelEntrustUI::BuildTeamMemberVO_Instance",
+      "purpose": "Builds the team-member VO array (LEVELENTRUST_MEMBERVO_CLASSNAME) for the guild-instance member panel from the live player/team object.",
+      "subsystem": "entrust-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Guard: param_5 > 0; player = DAT_1202e818+0xd0 -> +0x90 -> vtbl+0xb4; team = player vtbl+0xc0; requires player[0xaaf] != 0",
+        "Member list iterated over player-team container: count = (piVar3[0x14]-piVar3[0x13])/0x30 (member record stride 0x30)",
+        "Per member emits: netId (member vtbl+0xc), starLevel = *(memberInfo+0x14) where memberInfo=member vtbl+0x80, DAT_11dccf88 = member vtbl+0x30, weapon = member vtbl+0x38, DAT_11dd7eac = teamObj vtbl+4; state=0, selHuntPacket=0xffffffff, bIsLeader=0",
+        "Writes VO array field teammemberInfoArr"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI VO built from already-synced team state)",
+      "notes": "Member record stride 0x30 in the team container; starLevel/weapon offsets read from member sub-structs."
+    },
+    {
+      "address": "0x108f77f0",
+      "currentName": "FUN_108f77f0",
+      "proposedName": "CLevelEntrustUI::BuildTeamMemberVO_Guild",
+      "purpose": "Builds team-member VO array for the guild entrust panel (variant with hrLevel/bOfficer/remainWarning). Iterates a member container and emits per-member fields.",
+      "subsystem": "entrust-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Guard: in_stack_00000014 == 1; player via DAT_1202e818+0xd0->+0x90->vtbl+0xb4; member container via FUN_107cb5c0 / FUN_112e5470",
+        "Iterates container [begin..end] = *ppppiStack_b0 .. ppppiStack_b0[1], element stride 0xb (11 dwords)",
+        "Per member accessor calls emit: starLevel(FUN_112e9980 str), DAT_11dccf88(FUN_112e9970), weapon(FUN_112e99d0), DAT_11dd7eac(FUN_112e9950), hrLevel(FUN_112e9960), state(FUN_112e99c0 byte), bOfficer(FUN_112e99a0 byte), selHuntPacket(FUN_112e9930), bIsLeader=0",
+        "remainWarning = FUN_115768f0() emitted once after loop; teammemberInfoArr array field written",
+        "If bOfficer(FUN_112e99a0)!=0, cross-checks player vtbl+0xb8 member and marks *(iVar3+0x20)=1"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI VO from synced guild-team state)",
+      "notes": "starLevel/weapon/hrLevel/state/bOfficer come from opaque accessor thunks (FUN_112e99xx) on the member record."
+    },
+    {
+      "address": "0x10900850",
+      "currentName": "FUN_10900850",
+      "proposedName": "CTeamMatchUI::RegisterHandlers",
+      "purpose": "Registers team/matchmaking UI request handlers (create/join/quit/kick/invite/search team, raid invite). Dispatch-table registration.",
+      "subsystem": "team-ui",
+      "confidence": "high",
+      "formulas": [
+        "Registers: GetTeamFiltrationData->FUN_109011d0, RefreshTeamInfo->FUN_10901db0, SearchOtherTeam->FUN_10901fd0, SearchTeamChangePage->FUN_109020b0, LookOtherTeamInfo->FUN_109026e0, CreateTeamReq->FUN_109027e0, JoinTeamReq->FUN_10902bf0, ReqQuitTeam->LAB_10902eb0, ReqChangeLeader->FUN_10903e90, ReqKickMember->FUN_10902ee0, SetTeamOptionReq->FUN_10904030, InviteTeam->FUN_109043f0, QuickJoinTeamReq->FUN_10901e80, ReqSearchByName->FUN_10904480, onTeamTypeEight->FUN_10904540, onTeamTypeTwelve->FUN_10904600, onTeamTypeSixTeen->FUN_109038a0, GetTeamMemberList->FUN_10900f70, RaidInviteTeam->FUN_10901080, RaidTeamRequest->FUN_10902120, GetNetID->FUN_10904830"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI callback registration)",
+      "notes": "Team-size verbs onTeamTypeEight/Twelve/SixTeen map to 8/12/16-player team modes."
+    },
+    {
+      "address": "0x10907130",
+      "currentName": "FUN_10907130",
+      "proposedName": "CPaidBoxUI::RegisterHandlers",
+      "purpose": "Registers two UI handlers: RequestPaidBox and UpdateItemData. Small dispatch-registration stub.",
+      "subsystem": "shop-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Registers RequestPaidBox->handler@0x1090b064 and UpdateItemData->handler@0x1090b0a7 via FUN_100b62c0 + FUN_10907740/FUN_10907810"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI registration)",
+      "notes": "Handler targets encoded as little-endian bytes in acStack arrays (0x1090b064, 0x1090b0a7)."
+    },
+    {
+      "address": "0x10912f00",
+      "currentName": "FUN_10912f00",
+      "proposedName": "CInstanceEnterUI::RegisterHandlers",
+      "purpose": "Registers instance/level-enter and matchmaking UI handlers (get enter data, spec level data, team match, stop match, region/battle-map queries).",
+      "subsystem": "instance-ui",
+      "confidence": "high",
+      "formulas": [
+        "Registers: GetInstanceEnterData->CInstanceEnterUI::BuildEntryDataVO(FUN_10913600), GetSpecLevelData->FUN_10914690, IsCrossRegion->FUN_10913400, GetCrossRegionRoomID->FUN_10913480, GetGuildMathSignUP->FUN_10913370, IsBattleWatch->FUN_109134d0, LevelTeamMatch->FUN_10914f90, LevelTeamMatchByEntrust->FUN_10915240, ReqSpecLevelData->LAB_109154b0, ReqStopMatch->FUN_109154d0, IsLocalBattleMap->FUN_10913580, GetCurLevelID->FUN_109152e0, GetCurLevelMode->FUN_10915340, IsCrossServerPlayer->FUN_109153b0, IsBattleLevelCanTrade->FUN_10915440"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI callback registration)",
+      "notes": "GetInstanceEnterData/GetSpecLevelData are the two big VO builders (next entries)."
+    },
+    {
+      "address": "0x10913600",
+      "currentName": "FUN_10913600",
+      "proposedName": "CInstanceEnterUI::BuildEntryDataVO",
+      "purpose": "Builds the instance-entry browser VO tree: per-tab entries (ENTRY_TAB) and per-level data (ENTRYDATAVO/LEVELDATAVO) including daily entry counts, unlock state, proposed level/weapons, and objective descriptions. Client display model built from the level-definition registry.",
+      "subsystem": "instance-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Guard param_5==1. Walks a red-black tree of level-tab records (FUN_10912db0 gets root); tab dedup list built with dynamic array (FUN_10463c40 growth)",
+        "Per-level fields from level record pppppiVar4: nLevelID, nDiffLev=level[0xc], nProposeLev=level[0x1a], nProposePlayerNum=level[0x1b], nUIShowBossID=level[0x1e], nBelongTabId=iStack_d0",
+        "nState = FUN_10914e90(level[0x10]); nRecord = (level[0xae2]!=0 && FUN_114cd4a0(player)!=0) ? FUN_114cd4a0 result : 0",
+        "DAILY ENTRY COUNT: nDailyEnterCnt base = level[9][0x1b]; nDailyTotalMaxEnterCnt = level[9][0x1b] + level[9][0x1c]. If max>0 and active-hunt activity present (vtbl+0x388, FUN_1156c6b0): adjust enterCnt = level[9][0x1b] - FUN_1156c660(0) + FUN_1156c660(4); maxCnt -= FUN_1156c660(3)",
+        "nNeedLev emitted 0; strNeedQuest/strNeedOtherLevel/strProposeWeapon built empty then FUN_10914d40 fills proposed-weapon; strTargetDesc = level[0x1d] (fallback DAT_11d9d32b empty)",
+        "strOtherTarget%d loop: target array via FUN_117380d0, entry stride 0x54, capped at index 0x1a3 (sprintf \"%s%d\",\"strOtherTarget\",n)",
+        "strUIShowBossName from level[0x1d] when iStack_1b4==0 else built; strDesc = level[0x18]",
+        "Also queries per-level record activity via **(*ppppppiStack_228+0x388)"
+      ],
+      "costs": ["nDailyEnterCnt / nDailyTotalMaxEnterCnt: daily instance-entry quota (base level[9][0x1b], cap +level[9][0x1c], reduced by consumed entries and activity bonuses)"],
+      "serverRelevance": "client-only display, but exposes server-authoritative level-def offsets: daily-enter counters (level[9]+0x1b/0x1c), difficulty (level+0xc), proposed level/players (level+0x1a/0x1b), boss id (level+0x1e)",
+      "notes": "Level record offsets are load-bearing for the level/instance registry. Daily-enter quota math is the authoritative gate the server must enforce; here it is only rendered. Other-target entry stride 0x54 (84 bytes), max 420 entries (0x1a3)."
+    },
+    {
+      "address": "0x10914690",
+      "currentName": "FUN_10914690",
+      "proposedName": "CInstanceEnterUI::BuildSpecLevelDataVO",
+      "purpose": "Builds a single LEVELDATAVO for one level id (GetSpecLevelData path): resolves level record, emits difficulty/state/proposed/record/target fields. Sibling of BuildEntryDataVO for a single level.",
+      "subsystem": "instance-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Guard param_5==3. Level id iVar10 = *(param_4+8) when (*(param_4+4)&0x8f) is 3 or 4 else sentinel 0xDEADBEAF (-0x21524151)",
+        "Finds condition in player level-tab tree (FUN_10912db0 on player+0x2d2c); tab record stride: tree walk, per node target-id list at +0x14/+0x1c",
+        "Emits: nTaskShowCondition=uStack_34, nEntryPointID=uStack_68 when tab target id matches level id",
+        "Level record ppiVar4 (FUN_107d7930(levelId)): nUIShowBossID=level[0x1e], strDesc=level[0x18], nDiffLev=level[0xc], nState=FUN_10914e90(level[0x10],levelId), nProposeLev=level[0x1a], nProposePlayerNum=level[0x1b], nLevelID=iVar10, nNeedLev=0",
+        "nRecord = (*(player+0x2b88)!=0 && FUN_114cd4a0(levelId)!=0) ? FUN_114cd4a0 : 0",
+        "strTargetDesc = *(local_cc+0x74) (fallback empty); strOtherTarget%d loop identical to BuildEntryDataVO (stride 0x54, cap 0x1a3)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of server-authoritative level-def fields (same offsets as BuildEntryDataVO)",
+      "notes": "Confirms level record offsets: 0xc diff, 0x10 state, 0x18 desc, 0x1a proposeLev, 0x1b proposePlayers, 0x1e bossId. Sentinel level id 0xDEADBEAF for missing arg."
+    },
+    {
+      "address": "0x1091f100",
+      "currentName": "FUN_1091f100",
+      "proposedName": "CTaskUIModel::BuildTaskListVO",
+      "purpose": "PRIMARY quest/task VO builder. Builds guildTaskArray (GUILDTASK_CLASS_NAME) and the general active-task list, emitting per-task status, objective/target progress (kill/gather counts), reward-item lists, and computed reward amounts (exp/gold/fund/contribution). Reflects the server-authoritative task-progress and reward structures into the client UI.",
+      "subsystem": "quests",
+      "confidence": "medium",
+      "formulas": [
+        "GUILD TASKS: iterate container FUN_114a9220 -> [ppppiStack_d0 .. pppppiStack_cc]. Per guild task record pppiVar1: quest_id/name = pppiVar1[4] (task def), groupType = pppiVar1[2]. remainTime computed from _time64(0) baseline (DAT_123bbcc8/ccc) + status obj FUN_111743b0 (vtbl+0xe). questStatus, taskName(str@11dca5f8), description(str@11dcaa28). curCount = taskDef vtbl[3], maxCount = taskDef vtbl[4]. curStage=1, totalStage=1, group_id=1, bTracked=1, canShared=1, bGuildTask flag",
+        "other_info sub-VO (guild): farm_actuarialpoint=0, hunter_exp = taskDef[0x14], hunter_fund = taskDef[0x15], DAT_11dbfbc8 = taskDef[0x14], DAT_11dc0944 = taskDef[0x1b], gold_bind=0, hunter_contribution=0, npcfriendvalue=0, queststatus=0",
+        "GENERAL TASKS: iterate piStack_13c..piStack_138 (task ptr array). Task valid when *(taskDef+0x10)==0x80. taskDef = *(taskObj+8). questStatus = *(taskObj+0x14). quest_id = taskDef+4. Type flags *(taskDef+0x10): values 0x10/0x20/0x40/0x80 normalized to 0x10 for nOpType-like field @11dca6d0",
+        "OBJECTIVE/TARGET progress: task_targets array (TASK_TARGET_VO_NAME), target record stride 0x3b dwords (0xEC bytes). Per target piVar15: nTargetID1..5 = piVar15[0..4]; nOpType = piVar15[5]; nCurCount = piVar15[6]; nMaxCount = piVar15[7]; strTarget1..5 = piVar15[0xd],[0x13],[0x19],[0x1f],[0x25]; DAT_11dca874=0",
+        "TARGET COMPLETION GATE: if piVar15[0x3a]==3 && piVar15[0x34]!=4 (special/hunt objective): when piVar15[6]==piVar15[7] emit completed; when piVar15[6]<piVar15[7] emit in-progress and BREAK (stop listing further targets). Otherwise emit target unconditionally. cur==max => objective done, cur<max => in progress",
+        "REWARD AMOUNT FORMULA: reward = (int)((float)rewardLine[2] * (float)scaleFactor) where scaleFactor from CPlayer::GetHuntRankOrCount(rewardLine[1]) -> FUN_1185f2e0. Reward-line lookups by type id: FUN_10804980(taskDef+0x13, ...) hunter_exp-scaled; FUN_10804cd0(0x19)->DAT_11dbfbc8; FUN_10804940(0x18)->DAT_11dc0944 (line[2]*f and line[3]*f2); FUN_108049c0(0x21) x2 -> gold_bind = line[8]/line[0xc], hunter_fund = line[4]; FUN_10804a00() -> DAT_11dca87c",
+        "canShared/duplicate flag: canShared computed from FUN_10804c90 (>=2 -> 1 else 0)@11dca808; *(rewardCtx+0x20)!='0' -> flag@11dca830",
+        "task_awardList (TASK_AWARD_CLASS_NAME): per award item slotid, ItemID=award[0], count=award[1](DAT_11dbdc0c), itemIconPathName = itemDef[0x2d], quality = itemDef[4](DAT_11dca14c); empty slot -> ItemID=0, slotid=10, empty icon"
+      ],
+      "costs": [
+        "Reward amounts: hunter_exp, hunter_fund, gold_bind (bind+unbind money line[8]/line[0xc]), hunter_contribution, all = rewardLineBase * rankScaleFactor",
+        "Objective thresholds: nCurCount/nMaxCount per target (kill/gather/hunt counts)"
+      ],
+      "serverRelevance": "client-only VO builder, but it is the clearest map of server-authoritative task structures: task-target record layout (stride 0x3b: ids 0-4, opType@5, curCount@6, maxCount@7, name strings @0xd/0x13/0x19/0x1f/0x25), completion comparison cur==max, and reward = base*rankFactor. Server must produce these counters/rewards; this validates their layout and comparison semantics.",
+      "notes": "Highest-value function in chunk. nOpType (target+5) is the objective type discriminator (kill/gather/part-break/capture/ailment). The 0x3a==3 / 0x34!=4 branch singles out one objective class (likely hunt/capture) with early-break progress display. Reward scaling by hunter rank confirmed via CPlayer::GetHuntRankOrCount + float multiply. Type-flag normalization (0x10/0x20/0x40/0x80 -> 0x10) at taskDef+0x10 groups task categories. Offsets medium-confidence due to type-propagation warning."
+    },
+    {
+      "address": "0x1093faf0",
+      "currentName": "FUN_1093faf0",
+      "proposedName": "CBattleTeamUI::OnClanInviteReceived",
+      "purpose": "Handles an incoming clan/team invite: if auto-refuse config is off, pops a confirm MsgBox (Ok/Cancel); otherwise forwards accept directly to the network layer. Team/clan invite UI, not quest logic.",
+      "subsystem": "team-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Stores invite payload: *(this+0x28) = param_2 (8-byte inviter id)",
+        "Config check g_refuseClanRequest via config mgr (DAT_1202e818+0x2c vtbl+0x54); vtbl+8 == 0 => show dialog",
+        "String-table lookup (CInfoManager idiom): idx = wantId - mgr[0xc]; valid if 0<=idx<mgr[9] and stride mgr[10]!=0; rec = mgr[8][idx/stride][idx%stride] (2-level page table). Used for message ids 0x2a and 6",
+        "Dialog: FUN_1112d7a0(0x1ff1, \"BattleTeam.MsgBoxClanInviteOk\", \"BattleTeam.MsgBoxClanInviteCancel\", ...)",
+        "Accept path (refuse off): FUN_11c65590(player, invite_hi, invite_lo, 0) where player = DAT_1202e818+0xd0->+0x90->vtbl+0xb4"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (invite dialog + request send)",
+      "notes": "Message-id math (0x2a, 6) is stock CInfoManager string-table lookup; unrelated to quest thresholds."
+    },
+    {
+      "address": "0x10947d90",
+      "currentName": "FUN_10947d90",
+      "proposedName": "CSpoorTaskUIModel::RegisterHandlers",
+      "purpose": "Registers the Hunter Road (spoor task / progression road) UI handlers and builds the level-filter-condition VO list (min/max value ranges per group) plus localPlayerLevel. Hunter-road progression UI.",
+      "subsystem": "quests",
+      "confidence": "medium",
+      "formulas": [
+        "Registers: _requestHunterRoadData->CSpoorTaskUIModel::BuildEventList, _requestHunterRoadMapData->FUN_10948890, _requestHunterRoadGetGift->FUN_10948ae0, _requestHunterRoadContribution->CSpoorTaskUIModel::BuildRewardList",
+        "LEVEL_FILTER_CONDITION_CLASS VO per condition (FUN_10947530 count, FUN_109474a0(i)): maxValue = cond[6], minValue = cond[5], groupID = cond vtbl+0x18",
+        "localPlayerLevel = CPlayer::GetHuntRankOrCount() when player present (DAT_1202e818+0xd0->+0x90->vtbl+0xb4 != 0)"
+      ],
+      "costs": ["Filter-condition ranges minValue=cond[5]/maxValue=cond[6] used to bucket hunter-road tasks by player level/hunt rank"],
+      "serverRelevance": "client-only (UI registration + filter VO); localPlayerLevel and reward/contribution are server-authoritative and only rendered here",
+      "notes": "Hunter Road = a progression/task track; _requestHunterRoadGetGift is the client reward-claim entry whose server side does authoritative granting."
+    }
+  ]
+}

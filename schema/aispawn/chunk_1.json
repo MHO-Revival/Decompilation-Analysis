@@ -1,0 +1,438 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x10488ad0",
+      "currentName": "FUN_10488ad0",
+      "proposedName": "SmartPtrVector::InsertRange",
+      "purpose": "std::vector<_smart_ptr<T>>::insert helper. Shifts/copies smart-pointer elements and either reuses the tail (when count < size) or reallocates via FUN_10489ac0. Each copied element does AddRef (*(elem+4)++) and Release (dec refcount at +4, call vtable[1] dtor when 0).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "refcount stored at object offset +4; AddRef: *(int*)(obj+4)+=1; Release: *(int*)(obj+4)-=1, if ==0 call (*vtable[1])()",
+        "element stride 4 bytes; size = (end-begin)>>2",
+        "_wassert on negative refcount at smartptr.h line 0x18c (396)"
+      ],
+      "notes": "Stock CryEngine intrusive-refcount smart-pointer vector plumbing (D:\\MHFC\\...\\CEShare\\smartptr.h). Not AI-specific."
+    },
+    {
+      "address": "0x10488eb0",
+      "currentName": "FUN_10488eb0",
+      "proposedName": "BTObject::~Dtor_ReleaseSmartPtr18",
+      "purpose": "Object teardown: releases smart-pointer member at +0x18 (Release semantics, vtable[0](1) on zero refcount), then frees heap block at +0x14 (FUN_10c3d5d0) if distinct from self.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only",
+      "formulas": ["release member @+0x18; free @+0x14 if (!=this && !=0)"],
+      "notes": "Stock smartptr plumbing; identical shape to 10489a30/10489d60/1048a3a0/1048a3f0."
+    },
+    {
+      "address": "0x10489360",
+      "currentName": "FUN_10489360",
+      "proposedName": "SmartPtrVector::UninitializedCopyForward",
+      "purpose": "Forward copy of a smart-pointer range with refcount management (uninitialized_copy). AddRef source (+4), Release the slot's prior value, then store.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only",
+      "formulas": ["count = (param_2-param_1)>>2; AddRef @+4, Release prior via vtable[1]"],
+      "notes": "Stock smartptr plumbing."
+    },
+    {
+      "address": "0x10489a30",
+      "currentName": "FUN_10489a30",
+      "proposedName": "BTObject::~Dtor_ReleaseSmartPtr18_b",
+      "purpose": "Same teardown as 10488eb0: release smart ptr @+0x18 (vtable[1] dtor variant), free @+0x14.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only",
+      "notes": "Duplicate of 10488eb0 with vtable[1] release."
+    },
+    {
+      "address": "0x10489d60",
+      "currentName": "FUN_10489d60",
+      "proposedName": "BTObject::~Dtor_ReleaseSmartPtr18_c",
+      "purpose": "Object teardown identical to 10488eb0 (release @+0x18, free @+0x14).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only",
+      "notes": "Duplicate smartptr dtor."
+    },
+    {
+      "address": "0x1048a240",
+      "currentName": "FUN_1048a240",
+      "proposedName": "SmartPtrVector::DestroyRangeBackward",
+      "purpose": "Destroys a range of smart pointers walking backward (param_1 down to param_2, step -4), Release each (dec refcount @+4, vtable[1] dtor at 0).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048a2e0",
+      "currentName": "FUN_1048a2e0",
+      "proposedName": "SmartPtrVector::DestroyRangeForward",
+      "purpose": "Destroys a forward range of smart pointers (param_1..param_2, step +4), Release each.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048a3a0",
+      "currentName": "FUN_1048a3a0",
+      "proposedName": "BTObject::~Dtor_ReleaseSmartPtr18_ret",
+      "purpose": "Teardown as 10488eb0 but returns param_1 (release @+0x18 via vtable[1], free @+0x14).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048a3f0",
+      "currentName": "FUN_1048a3f0",
+      "proposedName": "BTObject::~Dtor_ReleaseSmartPtr18_ret_b",
+      "purpose": "Teardown as 1048a3a0 but release uses vtable[0](1). Returns param_1.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048a930",
+      "currentName": "FUN_1048a930",
+      "proposedName": "SmartPtrVector::MoveBackward",
+      "purpose": "Backward move/copy of smart-pointer vector elements with AddRef/Release (used by InsertRange tail path).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048a9b0",
+      "currentName": "FUN_1048a9b0",
+      "proposedName": "SmartPtrVector::CopyAssignRange",
+      "purpose": "Copy-assign smart-pointer range: AddRef source (+4), Release destination prior, store source into destination.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x1048ac50",
+      "currentName": "FUN_1048ac50",
+      "proposedName": "SmartPtr::Release",
+      "purpose": "Release a single smart pointer at *param_1 (dec refcount @+4, call vtable[1] dtor at 0, wassert on negative).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x10492f90",
+      "currentName": "FUN_10492f90",
+      "proposedName": "SmartPtr::Release_vtable0",
+      "purpose": "Release a single smart pointer (dec refcount @+4, call vtable[0](1) dtor at 0).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104931f0",
+      "currentName": "FUN_104931f0",
+      "proposedName": "CBTNodeGroup::~Dtor",
+      "purpose": "Destructor of a BT node/group container. Sets vtable PTR_FUN_11dbae74; walks child vector [4]..[5] calling each child's vtable[0](1); conditionally frees owned block at [0xb] (flag byte at +0xc*4); releases smart ptrs at [0x14],[0x12],[0x11] (latter two gated by refcount-owned byte at +2); frees child vector storage [4].",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "child vector: begin=[4], end=[5]; flag byte at *(char*)(this+0xc*4); owned block ptr [0xb]",
+        "smart ptr members at word offsets [0x11],[0x12],[0x14]"
+      ],
+      "notes": "BT node aggregate teardown; struct layout useful but logic is destruction plumbing."
+    },
+    {
+      "address": "0x104979c0",
+      "currentName": "FUN_104979c0",
+      "proposedName": "CBTNode::SetSmartPtrMember50",
+      "purpose": "Setter for a smart-pointer member at this+0x50: AddRef new value, Release old, store, AddRef stored again (standard _smart_ptr::operator=).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104994b0",
+      "currentName": "FUN_104994b0",
+      "proposedName": "LoadBehaviorTree::ApplyOverrideBranch",
+      "purpose": "Parses an override's RT (runtime) path against a referenced BT file and creates an override branch. strstr-matches the BT filename (*(ref+0x20)) inside the override's reference path (*(node+0xc)+0x38); tokenizes the RT path via FUN_1047c8f0 building a ':'-joined id list; when the path has exactly one segment and a flag is set it edits the node in place (writes segment id to node+0x4c, appends to list node+0x1c), otherwise creates a new override branch (FUN_10498a10/FUN_10498ab0) and links it (node+0x10). Increments a counter at target+0x24.",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree/override",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "single-segment path (iVar5==1) + flag param_4 -> in-place: node+0x4c = segment id; else create override branch at ret+0x10",
+        "*(iVar6+0x24) += 1 (override apply count)"
+      ],
+      "notes": "MHO BT override mechanism (LoadBehaviorTree.cpp ~0x174-0x1b1). Config-load-time, not runtime AI decision."
+    },
+    {
+      "address": "0x10499a30",
+      "currentName": "FUN_10499a30",
+      "proposedName": "LoadBehaviorTree::LoadXmlRoot",
+      "purpose": "Loads a behavior-tree XML file: gets XML system via DAT_123bb90c+8, validates the root is a 'Behavior' node (vtable+0x10 IsTag), fetches child count, recursively parses each node via FUN_10499f10, rejects stray 'OverrideNode' at root, and finalizes id-map (FUN_1049cbc0). Errors: 'Couldn't find root node in xml file!', 'Failed to find override root node!', 'Root Node is not ready when load XML file'.",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree/load",
+      "serverRelevance": "client-only",
+      "notes": "Entry point for XML BT parse. Ghidra type-propagation garbled the register aliasing but string/flow intent is clear."
+    },
+    {
+      "address": "0x10499f10",
+      "currentName": "FUN_10499f10",
+      "proposedName": "LoadBehaviorTree::ParseNode",
+      "purpose": "Core recursive BT-node XML parser. Reads 'Node_id' (int, req) and 'Type' (req) attributes, dispatches by node Type, constructs the concrete node, sets id/flags, links into parent's child vector, records into the tree id-map, and recurses into 'Connector' children (also handles 'EventBT').",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/nodes",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Node type taxonomy: Reference | Selector(SelectorType: Random/General/RandomAttack) | Sequence(SequenceType) | Filter(Filter_Type) | Action | Condition",
+        "Selector alloc: General -> operator new(0x54); Random/RandomAttack -> operator new(0x70); Reference -> new(0x64=100); Enter_Exit filter -> new(0x5c); EventBT child -> new(0x50)",
+        "Action/Condition leaf: node[0x17] = 2 - (strcmp(Type,'Action')!=0) => Action=2, Condition=1; leaf class resolved by 'Operation' attr via leaf factory (DAT_123bb90c+0x14)",
+        "Filter subtypes -> factory calls: Logger=FUN_1049e300, Timer=FUN_1049e390, Counter=FUN_1049e440, Loop(DAT_11dbb71c)=FUN_1049e4f0, Until_Fails_Limited=FUN_1049e5a0, Until_Fails=FUN_1049e650, Until_Success=FUN_1049e6e0, (DAT_11dbb75c)=FUN_1049e800",
+        "Timer: attr 'Time' (float, DAT_11dbb648) default 0xbf800000 = -1.0f",
+        "Counter: attr 'Times' (int) default -1; node[0x16]=Times, node[0x17]=0",
+        "Loop: attr 'Times' default -1; node[0x16]=Times, node[0x17]=0",
+        "Until_Fails_Limited: attr 'Times' default -1; node[0x16]=Times, node[0x17]=0",
+        "node struct: [9]=Node_id; [0xe] |= parent[0xf] (inherited flags); [0x13]=id-map entry ptr; child vector at [4](storage)/[5](end-ptr)/[6](cap-ptr)",
+        "'.' string DAT_11dbaf60 len==4 short-circuit sets local_a1=0 (skip attach to parent)"
+      ],
+      "notes": "Primary MHO BT node-type definition. Node kinds & filter/decorator semantics are the load-bearing reference for reconstructing monster behavior trees. Runs at asset-load time; the server that drives AI must interpret these same node types."
+    },
+    {
+      "address": "0x1049ae30",
+      "currentName": "FUN_1049ae30",
+      "proposedName": "LoadBehaviorTree::ParseNodeCustomAttrs",
+      "purpose": "Iterates all XML attributes of a node (vtable+0x18 count, +0x1c getAt), skips the reserved keys 'Comment', 'Type' (DAT_11da7300), 'Type'(DAT_11dbabc0) and 'Node_id', and stores every other attribute as a custom key/value property on the node (FUN_104934f0).",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree/nodes",
+      "serverRelevance": "client-only",
+      "formulas": ["reserved attribute keys skipped: Comment, Type(x2 dat refs), Node_id"]
+    },
+    {
+      "address": "0x1049b020",
+      "currentName": "FUN_1049b020",
+      "proposedName": "LoadBehaviorTree::ExpandReferencesAndApplyOverrides",
+      "purpose": "Second load pass: expands 'Reference' sub-tree nodes and applies overrides across the tree/group managers. Walks the override list (+0x1c) and reference list (+0x14), clones sub-trees (FUN_1049bd50), erases old id-map entries from parent & sub-tree group managers, re-parents cloned nodes, and recursively expands nested references. Rich error set covers RT-path resolution, id-map erase failures, clone failures, and 'root must contain single child' validation.",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree/override",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "reference bt file validity: ((child_end - child_begin) & 0xfffffffc) == 4  => exactly one child under root",
+        "RT-path node name build: sprintf('%s%c%-i', parentPath, ':' (0x3a), childNodeId+0x54)",
+        "override apply not allowed over an already-expanded tree (guard on iVar15+0x24 > 0)"
+      ],
+      "notes": "MHO reference/override expansion. Config-time tree assembly, not runtime decision math."
+    },
+    {
+      "address": "0x1049c650",
+      "currentName": "FUN_1049c650",
+      "proposedName": "SmartPtr::Assign",
+      "purpose": "Smart-pointer assignment: AddRef *param_2 (+4), Release *param_1, store.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104a2050",
+      "currentName": "FUN_104a2050",
+      "proposedName": "CBehaviorTreeContext::Ctor",
+      "purpose": "Constructor for a behavior-tree context/loader object bound to an entity. Zero-inits multiple embedded containers (vtables PTR_FUN_11dbac64 -> PTR_FUN_11dbc480), stores ctor args (param_2->[0x4b], param_3->[0x4e], param_4->[0x4d], param_5 file->[5]), then reads the entity's 'BTFolder' AISetting property (tries 'BTFolder', 'Properties.BTFolder', 'PropertyCustom'+'.AISetting.BTFolder') and stores it. Base BT path root is '/Scripts/AI/BehaviorTree/'.",
+      "confidence": "medium",
+      "subsystem": "monster-ai/config",
+      "serverRelevance": "validation",
+      "formulas": [
+        "default scalar fields: [0x67]=5, [0x72]=10 (container initial capacities/limits)",
+        "isServerCtx-ish flag: *(bool*)(this+0x30) = (param_1[0x4d]==0)",
+        "AISetting property lookup chain: 'BTFolder' -> 'Properties.BTFolder' -> ('PropertyCustom' + '.AISetting.BTFolder')",
+        "BT asset path base = '/Scripts/AI/BehaviorTree/'"
+      ],
+      "notes": "MHO monster AI config context. The AISetting/BTFolder key chain matches AISystem::LoadEntityBehaviorTree_Recursive @0x10259b80 in combat.md. Entity property source, so mirrors server-known monster config keys."
+    },
+    {
+      "address": "0x104a2af0",
+      "currentName": "FUN_104a2af0",
+      "proposedName": "CBehaviorTreeContext::LoadAISettingsToBlackboard",
+      "purpose": "Reads the entity's AISetting property block and pushes named tuning values into the AI blackboard. Property source resolved via 'Properties.'/'PropertyCustom'+'.AISetting.' chain. Reads BlackBoardFile, then AISetting keys 'Health' (float), 'RageDec' (float, DAT_11dbc56c), 'RageDec' key again, and 'TailFire'; for each present value it formats it (FUN_104a1b30 with DAT_11da0cf4 format) and writes it into the blackboard by key (FUN_113168d0 lookup + FUN_1046d130 set).",
+      "confidence": "medium",
+      "subsystem": "monster-ai/blackboard",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "AISetting blackboard keys written: 'Health', 'RageDec' (DAT_11dbc56c), 'TailFire'",
+        "each value written only if present AND >0.0 (Health/RageDec numeric guards)",
+        "property source key chain: 'Properties.' -> 'PropertyCustom' + '.AISetting.' / '.AISetting'"
+      ],
+      "notes": "MHO-specific monster tuning: Health / RageDec (rage decay) / TailFire seed the AI blackboard. These are authoritative monster stat/state inputs the server must replicate. RageDec ties to CRageInfo (monster.md)."
+    },
+    {
+      "address": "0x104a6720",
+      "currentName": "FUN_104a6720",
+      "proposedName": "CBehaviorTreeContext::SerializeNodeRef",
+      "purpose": "Serializes a BT node reference into a network/save buffer (param_4). Builds the node name string from *(node+0x9c), checks it resolves to the expected node id (FUN_1048a080 == param_6), then writes length-prefixed name plus offset fields into the buffer via FUN_100eaf50 (raw write) and back-patches a size field.",
+      "confidence": "low",
+      "subsystem": "BehaviorTree/serialize",
+      "serverRelevance": "validation",
+      "formulas": ["writes: int len, name bytes, int 0 placeholder; back-patch *(buf+0xc + startOff) = curOff - startOff"],
+      "notes": "BT node reference (de)serialization; likely for BT snapshot sync. Purpose partly inferred."
+    },
+    {
+      "address": "0x104a69f0",
+      "currentName": "FUN_104a69f0",
+      "proposedName": "CBehaviorTreeContext::BuildRuntimeNodeMaps",
+      "purpose": "Populates runtime node lookup maps for an AI instance from a source table. Resolves the current node set (via FUN_1048a120 against a global at DAT_123bb90c+0x28), then walks three red-black trees rooted in the source object (offsets +0x10/+0x28/+0x4c) building key->value pairs (FUN_104a6d40 pair-maker) into arrays at this+0x118/+0x120 and this+0x10c, clears an existing list at +0x34..+0x40, and sets ready flag *(this+0x171)=1.",
+      "confidence": "low",
+      "subsystem": "BehaviorTree/runtime",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "guard: *(this+0x200) != *(this+0x1fc) and resolved node != global set",
+        "per-entry stride 0xc (12 bytes) writing into *(this+0x10c) array indexed by count",
+        "sets *(this+0x171) = 1 (maps-ready flag) on success"
+      ],
+      "notes": "Runtime BT node/key-map construction for an AI entity. Server-side AI runtime, but exact key semantics uncertain."
+    },
+    {
+      "address": "0x104b4e40",
+      "currentName": "FUN_104b4e40",
+      "proposedName": "CBTObject::SetSmartPtrMember84",
+      "purpose": "Setter for smart-pointer member at this+0x84 (AddRef new, Release old, store, AddRef).",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104b51a0",
+      "currentName": "FUN_104b51a0",
+      "proposedName": "CBTObject::~Dtor",
+      "purpose": "Destructor: sets vtable PTR_FUN_11dbc7a8, clears back-link (*(this[0x29]+0x20)=0), tears down owned listener at [0x28] (FUN_1047c530), frees [0x2a], releases refcounted [0x28]/[0x21], frees embedded string [0x27], calls base FUN_104b5110, resets vtable to PTR_FUN_11dbac64.",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104b6d90",
+      "currentName": "FUN_104b6d90",
+      "proposedName": "CBTIteratorState::Ctor",
+      "purpose": "Constructor: vtable PTR_FUN_11dbc868, stores smart-ptr param_2 at [3] (AddRef), allocates/validates it (crash via FUN_10c3d580(0x30) if null), writes param_3 into *(target+0x1c).",
+      "confidence": "low",
+      "subsystem": "BehaviorTree",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104b6eb0",
+      "currentName": "FUN_104b6eb0",
+      "proposedName": "CBTIteratorState::~Dtor",
+      "purpose": "Destructor for 104b6d90's type: frees owned block [5] (FUN_104b3f20 + free), releases smart ptr [3], resets vtable to base PTR_FUN_11dbac64.",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104b7090",
+      "currentName": "FUN_104b7090",
+      "proposedName": "CBTObject::CallVtable38ThenHelper",
+      "purpose": "Fetches a smart-ptr-held object via this vtable+0x38 (into local, AddRef'd), invokes FUN_10475890(param_2,param_3), then releases the local. Thin dispatch wrapper.",
+      "confidence": "low",
+      "subsystem": "BehaviorTree",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104b9210",
+      "currentName": "FUN_104b9210",
+      "proposedName": "LoadBlackBoard::ParseXml",
+      "purpose": "Recursive AI blackboard XML loader. Validates the 'BlackBoard' tag, follows a single 'Parent' (with 'FileName') and a 'Parents' list of parent blackboards (each 'Parent'/'FileName'), recursing to load each parent file first (path base from DAT_123bb90c+0x18), then processes the 'KeyVars' section (FUN_104b98b0) to load this file's own key variables.",
+      "confidence": "medium",
+      "subsystem": "monster-ai/blackboard",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "XML tags: 'BlackBoard' (root), 'Parent'+'FileName' (single inherit), 'Parents' (list), 'KeyVars' (own vars)",
+        "parent files loaded before child (inheritance/override order)"
+      ],
+      "notes": "MHO AI blackboard definition with parent inheritance chain. Blackboard keys drive monster AI decisions; server-relevant as the authoritative key/value store schema."
+    },
+    {
+      "address": "0x104b9f60",
+      "currentName": "FUN_104b9f60",
+      "proposedName": "CBlackBoardVar::~Dtor",
+      "purpose": "Destructor for a blackboard variable/entry (vtable PTR_FUN_11dbc9c4): when refcount owner [7]==0 tears down value objects at [2]/[3] (vtable[0](1)) and clears [0xd], then decrements refcount at [8]+4, resets vtable to base.",
+      "confidence": "low",
+      "subsystem": "monster-ai/blackboard",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104bad50",
+      "currentName": "FUN_104bad50",
+      "proposedName": "CBTTreeWalker::Init",
+      "purpose": "Initializes a BT tree-walk/iterator context. Stores tree root smart-ptr (param_2 @+0x20, AddRef), stores a second object (param_3 @+0x34), copies node table pointers (+0x1c = *(param_2+0xc), +0x3c = param_2+0x28, +0x28 = param_3+0x14), computes node count = *(*(this+0x1c)+0x20) writing it to *(param_3+0x6c), pre-populates a per-node visited/stack array, and seeds the first current node at +0x14.",
+      "confidence": "low",
+      "subsystem": "BehaviorTree/runtime",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "node count = *(int*)(*(this+0x1c)+0x20) stored to *(param_3+0x6c)",
+        "per-node entry stride 0x10 (16 bytes) in the node-position table walked by iVar5+=0x10"
+      ],
+      "notes": "Runtime BT traversal setup. Server AI drives trees, so relevant, but field semantics inferred."
+    },
+    {
+      "address": "0x104bb120",
+      "currentName": "FUN_104bb120",
+      "proposedName": "SmartPtr::Assign_refcount4",
+      "purpose": "Assign a plain refcounted pointer to *param_1: AddRef param_2 (+4), Release prior, store. (refcount-at-+4 variant, wassert-guarded.)",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104c3ac0",
+      "currentName": "FUN_104c3ac0",
+      "proposedName": "SmartPtr::Release_withInnerRelease",
+      "purpose": "Release variant: dec refcount at param_1+2 (word offset 8 bytes); on zero, conditionally destroys an inner owned object at [0x11] (gated by owner byte at word +0x10) then calls vtable[0](1).",
+      "confidence": "medium",
+      "subsystem": "BehaviorTree/smartptr",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "0x104c4860",
+      "currentName": "FUN_104c4860",
+      "proposedName": "BTCryVector3::ParseFromParamString",
+      "purpose": "Parses a Vec3/Vec4 (4 floats) from a node-parameter string 'x,y,z,w' via sscanf_s '%f,%f,%f,%f'. Requires the object's IsEnabled (vtable+0x18) true and a valid param (FUN_104cd660). On 4 successful floats and at least one non-tiny component, stores the vector to param_3 (x,y,z at +0/+4/+8, w at +0xc) and validates finiteness (rejects inf/nan via exponent mask 0x7f800000). Returns true iff all components finite.",
+      "confidence": "high",
+      "subsystem": "BehaviorTree/params",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "sscanf_s(src,'%f,%f,%f,%f',&x,&z,&y,&w) — note decompiler ordering; 4 floats required",
+        "finite check: (bits & 0x7f800000) != 0x7f800000 for each of x,y,z,w (0x7f800000 = inf/nan exponent)",
+        "non-tiny gate: |component| > DAT_11de98c4 (small epsilon, via abs mask DAT_11de9c70) for at least one",
+        "wassert 'this->IsValid()' at BTCry_Vector3.h line 0x95"
+      ],
+      "notes": "Parses positional/target Vec params for BT nodes (e.g. TargetPos). Server needs these values if it evaluates the same BT param nodes."
+    },
+    {
+      "address": "0x104f7900",
+      "currentName": "FUN_104f7900",
+      "proposedName": "WildHunt::BuildActivityViewData",
+      "purpose": "Populates a client view struct 'mh.view.WildHunt.Data.WildHunt_ActivityData' from the WildHunt activity manager. Copies ActivityId, SignUp/Hunt/Award begin/end times, HuntSoul fields, guild/camp sign+award flags, and a PersonAwardDatas list ('WildHunt_AwardData': NeedSoul/ItemId/ItemCount parsed with atoi from ';'/',' delimited strings).",
+      "confidence": "medium",
+      "subsystem": "activity/wildhunt",
+      "serverRelevance": "client-only",
+      "costs": ["WildHunt award rows: NeedSoul (soul cost), ItemId, ItemCount"],
+      "notes": "UNRELATED to monster AI/spawn — WildHunt event UI/view data marshalling. Reads from CActivityMgr; pure client presentation. Included for completeness."
+    },
+    {
+      "address": "0x104f8c00",
+      "currentName": "FUN_104f8c00",
+      "proposedName": "WildHunt::BuildTaskSummaryViewData",
+      "purpose": "Populates client view 'mh.view.WildHunt.Data.WildHunt_TaskSummaryData' + per-task 'WildHunt_TaskData'. Fills refresh-count budgets and costs, submit-task counts, per-task HuntSoulBase/HuntSoulScale, IsAccept/IsComplete, and TaskTargets (QuestTrackVo: nTargetID1..5, strTarget1..5, nOpType/nCurCount/nMaxCount).",
+      "confidence": "medium",
+      "subsystem": "activity/wildhunt",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "FreeRefreshCount = max(0, MaxFreeRefreshCount - usedFree)",
+        "CreditRefreshCount = max(0, MaxCreditRefresh - usedFree) [computed from iVar5-iVar6 clamped >=0]",
+        "MaxCreditRefreshCount = iVar5 - iVar7 (creditCap - freeCap)",
+        "IsComplete = (task state *(taskTarget+0x14) == 4)"
+      ],
+      "costs": ["RefreshCost (task refresh price, FUN_11531be0)", "HuntSoulBase / HuntSoulScale (task soul reward scaling)"],
+      "notes": "UNRELATED to monster AI/spawn — WildHunt task-board UI/view data. Client-only presentation of server-provided task state."
+    }
+  ]
+}

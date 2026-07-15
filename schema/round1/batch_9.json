@@ -1,0 +1,284 @@
+{
+  "batchIndex": 9,
+  "notes": "SHARED PATTERN across all 14 classes: every function is Ghidra-mislabeled 'GetManagers' because it references the class-name string used by the CInfoManager<T> singleton registry (FUN_11679e10 = registry lookup by name; FUN_102500e0/FUN_100d83d0 = StcMbrNameSvr<CInfoManager>::GetSingletonName). None of these are true DebugFormat printers or TLV readers, so field offsets are INFERRED from consumer control-flow, not from a labeled struct writer; confidence is capped accordingly. Two singleton-accessor shapes recur: (a) signature (dummy, \"CXxxInfo\", 0) returning the manager pointer = GetManager(); (b) signature (int flag) returning *DAT_xxx when flag==0 = GetManagerRaw()/instance ptr. Manager object layout used everywhere: vtable+0x28 = GetCount(); fields [5]/[6] (i.e. +0x14/+0x18) = begin/end of a contiguous vector<T*> so GetByIndex(i) = *(mgr[5]+i*4); the id-keyed hash form uses +0x20=bucket array, +0x24=capacity, +0x28=divisor(bucket size), +0x30=minKey so GetById(id): k=id-min; bucket=buckets[k/divisor]; elem=bucket[k%divisor]. The lazy-init blocks writing PTR_FUN_* + _DAT_11de9ae0.. are static singleton construction and carry no game-data fields. TLV cross-ref: TlvSuitSkillGroups L1 caller sub_115721D0 sits right beside CEquipSuitSkillGroupInfo builder 0x11572a90 (genuine match). TlvCatCuisineData/State are PLAYER runtime cuisine state (tCatTime/vCatSeq/iOpen/tOpenTime/iTools), NOT the static CCatCuisineInfo config table — flagged as discrepancy, do not map fields across.",
+  "classes": [
+    {
+      "className": "CFishInfo",
+      "category": "activity",
+      "purpose": "Static config table for the fishing activity: each record ties a fish type to a monster id and spawn parameters. The recovered logic is the client-side fishing-spot effect spawner that scatters fish visual effects around target positions.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10bcb210", "currentName": "CFishInfo::GetManagers", "proposedName": "CFishInfo::SpawnFishingEffects", "purpose": "Iterates fishing-spot records (linked list via node+0x40, id at node+0x20; resolves fish->monster via CMonsterInfo::GetById using field+0x38), loops up to 6 times using rand()+fcos/fsin to place particle effect 'fish.pro' at randomized angles around a target position, and fires script events 'TargetPos' and 'ShowStart'. Client visual spawner."},
+        {"address": "10bcd070", "currentName": "CFishInfo::GetManagers_10bcd070", "proposedName": "CFishInfo::GetManager", "purpose": "CInfoManager<CFishInfo> singleton accessor (name-based registry lookup, form a)."},
+        {"address": "10bce5f0", "currentName": "CFishInfo::GetManagers_10bce5f0", "proposedName": "CFishInfo::GetManagerRaw", "purpose": "Returns raw manager instance pointer when flag==0 (form b)."}
+      ],
+      "fields": [
+        {"name": "monsterId", "type": "int", "offset": "0x38", "source": "inferred", "note": "fish record field used as CMonsterInfo::GetById key (iVar11+0x38)"},
+        {"name": "spotId", "type": "int", "offset": "0x20", "source": "inferred", "note": "spawn-list node id (iVar11+0x20)"}
+      ],
+      "constants": ["FishEffectFile=fish.pro", "ScriptEvent=TargetPos", "ScriptEvent=ShowStart", "MaxSpotsPerUpdate=6"],
+      "formulas": ["spawn angle uses rand()%0x168 (0..359) scaled by DAT_11de98c0 then *DAT_11de98e8 (deg->rad); position offset = (cos(a), sin(a))"],
+      "relatedTlv": []
+    },
+    {
+      "className": "CPetLevelInfo",
+      "category": "pet",
+      "purpose": "Pet leveling/experience curve table: one record per pet level giving the experience required to advance and the per-level attribute growth used to recompute pet stats.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "112f0b00", "currentName": "CPetLevelInfo::GetManagers", "proposedName": "CPetLevelInfo::GetManager", "purpose": "CInfoManager<CPetLevelInfo> singleton accessor (form a)."},
+        {"address": "112f6080", "currentName": "CPetLevelInfo::GetManagers_112f6080", "proposedName": "CPetLevelInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "11566a30", "currentName": "CPetLevelInfo::GetManagers_11566a30", "proposedName": "CPetLevelInfo::AddPetExp", "purpose": "Adds experience (param2) to pet: pet+0x48=level, pet+0x4c=accumulated exp; while accExp >= levelRecord[level].expToNext (record+0x14) advance level and subtract, clamped to owner max level (owner+0x20 +0x44) and FUN_1134b7d0 cap; on change calls ApplyLevelAttributes."},
+        {"address": "11566e10", "currentName": "CPetLevelInfo::GetManagers_11566e10", "proposedName": "CPetLevelInfo::CalcPetStatTotal", "purpose": "Computes an accumulated pet stat across levels: base from CPetStarInfo lookup plus per-level sum += (FUN_1181dd60(x)*factor)/100 for levels 1..param3."},
+        {"address": "11568360", "currentName": "CPetLevelInfo::GetManagers_11568360", "proposedName": "CPetLevelInfo::ApplyLevelAttributes", "purpose": "Recomputes pet attributes on level change: for each new level, growsFloatStat (pet[3]+0x94) += (pet[8]+0x3c * record+0x18)/DAT_11de9a30, and attr = (pet[8]+0x40 * record+0x1c)/100 + pet[4]; clamps against CAttributeInfo id 0x23 (max@+0xf8, min@+0xd0); pushes attribute updates via FUN_11568810 (tags 8,9,0x23)."},
+        {"address": "11926e80", "currentName": "CPetLevelInfo::GetManagers_11926e80", "proposedName": "CPetLevelInfo::PreloadLevelTable", "purpose": "Iterates all level records to force manager load (no per-record work)."}
+      ],
+      "fields": [
+        {"name": "expToNextLevel", "type": "int", "offset": "0x14", "source": "inferred", "note": "record+0x14, compared against accumulated exp in AddPetExp"},
+        {"name": "growthFactorA", "type": "int", "offset": "0x18", "source": "inferred", "note": "record+0x18, multiplies pet[8]+0x3c for float stat"},
+        {"name": "growthFactorB", "type": "int", "offset": "0x1c", "source": "inferred", "note": "record+0x1c, multiplies pet[8]+0x40 (/100) for attribute"}
+      ],
+      "constants": [],
+      "formulas": ["level-up: while(accExp >= level[lvl].expToNextLevel){ lvl++; accExp -= level[lvl].expToNextLevel; } clamp lvl to maxLevel", "attr = (petGrowBase * record.growthFactorB)/100 + baseAttr, then clamp to CAttributeInfo[0x23] min/max"],
+      "relatedTlv": []
+    },
+    {
+      "className": "CGuildTaskInfo",
+      "category": "quest",
+      "purpose": "Guild (legion) task definition table: each record is a guild task/objective referenced by id. Recovered logic validates a player's guild-task id arrays and collects tasks by category.",
+      "confidence": "low",
+      "methods": [
+        {"address": "114a1aa0", "currentName": "CGuildTaskInfo::GetManagers", "proposedName": "CGuildTaskInfo::GetManager", "purpose": "CInfoManager<CGuildTaskInfo> singleton accessor (form a)."},
+        {"address": "114a8db0", "currentName": "CGuildTaskInfo::GetManagers_114a8db0", "proposedName": "CGuildTaskInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "114a97b0", "currentName": "CGuildTaskInfo::GetManagers_114a97b0", "proposedName": "CGuildTaskInfo::ValidateGuildTaskState", "purpose": "Validates a player guild-task block: reads count at this+0xba5 (cap 0x400) over 7-byte entries at +0xbab (short id at -2) doing GetById, then rebuilds a 1600-slot (0x640) task bitset via FUN_115bed10/ee10/edf0/ed60."},
+        {"address": "118a9010", "currentName": "CGuildTaskInfo::GetManagers_118a9020", "proposedName": "CGuildTaskInfo::CollectTasksByType", "purpose": "Iterates all task records and appends those whose field+0x20 ([8]) equals param+0x10 into the output vector at param+0x1c (duplicate of 118a9020)."},
+        {"address": "118a9020", "currentName": "CGuildTaskInfo::GetManagers_118a9020", "proposedName": "CGuildTaskInfo::CollectTasksByType", "purpose": "Iterates all task records and appends those whose field+0x20 matches param+0x10 into vector at param+0x1c."},
+        {"address": "1190c650", "currentName": "CGuildTaskInfo::GetManagers_1190c650", "proposedName": "CGuildTaskInfo::PreloadTaskItems", "purpose": "Iterates all task records invoking CItemBaseInfo loader (FUN_11a02fc0) to preload referenced items."}
+      ],
+      "fields": [
+        {"name": "typeOrCategory", "type": "int", "offset": "0x20", "source": "inferred", "note": "record[8]; filter key in CollectTasksByType"}
+      ],
+      "constants": ["MaxPlayerTasks=0x400", "TaskBitsetSize=0x640(1600)", "PlayerTaskEntryStride=7"],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CHunterStarStatInfo",
+      "category": "activity",
+      "purpose": "Hunter-star statistics config table (per-star-rank statistic definitions). Recovered logic validates and builds UI lists from a player's star-stat arrays.",
+      "confidence": "low",
+      "methods": [
+        {"address": "114db920", "currentName": "CHunterStarStatInfo::GetManagers", "proposedName": "CHunterStarStatInfo::GetManager", "purpose": "CInfoManager<CHunterStarStatInfo> singleton accessor (form a)."},
+        {"address": "114dc810", "currentName": "CHunterStarStatInfo::GetManagers_114dc810", "proposedName": "CHunterStarStatInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "114dcac0", "currentName": "CHunterStarStatInfo::GetManagers_114dcac0", "proposedName": "CHunterStarStatInfo::ValidatePlayerStarStats", "purpose": "Iterates a player star-stat array: count at this+0x911a (cap 3000), ushort ids at +0x911e, validating each via GetById."},
+        {"address": "114dcca0", "currentName": "CHunterStarStatInfo::GetManagers_114dcca0", "proposedName": "CHunterStarStatInfo::ValidateStarStatTables", "purpose": "Two-block validator: block A = count at param[0] over stride-5-short entries (id at [-1]); block B = count at param[0x3e9] over stride-4-short entries; each id checked via GetById."},
+        {"address": "117f31f0", "currentName": "CHunterStarStatInfo::GetManagers_117f31f0", "proposedName": "CHunterStarStatInfo::BuildStarStatList", "purpose": "Iterates all records copying fields [4..8] into a display struct (FUN_117f5ad0); when record[9]==2 emits an extra entry via record vtable+0x18."}
+      ],
+      "fields": [
+        {"name": "statFieldsBlock", "type": "int[5]", "offset": "0x10", "source": "inferred", "note": "record[4..8] (offsets 0x10..0x20) copied into display struct in BuildStarStatList"},
+        {"name": "statType", "type": "int", "offset": "0x24", "source": "inferred", "note": "record[9]; ==2 triggers extra display entry"}
+      ],
+      "constants": ["MaxPlayerStarStats=3000", "PlayerStatEntryStrideShortsA=5", "PlayerStatEntryStrideShortsB=4"],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CLeagueInfo",
+      "category": "activity",
+      "purpose": "League/tournament (PvP season) config table. Records define league seasons/schedules; recovered logic collects league entries for UI and tracks the currently-active league season.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "104d9210", "currentName": "CLeagueInfo::GetManagers", "proposedName": "CLeagueInfo::GetManager", "purpose": "CInfoManager<CLeagueInfo> singleton accessor (StcMbrNameSvr form a)."},
+        {"address": "112fcec0", "currentName": "CLeagueInfo::GetManagers_112fcec0", "proposedName": "CLeagueInfo::CollectLeagueEntries", "purpose": "Iterates all league records; builds a 0x18-byte entry per record (FUN_112fccf0) into the output vector at param+4."},
+        {"address": "112fd290", "currentName": "CLeagueInfo::GetManagers_112fd290", "proposedName": "CLeagueInfo::CollectLeagueScheduleEntries", "purpose": "Like CollectLeagueEntries but appends up to two 0x18-byte entries per record via FUN_112fd0d0 and FUN_112fccf0 (schedule + main)."},
+        {"address": "115b77c0", "currentName": "CLeagueInfo::GetManagers_115b77c0", "proposedName": "CLeagueInfo::UpdateActiveLeague", "purpose": "GetById(4) (hardcoded league id 4); reads current schedule (FUN_11842650) field+0x18 (season id); if changed, resets this[2..0xc] and re-inits with 0x5dc(1500) via FUN_1138c790."},
+        {"address": "119a1290", "currentName": "CLeagueInfo::GetManagers_119a1290", "proposedName": "CLeagueInfo::RefreshLeagueSchedules", "purpose": "Iterates all records; for each non-null invokes CLeagueSchedule::GetManagers_11842f20."}
+      ],
+      "fields": [
+        {"name": "seasonId", "type": "int", "offset": "0x18", "source": "inferred", "note": "schedule object+0x18 compared/stored as active season in UpdateActiveLeague"}
+      ],
+      "constants": ["ActiveLeagueId=4", "ResetPeriod=0x5dc(1500)"],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CEquipSuitSkillGroupInfo",
+      "category": "skill",
+      "purpose": "Equipment set-bonus (suit) skill-group table: each group lists the suit skills granted at given equipped-piece counts. Recovered logic builds a player's active suit-skill set from equipped gear and answers suit-skill queries.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109a4a30", "currentName": "CEquipSuitSkillGroupInfo::GetManagers", "proposedName": "CEquipSuitSkillGroupInfo::GetManager", "purpose": "CInfoManager<CEquipSuitSkillGroupInfo> singleton accessor (StcMbrNameSvr form a)."},
+        {"address": "11572a90", "currentName": "CEquipSuitSkillGroupInfo::GetManagers_11572a90", "proposedName": "CEquipSuitSkillGroupInfo::BuildActiveSuitSkills", "purpose": "Parses the serialized suit-skill group buffer (matches TlvSuitSkillGroups): outer loop over groupCnt (*param2) at stride 0x391, group id at entry-8 resolved via GetById; inner loop over per-group skill entries (count at *local_c, stride 4) resolving CEquipSuitSkillInfo by id and matching skillInfo+0x18==groupId, recording (skillId, activeFlag from entry+0x2d9); creates the group via FUN_11570e20 with (groupId, count at entry-4)."},
+        {"address": "1172a750", "currentName": "CEquipSuitSkillGroupInfo::GetManagers_1172a750", "proposedName": "CEquipSuitSkillGroupInfo::GetSuitSkillId", "purpose": "Scans the player's skill-source vector (this+0x24..+0x28, stride 8) for entry[0]==2 (suit type), resolves its skill via GetById and returns skill->GetId (vtable+0x18); returns 0xffffffff if none."},
+        {"address": "1172a8f0", "currentName": "CEquipSuitSkillGroupInfo::GetManagers_1172a8f0", "proposedName": "CEquipSuitSkillGroupInfo::EnsureSkillManagersLoaded", "purpose": "Walks the skill-source vector; forces load of CEquipSuitSkillGroupInfo (type 2 / entry[4]==1) and CEquipPassiveSkillGroupInfo (type 1) managers."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int", "offset": "0x18", "source": "inferred", "note": "on the linked CEquipSuitSkillInfo record: skillInfo+0x18 == group id (join key)"},
+        {"name": "sourceEntryType", "type": "int", "offset": "0x0", "source": "inferred", "note": "player skill-source entry[0]: 1=passive group, 2=suit group"}
+      ],
+      "constants": ["GroupEntryStride=0x391", "SourceEntryStride=0x20(8 ints)", "SuitType=2", "PassiveType=1"],
+      "formulas": [],
+      "relatedTlv": ["TlvSuitSkillGroups (genuine: L1 caller sub_115721D0 adjoins builder 0x11572a90; groupCnt + suitSkillGroupData sub-struct)"]
+    },
+    {
+      "className": "CCatCuisineInfo",
+      "category": "item",
+      "purpose": "Felyne (cat) cuisine config table: each dish defines the monster it is associated with, the buffs it grants, and unlock conditions. Recovered logic links cuisines to monsters/buffs and filters available dishes.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "104fd470", "currentName": "CCatCuisineInfo::GetManagers", "proposedName": "CCatCuisineInfo::GetManager", "purpose": "CInfoManager<CCatCuisineInfo> singleton accessor (StcMbrNameSvr form a)."},
+        {"address": "11529f70", "currentName": "CCatCuisineInfo::GetManagers_11529f70", "proposedName": "CCatCuisineInfo::CollectAvailableCuisines", "purpose": "Iterates all dishes; for each unlocked one (FUN_118047d0) queries param collector: if not already present (vtable+0x38) and condition met (+0x4c) then adds it (+0x44)."},
+        {"address": "11933e80", "currentName": "CCatCuisineInfo::GetManagers_11933e80", "proposedName": "CCatCuisineInfo::LinkCuisinesToMonsters", "purpose": "Iterates all dishes; resolves associated monster via CMonsterInfo::GetById on record+0x20 (monsterId), appends the dish ptr to monster+0x74 -> vector at +0xf4/+0xf8; touches CCatCuisineRateInfo manager and, for each buff id in record[0xb..0xc], CBuffInfo manager."}
+      ],
+      "fields": [
+        {"name": "monsterId", "type": "int", "offset": "0x20", "source": "inferred", "note": "record+0x20; CMonsterInfo::GetById key linking dish to monster"},
+        {"name": "buffIdList", "type": "vector<int>", "offset": "0x2c", "source": "inferred", "note": "record[0xb]/[0xc] (offset 0x2c/0x30) = begin/end of granted-buff id list"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": ["TlvCatCuisineData (DISCREPANCY: that Tlv is player runtime cuisine state — tCatTime/vCatSeq/iOpen/tOpenTime/iTools — not this static config; do not map fields)"]
+    },
+    {
+      "className": "CNormalItemInfo",
+      "category": "item",
+      "purpose": "Normal/consumable item definition table. Recovered logic performs inventory stack-capacity and add-item validation using per-item stack sizes and tag-based item limits.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "105401a0", "currentName": "CNormalItemInfo::GetManagers", "proposedName": "CNormalItemInfo::GetManager", "purpose": "CInfoManager<CNormalItemInfo> singleton accessor (StcMbrNameSvr form a)."},
+        {"address": "11521cf0", "currentName": "CNormalItemInfo::GetManagers_11521cf0", "proposedName": "CNormalItemInfo::CheckStackCapacity", "purpose": "Walks an item-stack red-black tree (this+0x18), matching each stack against tag groups in param2 (stride 0x20); computes packing per CAllTagItemLimitInfo (FUN_11521b00) and stack size (FUN_116c04a0/116c0400); returns the item id whose required space exceeds capacity, else 0."},
+        {"address": "115402e0", "currentName": "CNormalItemInfo::GetManagers_115402e0", "proposedName": "CNormalItemInfo::CanAddItems", "purpose": "Validates adding a list of items (param2 entries stride 0xc: {itemId, count, subtype}); each id resolved via GetById, stackability via FUN_116c0790; accumulates needed slots and returns an error code (0=ok, 0xc/10 not-found, 9 not-stackable, 7/8 no-space, 3/5/1 constraint failures)."}
+      ],
+      "fields": [
+        {"name": "itemId", "type": "int", "offset": "0x0", "source": "inferred", "note": "param2 add-request entry+0x0"},
+        {"name": "count", "type": "int", "offset": "0x4", "source": "inferred", "note": "param2 add-request entry+0x4"},
+        {"name": "subtype", "type": "int", "offset": "0x8", "source": "inferred", "note": "param2 add-request entry+0x8 (passed to stack-size query)"}
+      ],
+      "constants": ["AddRequestEntryStride=0xc", "TagGroupEntryStride=0x20", "Err_Full=0xc", "Err_NotFound=10", "Err_NotStackable=9"],
+      "formulas": ["needed slots per item = ceil(count / stackSize) where stackSize = FUN_116c04a0(subtype) or FUN_116c0400() for special stackable"],
+      "relatedTlv": []
+    },
+    {
+      "className": "CEquipFoundQualityInfo",
+      "category": "economy",
+      "purpose": "Equipment forge/'found' quality-roll table: each record is a quality tier with a selection weight. The core method does a weighted RNG roll to pick a quality tier, then selects a result item from CEquipFoundInfo filtered by that quality and the equipment level range.",
+      "confidence": "high",
+      "methods": [
+        {"address": "118337a0", "currentName": "CEquipFoundQualityInfo::GetManagers", "proposedName": "CEquipFoundQualityInfo::GetManager", "purpose": "CInfoManager<CEquipFoundQualityInfo> singleton accessor (form a)."},
+        {"address": "11836140", "currentName": "CEquipFoundQualityInfo::GetManagers_11836140", "proposedName": "CEquipFoundQualityInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "11836800", "currentName": "CEquipFoundQualityInfo::GetManagers_11836800", "proposedName": "CEquipFoundQualityInfo::RollFoundResult", "purpose": "Weighted RNG result roller. Pass 1 sums all records' weight (record+0x14) into total. Draws r = FUN_100ee450()*_DAT_11de98f0 (uniform 0..1). Pass 2 accumulates weight until running > r*total to pick a quality tier (qualityId = record+0x10). Then scans CEquipFoundInfo for records with field+0x14==qualityId and level in [+0x18,+0x1c] around param1, collects their result item id (+0x10) and returns one chosen by a second uniform draw."}
+      ],
+      "fields": [
+        {"name": "qualityId", "type": "int", "offset": "0x10", "source": "inferred", "note": "record+0x10; the picked tier id"},
+        {"name": "weight", "type": "int", "offset": "0x14", "source": "inferred", "note": "record+0x14; selection weight summed and compared in the weighted roll"},
+        {"name": "CEquipFoundInfo.resultItemId", "type": "int", "offset": "0x10", "source": "inferred", "note": "on the joined CEquipFoundInfo record: candidate result item id"},
+        {"name": "CEquipFoundInfo.qualityId", "type": "int", "offset": "0x14", "source": "inferred", "note": "join key == qualityId"},
+        {"name": "CEquipFoundInfo.minLevel", "type": "int", "offset": "0x18", "source": "inferred", "note": "lower bound of level range (>= checked against param1)"},
+        {"name": "CEquipFoundInfo.maxLevel", "type": "int", "offset": "0x1c", "source": "inferred", "note": "upper bound of level range (<= checked against param1)"}
+      ],
+      "constants": [],
+      "formulas": ["totalWeight = sum over records of record.weight(0x14)", "pick quality: draw u in [0,1); walk records accumulating weight until acc > u*totalWeight -> that record.qualityId(0x10)", "candidates = CEquipFoundInfo where qualityId==picked AND minLevel<=param1<=maxLevel; result = candidates[floor(u2 * count)].resultItemId(0x10)"],
+      "relatedTlv": []
+    },
+    {
+      "className": "CTalentActiveInfo",
+      "category": "skill",
+      "purpose": "Active-talent (activatable skill) definition table. Records carry a talent id and display name; recovered logic learns/activates active talents, builds the active-talent UI list, and triggers talents by id.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "112b1b90", "currentName": "CTalentActiveInfo::GetManagers", "proposedName": "CTalentActiveInfo::GetManager", "purpose": "CInfoManager<CTalentActiveInfo> singleton accessor (form a)."},
+        {"address": "112b3500", "currentName": "CTalentActiveInfo::GetManagers_112b3500", "proposedName": "CTalentActiveInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "112b2ef0", "currentName": "CTalentActiveInfo::GetManagers_112b2ef0", "proposedName": "CTalentActiveInfo::LearnActiveTalent", "purpose": "Given talent id (param1): resolves CTalentInfo, scans active-talent records to find the matching entry (FUN_1157a6d0 on talentInfo+0x44), learns it (FUN_1141d5e0 / FUN_111de5d0); returns status codes 0xe8/0xd2/0xcb/0."},
+        {"address": "112b31f0", "currentName": "CTalentActiveInfo::GetManagers_112b31f0", "proposedName": "CTalentActiveInfo::BuildActiveTalentList", "purpose": "Builds a list of active-talent states (0x2c-byte entries) into param3's vector: per record reads id (+0x14) and name/icon string (+0x18), sets learned/cooldown state (FUN_1157a720/112b59d0)."},
+        {"address": "1141e540", "currentName": "CTalentActiveInfo::GetManagers_1141e540", "proposedName": "CTalentActiveInfo::TriggerTalentById", "purpose": "Finds the record whose id (+0x14) == param2 and triggers it on the owning entity (entity->GetX()->vtable+0x28(index)); note index-shifted (idx+1) lookup arithmetic."},
+        {"address": "118d9390", "currentName": "CTalentActiveInfo::GetManagers_118d9390", "proposedName": "CTalentActiveInfo::PreloadTalents", "purpose": "Iterates all records to force manager load."}
+      ],
+      "fields": [
+        {"name": "talentId", "type": "int", "offset": "0x14", "source": "inferred", "note": "record+0x14; primary id / trigger key"},
+        {"name": "nameOrIcon", "type": "char*", "offset": "0x18", "source": "inferred", "note": "record+0x18; string used in BuildActiveTalentList (default &DAT_11d9d32b when null)"}
+      ],
+      "constants": ["Status_NoSlot=0xe8", "Status_NotFound=0xd2", "Status_Fail=0xcb", "Status_TalentMissing=0xc9"],
+      "formulas": [],
+      "relatedTlv": ["TlvTalentEquipItem, TlvTalentLearnItem (related talent network structs; not directly parsed here — directional)"]
+    },
+    {
+      "className": "CGiftBagInfo",
+      "category": "item",
+      "purpose": "Gift-bag / reward-package definition table. Records belong to gift-bag groups; recovered logic resolves a bag's group, computes group-level reward values, and collects bags by group.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108fc460", "currentName": "CGiftBagInfo::GetManagers", "proposedName": "CGiftBagInfo::GetManager", "purpose": "CInfoManager<CGiftBagInfo> singleton accessor (StcMbrNameSvr form a)."},
+        {"address": "117fad20", "currentName": "CGiftBagInfo::GetManagers_117fad20", "proposedName": "CGiftBagInfo::ResolveGiftBagGroup", "purpose": "For a bag (param1): reads group id at bag+0x2c ->+0x10, resolves CGiftBagGroupInfo::GetById; if group flag (group+0x2c+0x2c)==1 iterates all bags in the same group of type 1 and stores the max value (FUN_117faa80) into bag+0x34."},
+        {"address": "11945a30", "currentName": "CGiftBagInfo::GetManagers_11945a30", "proposedName": "CGiftBagInfo::InitAllGiftBags", "purpose": "Iterates all gift-bag records calling initializer FUN_117faeb0."},
+        {"address": "11945cd0", "currentName": "CGiftBagInfo::GetManagers_11945cd0", "proposedName": "CGiftBagInfo::RefreshAllGiftBagGroups", "purpose": "Iterates all records invoking ResolveGiftBagGroup (117fad20) on each."},
+        {"address": "11a33cc0", "currentName": "CGiftBagInfo::GetManagers_11a33cd0", "proposedName": "CGiftBagInfo::CollectGiftBagsByKey", "purpose": "Iterates all bags and appends those whose bag[0xb]->+0x10 equals param+0x10 into vector at param+0x34 (duplicate of 11a33cd0)."},
+        {"address": "11a33cd0", "currentName": "CGiftBagInfo::GetManagers_11a33cd0", "proposedName": "CGiftBagInfo::CollectGiftBagsByKey", "purpose": "Iterates all bags and appends those whose bag[0xb]->+0x10 matches param+0x10 into vector at param+0x34."}
+      ],
+      "fields": [
+        {"name": "groupInfoPtr", "type": "ptr", "offset": "0x2c", "source": "inferred", "note": "bag+0x2c -> object whose +0x10 is the group id"},
+        {"name": "resolvedMaxValue", "type": "int", "offset": "0x34", "source": "inferred", "note": "bag+0x34; output of ResolveGiftBagGroup"},
+        {"name": "keyObjPtr", "type": "ptr", "offset": "0x2c", "source": "inferred", "note": "bag[0xb]->+0x10 used as filter key in CollectGiftBagsByKey"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CDamageInfo",
+      "category": "combat",
+      "purpose": "Damage-display / floating-number config table (paired with CProjectileInfo). Recovered logic builds combined damage+projectile lookup tables and initializes the damage-number display system.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10ab9ee0", "currentName": "CDamageInfo::GetManagers", "proposedName": "CDamageInfo::GetManager", "purpose": "CInfoManager<CDamageInfo> singleton accessor (form a)."},
+        {"address": "10abab30", "currentName": "CDamageInfo::GetManagers_10abab30", "proposedName": "CDamageInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "118c0c10", "currentName": "CDamageInfo::GetManagers_118c0c10", "proposedName": "CDamageInfo::BuildDamageProjectileTable", "purpose": "Loop 1 registers each CDamageInfo record's data (record+0x14) into a table (FUN_11316700 init, FUN_113186d0 add, growing via FUN_10265f00/11317bb0). Loop 2 iterates CProjectileInfo records; for each projectile-effect entry in its vector (proj+0x210..+0x214, stride 0x18) where entry+0x14 != entry+0x10 calls FUN_118c05b0. Frees temp lists at end."},
+        {"address": "118c2a90", "currentName": "CDamageInfo::GetManagers_118c2a90", "proposedName": "CDamageInfo::InitDamageDisplay", "purpose": "Resets display globals (_DAT_1238dba0=0, DAT_1238dba4=1) and iterates all records invoking FUN_116e8ff0."}
+      ],
+      "fields": [
+        {"name": "damageDataBlock", "type": "struct", "offset": "0x14", "source": "inferred", "note": "record+0x14; passed into the damage table builder"},
+        {"name": "CProjectileInfo.effectVecBegin", "type": "ptr", "offset": "0x210", "source": "inferred", "note": "on joined CProjectileInfo: begin of effect entries (stride 0x18)"},
+        {"name": "CProjectileInfo.effectVecEnd", "type": "ptr", "offset": "0x214", "source": "inferred", "note": "end of effect entries"}
+      ],
+      "constants": ["ProjectileEffectEntryStride=0x18"],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CIllustrateTaskInfo",
+      "category": "quest",
+      "purpose": "Illustration/monster-guide task definition table (hunter's notebook entries). Recovered logic links guide books to star stats, collects tasks by book, and rebuilds task state.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11216d40", "currentName": "CIllustrateTaskInfo::GetManagers", "proposedName": "CIllustrateTaskInfo::GetManager", "purpose": "CInfoManager<CIllustrateTaskInfo> singleton accessor (form a)."},
+        {"address": "11217790", "currentName": "CIllustrateTaskInfo::GetManagers_11217790", "proposedName": "CIllustrateTaskInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "1172dd40", "currentName": "CIllustrateTaskInfo::GetManagers_1172dd40", "proposedName": "CIllustrateTaskInfo::LinkBooksAndStarStats", "purpose": "Iterates CIllustrateBookInfo records; ensures CIllustrateTaskInfo and CHunterStarStatInfo managers are loaded (cross-table wiring)."},
+        {"address": "118097d0", "currentName": "CIllustrateTaskInfo::GetManagers_118097d0", "proposedName": "CIllustrateTaskInfo::CollectTasksByBook", "purpose": "Iterates all task records; appends those whose field+0x18 ([6]) equals param+0x10 into vector at param+0x58."},
+        {"address": "119c20d0", "currentName": "CIllustrateTaskInfo::GetManagers_119c20d0", "proposedName": "CIllustrateTaskInfo::RefreshAllTasks", "purpose": "Iterates all records calling FUN_1172d400 (per-task refresh)."},
+        {"address": "119c2220", "currentName": "CIllustrateTaskInfo::GetManagers_119c2220", "proposedName": "CIllustrateTaskInfo::RebuildTaskState", "purpose": "Iterates all records calling FUN_1172d2a0(param) then runs LinkBooksAndStarStats (1172dd40)."}
+      ],
+      "fields": [
+        {"name": "bookId", "type": "int", "offset": "0x18", "source": "inferred", "note": "record[6]; filter key in CollectTasksByBook"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": []
+    },
+    {
+      "className": "CChatTabInfo",
+      "category": "social",
+      "purpose": "Chat tab/channel definition table. Records define chat tabs; recovered logic enumerates all tabs and syncs the player's chat-tab set against the config (adding missing tabs, applying filters).",
+      "confidence": "medium",
+      "methods": [
+        {"address": "111e13f0", "currentName": "CChatTabInfo::GetManagers", "proposedName": "CChatTabInfo::GetManager", "purpose": "CInfoManager<CChatTabInfo> singleton accessor (form a)."},
+        {"address": "111e2de0", "currentName": "CChatTabInfo::GetManagers_111e2de0", "proposedName": "CChatTabInfo::GetAllChatTabs", "purpose": "Clears the output vector (param1) then iterates all chat-tab records, appending a 0xc-byte entry {recordPtr, refcount-obj, 0} for each; returns the filled vector."},
+        {"address": "111e3440", "currentName": "CChatTabInfo::GetManagers_111e3440", "proposedName": "CChatTabInfo::GetManagerRaw", "purpose": "Raw manager instance pointer when flag==0 (form b)."},
+        {"address": "111e3a40", "currentName": "CChatTabInfo::GetManagers_111e3a40", "proposedName": "CChatTabInfo::SyncChatTabs", "purpose": "Synchronizes the player's chat-tab set: fetches current tabs (FUN_113994b0) or falls back to GetAllChatTabs, diffs against saved tabs (this+8 vector, stride 0xc), and for config tabs not present (filter check FUN_111e2d80) appends them; frees temp lists."}
+      ],
+      "fields": [
+        {"name": "tabEntryRecordPtr", "type": "ptr", "offset": "0x0", "source": "inferred", "note": "collected chat-tab vector entry+0x0 = record ptr (0xc-byte entries)"}
+      ],
+      "constants": ["ChatTabEntryStride=0xc"],
+      "formulas": [],
+      "relatedTlv": []
+    }
+  ]
+}

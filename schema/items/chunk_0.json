@@ -1,0 +1,978 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x102ce8a0",
+      "currentName": "FUN_102ce8a0",
+      "proposedName": "CItemContainer::TdrTextFormat",
+      "subsystem": "items/inventory-container",
+      "purpose": "TDR text (human-readable) serializer for the full player item-container struct: store sizes, bag/equip/storehouse item blobs, and the item-use-once list. Iterates each variable-length array formatting one byte per element (via FUN_1010c010). This is the single most important struct in the chunk because it embeds every container capacity cap.",
+      "confidence": "high",
+      "serverRelevance": "validation - client-side TdrText formatter, but the array-size caps it enforces mirror the authoritative TDR schema bounds the server MUST enforce when parsing the binary container. Rebuild server should reject packets exceeding these caps.",
+      "formulas": [
+        "field [wStoreSize] = u16 @ *param_1 (offset 0)",
+        "field [wNormalSize] = u16 @ param_1[1] (offset 2)",
+        "field [wMaterialStoreSize] = u16 @ param_1[2] (offset 4)",
+        "field [iBagSize] = int @ *(param_1+3) (offset 6); if iBagSize < 0 return -6; if iBagSize > 82000 return -7",
+        "[szBagItem] = byte[iBagSize] starting at (int)param_1 + 10 (offset 0xa), one byte per element",
+        "field [wEquipSize] = u16 @ param_1[0xa02d] (offset 0x1405a); if wEquipSize > 0x1000 (4096) return -7",
+        "[szEquipItem] = byte[wEquipSize] starting at (int)param_1 + 0x1405c",
+        "field [iStoreDataSize] = int @ *(param_1+0xa82e) (offset 0x1505c); if iStoreDataSize < 0 return -6; if iStoreDataSize > 200000 return -7",
+        "[szStoreItem] = byte[iStoreDataSize] starting at (int)param_1 + 0x15060",
+        "field [wItemUseOnceCount] = u16 @ param_1[0x22ed0] (offset 0x45da0); if wItemUseOnceCount > 200 return -7",
+        "[itemUseOnceList] = u16[wItemUseOnceCount] starting at param_1[0x22ed1] (offset 0x45da2)"
+      ],
+      "costs": [
+        "Bag raw-data size cap: 82000 bytes",
+        "Equipment raw-data size cap: 0x1000 = 4096 bytes",
+        "Storehouse raw-data size cap: 200000 bytes",
+        "Item-use-once list cap: 200 entries",
+        "TDR error codes: -6 = negative/invalid size, -7 = array size exceeds max"
+      ],
+      "notes": "Field order/names cross-check with recovered TlvStoreSizes (storeSize/normalSize/materialStoreSize) and TlvStoreData. The szBagItem/szEquipItem/szStoreItem are size-prefixed byte blobs holding the packed item records; the count field is a byte/int count of blob bytes, not item count."
+    },
+    {
+      "address": "0x102debc0",
+      "currentName": "FUN_102debc0",
+      "proposedName": "CPlayerAppearance::TdrTextFormat",
+      "subsystem": "items/equipment-appearance",
+      "purpose": "TDR text serializer for a player-entity appearance/spawn struct: playerId, netObjId, name, gender, position (sub-struct FUN_10277cf0), rotation (FUN_102780d0), scale, connect flags, sendSrvId, equipmentPack blob, avatarSetID.",
+      "confidence": "high",
+      "serverRelevance": "client-only (debug text formatter); struct layout is authoritative for the spawn/appearance packet",
+      "formulas": [
+        "[dwPlayerId]=u32 @ *param_1; [dwNetObjId]=u32 @ param_1[1]; [szName]=str @ param_1+2",
+        "[bGender]=u8 @ (param_1+10); [stPosition] sub @ FUN_10277cf0; [stRotation] sub @ FUN_102780d0",
+        "[fScale]=float @ (int)param_1+0x45; [dwNewConnect]=u32 @ +0x49; [dwSendSrvId]=u32 @ +0x4d",
+        "[szEquipmentPack]=str/blob @ (int)param_1+0x51; [bAvatarSetID]=u8 @ +0x71"
+      ],
+      "costs": [],
+      "notes": "szEquipmentPack at +0x51 is the worn-equipment appearance blob broadcast to other clients."
+    },
+    {
+      "address": "0x102e6660",
+      "currentName": "FUN_102e6660",
+      "proposedName": "TlvItemSlotResult::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for a small item-slot-result struct: bItemColumn (u8), wItemGrid (u16), iResult (int).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; layout is the item-slot response",
+      "formulas": [
+        "[bItemColumn]=u8 @ *param_1 (fmt 0x%02x); [wItemGrid]=u16 @ param_1+1; [iResult]=int @ param_1+3"
+      ],
+      "costs": [],
+      "notes": "bItemColumn = inventory tab/column index; wItemGrid = grid cell within tab. Recurring (column,grid) addressing pair across all item packets."
+    },
+    {
+      "address": "0x103284f0",
+      "currentName": "FUN_103284f0",
+      "proposedName": "TlvItemTypeSlot::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: dwItemType (u32), bItemColumn (u8), wItemGrid (u16), then nested item-data sub-struct via FUN_102741f0.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[dwItemType]=u32 @ *param_1; [bItemColumn]=u8 @ param_1+1; [wItemGrid]=u16 @ (int)param_1+5; [stItemData] sub @ FUN_102741f0 (param_3+1 if param_3>=0)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10329240",
+      "currentName": "FUN_10329240",
+      "proposedName": "TlvItemIdSlot::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for ullItemID (u64), bItemColumn (u8), wItemGrid (u16). Base 'item at a slot' identity triple used by many item ops.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; layout is the canonical item-locator (id+column+grid)",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1] (fmt %I64u); [bItemColumn]=u8 @ param_1+2 (offset 8); [wItemGrid]=u16 @ (int)param_1+9"
+      ],
+      "costs": [],
+      "notes": "This 13-byte {u64 id, u8 column, u16 grid} locator is the recurring primitive; server validates id matches the item actually at (column,grid)."
+    },
+    {
+      "address": "0x10329a30",
+      "currentName": "FUN_10329a30",
+      "proposedName": "TlvMoveItemReq::TdrTextFormat",
+      "subsystem": "items/move",
+      "purpose": "TDR text serializer for a move-item request: item locator (id/column/grid) + destination (bDstColumn u8, wDstGrid u16).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; the request is server-authoritative (server validates dst slot free/valid)",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [bDstColumn]=u8 @ +0xb; [wDstGrid]=u16 @ param_1[3] (offset 0xc)"
+      ],
+      "costs": [],
+      "notes": "Duplicate layout shared with FUN_10329e00 / FUN_10353930."
+    },
+    {
+      "address": "0x10329e00",
+      "currentName": "FUN_10329e00",
+      "proposedName": "TlvMoveItemReq2::TdrTextFormat",
+      "subsystem": "items/move",
+      "purpose": "TDR text serializer identical in layout to FUN_10329a30 (item locator + dst column/grid). Second move-variant packet (e.g. storehouse move vs bag move).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [bDstColumn]=u8 @ +0xb; [wDstGrid]=u16 @ param_1[3]"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032a200",
+      "currentName": "FUN_1032a200",
+      "proposedName": "TlvSwapItemReq::TdrTextFormat",
+      "subsystem": "items/swap",
+      "purpose": "TDR text serializer for a swap-item request: source item locator (ullSrcItemID/column/grid) + destination item locator (ullDstItemID/bDstColumn/wDstGrid). Both endpoints carry item IDs, distinguishing swap from move.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; server authoritative over the swap",
+      "formulas": [
+        "[ullSrcItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [ullDstItemID]=u64 @ +0xb; [bDstColumn]=u8 @ +0x13; [wDstGrid]=u16 @ param_1[5] (offset 0x14)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032aec0",
+      "currentName": "FUN_1032aec0",
+      "proposedName": "TlvSwapItemReqB::TdrTextFormat",
+      "subsystem": "items/swap",
+      "purpose": "TDR text serializer, same 21-byte layout as FUN_1032a200 but first id labelled [ullItemID] (not SrcItemID) + [ullDstItemID]. Swap variant.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [ullDstItemID]=u64 @ +0xb; [bDstColumn]=u8 @ +0x13; [wDstGrid]=u16 @ param_1[5]"
+      ],
+      "costs": [],
+      "notes": "Byte-identical to FUN_1032b2e0 and FUN_10353d30."
+    },
+    {
+      "address": "0x1032b2e0",
+      "currentName": "FUN_1032b2e0",
+      "proposedName": "TlvSwapItemReqC::TdrTextFormat",
+      "subsystem": "items/swap",
+      "purpose": "TDR text serializer, byte-identical to FUN_1032aec0 (item locator + dst item locator). Third swap-variant packet.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [ullDstItemID]=u64 @ +0xb; [bDstColumn]=u8 @ +0x13; [wDstGrid]=u16 @ param_1[5]"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032b720",
+      "currentName": "FUN_1032b720",
+      "proposedName": "TlvSplitItemReq::TdrTextFormat",
+      "subsystem": "items/split-stack",
+      "purpose": "TDR text serializer for a split/partial-move request: item locator + wItemCount + destination column/grid + ullDstItemID. Presence of wItemCount indicates a stack split into a destination stack.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; server authoritative over split (validates count <= source stack size)",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb; [bDstColumn]=u8 @ +0xd; [wDstGrid]=u16 @ +0xe; [ullDstItemID]=u64 @ param_1[4..5] (offset 0x10)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032bb50",
+      "currentName": "FUN_1032bb50",
+      "proposedName": "TlvSplitItemReqB::TdrTextFormat",
+      "subsystem": "items/split-stack",
+      "purpose": "TDR text serializer: item locator + wItemCount + dst column/grid (no ullDstItemID, i.e. split into empty slot).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb; [bDstColumn]=u8 @ +0xd; [wDstGrid]=u16 @ +0xe"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032bf20",
+      "currentName": "FUN_1032bf20",
+      "proposedName": "TlvItemLocCount::TdrTextFormat",
+      "subsystem": "items/packet-element",
+      "purpose": "TDR text serializer for a single item-location-with-count element: id/column/grid + wItemCount. Used as the array element type by the tidy/batch serializers (FUN_1032cfa0/1032d540).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter (array element)",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb"
+      ],
+      "costs": [],
+      "notes": "Identical layout to FUN_1032de70, FUN_1034ac50, FUN_103eeed0."
+    },
+    {
+      "address": "0x1032cfa0",
+      "currentName": "FUN_1032cfa0",
+      "proposedName": "TlvTidyInventoryReq::TdrTextFormat",
+      "subsystem": "items/tidy-sort",
+      "purpose": "TDR text serializer for an inventory tidy/sort request: bItemColumn, begin/end grid range, wItemCount, plus four operation sequence counters (iMoveSeq, iSwapSeq, iAddSeq, iDelSeq), then a variable array astItemLocList of item-loc-count elements (FUN_1032bf20).",
+      "confidence": "high",
+      "serverRelevance": "validation - client formatter; server enforces the astItemLocList <= 2000 cap and applies the authoritative tidy result",
+      "formulas": [
+        "[bItemColumn]=u8 @ *param_1; [wItemBegGrid]=u16 @ +1; [wItemEndGrid]=u16 @ +3; [wItemCount]=u16 @ +5",
+        "[iMoveSeq]=int @ +7; [iSwapSeq]=int @ +0xb; [iAddSeq]=int @ +0xf; [iDelSeq]=int @ +0x13",
+        "if wItemCount (u16 @ +5) > 2000 return -7",
+        "[astItemLocList] = FUN_1032bf20[wItemCount]"
+      ],
+      "costs": [
+        "astItemLocList cap: 2000 entries; error -7 on overflow"
+      ],
+      "notes": "iMoveSeq/iSwapSeq/iAddSeq/iDelSeq are per-op sequence numbers used to reconcile client/server tidy ordering."
+    },
+    {
+      "address": "0x1032d540",
+      "currentName": "FUN_1032d540",
+      "proposedName": "TlvItemLocListReq::TdrTextFormat",
+      "subsystem": "items/tidy-sort",
+      "purpose": "TDR text serializer: bItemColumn + begin/end grid + wItemCount + astItemLocList array (FUN_1032bf20). Simpler variant of FUN_1032cfa0 without the seq counters.",
+      "confidence": "high",
+      "serverRelevance": "validation - astItemLocList <= 2000 enforced",
+      "formulas": [
+        "[bItemColumn]=u8 @ *param_1; [wItemBegGrid]=u16 @ +1; [wItemEndGrid]=u16 @ +3; [wItemCount]=u16 @ +5",
+        "if wItemCount > 2000 return -7; [astItemLocList]=FUN_1032bf20[wItemCount]"
+      ],
+      "costs": [
+        "astItemLocList cap: 2000 entries; error -7"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x1032da90",
+      "currentName": "FUN_1032da90",
+      "proposedName": "TlvUseItemReq::TdrTextFormat",
+      "subsystem": "items/use",
+      "purpose": "TDR text serializer for a use-item request: item locator + three generic dwParam1/2/3 args + szExtParam string. This is the parameterized item-use packet (params depend on item type).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; item-use effect is server-authoritative",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [dwParam1]=u32 @ +0xb; [dwParam2]=u32 @ +0xf; [dwParam3]=u32 @ +0x13; [szExtParam]=str @ +0x17"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1032de70",
+      "currentName": "FUN_1032de70",
+      "proposedName": "TlvItemCountReq::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: item locator + wItemCount (e.g. discard/sell-N request). Same layout as FUN_1032bf20.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1034ac50",
+      "currentName": "FUN_1034ac50",
+      "proposedName": "TlvItemCountReqB::TdrTextFormat",
+      "subsystem": "items/packet-element",
+      "purpose": "TDR text serializer: item locator + wItemCount; array element type for FUN_1034b540 / FUN_10354210.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter (array element)",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x1034b540",
+      "currentName": "FUN_1034b540",
+      "proposedName": "TlvItemLocListReq1000::TdrTextFormat",
+      "subsystem": "items/batch",
+      "purpose": "TDR text serializer: bItemColumn + begin/end grid + wItemCount + astItemLocList (FUN_1034ac50), cap 1000 (half of the tidy variants).",
+      "confidence": "high",
+      "serverRelevance": "validation - astItemLocList <= 1000 enforced",
+      "formulas": [
+        "[bItemColumn]=u8 @ *param_1; [wItemBegGrid]=u16 @ +1; [wItemEndGrid]=u16 @ +3; [wItemCount]=u16 @ +5",
+        "if wItemCount > 1000 return -7; [astItemLocList]=FUN_1034ac50[wItemCount]"
+      ],
+      "costs": [
+        "astItemLocList cap: 1000 entries; error -7"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x10353580",
+      "currentName": "FUN_10353580",
+      "proposedName": "TlvItemReasonReq::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: item locator + wReason (u16). Likely a discard/destroy with reason-code packet.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wReason]=u16 @ +0xb"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10353930",
+      "currentName": "FUN_10353930",
+      "proposedName": "TlvMoveItemReqD::TdrTextFormat",
+      "subsystem": "items/move",
+      "purpose": "TDR text serializer: item locator + dst column/grid; byte-identical to FUN_10329a30 (move variant).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [bDstColumn]=u8 @ +0xb; [wDstGrid]=u16 @ param_1[3]"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10353d30",
+      "currentName": "FUN_10353d30",
+      "proposedName": "TlvSwapItemReqD::TdrTextFormat",
+      "subsystem": "items/swap",
+      "purpose": "TDR text serializer: item locator + dst item locator; byte-identical to FUN_1032aec0/1032b2e0 (swap variant).",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [ullDstItemID]=u64 @ +0xb; [bDstColumn]=u8 @ +0x13; [wDstGrid]=u16 @ param_1[5]"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10354210",
+      "currentName": "FUN_10354210",
+      "proposedName": "TlvItemLocListReq1000B::TdrTextFormat",
+      "subsystem": "items/batch",
+      "purpose": "TDR text serializer: bItemColumn + begin/end grid + wItemCount + astItemLocList (FUN_1034ac50), cap 1000. Byte-identical to FUN_1034b540.",
+      "confidence": "high",
+      "serverRelevance": "validation - astItemLocList <= 1000 enforced",
+      "formulas": [
+        "[bItemColumn]=u8 @ *param_1; [wItemBegGrid]=u16 @ +1; [wItemEndGrid]=u16 @ +3; [wItemCount]=u16 @ +5",
+        "if wItemCount > 1000 return -7; [astItemLocList]=FUN_1034ac50[wItemCount]"
+      ],
+      "costs": [
+        "astItemLocList cap: 1000 entries; error -7"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x103e9840",
+      "currentName": "FUN_103e9840",
+      "proposedName": "TlvItemLocatorReq::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for the bare 13-byte item locator (id/column/grid) with no extra fields. Base request for single-item ops.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9"
+      ],
+      "costs": [],
+      "notes": "Same layout as FUN_10329240, FUN_103f1500."
+    },
+    {
+      "address": "0x103e9bb0",
+      "currentName": "FUN_103e9bb0",
+      "proposedName": "TlvItemLocatorRsp::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for a response: iErrCode (int) prefix + item locator. Generic error-code + locator reply.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; iErrCode is server-produced",
+      "formulas": [
+        "[iErrCode]=int @ *param_1; [ullItemID]=u64 @ param_1[1..2]; [bItemColumn]=u8 @ param_1+3 (offset 0xc); [wItemGrid]=u16 @ +0xd"
+      ],
+      "costs": [],
+      "notes": "Same layout as FUN_103ea2e0, FUN_103f1870 (iErrCode + locator)."
+    },
+    {
+      "address": "0x103e9f40",
+      "currentName": "FUN_103e9f40",
+      "proposedName": "TlvItemUpgradeReq::TdrTextFormat",
+      "subsystem": "items/upgrade",
+      "purpose": "TDR text serializer: item locator + iCreditItemCnt (int) + iGoalLevel (int). Item enhancement/upgrade request specifying number of credit/material items consumed and the target level.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; upgrade result (cost, success) is server-authoritative",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [iCreditItemCnt]=int @ +0xb; [iGoalLevel]=int @ +0xf"
+      ],
+      "costs": [
+        "iCreditItemCnt = count of material/credit items consumed for the upgrade; iGoalLevel = target enhance level"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x103ea2e0",
+      "currentName": "FUN_103ea2e0",
+      "proposedName": "TlvItemErrLocatorRsp::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: iErrCode + item locator. Byte-identical to FUN_103e9bb0.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[iErrCode]=int @ *param_1; [ullItemID]=u64 @ param_1[1..2]; [bItemColumn]=u8 @ +0xc; [wItemGrid]=u16 @ +0xd"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103ea6e0",
+      "currentName": "FUN_103ea6e0",
+      "proposedName": "TlvTransferAttrReq::TdrTextFormat",
+      "subsystem": "items/attribute-transfer",
+      "purpose": "TDR text serializer for an attribute-transfer request: wTransferAttr, wTransferType, source item locator (ullSrcItemID/column/grid) + destination item locator. Moves an attribute/enchant from one item to another.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; transfer is server-authoritative",
+      "formulas": [
+        "[wTransferAttr]=u16 @ *param_1; [wTransferType]=u16 @ param_1[1] (offset 2)",
+        "[ullSrcItemID]=u64 @ param_1+2 (offset 4); [bSrcItemColumn]=u8 @ param_1+6 (offset 0xc); [wSrcItemGrid]=u16 @ +0xd",
+        "[ullDstItemID]=u64 @ +0xf; [bDstItemColumn]=u8 @ +0x17; [wDstItemGrid]=u16 @ param_1[0xc] (offset 0x18)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103eaba0",
+      "currentName": "FUN_103eaba0",
+      "proposedName": "TlvTransferAttrRsp::TdrTextFormat",
+      "subsystem": "items/attribute-transfer",
+      "purpose": "TDR text serializer for the attribute-transfer response: iErrCode + wTransferAttr + wTransferType + src/dst item locators. Response counterpart of FUN_103ea6e0.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; iErrCode server-produced",
+      "formulas": [
+        "[iErrCode]=int @ *param_1; [wTransferAttr]=u16 @ param_1+1 (offset 4); [wTransferType]=u16 @ (int)param_1+6",
+        "[ullSrcItemID]=u64 @ param_1[2..3]; [bSrcItemColumn]=u8 @ param_1+4 (offset 0x10); [wSrcItemGrid]=u16 @ +0x11",
+        "[ullDstItemID]=u64 @ +0x13; [bDstItemColumn]=u8 @ +0x1b; [wDstItemGrid]=u16 @ param_1[7] (offset 0x1c)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103edf50",
+      "currentName": "FUN_103edf50",
+      "proposedName": "TlvCombineItemReq::TdrTextFormat",
+      "subsystem": "items/combine-craft",
+      "purpose": "TDR text serializer for an item combine/craft request: item locator + iDstItemID (resulting item) + iCreditItemCnt + bTagItemCnt (u8) + astTagItemData array (FUN_10272300), cap 6 tag items.",
+      "confidence": "high",
+      "serverRelevance": "validation - astTagItemData <= 6 enforced; combine result server-authoritative",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9",
+        "[iDstItemID]=int @ +0xb; [iCreditItemCnt]=int @ +0xf; [bTagItemCnt]=u8 @ +0x13 (fmt 0x%02x)",
+        "if bTagItemCnt > 6 return -7; [astTagItemData]=FUN_10272300[bTagItemCnt]"
+      ],
+      "costs": [
+        "Tag-item list cap: 6 entries; error -7. iCreditItemCnt = materials consumed."
+      ],
+      "notes": "Byte-identical to FUN_1041bfe0."
+    },
+    {
+      "address": "0x103ee3b0",
+      "currentName": "FUN_103ee3b0",
+      "proposedName": "TlvItemRetErrRsp::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for a response: iRetCode + iErrArg1 + item locator. Two-code error reply with one argument.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; codes server-produced",
+      "formulas": [
+        "[iRetCode]=int @ *param_1; [iErrArg1]=int @ param_1[1]; [ullItemID]=u64 @ param_1[2..3]; [bItemColumn]=u8 @ param_1+4 (offset 0x10); [wItemGrid]=u16 @ +0x11"
+      ],
+      "costs": [],
+      "notes": "Same layout as FUN_1041c440."
+    },
+    {
+      "address": "0x103eeed0",
+      "currentName": "FUN_103eeed0",
+      "proposedName": "TlvItemCountReqC::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: item locator + wItemCount. Same layout as FUN_1032bf20/1032de70.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [wItemCount]=u16 @ +0xb"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103ef260",
+      "currentName": "FUN_103ef260",
+      "proposedName": "TlvDyeItemReq::TdrTextFormat",
+      "subsystem": "items/dye-color",
+      "purpose": "TDR text serializer for a dye/recolor request: item locator + iColorIndex (int). Applies a color index to an equipment item.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; dye applied server-authoritatively",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [iColorIndex]=int @ +0xb"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103ef600",
+      "currentName": "FUN_103ef600",
+      "proposedName": "TlvDyeItemRsp::TdrTextFormat",
+      "subsystem": "items/dye-color",
+      "purpose": "TDR text serializer for the dye response: iRetCode + item locator + iColorIndex.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter; iRetCode server-produced",
+      "formulas": [
+        "[iRetCode]=int @ *param_1; [ullItemID]=u64 @ param_1[1..2]; [bItemColumn]=u8 @ param_1+3 (offset 0xc); [wItemGrid]=u16 @ +0xd; [iColorIndex]=int @ +0xf"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103f1500",
+      "currentName": "FUN_103f1500",
+      "proposedName": "TlvItemLocatorReqB::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer for the bare item locator (id/column/grid). Same as FUN_103e9840.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x103f1870",
+      "currentName": "FUN_103f1870",
+      "proposedName": "TlvItemErrLocatorRspB::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: iErrCode + item locator. Same as FUN_103e9bb0/103ea2e0.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[iErrCode]=int @ *param_1; [ullItemID]=u64 @ param_1[1..2]; [bItemColumn]=u8 @ +0xc; [wItemGrid]=u16 @ +0xd"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10412a60",
+      "currentName": "FUN_10412a60",
+      "proposedName": "TlvBeastItemReq::TdrTextFormat",
+      "subsystem": "items/pet-beast",
+      "purpose": "TDR text serializer for a beast/pet item op: iSrcBeast, iDstBeast, iUseItem (all int). Uses an item to act on/transfer between two beasts (e.g. feed/transfer).",
+      "confidence": "medium",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[iSrcBeast]=int @ *param_1; [iDstBeast]=int @ param_1[1]; [iUseItem]=int @ param_1[2]"
+      ],
+      "costs": [],
+      "notes": "'Beast' likely refers to a mount/pet monster; iUseItem is the consumed item id."
+    },
+    {
+      "address": "0x1041bfe0",
+      "currentName": "FUN_1041bfe0",
+      "proposedName": "TlvCombineItemReqB::TdrTextFormat",
+      "subsystem": "items/combine-craft",
+      "purpose": "TDR text serializer for item combine/craft: item locator + iDstItemID + iCreditItemCnt + bTagItemCnt + astTagItemData (FUN_10272300), cap 6. Byte-identical to FUN_103edf50.",
+      "confidence": "high",
+      "serverRelevance": "validation - astTagItemData <= 6 enforced",
+      "formulas": [
+        "[ullItemID]=u64 @ param_1[0..1]; [bItemColumn]=u8 @ +8; [wItemGrid]=u16 @ +9; [iDstItemID]=int @ +0xb; [iCreditItemCnt]=int @ +0xf; [bTagItemCnt]=u8 @ +0x13",
+        "if bTagItemCnt > 6 return -7; [astTagItemData]=FUN_10272300[bTagItemCnt]"
+      ],
+      "costs": [
+        "Tag-item list cap: 6 entries; error -7"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x1041c440",
+      "currentName": "FUN_1041c440",
+      "proposedName": "TlvItemRetErrRspB::TdrTextFormat",
+      "subsystem": "items/packet",
+      "purpose": "TDR text serializer: iRetCode + iErrArg1 + item locator. Byte-identical to FUN_103ee3b0.",
+      "confidence": "high",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "[iRetCode]=int @ *param_1; [iErrArg1]=int @ param_1[1]; [ullItemID]=u64 @ param_1[2..3]; [bItemColumn]=u8 @ +0x10; [wItemGrid]=u16 @ +0x11"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10515860",
+      "currentName": "FUN_10515860",
+      "proposedName": "CPetEquipUI::RefreshPetEquipsUI",
+      "subsystem": "items/pet-equipment-ui",
+      "purpose": "Builds the pet-equipment list VO array and pushes it to Flash/Scaleform UI. For each equip slot record (0x40-byte stride) fills asset, collumn, m_bUseItem, isBind, m_nBindType, then calls RefreshPetEquipsUI on the UI.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI rendering)",
+      "formulas": [
+        "per-record stride = 0x40 bytes (piVar3 += 0x10 dwords)",
+        "asset = rec[0xb]; collumn = rec[2]; m_bUseItem = (rec[0xd] > 0); bindType field(0x11dbfe78) = rec[1]; isBind = (char)rec[0xe]; m_nBindType = rec[0xf]"
+      ],
+      "costs": [],
+      "notes": "PETEQUIPITEMVO_CLASS_NAME is the Scaleform VO class."
+    },
+    {
+      "address": "0x1052c520",
+      "currentName": "FUN_1052c520",
+      "proposedName": "CItemBoxInfo::GetRecordById",
+      "subsystem": "items/config-table",
+      "purpose": "Config-table row lookup for CItemBoxInfo (item-box/loot-box definitions) by record id. Standard CInfoManager 2D-array lookup: resolves the singleton manager (lazily creating a default if FindByName fails), then indexes.",
+      "confidence": "high",
+      "serverRelevance": "client-only config read; the data table itself is authoritative content shared with server",
+      "formulas": [
+        "mgr = *CItemBoxInfo::GetInfoManager(); if null -> CInfoManager::FindByName('CItemBoxInfo') else default &DAT_123be650",
+        "id -= mgr[0x30] (base id); valid iff id>=0 && id<mgr[0x24] (count) && mgr[0x28] (stride)!=0",
+        "row = mgr[0x20][id / mgr[0x28]]; return row[id % mgr[0x28]]  (chunked 2D storage)"
+      ],
+      "costs": [],
+      "notes": "Same lookup pattern repeated for all *Info tables in this chunk."
+    },
+    {
+      "address": "0x1052c6a0",
+      "currentName": "FUN_1052c6a0",
+      "proposedName": "CItemBoxGroupInfo::GetRecordById",
+      "subsystem": "items/config-table",
+      "purpose": "Config-table row lookup for CItemBoxGroupInfo (item-box group definitions) by id; identical 2D-array pattern to FUN_1052c520.",
+      "confidence": "high",
+      "serverRelevance": "client-only config read",
+      "formulas": [
+        "id -= mgr[0x30]; valid iff 0<=id<mgr[0x24] && mgr[0x28]!=0; row=mgr[0x20][id/mgr[0x28]]; return row[id%mgr[0x28]]"
+      ],
+      "costs": [],
+      "notes": "Default fallback &DAT_123be614."
+    },
+    {
+      "address": "0x108aca50",
+      "currentName": "FUN_108aca50",
+      "proposedName": "CExpandInventorySlotInfo::GetRecordById",
+      "subsystem": "items/inventory-expansion",
+      "purpose": "Config-table lookup for CExpandInventorySlotInfo (bag-slot expansion tiers/costs) by id. Defines how bag capacity can be expanded. Same 2D-array pattern.",
+      "confidence": "high",
+      "serverRelevance": "client-only config read; expansion costs/limits are authoritative content",
+      "formulas": [
+        "id -= mgr[0x30]; valid iff 0<=id<mgr[0x24] && mgr[0x28]!=0; row=mgr[0x20][id/mgr[0x28]]; return row[id%mgr[0x28]]"
+      ],
+      "costs": [
+        "Row content (not read here) holds inventory-slot expansion cost/limit per tier"
+      ],
+      "notes": "Default fallback &DAT_123c7970. Directly relevant to bag capacity expansion mechanic."
+    },
+    {
+      "address": "0x108ad830",
+      "currentName": "FUN_108ad830",
+      "proposedName": "CExpandStoreHouseSlotInfo::GetRecordById",
+      "subsystem": "items/storehouse-expansion",
+      "purpose": "Config-table lookup for CExpandStoreHouseSlotInfo (storehouse-slot expansion tiers/costs) by id; identical 2D-array pattern.",
+      "confidence": "high",
+      "serverRelevance": "client-only config read; storehouse expansion costs/limits are authoritative content",
+      "formulas": [
+        "id -= mgr[0x30]; valid iff 0<=id<mgr[0x24] && mgr[0x28]!=0; row=mgr[0x20][id/mgr[0x28]]; return row[id%mgr[0x28]]"
+      ],
+      "costs": [
+        "Row content holds storehouse-slot expansion cost/limit per tier"
+      ],
+      "notes": "Default fallback &DAT_123c790c."
+    },
+    {
+      "address": "0x108b2440",
+      "currentName": "FUN_108b2440",
+      "proposedName": "CHunterGroupInventoryUI::RefreshRights",
+      "subsystem": "items/guild-inventory-ui",
+      "purpose": "Populates the hunter-group (guild) shared-inventory UI VO: inHunterGroup flag, m_Fund, inventoryRight array (7 rights entries), isHunterLeader, title, m_leaderName, and registers updataSelfCallBack. Only builds detailed fields when player is in a hunter group.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI); the rights/fund values are server-authoritative and merely displayed",
+      "formulas": [
+        "inHunterGroup = vtbl+8 call (bool)",
+        "m_Fund = FUN_114a8610(); rights = *(FUN_114b0f80()+0x20)",
+        "inventoryRight[] loop i in 0..6 (7 entries): value = FUN_116294f0() wrapped as VO type 3",
+        "isHunterLeader = FUN_114b0f90(); title = *(FUN_114b0f80()+4)"
+      ],
+      "costs": [
+        "inventoryRight has exactly 7 permission entries (loop < 7)"
+      ],
+      "notes": "Guild/hunter-group shared inventory permissions surface."
+    },
+    {
+      "address": "0x10924ee0",
+      "currentName": "FUN_10924ee0",
+      "proposedName": "CItemUseHandler::HandleSpecialUseItem",
+      "subsystem": "items/use",
+      "purpose": "Dispatch for special client-side item-use actions keyed by an item action code (0x44, 0xee, 0x7f, 0x10f, 0xf5): checks group/quest/wardrobe preconditions and either shows an error dialog (FUN_104ef270 with code) or grants an activity reward (GrantActivityReward) / enters wardrobe. Includes NORMAL_IDLE_WARDROBE gate.",
+      "confidence": "low",
+      "serverRelevance": "client-only (precondition UI gating); actual reward grant is a server request",
+      "formulas": [
+        "only runs when in_stack_00000014 == 1 and (state&0x8f) in {3,4}",
+        "action 0x44: needs group leader; if group fund count>0 -> GrantActivityReward(0xca7); else error code 0x43",
+        "action 0xee: wardrobe check -> GrantActivityReward(0x1bd9) else FUN_105eb980",
+        "action 0x7f: group check; fund>0 -> reward 0xca7; else -> reward 0x74f",
+        "action 0x9f4/0x1373/0x1376: wardrobe/idle-anim gated activity rewards",
+        "default error id = -0x21524151 (sentinel 0xDEADBEAF-like)"
+      ],
+      "costs": [
+        "Activity reward IDs: 0xca7, 0x1bd9, 0x74f, 0x9f4, 0x1373, 0x1376"
+      ],
+      "notes": "Reward IDs index CActivityReward content; error dialog codes (0x43 etc.) are UI message ids."
+    },
+    {
+      "address": "0x10944780",
+      "currentName": "FUN_10944780",
+      "proposedName": "CInventoryUIController::RegisterCommandHandlers",
+      "subsystem": "items/inventory-ui",
+      "purpose": "Registers the inventory UI command handlers (GetDataInit, SwapInventoryItem, SplitInventoryItem, TidyInventoryItem, RightClickItem, DiscardInventoryItem, InterSwapItem, TidyAllInventoryItem, MoveOutItem, EditTabName), binding each command string to a handler function pointer (FUN_10944dc0, FUN_10944f40, ...).",
+      "confidence": "high",
+      "serverRelevance": "client-only (UI command routing); the operations map to server-authoritative requests",
+      "formulas": [
+        "handler bindings: SwapInventoryItem->FUN_10944dc0, SplitInventoryItem->FUN_10944f40, TidyInventoryItem->FUN_109450b0, RightClickItem->FUN_10945160, DiscardInventoryItem->FUN_10945280, InterSwapItem->FUN_10945350, TidyAllInventoryItem->FUN_10945060, MoveOutItem->FUN_10944be0, EditTabName->FUN_10944aa0"
+      ],
+      "costs": [],
+      "notes": "Enumerates the full client inventory action set; use handler names to map to the Tlv request serializers above."
+    },
+    {
+      "address": "0x109e78b0",
+      "currentName": "FUN_109e78b0",
+      "proposedName": "CWardrobeUIController::RegisterCommandHandlers",
+      "subsystem": "items/wardrobe",
+      "purpose": "Registers wardrobe UI -> game (C2AS) command handlers: C2AS_EnterWardrobeState, C2AS_LeaveWardrobeState, C2AS_GetFashionDataArray (FUN_109e7dd0), C2AS_TryOn (FUN_109e80c0), C2AS_ChangePose (FUN_109e8230).",
+      "confidence": "high",
+      "serverRelevance": "client-only (UI command routing)",
+      "formulas": [
+        "C2AS_GetFashionDataArray -> FUN_109e7dd0; C2AS_TryOn -> FUN_109e80c0; C2AS_ChangePose -> FUN_109e8230"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x109e7dd0",
+      "currentName": "FUN_109e7dd0",
+      "proposedName": "CWardrobe::BuildFashionDataArray",
+      "subsystem": "items/wardrobe",
+      "purpose": "Builds the fashion-data array for the wardrobe UI (C2AS_GetFashionDataArray). Iterates the player's wardrobe fashion records (mode 4/5) and, for each, emits a FashionData VO (FUN_109e8440) plus a nested SuitFashionDataArray of the suit's component pieces looked up in CWardrobeInfo.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI); ownership (HasItem) reflects server state",
+      "formulas": [
+        "gated on param_5==2 and arg types (state&0x8f) in {3,4}",
+        "iterates wardrobe list; skips records where rec[10] byte != 0 (hidden)",
+        "per component: CWardrobeInfo::GetRecordById lookup (same 2D pattern: id-=[0x30]; row=[0x20][id/[0x28]]; elem=row[id%[0x28]])"
+      ],
+      "costs": [],
+      "notes": "SuitFashionDataArray = component pieces belonging to a suit fashion."
+    },
+    {
+      "address": "0x109e82c0",
+      "currentName": "FUN_109e82c0",
+      "proposedName": "CWardrobe::BuildOwnedFashionList",
+      "subsystem": "items/wardrobe",
+      "purpose": "Builds the list of wardrobe fashion records the player owns by iterating CWardrobeInfo table entries (count from vtbl+0x28) and appending each record whose model resolves. Lazily initializes the CWardrobeInfo manager default instance if missing.",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "count = mgr vtbl(+0x28); for i in 0..count-1: rec = mgr[0x14][i]; append if model type in {4,5}",
+        "table bounds check: i valid iff i>=0 && i < (mgr[0x18]-mgr[0x14])>>2"
+      ],
+      "costs": [],
+      "notes": "Writes result count/anchor at param_1+0x50."
+    },
+    {
+      "address": "0x109e8440",
+      "currentName": "FUN_109e8440",
+      "proposedName": "CWardrobe::BuildFashionDataVO",
+      "subsystem": "items/wardrobe",
+      "purpose": "Builds a single FashionData Scaleform VO (mh.view.Wardrobe.Data.FashionData): ItemId, MartId, HasItem, SecondType, ThirdType, ItemIcon, MaleIcon, FemaleIcon, Score. HasItem computed from an inventory presence check (FUN_113fa380).",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI VO); HasItem reflects server-owned inventory",
+      "formulas": [
+        "ItemId = rec[0x14/4]... (uStack_6c); MartId = rec+0x18; HasItem = (FUN_113fa380(MartId) != 0)",
+        "SecondType = rec+0x3c (from FUN_10254130); ItemIcon/MaleIcon(+0x40)/FemaleIcon(+0x58); Score = rec+0x60"
+      ],
+      "costs": [],
+      "notes": "MartId links fashion to a cash-shop (Mart) commodity."
+    },
+    {
+      "address": "0x109e8670",
+      "currentName": "FUN_109e8670",
+      "proposedName": "CWardrobe::EnterWardrobeIdleState",
+      "subsystem": "items/wardrobe",
+      "purpose": "Sets the local player model into the wardrobe idle state: flags byte +0x2405 = 1 and plays the NORMAL_IDLE_WARDROBE animation via CInfoRecord::GetModelString + FUN_10fd7800.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (animation/state)",
+      "formulas": [
+        "model->+0x2405 = 1; anim = CInfoRecord::GetModelString('NORMAL_IDLE_WARDROBE',...,1,0,0)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x109e9300",
+      "currentName": "FUN_109e9300",
+      "proposedName": "CWardrobeInfo::GetManagerOrDefault",
+      "subsystem": "items/config-table",
+      "purpose": "Returns the CWardrobeInfo config manager singleton, lazily creating a default (&DAT_123c911c) and initializing (FUN_109e9840) if the named manager is not found. Helper used by the wardrobe lookups.",
+      "confidence": "high",
+      "serverRelevance": "client-only config accessor",
+      "formulas": [
+        "mgr = *CWardrobeInfo::GetManager(); if null -> FindByName('CWardrobeInfo'); if still null -> default &DAT_123c911c (init once via flag DAT_123c9118&1)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10a4fc50",
+      "currentName": "FUN_10a4fc50",
+      "proposedName": "CPlayerInventoryExtension::~Reset",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Destructor/teardown for the CryEngine player game-object 'Inventory' extension: releases the 'Inventory'/'Interactor'/'AnimatedCharacter' game-object slots, unbinds many held references and animated-character resources, and restores base vtables. Stock CryEngine game-object-extension plumbing (IInventory), not the bag/item container.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (entity lifecycle)",
+      "formulas": [
+        "releases slots via IGameObject::ReleaseExtension('Inventory'/'Interactor'/'AnimatedCharacter', mode 3)",
+        "many member-pointer teardowns at param_1[...] offsets; ref-count free pattern (idx-0xc header, FUN_10c3dad0/FUN_10c3d900)"
+      ],
+      "costs": [],
+      "notes": "This 'Inventory' is CryEngine's actor-equipment/weapon inventory extension, distinct from the MHO bag/store container."
+    },
+    {
+      "address": "0x10a50d10",
+      "currentName": "FUN_10a50d10",
+      "proposedName": "CActor::GetOrAcquireInventoryExtension",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Lazily acquires the 'Inventory' game-object extension (mode 2 = acquire) for an actor and caches it at +0x3c. CryEngine plumbing.",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "if (this+0x3c)==0: this+0x3c = IGameObject::AcquireExtension('Inventory', 2); return this+0x3c"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10a50ee0",
+      "currentName": "FUN_10a50ee0",
+      "proposedName": "CPlayerInventoryExtension::Init",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Initializes the player Inventory game-object extension: binds parent game object, enables/updates AnimatedCharacter and Inventory slots, registers with the actor system, caches globals. Stock CryEngine init. Terminates in a not-return error path (FUN_10c3d580) if a subcheck fails.",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "acquires 'AnimatedCharacter'(mode 2) at +0x4d6; acquires 'Inventory'(mode 2) on parent",
+        "sets physics/update flags via vtbl calls"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10a51440",
+      "currentName": "FUN_10a51440",
+      "proposedName": "CPlayerInventoryExtension::PostInitClient",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Post-init / hand-off of the Inventory extension to a new owner: copies the +0x4d7 handle, re-acquires 'Inventory' slot, syncs AnimatedCharacter, sets update flags. CryEngine plumbing.",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "param_2[2] = this[0x4d7]; slot flag = (DAT_1202e818+0x16d == 0) ? 2 : 1"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10a53640",
+      "currentName": "FUN_10a53640",
+      "proposedName": "CPlayerInventoryExtension::ResetAndReload",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Resets the player Inventory extension on (re)spawn/revive: releases Inventory/Interactor slots, resets transform/scale members (identity 0x3f800000), reloads hitpart data (hitpartParams, HitPartSetting), gameParams, fires OnRevive. Largely CryEngine actor plumbing; touches worn-equipment appearance but not bag contents.",
+      "confidence": "low",
+      "serverRelevance": "client-only (entity reset)",
+      "formulas": [
+        "resets members +0x4d9.. with identity scale 0x3f800000 (1.0f) at +0x4de and +0x4e2",
+        "loads 'hitpartParams.hitpartdata'/'hitpartParams.partbinddata', HitpartInfo, HitPartData; script 'OnRevive'"
+      ],
+      "costs": [],
+      "notes": "param_2 flag controls whether appearance is re-applied (FUN_10ba9b00 path)."
+    },
+    {
+      "address": "0x10a64f90",
+      "currentName": "FUN_10a64f90",
+      "proposedName": "CActor::ReleaseInventoryInteractorSlots",
+      "subsystem": "items/gameobject-inventory",
+      "purpose": "Releases the 'Inventory' (+0x3c) and 'Interactor' (+0x40) game-object extension slots (mode 3 = release) and clears the cached handles. CryEngine plumbing.",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "if (this+0x3c): ReleaseExtension('Inventory',3); this+0x3c=0",
+        "if (this+0x40): ReleaseExtension('Interactor',3); this+0x40=0"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10b25320",
+      "currentName": "FUN_10b25320",
+      "proposedName": "CItemUseInteraction::TryUseOnTarget",
+      "subsystem": "items/use-interaction",
+      "purpose": "Validates a use-item-on-world-target interaction: reads ItemID from the interaction params, checks the target object is the expected type (==2) and shares the same class id (vtbl+0x88) as the actor's inventory-held object, then flags ItemUsed and triggers the use (FUN_1025bd00 / FUN_10262a50). Returns 0 on success, 0xffffffff on failure.",
+      "confidence": "low",
+      "serverRelevance": "validation - client-side pre-check before firing a server use request",
+      "formulas": [
+        "requires *param_2 == 0x3ff (interaction type) and ItemID (local_8) != -1",
+        "target type check: obj->vtbl(0xa8) must == 2 else reject",
+        "class match: actor-inventory obj->vtbl(0x88) == target obj->vtbl(0x88) required",
+        "reads 'ItemID' param, writes 'ItemUsed' flag"
+      ],
+      "costs": [
+        "interaction type constant 0x3ff"
+      ],
+      "notes": "ItemID -1 sentinel = no item bound."
+    },
+    {
+      "address": "0x10b63bb0",
+      "currentName": "FUN_10b63bb0",
+      "proposedName": "CGamePauseMenu::RegisterCommandHandlers",
+      "subsystem": "ui/menu (item-adjacent)",
+      "purpose": "Registers pause/system-menu command handlers via CInfoRecord::GetModelString bindings: OnResumeGame, OnReturnChooseRole, OnReturnTown(+OK/Cancel), OnShowSystemSettingDlg, GPItemClickOpenInventory, GPItemClickOpenManufacture, OnExitGame, RequireExitGame, OnShowKeySettingDlg, OnShowWorldMap, OnResetPosclick, CheckIdelOrFallingState.",
+      "confidence": "high",
+      "serverRelevance": "client-only (UI routing)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Item-relevant only for GPItemClickOpenInventory / GPItemClickOpenManufacture entry points."
+    },
+    {
+      "address": "0x10b660a0",
+      "currentName": "FUN_10b660a0",
+      "proposedName": "CSystemBar::RegisterCommandHandlers",
+      "subsystem": "ui/systembar (item-adjacent)",
+      "purpose": "Registers system-bar hotkey/command handlers: SystemBar_PlayerPropertyUI, SystemBar_ShowQuestUI, SystemBar_ShowInventoryUI, SystemBar_ShowSysConfigUI, and single-key shows (T/O/K/H/M).",
+      "confidence": "high",
+      "serverRelevance": "client-only (UI routing)",
+      "formulas": [],
+      "costs": [],
+      "notes": "SystemBar_ShowInventoryUI opens the bag UI."
+    },
+    {
+      "address": "0x10bf76e0",
+      "currentName": "FUN_10bf76e0",
+      "proposedName": "CPlayer::IsInWardrobeInteractableAnimState",
+      "subsystem": "items/wardrobe",
+      "purpose": "Returns 1 only if the local player's current animation state name is NOT one of NORMAL_IDLE / NORMAL_RUN / NORMAL_IDLE_WARDROBE (i.e. player is busy), else 0; also requires wardrobe preconditions (FUN_10fd05d0, vtbl+0x7bc, FUN_10f5b910). Inline strcmp of the current anim state name.",
+      "confidence": "medium",
+      "serverRelevance": "client-only (animation gating for wardrobe/try-on)",
+      "formulas": [
+        "returns 0 if anim-state == 'NORMAL_IDLE' or 'NORMAL_RUN' or 'NORMAL_IDLE_WARDROBE'; else 1 (with precondition checks)"
+      ],
+      "costs": [],
+      "notes": "Used to block wardrobe try-on while in a non-idle animation."
+    },
+    {
+      "address": "0x10c4c3c0",
+      "currentName": "FUN_10c4c3c0",
+      "proposedName": "CGameStateRecorder::DrawInventoryDebugOverlay",
+      "subsystem": "debug/gamestate",
+      "purpose": "CryEngine demo/game-state-recorder debug overlay renderer: draws the actor's recorded-vs-current inventory (item slots, ammo counts, accessories, ammo packs, firemode, health) using FUN_10b6ffa0 text draw. Pure diagnostic overlay ('demo_force_game_state'), highlights mismatches in red. Not gameplay logic.",
+      "confidence": "low",
+      "serverRelevance": "client-only (debug rendering)",
+      "formulas": [
+        "column X positions 0x43960000(300f)/0x43c80000(400f)/0x44160000(600f) etc; row advance DAT_11cd7e88",
+        "ammo grid wraps every 5 columns (local_10 == (local_10/5)*5); accessory/ammo-pack iteration over red-black tree"
+      ],
+      "costs": [
+        "max name length copied: 0x1f (31) chars via strncpy"
+      ],
+      "notes": "This 'Inventory' is the CryEngine actor equipment/ammo inventory, matching FUN_10a4fc50 family, not the MHO bag/store."
+    }
+  ]
+}

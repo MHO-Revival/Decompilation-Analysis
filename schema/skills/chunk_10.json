@@ -1,0 +1,955 @@
+{
+  "chunkIndex": 10,
+  "functions": [
+    {
+      "address": "1105f6c0",
+      "currentName": "FUN_1105f6c0",
+      "proposedName": "CFsmChecker::CheckGotoState",
+      "subsystem": "skill-fsm-anticheat",
+      "purpose": "Thin wrapper that validates a skill-driven FSM 'GotoState' transition. Fetches the game context (FUN_11398e60); if valid, packs the 4-word next-state id (param_2..param_5) into a local struct and calls the shared transition validator FUN_1105f7f0(..., mode=0). On failure it logs '[FsmChecker][1]HandleGotoState state_id: %u %u %u %u | skill: %d %d' and calls FUN_114811e0(param_10, 1) (raise/handle a tolerance violation of kind 1).",
+      "confidence": "high",
+      "formulas": [
+        "local struct at &local_14 = {param_2(state word0), param_3(word1), param_4(word2), param_5(word3)}; passed with param_6=skillId, param_7=level, param_8, param_9, transitionMode=0",
+        "on validator returning false byte: log + FUN_114811e0(param_10, 1); return that",
+        "return value masked with 0xffffff00 on success (returns 0/false-byte)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (FSM/skill-state transition legality; the shared core does the real check)",
+      "notes": "mode arg 0 distinguishes 'GotoState' from 'TransitionToState' (mode 1)."
+    },
+    {
+      "address": "1105f750",
+      "currentName": "FUN_1105f750",
+      "proposedName": "CFsmChecker::CheckTransitionToState",
+      "subsystem": "skill-fsm-anticheat",
+      "purpose": "Identical to CheckGotoState but for a 'TransitionToState' FSM edge. Calls FUN_1105f7f0(..., mode=1); on failure logs '[FsmChecker][2]HandleTransitionToState state_id: %u %u %u %u | skill: %d %d' and calls FUN_114811e0(param_10, 2) (tolerance violation kind 2).",
+      "confidence": "high",
+      "formulas": [
+        "same packing as 1105f6c0; transitionMode=1; failure path uses violation code 2"
+      ],
+      "costs": [],
+      "serverRelevance": "validation",
+      "notes": "Pairs with 1105f6c0; the '1' vs '2' distinguishes the two FSM transition primitives."
+    },
+    {
+      "address": "1105f7f0",
+      "currentName": "FUN_1105f7f0",
+      "proposedName": "CFsmChecker::ValidateSkillStateTransition",
+      "subsystem": "skill-fsm-anticheat",
+      "purpose": "Core anti-cheat / rate-limiter for skill-driven state transitions. Resolves the next-state definition object (FUN_10fb8160) from the 4-word state id and the current-state object (FUN_10fd05d0). Verifies the skill actually maps to a valid transition between current and next state (FUN_10fd4810). Then enforces a timing constraint: the elapsed time since last transition must not be shorter than the animation-defined limit multiplied by an 'FsmTolerance' factor. Logs detailed diagnostics when rejecting.",
+      "confidence": "medium",
+      "formulas": [
+        "increments transition counter: *(param_1+0x74) += 1",
+        "FsmTolerance CVar read via FUN_100b62c0(\"FsmTolerance\",\"\"); default multiplier = _DAT_11cbf11c (float). If CVar present, multiplier = (float)(cvarInt + 100) / DAT_11de9a30 (DAT_11de9a30 almost certainly 100.0 => tolerance% -> factor)",
+        "limited = animLimitTime(local_c) * multiplier, where local_c = (float)auVar13 * param_4 (param_4 = duration/speed input)",
+        "elapsed cached = FUN_11484e10(vtbl+0x294(param_1+0x28,+0x40,+0x58)) then * DAT_11de9a44 (DAT_11de9a44 = 0.001f, ms->sec) -> local_8",
+        "gate: if (*(param_1+0x24) >= 0) && ( *(param_1+0x24) > 0 || *(param_1+0x20) != 0 ) && (local_c < local_8): transition considered too-soon-cached; if local_8 <= DAT_11de9918 return 1(accept) else { *(param_1+0x70) += 1 (violation counter); return 0(reject) }",
+        "else store last-sync time: *(param_1+0x20)=param_5, *(param_1+0x24)=param_6; return 1",
+        "param_1+0x20/0x24 = last sync time (I64d pair), param_1+0x70 = reject count, param_1+0x74 = attempt count"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (authoritative timing/legality gate against skill-state spoofing; DAT_11de9a44=0.001 ms scale, DAT_11de9918 is a floor threshold)",
+      "notes": "Strings: 'Request to goto unkown state', 'Skill not match state or has no transition', 'currenst state ... takes %.2f and limited %.2f', 'Last sync time = %I64d, current = %I64d, multiplier = %.3f'. Names via FUN_10f57110 (GetModelString/name). This is the money function for reproducing server-side skill-transition rate limiting."
+    },
+    {
+      "address": "11065d70",
+      "currentName": "FUN_11065d70",
+      "proposedName": "CSkillSequence::LoadFromXmlNode",
+      "subsystem": "skill-animation-sequence",
+      "purpose": "Parses a 'Sequence' XML/config node into a runtime skill animation-sequence object. Reads boolean flags into a packed bitfield at param_1+0x116/0x117, an int Layer (0x114), SkillID (0x80), and iterates child event lists (AnimationNode, SoundEvent, EffectEvent, PhysicEvent, TriggerEvent, AttachmentEvent, SkillEvent, SkillRotateEvent, NextSequences) building per-event objects. Sorts SkillRotateEvent list by a float key (+4) using an introsort/insertion-sort hybrid.",
+      "confidence": "medium",
+      "formulas": [
+        "flags packed into *(param_1+0x116): DisablePhy -> bit3 (val<<3 &0x08), DisableColWithWall -> bit4 (<<4 &0x10), IsLoop -> bit6 (<<6 &0x40), CatchUpDist(present) -> bit5 (<<5 &0x20)",
+        "*(param_1+0x117): EnableMoveSplineScale -> bit2 (<<2 &0x04)",
+        "Layer: *(byte*)(param_1+0x114) = (byte)Layer",
+        "SkillID read into param_1+0x80 (getter vtbl+0x74)",
+        "SkillRotateEvent sort: heap-depth = floor(log2(count)) computed via loop; FUN_11069c20 (introsort) then FUN_11069b80 (final) with threshold 0x10; insertion sort compares *(float*)(evt+4)",
+        "per-event object sizes allocated via FUN_10c3d580: Sound 0x60, Effect 0x50, Physic 0x30, Trigger 0x30, (DAT_11cc19cc list) 0x20, Attachment 0x24, Skill 0x1c, SkillRotate/AnimationNode 0x5c, NextSequences 0x11c(?)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation/FX sequence authoring; parsed from config, drives client playback and event timing)",
+      "notes": "String uses _strlwr on the sequence name. 'NextSequences' chains sequences. Event lists are the animation event track. Not authoritative but defines the timeline the FSM checker validates against."
+    },
+    {
+      "address": "110717d0",
+      "currentName": "FUN_110717d0",
+      "proposedName": "CSkillSequenceGroup::LoadFromXml_variantA",
+      "subsystem": "skill-animation-sequence",
+      "purpose": "Parses a 'SkillSequenceGroup' node: for each 'Sequence' child reads a name (DAT_11da7300 = attr key), a Position (14-byte struct alloc 0x14) and a Rotation (0x14). Builds group entries. Client config loader.",
+      "confidence": "low",
+      "formulas": [
+        "child count via vtbl+0xa0; iterate via vtbl+0xa8; per-Sequence alloc 0x14 for Position and 0x14 for Rotation (FUN_10c3d580)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "One of three near-identical SkillSequenceGroup loaders (see 110720a0, 110722e0) differing by data-source object type."
+    },
+    {
+      "address": "110720a0",
+      "currentName": "FUN_110720a0",
+      "proposedName": "CSkillSequenceGroup::LoadFromRecord_variantB",
+      "subsystem": "skill-animation-sequence",
+      "purpose": "Same SkillSequenceGroup parse as 110717d0 but sourced from a linked-list record structure (walks nodes via [10] next pointer, filters type==1) using FUN_110725e0 to find 'SkillSequenceGroup'/'Position'/'Rotation' child records.",
+      "confidence": "low",
+      "formulas": [
+        "list walk: node = *(iVar3+0x18); next = node[10]; entries with node[5]==1; alloc 0x14 for Position and Rotation"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Record-based variant of the sequence-group loader."
+    },
+    {
+      "address": "110722e0",
+      "currentName": "FUN_110722e0",
+      "proposedName": "CSkillSequenceGroup::LoadFromRecord_variantC",
+      "subsystem": "skill-animation-sequence",
+      "purpose": "Third SkillSequenceGroup loader variant using FUN_11070530/FUN_110704b0 record accessors and __alloca for a large temp buffer (iStack_10060). Same semantics: iterate type==1 nodes named 'Sequence', read Position/Rotation (0x14 each).",
+      "confidence": "low",
+      "formulas": [
+        "node[0xb] next pointer; node[5]==1 filter; alloc 0x14 twice"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Functionally equivalent to 110717d0/110720a0."
+    },
+    {
+      "address": "11077b00",
+      "currentName": "FUN_11077b00",
+      "proposedName": "CSkillSequenceGroup::LoadEntries",
+      "subsystem": "skill-animation-sequence",
+      "purpose": "Validates a node is 'SkillSequenceGroup' (compare against DAT_11d0e0c8) then iterates its children allocating a 0x11c-byte entry per child (the full sequence-group entry). Lazily initializes a global registry (DAT_12031140) via FUN_10de9640/FUN_10de98c0 on first use.",
+      "confidence": "low",
+      "formulas": [
+        "per-child alloc size 0x11c (FUN_10c3d580)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "0x11c entry likely the full per-sequence runtime record."
+    },
+    {
+      "address": "11099640",
+      "currentName": "FUN_11099640",
+      "proposedName": "CRangedWeapon::CacheFireStateSounds",
+      "subsystem": "weapon-animation-audio",
+      "purpose": "Looks up and (optionally, when param_2 flag set) preloads a fixed list of weapon-fire animation/sound states by name, reading each one's 'value' child. States: fire_cock, empty_clip, reload, reload_chamber_full, reload_chamber_empty, spin_up, spin_down, spin_down_tail, overheating, cooldown, null_fire (plus a leading DAT_11dd633c/DAT_11d0f42c pair). FUN_10ab4370 = load/register, FUN_10ab25f0 = find-by-name.",
+      "confidence": "medium",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (weapon animation-state / sound asset caching)",
+      "notes": "Ranged-weapon (bowgun/HBG) firing state machine assets. Names indicate spin-up/overheat/cooldown mechanics of the weapon, but this fn only caches assets."
+    },
+    {
+      "address": "110ce4f0",
+      "currentName": "FUN_110ce4f0",
+      "proposedName": "CVehicleMovementSound::Init",
+      "subsystem": "vehicle-audio (NOT skill)",
+      "purpose": "Stock/vehicle CryEngine plumbing: parses vehicle 'SoundParams'/'Animations' config (engine, engineIgnitionTime, rpmPitchSpeed, runSoundDelay, maxSlipSpeed, engineSoundPosition) and builds sound event-group name strings ('sounds/vehicles:', ':start', ':stop', ':gear', ':slip', ':boost', ':acceleration', etc.). Also reads a 'Boost' block (endurance/regeneration/strength/skillID at param_1+0x2b..0x2e) and 'Eject'/'AirDamp'/'ForceFeedback'.",
+      "confidence": "medium",
+      "formulas": [
+        "engineIgnitionTime default 0x3fcccccd = 1.6f if attribute absent",
+        "Eject: if maxTippingAngle==0 => *(param_1+0xe3) = -0x40733333 (=-3.8f approx); else cos(maxTippingAngle * DAT_11de98c0) where DAT_11de98c0 = deg->rad (pi/180)",
+        "runSoundDelay: if >0, *(param_1+0xf) = runSoundDelay + DAT_11de98e8",
+        "Boost block reads endurance/regeneration/strength floats and skillID int into param_1+0x2b..0x2e"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Mostly unrelated to hunter skills; the 'Boost' skillID (param_1+0x2e) is the only tenuous skill link (vehicle boost ability). Included for completeness; do not over-document."
+    },
+    {
+      "address": "111e0d40",
+      "currentName": "FUN_111e0d40",
+      "proposedName": "CEquipInfo::CollectBuffIds",
+      "subsystem": "buff-equip",
+      "purpose": "Given an equip record (param_1) resolves its CBuffInfo entry and decodes the packed buff-id list at buffInfo+0x3c8 via DecodeBuffIdList into up to 10 ids, appending each to the output vector param_2. Uses standard CInfoManager sparse-table lookup on 'CBuffInfo' keyed by equip field *(param_1+0x1b) mapped through FUN_116c5010.",
+      "confidence": "medium",
+      "formulas": [
+        "buff index = FUN_116c5010(*(byte*)(param_1+0x1b)) ; CInfoManager sparse lookup on 'CBuffInfo' (mgr+0x30 base, +0x28 pageSize, +0x24 count, +0x20 pageArray): row=mgr[+0x20 + (idx/pageSize)*4]; entry=row[(idx%pageSize)*4]",
+        "DecodeBuffIdList(entry+0x3c8, local_30, max=10) -> count; append count ids to vector at param_2 (grows via FUN_10463c40 or writes *end and end+=4)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/authoritative (buff ids granted by equipment; server should own the definitive list)",
+      "notes": "CBuffInfo+0x3c8 = encoded buff-id list. Confirms equipment->buff mapping."
+    },
+    {
+      "address": "112076e0",
+      "currentName": "CManufactureSkillName__GetManagers",
+      "proposedName": "CManufactureSkillName::GetManager",
+      "subsystem": "crafting-skill (info-manager singleton)",
+      "purpose": "Stock CInfoManager singleton accessor for CManufactureSkillName (manufacture/crafting skill name table). Lazy-registers the manager via StcMbrNameSvr and returns it, falling back to a sentinel (&DAT_1203f824) on failure.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (static-data registry boilerplate)",
+      "notes": "Standard generated GetManagers pattern; not gameplay logic."
+    },
+    {
+      "address": "1120a050",
+      "currentName": "CManufactureSkillName__GetManagers_1120a050",
+      "proposedName": "CManufactureSkillName::GetSingleton",
+      "subsystem": "crafting-skill (info-manager singleton)",
+      "purpose": "Simplified singleton getter returning *DAT_1203f730 for CManufactureSkillName after lazy registration.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Boilerplate."
+    },
+    {
+      "address": "1120a2a0",
+      "currentName": "FUN_1120a2a0",
+      "proposedName": "CManufactureSkillLearnInfo::GetByIndex",
+      "subsystem": "crafting-skill",
+      "purpose": "Dense-array index accessor for CManufactureSkillLearnInfo: returns entry ptr at (mgr+0x14)[index] if 0<=index<count where count = (mgr+0x18 - mgr+0x14)>>2.",
+      "confidence": "high",
+      "formulas": [
+        "count = (*(mgr+0x18) - *(mgr+0x14)) >> 2; return *(*(mgr+0x14) + index*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (data lookup)",
+      "notes": "Dense vector accessor (vs sparse-table lookup used elsewhere)."
+    },
+    {
+      "address": "1120a300",
+      "currentName": "FUN_1120a300",
+      "proposedName": "CManufactureSkillName::GetById",
+      "subsystem": "crafting-skill",
+      "purpose": "CInfoManager sparse-table lookup returning the CManufactureSkillName entry for a given id.",
+      "confidence": "high",
+      "formulas": [
+        "standard sparse lookup (base +0x30, page +0x28, count +0x24, pages +0x20)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Reusable sparse-lookup shape shared across nearly all *Info::GetById fns in this chunk."
+    },
+    {
+      "address": "1120b200",
+      "currentName": "FUN_1120b200",
+      "proposedName": "CManufactureSkillName::ShowNameTooltip",
+      "subsystem": "crafting-skill-ui",
+      "purpose": "Resolves a CManufactureSkillName entry by id, reads its name string (entry+0x14, fallback DAT_11d9d32b empty), wraps via FUN_1024e9b0(name,0x2a) and posts a UI message FUN_1112f070(0x4b6, name).",
+      "confidence": "medium",
+      "formulas": [
+        "UI message id 0x4b6 with wrapped name string"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "entry+0x14 = name char*."
+    },
+    {
+      "address": "1124a0c0",
+      "currentName": "FUN_1124a0c0",
+      "proposedName": "CBuffSystem::ApplyOrRemoveBuffFromEntity",
+      "subsystem": "buff-runtime",
+      "purpose": "Given a param packet {entityId, buffIndex, arg2, boolArg}, resolves the entity (FUN_111e09f0 -> table -> vtbl+0x14) and the CBuffInfo entry. If the entity is server-side (vtbl+100 nonzero) and the buff is server-controlled (CBuffInfo+0x420 != 0), it re-dispatches and calls FUN_114249e0(buffIndex) (server remove path). Always finally calls the entity buff-manager (buffMgr = entity+0x10) vtbl+0x54(arg2, boolArg!=0).",
+      "confidence": "medium",
+      "formulas": [
+        "CBuffInfo sparse lookup on param_1[1]=buffIndex",
+        "gate: if (isServer(vtbl+100) != 0 && *(entry+0x420) != 0) -> server buff handling FUN_114249e0(param_1[1])",
+        "final call: buffMgr.vtbl+0x54(param_1[2], (char)param_1[3] != 0)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (CBuffInfo+0x420 flag routes server-controlled buffs through server; +0x54 is the apply/toggle entrypoint)",
+      "notes": "CBuffInfo+0x420 recurs across this chunk as the 'server-authoritative buff' flag."
+    },
+    {
+      "address": "11260460",
+      "currentName": "FUN_11260460",
+      "proposedName": "CBuffSystem::BuildBuffInstanceFromInfo",
+      "subsystem": "buff-runtime",
+      "purpose": "Resolves a CBuffInfo entry by id (param_2) and constructs a buff-instance descriptor struct (local_a4..) with a fresh instance id (global counter DAT_11dfa3cc++), copying buffInfo+0x10 (buffId), buffInfo+0x10c and buffInfo+0x80 (magnitude/param fields), then submits it to the target's buff manager via (param_1+0x10) vtbl+0x40.",
+      "confidence": "medium",
+      "formulas": [
+        "instanceId = DAT_11dfa3cc++ (monotonic buff-instance counter)",
+        "descriptor: local_a0 = *(entry+0x10) [buffId], local_9c=0, local_98=1(state), local_96=*(entry+0x10c), local_92=*(entry+0x80), local_28=1",
+        "dispatch: buffMgr(param_1+0x10).vtbl+0x40(&descriptor)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (creates buff instance with magnitude/param from CBuffInfo)",
+      "notes": "CBuffInfo fields: +0x10 buffId, +0x80 and +0x10c = numeric params (magnitude / duration / type)."
+    },
+    {
+      "address": "11288e90",
+      "currentName": "CCliLogicBuffArea__OnLogicEntityEnter",
+      "proposedName": "CCliLogicBuffArea::OnLogicEntityEnter",
+      "subsystem": "buff-area",
+      "purpose": "Client-side logic buff-area callback when an entity enters. Appends the entity to the area's occupant vector (param_1+0x1b4/0x1b8). If the area is active (+0x168), this is the first occupant (occupant-bytes delta == 4), and no tick timer yet (+0x180 == -1), schedules a periodic tick at interval *(param_1+0x16c)*DAT_11de9a44 seconds (ms) with callback FUN_11288d90. Then optionally applies the area buff to the entity (FUN_111e0ab0 gate -> FUN_11415280) and always FUN_11415380.",
+      "confidence": "medium",
+      "formulas": [
+        "occupant append: *(param_1+0x1b4) grows by 4 (int entity id per slot)",
+        "tick interval = (int)(*(float*)(param_1+0x16c) * DAT_11de9a44)  [DAT_11de9a44 = 0.001f, so field is ms]",
+        "timer scheduled only when occupantBytes(&0xfffffffc)==4 (first entity) and +0x180==-1",
+        "buff apply gated by FUN_111e0ab0()"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (mirror of server-authoritative buff-area; server owns actual buff application)",
+      "notes": "param_1+0x16c = tick period (ms as float). Complements CLogicBuffArea::SetEnable (11415450)."
+    },
+    {
+      "address": "112b3650",
+      "currentName": "FUN_112b3650",
+      "proposedName": "CTalentActiveInfo::GetById",
+      "subsystem": "talent",
+      "purpose": "CInfoManager sparse-table lookup returning the CTalentActiveInfo entry for a talent id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only (static talent data lookup)",
+      "notes": "Active-talent definition table."
+    },
+    {
+      "address": "112b36a0",
+      "currentName": "FUN_112b36a0",
+      "proposedName": "CTalentActiveInfo::GetByListIndex",
+      "subsystem": "talent",
+      "purpose": "Dense-array accessor into CTalentActiveInfo manager list ((mgr+0x14)[index]).",
+      "confidence": "high",
+      "formulas": ["count = (*(mgr+0x18)-*(mgr+0x14))>>2; return list[index]"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Dense variant."
+    },
+    {
+      "address": "112b3a20",
+      "currentName": "FUN_112b3a20",
+      "proposedName": "CNewSkillInfo::FillSkillDisplay",
+      "subsystem": "skill",
+      "purpose": "Resolves a CNewSkillInfo entry by id (param_1) and fills an output struct (param_2): sets name (CPet::SetName on entry+0x88 icon/name, fallback empty), copies entry+0x48 -> out+0x10 and entry+0x54 -> out+0x2c, and calls FUN_100e5e40(entry+0x18). Returns 0 on success, 0xD5 (missing-skill) if not found.",
+      "confidence": "medium",
+      "formulas": [
+        "out+0x10 = *(entry+0x48); out+0x2c = *(entry+0x54); name from entry+0x88",
+        "error code 0xD5 = skill-not-found (matches schema missingSkillCode=0xD5)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI/display fill)",
+      "notes": "Confirms CNewSkillInfo offsets 0x48/0x54/0x88 from recovered schema."
+    },
+    {
+      "address": "112b3ca0",
+      "currentName": "FUN_112b3ca0",
+      "proposedName": "CTalentActiveInfo::GetTalentIdByIndexPlus1",
+      "subsystem": "talent",
+      "purpose": "Sparse lookup on (index+1) into CTalentActiveInfo; returns entry+0x14 (talentId) or -1. The +1 offset implies the list is 1-based / index 0 is reserved.",
+      "confidence": "medium",
+      "formulas": ["param+1 then sparse lookup; return *(entry+0x14) else 0xffffffff"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "entry+0x14 = talentId (matches schema)."
+    },
+    {
+      "address": "112b59d0",
+      "currentName": "FUN_112b59d0",
+      "proposedName": "CTalentInfo::FillTalentDisplay",
+      "subsystem": "talent",
+      "purpose": "Resolves a CTalentInfo entry by id (param_2) and fills an output struct (param_3): out+0xc = FUN_11742830() (current runtime talent obj?), out+0x10 = talentId param_2, out+0x18 = (FUN_1141d820(id)==0) bool (learnable/available flag). Sets names from entry+0x90 and entry+0x78 (fallback empty).",
+      "confidence": "medium",
+      "formulas": [
+        "out+0x10 = param_2 (talentId); out+0x18 = (FUN_1141d820(param_2)==0); names entry+0x90, entry+0x78"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI fill)",
+      "notes": "CTalentInfo offsets: +0x78 name, +0x90 name/desc."
+    },
+    {
+      "address": "112f0c40",
+      "currentName": "CPetSupportBuff__GetManagers",
+      "proposedName": "CPetSupportBuff::GetManager",
+      "subsystem": "pet-buff (info-manager singleton)",
+      "purpose": "Stock CInfoManager singleton accessor for CPetSupportBuff table; lazy-registers and returns manager, sentinel fallback DAT_12040c84.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (boilerplate)",
+      "notes": "Pet support-buff static data registry."
+    },
+    {
+      "address": "112f5190",
+      "currentName": "FUN_112f5190",
+      "proposedName": "CPetSkillInfo::HasNextLevel",
+      "subsystem": "pet-skill",
+      "purpose": "After building a lookup context (FUN_112fb460) and checking a precondition (FUN_1158d040), resolves a CPetSkillInfo entry by id (param_3) and returns CPetSkillInfo::HasNextLevelInList(param_3) (whether the pet skill can be upgraded further).",
+      "confidence": "medium",
+      "formulas": ["sparse lookup on 'CPetSkillInfo'; delegate to HasNextLevelInList(param_3)"],
+      "costs": [],
+      "serverRelevance": "validation (pet-skill upgrade availability)",
+      "notes": "Boolean result (byte)."
+    },
+    {
+      "address": "112f6120",
+      "currentName": "CPetSupportBuff__GetManagers_112f6120",
+      "proposedName": "CPetSupportBuff::GetSingleton",
+      "subsystem": "pet-buff",
+      "purpose": "Simplified singleton getter returning *DAT_12040b8c for CPetSupportBuff.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Boilerplate."
+    },
+    {
+      "address": "112f6f90",
+      "currentName": "FUN_112f6f90",
+      "proposedName": "CPetGiftSkillInfo::GetById",
+      "subsystem": "pet-skill",
+      "purpose": "CInfoManager sparse lookup returning a CPetGiftSkillInfo entry by id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Pet gift-skill static data."
+    },
+    {
+      "address": "112f7940",
+      "currentName": "FUN_112f7940",
+      "proposedName": "CPetSupportBuff::GetById",
+      "subsystem": "pet-buff",
+      "purpose": "CInfoManager sparse lookup returning a CPetSupportBuff entry by id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Pet support-buff lookup."
+    },
+    {
+      "address": "1139a9f0",
+      "currentName": "CLogicPlayer__IsRagePowerEnough",
+      "proposedName": "CLogicPlayer::IsRagePowerEnough",
+      "subsystem": "rage",
+      "purpose": "Checks whether the player has a rage weapon equipped and enough rage power to cast the given skill (param_1). Delegates the actual check to FUN_1139f0f0(skillId); if nonzero (ok) proceeds via FUN_115bcbf0(param_2); otherwise logs 'CLogicPlayer::IsRagePowerEnough skill[%d] rage not equip or rageinfo not exist' and reports via FUN_1139c980.",
+      "confidence": "medium",
+      "formulas": [
+        "ok = FUN_1139f0f0(skillId) != 0 -> FUN_115bcbf0(param_2); else formatted-error path"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (rage-cost / rage-weapon requirement gate before rage skill cast; server must own rage power)",
+      "notes": "Rage/bushido gauge system. FUN_1139f0f0 is the real rage-power-enough test worth chasing in another chunk."
+    },
+    {
+      "address": "113f9970",
+      "currentName": "FUN_113f9970",
+      "proposedName": "CEquipSkillInfo::GetById",
+      "subsystem": "skill-equip",
+      "purpose": "CInfoManager sparse lookup returning a CEquipSkillInfo entry by id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Equipment-skill static data."
+    },
+    {
+      "address": "11415450",
+      "currentName": "CLogicBuffArea__SetEnable",
+      "proposedName": "CLogicBuffArea::SetEnable",
+      "subsystem": "buff-area",
+      "purpose": "Enables/disables a logic buff-area. On enable, if the area has a positive lifetime (+0x5e as float > DAT_11de9890), it (re)schedules a one-shot expiry timer at lifetime*DAT_11de9a44 ms via FUN_100ea610 with callback FUN_11415260, storing the timer handle at +0x5f. On disable, cancels the timer and, if flag +0x6b set, notifies owner (owner=+0x3 vtbl+0x1c). Propagates enable state to a child object (vtbl+0xd8 -> vtbl+0xa4).",
+      "confidence": "medium",
+      "formulas": [
+        "enabled flag stored at *(byte*)(param_1+0x58)",
+        "lifetime gate: DAT_11de9890 < (float)*(param_1+0x5e)  [DAT_11de9890 ~ small epsilon/0]",
+        "expiry delay = (float)*(param_1+0x5e) * DAT_11de9a44  [ms; DAT_11de9a44 = 0.001? actually here used as *seconds->ms multiplier]",
+        "timer handle at param_1+0x5f (-1 = none)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff-area lifetime/expiry timer; area at +0x5e duration)",
+      "notes": "param_1+0x5e = area duration, +0x5f = expiry timer id, +0x58 = enabled, +0x6b = notify-owner flag."
+    },
+    {
+      "address": "1141bef0",
+      "currentName": "FUN_1141bef0",
+      "proposedName": "CBuffBase::OnConditionChange",
+      "subsystem": "buff-runtime",
+      "purpose": "Handles a change in a buff's activation condition. If the buff is in an error/guard state (+0x3d), rate-limits an error log 'CBuffBase_OnConditionChange' (counter DAT_11dfa438 starts 10, decrements). Otherwise checks current condition state (FUN_115d3de0) vs the stored active flag (*(+0x48)+4): if condition now false but was active -> deactivate (FUN_115d2990(1)) and optionally notify owner (buffMgr vtbl+0x10(this,0)); if condition now true but was inactive -> activate (FUN_115d2a50) and notify owner (vtbl+0x10(this,1)).",
+      "confidence": "medium",
+      "formulas": [
+        "error-log rate limiter: DAT_11dfa438 init 10, --each, suppress when <1",
+        "active flag = *(*(param_1+0x48)+4); param_2 = 'notify' bool",
+        "activate -> owner.vtbl+0x10(this, 1); deactivate -> owner.vtbl+0x10(this, 0)",
+        "owner obtained via *(param_1+0x44)+0x10"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (conditional-buff enable/disable transitions)",
+      "notes": "Conditional buffs (active only while a condition holds). param_1+0x44 = buff-system backref, +0x48 = condition state obj, +0x3d = guard flag."
+    },
+    {
+      "address": "1141c350",
+      "currentName": "CBuffBase___AddTimer",
+      "proposedName": "CBuffBase::_AddTimer",
+      "subsystem": "buff-duration",
+      "purpose": "Arms a buff's duration/expiry timer (param_2 = duration in ms). If the buff is server-controlled (buffInfo+0x420 != 0), it just records expiry wall-clock and server-tick without scheduling a local timer. Otherwise (client-owned, timer slot +0x24 == -1) it schedules a periodic scheduler tick, accounting for the tick granularity (1000/tickRate).",
+      "confidence": "medium",
+      "formulas": [
+        "guard: only if *(param_1+0x34)=='\\0' (not already timed) and param_2!=0",
+        "wall expiry: *(DWORD*)(param_1+0x1c) = GetTickCount() + duration; server-tick expiry: *(param_1+0x20) = duration/1000 + serverTick(iVar2)",
+        "server-buff path (*(bufObj+0x420)!=0): set +0x1c and +0x20 as above, return (no local timer)",
+        "client path (+0x24 == -1): tickRate = vtbl+8(); step = 1000/tickRate; timerArg = step + duration; schedule FUN_10a127d0('CBuffBase::_AddTimer', timerArg, 1, this, FUN_1141c470); on success store handle +0x24, and +0x1c = step + tick + duration, +0x20 = timerArg/1000 + serverTick"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff duration expiry; server-controlled buffs bypass local timer). Struct: buff+0x1c = wall-clock expiry (ms), +0x20 = server-tick expiry, +0x24 = local timer handle, +0x34 = timed flag, +0x40 = buffInfo ptr, +0x44 = buff-system",
+      "notes": "buffInfo+0x420 flag again gates server vs client timing. Key for reproducing buff-duration accounting."
+    },
+    {
+      "address": "1141c960",
+      "currentName": "FUN_1141c960",
+      "proposedName": "CNewSkillInfo::ValidateSkillOwner",
+      "subsystem": "skill-learn",
+      "purpose": "Validates that skill id (param_2) belongs to weapon/category param_1: resolves CNewSkillInfo entry, if entry+0x40 (skill's owner/effect category) != param_1 returns 0xE3 (wrong owner). Otherwise delegates to FUN_1141dac0(param_2) (the full learn-prereq check). Returns 0xD5 if entry not found.",
+      "confidence": "medium",
+      "formulas": [
+        "if param_1 != *(entry+0x40) return 0xE3; else return FUN_1141dac0(param_2)",
+        "error codes: 0xE3 wrong-owner, 0xD5 not-found"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (skill-learn eligibility). CNewSkillInfo+0x40 = owner/effect id (schema effectId)",
+      "notes": "Feeds the learn pipeline; 0xE3 joins the skill error-code family (0xD5,0xE1,0xE2,0xE3)."
+    },
+    {
+      "address": "1141cf80",
+      "currentName": "FUN_1141cf80",
+      "proposedName": "CTalentInfo::GetByListIndex",
+      "subsystem": "talent",
+      "purpose": "Dense-array accessor into CTalentInfo manager list ((mgr+0x14)[index]).",
+      "confidence": "high",
+      "formulas": ["count = (*(mgr+0x18)-*(mgr+0x14))>>2"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Dense variant of CTalentInfo lookup."
+    },
+    {
+      "address": "1141d020",
+      "currentName": "FUN_1141d020",
+      "proposedName": "CTalentActiveInfo::CheckLevelRequirement",
+      "subsystem": "talent",
+      "purpose": "Checks whether the player can use an active talent (index param_2, looked up at index+1). Resolves the player's active-role object (via *param_1 chain, vtbl+0xa8 must be 0 = not disabled, then vtbl+0x46c to get level provider, vtbl+0x18 = current level). Returns 0 if level >= talent requirement (entry+0x14); 0xE6 if under-level; 0xCA if role invalid; 0xD6 if talent not found.",
+      "confidence": "medium",
+      "formulas": [
+        "playerLevel = provider.vtbl+0x18(); requirement = *(entry+0x14)",
+        "if playerLevel < requirement -> 0xE6 (under level); else 0 (ok)",
+        "error codes: 0xE6 under-level, 0xCA invalid-role, 0xD6 not-found"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (talent level gating). CTalentActiveInfo+0x14 doubles as level requirement here (vs talentId elsewhere — likely +0x14 is a level field for the *Active* record)",
+      "notes": "Note offset 0x14 semantics differ between CTalentActiveInfo callers; here it is a level threshold."
+    },
+    {
+      "address": "1141d4a0",
+      "currentName": "FUN_1141d4a0",
+      "proposedName": "CTalentInfo::EquipTalent",
+      "subsystem": "talent",
+      "purpose": "Equips/activates a talent (param_2) in a slot (param_3). Rejects if player is in a disabled state (vtbl+0xa8 != 0 -> 0xCC). Resolves CTalentInfo entry; verifies the talent's class/tree (entry+0x44) matches the player's current class (vtbl+0x294). Removes any previously-granted buff (FUN_1141df30 -> buffMgr vtbl+0x44 remove, type 0x10), then records the equip (FUN_1157a340), and pushes the new talent state (vtbl+0x30 with FUN_1157a720 level). Returns 0 on success, 0xD2 not-found, 0xCC disabled.",
+      "confidence": "medium",
+      "formulas": [
+        "class match: player.vtbl+0x294() == *(entry+0x44)  (entry+0x44 = talent class/tree id)",
+        "remove old buff: id=FUN_1141df30(param_2); buffMgr.vtbl+0x44(0, id, 0, 1, 0x10)",
+        "error codes: 0xCC disabled/in-combat, 0xD2 not-found"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (talent equip mutation; class-tree validation). CTalentInfo+0x44 = class/tree id",
+      "notes": "type-arg 0x10 = talent-buff removal channel. Complements EquipTalent-level 1141d640."
+    },
+    {
+      "address": "1141d640",
+      "currentName": "FUN_1141d640",
+      "proposedName": "CTalentInfo::LearnTalentLevel",
+      "subsystem": "talent",
+      "purpose": "Learns/upgrades a talent (param_2) by one level. Rejects if disabled (0xCC). Reads current level (FUN_1157a720); if already >0 returns 0xDC (already learned/maxed). Bumps to level = cur+1 (FUN_1157a380 stores), records via vtbl+0x2c, builds a talent-change event packet (msg 0x6ac, {..., talentId, newLevel}) via FUN_1157c850/FUN_1157df40, resolves runtime talent (FUN_117427f0). If active (FUN_1157a850) and class matches, removes prior buff and re-applies (buffMgr vtbl+0x44). Finally fires vtbl+0x20(entry+0x44 class, entry+0x10, entry+0x14). Success 0; 0xD3 apply-fail; 0xD2 not-found; 0xDC already; 0xCC disabled.",
+      "confidence": "medium",
+      "formulas": [
+        "curLevel = FUN_1157a720(param_2); if curLevel > 0 return 0xDC",
+        "newLevel = curLevel + 1; store FUN_1157a380(param_2, newLevel)",
+        "event packet msgId = 0x6ac, fields {0x6ac, -1, -1, talentId=param_2, newLevel}",
+        "final broadcast vtbl+0x20(*(entry+0x44), *(entry+0x10), *(entry+0x14))",
+        "error codes: 0xDC already-learned, 0xD3 runtime-fail, 0xD2 not-found, 0xCC disabled"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (talent learn/level-up mutation + 0x6ac change packet). CTalentInfo: +0x10, +0x14 (params), +0x44 class, +0x54 buff/skill id",
+      "notes": "The 0x6ac talent-change opcode is a good server-message anchor."
+    },
+    {
+      "address": "1141dac0",
+      "currentName": "FUN_1141dac0",
+      "proposedName": "CNewSkillInfo::CheckLearnPrereq",
+      "subsystem": "skill-learn",
+      "purpose": "Full prerequisite check for learning a weapon skill (param_2). Resolves entry, gets player level (role provider vtbl+0x46c -> vtbl+0x18). If entry+0x48 (required level) nonzero and playerLevel < it -> 0xE1 (under level). If entry+0x4c (prereq skill/condition id) nonzero and FUN_114e0340(that)==false -> 0xE2 (prereq unmet). Returns 0 ok, 0xCA invalid-role, 0xD5 not-found.",
+      "confidence": "high",
+      "formulas": [
+        "if *(entry+0x48)!=0 && playerLevel < *(entry+0x48) -> 0xE1",
+        "if *(entry+0x4c)!=0 && !FUN_114e0340(*(entry+0x4c)) -> 0xE2",
+        "error codes: 0xE1 under-level, 0xE2 prereq-unmet, 0xCA invalid-role, 0xD5 not-found"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (skill-learn gating). CNewSkillInfo+0x48 = required level, +0x4c = prerequisite id",
+      "notes": "Fills in schema field48 (=required level) and adds +0x4c prereq. Called by 1141c960."
+    },
+    {
+      "address": "1141dcb0",
+      "currentName": "FUN_1141dcb0",
+      "proposedName": "CTalentInfo::ResetAllTalentBuffs",
+      "subsystem": "talent",
+      "purpose": "On some transition (class-change / respec), iterates all CTalentInfo rows and, for talents whose class (+0x44) matches the player's current class field (param_1+6), removes their granted buff (entry+0x54) via buffMgr vtbl+0x44 (type 0x10). Guarded by: player enabled (vtbl+0xa8==0), a subsystem present (obj+3), a flag (vtbl+0x168), current class level < 0xD, and a talent-manager present (obj[0xabd]), plus a state check (vtbl+0x10 != 1).",
+      "confidence": "low",
+      "formulas": [
+        "class level gate: player.vtbl+0x294() < 0xD",
+        "for each CTalentInfo row: if *(entry+0x44) == param_1[6] -> buffMgr.vtbl+0x44(0, *(entry+0x54), 0, 1, 0x10)",
+        "row count via manager vtbl+0x28"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (bulk talent-buff clear on respec/class change). CTalentInfo+0x54 = granted buff id",
+      "notes": "0xD class-level ceiling and player+6 = current class id."
+    },
+    {
+      "address": "1141df30",
+      "currentName": "FUN_1141df30",
+      "proposedName": "CTalentInfo::GetGrantedBuffId",
+      "subsystem": "talent",
+      "purpose": "For a learned talent (param_1), resolves its CTalentInfo entry, reads the equipped/learned level (FUN_1157a720), resolves the runtime talent record (FUN_117427f0) and returns its granted buff id (record+0x54). Returns 0 if talent id 0 / not found / not learned.",
+      "confidence": "medium",
+      "formulas": [
+        "level = FUN_1157a720(param_1); if 0 return 0; rt = FUN_117427f0(level); return *(rt+0x54)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (resolves the buff a talent grants). +0x54 = buff id",
+      "notes": "Used by EquipTalent/LearnTalentLevel to add/remove the correct buff."
+    },
+    {
+      "address": "1141e3c0",
+      "currentName": "FUN_1141e3c0",
+      "proposedName": "CNewSkillInfo::AutoAssignWeaponSkillSlot",
+      "subsystem": "skill-slot",
+      "purpose": "Assigns a default skill into a weapon skill slot (param_3 = slot index < 0xD) for weapon side param_2 (0 or 1). Checks the slot-open gate (talent-mgr obj[0xabd] vtbl+0x10(slot) returns 0 or 1 = openable). Selects a base pointer per side (param_1+0x14 for side0, +0x3b for side1) with per-slot stride 0xD ints. If slot already populated (any of the 'iVar3' stride-scan entries nonzero) returns without change. Otherwise resolves the default skill via FUN_11679c30/FUN_1169ebe0(slot) -> CNewSkillInfo entry and writes entry+0x14 (skill level/id) into the slot.",
+      "confidence": "low",
+      "formulas": [
+        "slot gate index < 0xD (weaponSlotMax=0x0D from schema)",
+        "side0 base = param_1+0x14, side1 base = param_1+0x3b; slot record stride = 0xD ints (0x34 bytes)",
+        "scan count = 3 (side0) / 2 (side1); if any occupied -> abort",
+        "assigned value = *(CNewSkillInfo entry + 0x14)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (skill slot population). Slot stride 0xD ints matches display record stride 0x4C? no — this is the runtime slot array",
+      "notes": "Ties CNewSkillInfo+0x14 (level) into player weapon-skill slots; weaponSlotMax 0xD confirmed."
+    },
+    {
+      "address": "114249e0",
+      "currentName": "FUN_114249e0",
+      "proposedName": "CBuffSystem::OnServerBuffRemoved",
+      "subsystem": "buff-runtime",
+      "purpose": "Server-buff removal notification: resolves CBuffInfo entry by id (param_2); if entry valid and the target has an active state (param_1+0x3c != 0), and the currently-tracked buff (FUN_1141bd30) equals param_2, triggers FUN_1139d4a0 (state/UI refresh, e.g. clearing the current-buff indicator).",
+      "confidence": "low",
+      "formulas": [
+        "if FUN_1141bd30() == param_2 -> FUN_1139d4a0()",
+        "guard: *(param_1+0x3c) != 0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server-controlled buff removal hook)",
+      "notes": "Called from 1124a0c0 and 11473aa0 server paths."
+    },
+    {
+      "address": "11424f30",
+      "currentName": "FUN_11424f30",
+      "proposedName": "CBuffIconPair::Init",
+      "subsystem": "buff-ui",
+      "purpose": "Initializes a two-slot buff descriptor object (e.g. a stacking/paired buff display). Clears fields, then for param_2>0 resolves CBuffInfo entry storing entry+0x420 (server flag) at obj[7], the entry ptr at obj[9], and param_3 (level/source) at obj[8]. Repeats for param_4>0 into obj[0xc]/obj[10]/obj[0xb]. If first buff set, calls FUN_11473320(source, buffInfo, 0, 0, uVar3) where uVar3 = 6 if owner-type (vtbl+0xa8)==0xb else 5.",
+      "confidence": "low",
+      "formulas": [
+        "obj[7] = *(entry1+0x420) [server flag], obj[9] = entry1, obj[8] = param_3",
+        "obj[10] = *(entry2+0x420), obj[0xc] = entry2, obj[0xb] = param_5",
+        "add-type uVar3 = (ownerType==0xb) ? 6 : 5"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (display pairing) though it calls the buff-apply FUN_11473320",
+      "notes": "ownerType 0xb likely a specific entity class (pet/monster)."
+    },
+    {
+      "address": "1143dab0",
+      "currentName": "FUN_1143dab0",
+      "proposedName": "CBuffArea::ApplyAreaBuffsToTarget",
+      "subsystem": "buff-area",
+      "purpose": "Applies a set of up to 10 buffs defined on an area/effect descriptor (param_2) to a resolved target. Locates target's buff manager (via param_1[3]+0x90 lookup by key vtbl+0x1d4). Iterates 10 candidate buff ids stored at param_2+0x25.. (float-encoded ids), validates each against CBuffInfo, and adds it via buffMgr vtbl+0x44(sourceId=param_2[0x16], buffId, 0, removeFlag=(param_2[0x24]==0), type=0xb). Also does a pre-step effect refresh (vtbl+0xd8/0xb8) when *param_2 > epsilon.",
+      "confidence": "low",
+      "formulas": [
+        "buff id list: 10 floats starting at param_2+0x25 (pfVar7); nonzero => apply",
+        "apply: buffMgr.vtbl+0x44(param_2[0x16], (int)buffId, 0, *(char*)(param_2+0x24)=='\\0', 0xB)",
+        "gate DAT_11de9890 < *param_2 for the effect-refresh branch"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (area applies buffs to entities). Add-type 0xB = area-buff channel; param_2+0x24 = persist-vs-remove flag; +0x16 = source id",
+      "notes": "10-entry buff array on the area descriptor. Matches CBuffArea/logic-buff-area family."
+    },
+    {
+      "address": "1143f020",
+      "currentName": "FUN_1143f020",
+      "proposedName": "CBuffFilter::ResolveAddWithFilter",
+      "subsystem": "buff-filter",
+      "purpose": "Applies a buff (param_2 source, param_3 buffId) but first runs it through CBuffFilterInfo, which can redirect the buff id based on the target's type (vtbl+0xa8). If a filter entry exists: type1 -> use +0x14, type0 -> +0x18, type8 -> +0x1c; if the mapped value is 0 the branch falls through to add the original. Adds via buffMgr vtbl+0x44(param_2, resolvedId, 0, 1, 0x2d) and returns handle in *param_4.",
+      "confidence": "medium",
+      "formulas": [
+        "CBuffFilterInfo lookup by param_3; redirect: (targetType==1 -> +0x14) else (targetType==0 -> +0x18) else (targetType==8 -> +0x1c); if 8 and +0x1c==0 abort",
+        "add: buffMgr.vtbl+0x44(param_2, resolvedBuffId, 0, 1, 0x2d)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff redirection by target class; abnormal-status relation mapping). Add-type 0x2d. CBuffFilterInfo: +0x14/+0x18/+0x1c = per-target-type substitute buff ids",
+      "notes": "This is the abnormal-status/target-class buff substitution table — important for status relations."
+    },
+    {
+      "address": "1143f250",
+      "currentName": "FUN_1143f250",
+      "proposedName": "CBuffFilter::RemoveWithFilter",
+      "subsystem": "buff-filter",
+      "purpose": "Removes a buff (param_2) applying the same CBuffFilterInfo target-type redirection as 1143f020 (type1->+0x14, type0->+0x18, type8->+0x1c). If a filter mapping resolves, removes the mapped id via buffMgr vtbl+0x4c(id,1) and returns 1. If no filter and param_3(force)==0, removes param_2 directly (vtbl+0x4c). If force set, expands via FUN_104fd710/FUN_116a7450 into 2 related buff ids and removes each via vtbl+0x58.",
+      "confidence": "medium",
+      "formulas": [
+        "same target-type redirect as 1143f020",
+        "remove one: buffMgr.vtbl+0x4c(id, 1)",
+        "force-remove group: FUN_116a7450(local_c, 2) then for i in 0..2: buffMgr.vtbl+0x58(local_c[i], 1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (filtered buff removal / abnormal-status clearing)",
+      "notes": "Pairs with 1143f020. vtbl+0x4c = remove-one, +0x58 = remove-related."
+    },
+    {
+      "address": "1143f360",
+      "currentName": "FUN_1143f360",
+      "proposedName": "CBuffFilterInfo::GetById",
+      "subsystem": "buff-filter",
+      "purpose": "CInfoManager sparse lookup returning a CBuffFilterInfo entry by id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only (data lookup)",
+      "notes": "Buff-filter/redirect static data."
+    },
+    {
+      "address": "11441be0",
+      "currentName": "FUN_11441be0",
+      "proposedName": "CBuffSystem::ClearBuffSlot",
+      "subsystem": "buff-runtime",
+      "purpose": "Given a buff id (param_2), resolves CBuffInfo, reads its slot index (entry+0x424); if != -1, clears the player's buff-slot array entry at param_1+0x14 + slot*4 (sets to 0).",
+      "confidence": "high",
+      "formulas": [
+        "slot = *(entry+0x424); if slot != -1: *(param_1 + 0x14 + slot*4) = 0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff-slot bookkeeping). CBuffInfo+0x424 = fixed UI/logic slot index (-1 = none)",
+      "notes": "Confirms CBuffInfo+0x424 = slot index; +0x420 = server flag. Player buff-slot array base at this+0x14."
+    },
+    {
+      "address": "1145f260",
+      "currentName": "FUN_1145f260",
+      "proposedName": "CGuildSkillInfo::GetByLevelAndId",
+      "subsystem": "skill-guild",
+      "purpose": "Composite-key lookup into CGuildSkillInfo: key = param_1*100 + param_2 (level*100 + skillId), then CInfoManager sparse lookup.",
+      "confidence": "high",
+      "formulas": ["key = param_1 * 100 + param_2; standard sparse lookup on key"],
+      "costs": [],
+      "serverRelevance": "client-only (data lookup)",
+      "notes": "The *100 encoding means guild-skill ids are packed as level*100+id."
+    },
+    {
+      "address": "1145f2c0",
+      "currentName": "FUN_1145f2c0",
+      "proposedName": "CGuildSkillInfo::GetById",
+      "subsystem": "skill-guild",
+      "purpose": "CInfoManager sparse lookup returning a CGuildSkillInfo entry by id.",
+      "confidence": "high",
+      "formulas": ["standard sparse lookup"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Guild-skill static data."
+    },
+    {
+      "address": "11465310",
+      "currentName": "FUN_11465310",
+      "proposedName": "CEquipRandPassiveSkillActivateSetInfo::CheckSetActivation",
+      "subsystem": "skill-passive-equip",
+      "purpose": "Evaluates whether an equipment random-passive-skill activation SET is satisfied. Skips if state (*param_3==1). Resolves the set entry (via param_3[5]=setId), gets its rule list at entry+0x2c (begin/end at +0x10/+0x14) and iterates each rule object, dispatching a per-rule check (rule.vtbl+0x10 -> handler FUN_11562d00 -> vtbl+0xc(param_2, rule, param_3, this+0xc)). Returns 0 as soon as any rule fails, 1 if all pass.",
+      "confidence": "medium",
+      "formulas": [
+        "setId = param_3[5]; rule list at *(setEntry+0x2c)+0x10 .. +0x14",
+        "per-rule: handler = FUN_11562d00(rule.vtbl+0x10()); ok = handler.vtbl+0xc(param_2, rule, param_3, *(this+0xc)); if !ok return 0"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (equip set/random-passive activation eligibility). Matches schema CEquipRandPassiveSkillActivateSetInfo",
+      "notes": "Confirms rule list at +0x2c -> {+0x10,+0x14} for the activate-set."
+    },
+    {
+      "address": "114733f0",
+      "currentName": "FUN_114733f0",
+      "proposedName": "CBuffSystem::ApplyBuffPacket",
+      "subsystem": "buff-runtime",
+      "purpose": "Applies a buff from a network/event descriptor (param_2). Resolves CBuffInfo by param_2[1]. If target is server-side and buff is server-controlled (buffInfo+0x420 != 0), routes to server (builds a debug name via FUN_1083ded0 with DAT_11d9e0b4 format, then FUN_11424c80). Otherwise builds a local buff-apply structure (FUN_11472cb0 with fields from the descriptor: level *(short)(param_2+6)/+0x16 count, params +0xe/+0x12, flags +0x7d/+0x7f, ptr +0x81) and adds it via FUN_11612920/FUN_11612230 -> FUN_11475fb0 (OnAddBuff).",
+      "confidence": "low",
+      "formulas": [
+        "buffInfo lookup on param_2[1]; server gate: isServer(vtbl+100) && *(entry+0x420)!=0",
+        "descriptor fields: param_2[0]=?, [1]=buffId, [2]=source; +0x16=short stack/count, +0x7d=ushort, +0x7f=ushort, +0x81=extra ptr",
+        "FUN_11472cb0((short)param_2[3], *(param_2+0xe), *(param_2+0x12), overridesPtr, *(param_2+0x7f), param_2+0x81)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff application entry from packet). CBuffInfo+0x420 server flag gate",
+      "notes": "Sibling of 114736a0; this variant is descriptor-driven."
+    },
+    {
+      "address": "114736a0",
+      "currentName": "FUN_114736a0",
+      "proposedName": "CBuffSystem::AddBuff",
+      "subsystem": "buff-runtime",
+      "purpose": "Primary AddBuff entrypoint (string 'CBuffSystem_AddBuff'). Maps input buff id param_3 to an effective id via FUN_117d60c0(param_3, ownerType) then FUN_104fd710. If a suppression flag from owner (vtbl+0x174) is set, forces param_5=0. Builds a message-region check (msgId 0x1fb) to see if the buff is allowed in the current region; if blocked sets error 0x65. If buff not server-controlled (buffInfo+0x420==0), applies directly via FUN_11473320(target, buffInfo, param_4, flag, param_6). Otherwise server path (debug name + FUN_11424c80 + FUN_11472cb0 with buffInfo+0x10c/+0x80 + FUN_11579b90/FUN_11579c00).",
+      "confidence": "low",
+      "formulas": [
+        "effectiveBuffId = FUN_104fd710(FUN_117d60c0(param_3, ownerType))",
+        "region check msgId 0x1fb; if disallowed (local_6c==0) -> error code 0x65 stored at param_1[0x116]",
+        "direct apply: FUN_11473320(target, buffInfo, param_4, param_5flag, param_6)",
+        "server apply: FUN_11472cb0(1, *(buffInfo+0x10c), *(buffInfo+0x80), param_4, 0, 0)",
+        "rate-limited error log DAT_11dfa5b4 (init 10)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (the buff-add pipeline; owner suppression flag vtbl+0x174; region-gated). error 0x65 = buff-not-allowed-here",
+      "notes": "param_1[0x116] holds a result/error code. CBuffInfo+0x10c and +0x80 are the numeric params passed to the builder."
+    },
+    {
+      "address": "114739b0",
+      "currentName": "FUN_114739b0",
+      "proposedName": "CBuffSystem::ConflictCheck",
+      "subsystem": "buff-stacking",
+      "purpose": "Checks whether adding a buff (param_1 = buff id) would conflict with existing buffs. Resolves CBuffInfo, then delegates to FUN_11475300(buffInfo, &outFlag) which performs the actual conflict/priority test. Rate-limits an error log 'CBuffSystem_ConflictCheck' (DAT_11dfa5b0 init 10) when the id is invalid.",
+      "confidence": "medium",
+      "formulas": [
+        "result = FUN_11475300(buffInfo, &local(0)) (bool byte)",
+        "invalid-id log limiter DAT_11dfa5b0 init 10"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff conflict/stacking rule). FUN_11475300 is the core conflict evaluator (chase in another chunk)",
+      "notes": "Directly relevant to buff stacking/abnormal-status priority."
+    },
+    {
+      "address": "11473aa0",
+      "currentName": "FUN_11473aa0",
+      "proposedName": "CBuffSystem::RemoveBuff",
+      "subsystem": "buff-runtime",
+      "purpose": "Removes a buff. Maps input id (param_2) via FUN_117d60c0(param_2, ownerType) then resolves CBuffInfo. If target server-side and buff server-controlled (+0x420!=0), takes server path (FUN_114249e0 then builds a remove descriptor and FUN_1141b890/FUN_1141ba70 via manager vtbl+8). Otherwise removes locally via FUN_11475450(buffInfo+0x44, 1, buffInfo+0x10, param_3). Returns 0 ok, -1 if id invalid.",
+      "confidence": "low",
+      "formulas": [
+        "effectiveId = FUN_117d60c0(param_2, ownerType)",
+        "server gate: isServer && *(entry+0x420)!=0",
+        "local remove: FUN_11475450(*(entry+0x44), 1, *(entry+0x10), param_3)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff removal). entry+0x44 = category/owner, +0x10 = buffId",
+      "notes": "Mirror of AddBuff; +0x420 gate recurs."
+    },
+    {
+      "address": "114744f0",
+      "currentName": "FUN_114744f0",
+      "proposedName": "CBuffSystem::GetCountByTypeID",
+      "subsystem": "buff-query",
+      "purpose": "Validates buff id (param_1) against CBuffInfo, then returns the active count for that buff type via FUN_11612a80(param_1). Rate-limits error log 'CBuffSystem_GetCountByTypeID' (DAT_11dfa5bc init 10) on invalid id; returns -1 on failure.",
+      "confidence": "high",
+      "formulas": ["return FUN_11612a80(param_1) if valid, else 0xffffffff"],
+      "costs": [],
+      "serverRelevance": "validation/query (how many stacks of a buff type are active)",
+      "notes": "Used for stack-count based mechanics."
+    },
+    {
+      "address": "11475fb0",
+      "currentName": "FUN_11475fb0",
+      "proposedName": "CBuffSystem::OnAddBuff",
+      "subsystem": "buff-runtime",
+      "purpose": "Post-add hook. Only acts for buff phase/state == 2 (param_1+4). If the buff object flags an error (+0x3c), rate-limits an 'CBuffSystem_OnAddBuff' log (DAT_11dfa5b8 init 10). Otherwise fires a pre-add event (msgId 0x1fa), calls manager vtbl+0x24 (register), computes a follow-up value (FUN_1141bcc0, or FUN_11476490(buff) when param_3==0), commits via FUN_1141bbe0, invokes manager vtbl+0x14 (activate), and fires a post-add event (msgId 0x1f8).",
+      "confidence": "low",
+      "formulas": [
+        "only when *(param_1+4)==2",
+        "pre-event msgId 0x1fa (fields {0x1fa,-1,-1,buff}); post-event msgId 0x1f8",
+        "value = (param_3=='\\0') ? FUN_11476490(buff) : FUN_1141bcc0()"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (buff-added lifecycle events 0x1fa/0x1f8)",
+      "notes": "Event opcodes 0x1f8/0x1fa/0x1fb bracket the add flow."
+    },
+    {
+      "address": "114d75f0",
+      "currentName": "FUN_114d75f0",
+      "proposedName": "CPlayerGaugeMgr::AddPoison",
+      "subsystem": "abnormal-status-gauge",
+      "purpose": "Accumulates a status gauge (poison-type) and, when the running total (base FUN_1025b060 + param_2 delta) reaches the current threshold (FUN_1134d820), applies the associated CBuffInfo buff. Reads the current threshold's buff id (FUN_1134d720), validates CBuffInfo, and if buff is NOT server-controlled (+0x420==0) applies it locally via buffMgr vtbl+0x44(0, buffId, 0, 0, type=4). Advances gauge state via FUN_113b5640.",
+      "confidence": "medium",
+      "formulas": [
+        "total = FUN_1025b060() + param_2; if total >= threshold(FUN_1134d820()) -> resolve buff id FUN_1134d720()",
+        "apply if *(entry+0x420)==0: buffMgr.vtbl+0x44(0, buffId, 0, 0, 4); reset local_1c=0",
+        "add-type 4 = status-gauge-triggered buff"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (abnormal-status buildup -> proc). One of a family of near-identical gauge handlers (poison/para/sleep/blast/piyo). Add-type 4",
+      "notes": "The FUN_1134d820/720 pair = current threshold / current buff id for this gauge. _itoa builds a debug numeric string."
+    },
+    {
+      "address": "114d7700",
+      "currentName": "FUN_114d7700",
+      "proposedName": "CPlayerGaugeMgr::AddParalysis",
+      "subsystem": "abnormal-status-gauge",
+      "purpose": "Identical gauge-accumulate-and-proc logic to 114d75f0 but for a second status type (paralysis), using threshold FUN_11351760 / buff-id FUN_11351740 and advance FUN_113b5d80. Applies buff via add-type 4 when not server-controlled.",
+      "confidence": "medium",
+      "formulas": [
+        "total = FUN_1025b060()+param_2 >= FUN_11351760(); buffId = FUN_11351740(); buffMgr.vtbl+0x44(0,buffId,0,0,4) if +0x420==0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Gauge family member (para)."
+    },
+    {
+      "address": "114d7810",
+      "currentName": "CPlayerSPMgr__AddPiyo",
+      "proposedName": "CPlayerSPMgr::AddPiyo",
+      "subsystem": "abnormal-status-gauge",
+      "purpose": "Adds to the stun/piyo (dizzy) gauge. When total >= threshold (FUN_113520d0), resolves the piyo buff (FUN_11351fd0 id) and applies it (add-type 4) if not server-controlled. Manages a stun-timer list at param_1+0x20..0x24 (pairs of {kind=1, timerHandle}): if gauge drained (total<1) removes the active stun entry (cancel timer FUN_100ea6a0, memmove-compact the vector); if gauge active and no entry exists, schedules a 1000ms stun-duration timer (FUN_100ea610 -> FUN_114d82d0) and pushes {1, handle}.",
+      "confidence": "medium",
+      "formulas": [
+        "total = FUN_1025b060()+param_2; threshold FUN_113520d0(); buff id FUN_11351fd0(); add-type 4",
+        "stun duration timer = 1000 ms (FUN_100ea610('CPlayerSPMgr::AddPiyo', 1000, 0, this, FUN_114d82d0, 0))",
+        "stun list entries stride 8 bytes {int kind==1, int timerHandle} at [0x20,0x24), capacity end [0x28]",
+        "on drain (total<1): cancel timer + remove entry; on proc (total>=1, none present): add entry"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (stun/piyo status gauge + 1000ms stun duration)",
+      "notes": "Confirms piyo stun lasts 1000ms and uses the same add-type 4 buff-proc channel."
+    },
+    {
+      "address": "114d7a00",
+      "currentName": "FUN_114d7a00",
+      "proposedName": "CPlayerGaugeMgr::AddSleep",
+      "subsystem": "abnormal-status-gauge",
+      "purpose": "Gauge-accumulate-and-proc for another status type (sleep), threshold FUN_11352650 / buff-id FUN_11352570, advance FUN_113b6010. Add-type 4 when not server-controlled.",
+      "confidence": "medium",
+      "formulas": ["total>=FUN_11352650(); buffId=FUN_11352570(); buffMgr.vtbl+0x44(0,buffId,0,0,4) if +0x420==0"],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Gauge family member."
+    },
+    {
+      "address": "114d7b10",
+      "currentName": "FUN_114d7b10",
+      "proposedName": "CPlayerGaugeMgr::AddBlast",
+      "subsystem": "abnormal-status-gauge",
+      "purpose": "Gauge-accumulate-and-proc for a fifth status type (blastblight/other), threshold FUN_11353880 / buff-id FUN_11353860, advance FUN_113b6530. Add-type 4 when not server-controlled.",
+      "confidence": "medium",
+      "formulas": ["total>=FUN_11353880(); buffId=FUN_11353860(); buffMgr.vtbl+0x44(0,buffId,0,0,4) if +0x420==0"],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Gauge family member; the five (114d75f0/7700/7810/7a00/7b10) map to the five abnormal-status gauges."
+    },
+    {
+      "address": "114da6b0",
+      "currentName": "FUN_114da6b0",
+      "proposedName": "CBuffSystem::TriggerBuffAndBroadcast",
+      "subsystem": "buff-runtime",
+      "purpose": "Resolves a buff id from source/target context (FUN_117eb840 given caster type flags: PvP flag FUN_11463d90 or vtbl+0x30 hostility check, and self-cast flag param_1[0x11]==1) and applies it. If FUN_116a78d0(0x24) gate is false, applies the buff to the primary target (vtbl+0x44 type 0x20) and builds a debug string (skill name via FUN_114daf10(buffInfo+0x14), caster name). If gate true, iterates all entities in an area/party list (FUN_113a5930/58c0/58d0 iterator), applying the buff (type 0x20) to each and sending a per-target event (msgId 0x204).",
+      "confidence": "low",
+      "formulas": [
+        "buffId = FUN_117eb840(param_1[0x13], pvpFlag, selfCastFlag)",
+        "selfCastFlag = (param_1[0x11]==1); pvpFlag from FUN_11463d90 or target-hostility vtbl+0x30",
+        "add-type 0x20 = skill-triggered buff channel; per-target event msgId 0x204",
+        "area gate: FUN_116a78d0(0x24)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (skill casts a buff to self or all area/party targets). Add-type 0x20; buffInfo+0x14 = skill/name key; event 0x204",
+      "notes": "This is a skill->buff application with single-target vs area-broadcast branches; add-type 0x20 distinguishes skill-applied buffs from area(0xb)/gauge(4)/filter(0x2d)."
+    }
+  ]
+}

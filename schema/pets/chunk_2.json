@@ -1,0 +1,702 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x10f7a350",
+      "currentName": "FUN_10f7a350",
+      "proposedName": "CPetActionController::BuildNormalActionStateGraph",
+      "purpose": "Builds the large NORMAL (non-combat) animation/action-state graph for the pet/companion actor. Registers transition callbacks and maps gameplay action signals (EatDrug/EatMeat/EatDragonMeat/EatChocolate/EatCokeMeat, Flute type1/2, SetOnGround, Set Large/Small Bucket, Throw, Smash, SharpenWeapon, CollectPlant, Strip, Catch, Mine, CarryEgg, CliffFall/Fall, Fishing/NetFishing, Vehicle/SpeedBoat, ClimbLadder, Run, FlyAttack, GoToCuisine, GoTo Low/Med Climb, FindEgg, Bake, Glider fly, IdleView/IdleSelect, and hungry/hot/cold holstered idle-breaks) to CryEngine animation-graph tokens (PLBaseSignal/PLLocomotion/PLCombat/PLFlying/HolsteredIdle etc.) via GetModelString. Idle-break variants tagged with mood indices (0=hungry,1=hot,2=cold,3=normal) via FUN_10f5a480.",
+      "confidence": "high",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: pure CryEngine animation-graph/state-machine wiring; no gameplay state computed. 'GoToCuisine'/'FindEgg'/'Bake' etc. are visual action states only.",
+      "formulas": [
+        "sets flags: *(uint*)(this+0x80) |= 0x10 (NORMAL-state bit); *(this+0x6c)=0; *(this+0x14)=1 (state-ready)",
+        "*(u16*)(this+0x230)=0; *(this+0x234)=0x41400000 (=12.0f, likely a distance/timeout for holstered idle-break)",
+        "idle-break mood tags via FUN_10f5a480(this,4,mood): hungry=0, hot=1, cold=2, normal=3",
+        "state-record token 0x18 pushed to vector at this+0x44/0x48 (stride 4)"
+      ],
+      "costs": [],
+      "notes": "Shared with player locomotion; categorized under pets because the palico uses the same PL* graph. Stock plumbing FUN_10f56fa0 (push token), FUN_10f573e0/FUN_10f574b0 (begin/end transition), FUN_10f593b0 (finalize), FUN_10c3d5d0 (release string)."
+    },
+    {
+      "address": "0x10f7d410",
+      "currentName": "FUN_10f7d410",
+      "proposedName": "CPetActionController::BuildCombatIdleStateGraph",
+      "purpose": "Sets up the COMBAT_IDLE / INVALID_STATE branch of the actor animation graph, plus PARAPET_FALL and NORMAL_FALL fall transitions. Registers combat state callbacks (FUN_10f74c40, FUN_10f9a5b0, LAB_10f6b6a0, DAT_10f9a600).",
+      "confidence": "high",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: animation state graph setup.",
+      "formulas": [
+        "*(u8*)(this+0x1fc)=1; *(uint*)(this+0x80) |= 0x20 (COMBAT-state bit)",
+        "*(this+0x1d8)=0; *(u8*)(this+0x1dc)=0; *(u8*)(this+0x1f4)=0; *(this+0x1f8)=0xffffffff (no active state)",
+        "state token 0x10 pushed to vector at this+0x44/0x48"
+      ],
+      "costs": [],
+      "notes": "Uses ref-counted string buffer at this+0x1e0 for INVALID_STATE label."
+    },
+    {
+      "address": "0x10f81100",
+      "currentName": "FUN_10f81100",
+      "proposedName": "CPetActionController::BuildParapetCliffJumpStates",
+      "purpose": "Builds the PARAPET_CLIFF_JUMP state and its Landing/StartJump_Parapet/Falling_Parapet/StartFall_Parapet sub-transitions, wiring to NORMAL_IDLE and COMBAT_IDLE via PLLocomotion/PLFlying/PLCombatAction. Registers callback FUN_10fa39f0.",
+      "confidence": "high",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: animation state graph setup.",
+      "formulas": [
+        "FUN_10f5a480(this,2,0)/(3,2)/(4,2) attach transition mood/index tuples for Falling/Unholstered/Holstered idle branches"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10f81640",
+      "currentName": "FUN_10f81640",
+      "proposedName": "CPetActionController::BuildParapetFallState",
+      "purpose": "Builds the PARAPET_FALL state with StartFall_Parapet entry; registers callback FUN_10fa3ac0.",
+      "confidence": "high",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: animation state graph setup.",
+      "formulas": [],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x10f91660",
+      "currentName": "FUN_10f91660",
+      "proposedName": "CPetLocomotion::SelectCliffJumpOrFallAnim",
+      "purpose": "Given the actor's active locomotion sub-state (from FUN_10f6c5e0), picks between cliff-jump and fall animations. If cliff-type==2 uses PARAPET_CLIFF_JUMP else PARAPET_FALL; if ==3 uses NORMAL_CLIFF_JUMP else NORMAL_FALL. The jump variant is chosen only when a ground/edge test (vtbl+0x88) passes and the run-anim range matches.",
+      "confidence": "medium",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: chooses visual fall animation; movement is not authoritative here.",
+      "formulas": [
+        "if (FUN_10f6c5e0(entity,1)==2): edgeTest=vtbl[0x88](); jump if edgeTest && runAnimStart==runAnimEnd else fall (parapet variant)",
+        "if (==3): same test, NORMAL variant"
+      ],
+      "costs": [],
+      "notes": "entity pulled from param_1[6]+0x100."
+    },
+    {
+      "address": "0x10fa35e0",
+      "currentName": "FUN_10fa35e0",
+      "proposedName": "CPetLocomotion::OnFallAnimEvent",
+      "purpose": "Animation-graph event handler for the fall/jump state. String-compares the incoming event name (param_2+0xc) against OnLeave / StartFall / StartFall_Parapet / CloseCol / AGAnimationEnd. On OnLeave restores prior state (this+0x200 label). StartFall->func(1), StartFall_Parapet->func(2). On AGAnimationEnd, if current anim is not StartJump/StartFall, forces PLLocomotion 'Falling'.",
+      "confidence": "medium",
+      "subsystem": "pet-animation-fsm",
+      "serverRelevance": "client-only: animation event routing.",
+      "formulas": [
+        "func_0x12402b6c(1,1,0) on StartFall; func_0x12402b6c(2,1,0) on StartFall_Parapet"
+      ],
+      "costs": [],
+      "notes": "Uses inlined strcmp loops; entity chain *(param_1+0x18)+0x100."
+    },
+    {
+      "address": "0x1101f3f0",
+      "currentName": "FUN_1101f3f0",
+      "proposedName": "CScriptBind_PhysicsGeom::Register",
+      "purpose": "Constructor for a physics/geometry script-bind object. Registers Lua/script functions on the entity's script table: TestFunc, ClearPhysicsFlag, SetReceiveAttackType(spAttackType), EnableAttackable(enable), EnablePlayerWall, EnableMonsterWall, EnableCameraWall, AddGeometry(geometryInfo), EnableTerrain, SetPlayerCanAttack, SetMonsterCanAttack, SetUseMaterialEffect(use), SetNPCCanAttack(canAttack), SetPetCanAttack(canAttack).",
+      "confidence": "high",
+      "subsystem": "physics-scriptbind",
+      "serverRelevance": "client-only/shared: script-binding registration plumbing. The per-flag bind FUN_11020690 handles bool 'enable'/'canAttack' args; SetPetCanAttack toggles whether pets may collide/attack a geometry volume — the effect (a physics wall flag) is applied wherever geometry collision is authoritative, not here.",
+      "formulas": [
+        "vtable *param_1 = &PTR_FUN_11d08768; each bind: signature descriptor {name, argSpec, handler} passed to scriptSystem->RegisterFunction (vtbl+0x64)"
+      ],
+      "costs": [],
+      "notes": "Stock CryEngine ScriptBind pattern; not a gameplay formula. SetPetCanAttack is the only pet-specific token."
+    },
+    {
+      "address": "0x1103d2d0",
+      "currentName": "FUN_1103d2d0",
+      "proposedName": "CScriptBind_GameRules::RegisterPetAndLevelFuncs",
+      "purpose": "Registers a batch of gameplay script functions: QueryBattleStatus, GetNumLightsActivated, IsMountedWeaponUsableWithTarget, IsPlayer(entityId), GetPlayerLevel(entityId), PromptPlayerLevelTooLow(requiredLevel), LevelCtrlSwitchToNewLevel(levelname), TeleportToLevel(levelid), RegionJumpTriggerHandle(TriggerName), RegionJumpNearbyHandle(Enable), SyncPlayerAvatar(id,PlayerIndex), FreeRopeAttachment(id), SyncPlayerAvatarById(ProxyId,PlayerId), SyncPlayerPos(pos), SyncPetAvatar(id,index,nTrainingType,nPetID), ShowInteractIcon(show), TeleportToFarm, LeaveFarm, EnterGuildCamp, LeaveGuildCamp, HideWeapon(id,hide), UpdateSoundAreaOcclusion, SendEventToGameObject(entityId,event).",
+      "confidence": "high",
+      "subsystem": "gamerules-scriptbind",
+      "serverRelevance": "client-only/shared: script-binding registration. Notable pet arg contract: SyncPetAvatar(id, index, nTrainingType, nPetID) — the client requests the server/scene to spawn a pet avatar keyed by pet id + training type. The actual pet spawn is authoritative elsewhere.",
+      "formulas": [
+        "SyncPetAvatar param string = \"id,index,nTrainingType,nPetID\" (handler FUN_1103e7e0)"
+      ],
+      "costs": [],
+      "notes": "Reveals the nTrainingType/nPetID parameter contract used for pet display sync."
+    },
+    {
+      "address": "0x1105fe90",
+      "currentName": "FUN_1105fe90",
+      "proposedName": "CPetHitValidator::InitFreqQueueDepth",
+      "purpose": "Initializes the pet-hit anti-cheat frequency-queue depth from config key 'PetHitFreqQueue'; if the config lookup fails the default is 3. Passes result to FUN_11060d00 (reserves/sizes the hit-record ring buffer).",
+      "confidence": "high",
+      "subsystem": "pet-combat-anticheat",
+      "serverRelevance": "authoritative/validation: this is server-side pet-hit rate-limit config init. Reproduce default PetHitFreqQueue=3 when the config value is absent.",
+      "formulas": [
+        "queueDepth = config('PetHitFreqQueue'); if lookup fails => queueDepth = 3; then FUN_11060d00(queueDepth)"
+      ],
+      "costs": [
+        "PetHitFreqQueue default = 3 entries"
+      ],
+      "notes": "Config read via FUN_100b62c0/FUN_11479100/FUN_1147cea0 (data-table lookup returning success char)."
+    },
+    {
+      "address": "0x1105ff10",
+      "currentName": "FUN_1105ff10",
+      "proposedName": "CPetHitValidator::ValidatePetHit",
+      "purpose": "SERVER-SIDE authoritative validation of a single pet melee hit report. Resolves attacker entity (attackInfo+0x124) and target entity (attackInfo+0x128), verifies both have physics proxies and that the reported physical entity matches the attacker; verifies bone/joint id (vtbl+0x88) consistency; performs a 3D position-deviation check between the claimed hit positions (param_5/param_6) and the real entity positions; then applies hit-range and hit-frequency/hit-count rate limits before recording the hit in a ring buffer. Returns an error code (1..6) via FUN_114811e0 on any failure, or records the hit and returns success.",
+      "confidence": "high",
+      "subsystem": "pet-combat-anticheat",
+      "serverRelevance": "authoritative/validation: MUST be re-implemented server-side. Rejects spoofed/too-frequent/too-distant pet hits. Error codes propagated to caller.",
+      "formulas": [
+        "err1: attacker/target entity missing, proxy null, physics-entity(0x800) null, or reported phys-entity != attacker phys-entity",
+        "err2: attacker bone id (vtbl+0x88) != target bone id when both != -1 (bone/joint mismatch)",
+        "position check: dev = (float)config('PositionDeviation'); reject(err3) if sqrt(dx^2+dy^2+dz^2) > dev for attacker(pos param_5) OR target(pos param_6); check skipped if either entity's flag (vtbl+0x68) != 0",
+        "range check (only if attackInfo+0xc == 0): reject(err4) unless (attackInfo+0x160,+0x164) equals current range (this+0x38,+0x3c) OR previous range (this+0x30,+0x34)",
+        "hit-count: piCount=(int*)(this+0x40); *piCount -= 1; reject(err5) if *piCount < 0 (only when attackInfo+0xc==0)",
+        "queueCount = (this+0x24 - this+0x20)/0x18 (ring buffer entry stride = 0x18 = 24 bytes = 6 dwords)",
+        "freqQueueMin = config('PetHitFreqQueue'); clamped to >= 1",
+        "if freqQueueMin <= queueCount (buffer full enough): find oldest entry (min by dword[1]=ts_hi then dword[0]=ts_lo); delta64 = (param_3:param_2) - (oldest[1]:oldest[0]); if delta>0: freq = __alldiv(queueCount*1000, delta64); reject(err6) if config('PetHitFreqMax') <= freq",
+        "on accept: overwrite oldest entry with { [0]=param_2(ts_lo), [1]=param_3(ts_hi), [2]=attackInfo+0x160, [3]=attackInfo+0x164, [4]=attackInfo+0x128(targetId) }",
+        "if buffer not yet full (freqQueueMin > queueCount): append new entry via FUN_11060c90({ts_lo,ts_hi,+0x160,(targetId:+0x164)})"
+      ],
+      "costs": [
+        "PetHitFreqMax = max allowed hit frequency; freq metric = queueCount*1000 / deltaTimeMs. Higher freq (hits arriving faster) rejected when freq >= PetHitFreqMax.",
+        "PositionDeviation = max allowed distance (world units, float) between claimed and actual hit position",
+        "PetHitFreqQueue = minimum ring-buffer fill before frequency gating engages"
+      ],
+      "notes": "param_2/param_3 form a 64-bit hit timestamp (lo/hi, ms). this+0x20/0x24 = ring-buffer begin/end; this+0x30/0x34 current hit-range, +0x38/0x3c previous hit-range, +0x40 remaining-hit-count. this+0x44 -> +0x2cd8 = scene/entity-system pointer used to resolve entity ids (call +0x4c). Companion setters: InitFreqQueueDepth(0x1105fe90), SetHitRangeAndCount(0x11060380)."
+    },
+    {
+      "address": "0x11060380",
+      "currentName": "FUN_11060380",
+      "proposedName": "CPetHitValidator::SetExpectedHitRangeAndCount",
+      "purpose": "Configures the expected hit window for the next pet attack: rotates the current hit-range (this+0x30/0x34) into the previous slot (this+0x38/0x3c) if valid, stores the new range (param_2 lo, param_3 hi) into this+0x30/0x34, and loads the max hit count from config 'PetHitCountMax' into this+0x40 (default 0 if lookup fails). Returns early (no-op) when the new range encodes an empty/negative window.",
+      "confidence": "high",
+      "subsystem": "pet-combat-anticheat",
+      "serverRelevance": "authoritative/validation: sets the range/count budget consumed by ValidatePetHit. Reproduce server-side.",
+      "formulas": [
+        "guard: if (param_3 < 1) && (param_3 < 0 || param_2 == 0) => return 0 (invalid/empty window)",
+        "if current range valid ((this+0x34>0) || (this+0x34==0 && this+0x30!=0)): this+0x38=this+0x30; this+0x3c=this+0x34; this+0x30=0; this+0x34=0",
+        "this+0x30=param_2; this+0x34=param_3 (new 64-bit hit-range key)",
+        "this+0x40 = config('PetHitCountMax'); if lookup fails => this+0x40 = 0",
+        "returns 1"
+      ],
+      "costs": [
+        "PetHitCountMax = max number of hits allowed for the attack window"
+      ],
+      "notes": "param_2/param_3 = 64-bit range key (matches attackInfo+0x160/+0x164 compared in ValidatePetHit)."
+    },
+    {
+      "address": "0x11215d30",
+      "currentName": "FUN_11215d30",
+      "proposedName": "CSoulBeast::OnLevelChangedGrantRewards",
+      "purpose": "Fired when a soul-beast's level crosses a threshold (param_1+8 = oldLevel, param_1+0xc = newLevel, param_1+4 = soulBeastId). Grants activity reward 0x15f0 unconditionally; looks up the CSoulBeastInfo row, then scans two per-row threshold lists: if any entry in list at row+0x2c/+0x3c has (+0x34) in (old,new] grants 0x15f5; if any entry in list at row+0x2c/+0x28 has (+0x50) in (old,new] grants 0x15f9. Sends message 0x2c0 {mode=7, soulBeastId, 0} to the client and posts a 'PlayChange' UI event (id 0x953).",
+      "confidence": "medium",
+      "subsystem": "soul-beast",
+      "serverRelevance": "authoritative: server grants soul-beast level-milestone rewards and notifies the client. Reward ids 0x15f0/0x15f5/0x15f9, message 0x2c0.",
+      "formulas": [
+        "CInfoManager sparse-id lookup on CSoulBeastInfo (idx = id - mgr+0x30; bucket math via mgr+0x20/+0x28)",
+        "milestone A: for entry in [row+0x2c +0x3c .. +0x40): if old(+8) < entry[+0x34] <= new(+0xc) => GrantActivityReward(0x15f5); break",
+        "milestone B: for entry in [row+0x2c +0x28 .. +0x2c): if old(+8) < entry[+0x50] <= new(+0xc) => GrantActivityReward(0x15f9); break",
+        "client msg 0x2c0 payload {0x90=7, soulBeastId, 0}"
+      ],
+      "costs": [
+        "activity reward ids: 0x15f0 (base), 0x15f5 (skill-slot milestone), 0x15f9 (attr/skill milestone)"
+      ],
+      "notes": "row+0x2c is the soul-beast detail sub-struct holding the two upgrade lists."
+    },
+    {
+      "address": "0x112160b0",
+      "currentName": "FUN_112160b0",
+      "proposedName": "CSoulBeast::OnActivatePlayNotice",
+      "purpose": "For soul-beast id (param_1+4): validates the CSoulBeastInfo row exists, resolves the beast's display-name string (row+0x2c +8, fallback DAT_11d9d32b), formats a notice via FUN_1024e9b0(name,0x2a) and posts prompt FUN_1112f070(0x15f7,...). Marks the beast activated via FUN_114149b0(id,0) and sends client message 0x2c0 {mode=2, id, 0}.",
+      "confidence": "medium",
+      "subsystem": "soul-beast",
+      "serverRelevance": "authoritative: server-side soul-beast activation notice + state msg 0x2c0(mode 2). Prompt id 0x15f7.",
+      "formulas": [
+        "prompt = FUN_1112f070(0x15f7, formatted_name)",
+        "client msg 0x2c0 payload {0x90=2, soulBeastId, 0}"
+      ],
+      "costs": [
+        "prompt/notice id 0x15f7"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x112b6fa0",
+      "currentName": "CCliLogicPet__AfterEnterBattleGround",
+      "proposedName": "CCliLogicPet::AfterEnterBattleGround",
+      "purpose": "Client pet-logic hook run after entering a battleground. Calls base handler, then if the pet's periodic-timer handle (this[0x7cb]) is unset (-1) schedules a repeating 10000ms timer (FUN_112b7fe0) and stores its handle.",
+      "confidence": "high",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "client-only: schedules a 10s client tick for pet logic in battlegrounds.",
+      "formulas": [
+        "timer period = 10000 ms; handle stored at this[0x7cb] (byte offset 0x1f2c)"
+      ],
+      "costs": [],
+      "notes": "FUN_100ea610 is the generic named-timer scheduler."
+    },
+    {
+      "address": "0x112b75f0",
+      "currentName": "FUN_112b75f0",
+      "proposedName": "CPetTalkInfo::GetRecordById",
+      "purpose": "CInfoManager sparse-id lookup returning the CPetTalkInfo record pointer for a given talk id.",
+      "confidence": "high",
+      "subsystem": "pet-talk",
+      "serverRelevance": "shared: static config record accessor.",
+      "formulas": [
+        "standard CInfoManager lookup: idx=id-(mgr+0x30); valid if 0<=idx<(mgr+0x24); bucket=*(mgr+0x20 + (idx/(mgr+0x28))*4); rec=*(bucket + (idx%(mgr+0x28))*4)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x112b81b0",
+      "currentName": "FUN_112b81b0",
+      "proposedName": "CCliLogicPet::ShowPetTalkNotice",
+      "purpose": "Displays a pet 'talk' notice bubble. Requires an active pet (this+0x1ed0). Looks up the CPetTalkInfo row for param_2, checks a game-mode gate (FUN_113efa00 returns 1/2/3), pulls the pet's current display name (FUN_113ef730 vtbl+0xd8), fetches CNoticeInfo row index 6, formats the talk text (template + separator DAT_11d1e564 + name), and shows it via FUN_1112f070(noticeRow+0x2c, text).",
+      "confidence": "medium",
+      "subsystem": "pet-talk",
+      "serverRelevance": "client-only: UI notice/bubble rendering.",
+      "formulas": [
+        "gate: only when FUN_113efa00() in {1,2,3}",
+        "CNoticeInfo index = 6 - (mgr+0x30)"
+      ],
+      "costs": [],
+      "notes": "Stack-canary guarded; large local string buffers."
+    },
+    {
+      "address": "0x112b84b0",
+      "currentName": "FUN_112b84b0",
+      "proposedName": "CCliLogicPet::SpawnPetActorFromBlob",
+      "purpose": "Instantiates the pet actor from a serialized pet-state blob (param_2). Resolves the CPetInfo species row for the pet id (param_2+8), creates/binds the render proxy, copies transform (param_2+0x3c..0x54) and attribute block (param_2+0x5f..0x73) into the actor, calls CActor::ApplyEquipItemBonus with the equipment attr set, sets the pet name (string at param_2+0x1c), and stores the pet's world position (param_2+0x791c/+0x7920) into this+0x1f24/+0x1f28 and the mirror object at this+0x1ed4.",
+      "confidence": "medium",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "client-only: constructs the visual pet actor and applies equip bonuses for display. Authoritative stats come from the blob the server sent.",
+      "formulas": [
+        "transform copied from param_2+0x3c (12 bytes pos) and +0x4c (12 bytes rot)",
+        "equip attr block copied from param_2+0x5f (6 dwords) -> CActor::ApplyEquipItemBonus",
+        "world pos: this+0x1f24=param_2+0x791c; this+0x1f28=param_2+0x7920",
+        "flag copied via vtbl+4(param_2+0x508b, u16 at param_2+0x5089)"
+      ],
+      "costs": [],
+      "notes": "Pet blob offsets: name @+0x1c (C-string), species id @+8, extra flag @+0x78c7, train handles @+0x78c8/+0x78cc."
+    },
+    {
+      "address": "0x112b92e0",
+      "currentName": "FUN_112b92e0",
+      "proposedName": "CCliLogicPet::OnPetSummoned",
+      "purpose": "Handles a pet-summon result. Validates the CPetInfo row for pet id (param_3), builds the pet runtime object via FUN_112fb470/FUN_112fb460 keyed by (petUid param_4, extra param_5), fills its slot fields from the header (param_2+0x15,+0x19), sets active flags (+0x40=1, and +0x44=1 when the pet has no mount weapon), and if the active pet uid matches param_4 sends message 0x20c (pet-summon confirm) and message 0x100, then calls vtbl+100(1,petUid,extra,0).",
+      "confidence": "medium",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "client-only: applies a server-authored summon result and updates UI/state. Returns 0 on success, 0xffffffff on failure.",
+      "formulas": [
+        "runtime+0x40 = 1 (summoned); if mountWeapon lookup (vtbl+0x4c)==0 then also runtime+0x44 = 1",
+        "confirm gated on runtime+0x24 == param_4 (active pet uid match)",
+        "client msgs: 0x20c {0, petUid?, param_5, runtime+0x70}, 0x100 {}"
+      ],
+      "costs": [],
+      "notes": "param_6 (char) stored at runtime+0x2c; param_7 passed to FUN_11567b50."
+    },
+    {
+      "address": "0x112b9790",
+      "currentName": "FUN_112b9790",
+      "proposedName": "CCliLogicPet::OnPetListUpdate",
+      "purpose": "Parses a pet-list update packet (param_2/param_3). Decodes up to 0x14 (20) pet entries via FUN_101a03c0; for each entry (stride 0x11 = 17 dwords) looks up the CPetInfo row by entry[-2] (pet id) and writes quality-block fields into the pet species/runtime object: +0xa0=quality, +0xa4=character, +0xa8=atkTarget, +0xac=atkMode, name from entry[+3], +0xb0=skin, +0xb4=supportSkill. Then sends UI message 0x262.",
+      "confidence": "high",
+      "subsystem": "pet-attributes",
+      "serverRelevance": "client-only: applies server-authored pet full-attribute rolls to local pet objects. The rolled values (+0xa0..+0xb4) are authoritative and owned by the server (see CPetQuality/Character/AtkTarget/AtkMode/Skin/SupportSkill tables).",
+      "formulas": [
+        "max entries = 0x14 (20); actual count = min(20, entry[0])",
+        "per-pet write: rec+0xa0=quality(entry[-1]), rec+0xa4=character(entry[0]), rec+0xa8=atkTarget(entry[1]), rec+0xac=atkMode(entry[2]), name=entry[3..], rec+0xb0=skin(entry[0xb]), rec+0xb4=supportSkill(entry[0xc])",
+        "entry stride = 0x11 dwords (0x44 bytes)"
+      ],
+      "costs": [],
+      "notes": "Confirms canonical pet-attribute offsets: +0xa0 quality, +0xa4 character, +0xa8 atkTarget, +0xac atkMode, +0xb0 skin, +0xb4 supportSkill (matches recovered CPet* weighted-roll tables). UI msg 0x262."
+    },
+    {
+      "address": "0x112e8f10",
+      "currentName": "FUN_112e8f10",
+      "proposedName": "CSoulBeast::ApplyAvatarAndAttrUpdate",
+      "purpose": "For soul-beast id (param_1+8): validates CSoulBeastInfo row, optionally (when param_2 != 0) applies an avatar-model change (FUN_114137f0 + FUN_115aaf40 with data at param_1+0x2c/+0x28), then pushes a 7-dword attribute update (param_1+0xc..+0x24) via FUN_114380a0 and a follow-up FUN_114382c0.",
+      "confidence": "medium",
+      "subsystem": "soul-beast",
+      "serverRelevance": "client-only: applies server-authored soul-beast avatar/attribute state.",
+      "formulas": [
+        "attr block = param_1+0x0c .. +0x24 (7 dwords)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x112f64e0",
+      "currentName": "FUN_112f64e0",
+      "proposedName": "CPet::BuildPetDetailView",
+      "purpose": "Fills a large output struct (param_3, ~0x3c dwords) with a pet's full detail for the UI/query: resolves the runtime pet (FUN_112fb460/FUN_1158d040) and reads instance fields plus many localized/config values via FUN_115681b0(handle, index, 7). Includes level, exp, name, quality/star, growth, skills, cuisine, support-cat skill, and skin fields.",
+      "confidence": "medium",
+      "subsystem": "pet-attributes",
+      "serverRelevance": "client-only: assembles a display/query struct from the authoritative pet instance. Reproducing exact indices is only needed for UI parity.",
+      "formulas": [
+        "out[0]=inst+0x28, out[1]=inst+0x24, out[2]=inst+0x2c, out[3]=name(inst+0x30)",
+        "out[4]=inst+0x40 (level), out[5]=9 + (inst+0x44 != 0) (i.e. 9 or 10 = quality/active tier)",
+        "out[7]=inst+0x48 (skin/level-table id), out[8]=inst+0x4c",
+        "out[9]=CPetLevelInfo row(+0x14) expToNext for id inst+0x48",
+        "out[0xc]=*(inst+0x1c)+0x24, out[0x10]=*(inst+0x1c)+0x1c",
+        "out[0xd]=inst+0x6c, out[0xe]=inst+0x70, out[0x19]=inst+0x74, out[0x1a]=inst+0x78, out[0x1b]=inst+0x5c",
+        "many out[i] = *FUN_115681b0(h, cfgIndex, 7) with cfgIndex in {0x14,0x16,0x17,0x1d,0x1e,0x1f,0x2a,0x29,0x2d,0x2b,0x2c,0x76,0x77,0x78,0x2f,0x2e,0x32,0x31,0x30,0x89,...} (attribute-id -> value/string lookups)",
+        "out[0x18]=(int)(float)FUN_115681b0(h,0x89,7) (a float attr cast to int)",
+        "out[0x37]=*(inst+0x20)+0x7c, out[0x35]=*(inst+0x20)+0x80, out[0x3b]=*(inst+0x20)+0x44",
+        "out[0x38]=FUN_112ba910(petUid), out[0x39]=FUN_11568e80()"
+      ],
+      "costs": [],
+      "notes": "FUN_115681b0(h,idx,7) is a per-attribute config resolver (idx = CAttributeInfo/attribute id). Pet-instance offsets: +0x24/+0x28/+0x2c ids, +0x30 name, +0x40 level, +0x44 active-flag, +0x48 level-table id, +0x1c/+0x20 sub-struct ptrs."
+    },
+    {
+      "address": "0x112f70d0",
+      "currentName": "FUN_112f70d0",
+      "proposedName": "CPet::BuildPetPreviewFromItem",
+      "purpose": "Given an item id (param_1), verifies it is a pet-capsule item (CItemBaseInfo row with type flags +0x34==1,+0x38==1,+0x3c==0xe), scans the item's embedded sub-records (stride 0x114) for tag 0x73, loads the referenced pet record (FUN_1052bf70), and fills the preview struct (param_2) with the pet's ids, quality block (+0xa0..+0xac), level (+0x14), name, computed total stats, and matched star grade.",
+      "confidence": "medium",
+      "subsystem": "pet-attributes",
+      "serverRelevance": "validation/shared: computes displayed pet stats via CPetLevelInfo::CalcPetStatTotal; server should use the same stat totals. Returns 1 on success, 0 otherwise.",
+      "formulas": [
+        "item type gate: row+0x34==1 && row+0x38==1 && row+0x3c==0xe",
+        "sub-record scan: base=row+0x164, count=(row+0x168-base)/0x114; match when subrec+4 == 0x73",
+        "stat totals via CPetLevelInfo::CalcPetStatTotal(petRec, attrId, level=petRec+0x14): out[9]=attr0x16, out[0xa]=attr0x17, out[0xb]=attr0x14, out[0xd]=attr0x1d, out[0xe]=attr0x1e, out[0xf]=attr0x1f; out[0xc]=0",
+        "out[0]=petRec+0x1c, out[1]=petRec+0x24, out[2]=out[3]=petRec+0xa0(quality), out[4]=+0xa4, out[5]=+0xa8, out[6]=+0xac, out[0x10]=+0x14(level), out[0x11]=1",
+        "star grade: scan CPetStarInfo rows; match when star.keyB(+0x18)==pet.quality(+0xa0) && star.keyA(+0x14)==pet(+0x24) && star.keyC(+0x1c)==pet(+0xa4); out[0x16]=star(+0x44); else out[0x16]=0"
+      ],
+      "costs": [],
+      "notes": "Cross-ref confirms CPetStarInfo key layout (keyA 0x14 / keyB 0x18 / keyC 0x1c) and CalcPetStatTotal attribute ids {0x14,0x16,0x17,0x1d,0x1e,0x1f}. param_3 (char) = requireQuality-set flag; if set, requires petRec+0x98 != 0."
+    },
+    {
+      "address": "0x112f7820",
+      "currentName": "FUN_112f7820",
+      "proposedName": "CPetLevelInfo::GetRecordByLevel",
+      "purpose": "CInfoManager sparse-id lookup returning the CPetLevelInfo (exp-curve) record for a given level id.",
+      "confidence": "high",
+      "subsystem": "pet-leveling",
+      "serverRelevance": "shared: level-curve config accessor.",
+      "formulas": [
+        "standard CInfoManager sparse-id lookup on CPetLevelInfo"
+      ],
+      "costs": [],
+      "notes": "CPetLevelInfo row: +0x14 expToNextLevel, +0x18 growthFactorA, +0x1c growthFactorB."
+    },
+    {
+      "address": "0x112f78e0",
+      "currentName": "FUN_112f78e0",
+      "proposedName": "CPetStarInfo::GetRecordByIndex",
+      "purpose": "Linear-array accessor returning the CPetStarInfo record at a given index (bounds-checked against the manager's contiguous record vector).",
+      "confidence": "high",
+      "subsystem": "pet-star",
+      "serverRelevance": "shared: star-table config accessor.",
+      "formulas": [
+        "count = (mgr+0x18 - mgr+0x14) >> 2; rec = *(mgr+0x14 + index*4) for 0<=index<count"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x112fb130",
+      "currentName": "FUN_112fb130",
+      "proposedName": "CPet::ctor_InitCatModelPath",
+      "purpose": "Small constructor: initializes an intrusive list head (this+0x10/+0x14 = self) and sets the default Palico model path 'Objects/characters/pet/cat/cat_0'.",
+      "confidence": "high",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "client-only: default cat/Palico model asset path.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Confirms default Palico model root 'Objects/characters/pet/cat/cat_0'."
+    },
+    {
+      "address": "0x113efa30",
+      "currentName": "FUN_113efa30",
+      "proposedName": "CPetActor::InitFromSpeciesAndPlaySkills",
+      "purpose": "Initializes a pet actor instance: stores owner/species pointers (this+0x7b1=owner uid, this+0x7b2=owner ptr, this+0x7b4=species-row ptr, this+0x7b5), copies two attribute vectors (FUN_11414fc0/FUN_11414fe0 from param_5/param_6), binds the mesh (vtbl+0xb0 with species+0x7c), attaches to owner bone or spawns standalone, and finally plays skill animations (CPetSkillInfo::PlaySkillAnimations) and creates buff effects (CBuffInfo::CreateBuffEffects). When param_7 (isLocalPlayerPet) is set it re-resolves the species row from the local player's pet id (FUN_116a6a70 +0xa8).",
+      "confidence": "medium",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "client-only: pet actor construction and cosmetic skill/buff FX. Buff/skill *effects* application is authoritative elsewhere; here it only plays the visuals.",
+      "formulas": [
+        "this+0x7c5 = (char)isLocalPlayerPet",
+        "if standalone (no owner): spawn attachment via vtbl chain with args (0x68,-1,-1,...) -> stores handle this+0x7b7/0x7b8/0x7b9"
+      ],
+      "costs": [],
+      "notes": "Owner uid taken from param_2[1]."
+    },
+    {
+      "address": "0x114126f0",
+      "currentName": "FUN_114126f0",
+      "proposedName": "CSoulBeast::ApplyEvolveOrLevelState",
+      "purpose": "Given a soul-beast stage/level key (param_2), walks a balanced-tree map (root at param_1+0x70, node fields +8/+0xc children, +0x10 key) to find the matching node; validates the CSoulBeastInfo row; iterates the row's effect list (detail+0x2c -> +0x10.. +0x14) applying each effect handler (FUN_115d1b10 -> vtbl+8). Emits error/notice prompts 0x121b, 0x1201, or 0x1214 on the various failure/empty paths.",
+      "confidence": "low",
+      "subsystem": "soul-beast",
+      "serverRelevance": "client-only: applies soul-beast evolution/level effects and shows prompts. Effect application driven by server-sent state.",
+      "formulas": [
+        "tree search: at each node go left(+8) if key <= node+0x10 else right(+0xc)",
+        "prompt ids: 0x121b (no node/empty), 0x1201 (row invalid), 0x1214 (empty effect list)"
+      ],
+      "costs": [
+        "prompt/notice ids 0x121b, 0x1201, 0x1214"
+      ],
+      "notes": "Effect handler resolved per entry via FUN_115d1b10(effectType)->apply(detail+0x2c, entry, ownerId)."
+    },
+    {
+      "address": "0x114149b0",
+      "currentName": "FUN_114149b0",
+      "proposedName": "CSoulBeast::alloc_stub",
+      "purpose": "Thin allocator/accessor: touches the CSoulBeastInfo manager then allocates a 0x1c0-byte soul-beast object (FUN_10c3d580(0x1c0)). Decompiler shows it as non-returning (tail into allocator).",
+      "confidence": "low",
+      "subsystem": "soul-beast",
+      "serverRelevance": "unknown: allocation plumbing. 0x1c0 = soul-beast runtime object size.",
+      "formulas": [
+        "object size = 0x1c0 bytes"
+      ],
+      "costs": [],
+      "notes": "Called from FUN_112160b0 as FUN_114149b0(id,0)."
+    },
+    {
+      "address": "0x11529df0",
+      "currentName": "FUN_11529df0",
+      "proposedName": "CCatCuisineInfo::IsDishAvailable",
+      "purpose": "Server/shared eligibility check for a Felyne (cat) cuisine dish (CCatCuisineInfo row param_2). Returns 1 if the dish is unlocked/usable, else 0. Gates on hunt rank, an unlock-check id, and a feature/quest condition.",
+      "confidence": "high",
+      "subsystem": "cat-cuisine",
+      "serverRelevance": "validation: mirrors the client BuildCatFoodListModel eligibility gate. Server must re-validate before granting the cuisine buff.",
+      "formulas": [
+        "pre-gate: vtbl+0x40(dishId) must return non-zero",
+        "if row+0x98 (requiredHuntRank) != 0 && CPlayer::GetHuntRankOrCount() < row+0x98 => return 0",
+        "if row+0x9c (unlock id) != 0 && unlockCheck(vtbl@player[1]+0x2ab0, +100, row+0x9c) == 0 => return 0",
+        "if row+0xa0 (required id) != 0: vtbl(player[1], +0x46c, row+0xa0); if FUN_114dfbc0()==0 => return 0",
+        "else return 1"
+      ],
+      "costs": [
+        "row+0x98 = required hunt rank (word-index 0x26 in UI model)",
+        "row+0x9c = required unlock id (word-index 0x27)",
+        "row+0xa0 = required feature/quest id (word-index 0x28)"
+      ],
+      "notes": "Offsets confirmed against economy.md BuildCatFoodListModel word-indices ([0x26]=huntRank byte0x98, [0x27]=byte0x9c, [0x28]=byte0xa0). CCatCuisineInfo also has monsterId@0x20, buffIdList@0x2c."
+    },
+    {
+      "address": "0x1152a280",
+      "currentName": "FUN_1152a280",
+      "proposedName": "CCatCuisineInfo::GetDishStateFlag",
+      "purpose": "Looks up a CCatCuisineInfo dish by id and, if present, returns a per-dish state/flag value via FUN_118047d0 (e.g. unlocked/new state). Returns (id & 0xffffff00) sentinel when not found.",
+      "confidence": "medium",
+      "subsystem": "cat-cuisine",
+      "serverRelevance": "client-only: reads a per-dish UI state byte.",
+      "formulas": [
+        "standard CInfoManager sparse-id lookup on CCatCuisineInfo; then result = FUN_118047d0()"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x11534150",
+      "currentName": "FUN_11534150",
+      "proposedName": "CSoulBeastEvolveInfo::GetRecordByTypeStage",
+      "purpose": "Resolves a CSoulBeastEvolveInfo record from a composite key built as type*100 + stage. Returns the record pointer or 0.",
+      "confidence": "high",
+      "subsystem": "soul-beast",
+      "serverRelevance": "authoritative/shared: evolution-stage config accessor; the key formula is load-bearing for evolution lookups.",
+      "formulas": [
+        "compositeKey = param_1*100 + param_2 (soulBeastType*100 + evolveStage)",
+        "then standard CInfoManager sparse-id lookup on CSoulBeastEvolveInfo by compositeKey"
+      ],
+      "costs": [],
+      "notes": "Matches CSoulBeastEvolveInfo (max evolve stage per soul-beast id/type) in pet.md."
+    },
+    {
+      "address": "0x115341b0",
+      "currentName": "FUN_115341b0",
+      "proposedName": "CSoulBeastEvolveInfo::GetRecordById",
+      "purpose": "CInfoManager sparse-id lookup returning a CSoulBeastEvolveInfo record by raw id.",
+      "confidence": "high",
+      "subsystem": "soul-beast",
+      "serverRelevance": "shared: evolution config accessor.",
+      "formulas": [
+        "standard CInfoManager sparse-id lookup on CSoulBeastEvolveInfo"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x11567070",
+      "currentName": "FUN_11567070",
+      "proposedName": "CPet::GetSkinModelString",
+      "purpose": "Returns a pointer to the pet's skin model-string field (CPetSkinInfo row + 0x18) for the pet's skin id (pet+0x7c). Lazily initializes a default string global on first call. Falls back to a default string when the skin id is invalid.",
+      "confidence": "high",
+      "subsystem": "pet-skin",
+      "serverRelevance": "client-only: resolves the pet skin model/asset string.",
+      "formulas": [
+        "skinId = pet+0x7c; CInfoManager lookup on CPetSkinInfo; return &(rec+0x18)"
+      ],
+      "costs": [],
+      "notes": "CPetSkinInfo: skinId@0x10, weight@0x14, model-string@0x18, +0x30 (see FUN_115673e0)."
+    },
+    {
+      "address": "0x11567330",
+      "currentName": "FUN_11567330",
+      "proposedName": "CPetSkinInfo::GetRecordById",
+      "purpose": "CInfoManager sparse-id lookup returning a CPetSkinInfo record by skin id.",
+      "confidence": "high",
+      "subsystem": "pet-skin",
+      "serverRelevance": "shared: skin config accessor.",
+      "formulas": [
+        "standard CInfoManager sparse-id lookup on CPetSkinInfo"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x115673e0",
+      "currentName": "FUN_115673e0",
+      "proposedName": "CPet::GetSkinSecondaryString",
+      "purpose": "Like GetSkinModelString but returns the CPetSkinInfo secondary string field at rec+0x30 (e.g. avatar/portrait path) for the pet's skin id (pet+0x7c). Lazily inits a default global.",
+      "confidence": "high",
+      "subsystem": "pet-skin",
+      "serverRelevance": "client-only: resolves secondary skin asset string.",
+      "formulas": [
+        "skinId = pet+0x7c; return &(CPetSkinInfo_rec + 0x30)"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x11567ae0",
+      "currentName": "FUN_11567ae0",
+      "proposedName": "CPet::SetLevelClamped",
+      "purpose": "Sets the pet's current level (pet+0x4c) to param_2, clamped to the max level defined by its CPetLevelInfo table: if param_2 >= table maxLevel (row+0x14 used here as level count) the level is set to maxLevel-1.",
+      "confidence": "high",
+      "subsystem": "pet-leveling",
+      "serverRelevance": "authoritative/validation: server should clamp pet level to the level-table maximum identically.",
+      "formulas": [
+        "levelTableId = pet+0x48; row = CPetLevelInfo lookup; maxLevel = row+0x14",
+        "pet+0x4c = param_2; if maxLevel <= param_2 then pet+0x4c = maxLevel - 1"
+      ],
+      "costs": [],
+      "notes": "pet+0x48 = level-table id, pet+0x4c = current level."
+    },
+    {
+      "address": "0x11569120",
+      "currentName": "CPetTrain___AddTimer",
+      "proposedName": "CPetTrain::_AddTimer",
+      "purpose": "(Re)schedules the pet-training completion timer. If a timer handle exists (this+0x10 != -1) it is cancelled first; then a one-shot named timer 'CPetTrain::_AddTimer' is scheduled for param_2 seconds (param_2*1000 ms) firing FUN_115692a0, and its handle stored at this+0x10. No-op when param_2 <= 0.",
+      "confidence": "high",
+      "subsystem": "pet-training",
+      "serverRelevance": "client-only timer mirror: training duration is server-authoritative; this schedules the local completion callback. Duration param is in SECONDS.",
+      "formulas": [
+        "timer duration = param_2 * 1000 ms (param_2 = training seconds); one-shot (repeat flag 1... 5th arg=1)",
+        "guard: only if param_2 > 0"
+      ],
+      "costs": [
+        "training timer input in seconds"
+      ],
+      "notes": "FUN_11583340 gates on whether timers are enabled in the current context."
+    },
+    {
+      "address": "0x11581810",
+      "currentName": "FUN_11581810",
+      "proposedName": "CPetManager::SummonPet",
+      "purpose": "Executes a pet-summon request for pet id (param_2). Runs a pre-check (vtbl+0x18); on success validates the CPetInfo row, optionally recalls the currently-summoned pet (when param_4 flag set, FUN_1158d020/FUN_1158cfd0), then activates the pet (FUN_1158ce40). On failure sets error code (*param_3): 0x759e (activation failed) or 0x7596 (invalid pet id). On success emits vtbl+4(petId, petUid, extra, summonType, ...) and returns petUid.",
+      "confidence": "medium",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "authoritative: drives the actual pet activation/recall and returns the assigned pet uid + error code.",
+      "formulas": [
+        "err 0x759e = activation (FUN_1158ce40) failed; err 0x7596 = invalid pet id / row missing",
+        "on success: local_8 = petObj+0x28 (uid?), local_c = petObj+0x24 (id)"
+      ],
+      "costs": [
+        "error codes 0x7596, 0x759e"
+      ],
+      "notes": "param_4 = recall-current flag."
+    },
+    {
+      "address": "0x11581920",
+      "currentName": "FUN_11581920",
+      "proposedName": "CPetManager::CanSummonPet",
+      "purpose": "Validation predicate for summoning a pet (id param_2). Returns 0 (OK) or an error code. Checks: pet row exists; party-leader gate (member+0xc vtbl+0x164); a capability flag (self vtbl+0x78); player hunt rank >= pet required rank (row+0x14); and the summoned-pet count limit.",
+      "confidence": "high",
+      "subsystem": "pet-runtime",
+      "serverRelevance": "validation: server must re-check these gates before allowing a summon.",
+      "formulas": [
+        "if param_3 (already-summoned?) != 0 => return 0 (allowed / no-op)",
+        "if not party leader (member+0xc absent or vtbl+0x164==0) => return 0x759b",
+        "if self capability vtbl+0x78 == 0 => return 0x759c",
+        "if CPlayer::GetHuntRankOrCount() < row+0x14 (required rank) => return 0x759f",
+        "curCount = *(this[3]+0x34); maxCount = FUN_1158d1e0(); if curCount <= maxCount => return 0x75a0 (limit reached) else 0",
+        "if pet row missing => return 0x7596"
+      ],
+      "costs": [
+        "error codes: 0x7596 invalid pet, 0x759b not-leader, 0x759c no-capability, 0x759f rank-too-low, 0x75a0 pet-limit-reached",
+        "row+0x14 = required hunt rank to summon this pet"
+      ],
+      "notes": "GetHuntRankOrCount compared to CPetInfo row+0x14 (required rank/level)."
+    },
+    {
+      "address": "0x11582700",
+      "currentName": "FUN_11582700",
+      "proposedName": "CPetManager::CanDispatchPetFire",
+      "purpose": "Validation predicate for a pet 'fire'/deployment action (soul-beast/pet ranged dispatch). Returns 0 (OK) or an error code. Requires an active pet (FUN_1158d040); party-leader + capability gates; the pet must not be busy (row+0x40==0); no conflicting active state across 6 slots (FUN_114242c0); and a valid CPetFireInfo row for the current fire id (FUN_11567170).",
+      "confidence": "medium",
+      "subsystem": "pet-combat",
+      "serverRelevance": "validation: server-side gate for the pet-fire/deploy action.",
+      "formulas": [
+        "if no active pet (FUN_1158d040==0) => return 0x7597",
+        "if not party leader => return 0x759b",
+        "if self capability vtbl+0x78 == 0 => return 0x759c",
+        "if pet+0x40 != 0 (busy) => return 0x75a1",
+        "for slot in 0..5: if FUN_114242c0(slot) != 0 => return 0x75a3 (slot conflict)",
+        "if CPetFireInfo row for fireId (FUN_11567170) missing => return 0x7599; else return 0"
+      ],
+      "costs": [
+        "error codes: 0x7597 no-active-pet, 0x759b not-leader, 0x759c no-capability, 0x75a1 pet-busy, 0x75a3 slot-conflict, 0x7599 invalid-fire-config",
+        "slot count = 6"
+      ],
+      "notes": "CPetFireInfo = static pet elemental/attack (‘fire’) config; see pet.md."
+    },
+    {
+      "address": "0x11582eb0",
+      "currentName": "FUN_11582eb0",
+      "proposedName": "CPetFireInfo::GetRecordById",
+      "purpose": "CInfoManager sparse-id lookup returning a CPetFireInfo record by id.",
+      "confidence": "high",
+      "subsystem": "pet-combat",
+      "serverRelevance": "shared: pet-fire config accessor.",
+      "formulas": [
+        "standard CInfoManager sparse-id lookup on CPetFireInfo"
+      ],
+      "costs": [],
+      "notes": ""
+    },
+    {
+      "address": "0x115f6e60",
+      "currentName": "FUN_115f6e60",
+      "proposedName": "CSoulBeast::TryActivateWithGuard",
+      "purpose": "Attempts to activate/interact with a soul beast (id param_1+4) on target actor param_2. Bails (return 0) if the target is busy (vtbl+0xa8 != 0). Validates the CSoulBeastInfo row and a target readiness flag (param_2[0xac5]); if a further activation gate (FUN_11412fc0) fails returns 1, otherwise fires a target event (vtbl+0x464, event 0x15fd) and returns 0.",
+      "confidence": "low",
+      "subsystem": "soul-beast",
+      "serverRelevance": "client-only: soul-beast interaction trigger + event 0x15fd.",
+      "formulas": [
+        "event id 0x15fd fired on success"
+      ],
+      "costs": [
+        "event id 0x15fd"
+      ],
+      "notes": ""
+    },
+    {
+      "address": "0x11689ed0",
+      "currentName": "FUN_11689ed0",
+      "proposedName": "CPetCombatTuning::ParseMonsterVsPetRow",
+      "purpose": "Parses one row of the monster-vs-pet combat tuning data table (an XML/data node param_2) into a cached struct that is inserted into a per-monster hash list (param_1+0x90). Reads named columns: MonsterID, Difficulty, MaxHealth, PhyAtk, Defence, PhyPDRatio(float), WaterAtk, FireAtk, LightningAtk, DragonAtk, IceAtk, GoldSliFlag, three more float columns, and (when param_4 set) MonsterAtkPet(float) and PlayerAtkPet(float) damage-scalar columns.",
+      "confidence": "medium",
+      "subsystem": "pet-combat",
+      "serverRelevance": "authoritative data: these are the pet-vs-monster combat balance parameters (monster stats and the MonsterAtkPet / PlayerAtkPet damage multipliers applied to/for a pet). Server must load the same table to compute pet combat damage.",
+      "formulas": [
+        "keyed/deduped by MonsterID (param_1+0x14) then cached per (MonsterID+Difficulty) node into hash bucket param_1+0x90",
+        "struct fields: MaxHealth(int), PhyAtk(int), Defence(int), PhyPDRatio(float local_424), WaterAtk(int), FireAtk(int), LightningAtk(int), DragonAtk(int), IceAtk(int), GoldSliFlag(int local_420)",
+        "float columns local_41c/local_418/local_414 (unnamed in strings list) + MonsterAtkPet(float local_410), PlayerAtkPet(float local_40c) parsed only when param_4 != 0",
+        "each column read: hasAttr = node->vtbl+0x10(colName); int via vtbl+0x20, float via vtbl+0x30; missing column logs an error (FUN_100ea3b0/FUN_100ee330)"
+      ],
+      "costs": [
+        "damage scalars: MonsterAtkPet (monster->pet damage multiplier), PlayerAtkPet (player->pet damage multiplier)"
+      ],
+      "notes": "Column name globals cached via one-time init bitset DAT_12389260/DAT_123893a4. Node accessor vtbl: +0x10 hasAttr, +0x20 getInt, +0x30 getFloat. Insertion node built by FUN_11690260; list is an intrusive doubly-linked list at param_1+0x90."
+    }
+  ]
+}

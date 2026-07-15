@@ -1,0 +1,220 @@
+{
+  "chunkIndex": 13,
+  "functions": [
+    {
+      "address": "11a17f70",
+      "currentName": "FUN_11a17f70",
+      "proposedName": "CPetSkillInfo::GetManager",
+      "purpose": "Static accessor/registrar that resolves the CInfoManager singleton for the 'CPetSkillInfo' record type via CInfoManager::GetByName(0,\"CPetSkillInfo\",0). This is the manager-lookup idiom that pet.md documents (FUN_1051c550(0,\"CPetSkillInfo\",0)); all pet-skill definition records are held in this manager and fetched by the sparse-id formula.",
+      "confidence": "high",
+      "subsystem": "pet-skills",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (data-table manager bootstrap); the CPetSkillInfo dataset it exposes is shared authoritative game content",
+      "notes": "Cross-ref: schema/docs/pet.md CPetSkillInfo. Trivial one-line wrapper."
+    },
+    {
+      "address": "11a23370",
+      "currentName": "FUN_11a23370",
+      "proposedName": "KillMonsterObjective::Read",
+      "purpose": "IXmlNode config deserializer for an activity/quest 'kill monster' objective. Reads scalar fields by attribute name, stores groupId into owner+0x10, then packs the remaining 16 int fields into a fixed 0x40-byte record appended to the objective vector at owner+0x18 (end ptr owner+0x1c). Standard MHO Read pattern: vtable+0x10=HasAttr(nameId), +0x20=ReadInt(nameId); missing fields emit a client warning (FUN_100ea3b0/FUN_100ee330) and leave the slot uninitialized.",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x40 bytes (16 int32); appended by *(owner+0x18) += 0x40 or via FUN_11a241d0 grow-and-insert when full",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative game data). Parsing itself is client-side, but the objective spec — targetMonsterID/targetCount, second target pair, and the MonsterBuffID1..3 applied for durations Time1..3 — must be enforced/applied by the server.",
+      "notes": "Fields: groupId, spawnGroupId, msgID, logic, targetMonsterID, targetCount, TargMsgID, targetMonsterID2, targetCount2, TargMsgID2, MonsterBuffID1, MonsterBuffID2, MonsterBuffID3, Time1, Time2, Time3, AlertMsgID. Once-flags cached in DAT_123a8514 (bit0=name registered per field). FUN_100f67b0 interns the attribute name."
+    },
+    {
+      "address": "11a24910",
+      "currentName": "FUN_11a24910",
+      "proposedName": "ItemUseObjective::Read",
+      "purpose": "Config deserializer for an activity objective keyed on an item (use/collect a given itemId x itemNum near a spawn). Same Read idiom as KillMonsterObjective::Read; groupId -> owner+0x10, remaining 12 ints packed into a 0x30-byte record appended to vector at owner+0x18.",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x30 bytes (12 int32); *(owner+0x18) += 0x30, else FUN_11a25470 grow-insert",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": ["itemNum (quantity requirement, authoritative game-data amount)"],
+      "serverRelevance": "config-schema (shared authoritative). Server enforces itemId/itemNum requirement and applies MonsterBuffID1..3 for Time1..3.",
+      "notes": "Fields: groupId, itemId, itemNum, spawnGroupId, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags in DAT_123a8670."
+    },
+    {
+      "address": "11a26090",
+      "currentName": "FUN_11a26090",
+      "proposedName": "BreakPartObjective::Read",
+      "purpose": "Config deserializer for a monster part-break objective (break a named part to a break-level). Reads two string part-name fields via vtable+0x24=ReadString into local std::string buffers, other fields via ReadInt. groupId -> owner+0x10. Appends a 0x6c-byte record (contains embedded strings) to the vector at owner+0x18, using placement/copy helper FUN_11a25d00 (existing element) or FUN_11a27030 (grow-insert).",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x6c bytes (has two heap std::string members targetPartName/targetPartName2)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": ["targetBreakLev / targetBreakLev2 (break-level thresholds)"],
+      "serverRelevance": "config-schema (shared authoritative). Server validates part-break progress against targetPartName+targetBreakLev and applies MonsterBuffID1..3 for Time1..3.",
+      "notes": "Fields: groupId, spawnGroupId, logic, msgID, targetMonsterID, targetPartName(str), targetBreakLev, TargMsgID, targetPartName2(str), targetBreakLev2, TargMsgID2, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags span DAT_123a8778 (all 32 bits) then DAT_123a88bc. Local strings freed via FUN_10c3d5d0."
+    },
+    {
+      "address": "11a27780",
+      "currentName": "FUN_11a27780",
+      "proposedName": "AbnormalStatusObjective::Read",
+      "purpose": "Config deserializer for an objective requiring a monster to be inflicted with a given abnormal status. groupId -> owner+0x10; 12 ints packed into 0x30-byte record appended to vector at owner+0x18 (grow-insert via FUN_11a282e0).",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x30 bytes (12 int32)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). Directly relevant to abnormal-status system: server must detect targetStateAbnormal on targetMonsterID and apply MonsterBuffID1..3 for Time1..3.",
+      "notes": "Fields: groupId, spawnGroupId, targetMonsterID, targetStateAbnormal, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags in DAT_123a88e8. targetStateAbnormal is the abnormal-status id enum."
+    },
+    {
+      "address": "11a28a80",
+      "currentName": "FUN_11a28a80",
+      "proposedName": "KillMonsterSimpleObjective::Read",
+      "purpose": "Config deserializer for a minimal kill objective (single target monster, no count field). groupId -> owner+0x10; 11 ints packed into a 0x2c-byte record appended to vector at owner+0x18 (grow-insert via FUN_11a29520).",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x2c bytes (11 int32); note field pair at record+0x20 written as CONCAT44(Time3,Time2)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). Server applies MonsterBuffID1..3 for Time1..3 on kill of targetMonsterID.",
+      "notes": "Fields: groupId, spawnGroupId, targetMonsterID, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags in DAT_123a89f0."
+    },
+    {
+      "address": "11a2a160",
+      "currentName": "FUN_11a2a160",
+      "proposedName": "BreakPartCountObjective::Read",
+      "purpose": "Config deserializer for a part-break-count objective (break a named part N times, with a wrong-hit check). Like BreakPartObjective but uses targetPartCount instead of break-level and adds wrongHitCheck flag. Two string part-name fields read via ReadString. Appends a 0x70-byte record (embedded strings) to vector at owner+0x18 via FUN_11a29dd0/FUN_11a2b1c0.",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x70 bytes (two heap std::string members)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": ["targetPartCount / targetPartCount2 (required break counts)"],
+      "serverRelevance": "config-schema (shared authoritative). Server counts part breaks (respecting wrongHitCheck) and applies MonsterBuffID1..3 for Time1..3.",
+      "notes": "Fields: groupId, spawnGroupId, logic, msgID, wrongHitCheck, targetMonsterID, targetPartName(str), targetPartCount, TargMsgID, targetPartName2(str), targetPartCount2, TargMsgID2, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags span DAT_123a8ae4 (all 32 bits) then DAT_123a8c28."
+    },
+    {
+      "address": "11a2b5a0",
+      "currentName": "FUN_11a2b5a0",
+      "proposedName": "GatherItemObjective::Read",
+      "purpose": "Config deserializer for an item-gather objective (collect itemId x itemNum from a spawn group). Byte-identical record layout to ItemUseObjective::Read (0x30-byte element, grow-insert via FUN_11a25470) but a distinct field-name once-flag block, i.e. a separate objective subclass sharing the same POD record type.",
+      "confidence": "high",
+      "subsystem": "quest-activity-objectives",
+      "formulas": [
+        "record element size = 0x30 bytes (12 int32)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": ["itemNum (quantity requirement)"],
+      "serverRelevance": "config-schema (shared authoritative). Server enforces gather quantity and applies MonsterBuffID1..3 for Time1..3.",
+      "notes": "Fields: groupId, itemId, itemNum, spawnGroupId, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. Once-flags in DAT_123a8c68. Reuses record insert helper FUN_11a25470 shared with FUN_11a24910."
+    },
+    {
+      "address": "11a2d0b0",
+      "currentName": "FUN_11a2d0b0",
+      "proposedName": "DropTableEntry::Read",
+      "purpose": "Config deserializer for a loot/drop table entry with an optional buff. groupId -> owner+0x10; the 5 remaining ints (itemId, minCount, maxCount, dropProbability, BuffID) packed into a 0x14-byte record appended to vector at owner+0x18 (grow-insert via FUN_11a2d630).",
+      "confidence": "high",
+      "subsystem": "loot-drops-buff",
+      "formulas": [
+        "record element size = 0x14 bytes (5 int32: itemId, minCount, maxCount, dropProbability, BuffID)",
+        "groupId -> *(owner+0x10)"
+      ],
+      "costs": [
+        "minCount / maxCount (drop quantity range)",
+        "dropProbability (drop chance; stored as int — likely per-mille or percent, exact denominator not in this function)"
+      ],
+      "serverRelevance": "authoritative (server-side): drop rolls, minCount/maxCount ranges and dropProbability MUST be computed server-side; BuffID is the buff granted on drop/pickup.",
+      "notes": "Fields: groupId, itemId, minCount, maxCount, dropProbability, BuffID. Once-flags in DAT_123a8eb4."
+    },
+    {
+      "address": "11a34ce0",
+      "currentName": "FUN_11a34ce0",
+      "proposedName": "ActivityBuffList::Read",
+      "purpose": "Config deserializer mapping an ActivityId to up to three buff ids. ActivityId -> owner+0x10. Buff1/Buff2/Buff3 each read as int; each value is appended to an int32 vector at owner+0x18 (grow-insert via FUN_10463c40) ONLY when the value is > 0, so unset/zero buff slots are skipped.",
+      "confidence": "high",
+      "subsystem": "buffs-activity",
+      "formulas": [
+        "buff id appended to vector at owner+0x18 (stride 4) iff value > 0 (0<iVar3)",
+        "ActivityId -> *(owner+0x10)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). Server grants the listed buff ids to participants of the given ActivityId.",
+      "notes": "Fields: ActivityId, Buff1, Buff2, Buff3. Once-flags in DAT_123a96b0. The >0 gate means zero is treated as 'no buff'."
+    },
+    {
+      "address": "11a3a630",
+      "currentName": "FUN_11a3a630",
+      "proposedName": "RewardBuffEntry::Read",
+      "purpose": "Config deserializer for a reward entry (item + buff with a probability) into a fixed 5-dword struct (param_1 is the record, not a vector owner). Writes each field to a fixed member offset.",
+      "confidence": "high",
+      "subsystem": "rewards-buff",
+      "formulas": [
+        "ItemID -> record[0]; ItemAmount -> record[1]; BuffID -> record[2]; BuffItem -> record[3]; Probability -> record[4]",
+        "no vector append — writes directly into caller-provided struct"
+      ],
+      "costs": [
+        "ItemAmount (reward quantity)",
+        "Probability (reward/proc chance; int, denominator not resolved here)"
+      ],
+      "serverRelevance": "authoritative (server-side): Probability roll and reward grant (ItemID/ItemAmount, BuffID, BuffItem) must be server-computed.",
+      "notes": "Fields (XML order): Probability, ItemID, ItemAmount, BuffID, BuffItem. Once-flags in DAT_123a9ce4. Struct member order differs from XML order (see formulas)."
+    },
+    {
+      "address": "11a44a90",
+      "currentName": "FUN_11a44a90",
+      "proposedName": "PetSkillBuffLevelEntry::Read",
+      "purpose": "Config deserializer for a pet-skill/buff record keyed by a composite (skillId*100+level) index. Reads two int fields (owner+0x14, owner+0x18), two string fields (via ReadWString + FUN_100e5530; passed to the mislabeled CPet::SetName global-name helper), int at owner+0x24, owner+0x28, and BuffID -> owner+0x2c. Finally derives the composite key.",
+      "confidence": "medium",
+      "subsystem": "pet-skills-buff",
+      "formulas": [
+        "composite key: *(owner+0x10) = *(owner+0x14) * 100 + *(owner+0x18)  (skill/group id * 100 + level)",
+        "BuffID -> *(owner+0x2c)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). The *100+level keying is the notable rule; server uses the same key to resolve which BuffID a pet skill grants at a given level.",
+      "notes": "Field names for the first 6 fields are stripped to DAT_ pointers (DAT_11d43284, DAT_11d46564, DAT_11d710fc, DAT_11d3f8a0, DAT_11d71104, DAT_11d71110); last field is literal 'BuffID'. Once-flags in DAT_123aa950. CPet::SetName call is a Ghidra mislabel of the generic string-store helper (see pet.md note)."
+    },
+    {
+      "address": "11a473a0",
+      "currentName": "FUN_11a473a0",
+      "proposedName": "CPetSkillInfo::Read",
+      "purpose": "The XML/TLV deserializer for CPetSkillInfo records — the 'Read_0x99' reader that schema/docs/pet.md states was NOT present in the pet bundle and 'loaded elsewhere'. This is it. Populates the full CPetSkillInfo struct: displayId(+0x10), name (string), level(+0x18), +0x1c, +0x20, +0x24(skillGroupId), +0x28, +0xec, two 0x30-byte blocks parsed from string via FUN_10a199b0 into +0x30..0x5c and +0x60..0x8c (vec/param arrays), +0x94, a linked-id list into vectors at +0xd8 and +0xe4 (linkedSkillIds, split into two groups of 4), and a per-level 'BuffLV%d' (1..5) table of 0x10-byte entries starting at +0x98. Each parsed BuffLV id is validated against the buff manager's red-black tree (FUN_11679c30, root at +0x8d4); a missing buff triggers FUN_10c3d580(0xc) (fatal / does-not-return).",
+      "confidence": "medium",
+      "subsystem": "pet-skills",
+      "formulas": [
+        "displayId -> +0x10; level -> +0x18; skillGroupId -> +0x24 (offsets match pet.md CPetSkillInfo table)",
+        "linkedSkillIds: id-list of 4-byte ints split into vector at +0xd8 (first 4) and +0xe4 (next 4); count = (list_end - list_begin) >> 2, processed only when (count & 3)==0",
+        "BuffLV table: attribute names formatted 'BuffLV%d' for d=1..5 (FUN_1167e120(L\"BuffLV%d\",1,5)); each entry is 0x10 bytes written sequentially from +0x98 (stride 0x10, loop bound local_480 < 0x50 = 5 entries)",
+        "buff-id validation: for each BuffLV entry with id!=0, binary-search buff manager tree at (mgr+0x8d4); abort FUN_10c3d580(0xc) if not found"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). Defines the authoritative CPetSkillInfo dataset (skill id/level/group, linked skills, per-level buff refs) that the server needs to validate pet-skill casting and apply the correct buff per skill level. Buff-existence validation here is client-side, but the same referential integrity applies server-side.",
+      "notes": "Resolves the open question in pet.md ('NO XML/TLV reader present in this bundle'). Field names stripped to DAT_ pointers except literals 'BuffLV%d' and '>f:yL'. FUN_10a199b0 parses a whitespace/token string into a 0x30-byte numeric block (used twice — likely min/max stat or effect-param tuples). Once-flags in DAT_123aac60. Buff manager accessor FUN_11679c30 matches the buff-system singleton. Cross-ref: pet.md CPetSkillInfo offset table (displayId 0x10, level 0x14/0x18, skillGroupId 0x24, linkedSkillIds 0x80, val_0x94)."
+    },
+    {
+      "address": "11a872c0",
+      "currentName": "FUN_11a872c0",
+      "proposedName": "BuffRelatedRecord::Read",
+      "purpose": "Config deserializer for a small record carrying a 'Buff' id plus id/string fields. Reads an int -> owner+0x10, a string -> owner+0x2c, a string -> owner+0x14, a string -> owner+0x44, an int -> owner+0x5c, and Buff (int) -> owner+0x60. Standard Read idiom, direct member writes (no vector).",
+      "confidence": "low",
+      "subsystem": "buffs",
+      "formulas": [
+        "id -> *(owner+0x10); Buff -> *(owner+0x60); int -> *(owner+0x5c)",
+        "string fields written in place at owner+0x14, owner+0x2c, owner+0x44 (std::string via ReadString vtable+0x24)"
+      ],
+      "costs": [],
+      "serverRelevance": "config-schema (shared authoritative). Associates a Buff id with this record; server applies the referenced buff.",
+      "notes": "All field names except 'Buff' are stripped to DAT_ pointers (DAT_11d73d5c id, DAT_11d3ef8c/DAT_11d4cbe8/DAT_11d44360 strings, DAT_11d73d68 int). Once-flags in DAT_123ae264. Exact owning class unresolved — low confidence on record identity."
+    }
+  ]
+}

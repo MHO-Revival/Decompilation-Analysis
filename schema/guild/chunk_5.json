@@ -1,0 +1,420 @@
+{
+  "chunkIndex": 5,
+  "functions": [
+    {
+      "address": "1092ba00",
+      "currentName": "FUN_1092ba00",
+      "proposedName": "BattleTeamInvitePlayerInfoVO::Build",
+      "purpose": "Builds a UI view-object describing a player targeted for a battle-team/clan invite. Extracts a target id from the tagged-arg blob (arg+8 when type tag (arg+4)&0x8f is 3 or 4), resolves the player through the social manager (DAT_1202e818->[0xd0]->[0x90] vtbl+0x7c = FindPlayerById), rejects it if vtbl+0xa8 returns nonzero (invalid/self), and reads the local party/team via vtbl+0xb4. Emits playerName (obj->GetName), playerFaction (vtbl+0x44), playerLevel (CPlayer::GetHuntRankOrCount), selfID (*(team+4)).",
+      "confidence": "medium",
+      "subsystem": "matchmaking/party",
+      "serverRelevance": "client-only (presentation VO; reads already-synced player/party state)",
+      "formulas": [
+        "targetId = ((arg+4)&0x8f==3 || ==4) ? *(arg+8) : 0xdeadbeaf",
+        "player = mgr[0xd0][0x90]->vtbl_0x7c(targetId); skip if player->vtbl_0xa8()!=0",
+        "playerFaction = player->vtbl_0x44(); playerLevel = CPlayer::GetHuntRankOrCount(); selfID = *(localTeam+4)"
+      ],
+      "costs": [],
+      "notes": "Field setters used throughout chunk: FUN_104d1550=set int, FUN_104d1670=set ASCII str, FUN_104d1700=set wide str, FUN_104d1440=set 64-bit, FUN_104d15e0=set bool, FUN_104d14d0=clear/default, FUN_104d12b0=attach child obj/array, FUN_104d7c10=pop/commit. FUN_11a98de0=create VO instance, FUN_11a98a70=create array."
+    },
+    {
+      "address": "1092be80",
+      "currentName": "FUN_1092be80",
+      "proposedName": "BattleTeamBoxMemberVO::Build",
+      "purpose": "Iterates battle-team member 'boxes' and builds a member-info VO for the box whose player faction matches a target id (arg[0xe]). Box list at localTeam(+0xb4)->list; count = (list[0x88]-list[0x84])>>3. Per box: resolves player (FUN_1092b9b0), if player->vtbl_0x44()==targetId emits fields.",
+      "confidence": "medium",
+      "subsystem": "matchmaking/party",
+      "serverRelevance": "client-only (VO builder over synced battle-team roster)",
+      "formulas": [
+        "boxCount = (*(list+0x88) - *(list+0x84)) >> 3",
+        "match when player->vtbl_0x44() == targetId (targetId = arg[0xe] if (arg[0xd]&0x8f)==3||4 else 0xDEADBEAF)",
+        "boxIndex = (*(EBX+0xc+0x7c)!=0) ? FUN_1092c240() : -1"
+      ],
+      "costs": [],
+      "notes": "Emits selectedBoxID=box[1], playerNetID=box[0], playerName, playerFaction=0, playerLevel=GetHuntRankOrCount, selfID=*(EBX+4), boxIndex, boxName (from FUN_108f2ca0(box[1])->+0x14)."
+    },
+    {
+      "address": "1093d680",
+      "currentName": "FUN_1093d680",
+      "proposedName": "BattleTeamClanModel::RegisterHandlers",
+      "purpose": "UI-model initializer that registers named command handlers for the battle-team/clan creation window. Registers: InitModel, InitModelEx, InitCreateModel, CreateClan, CloseCreateUI, CloseBTM, AddBTMember, HasClan, EnterQT, CheckBTName, RenameBTName, RemoveMember, ChangeLeader, ModifyNote, MsgBoxClanInviteOk, MsgBoxClanInviteCancel. Each is bound via FUN_100b62c0 (std::string ctor) + FUN_10940240 (register), then a second pass (FUN_10d17440/10d17870) wires event dispatchers. Zeroes model state at +0x28.",
+      "confidence": "high",
+      "subsystem": "guild/social (clan UI)",
+      "serverRelevance": "client-only (UI command-table registration; stock CryEngine/game UI plumbing)",
+      "formulas": [],
+      "costs": [],
+      "notes": "The command-name list is the useful artifact: enumerates the clan/battle-team client actions that map to server requests (CreateClan, AddBTMember, RemoveMember, ChangeLeader, ModifyNote, RenameBTName, CheckBTName)."
+    },
+    {
+      "address": "1093e680",
+      "currentName": "FUN_1093e680",
+      "proposedName": "BattleTeamModel::HasClan",
+      "purpose": "HasClan command handler. When param_5==1, reads local player's clan object (localPlayer(+0x2adc)->vtbl_0x14 -> clan) and, if present, sets strClanName from clan->GetName(+0x14) and marks the model result byte (*(param_1+2)) = 1 (has clan) else stays 0.",
+      "confidence": "medium",
+      "subsystem": "guild/social (clan)",
+      "serverRelevance": "client-only (reads synced clan state, sets UI result flag)",
+      "formulas": [
+        "hasClan = (localPlayer+0x2adc != 0); strClanName = clan->vtbl_0x14()->[0x14]",
+        "player guild/clan handle offset = +0x2adc"
+      ],
+      "costs": [],
+      "notes": "Confirms local-player struct offset 0x2adc holds the clan/battle-team component pointer."
+    },
+    {
+      "address": "1093faf0",
+      "currentName": "FUN_1093faf0",
+      "proposedName": "BattleTeamModel::OnClanInviteReceived",
+      "purpose": "Handles an incoming clan invite (stores inviter ids at model+0x28/+0x2c). Reads config flag 'g_refuseClanRequest' (config mgr [0x2c]->vtbl_0x54('g_refuseClanRequest')->vtbl_0x08 = GetInt). If flag==0: pops a confirm dialog 'BattleTeam.MsgBoxClanInviteOk'/'BattleTeam.MsgBoxClanInviteCancel' (dialog id 0x1ff1) with localized message-parm indices 0x2a and 6. If flag!=0 (auto-refuse enabled): silently rejects via FUN_11c65590(guild, inviteId1, inviteId2, 0).",
+      "confidence": "medium",
+      "subsystem": "guild/social (clan invite)",
+      "serverRelevance": "validation/client (client decides prompt vs auto-reject; the actual accept/reject is sent to server)",
+      "formulas": [
+        "refuse = configInt('g_refuseClanRequest'); refuse!=0 -> auto-reject FUN_11c65590(guild,*(model+0x28),*(model+0x2c),0)",
+        "dialog id = 0x1ff1; CMessageParmDescInfo record indices 0x2a and 6 (localized text)"
+      ],
+      "costs": [],
+      "notes": "'g_refuseClanRequest' is a client preference; server still authoritative on membership. inviteId1/inviteId2 stored at model +0x28,+0x2c."
+    },
+    {
+      "address": "10940ee0",
+      "currentName": "FUN_10940ee0",
+      "proposedName": "GuildLeagueMatchModel::RegisterHandlers",
+      "purpose": "UI-model initializer registering guild-league / guild-match command handlers: GetMatchDetail, GetGuildPreMaryByPage, StartGameLeagueReq, StartGameLeaguePairReq, xGetRoomBySignId, SendGuildMatchQualifierResultList, sendGuildMatchPairList, LeagueRespondOkHandler, LeagueRespondCancelHandler. Same register pattern (FUN_100b62c0 + FUN_10942ca0 / FUN_104d0ee0) then event wiring.",
+      "confidence": "high",
+      "subsystem": "league/guild-match",
+      "serverRelevance": "client-only (UI command registration; command names map to server league/match requests)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Command names enumerate the league client->server surface: StartGameLeagueReq, StartGameLeaguePairReq, GetGuildPreMaryByPage (qualifier bracket), xGetRoomBySignId, SendGuildMatchQualifierResultList, sendGuildMatchPairList."
+    },
+    {
+      "address": "10941ab0",
+      "currentName": "FUN_10941ab0",
+      "proposedName": "GuildQualifierListVO::BuildByPage",
+      "purpose": "Builds the guild qualifier ('GuildPremary') ranking list VO, one entry per qualifying guild. Reads guild-match data at guildMgr(+0x2abc), calls its vtbl_0x0c (refresh) and FUN_11c65620(mgr,0xd) then FUN_10942d70 to fetch the entry vector (piVar1+10). Iterates entries with stride 0x58 (88 bytes; count=(end-begin)/0x58). Per entry: strName (FUN_1149e590), bestScore (FUN_1149e540), a second score field (FUN_1149e550, name DAT_11dca154), strGuildName (FUN_1149e580), isSelf=1 when FUN_1149e820 matches local guild. Emits array 'GuildPremaryArray' of class 'GUILDPREMARY_CLASS_NAME'.",
+      "confidence": "medium",
+      "subsystem": "league/guild-match (qualifier)",
+      "serverRelevance": "client-only (VO over server-supplied qualifier ranking)",
+      "formulas": [
+        "entry stride = 0x58 bytes (0x16 dwords); count = (vec_end - vec_begin)/0x58",
+        "bestScore = FUN_1149e540(entry); secondScore = FUN_1149e550(entry); isSelf = FUN_1149e820(guildId)"
+      ],
+      "costs": [],
+      "notes": "guild-match/qualifier component offset on local player = +0x2abc. Field 'bestScore' is the guild's best qualifier score."
+    },
+    {
+      "address": "109420b0",
+      "currentName": "FUN_109420b0",
+      "proposedName": "GuildMatchTeamListVO::Build",
+      "purpose": "Builds the guild-match bracket/pairing VO ('GuildMathTeamArray' of class 'GUILDMathTeam_CLASS_NAME'). Reads match data (guildMgr+0x2abc). Emits MatchStateNow = *(match+0x120), MathState = *(match+0x11c). Two code paths keyed on MatchStateNow: when state<5 it walks bracket rounds 4..1 (round counter starts at 4, decrements while >0) producing per-round pairings; when state in [5,7) it walks the final pairing list directly. Pairing entries have stride 0x10. Per pairing emits m_SignID1, m_SignID2, teamName1, teamName2, teamWin1/teamWin2, isPlaying.",
+      "confidence": "medium",
+      "subsystem": "league/guild-match (bracket)",
+      "serverRelevance": "client-only (VO over server bracket state; scoring/pairing authoritative server-side)",
+      "formulas": [
+        "MatchStateNow = *(match+0x120); MathState = *(match+0x11c)",
+        "state<5 -> iterate bracket rounds 4 down to 1; state in [5,7) -> final list path",
+        "pairing entry stride = 0x10 bytes",
+        "winner: signID1==winnerSignID(iStack_d0) -> teamWin1=1; signID2==winnerSignID -> teamWin2=1",
+        "isPlaying = FUN_11175670(&signID1)"
+      ],
+      "costs": [],
+      "notes": "m_SignID1/m_SignID2 are the two teams' sign ids; winnerSignID compared field is the round result. Bracket depth 4 rounds implied by the 4..1 loop."
+    },
+    {
+      "address": "10942a00",
+      "currentName": "FUN_10942a00",
+      "proposedName": "GuildLeagueModel::OnLeagueRespond",
+      "purpose": "League invite/enter-room respond handler. Resolves local player league component (player->vtbl_0x3a4). Compares the room/team leader id (team->vtbl_0x88()->vtbl_0x0c) against my id (player[1]). If I am the leader: enter directly (FUN_107cb5c0 -> mgr(+0x2abc)->vtbl_0x0c, then FUN_111764b0(1,1)). Otherwise: pop a confirm dialog (id 0x1ff6, 'LeagueRespondOkHandler'/'LeagueRespondCancelHandler') showing the leader's name (FUN_1024e9b0(name,6)).",
+      "confidence": "medium",
+      "subsystem": "league (room entry)",
+      "serverRelevance": "validation/client (client gates on leadership; enter/respond sent to server)",
+      "formulas": [
+        "isLeader = (team->vtbl_0x88()->vtbl_0x0c() == myId(player[1]))",
+        "dialog id = 0x1ff6"
+      ],
+      "costs": [],
+      "notes": "Leader auto-enters; non-leaders are prompted. Uses league component offset player->vtbl_0x3a4."
+    },
+    {
+      "address": "10944610",
+      "currentName": "FUN_10944610",
+      "proposedName": "CGuildMatchInfo::GetRecordById",
+      "purpose": "Standard InfoManager accessor for the CGuildMatchInfo config table. Gets/creates the singleton manager (CGuildMatchInfo::GetInfoManager or CInfoManager::FindByName('CGuildMatchInfo')), then does the usual 2D bucketed lookup to return the record for a given id.",
+      "confidence": "high",
+      "subsystem": "league/guild-match (config)",
+      "serverRelevance": "config data (static table; both client and server read the same guild-match config)",
+      "formulas": [
+        "idx = id - mgr[0xc]; valid if 0<=idx<mgr[9]; record = mgr[8][idx/mgr[10]][idx%mgr[10]]",
+        "mgr[8]=bucket array, mgr[9]=count, mgr[0xa]=stride/bucketSize, mgr[0xc]=id base"
+      ],
+      "costs": [],
+      "notes": "Stock InfoManager pattern (same shape as FUN_10968af0 and the CMessageParmDescInfo lookups in 1093faf0)."
+    },
+    {
+      "address": "10946980",
+      "currentName": "FUN_10946980",
+      "proposedName": "MailGiftBoxReaderVO::Build",
+      "purpose": "Builds a mail-with-attachments reader VO ('GIFT_BOX_READER_DATA_CLASSNAME' + nested 'MAIL_EXTRACT_ITEM_DATA_CLASSNAME' item list). Reads the mailbox at localPlayer(+0x2ac4), scans mail records (via FUN_114fd740 list piStack_5c..piStack_58) to find the mail whose key matches (*(mail)==*(mailbox+0x78) && mail[1]==*(mailbox+0x7c)). Builds item sub-array from mail attachment entries (mail[0x29]..mail[0x2a], stride 0x20).",
+      "confidence": "medium",
+      "subsystem": "mail",
+      "serverRelevance": "client-only (VO over server-synced mail; attachment claim is a separate server request)",
+      "formulas": [
+        "attachment item stride = 0x20 (32) bytes; count = (mail[0x2a]-mail[0x29])>>5",
+        "per item: itemId=*(base+0x14), _count=u16 *(base+0x10), _index=u16 *(base+0x02)",
+        "_itemIconPathName = ItemInfo(itemId)->[0xb4]",
+        "mail fields: gold(nGiftID area DAT_11dc0944)=mail[0x23], goldIndex=mail[0x24], source=(char)mail[2], strSender=mail[0xb], strTitle=mail[0x17], strContent=mail[0x1d]"
+      ],
+      "costs": [
+        "attachment amounts read as u16 per-item _count; gold amount at mail[0x23], goldIndex at mail[0x24]"
+      ],
+      "notes": "mailbox component offset localPlayer+0x2ac4. Mail record: sender +0x2c(0xb dwords), title +0x5c(0x17), content +0x74(0x1d), attachments vector at +0xa4/+0xa8 (0x29/0x2a)."
+    },
+    {
+      "address": "10956f40",
+      "currentName": "FUN_10956f40",
+      "proposedName": "TeamMemberInfoVO::Build",
+      "purpose": "Builds a party/team member info VO. Reads the member object (param_2): weapon type from avatar record, level/HP/faction/subteam. weaponType derives from avatar record via CAvatarInfo::ResolveRecordById(atoi(name))->[0x14]-0x1e. subTeamID computed from FUN_112e5540/FUN_112e5600 of the member net id.",
+      "confidence": "medium",
+      "subsystem": "matchmaking/party",
+      "serverRelevance": "client-only (VO over synced team roster)",
+      "formulas": [
+        "weaponType = CAvatarInfo::ResolveRecordById(atoi(name))->[0x14] - 0x1e   (0x1e=30 weapon base)",
+        "subTeamID = FUN_112e5600(netId) + FUN_112e5540(netId)*4   (default -1 if no team)",
+        "memberLevel = CPlayer::GetHuntRankOrCount; memberHRLevel = FUN_1025b060(); memberTotalHP = FUN_1134b990(); memberCurrentHP = FUN_1025b060()"
+      ],
+      "costs": [],
+      "notes": "Emits weaponType, memberLevel, memberHRLevel, memberName, memberTotalHP, memberCurrentHP, memberState=0, memberNetID=param_2[1], Watched=0, membterFaction, serverID=param_2[0xb5e], subTeamID. serverID offset 0xb5e dwords is notable."
+    },
+    {
+      "address": "10968af0",
+      "currentName": "FUN_10968af0",
+      "proposedName": "CGuildTipsInfo::GetManager",
+      "purpose": "InfoManager singleton getter for the CGuildTipsInfo config table (guild UI tip/hint strings). Returns the manager instance, lazily created via CInfoManager::FindByName('CGuildTipsInfo').",
+      "confidence": "high",
+      "subsystem": "guild (config)",
+      "serverRelevance": "config data / client-only (UI tip strings)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock InfoManager singleton accessor."
+    },
+    {
+      "address": "1096e6d0",
+      "currentName": "FUN_1096e6d0",
+      "proposedName": "NearbyPlayerListVO::Build",
+      "purpose": "Builds a player-list VO ('PLAYER_CLASS_NAME' entries in 'playerList') from a social list at localPlayer(+0x2d5c). Iterates via list iterator (FUN_113a58c0=atEnd, FUN_113a5930=deref, FUN_113a58d0=advance). Per player: skips if player->vtbl_0xa8()!=0; emits nNetID=player[1], strName (vtbl_0xb8), bFriend (self->vtbl_0x70 friend-check).",
+      "confidence": "medium",
+      "subsystem": "friends/social",
+      "serverRelevance": "client-only (VO over synced social/nearby list)",
+      "formulas": [
+        "social list component offset = localPlayer+0x2d5c",
+        "bFriend = self->vtbl_0x70(playerName)"
+      ],
+      "costs": [],
+      "notes": "Emits nNetID, strName, bFriend into playerList array."
+    },
+    {
+      "address": "1096eaa0",
+      "currentName": "FUN_1096eaa0",
+      "proposedName": "FriendListVO::Build",
+      "purpose": "Builds the friends list VO ('FRIEND_CLASS_NAME' entries in 'playerList'). Copies the friend record vector from friend component (localPlayer+0x2d5c ->vtbl_0x10) via memcpy, then per friend record (skip if record+0x84==0) emits net id, intimacy, group, online, mood, line, guild, team, star.",
+      "confidence": "medium",
+      "subsystem": "friends/social",
+      "serverRelevance": "client-only (VO over server-owned friend graph)",
+      "formulas": [
+        "friend record offsets: netId=+0x28, name=+0x24, statusField=+0x2c, HRlevelSrc=+0x34, intimate=+0x48, online(byte)=+0x38, groupPtr=+0x84 (groupId = *(group+4)), mood=+0x68, lineID=+0x3c, teamID=+0x88, hunterStar=+0xa4",
+        "HRlevel = (record+0x34 != 0) ? FUN_1025b060() : 0"
+      ],
+      "costs": [],
+      "notes": "Emits netId, intimate, groupId, isOnline, strMood, lineID, guildName (FUN_1096f9f0), nTeamID, strHunterStar. Cross-ref TlvFriendBriefInfo/TlvFriendRoleInfo; 'intimate' = intimacy points at +0x48."
+    },
+    {
+      "address": "10974590",
+      "currentName": "FUN_10974590",
+      "proposedName": "GuildInstanceModel::RegisterHandlers",
+      "purpose": "UI-model initializer for the guild-instance/knockout window. Registers handlers: InitModel, SwitchViewMode, FetchInstaceData, FetchGuildConfigData, FetchGuildKnockoutRemainSeconds, FetchNormalKnockoutRemainSeconds, RecordNormalKnockoutStartTime, InstancePayMode, GetInstanceEnterMode, GetPunishPlayTimes, NotifyWindow, GetMonsterIcon. Seeds model+0x20 with current time64 (cached DAT_123bbcc8/ccc override else _time64).",
+      "confidence": "high",
+      "subsystem": "guild (instance/knockout)",
+      "serverRelevance": "client-only (UI registration; DAT_123bbcc8 is a debug/test time override)",
+      "formulas": [
+        "model+0x20 = (DAT_123bbcc8|DAT_123bbccc != 0) ? cachedTime : _time64(NULL)"
+      ],
+      "costs": [],
+      "notes": "Handler names reveal guild-instance flow: pay mode, enter mode, punish play-times, knockout remaining-seconds (qualifier vs normal)."
+    },
+    {
+      "address": "10976560",
+      "currentName": "FUN_10976560",
+      "proposedName": "GuildInstanceModel::FetchGuildKnockoutRemainSeconds",
+      "purpose": "Computes and emits guild knockout instance timing for the UI. Reads config (FUN_11734e90): guildQualifierInstance = cfg[0x80], guildKnockoutInstance = cfg[0x84]. Looks up match record via CGuildMatchInfo::GetRecordById(matchId). Computes remaining seconds = scheduledTime(round+1) - now, where scheduledTime = FUN_1171cda0(roundIndex+1, param).",
+      "confidence": "medium",
+      "subsystem": "guild (instance/knockout timing)",
+      "serverRelevance": "validation/client (client mirrors server-scheduled knockout timing for countdown display; server authoritative on actual gating)",
+      "formulas": [
+        "guildQualifierInstance = FUN_11734e90()[0x80]; guildKnockoutInstance = FUN_11734e90()[0x84]",
+        "guildKnockoutRemainSeconds = FUN_1171cda0(roundIndex+1, arg) - now",
+        "now = (DAT_123bbcc8|DAT_123bbccc)!=0 ? cachedTime : _time64(NULL)",
+        "guarded by arg count == 4; roundIndex from arg[0xe] (tag 3/4) else 0xDEADBEAF sentinel"
+      ],
+      "costs": [],
+      "notes": "FUN_1171cda0(round+1,...) returns the schedule boundary epoch for the next round; subtracting current epoch yields countdown."
+    },
+    {
+      "address": "10981e80",
+      "currentName": "FUN_10981e80",
+      "proposedName": "IpvpAttackInfoPlayerDataVO::Build",
+      "purpose": "Builds 'mh.model.Ipvp.IpvpAttackInfoPlayerData' VO for an interactive-PVP attacker. Resolves the target player by id (social mgr vtbl_0x7c), and if not self (vtbl_0xa8()==0) emits name (vtbl_0xb8, field DAT_11da7300) and Faction (vtbl_0x44).",
+      "confidence": "medium",
+      "subsystem": "league/pvp (faction)",
+      "serverRelevance": "client-only (VO over synced attacker state)",
+      "formulas": [
+        "targetId = ((arg+4)&0x8f==3||4) ? *(arg+8) : 0xDEADBEAF (guarded by argCount==1)",
+        "Faction = player->vtbl_0x44()"
+      ],
+      "costs": [],
+      "notes": "iPVP = interactive/instanced PVP faction attack info."
+    },
+    {
+      "address": "10985850",
+      "currentName": "FUN_10985850",
+      "proposedName": "PvpBattleLeagueListVO::Build",
+      "purpose": "Large builder for the league/PVP-battle screen. Reads league component (localPlayer+0x2b9c). Emits header fields strTitleName, maxPvpBattleCount (component vtbl_0x20), curPvpBattleCount (vtbl_0x28), nEntrustVipCnt (FUN_11548ea0 when data[0xabe]!=0). Iterates league entries (vector stride 0x14): iLeagueID, iCountLeague = (levelsEnd-levelsBegin)>>2, plus a per-level sub-array (levelGroupID, levelID, levelName) and matching leagueTasksArr. Then a notices loop (stride 0x18): noticeLeagueID, noticeStartLeagueTime, noticeEndLeagueTime, noticePvpBattleRound, noticeLeagueName. Also builds pvpBattleListArr and pvpBattleNoticeArr; CLeagueInfo::CollectLeagueScheduleEntries fills the notice list.",
+      "confidence": "low",
+      "subsystem": "league/pvp-battle",
+      "serverRelevance": "client-only (VO over server league schedule/task state)",
+      "formulas": [
+        "league entry stride = 0x14 (20) bytes; iCountLeague = (levelVecEnd - levelVecBegin) >> 2",
+        "notice entry stride = 0x18 (24) bytes",
+        "maxPvpBattleCount = leagueComp->vtbl_0x20(); curPvpBattleCount = leagueComp->vtbl_0x28()",
+        "time offset constant 0x261d0 (=155600) added to a base time (iStack_164)"
+      ],
+      "costs": [
+        "maxPvpBattleCount / curPvpBattleCount = per-player league battle attempt cap and usage; nEntrustVipCnt = VIP entrust count"
+      ],
+      "notes": "league component offset localPlayer+0x2b9c. Heavy decompiler stack aliasing lowers confidence on some offsets; field names and array structure are reliable."
+    },
+    {
+      "address": "109af720",
+      "currentName": "FUN_109af720",
+      "proposedName": "ChatModel::RegisterHandlers",
+      "purpose": "UI-model initializer for the chat window. Registers handlers: InitModel, GetChatMess, SetBlockList, GetBlockList, Clean, SwitchViewMode.",
+      "confidence": "high",
+      "subsystem": "chat",
+      "serverRelevance": "client-only (UI registration)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Block list (mute) managed here; actual block persistence is a server request."
+    },
+    {
+      "address": "109afd60",
+      "currentName": "FUN_109afd60",
+      "proposedName": "ChatMessageVO::Build",
+      "purpose": "Builds a single chat-message VO appended to 'chatArray' (class 'CHATMESS_CLASS_NAME'). Reads a received chat-message struct (param_2) and maps its fields. Uses global chat model handles (DAT_123bd3f0/f4/f8). m_nWorldSvrID is zeroed when it equals the local world-server id (guildMgr+0x2d78).",
+      "confidence": "high",
+      "subsystem": "chat",
+      "serverRelevance": "client-only (VO over received chat packet)",
+      "formulas": [
+        "chat msg struct offsets (dword index unless noted): m_nSrcId=[0], m_sSrcName=+0x10([4]), m_sMsg=+0x30([0xc]), m_bSrcSelf=byte+0x230([0x8c]), m_nLineID=[0x8d], m_nVip=[0x8e], m_bVipCanUse=byte[0x90], m_sGuildName=+0x241, m_nLv=[0x99], m_nHRLv=[0x9a], m_sStarlv=+0x26c([0x9b]), m_nHours=[0xa1], m_nMinutes=[0xa2], m_nSeconds=[0xa3], m_bIsOnline=byte[0xa4], worldSvrId=[0x8f]",
+        "m_nWorldSvrID = (msg[0x8f] == *(guildMgr+0x2d78)) ? 0 : msg[0x8f]"
+      ],
+      "costs": [],
+      "notes": "m_nSrcDBId cleared (FUN_104d14d0). Cross-ref TlvChatSpeakData for wire layout."
+    },
+    {
+      "address": "109b87d0",
+      "currentName": "FUN_109b87d0",
+      "proposedName": "PopChatModel::RegisterHandlers",
+      "purpose": "UI-model initializer for the pop/bubble-chat model. Registers: InitModel, GetPopChatString, GetPopChatUpdateIndex, GetFillThreadId, GetProcessThreadId, GetFrameId.",
+      "confidence": "high",
+      "subsystem": "chat (bubble)",
+      "serverRelevance": "client-only (UI registration)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Threaded fill/process ids suggest async chat-bubble rendering; pure client."
+    },
+    {
+      "address": "109b8b70",
+      "currentName": "FUN_109b8b70",
+      "proposedName": "PopChatDataVO::Build",
+      "purpose": "Builds bubble-chat VO ('POP_CHAT_DATA_CLASSNAME') into either 'm_PopChatArray01' or 'm_PopChatArray02'. Iterates the pop-chat entry list (this+0x38..+0x3c, stride 0xc). Per entry emits strTXT, strChatBg, nPlayerId, bUpdateIcon=1, nWidth=-1, nHeight=-1. Target array chosen by DAT_1202e818[0x10]->vtbl_0x608 (0 -> array01, 1 -> array02). Writes count to output+0x28.",
+      "confidence": "medium",
+      "subsystem": "chat (bubble)",
+      "serverRelevance": "client-only (local render list)",
+      "formulas": [
+        "pop-chat entry stride = 0xc (12) bytes; count = (this+0x3c - this+0x38)/0xc",
+        "strTXT = *(entry+4); strChatBg = *(entry+8); nPlayerId = FUN_10c3f250() >> 0x1e (top 2 bits)",
+        "nWidth = nHeight = 0xffffffff (-1, auto)"
+      ],
+      "costs": [],
+      "notes": "nPlayerId derived as value>>30 (2-bit lane/slot id)."
+    },
+    {
+      "address": "109deac0",
+      "currentName": "FUN_109deac0",
+      "proposedName": "FactionBattleScoreVO::Build",
+      "purpose": "Builds the faction/PVP battle result score VO. Reads a score struct (unaff_EBX) and the level context (CMHLevelSystem::GetCurrentContext). Emits redBound/blueBound, playerDamage, damagePercentage, useTime, playerScore, accumulateScore, damageScore, withOutInjuryScore, isRedFaction, speedScore, charLevel, charName, winScore. Guarded on local player + battle context + FUN_114584c0(myId) valid.",
+      "confidence": "medium",
+      "subsystem": "league/pvp (faction battle scoring)",
+      "serverRelevance": "validation/client (client re-derives display scores from the same formula the server uses; server remains authoritative on stored scores)",
+      "formulas": [
+        "score struct offsets: playerScore=+0x28, speedScore(base)=+0x2c, damageScore=+0x30, withOutInjuryScore=+0x34, redBound=+0x20, blueBound=+0x24",
+        "redBound=*(model+0x20), blueBound=*(model+0x24)",
+        "accumulateScore = *(EBX+0x28) + FUN_1025b060()",
+        "winScore = (ctx[0xc8] * ctx[0xd4]) / 100    (ctx=CMHLevelSystem::GetCurrentContext; /100 integer div)",
+        "isRedFaction = (player->vtbl_0x44() == 1)",
+        "speedScore: if redBound==blueBound OR (winningSideFlag != isRedFaction): speedScore = *(EBX+0x2c); else speedScore = *(EBX+0x2c) - (ctx[0xc8]*ctx[0xd4])/100",
+        "winningSideFlag = (blueBound <= redBound)  [i.e. red is winning side]"
+      ],
+      "costs": [
+        "winScore bonus = (ctx[0xc8] * ctx[0xd4]) / 100 (a percentage of a base value); speedScore deducts this bonus from raw score when on winning side"
+      ],
+      "notes": "This is the one function in the chunk with real scoring arithmetic: the /100 win-bonus and the winning-side speedScore adjustment should be replicated server-side for authoritative scoring. ctx[0xc8]=base value, ctx[0xd4]=percent factor."
+    },
+    {
+      "address": "109e0950",
+      "currentName": "FUN_109e0950",
+      "proposedName": "GuildActivityTaskInfoVO::Build",
+      "purpose": "Builds the guild activity/task overview VO ('GUILDER_INFO_DATA_NAME' + nested 'GUILDER_ACTIVITY_TASK_DATA_NAME'). Reads guild data (guildMgr+0x2abc) and activity component (+0x2ab0). Emits guild-week score, player/guild activity totals and caps, then five task VOs (taskA=1-star, taskB=2-star, taskC=3-star, taskD=4-star, taskS=special id 99999). Each task VO: taskId, nStar, strNameTask, nCountTask, nTotalCountTask, nScoreTask, nStatus.",
+      "confidence": "low",
+      "subsystem": "guild (tasks / activity / contribution)",
+      "serverRelevance": "client-only VO, but reveals authoritative guild-activity/task fields the server owns (scores, activity caps, completion status)",
+      "formulas": [
+        "nGuildScoreInWeek = guildData[0x70]; nPlayerScoreTotal = guildData->vtbl_0x18(); nPlayerActivityInToday = guildData->vtbl_0x34()",
+        "nGuildActivityInToday = guildData[0x75]; nGuildActivityMax = FUN_117d8be0()[0x9c]",
+        "task record (FUN_117d8be0) offsets per star tier A/B/C/D: nTotalCountTask = record[+0x40,+0x44,+0x48,+0x4c]; nScoreTask = record[+0x50,+0x54,+0x58,+0x5c]",
+        "nStar values: taskA=1, taskB=2, taskC=3, taskD=4, taskS=0 (id 99999)",
+        "nStatus: if task-done-flag ptr != 0 -> 1 (completed); else claimable-check guild->vtbl_0x60() ? 4 (claimable) : -1 (locked/0xffffffff)",
+        "taskS.nStatus = (FUN_114a93d0() && guildComp->vtbl_0x30(0x494,2,&out) && out>=1) ? 1 : 0",
+        "taskS.taskId = 99999 sentinel"
+      ],
+      "costs": [
+        "nScoreTask = contribution/activity points awarded per task tier (record offsets +0x50..+0x5c)",
+        "activity caps: nPlayerActivityMax, nGuildActivityMax (daily activity ceilings)",
+        "taskS gated by counter id 0x494 (guild-comp vtbl_0x30 query, threshold >=1)"
+      ],
+      "notes": "Status enum {completed=1, claimable=4, locked=-1, in-progress=0} is reusable server-side. guild data offset +0x2abc, activity component +0x2ab0. Decompiler stack aliasing is heavy; treat offsets as best-effort."
+    },
+    {
+      "address": "109e13d0",
+      "currentName": "FUN_109e13d0",
+      "proposedName": "GuildTaskDetailVO::Build",
+      "purpose": "Builds a single guild-task detail VO ('GUILD_TASK_INFO_DATA_NAME'). Guarded on argCount==2. Reads guild task config record (FUN_104d8d20(taskId)) and the player's guild component (guildMgr+0x2abc region, ptrs at +0xaaf/+0xaac). Emits strName, taskId, reward (nMoneyType/nMoneyCount), nTaskAddition, strTarget (task step), UI button flags, and nTaskState.",
+      "confidence": "low",
+      "subsystem": "guild (task detail / reward)",
+      "serverRelevance": "client-only VO, but exposes guild-task reward + state model that server must own",
+      "formulas": [
+        "taskId = arg[0x20] when (arg+0x1c)&0x8f in {3,4} else 0xDEADBEAF sentinel; special S-task id = 99999",
+        "reward record = FUN_10804940(taskCfg+0x4c, 0x18)",
+        "reward split: CPlayer::GetHuntRankOrCount(reward[1], &moneyFloat, &expInt, 0); if moneyFloat>0 && reward[0xc]>0 -> nMoneyType=0,nMoneyCount; if expInt>0 && reward[8]>0 -> nMoneyType=0,nMoneyCount",
+        "nTaskAddition = FUN_109e22e0() ? [+4] : 0",
+        "task step vector stride = 0xec (236) bytes; strTarget from step, fields step[+0x18], step[+0x1c] (DAT_11de486c/11de4830)",
+        "nTaskState = guildComp->vtbl_0x30(0x494, 2, &out)",
+        "all button flags bShowAccept/bEnableAccept/bShowGiveUp/bEnableGiveUp/bShowFinish/bEnableFinish emitted (0 in this path)"
+      ],
+      "costs": [
+        "nMoneyType/nMoneyCount = task reward currency & amount; nTaskAddition = bonus/addition value",
+        "step-progress fields step+0x18 (current) / step+0x1c (target)"
+      ],
+      "notes": "counter id 0x494 recurs (guild task-state query, same as taskS in 109e0950). Reward record accessed via FUN_10804940 with type 0x18. Multiple 'Removing unreachable block' warnings indicate optimized-away branches; button-enable logic not fully recoverable here."
+    }
+  ]
+}

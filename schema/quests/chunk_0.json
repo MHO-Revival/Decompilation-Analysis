@@ -1,0 +1,436 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "1002c890",
+      "currentName": "FUN_1002c890",
+      "proposedName": "png_write_PLTE",
+      "purpose": "libpng: writes a PLTE palette chunk. Validates color count (0..0x100), rejects on grayscale PNG. Not quest-related; stock third-party plumbing.",
+      "confidence": "high",
+      "subsystem": "libpng (third-party)",
+      "serverRelevance": "client-only",
+      "formulas": ["palette bound: reject if param_3==0 (when flag bit0 clear) or 0x100 < param_3", "chunk length = param_3*3 (RGB triples), tag 0x504c5445='PLTE'"],
+      "notes": "Ignore for server rebuild; included only for completeness."
+    },
+    {
+      "address": "101468d0",
+      "currentName": "FUN_101468d0",
+      "proposedName": "TdrText_Print_EntrustGroupStat",
+      "purpose": "TDR debug-text serializer for a level-entrust group-stat record. Emits groupID, groupStatCnt and two parallel arrays (stat type/value), then a per-level array. Reveals the entrust group struct field layout used on the wire.",
+      "confidence": "high",
+      "subsystem": "entrust/commission (TDR serialization)",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0x0 groupID (int, *param_1); +0x4 groupStatCnt (short, param_1[1] low)",
+        "+0x6 groupStatType[10] (bytes, printed ' 0x%02x')",
+        "+0x10 groupStatValue[10] (ints, param_1[4+i])",
+        "+0x38 groupLevelCnt (short, param_1[0xe]); then groupLevelCnt sub-records via FUN_10145900",
+        "bounds: groupStatCnt <0 -> return -6, >10 -> return -7 (max 10 stat entries)",
+        "bounds: groupLevelCnt <0 -> return -6, >0x40 -> return -7 (max 64 entrust levels)"
+      ],
+      "notes": "Field caps (10 stats, 64 levels) are the authoritative array-size limits the server must enforce when parsing this struct."
+    },
+    {
+      "address": "1019be00",
+      "currentName": "FUN_1019be00",
+      "proposedName": "TdrUnpack_iEntrustUIStep",
+      "purpose": "TDR binary->host reader for a single-field struct {iEntrustUIStep:int}. Returns -0x13 (0xffffffed) if buffer null. Stack-canary guarded.",
+      "confidence": "high",
+      "subsystem": "entrust (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iEntrustUIStep (int)", "null buffer -> -0x13"],
+      "notes": "iEntrustUIStep = client entrust dialog wizard step; likely echoed, not authoritative."
+    },
+    {
+      "address": "1019beb0",
+      "currentName": "FUN_1019beb0",
+      "proposedName": "TdrText_Print_iEntrustUIStep",
+      "purpose": "TDR debug-text printer for {iEntrustUIStep:int}.",
+      "confidence": "high",
+      "subsystem": "entrust (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["struct: +0x0 iEntrustUIStep (int)"]
+    },
+    {
+      "address": "1019bee0",
+      "currentName": "FUN_1019bee0",
+      "proposedName": "TdrText_ToString_iEntrustUIStep",
+      "purpose": "TDR reader that writes into a caller buffer with length cap, NUL-terminates (clamps written length to param_3-1). Single field iEntrustUIStep.",
+      "confidence": "high",
+      "subsystem": "entrust (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["clamp: if param_3 <= written, written = param_3-1; buf[written]=0"]
+    },
+    {
+      "address": "1019bfb0",
+      "currentName": "FUN_1019bfb0",
+      "proposedName": "TdrPack_iEntrustUIStep",
+      "purpose": "TDR host->binary packer for {iEntrustUIStep}. Clamps offset to buffer capacity and NUL-pads.",
+      "confidence": "high",
+      "subsystem": "entrust (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["clamp: cap=param_2[2], used=param_2[1]; if cap<=used, used=cap-1; TdrBuf_PutNulAt(cap,used)"]
+    },
+    {
+      "address": "102bdfa0",
+      "currentName": "FUN_102bdfa0",
+      "proposedName": "TdrUnpack_InteractTargetReq",
+      "purpose": "TDR reader for {iTargetID:int, iRequestPlayer:int}. This is a generic interact/entrust request header (target entity + requesting player).",
+      "confidence": "high",
+      "subsystem": "interact/entrust request (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iTargetID (int); +0x4 iRequestPlayer (int)", "null buffer -> -0x13"]
+    },
+    {
+      "address": "102be040",
+      "currentName": "FUN_102be040",
+      "proposedName": "TdrText_Print_InteractTargetReq",
+      "purpose": "TDR debug printer for {iTargetID, iRequestPlayer}.",
+      "confidence": "high",
+      "subsystem": "interact/entrust request (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["struct: +0x0 iTargetID; +0x4 iRequestPlayer"]
+    },
+    {
+      "address": "102bf990",
+      "currentName": "FUN_102bf990",
+      "proposedName": "TdrText_Print_InteractExtRequestResult",
+      "purpose": "TDR debug printer for an interact request/result wrapper with a discriminated union. chExtType selects which sub-struct (stRequest / stResult) is present.",
+      "confidence": "high",
+      "subsystem": "interact/action-point (TDR)",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0x0 chExtType (byte, printed 0x%02x); +0x1 iResultCode (int)",
+        "union tag: stRequest and stResult sub-records emitted only when chExtType == 0x2 (calls TdrDebugFormat_InteractRequestWrap / _ActionPointDataWrap)"
+      ],
+      "notes": "chExtType==2 gates presence of the request+result payloads (action-point interaction extension)."
+    },
+    {
+      "address": "1041e840",
+      "currentName": "FUN_1041e840",
+      "proposedName": "TdrUnpack_ChapterIdIndex",
+      "purpose": "TDR reader for {iChapterId:int, iIndex:int} - chapter selection/recall request.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iChapterId; +0x4 iIndex", "null buffer -> -0x13"]
+    },
+    {
+      "address": "1041e8e0",
+      "currentName": "FUN_1041e8e0",
+      "proposedName": "TdrText_Print_ChapterIdIndex",
+      "purpose": "TDR printer for {iChapterId, iIndex}.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["struct: +0x0 iChapterId; +0x4 iIndex"]
+    },
+    {
+      "address": "1041ec50",
+      "currentName": "FUN_1041ec50",
+      "proposedName": "TdrText_Print_ChapterResult",
+      "purpose": "TDR printer for {iErrCode:int, iChapterId:int, iIndex:int} - chapter operation result packet.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iErrCode; +0x4 iChapterId; +0x8 iIndex"]
+    },
+    {
+      "address": "1041f870",
+      "currentName": "FUN_1041f870",
+      "proposedName": "TdrUnpack_ChapterId",
+      "purpose": "TDR reader for {iChapterId:int}. Returns -0x13 on null buffer.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iChapterId", "null buffer -> -0x13"]
+    },
+    {
+      "address": "1041f8f0",
+      "currentName": "FUN_1041f8f0",
+      "proposedName": "TdrText_Print_ChapterId",
+      "purpose": "TDR printer for {iChapterId:int}.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["struct: +0x0 iChapterId"]
+    },
+    {
+      "address": "1041f920",
+      "currentName": "FUN_1041f920",
+      "proposedName": "TdrText_ToString_ChapterId",
+      "purpose": "TDR to-string for {iChapterId} into capped caller buffer, NUL-terminated.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["clamp: if cap<=written, written=cap-1; buf[written]=0"]
+    },
+    {
+      "address": "1041f9b0",
+      "currentName": "FUN_1041f9b0",
+      "proposedName": "TdrPack_ChapterId",
+      "purpose": "TDR packer for {iChapterId} with capacity clamp and NUL pad.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["clamp: cap=param_2[2], used=param_2[1]; if cap<=used used=cap-1"]
+    },
+    {
+      "address": "1041fba0",
+      "currentName": "FUN_1041fba0",
+      "proposedName": "TdrUnpack_ChapterErrResult",
+      "purpose": "TDR reader for {iErrCode:int, iChapterId:int} - chapter result. Returns -0x13 on null.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "validation",
+      "formulas": ["struct: +0x0 iErrCode; +0x4 iChapterId", "null buffer -> -0x13"]
+    },
+    {
+      "address": "1041fc40",
+      "currentName": "FUN_1041fc40",
+      "proposedName": "TdrText_Print_ChapterErrResult",
+      "purpose": "TDR printer for {iErrCode, iChapterId}.",
+      "confidence": "high",
+      "subsystem": "chapters (TDR)",
+      "serverRelevance": "client-only",
+      "formulas": ["struct: +0x0 iErrCode; +0x4 iChapterId"]
+    },
+    {
+      "address": "104d8260",
+      "currentName": "FUN_104d8260",
+      "proposedName": "CLevelEntrustNpcInfo::GetEntryByKey",
+      "purpose": "Static-config accessor for CLevelEntrustNpcInfo (level-entrust NPC table). Resolves the singleton InfoManager (falls back to CInfoManager::FindByName), then performs a 2-level (bucketed) index lookup by key.",
+      "confidence": "medium",
+      "subsystem": "entrust config",
+      "serverRelevance": "validation",
+      "formulas": [
+        "guard: param_1 != -1 AND (param_1!=0 || mgr[0xc]==0) AND mgr[10]!=0",
+        "key = param_1 - mgr[0xc] (mgr[0xc]=id base offset); require 0 <= key < mgr[9] (mgr[9]=count)",
+        "bucket = mgr[8][key / mgr[10]] (mgr[10]=bucket size); entry = bucket[key % mgr[10]]"
+      ],
+      "notes": "Standard CInfoManager bucketed-array pattern (mgr[8]=bucket ptr array, [9]=count, [0xc]=id base, [10]=stride). Same config the server should load."
+    },
+    {
+      "address": "104faa60",
+      "currentName": "FUN_104faa60",
+      "proposedName": "ReviveModel::RegisterLuaHandlers",
+      "purpose": "Registers revive/death-watch UI callbacks (GetReviveData, RequestRevive, Start/StopDeathWatchModel, ChangeZIconFunc, RequestQuikBuy, ChangeAutoRevieState, PlayerRefuseRevive) into a Lua/UI dispatch table. Not quest logic.",
+      "confidence": "medium",
+      "subsystem": "revive UI (unrelated)",
+      "serverRelevance": "client-only",
+      "formulas": ["*(param_1+0x24)=0 init"],
+      "notes": "Included because it sits in this chunk; not quest-relevant."
+    },
+    {
+      "address": "107ca920",
+      "currentName": "FUN_107ca920",
+      "proposedName": "CHubEntryConfigKingQuestInfo::GetEntryByIndex",
+      "purpose": "Linear accessor into the King-Quest hub-entry config array by index.",
+      "confidence": "high",
+      "subsystem": "quest hub config (king quest)",
+      "serverRelevance": "validation",
+      "formulas": ["count = (mgr[6]-mgr[5])>>2 (dword ptr array); require 0<=param_1<count; entry = mgr[5][param_1]"]
+    },
+    {
+      "address": "107ca9b0",
+      "currentName": "FUN_107ca9b0",
+      "proposedName": "CHubEntryConfigKingQuestInfo::GetCount",
+      "purpose": "Returns element count for King-Quest hub-entry config (virtual call slot +0x28).",
+      "confidence": "high",
+      "subsystem": "quest hub config (king quest)",
+      "serverRelevance": "validation",
+      "formulas": ["count via vtable[0x28/4]()"]
+    },
+    {
+      "address": "107cab60",
+      "currentName": "FUN_107cab60",
+      "proposedName": "CHubEntryConfigLetterQuestInfo::GetEntryByIndex",
+      "purpose": "Linear accessor into the Letter-Quest (commission letter) hub-entry config array by index.",
+      "confidence": "high",
+      "subsystem": "quest hub config (letter quest)",
+      "serverRelevance": "validation",
+      "formulas": ["count = (mgr[6]-mgr[5])>>2; require 0<=param_1<count; entry = mgr[5][param_1]"]
+    },
+    {
+      "address": "107cabf0",
+      "currentName": "FUN_107cabf0",
+      "proposedName": "CHubEntryConfigLetterQuestInfo::GetCount",
+      "purpose": "Returns element count for Letter-Quest hub-entry config (vtable +0x28).",
+      "confidence": "high",
+      "subsystem": "quest hub config (letter quest)",
+      "serverRelevance": "validation",
+      "formulas": ["count via vtable[0x28/4]()"]
+    },
+    {
+      "address": "107cbc00",
+      "currentName": "FUN_107cbc00",
+      "proposedName": "HubEntryConfig::ResolveEntryScriptForPlayer",
+      "purpose": "Given a player/context (param_2), scans four hub-entry config tables in order - CHubEntryConfigInfo, CHubEntryConfigKingQuestInfo, CHubEntryRaidConfigInfo, CHubEntryConfigLetterQuestInfo - and for the first entry that MatchEntry()s and whose two chained lookups (FUN_107d7930 then FUN_107caf90) succeed, returns an associated string (copied into param_1 std::string). Determines which hub quest entry / entry-point script applies.",
+      "confidence": "medium",
+      "subsystem": "quest hub entry resolution",
+      "serverRelevance": "validation",
+      "formulas": [
+        "iterate each table 0..GetCount()-1 (GetCount via vtable+0x28)",
+        "match: CHubEntryConfigInfo entry offset +0x28 -> FUN_107d7930 -> its +0x14 -> FUN_107caf90 -> +0x14",
+        "KingQuest match uses entry +0x14; Raid uses +0x28; Letter uses +0x10 as first indirection",
+        "result string materialized from matched entry via +0x14 chain"
+      ],
+      "notes": "MatchEntry(param_2) is the eligibility check (level/prereq). Server must replicate which quest hub entry a player sees; exact match predicate is in FUN_107d7930/FUN_107caf90 (other chunks)."
+    },
+    {
+      "address": "107e1d80",
+      "currentName": "FUN_107e1d80",
+      "proposedName": "OperationActivityModel::RegisterLuaHandlers",
+      "purpose": "Registers ~18 operation-activity/anti-addiction Lua callbacks (C2AS_LevelMatch, C2AS_LevelStart, RequestOPSimpleData, GetActivityNoticeStatus, etc.) and a daily-login counter 's_loginIngameEachDay'. Marketing/operation-activity subsystem, not core quest state.",
+      "confidence": "medium",
+      "subsystem": "operation activity (adjacent)",
+      "serverRelevance": "client-only",
+      "formulas": ["daily login counter registered at param_1+0x24, cap 0x100"],
+      "notes": "C2AS_* = client-to-activity-server calls. Not quest objective logic."
+    },
+    {
+      "address": "107e2430",
+      "currentName": "FUN_107e2430",
+      "proposedName": "OperationActivityModel::RegisterSubHandlers",
+      "purpose": "Secondary registration for operation-activity model: _OpenInternalAddress, _RequestExeByUniqueID, _RequestOPSimpleData, _RequestOPDetailInfo, _getOnlineTimeFunc.",
+      "confidence": "medium",
+      "subsystem": "operation activity (adjacent)",
+      "serverRelevance": "client-only",
+      "formulas": ["smart-ptr addref pattern: if (flags>>6 &1) call vtable+4 (AddRef) / vtable+8 (Release)"]
+    },
+    {
+      "address": "107eb990",
+      "currentName": "FUN_107eb990",
+      "proposedName": "CTaskChapterInfo::GetEntryByKey",
+      "purpose": "Static-config accessor for CTaskChapterInfo (quest/task chapter definitions). Bucketed 2-level index lookup by chapter key.",
+      "confidence": "high",
+      "subsystem": "chapters config",
+      "serverRelevance": "validation",
+      "formulas": [
+        "guard: key!=-1 AND (key!=0 || mgr[0xc]==0) AND mgr[10]!=0",
+        "key -= mgr[0xc] (id base); require 0<=key<mgr[9]",
+        "entry = mgr[8][key/mgr[10]][key%mgr[10]]"
+      ],
+      "notes": "Chapter table = authoritative chapter definitions (levelMin/levelMax, sourceR, describe seen in FUN_107ee600)."
+    },
+    {
+      "address": "107eba40",
+      "currentName": "FUN_107eba40",
+      "proposedName": "CTaskChapterInfo::GetEntryByIndex",
+      "purpose": "Linear index accessor into CTaskChapterInfo array (0..count).",
+      "confidence": "high",
+      "subsystem": "chapters config",
+      "serverRelevance": "validation",
+      "formulas": ["count=(mgr[6]-mgr[5])>>2; require 0<=idx<count; entry=mgr[5][idx]"]
+    },
+    {
+      "address": "107ebad0",
+      "currentName": "FUN_107ebad0",
+      "proposedName": "CTaskChapterInfo::GetCount",
+      "purpose": "Returns number of task chapters (vtable +0x28).",
+      "confidence": "high",
+      "subsystem": "chapters config",
+      "serverRelevance": "validation",
+      "formulas": ["count via vtable[0x28/4]()"]
+    },
+    {
+      "address": "107eca30",
+      "currentName": "FUN_107eca30",
+      "proposedName": "PlayerTaskDialog::RegisterUiHandlers",
+      "purpose": "Registers the full set of player-task/quest-journal UI event handlers and data providers into the dialog dispatch table: data getters (_getPlayerTasksList, _getNpcTaskInfo(WithItem), _getPlayerTasksChapter, _getPlayerTasksTaskGroupDetail, _getNpcFriendList, _getTaskTimeLeftFunc, _IsTaskShouldCountDown, _getTaskTraceMode) and UI actions (OnAcceptTask, OnGiveupTask, OnPlayerShareTask/GiveupTask, OnCompleteNpcTaskDlg, OnCancelNpcTaskDlg, NpcTaskAwardClick/AwardClick, QuestTrace*, OnResetTask, TaskCheck, FetchQuestData, etc.). Pure client UI wiring.",
+      "confidence": "high",
+      "subsystem": "quest/task UI",
+      "serverRelevance": "client-only",
+      "formulas": ["gated by DAT_1202e818+0x209 flag (register once); DAT_123bb96a=1 set as 'model initialized'"],
+      "notes": "The registered action names (OnAcceptTask/OnGiveupTask/OnCompleteNpcTaskDlg) map to the C2S messages the server must handle authoritatively; the handlers themselves live in FUN_107f1d90-range functions (other chunks)."
+    },
+    {
+      "address": "107edd80",
+      "currentName": "FUN_107edd80",
+      "proposedName": "QuestTraceUI::SetMouseEnable",
+      "purpose": "Fires the 'QuestTraceUIMouseEnable' Lua/UI event with a bool arg, guarded by view-state (DAT_123bcea4 low nibble in {8,9,10}).",
+      "confidence": "medium",
+      "subsystem": "quest tracker UI",
+      "serverRelevance": "client-only",
+      "formulas": ["state gate: (DAT_123bcea4 & 0x8f) in {8,9,10}"]
+    },
+    {
+      "address": "107ee600",
+      "currentName": "FUN_107ee600",
+      "proposedName": "PlayerTaskModel::BuildTaskListVO",
+      "purpose": "Builds the UI value-object list for the player-task dialog. Branch on tab mode DAT_1200acbc: mode 1 = accepted-tasks list (TASK_TASKDATA_CLASS_NAME), mode 2 = history grouped by chapter (TASKHISTORY_CHAPTER_CLASS_NAME + per-group children). Reads authoritative task-instance fields and emits UI fields. Client-side display; exposes the task-instance struct layout.",
+      "confidence": "high",
+      "subsystem": "quest/task UI (display)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "accepted-task instance struct (entry at iVar8): +0x08 = ptr to task-def (def+0x04 = group_id/quest_id, def+0x81 = canShared byte); +0x14 = questStatus; +0x1c = bTracked (byte)",
+        "quest_id emitted = def+0x04; group_id = def+0x04; curStage/totalStage hardcoded 1 in this VO; groupType via FUN_107f1d10()",
+        "level field sourced from FUN_117c1280()",
+        "history chapter (piVar7): ChapterID via vtable+0x18; piVar7[0xb]=chapter cfg -> +0x28 sourceR; (piVar7[0xb]+0x10)[0]=levelMin, [1]=levelMax",
+        "history task-group node: node+0x2c -> +0x4 = nTaskGroupID; IsComplete/curStage via FUN_107ee460/FUN_107ee4f0; nChapterID via vtable+0x18"
+      ],
+      "notes": "DAT_1200acbc is the active tab (1=accepted,2=history). Task-instance offsets (+0x08 def ptr, +0x14 status, +0x1c tracked) are reusable for the server task record."
+    },
+    {
+      "address": "107eef70",
+      "currentName": "FUN_107eef70",
+      "proposedName": "NpcTaskModel::BuildNpcTaskDetailVO",
+      "purpose": "Builds the NPC-task detail VO: award item list (task_awardList / task_selectawardList), task meta (taskName, taskLevel, queststatus, cantGiveup, bTeam, bRepeat), computed reward preview currencies, and the task_targets objective list. Client-side preview; the reward math and the objective/target struct layout are the load-bearing data here.",
+      "confidence": "high",
+      "subsystem": "quest rewards + objectives (display)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "task-def base piVar6; reward table base = piVar6+0x13 (byte offset 0x4c)",
+        "reward lookup by type id via FUN_10804900/FUN_10804880/FUN_10804940/FUN_10804cd0/FUN_108049c0/FUN_10804980/FUN_10804d10/FUN_10804a00; reward record fields at [2],[3],[4]",
+        "farm_actuarialpoint = (int)((float)rewardRec[2] * (float)huntCount) where huntCount from CPlayer::GetHuntRankOrCount(rec[1],0,0,0,&cnt)",
+        "DAT_11dbfbc8 currency (type 0x19) = (int)((float)rewardRec[2] * (float)rank), rank via GetHuntRankOrCount(...,&rank,0)",
+        "gold_bind (type 0x18): DAT_11dc0944 = (int)((float)rewardRec[2]*(float)cnt); gold_bind = (int)((float)rewardRec[3]*(float)cnt2)",
+        "hunter_exp (type 0x21) = rewardRec[2]; hunter_fund = rewardRec[3]; hunter_contribution = *(rec+4)",
+        "huntingCredit (type 0x24) emitted as 0 in preview; npcfriendvalue = *(rec+8) (type via FUN_10804a00)",
+        "cantGiveup = (char)piVar6[7]; bRepeat = (char)piVar6[0x20]; bTeam = 1 if FUN_10804c90 team-size>=2 else 0",
+        "queststatus = task-instance+0x14 (or 0 if no instance)",
+        "OBJECTIVE/TARGET struct (stride 0x3b dwords = 0xEC bytes), fields per target: [0]nTargetID1 [1]nTargetID2 [2]nTargetID3 [3]nTargetID4 [4]nTargetID5 [5]nOpType [6]nCurCount [7]nMaxCount [0xd]strTarget1 [0x13]strTarget2 [0x19]strTarget3 [0x1f]strTarget4 [0x25]strTarget5 [0x34]?(compared !=4) [0x38]nQuestType [0x39]field(DAT_11dca838)[0x3a]?(compared ==3)",
+        "objective display gate: if (target[0x3a]==3 && target[0x34]!=4): complete branch when nCurCount==nMaxCount, in-progress branch when nCurCount<nMaxCount"
+      ],
+      "costs": [
+        "reward currencies: farm_actuarialpoint, gold_bind, hunter_exp, hunter_fund, hunter_contribution, huntingCredit, npcfriendvalue, and a gold amount (DAT_11dc0944)",
+        "reward amount = floor(config_base * player_hunt_count_or_rank) - i.e. rewards scale by hunt rank/count"
+      ],
+      "notes": "CRITICAL for server: the per-target objective struct (nOpType/nCurCount/nMaxCount + up to 5 target IDs + 5 target strings, nQuestType at 0x38) is the objective record the server tracks. Completion comparison is nCurCount>=nMaxCount. Reward preview scales linearly by hunt rank/count via GetHuntRankOrCount; server computes authoritative payout."
+    },
+    {
+      "address": "107f0270",
+      "currentName": "FUN_107f0270",
+      "proposedName": "TaskHistoryModel::BuildChapterGroupsVO",
+      "purpose": "Builds the history 'task groups' VO for a selected chapter+group (selectchapterrecall_chapterid / _groupid). Iterates chapter task-group content records (TASKHISTORY_CONTENT_CLASS_NAME) emitting content/taskname/iscomplete. Client-side display.",
+      "confidence": "high",
+      "subsystem": "chapters/history UI (display)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "chapter looked up via FUN_107eb990 (CTaskChapterInfo)",
+        "per-content node: node+0x2c -> content record; iscomplete = vtable+0x60(record+4) (completion query on task manager DAT_123bb99c)",
+        "content/taskname strings materialized from record"
+      ],
+      "notes": "iscomplete is queried from the local task manager (DAT_123bb99c); authoritative completion is server-side."
+    },
+    {
+      "address": "107f2330",
+      "currentName": "FUN_107f2330",
+      "proposedName": "PlayerTaskModel::BuildTaskDetailVO",
+      "purpose": "Builds the detailed VO for a single player task: award list, select-award list, task meta (taskid, tasktype, taskName, taskLevel, cantGiveup, queststatus, bTeam, bRepeat, bTrace, TaskContent), reward-currency previews, and the full task_targets objective list. Near-duplicate of FUN_107eef70 but for the player-owned (accepted) task including nQuestType per target. Client-side.",
+      "confidence": "high",
+      "subsystem": "quest rewards + objectives (display)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "same OBJECTIVE struct stride 0x3b dwords; per target emits nTargetID1..5, strTarget1..5, nOpType(idx5), nCurCount(idx6), nMaxCount(idx7), nQuestType(idx0x38), field idx0x39",
+        "same completion gate: if (target[0x3a]==3 && target[0x34]!=4): if nCurCount==nMaxCount full-complete VO; else if nCurCount<nMaxCount partial VO",
+        "default (non-count) target VO emits nOpType=0x1f for strTarget4-style entries",
+        "same reward-preview math as FUN_107eef70 (farm_actuarialpoint, gold_bind, hunter_exp/fund/contribution scaling by hunt rank/count)"
+      ],
+      "costs": [
+        "reward currencies mirror FUN_107eef70: farm_actuarialpoint, gold_bind, hunter_exp, hunter_fund, hunter_contribution, huntingCredit"
+      ],
+      "notes": "Confirms objective struct layout twice (kill/gather counts = nCurCount vs nMaxCount, nOpType = objective operation type, nQuestType = objective category). Server must track nCurCount and gate completion at nCurCount>=nMaxCount per target."
+    }
+  ]
+}

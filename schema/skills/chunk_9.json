@@ -1,0 +1,635 @@
+{
+  "chunkIndex": 9,
+  "functions": [
+    {
+      "address": "0x10fbec40",
+      "currentName": "FUN_10fbec40",
+      "proposedName": "CPlayerWeaponFSM::DispatchCallbackTable",
+      "subsystem": "skills/weapon-fsm",
+      "purpose": "Iterates a named callback table ('Callbacks') read from the weapon/skill state definition (CInfoRecord::GetModelString) and dispatches each entry by name to a concrete handler. Outer key must be 'Callbacks'; then for each child it reads the child's name and, when it has a value, string-matches SetValue/SetGValue/HolsterItem/SetAGInput and a long chain of FUN_10a675d0(...) probes to ~30 weapon-effect handlers (FUN_10fc3b60..FUN_10fd0280 range). Also handles per-callback sub-keys OnEnter/Update/OnLeave/SetCanDodge/SetCannotDodge/CheckFps by pushing thunk closures (FUN_10f7ef40/FUN_10f7eff0/FUN_10f7f040/FUN_10f7f100) into the state's callback vectors at param_2+0xbc/0xc0. Ref-counted string plumbing (FUN_10c3d780/FUN_10c3dab0/DAT_123be268) throughout.",
+      "formulas": [
+        "Outer table name must equal 'Callbacks' (strcmp) else whole function no-ops",
+        "child count = (**(param_1+0xa0))(); loop child = (**(param_1+0xa8))()",
+        "HolsterItem branch caches local_30 = *(param_2+0x50) before FUN_10f57110",
+        "SetCanDodge (in OnEnter/Update): pushes closure FUN_10f7ef40 into vector param_2+0xbc (grow-by-8 when +0xbc==+0xc0)",
+        "*(int*)(param_2+0xbc) += 8 on push",
+        "string heap-alloc: DAT_123be268 += _Size + 0xd on alloc, -= (*(p-4)+0xd) on free (CryString COW refcount at p-0xc, p-4=capacity)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - drives client-side weapon animation/FX callback registration from state-machine data (SetValue/PlayWeaponFX/ShowReloading/ToggleAimMode/SetDefence etc.). No authoritative game state; server does not need this dispatch. The callback NAMES are a useful inventory of weapon FSM hooks.",
+      "confidence": "medium",
+      "notes": "Handler names visible in strings: SetValue, SetGValue, HolsterItem, SetAGInput, ShowReloading, SetFpsMode, WE05SetFpsMode, TerrainFX, SetRotation, PlayWeaponFX, CallCrosshairsUI, SetDefence, RotateByInput, ToggleAimMode, PlayWeaponAnim, ShowWeaponItem, SendLogicEvent, NeedResetDirByPreState. The 30-deep FUN_10a675d0 chain maps each remaining name to one handler; exact name->handler pairing not resolvable without the string table for FUN_10a675d0 args."
+    },
+    {
+      "address": "0x10fbfde0",
+      "currentName": "FUN_10fbfde0",
+      "proposedName": "CPlayerInput::ParseActionName",
+      "subsystem": "skills/input-mapping",
+      "purpose": "Maps a player action/input command name (string) to an integer action-ID enum written to *param_2, returning 1 on match / 0 on no-match. First lowercases the input in place (chars 'A'..'Z' += 0x20). Then compares against a fixed table. For 'direction' variants it also writes a 2D direction vector into param_3[0]/param_3[1] as floats.",
+      "formulas": [
+        "lowercase: if (c>'@' && c<'[') c += 0x20",
+        "DAT_11ccdbec -> id 0; DAT_11ccdbf4 -> id 1; DAT_11cface8 -> id 2 (first three unnamed action strings)",
+        "holster->3, interact->4, defense->5, reload->6, dodge->7",
+        "DAT_11dce978->8, crouch->9, DAT_11dce988->0xa(10), creep->0xb, rage1->0xc, rage2->0xd, rage3->0xe, rage_transmission->0xf",
+        "direction->0x24 (no vector); direction_right->0x24 with param_3[0]=0x3f800000(1.0f),param_3[1]=0; direction_left->0x24 param_3[0]=0xbf800000(-1.0f),param_3[1]=0; direction_back->0x24 param_3[0]=0,param_3[1]=0xbf800000(-1.0f); direction_front->0x24 param_3[0]=0,param_3[1]=0x3f800000(1.0f)",
+        "xi_switch_lb->0x10, rb->0x11, lt->0x12, rt->0x13, x->0x14, y->0x15, b->0x16, a->0x17, l3->0x18, r3->0x19, start->0x1b, back->0x1a, pad_up->0x1c, pad_left->0x1d, pad_down->0x1e, r3_right->0x1f, r3_up->0x20, r3_left->0x21, r3_down->0x22, (dup r3_right)->0x23; no match -> return 0"
+      ],
+      "costs": [],
+      "serverRelevance": "validation - client-side string->ID parse, but the action-ID enum (holster=3, dodge=7, rage1/2/3=0xc/0xd/0xe, rage_transmission=0xf, direction=0x24, xi_switch_* controller = 0x10-0x23) is the authoritative action vocabulary the server must recognize when validating skill/action requests. 1.0f=0x3f800000, -1.0f=0xbf800000.",
+      "confidence": "high",
+      "notes": "DAT_11ccdbec/dbf4, DAT_11cface8, DAT_11dce978/988 are string literals not shown (likely basic-attack / creep-crouch variants). Enum IDs derived by matching each nested else-branch to its if by nesting depth."
+    },
+    {
+      "address": "0x10fd05f0",
+      "currentName": "FUN_10fd05f0",
+      "proposedName": "CPlayerWeaponFSM::TryRequestStateChange",
+      "subsystem": "skills/state-change",
+      "purpose": "Core weapon/skill state-transition request. Aborts if busy flag (char)param_1[0x42]!=0. Resolves the active weapon component via FUN_10fde0a0 (returns extension vector; [8]=component). Handles a 'sm_ignoreSkill'-gated fast path and an aim-direction path for gun/bow (COMBAT_PL05_AIM/COMMONSHOOT/CHARGE/HEAVYSHOOT/HEAVYSHOOTS). Computes a normalized aim direction and a rotation quaternion/basis from the target's velocity vector, iterates the state's transition-condition list (piStack_100[0x89..0x8a]) evaluating each predicate (piVar20[1] callback) and, on match, applies via FUN_10fd7800. Builds a network state-change packet (vfunc +0xf8 encode, FUN_10bf81b0 serialize, vfunc +0x228 send/apply) then runs cleanup lists (memmove-based vector compaction of active states at [0x30]).",
+      "formulas": [
+        "abort if (char)param_1[0x42] != 0 (busy/locked)",
+        "component = FUN_10fde0a0()[8]; abort if list==self or component==0",
+        "aim math constants: 0.70710677 (=sqrt(0.5), fStack_90 default), DAT_11de9950 (*2 midpoint scale for piStack_9c = (b0+b0)*DAT_11de9950), DAT_11de9978 (bias added after normalize), DAT_11de98e0 (min-length epsilon), DAT_11de9c80 (sign-flip xor mask), DAT_11cc06d8 (fallback angle)",
+        "len2 = b8*b8 + d0*d0 (horizontal speed^2); sqrt via libm_sse2_sqrt_precise; if len>DAT_11de98e0 normalize else use fallback",
+        "attack-flag: piStack_f0 = (char)param_7!=0 ? ... ; set to 2 if uStack_138 high byte set (charged)",
+        "transition list walked at component[0x89]..[0x8a] in stride 3 ints; predicate = piVar20[1], action-check FUN_10fd7800; on-hit cleanup FUN_10c3d5d0 when piVar20[2]!=0",
+        "DAT_120286b8+0x538 (combat-mode gate), +0x54c==1 (special transition branch FUN_10fd7bc0/80f0/81a0), +0x209 (dev/debug gate)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative/validation - this is the client's skill/state-change request builder; it computes the requested state + aim direction locally and transmits to the server (vfunc +0xf8 build, +0x228 apply/send). Server must independently validate the transition is legal (predicate list), the aim direction, and the charged/attack flags. The transition-list layout (component[0x89..0x8a], stride 3, [1]=predicate, [2]=cleanup) and the sm_ignoreSkill cvar gate are load-bearing.",
+      "confidence": "low",
+      "notes": "Very large (4671 bytes) with heavy register-spill noise (unaff_ESI/EDI, decompiler-invented locals). Exact packet field layout uncertain. DAT_1202e818 is the global game framework/system hub (env). iStack_88/piStack_100/piStack_fc are the player+weapon components."
+    },
+    {
+      "address": "0x10fdbbf0",
+      "currentName": "FUN_10fdbbf0",
+      "proposedName": "CBowWeapon::SetupRageArrowAttachments",
+      "subsystem": "skills/rage-bow",
+      "purpose": "When the player model ([param_1+0x100]) is weapon-type 10 (piVar1[0x56d]==10, bow), (re)creates arrow bone attachments for rage mode. Rebinds attachment sockets weapon_item_attachment, melee_arrow_item (bone index 0) and melee_arrow_secrect (bone index 7) via vfunc +0x790 + FUN_10ad44d0, then hides them (FUN_10a64020(0,...)), and attaches CGF 'Objects/items/arrow_bone.cgf' to sockets bow_rage01_A / bow_rage01_B (also hidden).",
+      "formulas": [
+        "guard: piVar1 = *(param_1+0x100); require piVar1!=0 && piVar1[0x56d]==10 (weapon class id 10 = bow)",
+        "melee_arrow_secrect uses bone slot arg 7; others use slot 0",
+        "attachment DAT_11cbf0e0/e4/e8/ec = default transform (identity offset quat)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - purely visual arrow-bone attachment setup for bow rage animation. No server relevance beyond confirming weapon-class id 10 = bow.",
+      "confidence": "medium",
+      "notes": "piVar1[0x56d]==10 is the weapon-type discriminator on the player model object."
+    },
+    {
+      "address": "0x10fdcba0",
+      "currentName": "FUN_10fdcba0",
+      "proposedName": "CPlayerWeaponFSM::TryComboTransitionWithSkillGate",
+      "subsystem": "skills/combo-gating",
+      "purpose": "Iterates the current state's transition table and, for each candidate whose target state != 'INVALID_STATE', checks whether the associated skill is castable before allowing the transition. Resolves the transition's skill via FUN_10fb8080, looks up the skill def (FUN_116cd730/FUN_116cd660), and gates on: skill enabled, cooldown/availability (FUN_117194d0 + FUN_11719420 count > 0), and a per-skill castable check FUN_1139aa90(skillId, ammo/resource). If ('sm_ignoreSkill' cvar set) OR skill invalid (id==-1) OR resource-available, executes the transition (func_0x10f6bb80 / FUN_10f59ff0). If the availability call returns state==2 (blocked) and skill valid, sets a block flag *(player+0x18)+0x40 = 1 and returns 0.",
+      "formulas": [
+        "index = *(uint)(DAT_120286b8+0x9d4); guard index < (*(param_1+0x188)-*(param_1+0x184))/0xc (transition-bucket array, stride 0xc)",
+        "inner transition entries stride 0x48 (iVar10 += 0x48; end at *(iVar1+4))",
+        "skillId resolve: iVar10 = *(iVar7+0x14); if ==-1 and iVar8!=0 then iVar10 = *(iVar8+0x1c4)",
+        "local_5 (castable) default 1; if skillId>0: def=FUN_116cd660; if def==0 -> local_5=0; else if *(def+0x2d)!=0 && FUN_117194d0(skillId)==1 && FUN_11719420(skillId)>0 -> local_5 = FUN_1139aa90(skillId, ammoIndex)",
+        "ammoIndex uVar4 = (*(*(param_1+0x18)+0x18c)!=0) ? FUN_10f3bae0(param_2) : 0xffffffff",
+        "local_6 = (name=='sm_ignoreSkill'); local_7 = (skillId==-1)",
+        "availability = vfunc(+0x18)(skillId,&local_18); allow if avail==0 && local_5==1; execute if local_6||local_7||allow",
+        "if local_18==2 && local_5==1 -> set *(*(param_1+0x18)+0x40)=1, return 0 (blocked)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/authoritative - this is client-side skill-cooldown/resource gating for combo transitions. Server must enforce the same: skill enabled flag (def+0x2d), cooldown ready (FUN_117194d0/FUN_11719420 count), resource/ammo castable (FUN_1139aa90), and the block state==2. DAT_120286b8+0x9d4 selects which transition bucket. Transition array stride 0xc (buckets) / 0x48 (entries); skillId at entry+0x14 with fallback to +0x1c4.",
+      "confidence": "medium",
+      "notes": "FUN_1139aa90/117194d0/11719420/116cd660 are the skill-instance manager (cooldowns, charges) - out of chunk. sm_ignoreSkill is a dev/debug cvar (DAT_1203d0f0)."
+    },
+    {
+      "address": "0x10fee230",
+      "currentName": "FUN_10fee230",
+      "proposedName": "CPlayerRageRush::UpdateEnergyDrain",
+      "subsystem": "skills/rage",
+      "purpose": "RageRush per-frame update. Advances rage-energy by frame time (FUN_10f169e0(deltaTime) where deltaTime from timer vfunc DAT_1202e818+0x28 +0x1c). When the rage energy at model+0x2088 has drained to/below the threshold at model+0x208c, fires the 'COMBAT_PL04_RAGERUSH_END' state event (FUN_10f59ff0).",
+      "formulas": [
+        "model = *(*(param_1+0x18)+0x100)",
+        "deltaTime = (**(DAT_1202e818+0x28) +0x1c)(0); FUN_10f169e0((float)deltaTime)",
+        "end condition: *(float*)(model+0x208c) <= *(float*)(model+0x2088)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative - rage-mode energy/duration drain. Server must track rage energy (model+0x2088) vs threshold (+0x208c) and end rage rush when depleted; PL04 = a specific weapon class.",
+      "confidence": "medium",
+      "notes": "PL04 = player weapon class 4 (rage-rush weapon). +0x2088 / +0x208c are rage-gauge fields on the player-model object."
+    },
+    {
+      "address": "0x10fee290",
+      "currentName": "FUN_10fee290",
+      "proposedName": "CPlayerRageRush::EnterState",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGERUSH_START. Sets animation state (FUN_10f58340), registers state tags 'HolsteredToRageRush' and 'UnholsteredToRageRush' (pushed into event vector at +0x64/+0x68), registers per-frame update callback FUN_1083ab70('COMBAT_PL04_RAGERUSH_LOW',0x18) and callbacks FUN_10fefd40 (into +0xb0 vector) and FUN_10fefe00 (into +0xc8 vector). Zeroes rage counters at +0x200, +0x204, +0x208.",
+      "formulas": [
+        "clears *(param_1+0x204)=0, *(param_1+0x208)=0, *(param_1+0x200)=0",
+        "callback vectors: +0x64/+0x68 (enter tags), +0xb0/+0xb4 (FUN_10fefd40), +0xc8/+0xcc (FUN_10fefe00); grow via FUN_10f649a0/FUN_108716d0 when full else *p=fn; p+=4"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - rage-rush state entry: animation + client callback registration. Rage counters +0x200/0x204/0x208 reset is state bookkeeping (server tracks its own).",
+      "confidence": "medium",
+      "notes": "Sibling to FUN_10fee5b0/fee9a0 (rage-rush idle/end)."
+    },
+    {
+      "address": "0x10fee5b0",
+      "currentName": "FUN_10fee5b0",
+      "proposedName": "CPlayerRageRush::EnterRageRushToIdle",
+      "subsystem": "skills/rage",
+      "purpose": "Transition state RageRushToIdle -> COMBAT_IDLE. Sets state flags *(param_1+0x80) |= 0x11, registers leave/update callbacks FUN_10fee1e0 (+0xb0 vector) and FUN_10fefef0 (+0xc8 vector), registers timer/event FUN_10f5bd40(6,FUN_10fee230) (bind the energy-drain update to event id 6), registers 'RageRushToIdle' tag, plays FX 'Fire_Ability_Mst.CST.FireBallSparkM_MST', sets next states PLLocomotion/UnholsteredIdle and finalizes COMBAT_PL04_RAGERUSH_END.",
+      "formulas": [
+        "*(uint*)(param_1+0x80) |= 0x11",
+        "FUN_10f5bd40(6, FUN_10fee230) binds event-id 6 -> energy-drain update",
+        "FUN_1083ab70('Fire_Ability_Mst.CST.FireBallSparkM_MST', 0x27) = FX name (len 0x27)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - animation/FX transition and callback wiring. State-flag 0x11 at +0x80 is client FSM state bits.",
+      "confidence": "medium",
+      "notes": ""
+    },
+    {
+      "address": "0x10fee700",
+      "currentName": "FUN_10fee700",
+      "proposedName": "CPlayerRageRush::ApplyRushSpeedAndDirection",
+      "subsystem": "skills/rage",
+      "purpose": "Computes and applies rage-rush movement speed. If the horizontal velocity magnitude (abs sum of components +0x154/+0x158/+0x15c) is <= threshold DAT_11cc3f68, forces +0x158 = 1.0f (default forward). Selects LOW vs HIGH rush by matching current state name to COMBAT_PL04_RAGERUSH_LOW/HIGH; reads a speed value from FUN_1134cd10 (low) or FUN_1134cd30 (high) and a config value from DAT_1202e818+0x7c +0x418(low)/+0x41c(high), stores config at +0x1e4, then applies speed via FUN_10de9b60(model, speed) and locomotion vfunc +0x198.",
+      "formulas": [
+        "abs mask DAT_11de9c70 (=0x7fffffff, fabs) applied to *(param_1+0x154/0x158/0x15c)",
+        "if (|v154|+|v158|+|v15c|) <= DAT_11cc3f68 then *(param_1+0x158) = 0x3f800000 (1.0f)",
+        "LOW: speed = FUN_1134cd10(); cfg = *(*(DAT_1202e818+0x7c)+0x418)",
+        "HIGH: speed = FUN_1134cd30(); cfg = *(*(DAT_1202e818+0x7c)+0x41c)",
+        "*(param_1+0x1e4) = cfg; FUN_10de9b60(model, speed)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative - rage-rush movement speed (low/high tier) and forward-direction defaulting. Speed magnitudes come from config (DAT_1202e818+0x7c region) so server should apply the same low/high rush speed; velocity fields at param_1+0x154/158/15c.",
+      "confidence": "medium",
+      "notes": "FUN_1134cd10/cd30 return the tuned low/high rush speed (float10). +0x1e4 stores the applied config value read by other rage callbacks."
+    },
+    {
+      "address": "0x10fee960",
+      "currentName": "FUN_10fee960",
+      "proposedName": "CPlayerRageRush::EnterRushLow",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGERUSH_LOW: sets animation state and sets rush-tier field *(param_1+0x6c) = 6.",
+      "formulas": ["*(param_1+0x6c) = 6 (low-tier id)"],
+      "costs": [],
+      "serverRelevance": "client-only - tier marker for animation; server tracks rush tier independently.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10fee980",
+      "currentName": "FUN_10fee980",
+      "proposedName": "CPlayerRageRush::EnterRushHigh",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGERUSH_HIGH: sets animation state and sets rush-tier field *(param_1+0x6c) = 7.",
+      "formulas": ["*(param_1+0x6c) = 7 (high-tier id)"],
+      "costs": [],
+      "serverRelevance": "client-only - tier marker; low=6 / high=7 pair with FUN_10fee960.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10fee9a0",
+      "currentName": "FUN_10fee9a0",
+      "proposedName": "CPlayerRageRush::EnterRushEnd",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGERUSH_END: sets animation state, registers 'RageRushToIdle' tag, sets next-state COMBAT_IDLE (FUN_10f57080/FUN_1083ab70), finalizes.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - rage-rush teardown to idle.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feea60",
+      "currentName": "FUN_10feea60",
+      "proposedName": "CPlayerRage01::EnterShieldAttack",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_SHIELDATTACK: sets state, registers 'Rage01ShieldAttack' tag, sets next-state COMBAT_IDLE (len 0xb).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - rage01 shield attack animation state.",
+      "confidence": "high",
+      "notes": "PL04 RAGE01 is a multi-move rage moveset (shield/spin/sword/stab)."
+    },
+    {
+      "address": "0x10feead0",
+      "currentName": "FUN_10feead0",
+      "proposedName": "CPlayerRage01::EnterSpinAttack01",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_SPINATTACK01, registers 'Rage01SpinAttack01' tag, sets next combo state COMBAT_PL04_RAGE01_SPINATTACK02 with combo params local_38=1, local_34=0x2d.",
+      "formulas": ["combo window params: local_38=1, local_34=0x2d (45) passed with next-state finalize"],
+      "costs": [],
+      "serverRelevance": "client-only - spin-attack combo step 1 of 3. Combo-chain naming is reference for server combo validation.",
+      "confidence": "high",
+      "notes": "0x2d(45) recurs across all rage01 combo steps - likely a frame/window constant."
+    },
+    {
+      "address": "0x10feeba0",
+      "currentName": "FUN_10feeba0",
+      "proposedName": "CPlayerRage01::EnterSpinAttack02",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_SPINATTACK02, tag 'Rage01SpinAttack02', next state SPINATTACK03 (combo params local_38=1, local_34=0x2d).",
+      "formulas": ["combo params local_38=1, local_34=0x2d"],
+      "costs": [],
+      "serverRelevance": "client-only - spin combo step 2/3.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feec70",
+      "currentName": "FUN_10feec70",
+      "proposedName": "CPlayerRage01::EnterSpinAttack03",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_SPINATTACK03, sets next state COMBAT_IDLE (len 0xb), tag 'Rage01SpinAttack03'. Final spin combo step.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - spin combo step 3/3 -> idle.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feece0",
+      "currentName": "FUN_10feece0",
+      "proposedName": "CPlayerRage01::EnterSwordAttack",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_SWORDATTACK, tag 'Rage01SwordAttack', next state COMBAT_IDLE (len 0xb).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - rage01 sword attack animation.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feed50",
+      "currentName": "FUN_10feed50",
+      "proposedName": "CPlayerRage01::EnterStabAttack01",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_STABATTACK01, tag 'Rage01StabAttack01', next state STABATTACK02 (combo params local_38=1, local_34=0x2d).",
+      "formulas": ["combo params local_38=1, local_34=0x2d"],
+      "costs": [],
+      "serverRelevance": "client-only - stab combo step 1/3.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feee20",
+      "currentName": "FUN_10feee20",
+      "proposedName": "CPlayerRage01::EnterStabAttack02",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_STABATTACK02, tag 'Rage01StabAttack02', next state STABATTACK03 (combo params local_38=1, local_34=0x2d).",
+      "formulas": ["combo params local_38=1, local_34=0x2d"],
+      "costs": [],
+      "serverRelevance": "client-only - stab combo step 2/3.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10feeef0",
+      "currentName": "FUN_10feeef0",
+      "proposedName": "CPlayerRage01::EnterStabAttack03",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE01_STABATTACK03, sets next state COMBAT_IDLE (len 0xb) first, tag 'Rage01StabAttack03'. Final stab combo step.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - stab combo step 3/3 -> idle.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10fef700",
+      "currentName": "FUN_10fef700",
+      "proposedName": "CPlayerRage03::OnThrowAnimEvent",
+      "subsystem": "skills/rage",
+      "purpose": "Rage03 (bomb-throw) animation-event handler (param_2+0xc = event/tag name). Early-outs unless the model, weapon component (vfunc +0x790!=0), FUN_10f19240 (world), combat mode (vfunc +0x228) and FUN_10f59630 all hold. Matches tag: RandomRight/RandomLeft/BombRight/BombLeft select a projectile-type string (from PTR table PTR_s_Throw_FlashGrenade... at 0x11df9a50; RandomRight/Left pick rand()%0xd; Bomb* use the FlashGrenade default) and set throwing flag +0x1f8=1, then emit OnEnter/Throw/OnLeave logic events (weapon vfunc +0x24 with packed args {0x11d,0x4ffff,...}). Rage03EndEnter clears +0x1f8=0; Rage03EndLeave -> NORMAL_IDLE.",
+      "formulas": [
+        "projectile pick: rand() % 0xd (13 throw types) index into (&PTR_s_Throw_FlashGrenade_11d05a9b_1_11df9a50)[i]",
+        "Rage03EndEnter -> *(byte*)(param_1+0x1f8)=0; else set +0x1f8=1 when throwing",
+        "logic-event packet header {0x11d, 0x4ffff, 0} with name 'OnEnter'/'Throw'/'OnLeave' + projectile ptr, sent via weapon vfunc(piVar2[1] +0x24)"
+      ],
+      "costs": ["throw uses a projectile from a 13-entry random table (FlashGrenade among them) - no currency cost, consumes rage-mode charges tracked elsewhere"],
+      "serverRelevance": "authoritative/validation - selects which grenade/projectile is thrown during rage03 and emits the throw logic event. Server must validate/spawn the projectile; the 13-entry throw table and rand()%0xd selection are the authoritative pick logic. Flag +0x1f8 = 'currently throwing'.",
+      "confidence": "medium",
+      "notes": "PTR_s_Throw_FlashGrenade_11d05a9b_1_11df9a50 is a table of throw-move name strings; only 'Throw_FlashGrenade' resolvable here."
+    },
+    {
+      "address": "0x10fefa20",
+      "currentName": "FUN_10fefa20",
+      "proposedName": "CPlayerRage03::EnterState",
+      "subsystem": "skills/rage",
+      "purpose": "Enters COMBAT_PL04_RAGE03 (bomb-throw rage). Initializes throw counter *(param_1+0x1f0) = config *(DAT_120286b8+0x728) (max throws), *(param_1+0x1f4)=0, *(param_1+0x200)=0. Registers 6 throw tags Rage03_Throw01..06 + Rage03_End (into +0x64 vector) and callbacks FUN_10fef4f0(+0xb0), FUN_10fef6a0(+0xc8), FUN_10fef700(+0xf8, the throw event handler above), FUN_10fef9a0(+0xec), plus timer FUN_10f5bd40(6,FUN_10fef560).",
+      "formulas": [
+        "*(param_1+0x1f0) = *(DAT_120286b8+0x728) (rage03 max throw count from config)",
+        "*(param_1+500)=0 (0x1f4), *(param_1+0x200)=0"
+      ],
+      "costs": ["throw count capped at config DAT_120286b8+0x728"],
+      "serverRelevance": "authoritative - rage03 throw budget comes from server config (DAT_120286b8+0x728). Server must enforce the max-throw count (+0x1f0) and consume per throw.",
+      "confidence": "medium",
+      "notes": "DAT_120286b8 is the combat/config globals hub; +0x728 = rage03 throw count."
+    },
+    {
+      "address": "0x10fefe00",
+      "currentName": "FUN_10fefe00",
+      "proposedName": "CPlayerRageRush::OnLowHighLeave_A",
+      "subsystem": "skills/rage",
+      "purpose": "Leave callback for RAGERUSH_LOW/HIGH. Always calls weapon vfunc +0x740(1) (enable something) and, in combat mode (+0x228), vfunc +0x7f4(0). For state COMBAT_PL04_RAGERUSH_HIGH additionally calls vfunc +0x580(0) and installs the state-update function pointer *(*(param_1+0x18)+0x234) = FUN_10fdc650.",
+      "formulas": [
+        "always: weapon vfunc +0x740(1); if combat(+0x228): +0x7f4(0)",
+        "HIGH only: +0x580(0); *(*(param_1+0x18)+0x234) = FUN_10fdc650"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - FSM leave wiring / next-update-fn install. No authoritative state.",
+      "confidence": "medium",
+      "notes": "Pairs with FUN_10fefef0; both installed by FUN_10fee290/fee5b0."
+    },
+    {
+      "address": "0x10fefef0",
+      "currentName": "FUN_10fefef0",
+      "proposedName": "CPlayerRageRush::OnLowHighLeave_B",
+      "subsystem": "skills/rage",
+      "purpose": "Second RAGERUSH_LOW/HIGH leave callback. For COMBAT_PL04_RAGERUSH_HIGH: weapon vfunc +0x740(0); if combat(+0x228) FUN_10de9aa0(model,1); clears model[0x822]=0; +0x580(0); installs *(*(param_1+0x18)+0x234) = FUN_10fdc650.",
+      "formulas": [
+        "HIGH: +0x740(0); combat-> FUN_10de9aa0(model,1); model[0x822]=0; +0x580(0); +0x234 fn = FUN_10fdc650"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - FSM leave wiring; model[0x822] is a client rush flag.",
+      "confidence": "medium",
+      "notes": ""
+    },
+    {
+      "address": "0x10ff1200",
+      "currentName": "FUN_10ff1200",
+      "proposedName": "CPlayerRage_PL05::EnterRageShoot",
+      "subsystem": "skills/rage-gun",
+      "purpose": "PL05 (gun/bowgun class 5) enters COMBAT_PL05_RAGE_SHOOT. Sets state, tag 'RageShoot', next-state COMBAT_IDLE, registers callbacks FUN_10ff1d80(+0xc8) and FUN_10ff06f0(+0xf8), sets next states PLLocomotion/UnholsteredIdle and finalizes.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only - PL05 rage-shoot animation state entry.",
+      "confidence": "high",
+      "notes": "PL05 = gun/bowgun weapon class."
+    },
+    {
+      "address": "0x10ff1cd0",
+      "currentName": "FUN_10ff1cd0",
+      "proposedName": "CPlayerRage_PL05::OnRageShootLeave",
+      "subsystem": "skills/rage-gun",
+      "purpose": "Leave callback for COMBAT_PL05_RAGE_SHOOT. Calls weapon vfunc +0x740(1); if the leaving state name == COMBAT_PL05_RAGE_SHOOT calls FUN_10f15f30(0); if combat mode (+0x228) calls FUN_10de9d20(weapon).",
+      "formulas": ["weapon vfunc +0x740(1); if state=='COMBAT_PL05_RAGE_SHOOT' -> FUN_10f15f30(0); if +0x228 -> FUN_10de9d20"],
+      "costs": [],
+      "serverRelevance": "client-only - rage-shoot teardown.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x10ff25d0",
+      "currentName": "FUN_10ff25d0",
+      "proposedName": "CPlayerRage_WE09::EnterGunLanceRageAim",
+      "subsystem": "skills/rage-gunlance",
+      "purpose": "WE09 (gunlance) enters WE09GunLanceRageAim. Sets state and registers callbacks FUN_10ff1e70(+0xb0), FUN_10ff20a0(+0xc8), FUN_10ff2120(+0xec), plus timer FUN_10f5bd40(6,FUN_10ff1ee0).",
+      "formulas": ["FUN_10f5bd40(6, FUN_10ff1ee0) binds event-id 6 update"],
+      "costs": [],
+      "serverRelevance": "client-only - gunlance rage-aim animation state.",
+      "confidence": "high",
+      "notes": "WE09 = gunlance weapon type."
+    },
+    {
+      "address": "0x1100efe0",
+      "currentName": "FUN_1100efe0",
+      "proposedName": "CRageBullet::FireHitEvent",
+      "subsystem": "skills/rage-projectile",
+      "purpose": "Handles a 'RageBullet' projectile hit. Resolves the RageBullet entity class (vfunc +4 -> FUN 'RageBullet' name lookup -> +0x150), then resolves a hit target from param_3 via DAT_1202e818+0xd0 hit system (+0x90 -> +0x7c). If param_2==0 (server-hit path): calls CActor::FireServerOnHitScriptEvent(target.entityId at +8) or with 0xffffffff when no target. If param_2==1 (local path): FUN_11001740(target+8) and sets bullet vfunc +0xc4(1).",
+      "formulas": [
+        "target = (DAT_1202e818+0xd0)[+0x90] vfunc +0x7c (param_3)",
+        "param_2==0: CActor::FireServerOnHitScriptEvent(target?*(target+8):0xffffffff)",
+        "param_2==1: FUN_11001740(*(target+8)); bullet vfunc +0xc4(1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative - fires the server on-hit script event for rage bullets (param_2==0 = server-authoritative hit registration passing the target entity id). Server owns damage; client passes hit target. CActor::FireServerOnHitScriptEvent is the authoritative damage trigger.",
+      "confidence": "medium",
+      "notes": "RageBullet is a registered entity class (see schema combat.md factory list)."
+    },
+    {
+      "address": "0x1101e220",
+      "currentName": "FUN_1101e220",
+      "proposedName": "CScriptBind_MHBuffArea::CScriptBind_MHBuffArea",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Constructor/registrar for the MHBuffArea Lua script-bind. Sets vtable PTR_FUN_11d085c8, grabs the script system (param_2 vfunc +0xfc), creates the methods table (this[0x11]) and a second table (this[0x14]), and registers all Lua-callable BuffArea methods via table vfunc 100 with (name, argSpec, thunk). Registered verbs: TestFunc, SetBuffID(sBuffID)->FUN_1101e880, AddExtendBuff(sBuffID)->FUN_1101eb50, SetContinuous(bContinuous)->FUN_1101e950, SetCheckDelta(fCheckDelta)->FUN_1101e9a0, SetLifeTime(fLifeTime)->FUN_1101e9f0, SetEnterInfo(processEnter,bEnterAdd)->FUN_1101ea40, SetLeaveInfo(processLeave,bLeaveAdd)->FUN_1101eaa0, SetRemoveBuffGene(bRemoveBuffGene)->FUN_1101eb00, SetEffectID(sEffectID)->FUN_1101ebc0, SetPlayerCanAttack(enable)->FUN_1101ec70, SetMonsterCanAttack(enable)->FUN_1101ec20, SetNPCCanAttack(enable)->FUN_1101ecc0, SetPetCanAttack(enable)->FUN_1101ed10.",
+      "formulas": [
+        "this[0x15]=param_2 (script sys); this[0x16] = param_2 vfunc(+0x124) vfunc(+0x3c)",
+        "this[0x12]=param_2 vfunc(+0xfc); this[0x11]=this[0x12] vfunc(+0x30)(0); this[0x14]=this[0x12] vfunc(+0x30)(0)",
+        "arg type ids: local_18=8 for typed setters, param converters FUN_1101f1a0(float), FUN_1101f1f0(string), FUN_1101f230(two-arg), FUN_1101f290(bool)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative - this registration exposes the full authoritative BuffArea configuration API the server must interpret. Method names + their target MHBuffArea component offsets (see sibling handlers) define how area buffs are configured: buff id, extend buffs, continuous tick, check-delta, lifetime, enter/leave triggers+add flags, remove-gene, effect id, and per-faction can-attack flags. Complements CLogicBuffArea::ReadPropertiesFromXml @0x10bc9f20 (schema combat.md).",
+      "confidence": "high",
+      "notes": "Converters: FUN_1101f1a0=float, FUN_1101f1f0=string, FUN_1101f230=(bool,bool), FUN_1101f290=bool. Table vfunc 100 = RegisterFunction."
+    },
+    {
+      "address": "0x1101e7a0",
+      "currentName": "FUN_1101e7a0",
+      "proposedName": "CScriptBind_MHBuffArea::CreateScriptTable",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Creates and binds the per-instance 'BuffArea' Lua table for a MHBuffArea entity. Verifies the entity has a proxy (vfunc chain +0xc -> +0x150(2) -> +0x38), creates a new script table (script sys +0x48 -> +0x30(0)), sets its '__this' field to the entity ptr (type 3, with GC handling for types 6/7), sets metatable to this+0x44 (the methods table), and registers it globally as 'BuffArea' via FUN_10c0df10.",
+      "formulas": [
+        "__this field: type 3 (ptr); if resolved type==6 -> AddRef(+0xc); if type==7 -> GC hold (DAT_1202e818+0x30 +0x60)",
+        "setmetatable(table, this+0x44); global name 'BuffArea'"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - Lua table plumbing for the BuffArea entity script instance.",
+      "confidence": "medium",
+      "notes": ""
+    },
+    {
+      "address": "0x1101e880",
+      "currentName": "FUN_1101e880",
+      "proposedName": "CScriptBind_MHBuffArea::SetBuffID",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetBuffID(sBuffID) handler. Resolves the entity's MHBuffArea extension (game-object +0x58 -> +0x144(entityId) -> +0x18('MHBuffArea')), atoi(param_3) -> buffID. If dev flag (DAT_1202e818+0x209) set and buffID!=0 and the buff does not exist (FUN_104fd710(buffID)==0), logs error 'entity %s set a invalid buffID %i' / 'BuffID Error'. Writes buffID to extension+0x84.",
+      "formulas": [
+        "buffID = atoi(sBuffID); write to MHBuffArea+0x84",
+        "validation: if DAT_1202e818[0x209]!=0 && buffID!=0 && FUN_104fd710(buffID)==0 -> error dialog (buff def must exist)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/authoritative - sets which buff (buffID) the area applies; MHBuffArea+0x84 = buffID. FUN_104fd710 is the buff-definition existence check the server should also enforce.",
+      "confidence": "high",
+      "notes": "extension lookup pattern (obj+0x58 -> +0x144 -> +0x18 'MHBuffArea') shared by all sibling setters."
+    },
+    {
+      "address": "0x1101e950",
+      "currentName": "FUN_1101e950",
+      "proposedName": "CScriptBind_MHBuffArea::SetContinuous",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetContinuous(bContinuous) handler. Writes byte flag to MHBuffArea+0x8c.",
+      "formulas": ["MHBuffArea+0x8c (byte) = bContinuous"],
+      "costs": [],
+      "serverRelevance": "authoritative - whether the area buff ticks continuously; +0x8c.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101e9a0",
+      "currentName": "FUN_1101e9a0",
+      "proposedName": "CScriptBind_MHBuffArea::SetCheckDelta",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetCheckDelta(fCheckDelta) handler. Writes float to MHBuffArea+0x90 (tick/re-check interval).",
+      "formulas": ["MHBuffArea+0x90 (float) = fCheckDelta"],
+      "costs": [],
+      "serverRelevance": "authoritative - tick interval for area buff re-application; +0x90.",
+      "confidence": "high",
+      "notes": "Corresponds to f_CheckDelta in CLogicBuffArea XML (schema obj+0x16c on the logic component)."
+    },
+    {
+      "address": "0x1101e9f0",
+      "currentName": "FUN_1101e9f0",
+      "proposedName": "CScriptBind_MHBuffArea::SetLifeTime",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetLifeTime(fLifeTime) handler. Writes float to MHBuffArea+0x94 (total area lifetime).",
+      "formulas": ["MHBuffArea+0x94 (float) = fLifeTime"],
+      "costs": [],
+      "serverRelevance": "authoritative - area buff total lifetime/duration; +0x94.",
+      "confidence": "high",
+      "notes": "Corresponds to f_LifeTime (schema obj+0x178 on logic component)."
+    },
+    {
+      "address": "0x1101ea40",
+      "currentName": "FUN_1101ea40",
+      "proposedName": "CScriptBind_MHBuffArea::SetEnterInfo",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetEnterInfo(processEnter, bEnterAdd) handler. Writes MHBuffArea+0x99 = processEnter (byte, trigger on enter) and +0x9a = bEnterAdd (byte, add-buff-on-enter).",
+      "formulas": ["+0x99 = processEnter (byte), +0x9a = bEnterAdd (byte)"],
+      "costs": [],
+      "serverRelevance": "authoritative - enter-trigger behavior: whether entering the area triggers processing and whether it adds the buff; +0x99/+0x9a.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101eaa0",
+      "currentName": "FUN_1101eaa0",
+      "proposedName": "CScriptBind_MHBuffArea::SetLeaveInfo",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetLeaveInfo(processLeave, bLeaveAdd) handler. Writes MHBuffArea+0x9b = processLeave (byte) and +0x9c = bLeaveAdd (byte).",
+      "formulas": ["+0x9b = processLeave (byte), +0x9c = bLeaveAdd (byte)"],
+      "costs": [],
+      "serverRelevance": "authoritative - leave-trigger behavior for the area buff; +0x9b/+0x9c.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101eb00",
+      "currentName": "FUN_1101eb00",
+      "proposedName": "CScriptBind_MHBuffArea::SetRemoveBuffGene",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetRemoveBuffGene(bRemoveBuffGene) handler. Writes byte to MHBuffArea+0x9d (remove buff on leave/expire).",
+      "formulas": ["+0x9d (byte) = bRemoveBuffGene"],
+      "costs": [],
+      "serverRelevance": "authoritative - whether the buff is removed when the area is left/expires; +0x9d (schema b_NeedRemove).",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101eb50",
+      "currentName": "FUN_1101eb50",
+      "proposedName": "CScriptBind_MHBuffArea::AddExtendBuff",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua AddExtendBuff(sBuffID) handler. atoi(param_3) -> buffID; if nonzero, appends it to the extension's extend-buff list via FUN_10d60090(buffID).",
+      "formulas": ["extendBuffId = atoi(sBuffID); if !=0 -> FUN_10d60090(extendBuffId) appends to extend-buff list"],
+      "costs": [],
+      "serverRelevance": "authoritative - additional buffs the area applies beyond the primary buffID. Server must apply the full extend-buff set. FUN_10d60090 appends to the list.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101ebc0",
+      "currentName": "FUN_1101ebc0",
+      "proposedName": "CScriptBind_MHBuffArea::SetEffectID",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetEffectID(sEffectID) handler. atoi(param_3) -> effectID; if nonzero writes to MHBuffArea+0x88.",
+      "formulas": ["effectID = atoi(sEffectID); if !=0 -> MHBuffArea+0x88 = effectID"],
+      "costs": [],
+      "serverRelevance": "authoritative/client - visual/effect id for the area buff; +0x88. Effect is client visual but id may be synced.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101ec20",
+      "currentName": "FUN_1101ec20",
+      "proposedName": "CScriptBind_MHBuffArea::SetMonsterCanAttack",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetMonsterCanAttack(enable) handler. Writes byte to MHBuffArea+0xad.",
+      "formulas": ["+0xad (byte) = enable (monsters can attack / be affected)"],
+      "costs": [],
+      "serverRelevance": "authoritative - faction targeting: whether monsters are affected/can-attack in the area; +0xad.",
+      "confidence": "high",
+      "notes": "Faction can-attack quartet: player +0xac, monster +0xad, npc +0xae, pet +0xaf."
+    },
+    {
+      "address": "0x1101ec70",
+      "currentName": "FUN_1101ec70",
+      "proposedName": "CScriptBind_MHBuffArea::SetPlayerCanAttack",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetPlayerCanAttack(enable) handler. Writes byte to MHBuffArea+0xac.",
+      "formulas": ["+0xac (byte) = enable (players can attack / be affected)"],
+      "costs": [],
+      "serverRelevance": "authoritative - faction targeting for players; +0xac.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101ecc0",
+      "currentName": "FUN_1101ecc0",
+      "proposedName": "CScriptBind_MHBuffArea::SetNPCCanAttack",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetNPCCanAttack(enable) handler. Writes byte to MHBuffArea+0xae.",
+      "formulas": ["+0xae (byte) = enable (NPCs affected)"],
+      "costs": [],
+      "serverRelevance": "authoritative - faction targeting for NPCs; +0xae.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101ed10",
+      "currentName": "FUN_1101ed10",
+      "proposedName": "CScriptBind_MHBuffArea::SetPetCanAttack",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "Lua SetPetCanAttack(enable) handler. Writes byte to MHBuffArea+0xaf.",
+      "formulas": ["+0xaf (byte) = enable (pets affected)"],
+      "costs": [],
+      "serverRelevance": "authoritative - faction targeting for pets; +0xaf.",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "0x1101ed60",
+      "currentName": "FUN_1101ed60",
+      "proposedName": "CScriptBind_MHBuffArea::GetterThunk_A",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "MHBuffArea Lua getter thunk: resolves the entity's MHBuffArea extension (same +0x58 -> +0x144 -> +0x18 chain) then tail-calls a component vfunc +0x18 whose jumptable the decompiler could not recover, returning its result (or 0 if no extension).",
+      "formulas": ["extension resolve then return component vfunc(+0x18)(...)"],
+      "costs": [],
+      "serverRelevance": "client-only - script getter accessor; exact property not resolvable (jumptable lost).",
+      "confidence": "low",
+      "notes": "Structurally identical to FUN_11026970; both are getter thunks with unrecovered indirect jump."
+    },
+    {
+      "address": "0x110243b0",
+      "currentName": "FUN_110243b0",
+      "proposedName": "CScriptBind_MHBuffArea::SetFlag_0x7a",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "MHBuffArea Lua setter: resolves the MHBuffArea extension and writes byte param_3 to extension+0x7a. Which property this is (the registering call is outside this chunk) is unknown.",
+      "formulas": ["MHBuffArea+0x7a (byte) = param_3"],
+      "costs": [],
+      "serverRelevance": "authoritative - an unnamed boolean property of the area buff at +0x7a (likely SetEnable / init-enable, given +0x7a sits below the config block).",
+      "confidence": "medium",
+      "notes": "Naming guessed; the Lua method name is registered elsewhere. Possibly b_InitEnable/SetEnable (schema mentions SetEnable)."
+    },
+    {
+      "address": "0x11026970",
+      "currentName": "FUN_11026970",
+      "proposedName": "CScriptBind_MHBuffArea::GetterThunk_B",
+      "subsystem": "buffs/buff-area-scriptbind",
+      "purpose": "MHBuffArea Lua getter thunk identical in shape to FUN_1101ed60: resolves the extension and tail-calls component vfunc +0x18 (jumptable unrecovered), returning its value or 0.",
+      "formulas": ["extension resolve then return component vfunc(+0x18)(...)"],
+      "costs": [],
+      "serverRelevance": "client-only - script getter accessor; property not resolvable.",
+      "confidence": "low",
+      "notes": "Duplicate structure of FUN_1101ed60."
+    }
+  ]
+}

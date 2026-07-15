@@ -1,0 +1,281 @@
+{
+  "batchIndex": 1,
+  "classes": [
+    {
+      "className": "CItemBaseInfo",
+      "category": "item",
+      "purpose": "Static item-definition (base item config) record loaded into a CInfoManager<CItemBaseInfo> singleton and looked up by item id. Holds an item's id, internal/config name, display name, type/subtype category, per-type stack/carry limit and various boolean gameplay flags. Almost none of the 41 grouped functions are true members of the class: the auto-grouper collected every function that references the manager-singleton name string \"CItemBaseInfo::GetManagers\". Most are consumers in OTHER classes (bag/inventory validators, resource precachers, crafting/equip/NPC-sale logic) that resolve the item table via the singleton and do a 2D-sparse-array GetById.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "10254050",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemBaseInfo::GetManagerSingleton",
+          "purpose": "The real accessor. Lazily registers the name \"CItemBaseInfo\" with StcMbrNameSvr<CInfoManager> (guarded by DAT_123bdbfc one-shot flag) and returns the CInfoManager<CItemBaseInfo>* stored at DAT_123bdba0. All other functions inline a copy of this to reach the item table."
+        },
+        {
+          "address": "10b5c170",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CGmChatCommand::HandleGiveItemCommand",
+          "purpose": "Parses a chat/GM command struct (char* fields at +0x18/+0x28/+0x38/+0x48), matches the leading token against \"gm\" (compare vs 0x6d67), _strtoui64-parses numeric args, and drives the HornNumDialogOK/HornNumDialogCancel numeric-input dialog. Resolves an item via the manager. Low confidence on exact command semantics."
+        },
+        {
+          "address": "10d68040",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CAvatarAppearanceSync::BuildAndSend",
+          "purpose": "Calls CAvatarInfo::GetManagers, reads a character/avatar info struct (fields +0xb8..+0xe4, name strings +0x50/+0x68/+0x80) and pushes strings/arrays to a network/render sink via vtable+0x32c; copies equipment id vectors (+0x19c..+0x1ac). Aborts with puts(\"out of memory\")/exit on alloc failure. Client appearance/equip snapshot builder; only incidentally touches the item table."
+        },
+        {
+          "address": "111e7b30",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemListUI::FillItemNames",
+          "purpose": "Iterates a collection (vtable+0x18 count, vtable+0x1c getAt), resolves each id in the item manager, strcpy_s copies the item display name (+0xb4) into a 32-byte buffer, and emits it via a UI/message sink (FUN_111e0a50 vtable+4, tag 0x32)."
+        },
+        {
+          "address": "112035c0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemFilterList::MarkMatchingEntries",
+          "purpose": "If param_1[5]==*param_2, walks an entry array (this[0xd]..this[0xe], stride 0x20), string-compares (FUN_100fd0c0) each entry name against param_2+2 and, when equal and entry[0x18]==param_2[1], sets entry[0x1c]=1 (a 'matched/selected' flag). Low confidence on owning class."
+        },
+        {
+          "address": "1120ad50",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CManufactureInfo::SendRecipeDetail",
+          "purpose": "Looks up a CManufactureInfo record by id, reads result item (+0x58), fields +0x60/+0x64/+0x78/+0x7c and a materials vector (+0x84..+0x88, stride 0x20). Resolves item display names (+0xb4) and emits recipe header (tag 0x74) and per-material rows (tag 0x77) to a message sink. Medium confidence."
+        },
+        {
+          "address": "112a9f30",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemCatalogSync::SendEntries",
+          "purpose": "Reads a manager/table via param_1[3], builds two copied lists (0x38-byte records) with memcpy, resolves item names (+0xb4) into 0x40 buffers, and sends each record (tag 0x106). Uses a red-black-tree membership test on ids. out-of-memory guarded. Low confidence."
+        },
+        {
+          "address": "113efea0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CActor::ApplyEquipItemBonus",
+          "purpose": "Copies param_2[0..5] into this[0x7bf..0x7c4]; if the item id (this[0x7c1]) resolves and item.type(+0x34)==4 and item[+0x11c]==2, stores item[+0x16c] into this[0x7bb]; then invokes vtable+0x1a4 with &this[0x7bf]. Applies an equipped item's derived bonus/id to an actor."
+        },
+        {
+          "address": "113fc2e0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CBagOpValidator::ValidateTypeCapacity",
+          "purpose": "Given add/remove lists (two vectors, stride 0x18 and 0xc), accumulates per-item running counts in an RB-tree keyed by hash, then checks each item's stack/carry limit via FUN_113f9ee0 (item+0x48) against existing count. Returns TDR-style error codes 0x34 (bad id range), 0x40, 0x32, 0x29 (capacity), 0 on success."
+        },
+        {
+          "address": "113fc920",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CBagOpValidator::ValidateCapacitySimple",
+          "purpose": "Simplified sibling of 113fc2e0: builds count map keyed by FUN_11669730 hash over add/remove vectors, validates against item stack limit (+0x48). Returns 0x32, 0x28, 0."
+        },
+        {
+          "address": "114014c0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CBagOpValidator::ValidateFull",
+          "purpose": "Full inventory add/remove validation over two operation vectors (this+0x8/0xc and +0x14/0x18). Derives an item category (0/1/2/5/9 from item.type +0x34, flags +0x68/+0xc4), computes needed slots via FUN_113f7100, and enforces per-item stack limit (+0x48) and per-category grid capacity. On failure writes error code to param_2+0x50 (0x28 stack, 0x29 grid, 0x2a category, 0x35 empty) and offending id to param_2+0x58; returns bool."
+        },
+        {
+          "address": "114b5ed0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CNpcSaleInfo::CalcItemSalePrice",
+          "purpose": "Resolves a CNpcSaleInfo record by id, walks an item's price/component vector (item+0x9c..+0xa0, stride 0x20), and computes a sale price with ceil()/double math (FUN_114b66e0). Medium-low confidence."
+        },
+        {
+          "address": "114bcea0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CDropTable::RollRewards",
+          "purpose": "Loot/drop roller. Consumes a list node stream (param_3+0x20 intrusive list), uses rand (FUN_100ee450) scaled by _DAT_11de98f0 over a min/max range to pick a count, resolves the item, validates via FUN_113f7d00/FUN_11521920, and appends granted (itemId,count,quality) triples into param_4; writes counts to out params. Low-medium confidence."
+        },
+        {
+          "address": "11599120",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CEquipUpgrade::ApplyStepList",
+          "purpose": "Processes an equip transform step list; switch on step type: 1=copy equip stats from a source (FUN_1166c4b0, fields +0xa8/+0xe0/+0xe4/+0xe8/+0xb0/+0xac), 2=CEquipLevelUpConsumeInfo lookup, 3=CItemBaseInfo+CEquipInfo lookup to rebuild an equip instance (clamps level/exp against caps, copies attribute list). Medium-low confidence."
+        },
+        {
+          "address": "1159dc20",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemBaseInfo::FindItemsByName",
+          "purpose": "Enumerates the whole item table (via FUN_102551f0(\"CItemBaseInfo\") + [5]/[6] linear array) and substring-matches each item's name (input string param_1+0x14) with FUN_100fd370; collects matching item ids (record+0x10) into output array param_3, count in *param_2, capped at 200. A genuine table query helper."
+        },
+        {
+          "address": "117436f0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CBuffInfo::PrecacheItemRefs",
+          "purpose": "If this[0x15]!=0 resolves a CBuffInfo, then iterates this[0x18..] (3 slots, stride 8) touching the item manager to force-load referenced items. Reference/precache walker."
+        },
+        {
+          "address": "117b5360",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTreeItems_c0",
+          "purpose": "Walks an RB-tree (this+0xd8/0xe0) and, for each node, an inner vector (this+0xc0/0xc4, stride 8), touching the item manager per element. Item reference/precache pass. Low confidence on owner."
+        },
+        {
+          "address": "117b6f40",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTreeItems_d4",
+          "purpose": "Same precache pattern as 117b5360 but over tree this+0xec/0xf4 and inner vector this+0xd4/0xd8. Low confidence."
+        },
+        {
+          "address": "117c5b70",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheList_28",
+          "purpose": "Iterates a container (this+0x28/0x2c, stride 8) touching the item manager per element. Item reference/precache pass. Low confidence."
+        },
+        {
+          "address": "117daf50",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CGoods::ResolveCommodityGroup",
+          "purpose": "Iterates this[0x24..0x25] entries; for entries whose vtable+4 type==0xe touches the item manager; then resolves a CCommodityGroupInfo by id this[0x16] and caches the record pointer into this[0x2a] (or 0 if not found). Low-medium confidence."
+        },
+        {
+          "address": "118401b0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemBuffRefWalker::PrecacheAll",
+          "purpose": "Precaches items (vector this+0x18/0x1c, stride 8) and buffs (CBuffInfo manager, vector this+0x24/0x28, stride 8); trailing loops are degenerate/no-op sort scaffolding. Reference/precache pass."
+        },
+        {
+          "address": "11854250",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheNested_18",
+          "purpose": "Nested precache: outer vector this+0x18/0x1c (stride 0x18), inner vector at entry+0xc/+0x10 (stride 4), touching the item manager per id. Low confidence."
+        },
+        {
+          "address": "118543b0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemGroupValidator::RequireType2",
+          "purpose": "Walks nested vectors (this+0x14/0x18 stride 0x10, inner stride 4); for each id resolves the item and bails unless item flag +0xc4!=0 and item.type(+0x34)==2. Validates that all referenced items are of category 2. Low-medium confidence."
+        },
+        {
+          "address": "1187f880",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CInfoManager::DebugExportConfNameTables",
+          "purpose": "Debug/export dump: writes tab-separated \"id\\tname\" text files for several data tables — tbItemDataConf.txt (CItemBaseInfo, name field record+0x14), tbInstanceNameConf.txt (CMHLevelInfo +0x1c), tbGiftBagNameConf.txt (CGiftBagGroupInfo), tbGiftNameConf.txt (CTalentInfo +0x78), tbMartConf.txt (CMartGoodsInfo +0x18). Confirms vtable+0x18=GetId and the manager linear-array layout. Medium-high confidence."
+        },
+        {
+          "address": "119fa060",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheVector_14x14",
+          "purpose": "Iterates a vector (this+0x14/0x18, stride 0x14) touching the item manager per element. Reference/precache pass. Low confidence."
+        },
+        {
+          "address": "11a011c0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CCommodityGroupInfo::GetManagerSingleton",
+          "purpose": "Touches the CItemBaseInfo singleton then registers/returns the CCommodityGroupInfo CInfoManager singleton (DAT_123c747c). Effectively a CCommodityGroupInfo manager accessor."
+        },
+        {
+          "address": "11a02fc0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheArray_60",
+          "purpose": "Iterates this+0x60..this+0x64 (stride 4) touching the item manager. Reference/precache pass."
+        },
+        {
+          "address": "11a054b0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheIfType3",
+          "purpose": "If this[0x18]==3, touches the item manager once (ensures a referenced item is loaded for a type-3 object)."
+        },
+        {
+          "address": "11a07860",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTree_1c",
+          "purpose": "Walks an RB-tree (this+0x14 root, iterate from +0x1c) touching the item manager per node. Reference/precache pass."
+        },
+        {
+          "address": "11a0c290",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTwoTrees_1c_2c",
+          "purpose": "Walks two containers (this+0x1c/0x20 and this+0x2c/0x30, stride 8) touching the item manager per element. Reference/precache pass."
+        },
+        {
+          "address": "11a0cce0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTwoTrees_1c_2c_b",
+          "purpose": "Near-duplicate of 11a0c290 (same two-container item precache, different init-guard label). Reference/precache pass."
+        },
+        {
+          "address": "11a185c0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheSlots5_14",
+          "purpose": "Iterates this+0x14 as 5 slot pairs (stride 8); for each non-null slot touches the item manager. Reference/precache pass."
+        },
+        {
+          "address": "11a1a130",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CPetSkill::PrecacheRefs",
+          "purpose": "Resolves CPetSkillInfo (this[0x12]) then iterates this+0xc as 3 slot pairs touching the item manager. Pet-skill + item reference/precache pass."
+        },
+        {
+          "address": "11a45200",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CNpcSale::PrepareAndGetItemManager",
+          "purpose": "Resolves a fixed CNpcSaleInfo entry (index 0x2c), if present calls FUN_117da950 with this->GetId(vtable+0x18); then returns the CItemBaseInfo manager singleton. Low-medium confidence."
+        },
+        {
+          "address": "11a4c3f0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CGuildMatchReward::PrecacheItems",
+          "purpose": "Resolves CFinalGuildMatchRewardInfo and a CGuildMatchInfo by id (this[0x10]); if valid, iterates a reward vector (this+0x20/0x24, stride 0x10) touching the item manager per reward. Guild-match reward item precache."
+        },
+        {
+          "address": "11a4c5a0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheVector_1c_x10",
+          "purpose": "Iterates a vector (this+0x1c/0x20, stride 0x10) touching the item manager per element. Reference/precache pass."
+        },
+        {
+          "address": "11a61130",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemRefWalker::PrecacheTree_1c_b",
+          "purpose": "Walks an RB-tree (this+0x14 root, from +0x1c) touching the item manager per node. Reference/precache pass (sibling of 11a07860)."
+        },
+        {
+          "address": "11a78660",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItem::GetBaseInfoIfEquipType",
+          "purpose": "If this.type(+0x34) is 2 or in [4,6) and this[0x38]>0, returns the resolved CItemBaseInfo manager (used as a guarded accessor for equip-like items). Otherwise returns the raw type value."
+        },
+        {
+          "address": "11a82370",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CHunterStarStat::PrepareAndGetManager",
+          "purpose": "Calls CAchieveLibInfo::GetManagers, touches the item manager if this[0x28]>0, then registers/returns the CHunterStarStatInfo CInfoManager singleton (DAT_122de664)."
+        },
+        {
+          "address": "11a87b20",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemBaseInfo::GetManagerSingleton_dup1",
+          "purpose": "Plain inlined copy of the manager-singleton accessor (returns CInfoManager<CItemBaseInfo>* at DAT_123bdba0). Functionally identical to 10254050."
+        },
+        {
+          "address": "11a880c0",
+          "currentName": "CItemBaseInfo::GetManagers",
+          "proposedName": "CItemBaseInfo::GetManagerSingleton_dup2",
+          "purpose": "Another plain inlined copy of the manager-singleton accessor (returns DAT_123bdba0). Identical to 10254050/11a87b20."
+        }
+      ],
+      "fields": [
+        {"name": "id", "type": "int32", "offset": "0x10", "source": "inferred", "note": "item id/index; copied as the result value in FindItemsByName (record+0x10)"},
+        {"name": "configName", "type": "char*", "offset": "0x14", "source": "inferred", "note": "internal/config name key; used as the 'name' column in tbItemDataConf.txt dump (record field[5]) and copied via FUN_100ec080(0x20)"},
+        {"name": "itemType", "type": "int32", "offset": "0x34", "source": "inferred", "note": "item category/type; compared ==1/==2/==4 across validators and equip logic"},
+        {"name": "subType", "type": "int32", "offset": "0x38", "source": "inferred", "note": "secondary category; e.g. type==1 && subType==2 path in bag validator"},
+        {"name": "stackLimit", "type": "uint32", "offset": "0x48", "source": "inferred", "note": "max stack/carry count per item; exceeding it yields bag error 0x28 (also read via FUN_113f9ee0)"},
+        {"name": "flag_0x68", "type": "uint8", "offset": "0x68", "source": "inferred", "note": "boolean gameplay flag branched on in bag category derivation"},
+        {"name": "displayName", "type": "char[32]", "offset": "0xb4", "source": "inferred", "note": "localized display name; strcpy_s(dst,0x20,item+0xb4) and FUN_100ec080 copies"},
+        {"name": "flag_0xc4", "type": "uint8", "offset": "0xc4", "source": "inferred", "note": "boolean flag (usable/gift-like); gates category 2/9 handling and RequireType2 validation"},
+        {"name": "field_0x11c", "type": "int32", "offset": "0x11c", "source": "inferred", "note": "checked ==2 together with type==4 in CActor::ApplyEquipItemBonus"},
+        {"name": "field_0x16c", "type": "int32", "offset": "0x16c", "source": "inferred", "note": "referenced id copied into actor when type==4 && field_0x11c==2"}
+      ],
+      "constants": ["MaxNameSearchResults=200"],
+      "formulas": [
+        "CInfoManager::GetById(id): let base=mgr+0x30, count=mgr+0x24, divisor=mgr+0x28, array=mgr+0x20. Valid iff id!=-1, !(id==0 && base!=0), divisor!=0, and 0 <= (id-base) < count. Then entry = array[(id-base)/divisor][(id-base)%divisor] (2D sparse bucket table). Same struct viewed via FUN_11679e10 result uses word indices [0xc]=base,[9]=count,[10]=divisor,[8]=array; linear enumeration uses [5]/[6] begin/end pointers, count=([6]-[5])>>2.",
+        "Bag validation error codes (written to op-struct+0x50): 0x28=per-item stack limit exceeded (offending id at +0x58), 0x29=grid/slot capacity exceeded, 0x2a=category capacity, 0x32/0x34/0x40=id out of table range, 0x35=empty/invalid op.",
+        "Needed-slots for a stack add ~ ceil((requiredCount - existingCount) / perStackMax) i.e. (required - existing - 1 + perStack)/perStack (114014c0).",
+        "NPC sale price computed with double math + ceil() over an item price/component vector (114b5ed0).",
+        "Drop roll count = base + floor(rand01 * (max-min+1)) then item/limit validated (114bcea0)."
+      ],
+      "relatedTlv": ["TlvItem (0x99) — RUNTIME item instance (itemId int64, itemType, posColumn, posGrid, count, bind, attrCount, ext-attr arrays), NOT this static config record; field layouts differ. CItemBaseInfo is the server-side static item definition table, so treat the mapping as thematic only."],
+      "notes": "The 41 grouped functions share only the singleton-name string \"CItemBaseInfo::GetManagers\"; only ~4 are genuine CItemBaseInfo members (the manager accessor 10254050 and its inlined duplicates 11a87b20/11a880c0, plus the table query FindItemsByName 1159dc20). The rest live in other classes (bag validators, resource precachers, crafting/equip/NPC/guild logic) and merely resolve items through the singleton. vtable offsets confirmed: +0x18=GetId, +0x28=GetCount. All record field offsets are inferred from consumer usage (Ghidra had no param types); none came from a dedicated DebugFormat/TLV reader in this bundle, so offset confidence is medium. The dump function 1187f880 is the strongest evidence for name fields and manager layout."
+    }
+  ]
+}

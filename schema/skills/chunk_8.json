@@ -1,0 +1,398 @@
+{
+  "chunkIndex": 8,
+  "functions": [
+    {
+      "address": "10eb3390",
+      "currentName": "FUN_10eb3390",
+      "proposedName": "CSkillNameAttr::GetStaticTypeInfo",
+      "purpose": "One-time (guarded by DAT_1203bc48 bit0) static initializer that builds a CryEngine-style attribute/type descriptor named \"Skill_Name\" and fills param_1 with vtable/typeinfo pointers (param_1[0]=&DAT_1203bc00 descriptor, param_1[1]=vtable &DAT_11cf63ac, param_1[2] type flags |= 0x11). Stock reflection/attribute-registration plumbing for a string field labelled 'Skill_Name'.",
+      "confidence": "low",
+      "subsystem": "skill-data-reflection",
+      "formulas": [
+        "init guard: if((DAT_1203bc48 & 1)==0){ DAT_1203bc48 |= 1; ... }",
+        "local_c = (local_c & 3) | 0x11df76e9 (vtable/type-tag composition)",
+        "param_1[2] = (param_1[2] & 0xfffff01f) | 0x11 (set type flag bits)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (CryEngine RTTI/attribute descriptor registration; refcount bookkeeping via DAT_123be268 string heap)",
+      "notes": "Emits string literal \"Skill_Name\". No gameplay math; stock plumbing."
+    },
+    {
+      "address": "10ef4f80",
+      "currentName": "FUN_10ef4f80",
+      "proposedName": "CPlayer::OnGameObjectEvent",
+      "purpose": "Player game-object event dispatcher keyed on event id *param_2. Handles: 0xc/0xd & 0x26/0x27 (weapon-render enable/disable via render-proxy vtable +0x28/+0x2c; on 0x27 also tears down weapon_item_attachment / melee_arrow_item / melee_arrow_secrect / bow_rage01_A/B attachments); event 1 sub-ids 0x39/0x3a/0x3b (aim/zoom FOV interpolation); event 0 (per-frame update: caches root transform, position tracking, network position sync); event 0x1e (cleanup of aux object param_1[0x714]); event 0x24 (calls param_1 vtable +0x44). DAT_1202e818 = global player/game context.",
+      "confidence": "medium",
+      "subsystem": "player-event-weapon-effects",
+      "formulas": [
+        "event 1 / sub 0x39: zoom time arg = (int)((*(float*)(DAT_120286b8+0x450) - *(float*)(DAT_120286b8+0x454)) * DAT_11de9a44)  [DAT_11de9a44 ~= 100.0f]; pushes state 0x3b",
+        "event 0 flag test on piVar1[1] (event flags): if((flags & 4)!=0 && (flags & 0x1002000)==0){ param_1[0x33 byte] = (flags & 0x1c000)!=0; copy root transform (4 ints via vtable+0xb4) into param_1[0x4db..0x4e2] and mirror into [0x591..0x594]; if(vtable+0x1b0 true) mirror [0x591..0x594] into [0x589..0x590] } gated by (param_1[0x4d9]==0 || (byte param_1[0x4da]&1)==0)",
+        "event 0: if((flags & 0x10000)==0 && byte@(param_1+0x1c9a)) call vtable+0x90",
+        "event 0 movement threshold: if( DAT_11cbf0b4 < (px-x)^2+(py-y)^2+(pz-z)^2 ) where last-pos cached at param_1[0x8df],[0x8e0],[0x8e1]; on exceed -> update cache and push network position (FUN_10b640b0 remote / FUN_10b63ff0 local via param_1[2] entity id, gated by DAT_12025178)"
+      ],
+      "costs": [],
+      "serverRelevance": "mostly client-only (weapon attachment render, FOV/zoom, animation); the movement-threshold branch pushes position updates to the network layer (DAT_11cbf0b4 = squared-distance epsilon that gates position resend) — server sees the resulting position packets but the gating itself is client",
+      "notes": "DAT_11cbf0b4 = position-resync squared-distance epsilon. Offsets: [0x4db..0x4e2]/[0x589..0x594] cached root transform vectors, [0x714] aux effect obj, [0x798] flag, [0x8df..0x8e1] last synced position."
+    },
+    {
+      "address": "10f0f750",
+      "currentName": "FUN_10f0f750",
+      "proposedName": "CPlayer::ExitVehicleOrDetachWeaponFx",
+      "purpose": "Reads model string \"VEHICLE_STATE\", queries a boolean state (vtable +0x830); when the state flag is clear and weapon object present, detaches weapon_item_attachment / melee_arrow_item / melee_arrow_secrect / bow_rage01_A/B via FUN_10a64020 and, if render proxy active (vtable+0x280), issues a render command (vtable+0x2c0(4,0,0)) and a UI/message dispatch (local_20=0x6e). Vehicle/mount dismount or weapon-fx cleanup.",
+      "confidence": "low",
+      "subsystem": "player-vehicle-weapon-fx",
+      "formulas": [
+        "local_5 = (vtable+0x830 result == '\\0')  (invert of state query)",
+        "message struct: local_20=0x6e (msg id), local_1c=local_18=0xffffffff, local_14=FUN_1025b060()"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (attachment detach, render/UI command)",
+      "notes": "FUN_113995e0(&{0x1f}) gate then detach set. 0x1f recurs as an attachment/slot enum across this chunk."
+    },
+    {
+      "address": "10f16c10",
+      "currentName": "FUN_10f16c10",
+      "proposedName": "CPlayer::ApplyWeaponClassReachAndCleanup",
+      "purpose": "Weapon-swap/equip finalizer. Clears byte@(param_1+0x159d); resolves weapon manager (vtable+400), links two weapon-instance ids (local_c/local_10 from attach slots iVar2+4 / iVar2+8, cross-wiring via vtable +0x110/+0x10c). Then switch on weapon class param_1[0x56d] (1,3,4,5,9) sets two float weapon params via *param_1 vtable +0x584 and +0x588 from per-class getter pairs. Finally iterates attachment sub-objects clearing flags and detaches the weapon/arrow attachment set; calls FUN_10f7f340/FUN_10f96b10.",
+      "confidence": "medium",
+      "subsystem": "weapon-equip",
+      "formulas": [
+        "param_1[0x56d] = weapon class id (switch cases 1,3,4,5,9)",
+        "case1: (*param_1+0x584)((float)FUN_11351190()); (*param_1+0x588)((float)FUN_11351470())",
+        "case3: 0x584<-FUN_11351250(); 0x588<-FUN_11351530()",
+        "case4: 0x584<-FUN_11350fd0(); 0x588<-FUN_113512b0()",
+        "case5: 0x584<-FUN_113511d0(); 0x588<-FUN_113514b0()",
+        "case9: 0x584<-FUN_11351210(); 0x588<-FUN_113514f0()",
+        "buff link: iVar2 = FUN_11111ec0(param_1[0x56d] + 0x1e) (weapon-class -> table row lookup, +0x1e base offset)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (weapon reach/range floats fed to animation/collision proxy). The +0x584/+0x588 pair are per-weapon-class reach or effective-range values; server would use its own weapon table equivalents.",
+      "notes": "param_1[0x56d]=weapon class. FUN_1135xxxx getters return per-class reach/range constants. FUN_11111ec0 keyed on weaponClass+0x1e."
+    },
+    {
+      "address": "10f1a850",
+      "currentName": "FUN_10f1a850",
+      "proposedName": "CPlayer::RefreshBuffsWithPVPExtraTime",
+      "purpose": "Reads config value \"PVPExtraBuffTime\" (via FUN_10a68a10 into local_8) when a PVP-mode gate is set (manager vtable+0x150(2) then +0x38 != 0). If param_2 (entity/actor id) == -1 it defaults to FUN_10a636e0() (local player). Then twice enumerates buff lists (flag 0 then flag 1) for that actor via context (DAT_1202e818+0xd0) buff-source vtable +0x34, passing each list plus PVPExtraBuffTime to FUN_10f1dba0, freeing the returned intrusive list nodes.",
+      "confidence": "medium",
+      "subsystem": "buff-application",
+      "formulas": [
+        "extraTime local_8 = read 'PVPExtraBuffTime' (only if PVP gate: mgr.vtable+0x150(2) && (+0x38)()!=0)",
+        "if(param_2==-1) param_2 = FUN_10a636e0()  (default = local player id)",
+        "buff enum: (ctx+0xd0).buffMgr(+0x94).vtable+0x34( actorId, buffOwner(+0x90), &list, 0 ) then FUN_10f1dba0(&list, 0, extraTime); repeat with flag 1"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/client-display: PVPExtraBuffTime is a gameplay tunable that extends buff durations in PVP; this call site builds the client buff view. Authoritative buff duration+PVP extension must be enforced server-side. The two passes (flag 0/1) = two buff categories (e.g. positive/negative or self/other).",
+      "notes": "FUN_10f1dba0(list, category, extraTime) is the actual per-buff apply/refresh. 'PVPExtraBuffTime' is a named CVar/config."
+    },
+    {
+      "address": "10f1c150",
+      "currentName": "FUN_10f1c150",
+      "proposedName": "CPlayer::SpawnSkillBuffEffectsFromCBuffInfo",
+      "purpose": "For an actor's skill/buff-source list at (param_1+0x15cc), for each entry: refreshes it (FUN_10f1fd40), resolves its model string and (if it lacks the \"_enhanced\" suffix) appends \"_enhanced\" to pick the enhanced-variant model, re-resolves. Then looks up a CBuffInfo record (FUN_10500130(0,\"CBuffInfo\",0)) and indexes it by param_3 to get the per-level buff row; DecodeBuffIdList extracts up to 10 buff ids; for each buff whose type (vtable[0]())==7 it spawns the buff's visual/particle effect on the skill object via (skillObj+0x1e8). Handles NUS_null00 special case and DAT_11dfa3c4 alt-buff-data override.",
+      "confidence": "medium",
+      "subsystem": "buff-effect-spawn",
+      "formulas": [
+        "enhanced variant: if strstr(modelName,\"_enhanced\")==NULL -> modelName += FUN_10a4c990(\"_enhanced\",9) (append 9-char suffix)",
+        "NUS special: if(DAT_11dfa3c4!=0 && (t=DAT_11dfa3c4/1000)==0x32||t==0x34||t==0x36) FUN_1083ac30(\"NUS_null00\")  [t in {50,52,54}]",
+        "CBuffInfo 2D lookup by param_3: rec=FUN_10500130(0,'CBuffInfo',0); base=rec[0x30]; rows*? : iVar4=rec[0x28] (columns); idx=param_3-base; valid iff param_3!=0-cases && 0<=idx<rec[0x24]; cell = rec[0x20][ (idx/iVar4) ][ (idx%iVar4) ]",
+        "buff id list: n = DecodeBuffIdList(cell+0x3c8, local_7c, 10)  (max 10 ids)",
+        "per buff: obj=buffMgr(+8)(id); if(obj && obj.vtable[0]()==7) { altData = DAT_11dfa3c4? FUN_10b2de00(DAT_11dfa3c4,DAT_11dfa3c8):0; spawn effect via skillObj.vtable+0x1e8( buffId=[3], effect=[4], pos=+6, rot=&{[9],[10],[0xb]}, scale=[0xc], flag=byte[0xe], 1,0, cond, 0 ); second effect uses field [0x10]/[0xf] }"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only rendering of buff particle effects, BUT the CBuffInfo structure it reads is authoritative buff data: rec[0x20]=2D buff-row table, rec[0x24]=index range, rec[0x28]=column count (divisor), rec[0x30]=index base offset; entry+0x3c8 = encoded buff-id list (<=10). Server must own the CBuffInfo->buff-id mapping and level indexing (idx = level-base -> row=idx/cols, col=idx%cols).",
+      "notes": "type==7 = the effect/visual buff subtype. DAT_11dfa3c4/DAT_11dfa3c8 = active alt-buff (rage/season?) data override key. param_3 = skill level/index. Cross-ref CBuffInfo in skill.md."
+    },
+    {
+      "address": "10f33380",
+      "currentName": "FUN_10f33380",
+      "proposedName": "CGuideTarget::ResolveItemOrSkillHighlight",
+      "purpose": "Given a name string (*param_2) and param_3==1, resolves a UI guide/highlight target: if the name begins with \"MhItem_\" (index 0) or \"MSkill_\" (index 1) and the current guide slot type (vtable+0x14) matches that index, extracts the trailing numeric id via atoi(name+7) and sets it on the guide object (vtable+0xc). Always returns 1.",
+      "confidence": "medium",
+      "subsystem": "ui-guide-skill-item",
+      "formulas": [
+        "prefix table: {0:\"MhItem_\", 1:\"MSkill_\"}; for i in 0..1: if( guide.vtable+0x14()==i && strncmp(name, table[i], 7)==0 ) { id = atoi(name+7); guide.vtable+0xc(id); return 1 }"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (tutorial/guide UI target resolution by encoded name string)",
+      "notes": "'MhItem_<id>' / 'MSkill_<id>' naming convention for guide/quest highlight targets. Gated by FUN_10f19240 (skill mgr) and FUN_11399470."
+    },
+    {
+      "address": "10f390b0",
+      "currentName": "FUN_10f390b0",
+      "proposedName": "CPlayerInput::RegisterActionMap",
+      "purpose": "Registers the player's full action-name table via FUN_1083ab70(name,len): movement/combat verbs (holster, interact, defense, reload, dodge, crouch, creep) plus rage_1/rage_2/rage_3/rage_transmission and the full xi_switch_* gamepad button set. Initializes 0x25(37) history/binding slots (copying default DAT_11cc06d8), then iterates 0x24(36) action-string entries binding each via FUN_10f40c80. Finally re-binds 3 rage action-map handlers (offsets 0x3b0/0x3b4/0x3b8) via FUN_10f3c450/FUN_10f3bbc0.",
+      "confidence": "medium",
+      "subsystem": "input-actionmap-rage",
+      "formulas": [
+        "slot init: puVar3 walks param_1+0x250, count 0x25 (37); each writes DAT_11cc06d8 at [-0x4a],[-0x25],[0]",
+        "action loop: 0x24 (36) iterations over string array at param_1+0x380 (local_c), binding via FUN_10f40c80",
+        "rage handlers: for slot in {0x3b0,0x3b4,0x3b8}: h=FUN_10f3c450(param+slot); if(h && byte@(h+0xde)==0) FUN_10f3bbc0(param+slot, *(h+0xc))",
+        "clear param_1+0x8fc = 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (input action-map / gamepad binding setup). rage_1/2/3/rage_transmission are the rage-mode skill input verbs.",
+      "notes": "Confirms rage skill inputs: rage_1, rage_2, rage_3, rage_transmission. Offsets 0x3b0/0x3b4/0x3b8 = 3 rage action-map handler pointers."
+    },
+    {
+      "address": "10f3b700",
+      "currentName": "FUN_10f3b700",
+      "proposedName": "CRageActionMap::LoadKeyBindings",
+      "purpose": "Loads Libs\\common\\RageActionMap.xml, gets the first (index 0) action node, and reads keyAction1..keyAction4 string attributes, resolving each into a key/action id via FUN_10fbfde0 and storing into local_1c/local_20/local_24/local_28. Reads an unnamed 0x11cd68d8 attribute first. Ends with FUN_10c3d580(0x14) construction of a 0x14-byte binding record.",
+      "confidence": "medium",
+      "subsystem": "input-rage-keymap",
+      "formulas": [
+        "load path literal: \"Libs\\\\common\\\\RageActionMap.xml\"",
+        "for each of keyAction1..4: if(node.has(name)) { node.get(name,&str); id=FUN_10fbfde0(str); store } -> local_10 holds resolved id, copied to local_20/24/28 for actions 2/3/4",
+        "record alloc size = 0x14 bytes (FUN_10c3d580(0x14))"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (rage-mode key binding load from XML)",
+      "notes": "Defines up-to-4 rage key actions (keyAction1..4) from RageActionMap.xml."
+    },
+    {
+      "address": "10f678f0",
+      "currentName": "FUN_10f678f0",
+      "proposedName": "CSkillTrigger::ParseFromXmlNode",
+      "purpose": "Parses a skill-trigger/condition XML node into an object. Reads the node name (vtable+0x7c(0x11dca14c)); if it equals a first sentinel string (0x11cfb1a4) sets type field param_1+0x24 = 1, else if it equals a second (0x11ccdb2c) sets param_1+0x24 = 3. Then reads attribute \"tpeOnly\" into param_1+0x2c (bool) and \"skillID\" into param_1+0x28 (int).",
+      "confidence": "medium",
+      "subsystem": "skill-trigger-data",
+      "formulas": [
+        "type: if(nodeName==str@0x11cfb1a4) param_1[0x24]=1 else if(nodeName==str@0x11ccdb2c) param_1[0x24]=3",
+        "param_1+0x2c = attr 'tpeOnly' (bool via vtable+0x50)",
+        "param_1+0x28 = attr 'skillID' (int via vtable+0x74)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/data: parses a skill trigger record (skillID + tpeOnly flag + type 1/3) from client data files. skillID is authoritative content; the trigger structure gates skill activation. Server should mirror the skillID<->trigger mapping.",
+      "notes": "Offsets on trigger obj: +0x24 type(1 or 3), +0x28 skillID, +0x2c tpeOnly (third-person-execution-only flag). tpeOnly = 'TpeOnly'."
+    },
+    {
+      "address": "10f6bea0",
+      "currentName": "FUN_10f6bea0",
+      "proposedName": "CAnimEventParser::ParseNoteTrackCommand",
+      "purpose": "Parses an animation note-track / event string (from param_2+0xc). sscanf splits it into first token (keyword) and remaining value. Dispatches on keyword: EFFECT -> spawn effect at \"Bip01 Spine\" bone (via char proxy +0x1e8, scale 0x3f800000=1.0); SKILLEFFECT -> spawn skill effect on the local player (checks +0x228 local-player flag); ANIMSPEED -> set animation playback speed = atof(value)*DAT_11de9a30 via FUN_10fd9120; OnLeave -> reset anim speed to 100 (if current !=100).",
+      "confidence": "medium",
+      "subsystem": "anim-event-fx",
+      "formulas": [
+        "token split: sscanf(str,\"%[^ ]\",keyword); sscanf(str,\"%*s%s\",value)",
+        "EFFECT: charProxy.vtable+0x1e8( value, \"Bip01 Spine\", &pos{0,0,0}, &rot{0,0,0}, 0x3f800000, 1,1,1,0,0 )  [scale=1.0f]",
+        "ANIMSPEED: speed = (float)atof(value) * DAT_11de9a30; FUN_10fd9120((int)speed)  [DAT_11de9a30 ~= 100.0f, so 'ANIMSPEED 1.5' -> 150]",
+        "OnLeave: if(FUN_10fd9110()!=100) FUN_10fd9120(100)  (restore default speed 100)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation note-track effect spawn + playback speed). ANIMSPEED scale factor DAT_11de9a30 (~100) means stored speed is percentage*? — anim playback is visual only; server uses its own animation-duration timing.",
+      "notes": "Note-track keywords: EFFECT, SKILLEFFECT, ANIMSPEED, OnLeave. Base anim speed unit = 100. DAT_11de9a30 ~= 100.0f."
+    },
+    {
+      "address": "10f781b0",
+      "currentName": "FUN_10f781b0",
+      "proposedName": "CPlayerAnimGraph::SetupCombatTransitions_TypeA",
+      "purpose": "Builds the animation state-transition graph for the current weapon class (read from actor+0x15b4). Case weapon==4: registers RageRushLow transition (PLLocomotion->RageRushLow via COMBAT_PL04_RAGERUSH_START) with callback FUN_10f73a40. Case weapon==5 (bowgun/gun): registers NoBullet (COMBAT_PL05_NOBULLET), ChangeBullet (COMBAT_PL05_CHANGEBULLET), and RageAim (COMBAT_PL05_RAGE_PRESHOOT) transitions between PLLocomotion/PLCombat/PLCharging animsets. Registers per-frame callback FUN_10f74a60.",
+      "confidence": "medium",
+      "subsystem": "anim-fsm-weapon",
+      "formulas": [
+        "weaponType = *(actor+0x15b4); if==0 return",
+        "state-array index: (weaponType+0x2f)*0xc byte offset into param_1 (per-weapon transition table slot)",
+        "case 4 -> RageRush transition; case 5 -> NoBullet/ChangeBullet/RageAim(preshoot) transitions"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation FSM/transition graph). weaponType@0x15b4 and the COMBAT_PL04/PL05 anim-state names are visual; rage-aim preshoot is client presentation.",
+      "notes": "actor+0x15b4 = weapon class/state id (recurs in f7a080, fbb060 skill-state code). Weapon 5 = ranged (bullet/rage-aim). Slot stride (type+0x2f)*0xc."
+    },
+    {
+      "address": "10f79480",
+      "currentName": "FUN_10f79480",
+      "proposedName": "CPlayerInput::OnRageMeleeActionInput",
+      "purpose": "Rage/melee input handler (gated by state short@(param_1+0x1ac)==1). param_3==2 (release/move): on any move action (moveforward/back/left/right) with nonzero velocity, zeroes velocity vector (0x154/0x158/0x15c) and issues an input command (local_2d8=0x800000). param_3==1 (press): depending on input scheme DAT_120286b8+0x9d4 (0=KB: melee1 or rage_1; 1=xi_switch_y; 2=xi_switch_y; 3=xi_switch_rb; 4=xi_thumbr_down / else xi_switch_lt combo) triggers rage/melee: builds and sends a 0x404 network packet (skill activation) via server-object vtable+0x254, or fires the combo-buffered action (state 0x234=2).",
+      "confidence": "medium",
+      "subsystem": "skill-input-network",
+      "formulas": [
+        "gate: short@(param_1+0x1ac)==1 else exit",
+        "input scheme = *(DAT_120286b8+0x9d4): 0=keyboard(melee1/rage_1); 1=pad(xi_switch_y); 2=pad(xi_switch_y); 3=pad(xi_switch_rb); 4=pad(xi_thumbr_down); fallback combo key xi_switch_lt",
+        "velocity offsets zeroed: param_1+0x154, +0x158, +0x15c (abs>0 test via &DAT_11de9c70 = 0x7fffffff abs mask)",
+        "rage skill send: if(actor+0x100 && FUN_10f19240() skillMgr && skillMgr.vtable[0x10]+0x1c(0x4c4b456)!=0){ build pkt: *local_8=0x404; local_8[8]=FUN_1141bd30(); local_8[10]=*(skill+8); send via (player+0x3c).vtable+0x254(pkt) }",
+        "combo path: if(byte@(param_1+0x238)==1){ func_0x12402b6c(2,1,0); param_1[0x234]=2; byte@(param_1+0x238)=0 }"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-request: builds and sends the 0x404 skill/rage activation packet to the server (opcode field via FUN_1141bd30, skill id from skill+8). The client issues the request; server must validate skill availability, rage energy, cooldown. Movement-cancel and combo-buffer are client-local.",
+      "notes": "Packet opcode 0x404 = rage/melee skill activation. 0x4c4b456 = magic skill-query key. Input scheme selector at DAT_120286b8+0x9d4. State offsets: 0x1ac(active), 0x234(action state), 0x238(combo-buffered flag)."
+    },
+    {
+      "address": "10f7a080",
+      "currentName": "FUN_10f7a080",
+      "proposedName": "CPlayerAnimGraph::SetupCombatTransitions_TypeB",
+      "purpose": "Second variant of the weapon anim-transition setup (weaponType@0x15b4, valid range 1..0xc). Case weapon==1: registers UnholsteredIdle transition via COMBAT_UNHOLSTER with callback FUN_10f6b660. Case weapon==5: registers the same NoBullet/ChangeBullet/RageAim(preshoot) ranged transitions as f781b0 but with callback wrapper FUN_10fb6bf0. Registers per-frame callback FUN_10f74a60.",
+      "confidence": "medium",
+      "subsystem": "anim-fsm-weapon",
+      "formulas": [
+        "weaponType = *(actor+0x15b4); valid iff (weaponType-1) unsigned <= 0xb (1..12)",
+        "state slot: index = weaponType*3 + 0x8c; byte offset = index*4 into param_1",
+        "case 1 -> COMBAT_UNHOLSTER; case 5 -> COMBAT_PL05 NoBullet/ChangeBullet/RagePreshoot"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation FSM setup, alternate entry path)",
+      "notes": "Slot stride here = weaponType*3+0x8c (vs (type+0x2f)*0xc in f781b0 — same table, different addressing). Weapon range 1..12."
+    },
+    {
+      "address": "10f7e370",
+      "currentName": "FUN_10f7e370",
+      "proposedName": "CChargeState::Enter",
+      "purpose": "Enter-handler for the weapon charge state. Pushes event 0x26 onto an event queue; resolves state COMBAT_CHARGE and INVALID_STATE; stores the buff name \"PlayerChargeBuff\" into a string field at param_1+0x85 (the buff applied while charging). Registers state callbacks FUN_10f9aa60 (param_1+0x2c list) and FUN_10f9aea0 (param_1+0x32 list); iterates/reinitializes a 0x80-stride sub-object array (param_1[0x81]..[0x82]). Sets byte@(param_1+0x86)=1 (charge active).",
+      "confidence": "medium",
+      "subsystem": "skill-state-charge",
+      "formulas": [
+        "event pushed: 0x26",
+        "buff name string 'PlayerChargeBuff' stored at param_1+0x85 (word field 0x6b zeroed too)",
+        "sub-object array stride 0x80 bytes between param_1[0x81] and param_1[0x82]",
+        "byte@(param_1+0x86) = 1 (charging flag)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only state entry, but 'PlayerChargeBuff' is a named buff granted during weapon charge — the buff itself (duration/magnitude) is authoritative server data.",
+      "notes": "Charge state applies buff 'PlayerChargeBuff'. States COMBAT_CHARGE / INVALID_STATE. Event id 0x26."
+    },
+    {
+      "address": "10f87670",
+      "currentName": "FUN_10f87670",
+      "proposedName": "CSkillState::ParseBoostBuffID",
+      "purpose": "Scans the child nodes of an XML element (vtable+0xa0 count, +0xa8 get) for a node named \"BoostBuffID\"; when found reads its value attribute (attr key @0x11de661c) into param_1+0x224 and returns true. Returns false if no BoostBuffID present.",
+      "confidence": "medium",
+      "subsystem": "skill-data-buff",
+      "formulas": [
+        "for i in 0..childCount: if(child.name==\"BoostBuffID\" && child.has(attr@0x11de661c)) { child.get(attr, param_1+0x224); return 1 }"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/data: 'BoostBuffID' is authoritative content (the buff id granted/boosted by this skill state); parsed here into param_1+0x224 for client use. Server must own the skill->BoostBuffID mapping.",
+      "notes": "param_1+0x224 = boost buff id. Element name 'BoostBuffID'."
+    },
+    {
+      "address": "10f8bc00",
+      "currentName": "FUN_10f8bc00",
+      "proposedName": "CChargeFallState::Enter",
+      "purpose": "Enter-handler for the charge-fall state. Pushes event 0x12; clears aim state short@(param_1+0x1ac); stores buff name \"PlayerChargeBuff\" into param_1+0x200 and copies byte@(param_1+0x1af) into +0x204. Registers callbacks FUN_10f9b620 / FUN_10f9b1e0, plus tick handler FUN_10f5bd40(6, FUN_10f9b100). Builds fall anim transition PLLocomotion:StartFall -> PLCharging -> NORMAL_FALL.",
+      "confidence": "medium",
+      "subsystem": "skill-state-charge",
+      "formulas": [
+        "event pushed: 0x12",
+        "buff 'PlayerChargeBuff' -> param_1+0x200; byte@(param_1+0x204) = byte@(param_1+0x1af)",
+        "tick registration: FUN_10f5bd40(6, FUN_10f9b100)  (6 = tick group/priority)",
+        "clear param_1+0x20c = 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only state entry; carries 'PlayerChargeBuff' (authoritative buff data) into the fall-while-charging state.",
+      "notes": "Charge-fall state keeps 'PlayerChargeBuff'. Event 0x12. Anim NORMAL_FALL."
+    },
+    {
+      "address": "10f98c50",
+      "currentName": "FUN_10f98c50",
+      "proposedName": "CPlayer::SetupRagePassiveEnergyFx",
+      "purpose": "Initializes 3 rage-passive-ability slots (loop i=0..2) from an id array param_2. For each slot (struct base param_1+0x1e8, stride 4 dwords = 0x10 bytes): stores the ability id at [+0x18/word6]; resolves the ability object; if its state (vtable+0xa8)==0, verifies particle asset \"Energy_Ability_PC.PRJ.RagePassPRJ\" exists, spawns it and stores the effect handle at slot[0], and sets slot[+0xc]=0x3f800000 (1.0f intensity/scale).",
+      "confidence": "medium",
+      "subsystem": "rage-passive-fx",
+      "formulas": [
+        "loop 3 iterations (3 rage-passive slots); slot stride = 4 dwords (0x10 bytes) starting param_1+0x1e8",
+        "slot[6] = param_2[i] (ability id)",
+        "gate: abilityObj = buffMgr(+0x7c)(id); if(abilityObj && abilityObj.vtable+0xa8()==0)",
+        "if particle 'Energy_Ability_PC.PRJ.RagePassPRJ' exists: slot[0] = spawned effect; slot[3] = 0x3f800000 (=1.0f)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (rage passive ability visual/particle). Confirms up to 3 rage-passive ability slots per player; ability ids are authoritative but effect spawn is client.",
+      "notes": "3 rage-passive slots. Particle 'Energy_Ability_PC.PRJ.RagePassPRJ'. slot[3]=1.0f scale (0x3f800000)."
+    },
+    {
+      "address": "10f98d30",
+      "currentName": "FUN_10f98d30",
+      "proposedName": "CRageTransmissionState::Enter",
+      "purpose": "Enter-handler for the rage-transmission (rage transfer) state. Registers state RAGE_TRANSMISSION, sub-state RageTransmission with callback (local_c) and tick callback FUN_10fac4b0; sets default-next-state NORMAL_IDLE; marks byte@(param_1+0x70)=1. Builds idle anim transitions PLLocomotion:HolsteredIdle -> PLBaseAction -> NORMAL_IDLE.",
+      "confidence": "medium",
+      "subsystem": "skill-state-rage",
+      "formulas": [
+        "state name RAGE_TRANSMISSION; sub RageTransmission; default next NORMAL_IDLE",
+        "byte@(param_1+0x70) = 1"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only anim/state entry for rage transmission (transferring rage to allies). The rage-transfer mechanic itself (amount, targets) is authoritative server-side.",
+      "notes": "Rage transmission = rage-sharing skill. States RAGE_TRANSMISSION / RageTransmission."
+    },
+    {
+      "address": "10f98e80",
+      "currentName": "FUN_10f98e80",
+      "proposedName": "CPlayer::ToggleWeaponRageAttachments",
+      "purpose": "Shows or hides the rage/bow weapon attachment set. On entry (param_1!=0, and FUN_10fdbb90 true): re-shows the weapon_item_attachment slot (sub-object +0x44(1)). When param_2==10: hides the weapon and detaches weapon_item_attachment plus (if present) melee_arrow_item / melee_arrow_secrect / bow_rage01_A / bow_rage01_B, storing the base attachment id at param_1[0x8a3].",
+      "confidence": "medium",
+      "subsystem": "weapon-rage-fx",
+      "formulas": [
+        "entry: (*param_1+0x790)() [get weapon]; if(FUN_10fdbb90()) show weapon_item_attachment (attach.vtable+0x44(1))",
+        "param_2==10: hide weapon (FUN_10fdbbf0); param_1[0x8a3] = weapon_item_attachment id; detach each of {weapon_item_attachment, melee_arrow_item, melee_arrow_secrect, bow_rage01_A, bow_rage01_B} that exists"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (weapon attachment / rage-bow visual toggle)",
+      "notes": "param_2==10 = a specific weapon/rage state id triggering attachment cleanup. bow_rage01_A/B are rage-mode bow visual attachments."
+    },
+    {
+      "address": "10fb8630",
+      "currentName": "FUN_10fb8630",
+      "proposedName": "CStateFactory::CreateStateFromXmlNode",
+      "purpose": "State-machine factory: given an XML node it verifies the node is named \"State\", reads a required attr (@0x11dbac80, likely 'name'), and looks up an existing state by name (FUN_10fde580). If absent, resolves the state \"class\" attribute (or inherits via \"parent\") and allocates the concrete state object whose byte-size is chosen per class name (giant if-chain: Charge=0x220, NormalCombo/InteractEmotion/GunAction/WE05Rage01Shoot=0x200, HolsteredIdle=0x2d0, HolsteredRun=0x2d8, UnholsteredIdle/UseItem/SharpenWeapon/WE05Rage01Reload/Aim=0x1f0, UnholsteredRun/DefenseSuccess/DefenseFailed=0x1f8, Defense=0x1e0, Standard/CollectRestart/Injury/PLInjuryLevelN=0x1e8, Dodge/SlashAxeDodge=0x208, ChargingIdle=0x218, ChargingRun/ChargingSpinAttack=0x220, Abnormal=0x1d8, InjuryFly/PLInjuryLevel11-12=0x258, InjuryRun=0x250, Lance/GunLance rage/SlashAxe holster=0x230, PLStateFly=0x240...). Then dispatches its child sections: Basics->FUN_10fb9dd0, Extend->FUN_10fba900, Transitions->FUN_10fbab00, DefenseSuperArmor->FUN_10fbaba0.",
+      "confidence": "medium",
+      "subsystem": "skill-state-machine",
+      "formulas": [
+        "must be node 'State' with attr@0x11dbac80; else *param_2=0",
+        "class->object size map (operator new size via FUN_10c3d580): Charge 0x220; NormalCombo 0x200; InteractEmotion 0x200; HolsteredIdle 0x2d0; HolsteredRun 0x2d8; UnholsteredIdle 0x1f0; UnholsteredRun 0x1f8; Defense 0x1e0; DefenseSuccess 0x1f8; DefenseFailed 0x1f8; Standard 0x1e8; CollectRestart 0x1e8; Dodge 0x208; UseItem 0x1f0; ChargingIdle 0x218; ChargingRun 0x220; ChargingSpinAttack 0x220; GunAction 0x200; WE05Reload 0x218; WE05ReloadPerfect 0x218; WE05Rage01Reload 0x1f0; WE05Rage01Aim 0x1f0; WE05Rage01Shoot 0x200; WE09GunLanceRageAim 0x230; Abnormal 0x1d8; Injury 0x1e8; InjuryFly 0x258(600); InjuryRun 0x250; SharpenWeapon 0x1f0; LanceRage02_charge 0x230; SlashAxeDodge 0x208; SlashAxeSwordRunningHolster 0x230; PLInjuryLevel1..8 Front/Back 0x1e8; PLInjuryLevel11-12 Front/Back 0x258(600); PLStateFly 0x240",
+        "child section dispatch by name: Basics/Extend/Transitions/DefenseSuperArmor"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation/combat state-machine construction from XML). Enumerates the full player state vocabulary (combat, charge, defense, dodge, injury tiers, weapon rage states) — useful reference for the server's action/state enum, but the object sizes are client memory layout only.",
+      "notes": "Comprehensive state-name list: charge/normalcombo/defense/dodge/injury L1-12/abnormal/weapon-specific rage states. 'Abnormal' state = abnormal-status animation. attr@0x11dbac80 is the common 'name'/'value' key used throughout this parser cluster."
+    },
+    {
+      "address": "10fb9dd0",
+      "currentName": "FUN_10fb9dd0",
+      "proposedName": "CState::ParseBasicsSection",
+      "purpose": "Parses a state's <Basics> section. Handles child elements: EndAnims/EndAnim (appends end-anim ids to list param_1+0x19), Extensions/Extension (extension state ids -> list param_1+0x53), Callbacks (installs FUN_10fbec40), Property with sub-keys: Skill (param_1[0x71]=atoi(skillID); registers via FUN_10f19240/FUN_11398240), NoEndLastStateSkills/NoEndLastStateSkill (FUN_10f5ca90 per id), CanRotation (bool -> byte@(param_1+3)), Speed (param_1[0x75]=FUN_113b3380(value)), StateType/Component/SpecialSelectAnim (via value attr), NextHolsterStateName.",
+      "confidence": "medium",
+      "subsystem": "skill-state-data",
+      "formulas": [
+        "Skill: param_1[0x71] = atoi(value); FUN_10f19240(id,0xffffffff); FUN_11398240()  (binds state to a skill id)",
+        "Speed: param_1[0x75] = FUN_113b3380(value)  (parsed playback/action speed)",
+        "CanRotation: byte@(param_1+3) = FUN_10a675d0(value, str@0x11d9e058)  (compares to a bool literal)",
+        "EndAnim list appended at param_1[0x19]/[0x1a]; Extension id list at param_1[0x53]/[0x54]"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/data: the state<->Skill binding (param_1[0x71] = skillID) and NoEndLastStateSkill exceptions are gameplay content; parsed client-side. Server must know which skill each action state corresponds to and skill cancel/chaining rules. Speed and CanRotation are client anim/movement.",
+      "notes": "Key gameplay field: state.skillID at offset 0x71. NoEndLastStateSkill = skills that don't terminate the previous state (combo chaining). offset 3 = CanRotation, 0x75 = Speed."
+    },
+    {
+      "address": "10fbad40",
+      "currentName": "FUN_10fbad40",
+      "proposedName": "CState::ParseDefaultNextState",
+      "purpose": "Parses the \"DefaultNextState\" element of a state. Reads its value attr (@0x11dbac80); depending on the state name it names, stores the default-next-state into one of several slots: Charge/LanceRage02_charge -> generic slot (local_14 via FUN_10a72410), ChargingIdle->local_8, ChargingRun->local_c, ChargingSpinAttack->local_10, and NormalCombo/GunAction/WE05Reload/InteractEmotion/Dodge/SlashAxeDodge -> registered via FUN_1083ac30 or FUN_10f57080.",
+      "confidence": "low",
+      "subsystem": "skill-state-transition",
+      "formulas": [
+        "element 'DefaultNextState', value attr @0x11dbac80",
+        "branch by value name: Charge/LanceRage02_charge/ChargingIdle/ChargingRun/ChargingSpinAttack/NormalCombo/GunAction/WE05Reload/InteractEmotion/Dodge/SlashAxeDodge -> distinct storage slots"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (default anim transition target). Combo/charge default-next-state is presentation; server tracks its own action sequencing.",
+      "notes": "Default post-state transition table. Charge-family and combo states get dedicated slots."
+    },
+    {
+      "address": "10fbb060",
+      "currentName": "FUN_10fbb060",
+      "proposedName": "CState::ParseTransitionSection",
+      "purpose": "Parses a <Transition> node of the combat state machine. Reads: skillID (atoi; validates the skill is owned/usable via FUN_10f19240 + skill.vtable+0x58 and FUN_116cd660/FUN_116cdb80 — if the skill exists but is not usable the transition is rejected and the function returns 0); stateName (target state); rotType (camera=1 / normal=2 / default=3 stored at trans+0xc) with rotLimit (atoi -> trans+0x10); TransNoCheckHolster (bool -> trans+0x1c); c2Process (bool -> trans+0x1d); windowName (dodge=1 / combo=2 / immedodge=3 -> trans+0x18); Conditions list; OnTransitionCallbacks/OnTransition/function dispatch to a large set of transition-action handlers (HolsterItem, SetValue, SetFpsMode, FUN_10fc42c0..FUN_10fcfb20 chain); AGInputs/AGInput (action-graph input bindings).",
+      "confidence": "medium",
+      "subsystem": "skill-state-transition",
+      "formulas": [
+        "skillID = atoi(value); validation: if(actor+0x100 && actor.+0x228 (is-local) && (skillMgr=FUN_10f19240())!=0 && skillID>0 && skillMgr.(+0x14).vtable+0x58()=='\\0') { FUN_116cd660(); if(FUN_116cdb80()=='\\0') return 0 }  -> transition blocked when skill not usable",
+        "on valid skillID: transitionObj(+0x14) = skillID (via FUN_10f59500 target)",
+        "rotType: camera->1, normal->2, default->3 stored at trans+0xc; rotLimit atoi -> trans+0x10",
+        "windowName: dodge->trans+0x18=1, combo->=2, immedodge->=3 (cancel-window classification)",
+        "TransNoCheckHolster -> byte trans+0x1c; c2Process(false) -> byte trans+0x1d"
+      ],
+      "costs": [],
+      "serverRelevance": "validation: this is the client-side skill-usability gate for state transitions (skillID must be owned and not locked/cooldown before the transition/skill fires; rejects with return 0 otherwise). Authoritative enforcement of skill ownership, cooldown, and cancel-window (dodge/combo/immedodge) timing must live server-side; this parser defines the data (skillID per transition, cancel-window type, rotation limits) the server needs to mirror.",
+      "notes": "Transition obj offsets: +0xc rotType(1 camera/2 normal/3 default), +0x10 rotLimit, +0x14 skillID, +0x18 windowType(1 dodge/2 combo/3 immedodge), +0x1c TransNoCheckHolster, +0x1d c2Process. 'immedodge'/'dodge'/'combo' = cancel windows. OnTransition handler chain FUN_10fc42c0..10fcfb20 are the ~25 transition-action opcodes (SetValue/SetFpsMode/HolsterItem + others)."
+    }
+  ]
+}

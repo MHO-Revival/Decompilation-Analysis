@@ -1,0 +1,421 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "10322b60",
+      "currentName": "FUN_10322b60",
+      "proposedName": "TdrText_EnforceItemEntry_Dump",
+      "subsystem": "crafting/forge/enforce",
+      "purpose": "TDR human-readable text dumper for an enforce/enhance material item entry struct. Walks fields and emits name=value lines via TdrText_FieldScalar/FieldValueFmt.",
+      "formulas": [
+        "field [iM_nItemID] = param_1[0] (offset 0x0, int via fmt &DAT_11d9e0b4 = '%d')",
+        "field [iM_nEnforceLv] = param_1[1] (offset 0x4, int)",
+        "field [szM_strName] = param_1+2 (offset 0x8, string via TdrText_FieldValueFmt)"
+      ],
+      "costs": ["iM_nEnforceLv: enforcement/enhance level of the item (no arithmetic here, just a field)"],
+      "serverRelevance": "client-only (debug/log text serializer); the struct {itemID, enforceLv, name} is a shared wire type the server also parses",
+      "confidence": "high",
+      "notes": "'M_' prefix indicates a manufacture/enforce material record. Pure field walk, no math."
+    },
+    {
+      "address": "103243c0",
+      "currentName": "FUN_103243c0",
+      "proposedName": "TdrText_CraftIdKey_Parse",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR parse/scan variant for a single-field struct holding a craft recipe ID. Sets up a local read cursor, reads [dwNCraftID], optionally frees a temp buffer (FUN_10c3da30). Returns 0xffffffed (-19) on null input.",
+      "formulas": ["field [dwNCraftID] = param_1[0] (offset 0x0, uint32 via fmt &DAT_11d9f574)"],
+      "costs": [],
+      "serverRelevance": "client-only text/TDR helper; craft ID key struct shared with server",
+      "confidence": "high",
+      "notes": "One of 4 sibling variants (this=parse-into-cursor). Error -19 = TDR generic null/param error."
+    },
+    {
+      "address": "10324440",
+      "currentName": "FUN_10324440",
+      "proposedName": "TdrText_CraftIdKey_DumpField",
+      "subsystem": "crafting/forge",
+      "purpose": "Minimal TDR text emit of [dwNCraftID] scalar field for the craft-ID key struct.",
+      "formulas": ["[dwNCraftID] = param_1[0] (uint32)"],
+      "costs": [],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": "Sibling of FUN_103243c0."
+    },
+    {
+      "address": "10324470",
+      "currentName": "FUN_10324470",
+      "proposedName": "TdrText_CraftIdKey_DumpToSizedBuf",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR text dump of craft-ID key struct into a caller buffer of size param_3, null-terminating at min(len,param_3-1). Returns empty string (&DAT_11d9d32b) if buffer null/zero-size.",
+      "formulas": [
+        "[dwNCraftID] = param_1[0]",
+        "null-term index: uVar2 = written_len; if(param_3 <= written_len) uVar2 = param_3-1; buf[uVar2]=0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": "Buffer-bounded variant."
+    },
+    {
+      "address": "10324500",
+      "currentName": "FUN_10324500",
+      "proposedName": "TdrText_CraftIdKey_DumpBufStruct",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR text dump of craft-ID key into a buf-descriptor struct {ptr@0, len@4, cap@8}; null-terminates via TdrBuf_PutNulAt at min(written,cap-1).",
+      "formulas": [
+        "[dwNCraftID] = param_1[0]",
+        "clamp: if(cap <= written) written = cap-1; TdrBuf_PutNulAt(cap, written)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": "buf-descriptor variant of the CraftId dumper."
+    },
+    {
+      "address": "103246f0",
+      "currentName": "FUN_103246f0",
+      "proposedName": "TdrText_CraftResultKey_Parse",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR parse for {dwNCraftID, dwNResult} struct (craft recipe + result code/item). Returns -0x13 (-19) on null input.",
+      "formulas": [
+        "[dwNCraftID] = param_1[0] (uint32)",
+        "[dwNResult] = param_1[1] (offset 0x4, uint32)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only TDR helper; struct is craft-result wire type",
+      "confidence": "high",
+      "notes": "dwNResult likely result item/status of a craft operation."
+    },
+    {
+      "address": "10324790",
+      "currentName": "FUN_10324790",
+      "proposedName": "TdrText_CraftResultKey_Dump",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR text emit of {dwNCraftID, dwNResult}.",
+      "formulas": ["[dwNCraftID]=param_1[0]", "[dwNResult]=param_1[1]"],
+      "costs": [],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": "Dump sibling of FUN_103246f0."
+    },
+    {
+      "address": "10325000",
+      "currentName": "FUN_10325000",
+      "proposedName": "TdrText_AddCraftOrder_Dump",
+      "subsystem": "crafting/forge",
+      "purpose": "TDR text dumper for a craft ORDER struct: a craft recipe that produces a result and consumes up to two order/material items with counts. Economy-relevant: defines the material-cost shape of an AddCraft request/config.",
+      "formulas": [
+        "[dwNCraftID] = param_1[0] (0x0, uint32)",
+        "[dwNResult] = param_1[1] (0x4, uint32)",
+        "[dwNOrderItemID1] = param_1[2] (0x8, uint32)",
+        "[dwNOrderItemCount1] = param_1[3] (0xc, uint32)",
+        "[dwNOrderItemID2] = param_1[4] (0x10, uint32)",
+        "[dwNOrderItemCount2] = param_1[5] (0x14, uint32)"
+      ],
+      "costs": [
+        "OrderItemID1 x OrderItemCount1 and OrderItemID2 x OrderItemCount2 = material items consumed by the craft order (server must validate/deduct these)"
+      ],
+      "serverRelevance": "validation/authoritative: struct is the AddCraft order wire type; server must validate the two material item/count pairs and deduct on craft. This function itself is a client/debug text serializer.",
+      "confidence": "high",
+      "notes": "Matches stAddCraft/stManufactureProduceReq family in FUN_1043b460 dispatcher."
+    },
+    {
+      "address": "10341cc0",
+      "currentName": "FUN_10341cc0",
+      "proposedName": "TdrText_GuildFullInfo_Dump",
+      "subsystem": "guild economy",
+      "purpose": "TDR text dumper for the full Guild/Clan info struct. Rich economy state: fund, resources A-D (daily/weekly/max), commerce boats, commerce buffs, celebration scores. Reveals guild struct layout. Enforces array-count sanity (returns -6 if <0, -7 if over cap).",
+      "formulas": [
+        "[ullId] = param_1[0..1] (u64 @0x0, '%I64u')",
+        "[szName] = param_1+2 (@0x8)",
+        "[iIcon] = param_1[0x10] (@0x40)",
+        "[szNote] = param_1+0xb (@0x2c)",
+        "[iLevel] = param_1[0x88] (@0x220)",
+        "[iExp] = param_1[0x89] (@0x224)",
+        "[iRepute] = param_1[0x8a] (@0x228)",
+        "[iFund] = param_1[0x8b] (@0x22c)",
+        "[iArena] = param_1[0x8c] (@0x230)",
+        "[iPlot]=0x8d, [iResA]=0x8e, [iResB]=0x8f (@0x234/0x238/0x23c)",
+        "[iGuildersCount]=0x90, [iOnlineGuildersCount]=0x91, [iGuildersAvgLevel]=0x92, [iJoinLevel]=0x93",
+        "[bDepotOpenFlag] = *(u8)(param_1+0x94) @0x250 ('0x%02x')",
+        "[ullFundMax] = u64 @0x251, [bHallLevel]@0x259, [bRecruitingLevel]@0x25a, [bResourcingLevel]@0x25b, [bTradingLevel]@0x25c, [bTrainingLevel]@0x25d",
+        "[iGuilderCountMax] @0x25e",
+        "[ullFundDaily] u64 @0x262, [ullFundWeekly] u64 @0x26a",
+        "[ullCommodityUnlock1] @0x272, [ullCommodityUnlock2] @0x27a, [ullCommodityUnlock3] @0x282",
+        "[iResC]@0x28a, [iResD]@0x28e",
+        "[iResADaily]@0x292, [iResBDaily]@0x296, [iResCDaily]@0x29a, [iResDDaily]@0x29e",
+        "[iResAWeekly]@0x2a2, [iResBWeekly]@0x2a6, [iResCWeekly]@0x2aa, [iResDWeekly]@0x2ae",
+        "[iResAMax]@0x2b2, [iResBMax]@0x2b6, [iResCMax]@0x2ba, [iResDMax]@0x2be",
+        "[iCelebrationScore]@0x2c2, [iCelebrationTaskA..D]@0x2c6/0x2ca/0x2ce/0x2d2, [iCelebrationReward]@0x2d6, [iDailyCelebrationScore]@0x2da",
+        "[iCommerceBoatCount]@0x2de (validate: <0 -> -6, >10 -> -7)",
+        "[astCommerceBoats] array @0x2e2, count=@0x2de max 10, per-elem via FUN_103407f0",
+        "[iSelectBoatsId]=param_1[0xd9], [dwGuildWarHistoryInfo]=param_1[0xda], [iBuffCount]=param_1[0xdb] (validate <0 ->-6, >5 ->-7)",
+        "[astCommerceBuffInfo] array @param_1+0xdc, count=param_1[0xdb] max 5, per-elem via FUN_10340ba0"
+      ],
+      "costs": [
+        "iFund/ullFundMax/ullFundDaily/ullFundWeekly = guild currency (fund) balance & caps",
+        "iResA-D + daily/weekly/max = guild resource currencies with periodic caps",
+        "ullCommodityUnlock1-3 = commerce/commodity unlock bitmasks or ids"
+      ],
+      "serverRelevance": "authoritative: this struct holds guild currency (fund) and resource balances/caps the server must own; array-count bounds (10 boats, 5 buffs) are server-enforced validation limits. This function is the client/debug text dump of it.",
+      "confidence": "high",
+      "notes": "Cross-ref guild schema. Offsets are the load-bearing recovery. Array caps: boats<=10, buffs<=5."
+    },
+    {
+      "address": "1037c2a0",
+      "currentName": "FUN_1037c2a0",
+      "proposedName": "TdrText_RankRewardEntry_Dump",
+      "subsystem": "rewards/ranking",
+      "purpose": "TDR text dump of a rank reward entry {szName, iReward, bBFetched}.",
+      "formulas": [
+        "[szName] = param_1+0 (string)",
+        "[iReward] = *(param_1+0x20) (int)",
+        "[bBFetched] = *(u8)(param_1+0x24) ('0x%02x', fetched-flag)"
+      ],
+      "costs": ["iReward: reward amount/id for a rank slot"],
+      "serverRelevance": "authoritative: reward grant & fetched-flag are server-owned; function is client/debug dump",
+      "confidence": "high",
+      "notes": "bBFetched prevents double-claim (server must enforce)."
+    },
+    {
+      "address": "1037c880",
+      "currentName": "FUN_1037c880",
+      "proposedName": "TdrText_RankListInfo_Dump",
+      "subsystem": "rewards/ranking",
+      "purpose": "TDR text dump of a ranking list response: paging, reward list (max 5), and ranker array (max 150). Enforces array bounds.",
+      "formulas": [
+        "[iRankId]=param_1[0], [iPos]=param_1[1], [iRankersCount]=param_1[2], [iPages]=param_1[3], [iPage]=param_1[4], [iRewardNum]=param_1[5]",
+        "[astRewards] array count=param_1[5] (validate <0->-6, >5->-7), per-elem FUN_1037c2a0",
+        "[iCount] = *(param_1+0xd1) (rank entry count; validate <0->-6, >0x96(150)->-7)",
+        "[astRank] array @param_1+0xd5 count=[iCount] max 150, per-elem FUN_1037bd80"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative source of rank data & reward list; caps (5 rewards, 150 rankers) are validation limits. This fn is client/debug dump.",
+      "confidence": "high",
+      "notes": "astRank stride implied by 0xd5-0xd1 header; per-elem formatter FUN_1037bd80 (outside chunk)."
+    },
+    {
+      "address": "1037f2f0",
+      "currentName": "FUN_1037f2f0",
+      "proposedName": "TdrText_RankIdReward_Parse",
+      "subsystem": "rewards/ranking",
+      "purpose": "TDR parse of {iRankId, iReward}. Returns -0x13 on null.",
+      "formulas": ["[iRankId]=param_1[0]", "[iReward]=param_1[1]"],
+      "costs": ["iReward: reward value tied to a rank id"],
+      "serverRelevance": "client-only TDR helper; server owns reward mapping",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "1037f390",
+      "currentName": "FUN_1037f390",
+      "proposedName": "TdrText_RankIdReward_Dump",
+      "subsystem": "rewards/ranking",
+      "purpose": "TDR text emit of {iRankId, iReward}.",
+      "formulas": ["[iRankId]=param_1[0]", "[iReward]=param_1[1]"],
+      "costs": ["iReward"],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": "Dump sibling of FUN_1037f2f0."
+    },
+    {
+      "address": "1037f790",
+      "currentName": "FUN_1037f790",
+      "proposedName": "TdrText_RankIdRewardName_Dump",
+      "subsystem": "rewards/ranking",
+      "purpose": "TDR text emit of {iRankId, iReward, szName}.",
+      "formulas": ["[iRankId]=param_1[0]", "[iReward]=param_1[1]", "[szName]=param_1+2"],
+      "costs": ["iReward"],
+      "serverRelevance": "client-only debug serializer",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "103d3460",
+      "currentName": "FUN_103d3460",
+      "proposedName": "TdrText_RewardTaskConfig_Dump",
+      "subsystem": "rewards/tasks",
+      "purpose": "TDR text dumper for a reward/task config item with unlock conditions, per-item get-count cap, and a reward-item array (max 10). Reveals config struct layout.",
+      "formulas": [
+        "[dwItemID] = param_1[0] (uint32)",
+        "[nItemCount] = *(short)(param_1+1) (@0x4, int16)",
+        "[bBindType] = *(u8)@0x6, [bOpenType] = *(u8)@0x7",
+        "[chColumn] = *(char)@0x8",
+        "[dwFlags] = *(u32)@0x9",
+        "[bCondType]=@0xd, [bCondId]=@0xe (u8 condition type/id)",
+        "[iCondParam1]=@0xf, [iCondParam2]=@0x13 (int cond params)",
+        "[szCondParam] string @0x17 (32 bytes -> next field @0x37)",
+        "[nGetCountMax] = *(short)@0x37 (int16, max obtain count)",
+        "[szDesc] string @0x39 (0x80=128 bytes -> @0xb9)",
+        "[szCondArg1] @0xb9 (128 bytes -> @0x139), [szCondArg2] @0x139 (128 bytes -> @0x1b9)",
+        "[bRewardItemCount] = *(u8)@0x1b9 (validate >10 -> -7)",
+        "[astRewardItems] array count=@0x1b9 max 10, per-elem FUN_103d2b40"
+      ],
+      "costs": [
+        "nGetCountMax = per-player obtain cap for this reward (server-enforced limit)",
+        "astRewardItems (<=10) with dwItemID/nItemCount = items granted"
+      ],
+      "serverRelevance": "validation/authoritative: nGetCountMax and reward-item list define what/how-much server grants and caps; bBindType controls bound-on-acquire. This fn is client/debug dump.",
+      "confidence": "high",
+      "notes": "String fields are 128-byte fixed buffers; szCondParam is 32 bytes."
+    },
+    {
+      "address": "103de410",
+      "currentName": "FUN_103de410",
+      "proposedName": "TdrText_LeagueScoreMod_Dump",
+      "subsystem": "leveling/pvp rewards (league/arena)",
+      "purpose": "TDR text dumper for a league/arena match score-modifier config: clan & self score/PV/medal deltas, punish, step-reward level, weekly/total limits, extra reward score/medal.",
+      "formulas": [
+        "[iType]=param_1[0]",
+        "[iClanScoreMod]=param_1[1], [iClanPVMod]=param_1[2]",
+        "[iSelfScoreMod]=param_1[3], [iPunish]=param_1[4], [iSelfPVMod]=param_1[5], [iSelfMedalMod]=param_1[6]",
+        "[iStepRewardLevel]=param_1[7]",
+        "[bWeekLimit] = *(u8)@0x20, [bTotalLimit] = *(u8)@0x21",
+        "[iExRewardScore] = *(u32)@0x22, [iExRewardMedal] = *(u32)@0x26"
+      ],
+      "costs": [
+        "iClanScoreMod/iSelfScoreMod/iSelfMedalMod/iSelfPVMod = score & medal deltas applied per match outcome",
+        "iExRewardScore/iExRewardMedal = extra reward amounts",
+        "bWeekLimit/bTotalLimit = claim caps"
+      ],
+      "serverRelevance": "authoritative config: server applies these score/medal modifiers and enforces week/total limits. This fn is client/debug dump.",
+      "confidence": "medium",
+      "notes": "Actual add/subtract math lives in the league-scoring code, not here; this only serializes the config values."
+    },
+    {
+      "address": "103e0350",
+      "currentName": "FUN_103e0350",
+      "proposedName": "TdrText_LeagueSeasonStats_Dump",
+      "subsystem": "leveling/pvp rewards (league)",
+      "purpose": "TDR text dumper for a player's league season stats: score, top score, streak, win/lose/total counts, reward mask, extra-reward and step-reward counts, medal count.",
+      "formulas": [
+        "[iCurSeason]=p[0], [iScore]=p[1], [iScoreTop]=p[2], [iWeekReward]=p[3], [iStreak]=p[4]",
+        "[iWinNum]=p[5], [iLoseNum]=p[6], [iTotalNum]=p[7]",
+        "[iRewardMask]=p[8], [iExRewardNum]=p[9], [iStepReward]=p[10], [iExMedalNum]=p[0xb]"
+      ],
+      "costs": [
+        "iScore = league score (currency-like ranking value)",
+        "iRewardMask = bitmask of claimed rewards (anti-double-claim)",
+        "iExMedalNum = medal count"
+      ],
+      "serverRelevance": "authoritative: season score/streak/win-loss and reward mask are server-owned; function is client/debug dump",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "103f3940",
+      "currentName": "FUN_103f3940",
+      "proposedName": "TdrText_QuenchResult_Dump",
+      "subsystem": "upgrade/enchant (quench/temper)",
+      "purpose": "TDR text dumper for an item Quench (淬炼 temper/enchant) result struct: return code, item uid, quench level, and parallel attrType[]/attrValue[] arrays (max 20). Reveals the enchant-result wire layout.",
+      "formulas": [
+        "[iRetCode] = param_1[0]",
+        "[llItemUid] = param_1[1..2] (i64 @0x4, '%I64i')",
+        "[iQuenchLv] = param_1[3] (@0xc, quench/temper level)",
+        "[iAttrDataCnt] = param_1[4] (@0x10; validate <0 -> -6, >0x14(20) -> -7)",
+        "[attrType] array = param_1+5 (@0x14), count=[iAttrDataCnt], 4 bytes each, emitted via FUN_1010c010",
+        "[szAttrValue] array = bytes at (param_1 + 0x64 + i) (@0x64), count=[iAttrDataCnt], u8 each ('0x%02x')"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: quench level and resulting attributes are computed server-side (upgrade result). This fn is client/debug dump. Array cap 20 is a validation bound.",
+      "confidence": "high",
+      "notes": "Quench = weapon/armor temper enchant. attrType[] (20 u32 @0x14..0x63) and szAttrValue[] (20 u8 @0x64..0x77) are parallel arrays. Duplicate of FUN_103f3ee0."
+    },
+    {
+      "address": "103f3ee0",
+      "currentName": "FUN_103f3ee0",
+      "proposedName": "TdrText_QuenchResult_Dump_dup",
+      "subsystem": "upgrade/enchant (quench/temper)",
+      "purpose": "Byte-identical sibling of FUN_103f3940 (same Quench result struct dumper). Likely the Req vs Rsp or two protocol structs sharing the same layout.",
+      "formulas": [
+        "[iRetCode]=p[0]; [llItemUid]=p[1..2] i64; [iQuenchLv]=p[3]; [iAttrDataCnt]=p[4] (cap 20)",
+        "[attrType][] @0x14 (u32 x count); [szAttrValue][] @0x64 (u8 x count)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative quench result; client/debug dump. Same as FUN_103f3940.",
+      "confidence": "high",
+      "notes": "Identical body to FUN_103f3940."
+    },
+    {
+      "address": "10406020",
+      "currentName": "FUN_10406020",
+      "proposedName": "TdrText_PointRewardStep_Dump",
+      "subsystem": "rewards (point-threshold)",
+      "purpose": "TDR text dumper for a point-threshold reward step {iIndex, iNeedPoint, iGetedState, iRewardItemID, iRewardItemCount}.",
+      "formulas": [
+        "[iIndex]=p[0], [iNeedPoint]=p[1], [iGetedState]=p[2], [iRewardItemID]=p[3], [iRewardItemCount]=p[4]"
+      ],
+      "costs": [
+        "iNeedPoint = point threshold required to claim",
+        "iRewardItemID x iRewardItemCount = reward granted at threshold"
+      ],
+      "serverRelevance": "authoritative/validation: server checks accumulated points >= iNeedPoint and iGetedState to grant reward. This fn is client/debug dump.",
+      "confidence": "high",
+      "notes": "Common 'activity point milestone reward' shape."
+    },
+    {
+      "address": "10418650",
+      "currentName": "FUN_10418650",
+      "proposedName": "TdrText_DailyHunterActivity_Dump",
+      "subsystem": "rewards (daily activity)",
+      "purpose": "TDR text dumper for a daily activity/encounter tracking struct {iDateDay, iCurHigher, iMeetTime, iGiantTime, iDailyRewardFlag, iRewardFlag}.",
+      "formulas": [
+        "[iDateDay]=p[0], [iCurHigher]=p[1], [iMeetTime]=p[2], [iGiantTime]=p[3], [iDailyRewardFlag]=p[4], [iRewardFlag]=p[5]"
+      ],
+      "costs": ["iDailyRewardFlag/iRewardFlag = reward-claimed bitflags (anti-double-claim)"],
+      "serverRelevance": "authoritative: daily counters and reward flags reset/owned by server; client/debug dump here",
+      "confidence": "medium",
+      "notes": "iMeetTime/iGiantTime = per-day encounter counters."
+    },
+    {
+      "address": "1041b390",
+      "currentName": "FUN_1041b390",
+      "proposedName": "TdrText_ReserveAbilityResult_Dump",
+      "subsystem": "upgrade (item ability/level-up)",
+      "purpose": "TDR text dumper for an item reserve-ability / level-up result {iErrCode, ullItemID, bColumn, wGrid, stReserveAbilityInfo (nested), bLevelUpFlag}.",
+      "formulas": [
+        "[iErrCode]=p[0]",
+        "[ullItemID]=p[1..2] (u64 @0x4, '%I64u')",
+        "[bColumn]=*(u8)@0xc",
+        "[wGrid]=*(u16)@0xd (inventory grid slot)",
+        "[stReserveAbilityInfo] nested via FUN_10272f80",
+        "[bLevelUpFlag]=*(u8)@0x1b"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: item ability upgrade / level-up result computed server-side; bColumn/wGrid identify inventory slot. Client/debug dump.",
+      "confidence": "medium",
+      "notes": "bColumn+wGrid = standard MHO inventory (column, grid) addressing seen across item ops."
+    },
+    {
+      "address": "1041d9f0",
+      "currentName": "FUN_1041d9f0",
+      "proposedName": "TdrText_ChapterRewardState_Dump",
+      "subsystem": "rewards (chapter/achievement)",
+      "purpose": "TDR text dumper for chapter reward tracking {iChapterId, iGetRewardCount, chIsNotNew}.",
+      "formulas": [
+        "[iChapterId]=p[0], [iGetRewardCount]=p[1], [chIsNotNew]=*(char)(p+2) @0x8 ('0x%02x')"
+      ],
+      "costs": ["iGetRewardCount = number of rewards already claimed for the chapter (server-enforced cap tracking)"],
+      "serverRelevance": "authoritative: claimed-count owned by server to prevent over-claim; client/debug dump",
+      "confidence": "high",
+      "notes": ""
+    },
+    {
+      "address": "1043b460",
+      "currentName": "FUN_1043b460",
+      "proposedName": "TdrDbg_DispatchByCmdId_MasterFormatter",
+      "subsystem": "protocol/serialization (all subsystems)",
+      "purpose": "Master TDR debug-format dispatcher. Big jumptable switch over a protocol command/message ID (param_1) that labels the payload with the struct name (TdrText_FieldLabelChar) then calls the per-message text formatter. param_4>=0 increments a depth/index arg by 1 before recursing. Covers the ENTIRE protocol (hundreds of message types), including all economy messages.",
+      "formulas": [
+        "guard: if((param_2-1+(param_1!=0)) != 0 || (param_1-1) > 0xee00) -> return 0 (bail)",
+        "special: param_1 == 0x201 -> '[stAction]' (FUN_102d88a0)",
+        "range param_1-1 < 0x10e -> switch((&DAT_10457a8f)[param_1]) jumptable; jumptable base DAT_10457a8f, case values map to struct labels",
+        "recurse arg: iVar = (param_4 < 0) ? param_4 : param_4+1 passed to per-struct formatter"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only/tooling: pure debug text-formatting dispatcher. BUT it is the authoritative command-ID -> message-struct registry for the whole protocol; economy messages routed here include: stAddCraft/stAddCraftResult/stBeginCraft/stBeginCraftResult (crafting), stManufactureProduceReq, stMaterialExchange/stMaterialExchangeNtf (material exchange), stNpcShopBuyItemReq (shop purchase), stTradeErrorRet, stAuction* (Bidding/Cancel/Sale/Search/Sort - auction house), stC2SVIPOpenReq/stC2SVIPServiceRenewReq (VIP purchases), stBuyExpLimitRsp (buy exp cap), stC2SGuildTakeWage/stC2SGuildOperateItemReq/stC2SGuildLevelUp/stC2SGuildLearnSkill (guild econ), stCatCuisineMakeReq (cooking), stC2SSoulStoneLevelUp/StageUp/AttrUpgrade/Reset (soulstone upgrade), stCharmRebuildReq (charm reroll), stC2SActivityFetchAward/stC2SAchieveFetchReward (reward claims), stC2SPetRng/stC2SActivityMonolopyDice (lottery/gacha-like).",
+      "confidence": "high",
+      "notes": "Jumptable at DAT_10457a8f indexes struct-name cases; exact cmdID->case mapping needs the jumptable bytes (not in this text). Stock tdr debug plumbing; value is the message inventory, not logic. ~12.7KB, homogeneous cases (label + call per-struct formatter). Per-struct formatters (FUN_10xxxxxx) live in other chunks."
+    }
+  ]
+}

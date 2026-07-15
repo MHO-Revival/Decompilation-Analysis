@@ -1,0 +1,485 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "1095c390",
+      "currentName": "FUN_1095c390",
+      "proposedName": "TreasuresEntrustModel::RegisterHandlers",
+      "purpose": "Model init that registers the client->model command handler table for the Treasures/Entrust shop UI. Registers 7 named handlers: GetTreasuresBoxData, GetTreasuresShopData, GetEntrustMoney(->FUN_1095cc50), GetMedalTreasuresData, RequestGetAllTreasures, RequestTreasuresExchange, RequestGetMedalTreasures. Repeated FUN_100b62c0(makeString)/FUN_1095d720|FUN_1095d660(registerHandler)/FUN_10c3d5d0(freeString) triads — stock UI-binding plumbing.",
+      "subsystem": "entrust/treasures",
+      "confidence": "high",
+      "serverRelevance": "client-only: builds the model's local command-dispatch table. Each 'Request*' entry is the client request that maps to a server RPC; the 'Get*' entries return locally-cached server data.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handler thunks: RequestTreasuresExchange->FUN_1095cd20, RequestGetMedalTreasures->FUN_1095d530, GetEntrustMoney->FUN_1095cc50. LAB_1095d020 is one inline handler."
+    },
+    {
+      "address": "1095cc50",
+      "currentName": "FUN_1095cc50",
+      "proposedName": "TreasuresEntrustModel::GetEntrustMoney",
+      "purpose": "GetEntrustMoney handler. Resolves the local player (DAT_1202e818+0xd0 -> +0x90 -> vtbl+0xb4 == GetLocalPlayer); if non-null, reads the two entrust-money balances via FUN_1025b060 and writes them into the outgoing VO as nEntrustMoney1Num and nEntrustMoney2Num (FUN_104d1550 = set-int field). local_1c>>6&1 tests bit 6 of a variant/AS-value header for the pointer-owned addref/release around the write.",
+      "subsystem": "entrust/treasures",
+      "confidence": "high",
+      "serverRelevance": "client-only display of two server-authoritative entrust currency balances; server owns the actual balances.",
+      "formulas": [
+        "playerObj = *(*(*(DAT_1202e818+0xd0)+0x90))+0xb4)()  // GetLocalPlayer",
+        "nEntrustMoney1Num = FUN_1025b060(); nEntrustMoney2Num = FUN_1025b060()  // two successive money accessors",
+        "variant addref/release gated by (header>>6 & 1) != 0"
+      ],
+      "costs": ["nEntrustMoney1Num, nEntrustMoney2Num: two distinct entrust-currency balances shown in the entrust UI"],
+      "notes": "in_stack_00000010 is the incoming request VO (variant array); fields [1]=header,[2..4] copied out."
+    },
+    {
+      "address": "10985230",
+      "currentName": "FUN_10985230",
+      "proposedName": "PvpBattleEntrustModel::RegisterHandlers",
+      "purpose": "Model init registering the PvP-Battle / League-Entrust command handler table. Handlers: GetPvpBattleListData(->FUN_10985850), GetSelEntrustDetailData(->LevelEntrustDetailVO__BuildByGroup), GetLevelInstanceGoData(->FUN_10987380), GetHunterBoxData(->FUN_10986db0), GetAvalidActionPoint(->FUN_10986d30), AcceptPvpBattleTask(->FUN_10985650), SelHuntPacket(->FUN_10985790), PvpBattleReady(->FUN_109857e0), RequestPvpBattleList(->LAB_10985610), GiveUpPvpBattleTask(->FUN_109856b0), ReqOpenPvpBattleGoView(->FUN_10985700), ReqPvpBattleTrackData(->FUN_10987760), ReqOpenPvpBattleInfoByTrack(->FUN_10987b10).",
+      "subsystem": "pvp-battle/league-entrust",
+      "confidence": "high",
+      "serverRelevance": "client-only registration; the Accept/GiveUp/Ready/Request handlers are the client-side entry points that emit the corresponding server RPCs (server authoritatively accepts/gives-up/starts league tasks).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Same triad plumbing as FUN_1095c390. 'GetAvalidActionPoint' = action-point (stamina) accessor for the entrust task."
+    },
+    {
+      "address": "10985850",
+      "currentName": "FUN_10985850",
+      "proposedName": "PvpBattleEntrustModel::BuildPvpBattleListVO",
+      "purpose": "GetPvpBattleListData handler (param_5==1 guard). Resolves local player, reads its league/pvp-battle data block (player+0x2b9c). Emits: maxPvpBattleCount, curPvpBattleCount, nEntrustVipCnt, plus three arrays: leagueTasksArr, pvpBattleListArr, pvpBattleNoticeArr. Iterates league entries (record stride 0x14=20 bytes) and notice entries (stride 0x18=24 bytes), building nested VOs (PVPBATTLE_LISTVO_CLASSNAME / PVPBATTLE_TASKVO_CLASSNAME / PVPBATTLE_NOTICEVO_CLASSNAME). Calls CLeagueInfo::CollectLeagueScheduleEntries for the schedule/notice list.",
+      "subsystem": "pvp-battle/league-entrust",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; all values (counts, vip count, league/task/notice lists, schedule times) originate from server-authoritative league state. maxPvpBattleCount / curPvpBattleCount are the server-tracked participation cap and current count.",
+      "formulas": [
+        "player = *(*(*(DAT_1202e818+0xd0)+0x90))+0xb4)(); leagueBlock = *(player+0x2b9c); guard leagueBlock!=0",
+        "maxPvpBattleCount = vtbl+0x20 accessor on player[0xae6]; curPvpBattleCount = vtbl+0x28 accessor on player[0xae6]",
+        "nEntrustVipCnt = FUN_11548ea0() only if player[0xabe] != 0, else 0",
+        "iCountLeague = (levelIdArrEnd - levelIdArrStart) >> 2   // count of 4-byte level IDs",
+        "league loop count = (EBX[2]-EBX[1]) / 0x14 ; per-entry: iLeagueID = *(base+4), levelIds span = *(base+0xc)-*(base+8)",
+        "notice loop count = (pcStack_1b8 - piStack_1bc) / 0x18 ; noticePvpBattleRound = *(apiStack_138+iVar4+8)"
+      ],
+      "costs": [
+        "maxPvpBattleCount: per-period cap on PvP-battle/league task participation",
+        "curPvpBattleCount: current used count against the cap",
+        "nEntrustVipCnt: VIP entrust slot count"
+      ],
+      "notes": "Field strings: strTitleName, iLeagueID, iCountLeague, iLeagueName, levelGroupID, levelID, levelName, leagueTasksArr, pvpBattleListArr, noticeLeagueID, noticeStartLeagueTime, noticeEndLeagueTime, noticePvpBattleRound, noticeLeagueName, pvpBattleNoticeArr. Heavy Ghidra register-aliasing in body; loop strides are reliable, exact source offsets partly obscured."
+    },
+    {
+      "address": "10987380",
+      "currentName": "FUN_10987380",
+      "proposedName": "PvpBattleEntrustModel::BuildTeamMemberInfoVO",
+      "purpose": "GetLevelInstanceGoData handler (in_stack_00000014==1 guard). Builds the teammemberInfoArr for the level-entrust 'go' view. Resolves local player and a party/team object (FUN_112ea0c0 returns [begin,end], iterating members at stride 0x2c=44 bytes). Per member emits fields via LEVELENTRUST_MEMBERVO_CLASSNAME: playerName (DAT_11dbac80), starLevel, level (DAT_11dccf88), weapon, class/job (DAT_11dd7eac), state=0, selHuntPacket=0xffffffff, bIsLeader=0. Also emits remainWarning (FUN_115768f0) at model level.",
+      "subsystem": "pvp-battle/level-entrust",
+      "confidence": "medium",
+      "serverRelevance": "client-only display of party member info; membership, star levels and remainWarning are server-provided. state/selHuntPacket/bIsLeader are initialized to sentinel defaults client-side (state=0, selHuntPacket=-1/0xffffffff).",
+      "formulas": [
+        "member iteration: for(p=*iter; p!=iter[1]; p+=0x2c)",
+        "state initialized 0, selHuntPacket initialized 0xFFFFFFFF (no packet selected), bIsLeader initialized 0",
+        "remainWarning = FUN_115768f0()"
+      ],
+      "costs": [],
+      "notes": "Member accessors: FUN_112e9990=name-key, FUN_112e9970=level, FUN_112e99d0=weapon, FUN_112e9950=class, FUN_112e99b0=starLevel source. teammemberInfoArr pushed via VO vtbl+5 (append-array)."
+    },
+    {
+      "address": "109895d0",
+      "currentName": "FUN_109895d0",
+      "proposedName": "CoachModel::RegisterHandlers",
+      "purpose": "Minimal model init registering a single handler 'RequestCoachLoginMatch' (->FUN_10989740). Standard makeString/register/free triad.",
+      "subsystem": "coach/matchmaking",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; RequestCoachLoginMatch emits a server matchmaking RPC.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Not quest-core; coach (mentor) matchmaking."
+    },
+    {
+      "address": "10991240",
+      "currentName": "FUN_10991240",
+      "proposedName": "EquipColorShopModel::RegisterHandlers",
+      "purpose": "Registers equip-dye/color shop handlers, gated on DAT_1202e818 present, +0x58 non-null, and *(DAT_1202e818+0x209)=='\\0'. Handlers (FUN_104d13b0 = registerNamedMethod): _openEquipShow, _requestEquipColorList, _requestEquipItemColor, _checkEquipItemColor, _buyEquipItemColor, _getItemCount, _getMoneyCount, _getItemMartID.",
+      "subsystem": "equip-color-shop (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; _buy/_check/_request map to server shop RPCs; _getItemCount/_getMoneyCount read locally-cached inventory/currency.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Equipment coloring shop, not quest. Included for completeness."
+    },
+    {
+      "address": "109aa610",
+      "currentName": "FUN_109aa610",
+      "proposedName": "QuestionModel::GetQuestionTitle",
+      "purpose": "Handler (in_stack_00000014==2 guard) that resolves an ID from the request variant (type 3 or 4 -> *(req+0x20), else sentinel 0xdeadbeaf), fetches the local player, looks up a question/quiz record via FUN_109a8650(id) and, if found, writes its title (record+0x14) into 'questionTitle'.",
+      "subsystem": "question/quiz activity",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; question definition is data-driven, title text from record.",
+      "formulas": [
+        "id = ((reqHeader & 0x8f)==3||==4) ? *(req+0x20) : 0xdeadbeaf",
+        "questionTitle = *(FUN_109a8650(id) resolved record via FUN_100e5b40 +0x14)"
+      ],
+      "costs": [],
+      "notes": "0xdeadbeaf is the invalid/absent sentinel used across these handlers for missing numeric args."
+    },
+    {
+      "address": "109b4ca0",
+      "currentName": "FUN_109b4ca0",
+      "proposedName": "EquipRecastModel::RegisterHandlers",
+      "purpose": "Registers equip-recast (re-forge) model handlers: InitModel(&DAT_109b4fa0), requestPutItemIn(->FUN_109b4fb0), requestEquipRecastInfo(->EquipRecastModel::BuildSourceInfo), requrestAttributeData(->FUN_109b6580), requestEquipRecast(->FUN_109b6ff0), setDestEquipData(->FUN_109b56c0), requestEquipShow(->FUN_109b7540), canEquipRecast(->LAB_109b6bd0), Dispose(->FUN_109b4990).",
+      "subsystem": "equip-recast (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; requestEquipRecast is the server RPC that performs the reforge (server-authoritative outcome).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Equipment reforge, not quest."
+    },
+    {
+      "address": "109bf940",
+      "currentName": "FUN_109bf940",
+      "proposedName": "ItemRemoveBindModel::RegisterHandlers",
+      "purpose": "Registers item unbind model handlers: InitModel(&DAT_109bfb70), requestPutItemIn(->FUN_109bfb80), requestRemoveBindItemInfo(->FUN_109bfd90), canItemRomoveBind(->FUN_109c0220), requestItemRomoveBind(->FUN_109c02a0), Dispose(->FUN_109bf630).",
+      "subsystem": "item-unbind (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; requestItemRomoveBind is a server RPC.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Item bind-removal, not quest (sic 'Romove' typo in original strings)."
+    },
+    {
+      "address": "109da010",
+      "currentName": "FUN_109da010",
+      "proposedName": "OperationActivityModel::BuildTaskListVO",
+      "purpose": "Builds arrTaskData for the NewOperationActivity detail view. Resolves local player, iterates the activity's task table and for each task whose byte at [record-0x22]==0x20 (' ', 'active/shown' flag) emits an ActivityDetailData VO (class 'mh.view.NewOperationActivity.Data.ActivityDetailData') with EntryId, taskState (0/1 completion), taskDesc. taskState is computed from server-tracked progress.",
+      "subsystem": "operation-activity tasks",
+      "confidence": "high",
+      "serverRelevance": "client-only VO build, but taskState is DERIVED from server-authoritative progress: server owns the completion counters queried by FUN_11513b40. Useful to mirror the completion gate.",
+      "formulas": [
+        "activityObj = param_4 (local_78); taskCount = *(byte*)(activityObj+0xad2)",
+        "record base = activityObj+0xaf6, stride 0x423 bytes, loop while index < taskCount",
+        "filter: process record only if *(byte*)(record-0x22) == 0x20 (' ')",
+        "EntryId = *(byte*)(record-0x23); taskTypeArg = *(byte*)record (piStack_70)",
+        "taskState = 1 IFF ( *(player+0x2acc)!=0  AND  FUN_11513b40(*ESI, *(byte*)(ESI+5), taskTypeArg, &progressOut)!='\\0'  AND  progressOut!=0 ); else taskState = 0",
+        "taskDesc built from CPet::SetName(record-0x20) name buffer"
+      ],
+      "costs": [],
+      "notes": "*(player+0x2acc) = player activity-state block (confirmed by economy.md). FUN_11513b40 is the activity-task completion/progress query. Record layout: [-0x23]=EntryId, [-0x22]=shown flag, [-0x20]=name/desc buffer, [0]=task type."
+    },
+    {
+      "address": "109e13d0",
+      "currentName": "FUN_109e13d0",
+      "proposedName": "GuildTaskModel::BuildGuildTaskInfoVO",
+      "purpose": "Builds guildTaskInfoData VO for a single guild task/commission (in_stack_00000014==2 guard). Resolves taskId from request variant, looks up guild + task-config + reward record, and emits strName, taskId, nMoneyType, nMoneyCount, nTaskAddition, strTarget, the six button-gate booleans (bShowAccept/bEnableAccept/bShowGiveUp/bEnableGiveUp/bShowFinish/bEnableFinish), and nTaskState. Handles the special generic task id 99999.",
+      "subsystem": "guild-task/commission",
+      "confidence": "medium",
+      "serverRelevance": "client-only VO build for the guild-task panel, but reward amounts (nMoneyCount/nMoneyType), nTaskAddition, hunt-count progress and nTaskState are server-authoritative; the accept/giveup/finish gates and reward math are worth mirroring server-side for validation.",
+      "formulas": [
+        "taskId = ((reqHeader & 0x8f)==3||==4) ? *(int*)(req+0x20) : -0x21524151 (0xdeadbeaf)",
+        "reward record = FUN_10804940(iStack_a0+0x4c, 0x18)  // lookup by 0x18-stride table",
+        "if reward==0: nMoneyCount = 0",
+        "else: (huntCountFloat, huntRank) = CPlayer::GetHuntRankOrCount(*(reward+4), &countFloat, &rankPtr, 0)",
+        "  if (countFloat > 0.0 && *(int*)(reward+0xc) > 0): nMoneyType=0, nMoneyCount=FUN_104d14d0",
+        "  if (rankFloat > 0.0 && *(int*)(reward+8) > 0): nMoneyType=0, nMoneyCount=FUN_104d14d0",
+        "nTaskAddition = FUN_109e22e0()==0 ? 0 : *(int*)(ret+4)",
+        "if taskId==99999: strName/taskId overridden with generic guild-task record (FUN_109df950)",
+        "target list: iterate task targets at stride 0xec=236 bytes; strTarget from *(entry+0x18)(DAT_11de486c) and *(entry+0x1c)(DAT_11de4830)",
+        "button gates default 0 then set via (*(*apiStack_90[0]+0x30))(0x494, 2, &stateVar)  // 0x494=1172 task-state query",
+        "nTaskState = iStack_b4"
+      ],
+      "costs": [
+        "nMoneyType / nMoneyCount: guild-task reward currency type and amount (server-authoritative)",
+        "nTaskAddition: task reward bonus/addition value"
+      ],
+      "notes": "Field strings: GUILD_TASK_INFO_DATA_NAME(class), strName, taskId, nMoneyType, nMoneyCount, nTaskAddition, strTarget, nTaskState, guildTaskInfoData. taskId 99999 = the fixed/daily generic guild task. Many unreachable-block warnings; reward-branch offsets (reward+8, +0xc) reliable, exact currency-type resolution partly obscured."
+    },
+    {
+      "address": "109ed990",
+      "currentName": "FUN_109ed990",
+      "proposedName": "LegendPearlModel::RegisterHandlers",
+      "purpose": "Registers InitModel(->LegendPearlModel::RegisterHandlers thunk) and C2AS_RequestLegendPearlAttribute(->BuildEquipPassiveSkillDataVO_A).",
+      "subsystem": "legend-pearl (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; C2AS_RequestLegendPearlAttribute is a client->AS(activity server) RPC.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Equip passive-skill 'legend pearl', not quest."
+    },
+    {
+      "address": "109ffdc0",
+      "currentName": "FUN_109ffdc0",
+      "proposedName": "LuckyShopModel::RegisterHandlers",
+      "purpose": "Registers lucky-shop activity handlers: C2AS_GetCountDown(->FUN_109fff20), AS2C_RequestLuckyShop(->FUN_109fffd0), C2AS_GetCommodityData(->FUN_10a00060), AS2C_RequestBuy(->FUN_10a002a0).",
+      "subsystem": "lucky-shop activity (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only registration; C2AS_*/AS2C_* are activity-server RPCs (server authoritative for purchase outcome).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Gacha-style 'lucky shop', not quest."
+    },
+    {
+      "address": "10b5e6c0",
+      "currentName": "FUN_10b5e6c0",
+      "proposedName": "ItemInfoUIModel::ctor",
+      "purpose": "Constructor for an item-info UI model (vtable PTR_FUN_11cc7aa4). Grabs a subsystem from DAT_1202e818+0xbc vtbl+0x3c and registers script commands via CInfoRecord::GetModelString: GetStaticItemData(->FUN_10b5dbc0), ItemIcon_RequestItemInfo(->FUN_10b5dcb0), global_getItemData(->FUN_10b5dd90), global_getEquipAdditionalInfo(->FUN_10b5dec0).",
+      "subsystem": "item-info UI (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only UI plumbing.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock model ctor; item tooltip/info bindings."
+    },
+    {
+      "address": "10b5eed0",
+      "currentName": "FUN_10b5eed0",
+      "proposedName": "SystemMsgDialogUIModel::ctor",
+      "purpose": "Constructor (vtable PTR_FUN_11cc7b14) registering onSendSystemMsgByIDFromUI(->FUN_10b5e900), requestDialogCreate(->FUN_10b5ea90), SpecialQuitGame(->FUN_10b5ee80).",
+      "subsystem": "system-message/dialog UI (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client-only UI plumbing.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock model ctor."
+    },
+    {
+      "address": "10b660a0",
+      "currentName": "FUN_10b660a0",
+      "proposedName": "SystemBarUIModel::ctor",
+      "purpose": "Constructor (vtable PTR_FUN_11cc8130) for the system-bar/HUD top menu, registering navigation commands: SystemBar_PlayerPropertyUI, SystemBar_ShowQuestUI, SystemBar_ShowInventoryUI, SystemBar_ShowSysConfigUI, SystemBar_ShowT/O/K/H/M.",
+      "subsystem": "systembar HUD (non-quest UI)",
+      "confidence": "medium",
+      "serverRelevance": "client-only UI navigation. SystemBar_ShowQuestUI merely opens the quest panel; no server logic.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Only tangential quest mention (opens quest UI)."
+    },
+    {
+      "address": "10bc3b80",
+      "currentName": "FUN_10bc3b80",
+      "proposedName": "PlayerInputContext::RegisterActionFilters",
+      "purpose": "Registers CryEngine action/input-context filter groups on a player-input object via DAT_120286c8 action-map factory (vtbl+0x3c ->+0x74 ->+0x54 add). Groups: no_vehicle_exit(param_1+0x570), cutscene(+0x578), cutscene_no_player(+0x57c), no_map_open(+0x580), no_objectives_open(+0x584), no_connectivity(+0x58c), teleport(+0x598), UpView(+0x5a8); plus sub-init calls FUN_10bc3db0/3e90/4050/4120/42c0/4660/4870/4960/4aa0/4b70/4ca0/4ec0.",
+      "subsystem": "input/action-map (stock CryEngine)",
+      "confidence": "medium",
+      "serverRelevance": "client-only input plumbing. 'no_objectives_open' is an input-block context tied to the objectives HUD, not quest logic.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock CryEngine action-filter setup; the '1'/'0' second arg is the block/enable flag."
+    },
+    {
+      "address": "10bc4830",
+      "currentName": "FUN_10bc4830",
+      "proposedName": "PlayerInputContext::RegisterNoObjectivesOpenFilter",
+      "purpose": "Registers just the 'no_objectives_open' action filter (writes result to param_1+0x584 and binds handler param_1+0x39c). A single-group variant of FUN_10bc3b80.",
+      "subsystem": "input/action-map (stock CryEngine)",
+      "confidence": "medium",
+      "serverRelevance": "client-only.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock plumbing."
+    },
+    {
+      "address": "10be86b0",
+      "currentName": "FUN_10be86b0",
+      "proposedName": "MovementController::ApplyMoveRequest",
+      "purpose": "CryEngine locomotion: reads a movement request block, computes delta from current position via animation-graph query, and forwards RequestedMoveAnim / MoveSpeedMultiplier / Steer_Enabled into the animation-graph input (FUN_113168d0 = get-AG-input-id, FUN_1046dc90, FUN_1025bc60/cc60/be30 = set value). Two paths based on request flags (bit 2 vs bit 1 at +0x133).",
+      "subsystem": "locomotion (stock CryEngine)",
+      "confidence": "low",
+      "serverRelevance": "client-only movement/animation.",
+      "formulas": ["request flags at *(param_2+0x133): bit2 path A, bit1 path B"],
+      "costs": [],
+      "notes": "Stock movement code; not quest."
+    },
+    {
+      "address": "10c01e40",
+      "currentName": "FUN_10c01e40",
+      "proposedName": "SpectatorController::RequestSpectatorTarget",
+      "purpose": "If the target's state (vtbl+0x1a4) == 3 and DAT_1202e818+0x16c flag set, sends 'RequestSpectatorTarget' RPC (via FUN_10c0bc50 on obj+0x6c) with the target's id (param_2[2]).",
+      "subsystem": "spectator (non-quest)",
+      "confidence": "medium",
+      "serverRelevance": "client emits a server RPC to switch spectate target; server authoritative.",
+      "formulas": ["gate: targetState(vtbl+0x1a4)==3 && *(char*)(DAT_1202e818+0x16c)!=0"],
+      "costs": [],
+      "notes": "Spectator mode, not quest."
+    },
+    {
+      "address": "10ca6410",
+      "currentName": "FUN_10ca6410",
+      "proposedName": "CUIObjectives::ctor",
+      "purpose": "Constructor for the stock CryEngine 'UIObjectives' HUD element (vtable PTR_FUN_11cddd38). Registers Flash<->game events ObjectiveAdded/ObjectiveRemoved/ObjectivesReset/ObjectiveStateChanged (each with args ObjectiveID/MissionID/Name/Desc/State) and function RequestObjectives, then calls FUN_10ca6e10 to load the objectives XML.",
+      "subsystem": "objectives HUD (stock CryEngine)",
+      "confidence": "high",
+      "serverRelevance": "client-only HUD. These are the generic CryEngine mission-objective UI events; MHO quest objective data is pushed into them but the widget itself is stock.",
+      "formulas": [
+        "event ids: ObjectiveAdded=0, ObjectiveRemoved=1, ObjectivesReset=2, ObjectiveStateChanged=3"
+      ],
+      "costs": [],
+      "notes": "Descriptions verbatim: 'Mission objective added/removed', 'All mission objectives reset', 'Objective status changed', 'Request all mission objectives (force to call ObjectiveAdded for each objective)'. Stock CryEngine UIObjectives.cpp."
+    },
+    {
+      "address": "10ca6e10",
+      "currentName": "FUN_10ca6e10",
+      "proposedName": "CUIObjectives::LoadObjectivesConfig",
+      "purpose": "Loads Libs/UI/Objectives_new.xml, walks the top-level nodes and per-child (attr index 0 and 1) builds dotted key strings and registers them into two string tables (FUN_1083ab70 / FUN_10ca7540). Standard XML-driven UI config load with reference-counted string helpers.",
+      "subsystem": "objectives HUD (stock CryEngine)",
+      "confidence": "low",
+      "serverRelevance": "client-only config load.",
+      "formulas": [],
+      "costs": [],
+      "notes": "String refcount bookkeeping via DAT_123be268 memory accounting; stock plumbing."
+    },
+    {
+      "address": "10caa200",
+      "currentName": "FUN_10caa200",
+      "proposedName": "CUISettings::ctor",
+      "purpose": "Constructor for the stock CryEngine 'Settings' UI (graphics/sound/game). Caches cvars r_Width/r_Height/r_Fullscreen/s_MusicVolume/s_SFXVolume/sys_flash_video_soundvolume/cl_sensitivity/cl_invertMouse/cl_invertController, seeds a default resolution list, and registers events (OnGraphicChanged/OnSoundChanged/OnGameSettingsChanged/OnResolutions/OnResolutionItem/OnLevelItem) and functions (SetGraphics/SetResolution/SetSound/SetGameSettings/GetResolutionList/GetCurrGraphics/GetCurrSound/GetCurrGameSettings/GetLevels/LogoutUser).",
+      "subsystem": "settings UI (stock CryEngine)",
+      "confidence": "medium",
+      "serverRelevance": "client-only settings.",
+      "formulas": [
+        "default resolutions seeded: 1024x768(0x400x0x300), 1280x720(0x500x0x2d0), 1280x1050(0x500x0x41a), 1680x1050(0x690x0x41a), 1920x1080(0x780x0x438)"
+      ],
+      "costs": [],
+      "notes": "Stock CryEngine UISettings; not quest."
+    },
+    {
+      "address": "10cf6f50",
+      "currentName": "FUN_10cf6f50",
+      "proposedName": "MovementSteeringParams::ctor",
+      "purpose": "Constructor for a movement/steering parameter block: creates many named AG inputs with float/bool defaults (TargetPos, TargetID, RequestedMoveAnim, TargetType='Entity', MoveSpeedByAnim, Steer_* family, RotateSpeedByMove, MaxMoveSpeed, MaxRotateSpeed, MoveSpeedMultiplier, etc.). Ends with FUN_10c3d580(0x44) (noreturn tail).",
+      "subsystem": "locomotion/steering (stock CryEngine)",
+      "confidence": "low",
+      "serverRelevance": "client-only movement tuning constants.",
+      "formulas": [
+        "defaults: RotateReachedTimeScale=0.5f(0x3f000000), MaxMoveSpeed=4.0f(0x40800000), MaxRotateSpeed=180.0f(0x43340000), MoveSpeedMultiplier=1.0f(0x3f800000), Steer_MaxForce=2.0f(0x40000000), Steer_AvoidanceRadius=1.0f, Steer_TravelAngleToRollRatio=0.6f(0x3f19999a), MinYawTurnAngle=60.0f(0x42700000), PitchRotateSpeed=125.0f(0x42fa0000), Steer_MoveSpeedSmoothTime=0.04f(0x3d23d70a), Steer_TurnSpeedSmoothTime=0.4f(0x3ecccccd), Steer_StrafeSmoothTime=0.1f(0x3dcccccd)"
+      ],
+      "costs": [],
+      "notes": "Movement/steering config, not quest. Float constants listed for reference only."
+    },
+    {
+      "address": "10db7800",
+      "currentName": "FUN_10db7800",
+      "proposedName": "MovementRequestProxy::ApplyAnimGraphInputs",
+      "purpose": "Applies a movement request onto the AI/pathing object: writes Steer_Enabled bool to obj+0x165, RequestedMoveAnim string to obj+4 (skipping empty/default sentinels DAT_11d9d32b and DAT_11dbab60), MoveSpeedMultiplier float to obj+0x184.",
+      "subsystem": "locomotion (stock CryEngine)",
+      "confidence": "low",
+      "serverRelevance": "client-only.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock movement plumbing."
+    },
+    {
+      "address": "10dceca0",
+      "currentName": "FUN_10dceca0",
+      "proposedName": "PlayerMovementSync::WriteRequestState_A",
+      "purpose": "Physics/movement network-debug sync: computes requested velocity magnitude and rotation-Z (via _CIatan2 * rad-to-deg DAT_11de9a28) and publishes m_request.velocity, ReqVelo, ReqVeloX/Y/Z, ReqRotZ debug values; fires detachLadder/jumped events; copies velocity/jumped/rotation state from the physics block (param_1) into the entity net-state (param_2 at word offsets 0x5a4..0x646). Sets an on-ground/moving flag.",
+      "subsystem": "player movement/physics net-sync",
+      "confidence": "low",
+      "serverRelevance": "client-only debug publish + local state copy; the actual movement is server-validated elsewhere.",
+      "formulas": [
+        "ReqVelo = sqrt(vx^2+vy^2+vz^2), vx=*(p1+0x248) vy=*(p1+0x24c) vz=*(p1+0x250)",
+        "ReqRotZ = atan2(...) * DAT_11de9a28 (rad->deg)",
+        "moving flag = (velY>threshold) && ... && (physFlags&8) via *(byte*)(p1+0x240)&8"
+      ],
+      "costs": [],
+      "notes": "Near-identical to FUN_10ed1a20 and FUN_10f414e0 (different entity net-state offsets / accessor variants). Stock, not quest."
+    },
+    {
+      "address": "10e3efd0",
+      "currentName": "FUN_10e3efd0",
+      "proposedName": "TaskStateNotify::GetNetSerializer",
+      "purpose": "Lazily initializes and returns the network-message (RMI) field descriptor for a task-state notification. Fields: Enable(bool), playerNetID, taskID, taskState. One-time init guarded by DAT_12035390 bits 0/1; assigns the descriptor to *param_1 and the taskState sub-field table to param_1[1].",
+      "subsystem": "quest/task net-schema",
+      "confidence": "high",
+      "serverRelevance": "authoritative wire schema: this defines the on-the-wire layout of a server->client task-state message (playerNetID, taskID, taskState). Directly mirror for the private server's task-update packet.",
+      "formulas": [
+        "field set = { Enable:bool, playerNetID:int, taskID:int, taskState:int }",
+        "param_1[2] = (param_1[2] & 0xfffff01f) | 0x10  // flag/type bits"
+      ],
+      "costs": [],
+      "notes": "Message field builders PTR_FUN_11df7674/766c (int fields), 11df7734/772c (bool). Compare with FUN_10e3f1f0 (adds 'result')."
+    },
+    {
+      "address": "10e3f1f0",
+      "currentName": "FUN_10e3f1f0",
+      "proposedName": "TaskResultNotify::GetNetSerializer",
+      "purpose": "Lazily initializes and returns the network-message descriptor for a task RESULT notification. Fields: Enable(bool), playerNetID, taskID, taskState, plus a trailing result field. One-time init guarded by DAT_12035430 bits 0/1.",
+      "subsystem": "quest/task net-schema",
+      "confidence": "high",
+      "serverRelevance": "authoritative wire schema: server->client task-result message adding a 'result' code on top of {playerNetID, taskID, taskState}. Mirror for task completion/failure results.",
+      "formulas": [
+        "field set = { Enable:bool, playerNetID:int, taskID:int, taskState:int, result:int }",
+        "param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"
+      ],
+      "costs": [],
+      "notes": "Sibling of FUN_10e3efd0 with an extra 'result' field."
+    },
+    {
+      "address": "10ed1a20",
+      "currentName": "FUN_10ed1a20",
+      "proposedName": "PlayerMovementSync::WriteRequestState_B",
+      "purpose": "Duplicate of FUN_10dceca0 (player movement/physics net-sync + ReqVelo/ReqRotZ debug publish). Differs only in entity net-state word offsets (0x5a6.. / flag at +0x179d) and uses accessor FUN_10ecc2c0 instead of FUN_10da84c0.",
+      "subsystem": "player movement/physics net-sync",
+      "confidence": "low",
+      "serverRelevance": "client-only.",
+      "formulas": ["ReqVelo = sqrt(vx^2+vy^2+vz^2); ReqRotZ = atan2(...)*DAT_11de9a28"],
+      "costs": [],
+      "notes": "See FUN_10dceca0. Stock, not quest."
+    },
+    {
+      "address": "10f15d00",
+      "currentName": "FUN_10f15d00",
+      "proposedName": "QuestPresenter::OnQuestComplete",
+      "purpose": "Client-side quest-complete trigger. If the actor is alive/valid (vtbl+0x228 true), has a quest context (vtbl+0x790 non-null) and is still valid, calls FUN_10fc3af0 then FUN_10fd9450('QUEST_COMPLETE', 0, FUN_10f96490, 0) to fire the QUEST_COMPLETE cinematic/anim event.",
+      "subsystem": "quest presentation",
+      "confidence": "medium",
+      "serverRelevance": "client-only presentation; server decides actual completion. This just plays the local complete sequence.",
+      "formulas": ["gate: alive(vtbl+0x228) && questCtx(vtbl+0x790)!=0 && alive(vtbl+0x228)"],
+      "costs": [],
+      "notes": "FUN_10f96490 is the anim-state setup callback (see FUN_10f964d0)."
+    },
+    {
+      "address": "10f15d60",
+      "currentName": "FUN_10f15d60",
+      "proposedName": "QuestPresenter::OnQuestFail",
+      "purpose": "Client-side quest-fail trigger; same gating as OnQuestComplete but fires FUN_10fd9450('QUEST_FAIL', 0, FUN_10f96490, 0). No FUN_10fc3af0 pre-call.",
+      "subsystem": "quest presentation",
+      "confidence": "medium",
+      "serverRelevance": "client-only presentation.",
+      "formulas": ["gate: alive(vtbl+0x228) && questCtx(vtbl+0x790)!=0 && alive(vtbl+0x228)"],
+      "costs": [],
+      "notes": "Mirror of FUN_10f15d00 for the fail path."
+    },
+    {
+      "address": "10f414e0",
+      "currentName": "FUN_10f414e0",
+      "proposedName": "PlayerMovementSync::WriteRequestState_C",
+      "purpose": "Third duplicate of the player movement/physics net-sync (see FUN_10dceca0), with its own entity net-state offsets (0x5ce.. / flag +0x1851) and accessor FUN_10f1eb30.",
+      "subsystem": "player movement/physics net-sync",
+      "confidence": "low",
+      "serverRelevance": "client-only.",
+      "formulas": ["ReqVelo = sqrt(vx^2+vy^2+vz^2); ReqRotZ = atan2(...)*DAT_11de9a28"],
+      "costs": [],
+      "notes": "See FUN_10dceca0. Stock, not quest."
+    },
+    {
+      "address": "10f964d0",
+      "currentName": "FUN_10f964d0",
+      "proposedName": "QuestPresenter::SetupQuestCompleteAnimState",
+      "purpose": "Builds the animation-state graph for the QUEST_COMPLETE sequence: pushes callbacks FUN_10f964b0 and FUN_10f75060, transitions NORMAL_IDLE -> QuestComplete -> PLLocomotion/HolsteredIdle -> NORMAL_IDLE. Registered as the FUN_10f96490-referenced state builder.",
+      "subsystem": "quest presentation/animation",
+      "confidence": "low",
+      "serverRelevance": "client-only animation.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Anim state names: NORMAL_IDLE, QuestComplete, PLLocomotion, HolsteredIdle."
+    },
+    {
+      "address": "10f96650",
+      "currentName": "FUN_10f96650",
+      "proposedName": "QuestPresenter::SetupQuestFailAnimState",
+      "purpose": "Animation-state graph for the QUEST_FAIL sequence: callbacks FUN_10f96630 + FUN_10f75060, transitions NORMAL_IDLE -> QuestFail -> PLLocomotion/HolsteredIdle -> NORMAL_IDLE.",
+      "subsystem": "quest presentation/animation",
+      "confidence": "low",
+      "serverRelevance": "client-only animation.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Mirror of FUN_10f964d0 for the fail path (state name 'QuestFail')."
+    }
+  ]
+}

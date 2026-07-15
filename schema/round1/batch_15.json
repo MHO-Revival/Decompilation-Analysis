@@ -1,0 +1,562 @@
+{
+  "batchIndex": 15,
+  "classes": [
+    {
+      "className": "CGuildLevelUpInfo",
+      "category": "social",
+      "purpose": "Static config table for guild (union) level-up requirements/rewards. Rows are held by a CInfoManager<CGuildLevelUpInfo> singleton and iterated at load time.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108ad960", "currentName": "CGuildLevelUpInfo::GetManagers", "proposedName": "CGuildLevelUpInfo::GetInfoManagerSingleton", "purpose": "Lazy-init and return the CInfoManager<CGuildLevelUpInfo> singleton; registers the manager name via StcMbrNameSvr."},
+        {"address": "1190afa0", "currentName": "CGuildLevelUpInfo::GetManagers_1190afa0", "proposedName": "CGuildLevelUpInfo::PreCacheAll", "purpose": "Iterate all rows (count via mgr vtbl+0x28) and register/precache each via FUN_11a01c90."},
+        {"address": "1190b0f0", "currentName": "CGuildLevelUpInfo::GetManagers_1190b0f0", "proposedName": "CGuildLevelUpInfo::PreCacheAll_Variant", "purpose": "Same all-row iteration, per-row callback CItemBaseInfo::GetManagers_11a07860 (second registration pass)."}
+      ],
+      "notes": "FUN_11679e10 = CInfoManager<T> find-or-default singleton accessor; mgr+0x14/+0x18 = row vector begin/end, count=(end-begin)/4; vtbl+0x28 = GetCount. No DebugFormat/reader recovered so field offsets unknown."
+    },
+    {
+      "className": "CDragonBoxFxInfo",
+      "category": "item",
+      "purpose": "Static config for Dragon Box (lottery box) visual/effect entries. Related to the DragonBox lottery/shop system.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1092d080", "currentName": "CDragonBoxFxInfo::GetManagers", "proposedName": "CDragonBoxFxInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CDragonBoxFxInfo> singleton (StcMbrNameSvr name registration)."},
+        {"address": "11912e30", "currentName": "CDragonBoxFxInfo::GetManagers_11912e30", "proposedName": "CDragonBoxFxInfo::PreCacheAll", "purpose": "Iterate all rows, per-row registration via FUN_11a07a10."},
+        {"address": "11912f80", "currentName": "CDragonBoxFxInfo::GetManagers_11912f80", "proposedName": "CDragonBoxFxInfo::PreCacheAll_ItemBase", "purpose": "All-row iteration, per-row callback CItemBaseInfo::GetManagers_11a07860."}
+      ],
+      "relatedTlv": ["TlvDragonBoxLotteryData", "TlvDragonBoxShopItems"],
+      "notes": "Directional TLV link only; those Tlv structs are runtime save data, this is the static Fx config table."
+    },
+    {
+      "className": "CAbnormalStatePriorityInfo",
+      "category": "combat",
+      "purpose": "Static table mapping abnormal-status (debuff) flags to priority values. Used to resolve which abnormal state takes precedence when several are active.",
+      "confidence": "high",
+      "methods": [
+        {"address": "117caf80", "currentName": "CAbnormalStatePriorityInfo::GetManagers", "proposedName": "CAbnormalStatePriorityInfo::GetInfoManager", "purpose": "Return CInfoManager<CAbnormalStatePriorityInfo>* (find-or-default); returns static empty instance &DAT_12393650 if not loaded."},
+        {"address": "117cb690", "currentName": "CAbnormalStatePriorityInfo::GetManagers_117cb690", "proposedName": "CAbnormalStatePriorityInfo::ComputeStatePriorities", "purpose": "Given an abnormal-state bitmask (param_1) and level offset (param_2), iterate bits 1..0x14 (20 states); for each set bit look up its row by bit-index and, if row+0x14 set, fold into *param_3 (priorityA via max FUN_117cbae0), if row+0x18 set fold into *param_4 (priorityB). Clamps result 0x13 to param_2+0x13."}
+      ],
+      "fields": [
+        {"name": "hasPriorityGroupA", "type": "int(bool)", "offset": "0x14", "source": "inferred", "note": "if nonzero, this abnormal state contributes to priority output A"},
+        {"name": "hasPriorityGroupB", "type": "int(bool)", "offset": "0x18", "source": "inferred", "note": "if nonzero, contributes to priority output B"}
+      ],
+      "formulas": ["Iterates 20 abnormal-state bits (index 1..0x14). If a level offset param_2>0 the state mask is OR'd with 0x80000. Result priority 0x13 (19) is remapped to param_2+0x13.", "Priority accumulation uses FUN_117cbae0(current, bitIndex) = max/select."],
+      "constants": ["NumAbnormalStates=0x14 (20)", "PriorityCap=0x13 (19)"]
+    },
+    {
+      "className": "CGuildBuildingLevelUpInfo",
+      "category": "social",
+      "purpose": "Static config for guild-building level-up rules (per building type, its level rows). Used to query the max level available for a building type.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1145da50", "currentName": "CGuildBuildingLevelUpInfo::GetManagers", "proposedName": "CGuildBuildingLevelUpInfo::GetInfoManager", "purpose": "Return CInfoManager<CGuildBuildingLevelUpInfo>* (find-or-default static fallback)."},
+        {"address": "1145ec70", "currentName": "CGuildBuildingLevelUpInfo::GetManagers_1145ec70", "proposedName": "CGuildBuildingLevelUpInfo::GetMaxLevelForBuilding", "purpose": "Iterate all rows; for rows whose row+0x14 == param_1 (buildingType) return the maximum row+0x18 (level). Returns 0 if none."},
+        {"address": "1145f610", "currentName": "CGuildBuildingLevelUpInfo::GetManagers_1145f610", "proposedName": "CGuildBuildingLevelUpInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor (returns *DAT when arg 0)."}
+      ],
+      "fields": [
+        {"name": "buildingType", "type": "int", "offset": "0x14", "source": "reader", "note": "matched against query key"},
+        {"name": "level", "type": "int", "offset": "0x18", "source": "reader", "note": "building level; max returned for a type"}
+      ]
+    },
+    {
+      "className": "CRageInfo",
+      "category": "monster",
+      "purpose": "Static config for monster rage/enrage states. The recovered method walks a red-black tree of active entities and toggles a rage flag when a matching rage entry is found.",
+      "confidence": "low",
+      "methods": [
+        {"address": "107cd5c0", "currentName": "CRageInfo::GetManagers", "proposedName": "CRageInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CRageInfo> singleton (StcMbrNameSvr)."},
+        {"address": "116603f0", "currentName": "CRageInfo::GetManagers_116603f0", "proposedName": "CRageInfo::UpdateRageStates", "purpose": "Walk a std::map/rbtree at this+0xb (nodes) after validating an entity chain (this+5 -> +0x10 -> +0x1c -> +0x2af4); for each node compare its key (node+4) against a resolved id and, if a matching rage row exists in the manager, invoke vtbl+8(1) (set rage active)."}
+      ],
+      "notes": "Row field layout not exposed; only manager count/array access. FUN_11719490/117194b0/11518b30/1141ca30 resolve/compare an entity id."
+    },
+    {
+      "className": "CFactionInfo",
+      "category": "social",
+      "purpose": "Static faction definition table. Builds the faction-vs-faction relationship matrix for 10 factions at init.",
+      "confidence": "high",
+      "methods": [
+        {"address": "115cf010", "currentName": "CFactionInfo::GetManagers", "proposedName": "CFactionInfo::GetInfoManager", "purpose": "Return CInfoManager<CFactionInfo>* (find-or-default static fallback)."},
+        {"address": "115d0380", "currentName": "CFactionInfo::GetManagers_115d0380", "proposedName": "CFactionInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "115d0530", "currentName": "CFactionInfo::GetManagers_115d0530", "proposedName": "CFactionInfo::InitFactionRelations", "purpose": "For each faction i in 1..10 first reset via vtbl+0x14(i); then look up faction i's row and for each j in i..10 compute relation FUN_1184aa80(j) and store via vtbl+0x18(i,j,value). Builds the 10x10 faction relation matrix."}
+      ],
+      "constants": ["NumFactions=10 (loops 1..0xb exclusive)"]
+    },
+    {
+      "className": "CXHunterInfo",
+      "category": "activity",
+      "purpose": "Static table for X-Hunter (special hunter mode) value scaling by level. Given a level and category it interpolates a value from a level-band row.",
+      "confidence": "high",
+      "methods": [
+        {"address": "11a67cd0", "currentName": "CXHunterInfo::GetManagers", "proposedName": "CXHunterInfo::GetInfoManager", "purpose": "Return CInfoManager<CXHunterInfo>* (find-or-default static fallback)."},
+        {"address": "11a67e80", "currentName": "CXHunterInfo::GetManagers_11a67e80", "proposedName": "CXHunterInfo::GetValueByLevel", "purpose": "Iterate rows; find the row whose category (row+0x10 / 100) == param_2 and whose level band [row+0x14, row+0x18] contains param_1 (level). Interpolate a value across the band."},
+        {"address": "11a68020", "currentName": "CXHunterInfo::GetManagers_11a68020", "proposedName": "CXHunterInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."}
+      ],
+      "fields": [
+        {"name": "categoryPacked", "type": "int", "offset": "0x10", "source": "reader", "note": "row+0x10/100 is the category matched against param_2"},
+        {"name": "levelMin", "type": "int", "offset": "0x14", "source": "reader"},
+        {"name": "levelMax", "type": "int", "offset": "0x18", "source": "reader"},
+        {"name": "levelStep", "type": "int", "offset": "0x1c", "source": "reader"},
+        {"name": "valuePerStep", "type": "int", "offset": "0x20", "source": "reader"},
+        {"name": "valueBase", "type": "int", "offset": "0x24", "source": "reader"}
+      ],
+      "formulas": ["value = ((level - levelMin) / levelStep) * valuePerStep + valueBase, when valuePerStep != 0; otherwise value = valueBase."]
+    },
+    {
+      "className": "CExplimitInfo",
+      "category": "misc",
+      "purpose": "Static experience-limit table (per-level exp caps). Works together with CPlayerLevelUpInfo to compute how many levels an exp gain crosses given the exp cap rows.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108d1770", "currentName": "CExplimitInfo::GetManagers", "proposedName": "CExplimitInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CExplimitInfo> singleton (StcMbrNameSvr)."},
+        {"address": "1139db00", "currentName": "CExplimitInfo::GetManagers_1139db00", "proposedName": "CExplimitInfo::CalcExpOverflowLevels", "purpose": "Given a start level (param_1), current exp (param_2) and exp-to-add (param_3), read the exp-limit row (row+0x14 = per-level exp cap) via keyed lookup, then loop applying caps (using CPlayerLevelUpInfo row+0x30/max-level at +0xd0) to count how many levels are gained; returns level count or -1 on error."}
+      ],
+      "fields": [
+        {"name": "expLimit", "type": "int", "offset": "0x14", "source": "reader", "note": "per-level experience cap"}
+      ],
+      "notes": "FUN_1046c7c0(1)+0xd0 = server max level; FUN_1139dcb0 advances level/exp given a cap."
+    },
+    {
+      "className": "CRandomWeaponAddonGroupInfo",
+      "category": "weapon",
+      "purpose": "Static config for random-weapon addon (affix) groups. Rows are precached/registered per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11870c90", "currentName": "CRandomWeaponAddonGroupInfo::GetManagers", "proposedName": "CRandomWeaponAddonGroupInfo::GetInfoManager", "purpose": "Return CInfoManager<CRandomWeaponAddonGroupInfo>* (find-or-default static fallback)."},
+        {"address": "11874f60", "currentName": "CRandomWeaponAddonGroupInfo::GetManagers_11874f60", "proposedName": "CRandomWeaponAddonGroupInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "119b7db0", "currentName": "CRandomWeaponAddonGroupInfo::GetManagers_119b7db0", "proposedName": "CRandomWeaponAddonGroupInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11878190."}
+      ]
+    },
+    {
+      "className": "CRandomWeaponRandScoreInfo",
+      "category": "weapon",
+      "purpose": "Static config for random-weapon random-score (roll quality) tables. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11870dd0", "currentName": "CRandomWeaponRandScoreInfo::GetManagers", "proposedName": "CRandomWeaponRandScoreInfo::GetInfoManager", "purpose": "Return CInfoManager<CRandomWeaponRandScoreInfo>* (find-or-default static fallback)."},
+        {"address": "11875000", "currentName": "CRandomWeaponRandScoreInfo::GetManagers_11875000", "proposedName": "CRandomWeaponRandScoreInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "119b7b50", "currentName": "CRandomWeaponRandScoreInfo::GetManagers_119b7b50", "proposedName": "CRandomWeaponRandScoreInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11878270."}
+      ]
+    },
+    {
+      "className": "CEquipEnforceTransferInfo",
+      "category": "item",
+      "purpose": "Static config for equipment 'enforce' (enhancement/reinforce) transfer rules — moving enhancement level between equipment. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "115bf360", "currentName": "CEquipEnforceTransferInfo::GetManagers", "proposedName": "CEquipEnforceTransferInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipEnforceTransferInfo>* (find-or-default static fallback)."},
+        {"address": "115c4220", "currentName": "CEquipEnforceTransferInfo::GetManagers_115c4220", "proposedName": "CEquipEnforceTransferInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "1191c930", "currentName": "CEquipEnforceTransferInfo::GetManagers_1191c930", "proposedName": "CEquipEnforceTransferInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CItemBaseInfo::GetManagers_11a0c290 (link each transfer row to its item base)."}
+      ]
+    },
+    {
+      "className": "CSoulBeastLevelUpInfo",
+      "category": "pet",
+      "purpose": "Static config for Soul Beast (pet/companion) level-up rules. Used to query the max level available for a given soul-beast id/type.",
+      "confidence": "high",
+      "methods": [
+        {"address": "11533150", "currentName": "CSoulBeastLevelUpInfo::GetManagers", "proposedName": "CSoulBeastLevelUpInfo::GetInfoManager", "purpose": "Return CInfoManager<CSoulBeastLevelUpInfo>* (find-or-default static fallback)."},
+        {"address": "11534020", "currentName": "CSoulBeastLevelUpInfo::GetManagers_11534020", "proposedName": "CSoulBeastLevelUpInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "117b8df0", "currentName": "CSoulBeastLevelUpInfo::GetManagers_117b8df0", "proposedName": "CSoulBeastLevelUpInfo::GetMaxLevel", "purpose": "Iterate rows; for rows whose row+0x14 == param_1 (soul-beast id/type) track and return the max row+0x18 (level) into cached DAT_12392738."}
+      ],
+      "fields": [
+        {"name": "soulBeastId", "type": "int", "offset": "0x14", "source": "reader", "note": "matched against query key"},
+        {"name": "level", "type": "int", "offset": "0x18", "source": "reader"}
+      ],
+      "relatedTlv": ["TlvSoulBeastSystemData", "TlvSoulBeastStats"]
+    },
+    {
+      "className": "CSoulBeastEvolveInfo",
+      "category": "pet",
+      "purpose": "Static config for Soul Beast evolution stages. Used to query the max evolve stage for a soul-beast id/type.",
+      "confidence": "high",
+      "methods": [
+        {"address": "115330b0", "currentName": "CSoulBeastEvolveInfo::GetManagers", "proposedName": "CSoulBeastEvolveInfo::GetInfoManager", "purpose": "Return CInfoManager<CSoulBeastEvolveInfo>* (find-or-default static fallback)."},
+        {"address": "11533fd0", "currentName": "CSoulBeastEvolveInfo::GetManagers_11533fd0", "proposedName": "CSoulBeastEvolveInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "117b86a0", "currentName": "CSoulBeastEvolveInfo::GetManagers_117b86a0", "proposedName": "CSoulBeastEvolveInfo::GetMaxEvolveStage", "purpose": "Iterate rows; for rows whose row+0x14 == param_1 (soul-beast id) track and return max row+0x18 (evolve stage) into cached DAT_123926f4."}
+      ],
+      "fields": [
+        {"name": "soulBeastId", "type": "int", "offset": "0x14", "source": "reader"},
+        {"name": "evolveStage", "type": "int", "offset": "0x18", "source": "reader"}
+      ],
+      "relatedTlv": ["TlvSoulBeastSystemData"]
+    },
+    {
+      "className": "CRandomWeaponAbilityInfo",
+      "category": "weapon",
+      "purpose": "Static config for random-weapon abilities/affixes. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11870bf0", "currentName": "CRandomWeaponAbilityInfo::GetManagers", "proposedName": "CRandomWeaponAbilityInfo::GetInfoManager", "purpose": "Return CInfoManager<CRandomWeaponAbilityInfo>* (find-or-default static fallback)."},
+        {"address": "11874f10", "currentName": "CRandomWeaponAbilityInfo::GetManagers_11874f10", "proposedName": "CRandomWeaponAbilityInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "119b7c80", "currentName": "CRandomWeaponAbilityInfo::GetManagers_119b7c80", "proposedName": "CRandomWeaponAbilityInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11878180."}
+      ]
+    },
+    {
+      "className": "CEquipBreakTransferInfo",
+      "category": "item",
+      "purpose": "Static config for equipment 'break' (dismantle/salvage) transfer rules. Rows precached per entry, linked to item base.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "115bf180", "currentName": "CEquipBreakTransferInfo::GetManagers", "proposedName": "CEquipBreakTransferInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipBreakTransferInfo>* (find-or-default static fallback)."},
+        {"address": "115c4130", "currentName": "CEquipBreakTransferInfo::GetManagers_115c4130", "proposedName": "CEquipBreakTransferInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "1191ca60", "currentName": "CEquipBreakTransferInfo::GetManagers_1191ca60", "proposedName": "CEquipBreakTransferInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CItemBaseInfo::GetManagers_11a0cce0 (link each row to its item base)."}
+      ]
+    },
+    {
+      "className": "CCatCuisineRateInfo",
+      "category": "activity",
+      "purpose": "Static config for Felyne (Cat) Cuisine success/effect rates. Rows precached per entry and linked to buff definitions.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10a044e0", "currentName": "CCatCuisineRateInfo::GetManagers", "proposedName": "CCatCuisineRateInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CCatCuisineRateInfo> singleton (StcMbrNameSvr)."},
+        {"address": "11934380", "currentName": "CCatCuisineRateInfo::GetManagers_11934380", "proposedName": "CCatCuisineRateInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CBuffInfo::GetManagers_11a21800 (link each cuisine-rate row to its buff)."}
+      ],
+      "relatedTlv": ["TlvCatCuisineData", "TlvCatCuisineState"],
+      "notes": "TLV structs are runtime cuisine save state; this is the static rate config."
+    },
+    {
+      "className": "CHubEntryConfigInfo",
+      "category": "activity",
+      "purpose": "Static config controlling access/entry to hub (gathering hall / town) instances. Used to test whether a given entry is available to the player.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "107ca2b0", "currentName": "CHubEntryConfigInfo::GetManagers", "proposedName": "CHubEntryConfigInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CHubEntryConfigInfo> singleton (StcMbrNameSvr)."},
+        {"address": "11710040", "currentName": "CHubEntryConfigInfo::GetManagers_11710040", "proposedName": "CHubEntryConfigInfo::HasAvailableHubEntry", "purpose": "thiscall: walk a red-black tree of the owner's entries (this+0x78/+0x80); for each node's entry id (node+0x74) look up its config row and test FUN_11711940(param_2); return 1 if any entry passes."}
+      ]
+    },
+    {
+      "className": "CNpcAtdGroupInfo",
+      "category": "misc",
+      "purpose": "Static config for NPC 'ATD' (attitude/affinity) groups. Given a query it finds the matching group and returns its group id.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11507670", "currentName": "CNpcAtdGroupInfo::GetManagers", "proposedName": "CNpcAtdGroupInfo::GetInfoManager", "purpose": "Return CInfoManager<CNpcAtdGroupInfo>* (find-or-default static fallback)."},
+        {"address": "115095f0", "currentName": "CNpcAtdGroupInfo::GetManagers_115095f0", "proposedName": "CNpcAtdGroupInfo::FindGroupId", "purpose": "Iterate rows; for the row that satisfies FUN_117fa320(param_1) write row+0x10 (group id) into *param_2 and return 1; else 0."},
+        {"address": "11509850", "currentName": "CNpcAtdGroupInfo::GetManagers_11509850", "proposedName": "CNpcAtdGroupInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int", "offset": "0x10", "source": "reader", "note": "returned when the row matches"}
+      ]
+    },
+    {
+      "className": "CLegendRandomAttrInfo",
+      "category": "item",
+      "purpose": "Static config for legendary-equipment random attribute rolls. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "119cb830", "currentName": "CLegendRandomAttrInfo::GetManagers", "proposedName": "CLegendRandomAttrInfo::GetInfoManager", "purpose": "Return CInfoManager<CLegendRandomAttrInfo>* (find-or-default static fallback)."},
+        {"address": "119ccbe0", "currentName": "CLegendRandomAttrInfo::GetManagers_119ccbe0", "proposedName": "CLegendRandomAttrInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "119cced0", "currentName": "CLegendRandomAttrInfo::GetManagers_119cced0", "proposedName": "CLegendRandomAttrInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11a85460."}
+      ]
+    },
+    {
+      "className": "CEquipQuickLevelUpInfo",
+      "category": "item",
+      "purpose": "Static config for equipment quick level-up (batch/one-click leveling) rules. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11594620", "currentName": "CEquipQuickLevelUpInfo::GetManagers", "proposedName": "CEquipQuickLevelUpInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipQuickLevelUpInfo>* (find-or-default static fallback)."},
+        {"address": "11599f40", "currentName": "CEquipQuickLevelUpInfo::GetManagers_11599f40", "proposedName": "CEquipQuickLevelUpInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11916be0", "currentName": "CEquipQuickLevelUpInfo::GetManagers_11916be0", "proposedName": "CEquipQuickLevelUpInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_1183e310."}
+      ]
+    },
+    {
+      "className": "CEquipLevelUpInfo",
+      "category": "item",
+      "purpose": "Static config for equipment level-up rules/costs. Rows precached per entry and linked to their item base at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "116c3300", "currentName": "CEquipLevelUpInfo::GetManagers", "proposedName": "CEquipLevelUpInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipLevelUpInfo>* (find-or-default static fallback)."},
+        {"address": "116c4c90", "currentName": "CEquipLevelUpInfo::GetManagers_116c4c90", "proposedName": "CEquipLevelUpInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11916e40", "currentName": "CEquipLevelUpInfo::GetManagers_11916e40", "proposedName": "CEquipLevelUpInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CItemBaseInfo::GetManagers_117b6f40 (link each row to its item base)."}
+      ]
+    },
+    {
+      "className": "CEquipQuenchRuleInfo",
+      "category": "item",
+      "purpose": "Static config for equipment 'quench' (refine/temper) rules. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "115bf4a0", "currentName": "CEquipQuenchRuleInfo::GetManagers", "proposedName": "CEquipQuenchRuleInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipQuenchRuleInfo>* (find-or-default static fallback)."},
+        {"address": "115c42c0", "currentName": "CEquipQuenchRuleInfo::GetManagers_115c42c0", "proposedName": "CEquipQuenchRuleInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "1191c800", "currentName": "CEquipQuenchRuleInfo::GetManagers_1191c800", "proposedName": "CEquipQuenchRuleInfo::PreCacheAll", "purpose": "Iterate all rows and register each per entry."}
+      ]
+    },
+    {
+      "className": "CManufactureInfo",
+      "category": "item",
+      "purpose": "Static config for manufacturing/crafting recipes. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10813be0", "currentName": "CManufactureInfo::GetManagers", "proposedName": "CManufactureInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CManufactureInfo> singleton (StcMbrNameSvr)."},
+        {"address": "119003d0", "currentName": "CManufactureInfo::GetManagers_119003d0", "proposedName": "CManufactureInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry (while-loop over GetCount)."}
+      ]
+    },
+    {
+      "className": "CNpcAtdAttrUnlockInfo",
+      "category": "misc",
+      "purpose": "Static config for NPC ATD (attitude/affinity) attribute unlock thresholds. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1192f530", "currentName": "CNpcAtdAttrUnlockInfo::GetManagers", "proposedName": "CNpcAtdAttrUnlockInfo::GetInfoManager", "purpose": "Return CInfoManager<CNpcAtdAttrUnlockInfo>* (find-or-default static fallback)."},
+        {"address": "11931480", "currentName": "CNpcAtdAttrUnlockInfo::GetManagers_11931480", "proposedName": "CNpcAtdAttrUnlockInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11931d40", "currentName": "CNpcAtdAttrUnlockInfo::GetManagers_11931d40", "proposedName": "CNpcAtdAttrUnlockInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CEquipRankUpInfo",
+      "category": "item",
+      "purpose": "Static config for equipment rank-up (tier promotion) rules. Rows precached per entry and linked to item base at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "115bf540", "currentName": "CEquipRankUpInfo::GetManagers", "proposedName": "CEquipRankUpInfo::GetInfoManager", "purpose": "Return CInfoManager<CEquipRankUpInfo>* (find-or-default static fallback)."},
+        {"address": "115c4310", "currentName": "CEquipRankUpInfo::GetManagers_115c4310", "proposedName": "CEquipRankUpInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11916d10", "currentName": "CEquipRankUpInfo::GetManagers_11916d10", "proposedName": "CEquipRankUpInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CItemBaseInfo::GetManagers_117b5360 (link each row to its item base)."}
+      ]
+    },
+    {
+      "className": "CNewSkillLearnInfo",
+      "category": "skill",
+      "purpose": "Static config for the (new) skill learning/unlock system. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "118fe930", "currentName": "CNewSkillLearnInfo::GetManagers", "proposedName": "CNewSkillLearnInfo::GetInfoManager", "purpose": "Return CInfoManager<CNewSkillLearnInfo>* (find-or-default static fallback)."},
+        {"address": "118ff570", "currentName": "CNewSkillLearnInfo::GetManagers_118ff570", "proposedName": "CNewSkillLearnInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "118ff800", "currentName": "CNewSkillLearnInfo::GetManagers_118ff800", "proposedName": "CNewSkillLearnInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ],
+      "relatedTlv": ["TlvNewFlagSkills", "TlvSkills"]
+    },
+    {
+      "className": "CUIInfo",
+      "category": "ui",
+      "purpose": "Static UI-window definition table. Builds the list of UI ids that are open/enabled by default at startup.",
+      "confidence": "high",
+      "methods": [
+        {"address": "104d00e0", "currentName": "CUIInfo::GetManagers", "proposedName": "CUIInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CUIInfo> singleton (StcMbrNameSvr)."},
+        {"address": "10b69ee0", "currentName": "CUIInfo::GetManagers_10b69ee0", "proposedName": "CUIInfo::BuildDefaultOpenUIList", "purpose": "Initialize an output vector (param_1[2..5]); iterate all UI rows and, for each row whose row+0x70 (defaultOpen flag) is set, append row+0x10 (uiId) to the vector; finally append fixed ids 1 and 0x1b (27)."}
+      ],
+      "fields": [
+        {"name": "uiId", "type": "int", "offset": "0x10", "source": "reader"},
+        {"name": "defaultOpen", "type": "char(bool)", "offset": "0x70", "source": "reader", "note": "nonzero => added to default-open list"}
+      ],
+      "constants": ["Always-appended UI ids: 1 and 0x1b (27)"]
+    },
+    {
+      "className": "CGodLuckInfo",
+      "category": "activity",
+      "purpose": "Static config for the 'God Luck' (blessing/lucky) system. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10907ce0", "currentName": "CGodLuckInfo::GetManagers", "proposedName": "CGodLuckInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CGodLuckInfo> singleton (StcMbrNameSvr)."},
+        {"address": "11950ca0", "currentName": "CGodLuckInfo::GetManagers_11950ca0", "proposedName": "CGodLuckInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11a39d10 (while-loop over GetCount)."}
+      ]
+    },
+    {
+      "className": "CInDirectPVPInfo",
+      "category": "activity",
+      "purpose": "Static config for indirect PVP (asynchronous / non-realtime PVP) rules. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11999e30", "currentName": "CInDirectPVPInfo::GetManagers", "proposedName": "CInDirectPVPInfo::GetInfoManager", "purpose": "Return CInfoManager<CInDirectPVPInfo>* (find-or-default static fallback)."},
+        {"address": "1199a9e0", "currentName": "CInDirectPVPInfo::GetManagers_1199a9e0", "proposedName": "CInDirectPVPInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "1199ac00", "currentName": "CInDirectPVPInfo::GetManagers_1199ac00", "proposedName": "CInDirectPVPInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CLeagueScoreInfo",
+      "category": "activity",
+      "purpose": "Static config for league/ranked-score thresholds and rewards. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11840e30", "currentName": "CLeagueScoreInfo::GetManagers", "proposedName": "CLeagueScoreInfo::GetInfoManager", "purpose": "Return CInfoManager<CLeagueScoreInfo>* (find-or-default static fallback)."},
+        {"address": "11842970", "currentName": "CLeagueScoreInfo::GetManagers_11842970", "proposedName": "CLeagueScoreInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "119a14f0", "currentName": "CLeagueScoreInfo::GetManagers_119a14f0", "proposedName": "CLeagueScoreInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CItemColumnInfo",
+      "category": "item",
+      "purpose": "Static config for item bag column/slot layout. Populates a per-owner column table (up to 11 columns) from a config key.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1122e8f0", "currentName": "CItemColumnInfo::GetManagers", "proposedName": "CItemColumnInfo::GetInfoManager", "purpose": "Return CInfoManager<CItemColumnInfo>* (find-or-default static fallback)."},
+        {"address": "11230500", "currentName": "CItemColumnInfo::GetManagers_11230500", "proposedName": "CItemColumnInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "113fada0", "currentName": "CItemColumnInfo::GetManagers_113fada0", "proposedName": "CItemColumnInfo::InitColumnsFromConfig", "purpose": "thiscall: clear this+0x170/0x174, store config key at this+8; loop columns 0..10, look up each column's row by key, validate via FUN_113fefa0/FUN_11461010, and store resolved value at this+0xc+col*4. Returns error codes 10/0xd on missing config."}
+      ],
+      "constants": ["MaxColumns=11 (loop 0..10, overflow guard at >10)", "returns 10 when key==0, 0xd on lookup miss"]
+    },
+    {
+      "className": "CPetFireInfo",
+      "category": "pet",
+      "purpose": "Static config for pet 'fire' (elemental/attack) attributes. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11580e30", "currentName": "CPetFireInfo::GetManagers", "proposedName": "CPetFireInfo::GetInfoManager", "purpose": "Return CInfoManager<CPetFireInfo>* (find-or-default static fallback)."},
+        {"address": "11582a60", "currentName": "CPetFireInfo::GetManagers_11582a60", "proposedName": "CPetFireInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11928ce0", "currentName": "CPetFireInfo::GetManagers_11928ce0", "proposedName": "CPetFireInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CFluteFxInfo",
+      "category": "weapon",
+      "purpose": "Static config for Hunting Horn (flute) melody/effect entries. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "115e2370", "currentName": "CFluteFxInfo::GetManagers", "proposedName": "CFluteFxInfo::GetInfoManager", "purpose": "Return CInfoManager<CFluteFxInfo>* (find-or-default static fallback)."},
+        {"address": "115e2d80", "currentName": "CFluteFxInfo::GetManagers_115e2d80", "proposedName": "CFluteFxInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "118bfd30", "currentName": "CFluteFxInfo::GetManagers_118bfd30", "proposedName": "CFluteFxInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CCommerceBoatInfo",
+      "category": "economy",
+      "purpose": "Static config for the guild commerce-boat (trade ship) system. The recovered method processes/queries the boat entries for an owner object.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109f5830", "currentName": "CCommerceBoatInfo::GetManagers", "proposedName": "CCommerceBoatInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CCommerceBoatInfo> singleton (StcMbrNameSvr)."},
+        {"address": "11174eb0", "currentName": "CCommerceBoatInfo::GetManagers_11174eb0", "proposedName": "CCommerceBoatInfo::ProcessBoatEntries", "purpose": "thiscall: after validating owner state (vtbl+0xc), iterate all boat config rows and apply per-row processing to the owner object (param_2)."}
+      ],
+      "relatedTlv": ["TlvCommerceBoat", "TlvCommerceBoatContribution", "TlvCommerceGuild"],
+      "notes": "TLV structs are runtime commerce save data; this is the static boat config."
+    },
+    {
+      "className": "CTournamentsAwardInfo",
+      "category": "activity",
+      "purpose": "Static config for tournament award/prize tiers. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11975e90", "currentName": "CTournamentsAwardInfo::GetManagers", "proposedName": "CTournamentsAwardInfo::GetInfoManager", "purpose": "Return CInfoManager<CTournamentsAwardInfo>* (find-or-default static fallback)."},
+        {"address": "11977720", "currentName": "CTournamentsAwardInfo::GetManagers_11977720", "proposedName": "CTournamentsAwardInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11977f20", "currentName": "CTournamentsAwardInfo::GetManagers_11977f20", "proposedName": "CTournamentsAwardInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CLevelEnSubGroupRewardInfo",
+      "category": "economy",
+      "purpose": "Static config for level-enhancement sub-group rewards. Sums up two reward categories (type 1 and type 2) across a set of sub-group entries.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1095c030", "currentName": "CLevelEnSubGroupRewardInfo::GetManagers", "proposedName": "CLevelEnSubGroupRewardInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CLevelEnSubGroupRewardInfo> singleton (StcMbrNameSvr)."},
+        {"address": "114cfd70", "currentName": "CLevelEnSubGroupRewardInfo::GetManagers_114cfd70", "proposedName": "CLevelEnSubGroupRewardInfo::SumSubGroupRewards", "purpose": "Iterate an owner vector at param_1+8/+0xc (element stride 8); look up each element's reward row by key; accumulate row+0x18 (value) into *param_2 when row+0x14 (type)==1 and into *param_3 when type==2."}
+      ],
+      "fields": [
+        {"name": "rewardType", "type": "int", "offset": "0x14", "source": "reader", "note": "1 => sum into out A, 2 => sum into out B"},
+        {"name": "rewardValue", "type": "int", "offset": "0x18", "source": "reader"}
+      ]
+    },
+    {
+      "className": "CWakeAbilityInfo",
+      "category": "skill",
+      "purpose": "Static config for 'wake'/awaken abilities (weapon or armor awakening skills). Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "116c33a0", "currentName": "CWakeAbilityInfo::GetManagers", "proposedName": "CWakeAbilityInfo::GetInfoManager", "purpose": "Return CInfoManager<CWakeAbilityInfo>* (find-or-default static fallback)."},
+        {"address": "116c4ce0", "currentName": "CWakeAbilityInfo::GetManagers_116c4ce0", "proposedName": "CWakeAbilityInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11966a30", "currentName": "CWakeAbilityInfo::GetManagers_11966a30", "proposedName": "CWakeAbilityInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11a46590."}
+      ]
+    },
+    {
+      "className": "CClanLevelInfo",
+      "category": "social",
+      "purpose": "Static config for clan (team/legion) level requirements/rewards. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1194bbf0", "currentName": "CClanLevelInfo::GetManagers", "proposedName": "CClanLevelInfo::GetInfoManager", "purpose": "Return CInfoManager<CClanLevelInfo>* (find-or-default static fallback)."},
+        {"address": "1194c7a0", "currentName": "CClanLevelInfo::GetManagers_1194c7a0", "proposedName": "CClanLevelInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "1194c9c0", "currentName": "CClanLevelInfo::GetManagers_1194c9c0", "proposedName": "CClanLevelInfo::PreCacheAll", "purpose": "Iterate all rows and register each via FUN_11a368d0."}
+      ]
+    },
+    {
+      "className": "CVipCutOffInfo",
+      "category": "economy",
+      "purpose": "Static config for VIP-level cutoff thresholds (benefits gated by VIP tier). The recovered method resolves the applicable VIP cutoff index for an owner.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "104d8e40", "currentName": "CVipCutOffInfo::GetManagers", "proposedName": "CVipCutOffInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CVipCutOffInfo> singleton (StcMbrNameSvr)."},
+        {"address": "1159a060", "currentName": "CVipCutOffInfo::GetManagers_1159a060", "proposedName": "CVipCutOffInfo::GetVipCutOffIndex", "purpose": "After a precondition check (FUN_1159a3c0), iterate rows by key; for the first row whose owner-state check (FUN_1174a3b0, entry+4 nonzero) passes, return its index; else 1."}
+      ]
+    },
+    {
+      "className": "CActivityLotteryInfo",
+      "category": "activity",
+      "purpose": "Static config for activity/event lottery pools. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "111fd4e0", "currentName": "CActivityLotteryInfo::GetManagers", "proposedName": "CActivityLotteryInfo::GetInfoManager", "purpose": "Return CInfoManager<CActivityLotteryInfo>* (find-or-default static fallback)."},
+        {"address": "111ff4d0", "currentName": "CActivityLotteryInfo::GetManagers_111ff4d0", "proposedName": "CActivityLotteryInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "11949ee0", "currentName": "CActivityLotteryInfo::GetManagers_11949ee0", "proposedName": "CActivityLotteryInfo::PreCacheAll", "purpose": "Iterate all rows (GetCount via vtbl+0x28) and register each entry."}
+      ],
+      "relatedTlv": ["TlvLotteryBoxContainer", "TlvLotteryBoxItemPool"]
+    },
+    {
+      "className": "CSkillInfo",
+      "category": "skill",
+      "purpose": "Static skill definition table (core skill data). The recovered iteration returns the first skill row that passes a predicate.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "116cc170", "currentName": "CSkillInfo::GetManagers", "proposedName": "CSkillInfo::GetInfoManager", "purpose": "Return CInfoManager<CSkillInfo>* (find-or-default static fallback)."},
+        {"address": "116cd540", "currentName": "CSkillInfo::GetManagers_116cd540", "proposedName": "CSkillInfo::GetInfoManagerPtr", "purpose": "Raw singleton manager pointer accessor."},
+        {"address": "116cffa0", "currentName": "CSkillInfo::GetManagers_116cffa0", "proposedName": "CSkillInfo::FindFirstMatchingSkill", "purpose": "Iterate all skill rows; return the first nonzero result of FUN_116cd1b0(index); else 0."}
+      ],
+      "relatedTlv": ["TlvSkills", "TlvSkillLevel", "TlvSkillGroupData"],
+      "notes": "TLV structs are runtime player skill data; CSkillInfo is the static skill config table."
+    },
+    {
+      "className": "CCraftInfo",
+      "category": "item",
+      "purpose": "Static config for crafting (weapon/armor forge) entries. The recovered method builds two craft lists split by craft type and stores them on an owner object.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "107ec1a0", "currentName": "CCraftInfo::GetManagers", "proposedName": "CCraftInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CCraftInfo> singleton (StcMbrNameSvr)."},
+        {"address": "1124fc00", "currentName": "CCraftInfo::GetManagers_1124fc00", "proposedName": "CCraftInfo::BuildCraftLists", "purpose": "Iterate all craft rows; branch on row+0x44 (craftType 1 vs 2) and append row+0x10 (id) to the corresponding temp list; finally store two computed results at owner param_1+0x24 and param_1+0x20."}
+      ],
+      "fields": [
+        {"name": "craftId", "type": "int", "offset": "0x10", "source": "reader"},
+        {"name": "craftType", "type": "int", "offset": "0x44", "source": "reader", "note": "1 or 2, selects target list"}
+      ]
+    },
+    {
+      "className": "CStarStoneSlotInfo",
+      "category": "item",
+      "purpose": "Static config for Star Stone (gem) socket slots. Computes how many slots are unlocked given a player value (level/score).",
+      "confidence": "high",
+      "methods": [
+        {"address": "1098b960", "currentName": "CStarStoneSlotInfo::GetManagers", "proposedName": "CStarStoneSlotInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CStarStoneSlotInfo> singleton (StcMbrNameSvr)."},
+        {"address": "115a6180", "currentName": "CStarStoneSlotInfo::GetManagers_115a6180", "proposedName": "CStarStoneSlotInfo::GetUnlockedSlotCount", "purpose": "Read a player value uVar3 = FUN_115a6b30(); loop slot index 1..4 looking up each slot's row; stop at the first slot whose requirement (row+0x14) exceeds uVar3. Returns unlocked count = index-1 (capped at 4)."}
+      ],
+      "fields": [
+        {"name": "unlockRequirement", "type": "uint", "offset": "0x14", "source": "reader", "note": "player value must be >= this to unlock the slot"}
+      ],
+      "constants": ["MaxSlots=4 (loop 1..4)"]
+    },
+    {
+      "className": "CFluteWeaponInfo",
+      "category": "weapon",
+      "purpose": "Static config for Hunting Horn (flute) weapon entries. Rows precached per entry and linked to flute-tune config at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108557d0", "currentName": "CFluteWeaponInfo::GetManagers", "proposedName": "CFluteWeaponInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CFluteWeaponInfo> singleton (StcMbrNameSvr)."},
+        {"address": "118bdef0", "currentName": "CFluteWeaponInfo::GetManagers_118bdef0", "proposedName": "CFluteWeaponInfo::PreCacheAll", "purpose": "Iterate all rows, per-row callback CFluteTuneInfo::GetManagers_117eada0 (link each flute weapon to its tune data)."}
+      ]
+    },
+    {
+      "className": "CPersonalParagraphInfo",
+      "category": "misc",
+      "purpose": "Static config for 'personal paragraph' entries (per-player narrative/biography or profile text blocks). Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1099e3f0", "currentName": "CPersonalParagraphInfo::GetManagers", "proposedName": "CPersonalParagraphInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CPersonalParagraphInfo> singleton (StcMbrNameSvr)."},
+        {"address": "119a1ae0", "currentName": "CPersonalParagraphInfo::GetManagers_119a1ae0", "proposedName": "CPersonalParagraphInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    },
+    {
+      "className": "CMaterialExchangeInfo",
+      "category": "economy",
+      "purpose": "Static config for material-exchange (trade-in / barter) recipes. Rows precached per entry at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1097e450", "currentName": "CMaterialExchangeInfo::GetManagers", "proposedName": "CMaterialExchangeInfo::GetInfoManagerSingleton", "purpose": "Lazy-init/return CInfoManager<CMaterialExchangeInfo> singleton (StcMbrNameSvr)."},
+        {"address": "1198e3d0", "currentName": "CMaterialExchangeInfo::GetManagers_1198e3d0", "proposedName": "CMaterialExchangeInfo::PreCacheAll", "purpose": "Iterate all rows and register each entry."}
+      ]
+    }
+  ]
+}

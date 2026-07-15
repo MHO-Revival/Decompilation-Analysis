@@ -1,0 +1,1051 @@
+{
+  "chunkIndex": 9,
+  "functions": [
+    {
+      "address": "0x10217b40",
+      "currentName": "FUN_10217b40",
+      "proposedName": "TlvStarBranchData_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat/ToString for a star-branch reward struct. Emits starNum(byte@0), branchNum(byte@1), branchList[branchNum] (max 11), starList[starNum] (max 21) where each starList element = {quality(byte), finishTime(uint32)}.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "starNum: uint8 @0 — number of starList entries (max 0x15=21)",
+        "branchNum: uint8 @1 — number of branchList entries (max 0xb=11)",
+        "branchList[]: sub-struct array @ (offset via FUN_102166e0)",
+        "starList[]: array @ base+0xe8 stride 9 = { quality: uint8 @+0, finishTime: uint32 @+1 }"
+      ],
+      "relatedTlv": ["TlvStarBranchData"],
+      "tlvDocDiscrepancy": "Doc TlvStarBranchData (@0x10217820) lists 4 wire fields: starNum(1), branchNum(3,unknown), starList(4,int32), quality(5,int32). The real DebugFormat shows branchNum is a uint8 count driving a separate branchList array (doc omits branchList entirely), and starList is an ARRAY whose element = {quality:uint8, finishTime:uint32}, not two scalar int32 fields. Doc's 0x99-subset flag is correct that it truncated, but the field semantics (branchList missing, starList element shape) are wrong.",
+      "serverRelevance": "Debug/logging only, not on wire; but authoritatively documents the star-branch reward struct layout the server must build.",
+      "notes": "FUN_1024a290=print scalar field, FUN_1024a140=array-index open, FUN_1010c010=sprintf-into-buf. Returns -7 on count overflow (branchNum>=0xb or starNum>=0x15)."
+    },
+    {
+      "address": "0x10217f90",
+      "currentName": "FUN_10217f90",
+      "proposedName": "TlvPair_ByteVarint_Pack_v0",
+      "purpose": "TdrBuf.h wire pack for a 2-field element: field1 byte@0 (tag 0x11), field2 (tag 0x20, wire0 varint) via FUN_1010c5f0.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "f1: uint8 @0 (tag 0x11, wire1)",
+        "f2: varint @+1 (tag 0x20, wire0)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire serializer; server must emit this exact tag/field layout. Paired with FUN_10218010 (alternate TDR cut version).",
+      "notes": "asserts position<=length (TdrBuf.h:0xe0). Returns -1 on buffer full."
+    },
+    {
+      "address": "0x10218010",
+      "currentName": "FUN_10218010",
+      "proposedName": "TlvPair_ByteFixed32_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, same element as FUN_10217f90 but field2 uses tag 0x23 (wire3, fixed 4-byte) via FUN_1010c190. Alternate TDR cut-version of the same struct.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "f1: uint8 @0 (tag 0x11, wire1)",
+        "f2: fixed32 @+1 (tag 0x23, wire3)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire serializer (cut-version variant of FUN_10217f90).",
+      "notes": ""
+    },
+    {
+      "address": "0x10218160",
+      "currentName": "FUN_10218160",
+      "proposedName": "TlvPair_Element_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack of a 2-field element: field_id 1 = byte@0, field_id 2 = varint@+1 (FUN_1010c870). Switches on local_8>>4 (field_id). Sets presence-flag dword at +5.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: uint8 @0 (presence bit 0x1)",
+        "field 2: varint @+1 (presence bit 0x2)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — server must parse this element from client packets. Unknown fields skipped via FUN_1010d4f0.",
+      "notes": "Element read by array containers FUN_10218990/FUN_1022... ; return codes -2 EOF, -0x22 length mismatch."
+    },
+    {
+      "address": "0x10218250",
+      "currentName": "FUN_10218250",
+      "proposedName": "TlvPair_Element_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, same element as FUN_10218160, alternate cut-version.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: uint8 @0",
+        "field 2: varint @+1"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire unpacker (cut variant of FUN_10218160).",
+      "notes": ""
+    },
+    {
+      "address": "0x10218990",
+      "currentName": "FUN_10218990",
+      "proposedName": "TlvCardTargetContainer_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack of a container: field1 scalar (FUN_1010cb00) = cardId, field2 byte@+2 = targetNum, field3 = length-delimited array (up to 10) of target elements each parsed by FUN_10218160. Matches DebugFormat FUN_10218e00.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: cardId scalar @0 (presence bit 0x1)",
+        "field 2: targetNum uint8 @+2 (presence bit 0x2)",
+        "field 3: targetList[] array (max 10), element via FUN_10218160 (presence bit 0x4)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — server parses this card/target struct from client.",
+      "notes": "Array capped at 10 iterations; -0x25 on missing nested length header."
+    },
+    {
+      "address": "0x10218b60",
+      "currentName": "FUN_10218b60",
+      "proposedName": "TlvCardTargetContainer_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_10218990 (nested element via FUN_10218250, scalar via FUN_1010c800).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: cardId scalar @0",
+        "field 2: targetNum uint8 @+2",
+        "field 3: targetList[] (max 10) via FUN_10218250"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire unpacker (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x10218e00",
+      "currentName": "FUN_10218e00",
+      "proposedName": "TlvCardTargetContainer_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat for the card/target struct: cardId (2-byte, DAT_11d9e0b4), targetNum (byte), targetList[targetNum] (max 10) each via FUN_10218440.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "cardId: uint16 @0",
+        "targetNum: uint8 @2 (max 10)",
+        "targetList[]: element @ FUN_10218440"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents cardId/targetNum/targetList layout (pairs with unpack FUN_10218990).",
+      "notes": ""
+    },
+    {
+      "address": "0x10219330",
+      "currentName": "FUN_10219330",
+      "proposedName": "TlvPair_U16Varint_Unpack",
+      "purpose": "TdrBuf.h wire unpack of element: field1 = 2-byte little-endian @0/@+1 (tag wire1, reads 2 bytes hi/lo), field2 = varint @+2 (FUN_1010c870). Presence flags at +6.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0 (little-endian, 2 bytes)",
+        "field 2: varint @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": "Reads 2 raw bytes for field1 (byte[1] then byte[0]); -0xfffffffe if <2 bytes left."
+    },
+    {
+      "address": "0x1021a9f0",
+      "currentName": "FUN_1021a9f0",
+      "proposedName": "TlvPair_U16U16_Unpack",
+      "purpose": "TdrBuf.h wire unpack of element with two 2-byte little-endian fields: field1 @0 (bytes @+0/+1), field2 @+2 (bytes @+2/+3). Presence flags at +4.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: uint16 @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x1021b0a0",
+      "currentName": "FUN_1021b0a0",
+      "proposedName": "TlvPair_U16Varint_Unpack_2",
+      "purpose": "TdrBuf.h wire unpack: field1 = 2-byte little-endian @0, field2 = varint @+2 (FUN_1010c870). Presence flags at +6. (Same shape as FUN_10219330.)",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: varint @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x1021bf40",
+      "currentName": "FUN_1021bf40",
+      "proposedName": "TlvStatContainer_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat of a two-array stat container: statNumInt(uint16@0) + statListInt[] (max 200) via FUN_1021b2a0; statNum(uint16 @0x7d2) + statList[] (max 0xe74=3700) via FUN_1021ac30.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "statNumInt: uint16 @0 (max 200)",
+        "statListInt[]: element @ FUN_1021b2a0",
+        "statNum: uint16 @0x7d2 (param_1[0x3e9]) (max 3700)",
+        "statList[]: element @ FUN_1021ac30"
+      ],
+      "relatedTlv": ["TlvStarStatData"],
+      "tlvDocDiscrepancy": "Candidate match to TlvStarStatData/similar stat container; verify element structs FUN_1021b2a0/FUN_1021ac30 against doc.",
+      "serverRelevance": "Debug only; documents the dual stat-list layout the server produces (e.g., star/stat progression).",
+      "notes": ""
+    },
+    {
+      "address": "0x1021fc80",
+      "currentName": "FUN_1021fc80",
+      "proposedName": "TlvPair_ScalarByte_Unpack",
+      "purpose": "TdrBuf.h wire unpack: field1 scalar 4-byte via FUN_1010ca10 @0, field2 byte @+2. Presence flags at +3.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: 4-byte scalar @0 (FUN_1010ca10)",
+        "field 2: uint8 @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x1021fd70",
+      "currentName": "FUN_1021fd70",
+      "proposedName": "TlvPair_U16Byte_Unpack",
+      "purpose": "TdrBuf.h wire unpack: field1 = 2-byte little-endian @0, field2 = byte @+2. Presence flags at +3.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: uint8 @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x102205c0",
+      "currentName": "FUN_102205c0",
+      "proposedName": "TlvBigArrayContainer_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack of a large container: field1 scalar (FUN_1010cbd0), field2 = array (max 0x800=2048) of 2-byte scalars starting @+2 (FUN_1010ca10), field3 = byte array (max 2048) at offset 0x1004. Count written to *param_1. Presence flags at +0x1804 (param_1[0x601]).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: scalar @0 (presence bit 0x1)",
+        "field 2: array<uint16>[*param_1] (max 2048) @ base+4, element via FUN_1010ca10 (presence bit 0x2)",
+        "field 3: array<uint8>[] (max 2048) @ base+0x1004 (presence bit 0x4)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — large fixed-capacity array container parsed from wire.",
+      "notes": "count stored at *param_1; -0x22 length overrun, -0x25 missing header."
+    },
+    {
+      "address": "0x102207e0",
+      "currentName": "FUN_102207e0",
+      "proposedName": "TlvBigArrayContainer_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_102205c0 (element via FUN_1010c800, scalar via FUN_1010c870).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: scalar @0",
+        "field 2: array<uint16>[] (max 2048)",
+        "field 3: array<uint8>[] (max 2048) @ base+0x1004"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire unpacker (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x10221010",
+      "currentName": "FUN_10221010",
+      "proposedName": "TlvPair_U16Varint_Unpack_3",
+      "purpose": "TdrBuf.h wire unpack: field1 = 2-byte little-endian @0, field2 = varint @+2. Presence flags at +6. (Same shape as FUN_10219330.)",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: varint @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x10222220",
+      "currentName": "FUN_10222220",
+      "proposedName": "TlvPair_U16Varint_Unpack_4",
+      "purpose": "TdrBuf.h wire unpack: field1 = 2-byte little-endian @0, field2 = varint @+2. Presence flags at +6. (Same shape as FUN_10219330.)",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: varint @+2"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker.",
+      "notes": ""
+    },
+    {
+      "address": "0x10226430",
+      "currentName": "FUN_10226430",
+      "proposedName": "TlvQuestSystemData_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat of the quest/task system container: taskCount+task[] (max 0x80), contentCount+content[] (max 0x100), completeBitCount+completeBit[] (byte-array, max 0x500), daily (sub), schedule (sub), xDailyCount+xDaily[] (max 0x20), reset (sub), trace (sub), complete (sub).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "taskCount: int32 @0 (max 0x80)",
+        "task[]: element @ FUN_1021efd0 (base offset 4)",
+        "contentCount: int32 @0x784 (param_1[0x1e1]) (max 0x100)",
+        "content[]: element @ FUN_1021f870",
+        "completeBitCount: int32 @0x1088 (param_1[0x422]) (max 0x500)",
+        "completeBit[]: uint8[] @ base+0x108c",
+        "daily: sub-struct @ FUN_102239e0",
+        "schedule: sub-struct @ FUN_10224030",
+        "xDailyCount: int32 @0x1626 (max 0x20)",
+        "xDaily[]: element @ FUN_10224750",
+        "reset: sub-struct @ FUN_10221ce0",
+        "trace: sub-struct @ FUN_10222eb0",
+        "complete: sub-struct @ FUN_10220ad0"
+      ],
+      "relatedTlv": ["TlvQuestSystemData", "TlvQuestScheduleData", "TlvCompleteBit"],
+      "tlvDocDiscrepancy": "Cross-ref TlvQuestSystemData / TlvQuestScheduleData / TlvCompleteBit: verify the auto-doc includes all 12 members (task, content, completeBit byte-array, daily, schedule, xDaily, reset, trace, complete). If the 0x99 doc truncated after early fields, flag it as incomplete.",
+      "serverRelevance": "Debug only; documents the full quest-system payload layout the server must build for quest sync.",
+      "notes": "Return -6 on negative count, -7 on count overflow."
+    },
+    {
+      "address": "0x102281f0",
+      "currentName": "FUN_102281f0",
+      "proposedName": "TlvDailyList_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(int32@0, max 0x20) + dailys[] via FUN_10227820.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: int32 @0 (max 0x20)",
+        "dailys[]: element @ FUN_10227820"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents daily-list layout.",
+      "notes": ""
+    },
+    {
+      "address": "0x10228510",
+      "currentName": "FUN_10228510",
+      "proposedName": "TlvScheduleEntry_Pack_v0",
+      "purpose": "TdrBuf.h wire pack: field1 (tag 0x10, wire0 varint) @0 via FUN_1010c5f0; field2 (tag 0x20, wire0) @+4 via FUN_1010c560; then length-delimited (tag 0x25) sub-struct via FUN_10227b90 with back-patched size.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: varint @0 (tag 0x10)",
+        "field 2: varint @+4 (tag 0x20)",
+        "field 3: length-delimited sub-struct @ FUN_10227b90 (tag 0x25)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire serializer. Paired with FUN_10228600 (cut variant).",
+      "notes": "FUN_1010bf70 reserves 4-byte length placeholder; FUN_1010c3c0 back-patches."
+    },
+    {
+      "address": "0x10228600",
+      "currentName": "FUN_10228600",
+      "proposedName": "TlvScheduleEntry_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, cut-version of FUN_10228510: fields use fixed-32 encoding (tags 0x13/0x23, FUN_1010c190) and sub-struct FUN_10227c80.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: fixed32 @0 (tag 0x13)",
+        "field 2: fixed32 @+4 (tag 0x23)",
+        "field 3: length-delimited sub-struct @ FUN_10227c80 (tag 0x25)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — wire serializer (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x10228a90",
+      "currentName": "FUN_10228a90",
+      "proposedName": "TlvScheduleContainer_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: prints [schedule] sub-struct (FUN_10226e70) then [dailys] via FUN_102281f0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "schedule: sub-struct @ FUN_10226e70",
+        "dailys: sub-struct @ FUN_102281f0"
+      ],
+      "relatedTlv": ["TlvQuestScheduleData"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents schedule+dailys container.",
+      "notes": ""
+    },
+    {
+      "address": "0x1022b490",
+      "currentName": "FUN_1022b490",
+      "proposedName": "TlvNpcOrgPrefsContainer_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat of NPC org/prefs container: count+npcAtdPkg[] (max 0x1e=30) via FUN_10229350; orgNum+npcOrgPkg[] (max 30) via FUN_102299a0; preferNum+npcPrefersPkg[] (max 30) via FUN_1022a2c0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: int32 @0 (max 30) — drives npcAtdPkg[]",
+        "npcAtdPkg[]: element @ FUN_10229350",
+        "orgNum: int32 @0x1e4 (param_1[0x79]) — drives npcOrgPkg[]",
+        "npcOrgPkg[]: element @ FUN_102299a0",
+        "preferNum: int32 @0x3c8 (param_1[0xf2]) (max 30) — drives npcPrefersPkg[]",
+        "npcPrefersPkg[]: element @ FUN_1022a2c0"
+      ],
+      "relatedTlv": ["TlvNpcOrgPrefsContainer"],
+      "tlvDocDiscrepancy": "Doc TlvNpcOrgPrefsContainer (@0x1022B030) models this as 6 SCALAR fields (count/orgNum/npcOrgPkg/preferNum/npcPrefersPkg/npcAtdPkg). In reality it is THREE count+array pairs: (count → npcAtdPkg[]), (orgNum → npcOrgPkg[]), (preferNum → npcPrefersPkg[]). The doc mis-pairs the names (e.g. npcAtdPkg is the array driven by 'count', not a standalone tail scalar) and treats the *Pkg members as scalars rather than array elements. NOTE: DebugFormat loops npcOrgPkg using *param_1 (the 'count' field) not param_1[0x79] (orgNum) — likely an in-game bug or count-shared design; verify server side.",
+      "serverRelevance": "Debug only; documents NPC attendance/organization/preference package layout.",
+      "notes": ""
+    },
+    {
+      "address": "0x1022be00",
+      "currentName": "FUN_1022be00",
+      "proposedName": "TlvByteSub_Pack_v0",
+      "purpose": "TdrBuf.h wire pack of small element: field1 byte@0 (tag 0x11), field2 (tag 0x21, wire1) via FUN_101159e0 (nested byte/sub serializer).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint8 @0 (tag 0x11)",
+        "field 2: @+1 via FUN_101159e0 (tag 0x21)"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element serializer used by 'pieces' array pack FUN_1022c580.",
+      "notes": "Paired with identical FUN_1022be80."
+    },
+    {
+      "address": "0x1022be80",
+      "currentName": "FUN_1022be80",
+      "proposedName": "TlvByteSub_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, duplicate/cut-version of FUN_1022be00 (same tags 0x11/0x21, FUN_101159e0).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint8 @0",
+        "field 2: @+1 via FUN_101159e0"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element serializer (variant, used by FUN_1022c6a0).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022bfd0",
+      "currentName": "FUN_1022bfd0",
+      "proposedName": "TlvBytePair_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack of element with two byte fields: field1 uint8@0, field2 uint8@+1. Presence flags at +2.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: uint8 @0",
+        "field 2: uint8 @+1"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — 'pieces' element unpacker (used by FUN_1022c890).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022c0f0",
+      "currentName": "FUN_1022c0f0",
+      "proposedName": "TlvBytePair_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_1022bfd0 (two byte fields).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: uint8 @0",
+        "field 2: uint8 @+1"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker (used by FUN_1022ca50).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022c580",
+      "currentName": "FUN_1022c580",
+      "proposedName": "TlvPiecesArray_Pack_v0",
+      "purpose": "TdrBuf.h wire pack: count byte@0 (field1 tag 0x11, max 0x19=25), then length-delimited (tag 0x25) array of elements via FUN_1022be00 with back-patched sizes.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 25)",
+        "pieces[]: element @ FUN_1022be00 (tag 0x25, length-delimited)"
+      ],
+      "relatedTlv": ["TlvPiecePrizes", "TlvDragonBoxLotteryData"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — 'pieces' array serializer (referenced as field 'pieces' in DragonBoxLottery pack FUN_1022f160).",
+      "notes": "Returns -6 negative, -7 overflow."
+    },
+    {
+      "address": "0x1022c6a0",
+      "currentName": "FUN_1022c6a0",
+      "proposedName": "TlvPiecesArray_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, cut-version of FUN_1022c580 (elements via FUN_1022be80).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 25)",
+        "pieces[]: element @ FUN_1022be80"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array serializer (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022c890",
+      "currentName": "FUN_1022c890",
+      "proposedName": "TlvPiecesArray_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack: field1 count byte@0, field2 length-delimited array (max 0x19=25, element stride 6) of elements via FUN_1022bfd0. Presence flags at +0x97.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: pieces[] (max 25, element stride 6) via FUN_1022bfd0"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — 'pieces' array unpacker.",
+      "notes": "Element stride = 6 bytes."
+    },
+    {
+      "address": "0x1022ca50",
+      "currentName": "FUN_1022ca50",
+      "proposedName": "TlvPiecesArray_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_1022c890 (element via FUN_1022c0f0).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: pieces[] (max 25, stride 6) via FUN_1022c0f0"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array unpacker (cut variant).",
+      "notes": "Doc TlvDragonBoxLotteryData references sub_1022CA50 for field 'pieces' (field 2) — consistent."
+    },
+    {
+      "address": "0x1022cce0",
+      "currentName": "FUN_1022cce0",
+      "proposedName": "TlvPiecesArray_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(byte@0, max 0x19=25) + pieces[] via FUN_1022c310.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 25)",
+        "pieces[]: element @ FUN_1022c310"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents pieces array.",
+      "notes": ""
+    },
+    {
+      "address": "0x1022d150",
+      "currentName": "FUN_1022d150",
+      "proposedName": "TlvPrizePair_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack element: field1 scalar 4-byte @0 (FUN_1010ca10), field2 byte @+2. Presence flags at +3.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: 4-byte scalar @0",
+        "field 2: uint8 @+2"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — 'piecePrizes' element unpacker (used by FUN_1022da00).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022d240",
+      "currentName": "FUN_1022d240",
+      "proposedName": "TlvPrizePair_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_1022d150: field1 = 2-byte little-endian @0, field2 byte @+2.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "field 1: uint16 @0",
+        "field 2: uint8 @+2"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — element unpacker (cut variant, used by FUN_1022dbb0).",
+      "notes": "Doc TlvDragonBoxLotteryData references sub_1022D240 for field 'ultimatePrize' (field 3)."
+    },
+    {
+      "address": "0x1022d6f0",
+      "currentName": "FUN_1022d6f0",
+      "proposedName": "TlvPrizeArray_Pack_v0",
+      "purpose": "TdrBuf.h wire pack: count byte@0 (max 0xb=11), then length-delimited (tag 0x25) array of elements via FUN_1022cfe0.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 11)",
+        "prizes[]: element @ FUN_1022cfe0 (length-delimited)"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — piecePrizes array serializer (field 'piecePrizes' in FUN_1022f160).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022d810",
+      "currentName": "FUN_1022d810",
+      "proposedName": "TlvPrizeArray_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, cut-version of FUN_1022d6f0 (elements via FUN_1022d030).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 11)",
+        "prizes[]: element @ FUN_1022d030"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array serializer (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x1022da00",
+      "currentName": "FUN_1022da00",
+      "proposedName": "TlvPrizeArray_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack: field1 count byte@0, field2 length-delimited array (max 0xb=11, element stride 7) via FUN_1022d150. Presence flags at +0x4e.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: prizes[] (max 11, stride 7) via FUN_1022d150"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — piecePrizes array unpacker.",
+      "notes": "Element stride = 7 bytes."
+    },
+    {
+      "address": "0x1022dbb0",
+      "currentName": "FUN_1022dbb0",
+      "proposedName": "TlvPrizeArray_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_1022da00 (element via FUN_1022d240).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: prizes[] (max 11, stride 7) via FUN_1022d240"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array unpacker (cut variant).",
+      "notes": "Doc TlvDragonBoxLotteryData references sub_1022DBB0 for field 'piecePrizes' (field 4)."
+    },
+    {
+      "address": "0x1022de30",
+      "currentName": "FUN_1022de30",
+      "proposedName": "TlvPrizeArray_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(byte@0, max 0xb=11) + piecePrizes[] via FUN_1022d470.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 11)",
+        "piecePrizes[]: element @ FUN_1022d470"
+      ],
+      "relatedTlv": ["TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents piecePrizes array.",
+      "notes": ""
+    },
+    {
+      "address": "0x1022eda0",
+      "currentName": "FUN_1022eda0",
+      "proposedName": "TlvDragonBoxShopItems_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(int32@0, max 10) + dragonBoxShopItems[] via FUN_1022e4f0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: int32 @0 (max 10)",
+        "dragonBoxShopItems[]: element @ FUN_1022e4f0"
+      ],
+      "relatedTlv": ["TlvDragonBoxShopItems"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents dragon-box shop items array.",
+      "notes": ""
+    },
+    {
+      "address": "0x1022f160",
+      "currentName": "FUN_1022f160",
+      "proposedName": "TlvDragonBoxLotteryData_Pack_v0",
+      "purpose": "TdrBuf.h wire pack of DragonBoxLotteryData (15 fields). f1 hitCount byte (tag 0x11); f2 pieces (tag 0x25, FUN_1022c580); f3 ultimatePrize (0x35, FUN_1022cfe0); f4 piecePrizes (0x45, FUN_1022d6f0); f5 blackFaceCount (0x50) @0xf5; f6 iFHasSSR (0x60) @0xf9; f7 dragonShopID (0x70) @0xfd; f8 dragonShopEndTime (0x80) @0x101; f9 freshNumBitCount (0x90) @0x105; f10 freshNumBit[] int32-array (0xa5) @0x109; f11 freshNumTenCount (0xb0) @0x131; f12 freshNumTen[] (0xc5) @0x135; f13 dragonBoxShopItems (0xd5, FUN_1022e780); f14 freshNumCnt (0xe0) @0x1dd; f15 fetchState (0xf0) @0x1e1.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "f1 hitCount: uint8 @0 (tag 0x11)",
+        "f2 pieces: sub-array @ FUN_1022c580 (tag 0x25)",
+        "f3 ultimatePrize: sub @ FUN_1022cfe0 (tag 0x35)",
+        "f4 piecePrizes: sub-array @ FUN_1022d6f0 (tag 0x45)",
+        "f5 blackFaceCount: varint @0xf5 (tag 0x50)",
+        "f6 iFHasSSR: varint @0xf9 (tag 0x60)",
+        "f7 dragonShopID: varint @0xfd (tag 0x70)",
+        "f8 dragonShopEndTime: varint @0x101 (tag 0x80)",
+        "f9 freshNumBitCount: varint @0x105 (tag 0x90, max 10)",
+        "f10 freshNumBit[]: int32 array @0x109 (tag 0xa5)",
+        "f11 freshNumTenCount: varint @0x131 (tag 0xb0, max 10)",
+        "f12 freshNumTen[]: int32 array @0x135 (tag 0xc5)",
+        "f13 dragonBoxShopItems: sub @ FUN_1022e780 (tag 0xd5)",
+        "f14 freshNumCnt: varint @0x1dd (tag 0xe0)",
+        "f15 fetchState: varint @0x1e1 (tag 0xf0)"
+      ],
+      "relatedTlv": ["TlvDragonBoxLotteryData", "TlvDragonBoxShopItems", "TlvPiecePrizes"],
+      "tlvDocDiscrepancy": "Doc TlvDragonBoxLotteryData lists only 9 fields (truncates after freshNumBitCount) and mis-tracks offsets (e.g. field 5 blackFaceCount shown @offset 245 duplicating 'pieces'). Real struct has 15 fields; missing from doc: freshNumBit[] (f10), freshNumTenCount (f11), freshNumTen[] (f12), dragonBoxShopItems (f13), freshNumCnt (f14), fetchState (f15). Also fields f2/f3/f4 offsets in doc (245/249/253) are wrong — those are sub-array structs, not int32 @ those offsets.",
+      "serverRelevance": "Yes — critical: server must serialize the full 15-field DragonBox lottery payload (S2C shop/lottery state). Paired with FUN_1022f570 (fixed-32 cut variant).",
+      "notes": "matches DebugFormat FUN_102304e0."
+    },
+    {
+      "address": "0x1022f570",
+      "currentName": "FUN_1022f570",
+      "proposedName": "TlvDragonBoxLotteryData_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, cut-version of FUN_1022f160 using fixed-32 wire (tags 0x53/0x63/0x73/0x83/0x93/0xb3/0xe3/0xf3, scalars via FUN_1010c190) and sub-structs FUN_1022c6a0/FUN_1022d030/FUN_1022d810/FUN_1022e860.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "Same 15 fields as FUN_1022f160 but scalars encoded as fixed32 (wire3) instead of varint (wire0)"
+      ],
+      "relatedTlv": ["TlvDragonBoxLotteryData"],
+      "tlvDocDiscrepancy": "See FUN_1022f160 (doc truncated to 9 fields).",
+      "serverRelevance": "Yes — wire serializer (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x102304e0",
+      "currentName": "FUN_102304e0",
+      "proposedName": "TlvDragonBoxLotteryData_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat of DragonBoxLotteryData: hitCount, pieces, ultimatePrize, piecePrizes, blackFaceCount, iFHasSSR, dragonShopID, dragonShopEndTime(time), freshNumBitCount+freshNumBit[] (max 10), freshNumTenCount+freshNumTen[] (max 10), dragonBoxShopItems, freshNumCnt, fetchState.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "hitCount uint8 @0",
+        "pieces sub @ FUN_1022cce0",
+        "ultimatePrize sub @ FUN_1022d470",
+        "piecePrizes sub @ FUN_1022de30",
+        "blackFaceCount int32 @0xf5",
+        "iFHasSSR int32 @0xf9",
+        "dragonShopID int32 @0xfd",
+        "dragonShopEndTime uint32(time) @0x101",
+        "freshNumBitCount int32 @0x105 (max 10)",
+        "freshNumBit[] int32 @0x109",
+        "freshNumTenCount int32 @0x131 (max 10)",
+        "freshNumTen[] int32 @0x135",
+        "dragonBoxShopItems sub @ FUN_1022eda0",
+        "freshNumCnt int32 @0x1dd",
+        "fetchState int32 @0x1e1"
+      ],
+      "relatedTlv": ["TlvDragonBoxLotteryData"],
+      "tlvDocDiscrepancy": "Confirms the 15-field superset the doc truncated to 9. dragonShopEndTime uses time format (DAT_11d9f574), not plain int32 as doc labels it.",
+      "serverRelevance": "Debug only; authoritative field list for the DragonBox lottery struct.",
+      "notes": ""
+    },
+    {
+      "address": "0x102315f0",
+      "currentName": "FUN_102315f0",
+      "proposedName": "TlvBoxArray_Pack_v0",
+      "purpose": "TdrBuf.h wire pack: count byte@0 (max 5), then length-delimited (tag 0x25) array of elements via FUN_10230ad0.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 5)",
+        "boxes[]: element @ FUN_10230ad0"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — box/container array serializer.",
+      "notes": ""
+    },
+    {
+      "address": "0x10231720",
+      "currentName": "FUN_10231720",
+      "proposedName": "TlvBoxArray_Pack_v1",
+      "purpose": "TdrBuf.h wire pack, cut-version of FUN_102315f0 (elements via FUN_10230bf0).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 5)",
+        "boxes[]: element @ FUN_10230bf0"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array serializer (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x10231920",
+      "currentName": "FUN_10231920",
+      "proposedName": "TlvBoxArray_Unpack_v0",
+      "purpose": "TdrBuf.h wire unpack: field1 count byte@0, field2 length-delimited array (max 5, element stride 0x204=516) via FUN_10230de0. Presence flags at +0xa15.",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: boxes[] (max 5, stride 0x204) via FUN_10230de0"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — box array unpacker.",
+      "notes": "Element stride 516 bytes."
+    },
+    {
+      "address": "0x10231af0",
+      "currentName": "FUN_10231af0",
+      "proposedName": "TlvBoxArray_Unpack_v1",
+      "purpose": "TdrBuf.h wire unpack, cut-version of FUN_10231920 (element via FUN_10230fc0).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "field 1: count uint8 @0",
+        "field 2: boxes[] (max 5, stride 0x204) via FUN_10230fc0"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Yes — array unpacker (cut variant).",
+      "notes": ""
+    },
+    {
+      "address": "0x10231d90",
+      "currentName": "FUN_10231d90",
+      "proposedName": "TlvBoxArray_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(byte@0, max 5) + boxes[] via FUN_10231270.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: uint8 @0 (max 5)",
+        "boxes[]: element @ FUN_10231270"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents boxes array.",
+      "notes": ""
+    },
+    {
+      "address": "0x102358f0",
+      "currentName": "FUN_102358f0",
+      "proposedName": "TlvFriendInsts_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: count(int32@0, max 2000) + friendInsts[] via FUN_10234f20.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "count: int32 @0 (max 2000)",
+        "friendInsts[]: element @ FUN_10234f20"
+      ],
+      "relatedTlv": ["TlvFriendInsts"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents friend-instances list (social/friends S2C).",
+      "notes": ""
+    },
+    {
+      "address": "0x102379a0",
+      "currentName": "FUN_102379a0",
+      "proposedName": "TlvRecordList300_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: recordCount(uint16@0, max 300) + records[] via FUN_10236e10.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "recordCount: uint16 @0 (max 300)",
+        "records[]: element @ FUN_10236e10"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents a record list (max 300).",
+      "notes": ""
+    },
+    {
+      "address": "0x1023a060",
+      "currentName": "FUN_1023a060",
+      "proposedName": "TlvAuctionRecordContainer_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat of auction records: saleCount+sales[] (max 100), recordSaleCount+recordSale[] (max 400), recordBuyCount+recordBuy[] (max 400), all elements via FUN_10238ce0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "saleCount: uint16 @0 (max 100)",
+        "sales[]: element @ FUN_10238ce0",
+        "recordSaleCount: uint16 @0x5dc4 (param_1[0x1771]) (max 400)",
+        "recordSale[]: element @ FUN_10238ce0",
+        "recordBuyCount: uint16 @0x1d4c8 (param_1[0x7532]) (max 400)",
+        "recordBuy[]: element @ FUN_10238ce0"
+      ],
+      "relatedTlv": ["TlvAuctionRecordContainer"],
+      "tlvDocDiscrepancy": "Verify doc TlvAuctionRecordContainer captures all three arrays (sales max 100, recordSale max 400, recordBuy max 400) sharing the same element type sub_10238CE0.",
+      "serverRelevance": "Debug only; documents auction house record container (S2C auction data).",
+      "notes": ""
+    },
+    {
+      "address": "0x1023ac70",
+      "currentName": "FUN_1023ac70",
+      "proposedName": "TlvRecordList400_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: recordCount(uint16@0, max 400) + records[] via FUN_10238ce0 (same element as auction records).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "recordCount: uint16 @0 (max 400)",
+        "records[]: element @ FUN_10238ce0"
+      ],
+      "relatedTlv": ["TlvAuctionRecordContainer"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents auction record list (max 400).",
+      "notes": ""
+    },
+    {
+      "address": "0x1023bcc0",
+      "currentName": "FUN_1023bcc0",
+      "proposedName": "TlvRateHistory_DebugFormat",
+      "purpose": "TdrBufUtil.cpp DebugFormat: rate(uint16@0) + historyCount(uint16@2, max 10) + history[] via FUN_1023b350.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "confidence": "high",
+      "protocolFields": [
+        "rate: uint16 @0",
+        "historyCount: uint16 @2 (max 10)",
+        "history[]: element @ FUN_1023b350"
+      ],
+      "relatedTlv": ["TlvRateHistory"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Debug only; documents rate + history-list layout.",
+      "notes": ""
+    },
+    {
+      "address": "0x1023cc50",
+      "currentName": "FUN_1023cc50",
+      "proposedName": "TlvUniformSubStructAggregate_Pack",
+      "purpose": "TdrBuf.h wire pack of a large aggregate: ~35 length-delimited members, each a sub-struct serialized by the SAME helper FUN_101b01d0, at ascending tags 0x45,0x55,0x75,0x85,0x95,0xa5,0x125,0x135,...0x5b5 (wire5 each with reserved/back-patched length). No field-name strings (pure TdrBuf.h).",
+      "subsystem": "tlv-serializer",
+      "direction": "both",
+      "msgId": "unknown",
+      "confidence": "medium",
+      "protocolFields": [
+        "~35 members, all length-delimited sub-structs via FUN_101b01d0 (uniform element type)",
+        "tags: 0x45,0x55,0x75,0x85,0x95,0xa5,0x125,0x135,0x145,0x155,0x175,0x185,0x195,0x1e5,0x1f5,0x205,0x225,0x235,0x245,0x2a5,0x2b5,0x2c5,0x2d5,0x2e5,0x2f5,0x305,0x315,0x325,0x335,0x345,0x355,0x365,0x375,0x385,0x435,0x445,0x455,0x465,0x4c5,0x4d5,0x4e5,0x4f5,0x505,0x515,0x525,0x535,0x545,0x555,0x565,0x575,0x585,0x595,0x5a5,0x5b5"
+      ],
+      "relatedTlv": [],
+      "tlvDocDiscrepancy": "No embedded field names; cross-ref by address (0x1023cc50) and the shared element serializer FUN_101b01d0 to identify which generated TLV struct this is. Field IDs are non-contiguous (gaps between 0xa5→0x125 etc.), so the generated doc must preserve the exact field_id numbering, not a 1..N renumber.",
+      "serverRelevance": "Yes — server must emit this multi-member aggregate; each member is the same sub-struct type (FUN_101b01d0). Likely a large per-entity data blob (e.g., character/attribute or slot array).",
+      "notes": "Void return (fire-and-forget pack). Non-contiguous field_ids indicate optional/versioned members."
+    }
+  ]
+}

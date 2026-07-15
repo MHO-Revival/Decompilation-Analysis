@@ -1,0 +1,156 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "0x11008410",
+      "currentName": "FUN_11008410",
+      "proposedName": "MHAttackable::HandleGameOnHitAnimEvent",
+      "purpose": "Game-object event handler (this=param_1, param_2=SGameObjectEvent). Reacts to two event ids. On event 0x110 (melee/attack hit frame reached): if a suppress flag at this[7]+0x1d is set it just calls a cleanup vfunc and returns; otherwise it walks the physics/proximity query result set (red-black tree of nearby entities obtained via world manager DAT_1202e818+4 -> proxy 0x3c -> 0x68 -> 0x14 fill), and for each entity whose vfunc 0x1c4 test returns false it does a hit-shape overlap query FUN_10b27660(this[0x10],0,this[0x12],0,-1,-1,0), reads the attack descriptor from this[7]+0xb4 (attack params: [0]=id, +0x10, +0x14) and issues a hit (vfunc 0x31c). A second pass (when world/camera manager DAT_1202e818+0xd0 mode==1) collects entities into a local list and broadcasts a 'GameOnHit' game-object event (flags 0x4ffff) to each via game-object lookup (+0x144 -> SendEvent 0x24), then frees list nodes with FUN_10c3d5d0/FUN_11008e10. Finally builds a material/impact effect struct (vfunc 0x9c). On event 0x111: reads flag via vfunc 0x1b0 and OR's bit 1 back via 0x1ac (enables an aspect/state).",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "validation - this is the client-side melee hit-frame trigger that enumerates nearby attackable entities and emits GameOnHit events; the authoritative damage decision lives in the receiving entity's GameOnHit handler and on the server. Server should treat client-emitted GameOnHit as a claim to validate (overlap of attack shape this[0x10]/this[0x12] vs target), not trust it.",
+      "constants": ["event id 0x110 = attack hit frame", "event id 0x111 = enable-aspect (OR bit 1)", "GameOnHit event flags 0x4ffff", "attack descriptor pointer at this[7]+0xb4", "suppress flag at this[7]+0x1d"],
+      "formulas": ["hit-shape overlap query: FUN_10b27660(this[0x10], 0, this[0x12], 0, 0xffffffff, 0xffffffff, 0) — this[0x10] and this[0x12] are the attack collision-shape / filter handles"],
+      "protocolFields": ["GameOnHit event payload assembled from attack descriptor at this[7]+0xb4: field[0], field+0x10, field+0x14 (attack id + params)"],
+      "notes": "Iteration is std::map/set red-black-tree successor walk (offsets [1]=parent,[2]=left,[3]=right,[4]=value). Uses global world/scene manager DAT_1202e818. Client-side attack broadcasting; not the damage math itself."
+    },
+    {
+      "address": "0x11010ab0",
+      "currentName": "FUN_11010ab0",
+      "proposedName": "CFlowNode_MHOnHitResult::Init",
+      "purpose": "Flow-graph node initializer for the 'MHOnHitResult' node. Copies host/graph pointers into this (+4=graph, +0xc=node ctx from param+0xc, +8), registers the node with the flow system (DAT_120286c8 vtable +0x154), calls FUN_1101f970, then if graph feature vfunc(0x150)(2)->0x38 is nonzero it caches two interned string handles 'MHOnHit...' (this+0x2c) and 'MHOnHitResult' (this+0x30) via FUN_10a68b10. Returns 1.",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - CryEngine flow-graph (visual scripting) node setup for surfacing hit results in the editor/UI. No damage math.",
+      "constants": ["string 'MHOnHitResult'", "string 'MHOnHit...' (PTR_s_MHOnHit_11d07ebb)"],
+      "notes": "Standard IFlowNode plumbing customized for MH hit-result event routing."
+    },
+    {
+      "address": "0x11011110",
+      "currentName": "FUN_11011110",
+      "proposedName": "CFlowNode_MHOnHitResult::ProcessEvent",
+      "purpose": "Flow-graph node event handler. On event type 3 (eFE_Uninitialize/cleanup): releases the two cached string handles at this+0x2c and this+0x30 via string-table release (DAT_1202e818+0x30 vtable +0x60). On event type 5 (eFE_Initialize/activate): if graph feature (vfunc 0x150(2)->0x38) is active, re-acquires the 'MHOnHit...' (this+0x2c) and 'MHOnHitResult' (this+0x30) string handles.",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - flow-graph node lifecycle (visual scripting). No damage math.",
+      "constants": ["event type 3 = cleanup", "event type 5 = init/activate"],
+      "notes": "Pairs with FUN_11010ab0."
+    },
+    {
+      "address": "0x11014af0",
+      "currentName": "FUN_11014af0",
+      "proposedName": "MHCombat::BuildAndSendGameOnHit_Variant1",
+      "purpose": "Builds a 'GameOnHit' hit-info payload for a specific target and dispatches it. Args: param_1=this (attacker context, this[0xc]=attacker entity), param_2=target entity id, param_3=attack/hit-type token, param_4=extra param. Resolves target via entity-system DAT_1202e818+0x50 vfunc 0x2c(param_2). Early-out if attacker/target null or param_3==0, or if target's component (vfunc 0x288) reports invulnerable (vfunc 0x9c != 0). Computes: (a) attacker origin = bone/attach pos (vfunc 0xd8) if this+0x40 flag set, else attacker world pos (vfunc 0xc8); (b) delta = attackerPos - targetPos (each component sign-flipped via XOR 0x80000000), normalizes it with a fast rsqrt + one Newton-Raphson step; (c) fetches target rotation quaternion (vfunc 0xd0), world pos (vfunc 0xc8), and inverse scale = 1.0/scale (vfunc 0xbc, guarded against 0); (d) rotates the delta and an up-vector into target-local space via quaternion sandwich (q*v*q^-1 expansions), computes the angle between vectors with libm acos, then a half-angle cos/sin to form a hit rotation (via FUN_10abc150). Packs entity ids (local_204=attacker entity id via vfunc+4, local_200=target id, local_1ec/1e8=FUN_10b27fd0(param_3) hit-type), a ±500 unit AABB, and dispatches the 'GameOnHit' event (flags 0x4ffff) to the target's game object (game-object mgr +0x144 lookup -> SendEvent 0x24).",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "validation - computes client-side hit geometry (direction/angle/position on target) and reports it as a GameOnHit event to the target. Server must independently verify the attacker->target relationship (range, facing) rather than trust the reported hit vector; the hit-type token (param_3, transformed by FUN_10b27fd0) identifies which attack.",
+      "constants": ["DAT_11de9c90 = 0x80000000 (float sign-flip mask for vector negation)", "DAT_11de9938 = 1.5f, DAT_11de98e8 = 0.5f (rsqrt Newton step: (1.5 - 0.5*x*r*r)*r)", "DAT_11de9918 = 1.0f", "DAT_11de98a0 = squared-length epsilon", "DAT_11cbf070 = min squared-length threshold", "DAT_11cbf074 = min-length threshold for angle path", "0x43fa0000 = 500.0f (AABB half-extent), DAT_11cc4cc0 = -500.0f", "GameOnHit event flags 0x4ffff"],
+      "formulas": [
+        "dir = normalize(attackerPos - targetPos): sq = dx*dx+dy*dy+dz*dz + eps; r = rsqrt(sq); r = (1.5 - 0.5*sq*r*r)*r; dir *= r",
+        "invScale = (scale != 0) ? 1.0/scale : 1.0  (from target vfunc 0xbc)",
+        "vector rotate by quaternion q=(x,y,z,w): t = 2*cross(q.xyz, v); v' = v + w*t + cross(q.xyz, t) (standard, expanded inline)",
+        "half-angle hit rotation: theta = acos(dot); cos(theta*0.5), sin(theta*0.5) build axis-angle quaternion; axis scaled by invScale",
+        "AABB extents = [-500, +500] on each axis"
+      ],
+      "protocolFields": ["local_204: attacker entity id (vfunc+4)", "local_200: target entity id (param_2)", "local_1ec/local_1e8: hit-type/attack id = FUN_10b27fd0(param_3)", "local_a8: param_4 (extra token, e.g. weapon/firemode)", "hit position + rotation + ±500 AABB in payload"],
+      "notes": "acos via libm_sse2_acos_precise. Nearly identical to FUN_11017ff0; this variant always uses attacker context this[0xc]/this+0x40 as origin."
+    },
+    {
+      "address": "0x11017ff0",
+      "currentName": "FUN_11017ff0",
+      "proposedName": "MHCombat::BuildAndSendGameOnHit_Variant2",
+      "purpose": "Second overload of the GameOnHit builder (see FUN_11014af0). Same math and payload, differing in origin/defaults: attacker origin entity comes from FUN_11018a00() (fallback to this[0xc] if null) and its entity id is used for local_204; if param_4 == -1 it is replaced by FUN_110189c0() (a default firemode/weapon token). Resolves target via entity-system vfunc 0x2c(param_2), same invulnerability guard (vfunc 0x288 -> 0x9c), same normalize/quaternion/acos geometry, same ±500 AABB, and dispatches 'GameOnHit' (flags 0x4ffff) to the target game object.",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "validation - identical role to FUN_11014af0 but with a resolved shooter entity (FUN_11018a00) and default-firemode substitution when param_4==-1. Server should validate the reported hit; the substituted firemode (FUN_110189c0) is the current weapon fire mode.",
+      "constants": ["same float set as FUN_11014af0: 0x80000000 negate mask, 1.5f/0.5f rsqrt, 1.0f, 500.0f (0x43fa0000)/-500.0f", "param_4 == -1 sentinel -> default firemode via FUN_110189c0", "GameOnHit flags 0x4ffff"],
+      "formulas": [
+        "same normalize/quaternion-rotate/half-angle formulas as FUN_11014af0",
+        "if (param_4 == -1) param_4 = GetDefaultFireMode()  // FUN_110189c0",
+        "attacker origin entity = FUN_11018a00() ?: this[0xc]"
+      ],
+      "protocolFields": ["local_204: shooter entity id (FUN_11018a00 result, vfunc+4)", "local_200: target entity id (param_2)", "local_1ec/1e8: hit-type = FUN_10b27fd0(param_3)", "local_a8: firemode/weapon token (param_4, -1 => default)"],
+      "notes": "Ranged/projectile-oriented variant (shooter resolved separately, default fire mode). Duplicate of FUN_11014af0 geometry."
+    },
+    {
+      "address": "0x110219a0",
+      "currentName": "FUN_110219a0",
+      "proposedName": "CScriptBind_MHLogicObject::RegisterMethods",
+      "purpose": "Constructor/registrar for the MH scene-logic-object Lua script bind. Sets vtable PTR_FUN_11d089a0, grabs the script system (param_2 vfunc 0xfc) and creates two script tables (this[0x11] methods table, this[0x14]). Registers a large table of Lua-callable methods, each via table vfunc 100 with (name, argSpec, thunk). Also registers named float constants into the type table (param_1[0x12] vfunc 0x70).",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "authoritative - registration is client scripting plumbing, BUT it exposes the authoritative MH combat verbs and, critically, the attack-flag enum values the server must interpret. Handlers of interest: MHExplode(radius, friendFire, attackName), MakeDamageTo, ShootProjectile(paramTable), SetContinuousAttackInfo(paramtable -> FUN_110265d0), StartAttack(bStart), SetReceiveAttackType/Flag, EnableAttackType(attackType), SetPlayerCanAttack/SetMonsterCanAttack/SetNPCCanAttack/SetPetCanAttack(enable), SetFaction/GetFaction, SetDamageTag, SetBuffAreaEnterDamage.",
+      "constants": [
+        "ObjAF_Normal_Short = 1.0 (0x3f800000)", "ObjAF_Shake_Gournd = 2.0 (0x40000000)", "ObjAF_Rush = 4.0 (0x40800000)", "ObjAF_FlyObj = 8.0 (0x41000000)", "ObjAF_AttackDropTrap = 16.0 (0x41800000)", "ObjAF_AttackParaTrap = 32.0 (0x42000000)", "ObjAF_BreakBarrier = 64.0 (0x42800000)  [these are a bitmask]",
+        "OAF_NormalShort = 0", "OAF_ShakeGround = 1.0", "OAF_Rush = 2.0", "OAF_FlyObj = 3.0 (0x40400000)", "OAF_DropTrap = 4.0", "OAF_ParaTrap = 5.0 (0x40a00000)", "OAF_BreakBarrier = 6.0 (0x40c00000)  [enum index]",
+        "SimpleAction_Enable=0, _Disable=1.0, _Hide=2.0, _UnHide=3.0(0x40400000)",
+        "ScriptState_OnEvent = 4.0 (0x40800000)", "ScriptState_OnDamage = 5.0 (0x40a00000)"
+      ],
+      "protocolFields": [
+        "MHExplode args: radius, friendFire, attackName",
+        "MakeDamageTo (no arg spec captured)",
+        "ShootProjectile args: paramTable",
+        "SetContinuousAttackInfo args: paramtable",
+        "SetReceiveAttackType args: spAttackType", "SetReceiveAttackFlag args: flagTable", "EnableAttackType args: attackType",
+        "SetDamageTag args: sTag", "SetBuffAreaEnterDamage args: sBuffAreaEnterDamage"
+      ],
+      "notes": "Method thunks live at FUN_11025300 (MHExplode), FUN_11025490 (MakeDamageTo), FUN_11025830 (ShootProjectile), FUN_110265d0 (SetContinuousAttackInfo), FUN_11026790 (StartAttack), etc. — outside this chunk. Attack-flag values above are the load-bearing takeaway for the server."
+    },
+    {
+      "address": "0x110265d0",
+      "currentName": "FUN_110265d0",
+      "proposedName": "CScriptBind_MHLogicObject::SetContinuousAttackInfo",
+      "purpose": "Lua handler for 'SetContinuousAttackInfo'. Reads a parameter table describing a periodic (continuous) area attacker and applies it to the object's MHContAttacker component. Fetches the component by looking up 'MHContAttacker' extension (game-object +0x144 -> 0x18). Reads table fields: bAttackPlayer/bAttackMonster/bAttackPet (bool), fAttackDelta/fAttackTime/fRestTime/fLifeTime (float), vAttackBox/vOffset (vec3), bMoveable/bUseHostile/bUseFixedDir (bool), sAttackName (string, length computed inline). Packs them into a local config struct and passes to the component via vfunc 0x6c, then returns the component's status (piVar6 vfunc 0x2c).",
+      "confidence": "high",
+      "subsystem": "combat-npc",
+      "serverRelevance": "authoritative - defines a server-driven continuous/periodic AoE attack: who it hits (player/monster/pet), timing (delta/attack/rest/lifetime), volume (box+offset), whether it moves with the owner, hostility filter, fixed direction, and the named attack (sAttackName -> damage table). Server must run this timing/volume logic to produce damage.",
+      "constants": ["component name 'MHContAttacker'"],
+      "protocolFields": [
+        "bAttackPlayer: bool - hit players",
+        "bAttackMonster: bool - hit monsters",
+        "bAttackPet: bool - hit pets",
+        "fAttackDelta: float - initial delay before first tick",
+        "fAttackTime: float - active/attacking duration per cycle",
+        "fRestTime: float - idle duration per cycle",
+        "vAttackBox: vec3 - half-extents of the attack volume",
+        "vOffset: vec3 - volume offset from owner",
+        "bMoveable: bool - volume follows owner",
+        "sAttackName: string - named attack -> damage descriptor",
+        "bUseHostile: bool - only hit hostiles",
+        "bUseFixedDir: bool - fixed vs owner-relative direction",
+        "fLifeTime: float - total lifetime of the attacker"
+      ],
+      "notes": "Field readers: FUN_10a690f0 (bool), FUN_10a68f50 (float), FUN_10a69050 (vec3), FUN_10a68fd0 (string). Config applied via component vfunc 0x6c."
+    },
+    {
+      "address": "0x1102bc00",
+      "currentName": "FUN_1102bc00",
+      "proposedName": "CScriptBind_Actor::RegisterMethods",
+      "purpose": "Constructor/registrar for the Actor Lua script bind (CryEngine CScriptBind_Actor, MH-extended). Sets vtable PTR_FUN_11d094f0, builds the method table (this[0x11]) and registers ~65 actor methods via table vfunc 100 (name, argSpec, thunk-label).",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "authoritative - registration is client plumbing, but the registered verbs are the authoritative actor/damage surface. Combat-relevant registered methods: DamageInfo, SetHealth/GetHealth/GetMaxHealth/SetMaxHealth, GetArmor/GetMaxArmor, GetFrozenAmount/AddFrost, Revive/Kill, RagDollize, AttachVulnerabilityEffect/ResetVulnerabilityEffects/GetCloseColliderParts (hit-zone parts), SetStats/SetParams/GetParams. Actual handlers live elsewhere.",
+      "constants": [],
+      "protocolFields": ["registered actor verbs incl. DamageInfo, SetHealth, GetHealth, GetMaxHealth, GetArmor, GetMaxArmor, GetFrozenAmount, AddFrost, Kill, Revive, RagDollize, GetCloseColliderParts, AttachVulnerabilityEffect"],
+      "notes": "Standard CryEngine actor scriptbind, mostly stock plumbing; MH additions are frost/vulnerability/collider-part helpers. Handlers not in this chunk. Full verb list: DumpActorInfo, SetViewAngleOffset, GetViewAngleOffset, Revive, Kill, RagDollize, SetStats, SetParams, GetParams, GetHeadPos, GetHeadDir, PostPhysicalize, GetChannel, IsPlayer, IsMonster, IsPet, IsDead, IsLocalClient, LinkToEntity, GetLinkedVehicleId, LinkToVehicle, LinkToVehicleRemotely, IsGhostPit, IsFlying, SetAngles, GetAngles, AddAngularImpulse, SetViewLimits, PlayAction, SimulateOnAction, SetMovementTarget, CameraShake, SetViewShake, VectorToLocal, EnableAspect, SetExtensionActivation, SetExtensionParams, GetExtensionParams, SetMovementControlledByAnimation, EnableFade, Set/Add/GetInventoryAmmo, SetHealth, DamageInfo, SetMaxHealth, GetHealth, GetMaxHealth, GetArmor, GetMaxArmor, GetFrozenAmount, AddFrost, Set/GetPhysicalizationProfile, GetClosestAttachment, AttachVulnerabilityEffect, ResetVulnerabilityEffects, GetCloseColliderParts, QueueAnimationState, ChangeAnimGraph, CreateCodeEvent, GetCurrentAnimationState, SetAnimationInput, TrackViewControlled, Set/GetSpectatorMode, GetSpectatorTarget."
+    },
+    {
+      "address": "0x110442b0",
+      "currentName": "FUN_110442b0",
+      "proposedName": "CScriptBind_GameRules::RegisterMethods",
+      "purpose": "Registrar for the GameRules Lua script bind (CryEngine CScriptBind_GameRules, MH-extended). For each method it fills a binding descriptor (name at local_38, argSpec at local_34, C thunk at local_18) and registers via script table vfunc 100. Registers ~95 game-rules methods.",
+      "confidence": "high",
+      "subsystem": "hit-validation",
+      "serverRelevance": "authoritative/validation - registration plumbing, but this is the GameRules surface where authoritative damage entrypoints live: ServerHit and ServerExplosion (server-side hit/explosion application), KillPlayer (with a full damage/hit descriptor), plus the hit-material and hit-type registries (RegisterHitMaterial/GetHitMaterialId, RegisterHitType/GetHitTypeId/GetHitType) that map names<->ids used in hit packets. Handlers are FUN_1104b0a0/FUN_1104b100/... (outside this chunk).",
+      "constants": [],
+      "protocolFields": [
+        "KillPlayer args (damage descriptor): playerId, dropItem, ragdoll, shooterId, weaponId, damage, hitJoint, headshot, melee, impulse, projectileId, [weaponClassId], [projectileClassId]",
+        "ServerHit: (arg spec not captured here) - authoritative hit application",
+        "ServerExplosion: authoritative explosion application",
+        "RegisterHitType / GetHitTypeId / GetHitType - hit-type name<->id table",
+        "RegisterHitMaterial / GetHitMaterialId / GetHitMaterialName - hit-material name<->id table"
+      ],
+      "notes": "Mostly stock CryEngine GameRules scriptbind (teams, spawn/spectator locations, objectives, timers, minimap, text messages). Combat-authoritative handlers of interest: ServerHit, ServerExplosion, KillPlayer, ResetEntities, Register/Get HitMaterial/HitType. Full list captured in prior extraction: IsServer, IsClient, CanCheat, SpawnPlayer, ChangePlayerClass, RevivePlayer(InVehicle), RenamePlayer, KillPlayer, MovePlayer, GetPlayerByChannelId, GetChannelId, GetPlayerCount, GetSpectatorCount, GetPlayers, IsPlayerInGame, IsProjectile, IsSameTeam, IsNeutral, spawn/spectator-location mgmt, minimap, GetPing, ResetEntities, ServerExplosion, ServerHit, team mgmt, objectives, text/chat messages, game/round/revive/prestart timers, EndGame, NextLevel, RegisterHitMaterial/HitType + getters, ForceScoreboard, FreezeInput, Schedule/Abort Entity Respawn/Removal."
+    }
+  ]
+}

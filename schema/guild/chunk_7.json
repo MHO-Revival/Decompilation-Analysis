@@ -1,0 +1,573 @@
+{
+  "chunkIndex": 7,
+  "functions": [
+    {
+      "address": "0x118a60f0",
+      "currentName": "FUN_118a60f0",
+      "proposedName": "CGuildTaskCondition::AllocByTypeName",
+      "subsystem": "guild-task",
+      "purpose": "Guild-task prerequisite/condition factory. Given a condition type name it tail-calls an allocator (FUN_10c3d580, 'does not return' = jump/throw allocator) with the byte size of the matching condition struct, i.e. it dispatches allocation of a guild-task condition object keyed by its XML type string.",
+      "formulas": [
+        "name==\"Quest\" -> alloc size 0xc (12)",
+        "name==\"QuestExec\" -> alloc size 0xc (12)",
+        "name==\"CharLevel\" -> alloc size 0x10 (16)",
+        "name==\"NpcAtdLevel\" -> alloc size 0x10 (16)",
+        "name==\"HunterStarLevel\" -> alloc size 0x10 (16)",
+        "name==\"GuildLevel\" -> alloc size 0x10 (16)",
+        "name==\"CharSex\" -> alloc size 0xc (12)",
+        "name==\"ItemCount\" -> alloc size 0x14 (20)",
+        "no match -> return 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (object factory for parsing condition config); the condition TYPES themselves (Quest, QuestExec, CharLevel, NpcAtdLevel, HunterStarLevel, GuildLevel, CharSex, ItemCount) are the authoritative set of guild-task/quest prerequisites the server must also enforce",
+      "confidence": "high",
+      "notes": "String set enumerates the guild-task requirement categories. Struct sizes suggest field counts: 12-byte conds = ~2 params (Quest/QuestExec/CharSex), 16-byte = ~3 params (level checks), 20-byte = ~4 params (ItemCount: itemId+count+...)."
+    },
+    {
+      "address": "0x118a8e90",
+      "currentName": "FUN_118a8e90",
+      "proposedName": "CGuildTaskInfo::HasTaskInGroupById",
+      "subsystem": "guild-task",
+      "purpose": "Member fn on some guild object; looks up a CGuildTaskInfo record by id in the manager's paged/sparse container and returns bool = 'a task with this id exists AND its category field (task+0x20) equals this->field_0x10'. Used to validate a task id belongs to this object's group/category.",
+      "formulas": [
+        "mgr = CGuildTaskInfo::GetManager(0,\"CGuildTaskInfo\",0)",
+        "paged container: minId=mgr+0x30, pageSize=mgr+0x28, count=mgr+0x24, pages=mgr+0x20",
+        "reject id==-1; require (id!=0 || minId==0) && pageSize!=0",
+        "local = id - minId; require 0<=local<count",
+        "page = pages[local/pageSize]; entry = page[local%pageSize]",
+        "match iff entry!=0 && entry+0x20 == this->field_0x10",
+        "returns (entry != 0) after the +0x20==+0x10 check"
+      ],
+      "costs": [],
+      "serverRelevance": "validation (confirms a client-referenced guild-task id is real and in the expected category); server must do the equivalent authoritative check. Confirms CGuildTaskInfo+0x20 = task category/typeOrCategory (matches recovered schema).",
+      "confidence": "high",
+      "notes": "Standard CInfoManager paged-array by-id lookup (offsets 0x20/0x24/0x28/0x30) plus a category-equality filter."
+    },
+    {
+      "address": "0x118a8f10",
+      "currentName": "FUN_118a8f10",
+      "proposedName": "CGuildTaskInfo::GetByIndex",
+      "subsystem": "guild-task",
+      "purpose": "Return the CGuildTaskInfo record at linear array index param_1 (bounds-checked against the manager's contiguous record vector).",
+      "formulas": [
+        "mgr = CGuildTaskInfo::GetManager(...)",
+        "count = (mgr+0x18 - mgr+0x14) >> 2  (vector of ptrs, 4 bytes each)",
+        "if 0<=idx<count return *(mgr+0x14 + idx*4) else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into the guild-task definition table",
+      "confidence": "high",
+      "notes": "vector base=mgr+0x14, end=mgr+0x18. This is the recurring GetByIndex idiom used by all Info tables in this chunk."
+    },
+    {
+      "address": "0x118a8f90",
+      "currentName": "FUN_118a8f90",
+      "proposedName": "CGuildTaskInfo::FindTaskInGroupById",
+      "subsystem": "guild-task",
+      "purpose": "Same paged by-id lookup + category filter as 0x118a8e90 but returns the matching CGuildTaskInfo record pointer (0 if not found / category mismatch).",
+      "formulas": [
+        "identical paged lookup to 0x118a8e90 (minId=+0x30,pageSize=+0x28,count=+0x24,pages=+0x20)",
+        "return entry iff entry!=0 && entry+0x20 == this->field_0x10, else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/lookup (resolve guild-task id to record within this object's category)",
+      "confidence": "high",
+      "notes": "Pointer-returning twin of 0x118a8e90."
+    },
+    {
+      "address": "0x1190a480",
+      "currentName": "FUN_1190a480",
+      "proposedName": "CGuildTitleInfo::GetByIndex",
+      "subsystem": "guild-rank",
+      "purpose": "Return CGuildTitleInfo (guild title/rank definition) record at linear index (bounds-checked).",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into guild title/rank table (ranks are authoritative server state)",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom; CGuildTitleInfo = guild titles/ranks."
+    },
+    {
+      "address": "0x1190c0c0",
+      "currentName": "FUN_1190c0c0",
+      "proposedName": "CGuildTaskGroupInfo::GetByIndex",
+      "subsystem": "guild-task",
+      "purpose": "Return CGuildTaskGroupInfo (guild-task group definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into guild-task-group table",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom."
+    },
+    {
+      "address": "0x1190d950",
+      "currentName": "FUN_1190d950",
+      "proposedName": "CGuildQuestLevelInfo::GetByIndex",
+      "subsystem": "guild-quest",
+      "purpose": "Return CGuildQuestLevelInfo (guild-quest level-curve definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; underlying guild-quest level table drives authoritative level gating",
+      "confidence": "high",
+      "notes": "Manager fetched via GetInfoMgrByName."
+    },
+    {
+      "address": "0x1190d9b0",
+      "currentName": "FUN_1190d9b0",
+      "proposedName": "CGuildQuestPrizeInfo::GetByIndex",
+      "subsystem": "guild-quest",
+      "purpose": "Return CGuildQuestPrizeInfo (guild-quest reward definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; guild-quest prize table is authoritative reward config",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom."
+    },
+    {
+      "address": "0x119101d0",
+      "currentName": "FUN_119101d0",
+      "proposedName": "CGuildResourceInstituteInfo::GetByIndex",
+      "subsystem": "guild-resource",
+      "purpose": "Return CGuildResourceInstituteInfo (guild resource-institute / research building definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; guild resource/institute config governs resource accrual & upgrades (server-authoritative)",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom."
+    },
+    {
+      "address": "0x11910230",
+      "currentName": "FUN_11910230",
+      "proposedName": "CGuildTradeInstituteInfo::GetByIndex",
+      "subsystem": "guild-resource",
+      "purpose": "Return CGuildTradeInstituteInfo (guild trade-institute / commerce building definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; guild trade/commerce config (server-authoritative)",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom. Related to the CommerceBoat/Commerce/CommerceGrabTime schema fields below."
+    },
+    {
+      "address": "0x11925260",
+      "currentName": "FUN_11925260",
+      "proposedName": "FriendlyInfo::GetFieldDescriptor",
+      "subsystem": "social-friend",
+      "purpose": "Lazy-init static schema/field descriptor for the 'FriendlyInfo' (friendship/friendliness) data field. On first call registers the wide name L\"FriendlyInfo\" and fills a descriptor block; returns &descriptor and writes 1 to *param_2.",
+      "formulas": [
+        "descriptor type/id constant _DAT_1239f4a4 = 0xb3 (179)",
+        "_DAT_1239f4ac = 1 (flag); other slots zeroed; owner=param_1"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only reflection/schema plumbing (CryEngine data-field descriptor); field id 0xb3 identifies the FriendlyInfo column",
+      "confidence": "medium",
+      "notes": "One of the stock 'DAT & 1' one-time-init descriptor accessors. Field type id 0xb3."
+    },
+    {
+      "address": "0x1194c640",
+      "currentName": "FUN_1194c640",
+      "proposedName": "CClanLevelInfo::GetByIndex",
+      "subsystem": "league-faction",
+      "purpose": "Return CClanLevelInfo (clan/league level-curve definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; clan/league level table is authoritative progression config",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom. 'Clan' vs 'Guild' distinction: likely the league/faction tier."
+    },
+    {
+      "address": "0x11965830",
+      "currentName": "FUN_11965830",
+      "proposedName": "CGuildRandCommodityInfo::GetByIndex",
+      "subsystem": "guild-resource",
+      "purpose": "Return CGuildRandCommodityInfo (guild random-commodity / trade-goods definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; random-commodity pool for guild commerce (server rolls authoritatively)",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom."
+    },
+    {
+      "address": "0x1196c160",
+      "currentName": "FUN_1196c160",
+      "proposedName": "ChatTabInfo::GetFieldDescriptor",
+      "subsystem": "chat",
+      "purpose": "Lazy-init static schema/field descriptor for the 'ChatTab' data field; returns &descriptor, writes 1 to *param_2.",
+      "formulas": [
+        "descriptor id constant _DAT_123a0e04 = 0x129 (297)",
+        "_DAT_123a0e0c = 1 (flag); other slots zeroed"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only chat-UI schema plumbing; field id 0x129",
+      "confidence": "medium",
+      "notes": "Stock descriptor accessor."
+    },
+    {
+      "address": "0x1196c250",
+      "currentName": "FUN_1196c250",
+      "proposedName": "CChatTabInfo::ReadRow",
+      "subsystem": "chat",
+      "purpose": "Config-row reader for a chat-tab definition. Reads: an id (unnamed first field) -> this+0x10; \"TabName\" (localized string, via CPet::SetName sink); \"ChatTab\" -> a set of chat-channel enum values parsed into a bitmask and a channel list. Emits per-field 'missing attribute' warnings when absent.",
+      "formulas": [
+        "id -> this+0x10 (int, reader vtbl+0x20)",
+        "TabName -> string (reader vtbl+0x28) -> SetName sink",
+        "ChatTab channel bitmask DAT_123a0e68 built from table UNK_11d63c8c: for offset uVar8=4; uVar8<0x38 step 4: mask |= 1<<(*(u8*)(UNK_11d63c8c+uVar8) & 0x1f); if result==0 -> 0xffffffff",
+        "channel-name list built from same 4..0x38 table entries (0x0d=13 channel enums, stride 4)",
+        "FUN_1196bc50(this+0x18, parsedStr, channelMask, 10, ...) — stores channel config at this+0x18 with cap arg 10"
+      ],
+      "costs": [
+        "channel table spans bytes 4..0x38 stride 4 => 13 chat-channel enum entries; literal '10' passed as a limit/count to the channel store fn"
+      ],
+      "serverRelevance": "client-only (chat-tab UI configuration: which channels appear under a named tab). No server state, but enumerates the chat channel id set.",
+      "confidence": "medium",
+      "notes": "The 0x129/ChatTab descriptor (0x1196c160) feeds this. The '10' arg and channel enum table are the notable numbers."
+    },
+    {
+      "address": "0x1196ea50",
+      "currentName": "FUN_1196ea50",
+      "proposedName": "CGuildMatchAgainstInfo::GetByIndex",
+      "subsystem": "guild-league-match",
+      "purpose": "Return CGuildMatchAgainstInfo (guild match/versus-pairing definition) record at linear index.",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor; guild-match/matchmaking pairing config (server owns matchmaking)",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom. Relevant to league/guild-war matchmaking."
+    },
+    {
+      "address": "0x11983470",
+      "currentName": "FUN_11983470",
+      "proposedName": "GuildTipsInfo::GetFieldDescriptor",
+      "subsystem": "guild-ui",
+      "purpose": "Lazy-init static schema/field descriptor for the 'GuildTips' data field; returns &descriptor, writes 1 to *param_2.",
+      "formulas": [
+        "descriptor id constant _DAT_123a1720 = 0x14c (332); flag slot _DAT_123a1728 = 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only UI schema plumbing; field id 0x14c",
+      "confidence": "medium",
+      "notes": "Stock descriptor accessor; matches CGuildTipsInfo (tips/notice text) in social.md."
+    },
+    {
+      "address": "0x1199e640",
+      "currentName": "CLeagueDetail__GetManagers",
+      "proposedName": "CLeagueDetail::GetManagers",
+      "subsystem": "league",
+      "purpose": "Singleton accessor for the CLeagueDetail info-table manager. First call registers the singleton (StcMbrNameSvr<CInfoManager>) and, on lookup failure, initializes a fallback empty manager; returns the manager pointer.",
+      "formulas": [
+        "if param_3==0 return cached *DAT_123a2024 (once registered)",
+        "else CInfoManager::FindByName(vtbl=PTR_FUN_11d667b4, name, id); on null return fallback &DAT_123a21ac"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only info-table singleton plumbing (CryEngine)",
+      "confidence": "high",
+      "notes": "Stock StcMbrNameSvr singleton factory pattern."
+    },
+    {
+      "address": "0x119a0850",
+      "currentName": "FUN_119a0850",
+      "proposedName": "CLeagueDetail::GetByIndex",
+      "subsystem": "league",
+      "purpose": "Return CLeagueDetail record at linear index (bounds-checked).",
+      "formulas": [
+        "count=(mgr+0x18-mgr+0x14)>>2; return *(mgr+0x14+idx*4) if in range else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into league-detail table",
+      "confidence": "high",
+      "notes": "Standard GetByIndex idiom."
+    },
+    {
+      "address": "0x119a0d90",
+      "currentName": "CLeagueDetail__GetManagers_119a0d90",
+      "proposedName": "CLeagueDetail::GetManagerOrNull",
+      "subsystem": "league",
+      "purpose": "Thin singleton accessor: registers the CLeagueDetail manager and returns *DAT_123a2024 when param==0, else 0. Variant of 0x1199e640 without the FindByName fallback.",
+      "formulas": [
+        "if param_1==0 { ensure-registered; return *DAT_123a2024 } else return 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only singleton plumbing",
+      "confidence": "high",
+      "notes": "Boilerplate."
+    },
+    {
+      "address": "0x119a13c0",
+      "currentName": "CLeagueDetail__GetManagers_119a13c0",
+      "proposedName": "CLeagueDetail::ForEachApply",
+      "subsystem": "league",
+      "purpose": "Iterate every CLeagueDetail record (count via vtbl+0x28) and, for each valid entry index, invoke a per-entry apply callback (FUN_11a6cdb0 -> touches CLeagueRoundSchedule). Also performs the one-time fallback-manager init inline.",
+      "formulas": [
+        "count = (*(mgr_vtbl+0x28))()",
+        "for iVar5 in [0,count): resolve manager; if 0<=iVar5<((mgr+0x18-mgr+0x14)>>2) && record!=0 -> FUN_11a6cdb0(orig_param)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only initialization loop (links league details to round schedules)",
+      "confidence": "medium",
+      "notes": "The inline fallback block writes descriptor consts _DAT_11de9ae0.. (a shared empty-record template) at DAT_123a21ac."
+    },
+    {
+      "address": "0x119a1620",
+      "currentName": "CLeagueSchedule__GetManagers_119a1620",
+      "proposedName": "CLeagueSchedule::ForEachBuildRounds",
+      "subsystem": "league",
+      "purpose": "Iterate every CLeagueSchedule record and, for each valid entry, call CLeagueRoundSchedule::BuildRoundAndRewardLists — i.e. build the per-schedule round & reward lists from the CLeagueSchedule table.",
+      "formulas": [
+        "count=(*(mgr_vtbl+0x28))(); per valid entry -> CLeagueRoundSchedule::BuildRoundAndRewardLists(orig_param)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only initialization loop; the league round/reward structure is authoritative server scheduling config",
+      "confidence": "medium",
+      "notes": "Twin of 0x119a13c0 for CLeagueSchedule."
+    },
+    {
+      "address": "0x119a1750",
+      "currentName": "CLeagueRoundSchedule__GetManagers_119a1750",
+      "proposedName": "CLeagueRoundSchedule::ForEachApplyToLevel",
+      "subsystem": "league",
+      "purpose": "Iterate every CLeagueRoundSchedule record and call CMHLevelInfo::ApplyLeagueScheduleDetail for each valid entry — applying league round-schedule detail onto level/instance info.",
+      "formulas": [
+        "manager via FUN_108fa510(0,\"CLeagueRoundSchedule\",0)",
+        "count=(*(mgr_vtbl+0x28))(); container end/begin at puVar4[6]/puVar4[5]; per valid entry -> CMHLevelInfo::ApplyLeagueScheduleDetail(orig_param)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only initialization loop; league scheduling is server-authoritative",
+      "confidence": "medium",
+      "notes": "Fallback template consts _DAT_11de9ae0.. reused."
+    },
+    {
+      "address": "0x119d09b0",
+      "currentName": "FUN_119d09b0",
+      "proposedName": "GuildWarConfig::GetField_357c",
+      "subsystem": "guild-war",
+      "purpose": "Return a single 'GuildWar' scalar config value (DAT_123a357c) via *param_1; lazy-registers the L\"GuildWar\" name on first call.",
+      "formulas": [
+        "*param_1 = DAT_123a357c"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor to a GuildWar config scalar (value unknown; data-driven)",
+      "confidence": "low",
+      "notes": "One of three near-identical GuildWar scalar getters (this, 0x119d0f80, 0x119d1b50)."
+    },
+    {
+      "address": "0x119d0a40",
+      "currentName": "FUN_119d0a40",
+      "proposedName": "CommerceBoatInfo::GetFieldDescriptor",
+      "subsystem": "guild-commerce",
+      "purpose": "Lazy-init static schema/field descriptor for 'CommerceBoat' field; returns &descriptor, *param_2=1.",
+      "formulas": [
+        "descriptor id constant _DAT_123a3584 = 0x1d7 (471)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only schema plumbing; field id 0x1d7 (guild commerce-boat)",
+      "confidence": "medium",
+      "notes": "Stock descriptor accessor."
+    },
+    {
+      "address": "0x119d0f80",
+      "currentName": "FUN_119d0f80",
+      "proposedName": "GuildWarConfig::GetField_35a8",
+      "subsystem": "guild-war",
+      "purpose": "Return GuildWar scalar config value DAT_123a35a8 via *param_1.",
+      "formulas": [
+        "*param_1 = DAT_123a35a8"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor to a GuildWar config scalar",
+      "confidence": "low",
+      "notes": "Sibling of 0x119d09b0."
+    },
+    {
+      "address": "0x119d1050",
+      "currentName": "FUN_119d1050",
+      "proposedName": "CommerceInfo::GetFieldDescriptor",
+      "subsystem": "guild-commerce",
+      "purpose": "Lazy-init static schema/field descriptor for 'Commerce' field; returns &descriptor, *param_2=1.",
+      "formulas": [
+        "descriptor id constant _DAT_123a35b0 = 0x1d8 (472)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only schema plumbing; field id 0x1d8 (guild commerce)",
+      "confidence": "medium",
+      "notes": "Stock descriptor accessor."
+    },
+    {
+      "address": "0x119d1b50",
+      "currentName": "FUN_119d1b50",
+      "proposedName": "GuildWarConfig::GetField_35f4",
+      "subsystem": "guild-war",
+      "purpose": "Return GuildWar scalar config value DAT_123a35f4 via *param_1.",
+      "formulas": [
+        "*param_1 = DAT_123a35f4"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor to a GuildWar config scalar",
+      "confidence": "low",
+      "notes": "Sibling of 0x119d09b0 / 0x119d0f80."
+    },
+    {
+      "address": "0x119d1d50",
+      "currentName": "FUN_119d1d50",
+      "proposedName": "CommerceGrabTimeInfo::GetFieldDescriptor",
+      "subsystem": "guild-commerce",
+      "purpose": "Lazy-init static schema/field descriptor for 'CommerceGrabTime' field; returns &descriptor, *param_2=1.",
+      "formulas": [
+        "descriptor id constant _DAT_123a35fc = 0x1d9 (473)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only schema plumbing; field id 0x1d9 (commerce grab/steal time window)",
+      "confidence": "medium",
+      "notes": "Stock descriptor accessor. 'GrabTime' implies a commerce-boat interception/steal timing window."
+    },
+    {
+      "address": "0x11a03200",
+      "currentName": "FUN_11a03200",
+      "proposedName": "CGuildTaskInfo::ReadRow",
+      "subsystem": "guild-task",
+      "purpose": "Full config-row reader for a CGuildTaskInfo (guild-task/legion-task definition). Reads id, localized Name/Note/Description strings, requirement fields, a task-content sub-object built from Content* args, and the full reward set. This recovers the complete CGuildTaskInfo struct layout (schema doc previously only had 0x20).",
+      "formulas": [
+        "id (unnamed first field) -> this+0x10",
+        "\"Name\" -> localized string (SetName sink)",
+        "\"Note\" -> localized string",
+        "\"Description\" -> localized string",
+        "\"Group\" -> this+0x20 (int, task category/group; matches recovered typeOrCategory@0x20)",
+        "\"GuildLevel\" (required) -> this+0x24",
+        "\"GuildRepute\" (required) -> this+0x28",
+        "\"GuildArena\" (required) -> this+0x2c",
+        "\"GuildPlot\" (required) -> this+0x30",
+        "\"PreTasks\" -> list at this+0x34 via FUN_1162bea0 (prerequisite task ids)",
+        "\"ContentsType\" -> this+0x40",
+        "\"ContentId\" -> local_464; \"ContentType\" -> local_460; \"ContentArg1\"->local_45c; \"ContentArg2\"->local_458; \"ContentArg3\"->local_454; \"ContentArg4\"->local_450; \"ContentArg5\"->local_44c",
+        "content obj = FUN_11a02e50(&local_464); if nonzero push int into vector at this+0x48 (end ptr this+0x48, grows by 4; realloc via FUN_11a04c30 when full at this+0x4c)",
+        "\"GuildExpPrize\" -> this+0x50 (reward: guild EXP)",
+        "\"GuildFundPrize\" -> this+0x54 (reward: guild funds)",
+        "\"GuildReputePrize\" -> this+0x58 (reward: guild reputation)",
+        "\"GuildArenaPrize\" -> this+0x5c (reward: guild arena points)",
+        "\"GoldPrize\" -> this+0x6c (reward: gold currency)",
+        "\"ItemsPrize1\"..\"ItemsPrize5\" -> parsed via FUN_11a030e0 into an item-reward list (appended, null-terminated, buffer at local_420/this)"
+      ],
+      "costs": [
+        "Reward columns per guild task: GuildExpPrize, GuildFundPrize, GuildReputePrize, GuildArenaPrize, GoldPrize, plus up to 5 ItemsPrize entries",
+        "Requirement columns: GuildLevel, GuildRepute, GuildArena, GuildPlot, PreTasks",
+        "Content sub-object holds ContentId, ContentType, ContentArg1..5 (7 ints, matches CGuildTaskInfo PlayerTaskEntryStride=7 in schema doc)"
+      ],
+      "serverRelevance": "authoritative config — this is the guild-task definition the server must own: task requirements (guild level/repute/arena/plot, prerequisite tasks) and reward grants (guild exp/fund/repute/arena, gold, items). Server computes and grants these amounts on task completion; client only reads the table for display.",
+      "confidence": "high",
+      "notes": "Struct offsets: id@0x10, Group/category@0x20, GuildLevel@0x24, GuildRepute@0x28, GuildArena@0x2c, GuildPlot@0x30, PreTasks list@0x34, ContentsType@0x40, content-obj vector@0x48/0x4c, GuildExpPrize@0x50, GuildFundPrize@0x54, GuildReputePrize@0x58, GuildArenaPrize@0x5c, GoldPrize@0x6c, ItemsPrize list appended after. Extends schema/docs/quest.md CGuildTaskInfo (was low-confidence, only 0x20 known)."
+    },
+    {
+      "address": "0x11a15280",
+      "currentName": "FUN_11a15280",
+      "proposedName": "CFriendlyInfo::ReadRow",
+      "subsystem": "social-friend",
+      "purpose": "Config-row reader for a CFriendlyInfo (friendship/friendliness level definition). Reads the level index, level number, lower/upper friendliness point thresholds, and localized name/desc.",
+      "formulas": [
+        "\"indexId\" -> this+0x10",
+        "\"FriendlyLev\" -> this+0x14 (friendliness level number)",
+        "\"DownFriendly\" -> this+0x18 (lower point threshold for this level)",
+        "\"TopFriendly\" -> this+0x1c (upper point threshold for this level)",
+        "\"name\" -> localized string (SetName sink)",
+        "\"desc\" -> localized string"
+      ],
+      "costs": [
+        "Friendliness level bands defined by [DownFriendly, TopFriendly] point ranges per FriendlyLev"
+      ],
+      "serverRelevance": "authoritative config — friendship point thresholds per friendliness level; server tracks friendship points and computes level from these bands. Client reads for display.",
+      "confidence": "high",
+      "notes": "Struct: indexId@0x10, FriendlyLev@0x14, DownFriendly@0x18, TopFriendly@0x1c, name/desc strings. Ties to FriendlyInfo descriptor (0x11925260, id 0xb3)."
+    },
+    {
+      "address": "0x11a6afa0",
+      "currentName": "FUN_11a6afa0",
+      "proposedName": "CLeagueDetail::GetById",
+      "subsystem": "league",
+      "purpose": "Paged/sparse by-id lookup returning the CLeagueDetail record (0 if absent).",
+      "formulas": [
+        "mgr=CLeagueDetail::GetManagers; minId=mgr+0x30,pageSize=mgr+0x28,count=mgr+0x24,pages=mgr+0x20",
+        "reject id==-1; require (id!=0||minId==0)&&pageSize!=0; local=id-minId; 0<=local<count",
+        "return pages[local/pageSize][local%pageSize] (0 if page null)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into league-detail table by id",
+      "confidence": "high",
+      "notes": "Standard paged by-id idiom (no category filter, unlike the guild-task variant)."
+    },
+    {
+      "address": "0x11a6b000",
+      "currentName": "FUN_11a6b000",
+      "proposedName": "CLeagueSchedule::GetById",
+      "subsystem": "league",
+      "purpose": "Paged by-id lookup returning the CLeagueSchedule record.",
+      "formulas": [
+        "same paged idiom (minId@0x30,pageSize@0x28,count@0x24,pages@0x20) on CLeagueSchedule::GetManagers"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into league-schedule table by id",
+      "confidence": "high",
+      "notes": "Standard paged by-id idiom."
+    },
+    {
+      "address": "0x11a6c4f0",
+      "currentName": "FUN_11a6c4f0",
+      "proposedName": "CLeagueRoundSchedule::GetById",
+      "subsystem": "league",
+      "purpose": "Paged by-id lookup returning the CLeagueRoundSchedule record.",
+      "formulas": [
+        "manager via FUN_108fa510(0,\"CLeagueRoundSchedule\",0); same paged idiom"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only accessor into league-round-schedule table by id",
+      "confidence": "high",
+      "notes": "Standard paged by-id idiom."
+    },
+    {
+      "address": "0x11a6cdb0",
+      "currentName": "FUN_11a6cdb0",
+      "proposedName": "CLeagueRoundSchedule::TouchManager",
+      "subsystem": "league",
+      "purpose": "Trivial stub that resolves/registers the CLeagueRoundSchedule manager (FUN_108fa510) and returns. Used as the per-entry callback from CLeagueDetail::ForEachApply (0x119a13c0).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only manager-registration plumbing",
+      "confidence": "medium",
+      "notes": "Likely inlined-away body; only the manager-get survived."
+    },
+    {
+      "address": "0x11a74910",
+      "currentName": "FUN_11a74910",
+      "proposedName": "CLeagueDetail::ReadRow",
+      "subsystem": "league",
+      "purpose": "Config-row reader for a CLeagueDetail (league tier/detail definition). Reads id, LeagueType, LevelID, three unnamed localized strings (name/note/desc), and PicturePath/PictureDesc.",
+      "formulas": [
+        "id (unnamed first field, DAT_11d38d6c) -> this+0x10",
+        "\"LeagueType\" -> this+0x14",
+        "\"LevelID\" -> this+0x18",
+        "three unnamed string fields (&DAT_11d72fb8, &DAT_11d72fc4, &DAT_11d72fd0) -> localized strings (SetName sinks) [likely name/short-name/desc]",
+        "\"PicturePath\" -> localized string",
+        "\"PictureDesc\" -> localized string"
+      ],
+      "costs": [
+        "LeagueType and LevelID key each league tier record"
+      ],
+      "serverRelevance": "authoritative config — LeagueType/LevelID define league tiers/divisions used in league scoring & progression; server owns league standings. Picture fields are client display only.",
+      "confidence": "high",
+      "notes": "Struct: id@0x10, LeagueType@0x14, LevelID@0x18. Exact names of the three &DAT_ string fields unknown (name/desc strings)."
+    }
+  ]
+}

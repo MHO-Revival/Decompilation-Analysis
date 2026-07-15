@@ -1,0 +1,228 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "0x101e0ea0",
+      "currentName": "FUN_101e0ea0",
+      "proposedName": "Tlv_WriteLargeStruct_Unknown_101e0ea0",
+      "purpose": "Auto-generated TDR/TLV serializer (writer) for a very large fixed-layout struct. Opens with tag 0x25 (field 2, wire 5 LEN) framing a nested block of 7 consecutive int32 written raw via FUN_1010c190 (7-dword group = 28 bytes), then writes a long chain of individual 4-byte fields (tags 0x43,0x63,0x73,0x83,0x93,0xa3,0xb3,0xc3,0xd3,0xe3,0xf3,0x103,0x115...), 2-byte fields via FUN_1010c120 (tags 0x142,0xca3), and many more LEN-delimited nested 7-dword groups (each framed by FUN_1010bf70 reserve + FUN_1010c3c0 patch). Tag space extends past 0x925. Helpers: FUN_1010c5f0=write tag(LEB128), FUN_1010c190=write int32, FUN_1010c120=write int16, FUN_1010bf70=reserve 4-byte len, FUN_1010c3c0=backpatch len. Concrete struct identity not recoverable from this chunk.",
+      "subsystem": "tlv-serializer",
+      "confidence": "low",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 2: tag 0x25 wire5 @ src+0 — nested block of 7x int32 (28B)",
+        "field 4: tag 0x43 wire3 int32 @ src+0x1c",
+        "field 6: tag 0x63 wire3 int32 @ src+0x20",
+        "field 7: tag 0x73 wire3 int32 @ src+0x24",
+        "field 8: tag 0x83 wire3 int32 @ src+0x28",
+        "field 9..17: tags 0x93/0xa3/0xb3/0xc3/0xd3/0xe3/0xf3/0x103/0x115 wire3 int32 @ src+0x2c..0x48",
+        "field 0x14: tag 0x142 wire2 int16 @ src+0x68",
+        "field 0x16: tag 0x165 wire5 nested 7x int32 group @ src+0x6a (repeats many times up to src+0x448)"
+      ],
+      "relatedTlv": [],
+      "serverRelevance": "Unknown struct; if identified it is a large payload the server must produce/consume, but no name recovered here.",
+      "tlvDocDiscrepancy": "",
+      "notes": "10727-byte function, deeply nested single-path writer typical of TDR codegen. Nested 7-int32 groups likely fixed arrays or Vec-like sub-structs. Not matched to any TLV_DOCS entry."
+    },
+    {
+      "address": "0x101ee230",
+      "currentName": "FUN_101ee230",
+      "proposedName": "TlvTalentLearnItem_Read_varint_101ee230",
+      "purpose": "TDR/TLV element deserializer (reader). Loops reading LEB128 tags via FUN_1010ccb0; switches on tag>>4 (field_id): field 1 -> reads Id via FUN_1010cbd0 (varint int); field 2 -> reads a single byte (Level/Idx) into obj+4; other -> skip via FUN_1010d4f0. Sets presence-flag bits at obj+5 (bit0 for field1, bit1 for field2). This is the read counterpart the C# marks as 'C++ Reader: sub_XXXXX' for the {Id:int32, Level:byte} element (TlvTalentLearnItem).",
+      "subsystem": "tlv-serializer",
+      "confidence": "medium",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 1: Id int32 (varint) — via FUN_1010cbd0, presence bit0 @ obj+5",
+        "field 2: Level/Idx byte @ obj+4, presence bit1 @ obj+5"
+      ],
+      "relatedTlv": ["TlvTalentLearnItem"],
+      "serverRelevance": "Server must parse this element when receiving talent-learn lists (embedded in SkillWeaponItem, C2S skill updates) and produce it S2C.",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint variant (field1 via FUN_1010cbd0). Sibling FUN_101ee8f0 is identical. Pairs with writer sub_101EE0C0 (TlvTalentLearnItem) referenced in SkillWeaponItem writer FUN_101ef630."
+    },
+    {
+      "address": "0x101ee320",
+      "currentName": "FUN_101ee320",
+      "proposedName": "TlvTalentEquipItem_Read_fixed_101ee320",
+      "purpose": "TDR/TLV element deserializer (reader), 4-byte-field variant. Same shape as FUN_101ee230 but field 1 (Id) is read via FUN_1010c870 (fixed 4-byte) instead of varint; field 2 -> byte (Idx) into obj+4; other -> skip. Presence bits at obj+5. Matches sub_101EE320 referenced by the generated SkillWeaponItem doc (talentEquip element {Id:int32, Idx:byte} = TlvTalentEquipItem).",
+      "subsystem": "tlv-serializer",
+      "confidence": "medium",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 1: Id int32 (fixed 4B) — via FUN_1010c870, presence bit0 @ obj+5",
+        "field 2: Idx byte @ obj+4, presence bit1 @ obj+5"
+      ],
+      "relatedTlv": ["TlvTalentEquipItem"],
+      "serverRelevance": "Server must parse talent-equip elements on C2S skill/talent equip updates and emit them S2C.",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed-int variant. Writer counterpart sub_101EE780 (TlvTalentEquipItem) is called from SkillWeaponItem writer FUN_101ef630."
+    },
+    {
+      "address": "0x101ee8f0",
+      "currentName": "FUN_101ee8f0",
+      "proposedName": "TlvTalentLearnItem_Read_varint_101ee8f0",
+      "purpose": "Byte-for-byte duplicate of FUN_101ee230: TDR element reader, field 1 Id via varint (FUN_1010cbd0), field 2 byte @ obj+4, presence flags @ obj+5. Codegen emitted a separate instance for a second array field of the same element type ({Id, Level/Idx}).",
+      "subsystem": "tlv-serializer",
+      "confidence": "medium",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 1: Id int32 (varint), presence bit0 @ obj+5",
+        "field 2: byte @ obj+4, presence bit1 @ obj+5"
+      ],
+      "relatedTlv": ["TlvTalentLearnItem"],
+      "serverRelevance": "Same as FUN_101ee230 — element reader for talent/skill sub-lists.",
+      "tlvDocDiscrepancy": "",
+      "notes": "Identical to FUN_101ee230; distinct address due to per-array-field template instantiation."
+    },
+    {
+      "address": "0x101ee9e0",
+      "currentName": "FUN_101ee9e0",
+      "proposedName": "TlvTalentEquipItem_Read_fixed_101ee9e0",
+      "purpose": "Duplicate of FUN_101ee320: TDR element reader with field 1 Id read as fixed 4-byte (FUN_1010c870), field 2 byte @ obj+4, presence flags @ obj+5. Corresponds to sub_101EE9E0 referenced by the SkillWeaponItem doc (the doc attaches it to 'rageIdx', but the actual shape is the standard {Id:int32, Idx:byte} element reader).",
+      "subsystem": "tlv-serializer",
+      "confidence": "medium",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 1: Id int32 (fixed 4B), presence bit0 @ obj+5",
+        "field 2: byte @ obj+4, presence bit1 @ obj+5"
+      ],
+      "relatedTlv": ["TlvTalentEquipItem"],
+      "serverRelevance": "Element reader for talent-equip / skill sub-lists on C2S.",
+      "tlvDocDiscrepancy": "Generated SkillWeaponItem.md maps sub_101EE9E0 to scalar field 'rageIdx' (0x73); in reality sub_101EE9E0 is a 2-field element reader {Id:int32, Idx:byte}, not a scalar. The doc's field->sub_addr mapping is unreliable.",
+      "notes": "Identical to FUN_101ee320."
+    },
+    {
+      "address": "0x101ef630",
+      "currentName": "FUN_101ef630",
+      "proposedName": "TlvSkillWeaponItem_Write_varint_101ef630",
+      "purpose": "TDR/TLV serializer (writer) for SkillWeaponItem (varint element variant). Field order recovered from tag sequence + the DebugFormat FUN_101f0b50 and reconstructed C# (writer noted as sub_101EF630). Writes: skillLearnCount(byte)->skillLearn[]->talentLearnCount(byte)->talentLearn[]->talentEquipCount(byte)->talentEquip[]->rageIdx(byte)->rageCount(byte)->rage[](int32 scalar array)->bushidoRageCount(byte)->bushidoRage[](int32 scalar array). Count fields validated with FUN_101159e0 and range-checked (<0 => -6, >max => -7). Arrays framed with FUN_1010bf70/FUN_1010c3c0. skillLearn inner element writes field 1 (tag 0x10, VARINT) via FUN_1010c560.",
+      "subsystem": "tlv-serializer",
+      "confidence": "high",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 2: skillLearnCount byte, tag 0x21 (wire1) @ src+0, max 4",
+        "field 3: skillLearn[] tag 0x35 (wire5), stride 8 @ src+1; each entry inner field1 Id (tag 0x10 VARINT via FUN_1010c560)",
+        "field 4: talentLearnCount byte, tag 0x41 (wire1) @ src+0x21, max 0x10",
+        "field 5: talentLearn[] tag 0x55 (wire5) — elements via FUN_101ee0c0 (TlvTalentLearnItem writer)",
+        "field 6: talentEquipCount byte, tag 0x61 (wire1) @ src+0xb2, max 8",
+        "field 7: talentEquip[] tag 0x75 (wire5) — elements via FUN_101ee780 (TlvTalentEquipItem writer)",
+        "field 8: rageIdx byte, tag 0x81 (wire1) @ src+0xfb",
+        "field 9: rageCount byte, tag 0x91 (wire1) @ src+0xfc, max 5",
+        "field 10: rage[] int32 scalar array, tag 0xa5 (wire5) @ src+0xfd (values via FUN_1010c560)",
+        "field 11: bushidoRageCount byte, tag 0xb1 (wire1) @ src+0x111",
+        "field 12: bushidoRage[] int32 scalar array, tag 0xc5 (wire5) @ src+0x112"
+      ],
+      "relatedTlv": ["SkillWeaponItem", "TlvSkillLearnIdItem", "TlvTalentLearnItem", "TlvTalentEquipItem"],
+      "serverRelevance": "High — server must serialize SkillWeaponItem when sending character skill/weapon data (S2C) and validate/parse the same layout on C2S skill changes. Field ranges (max 4/0x10/8/5) are server-enforceable limits.",
+      "tlvDocDiscrepancy": "Generated SkillWeaponItem.md is materially WRONG. It lists only 8 fields with SHIFTED names/types: it labels field3=talentLearnCount, field4=talentLearn, field5=talentEquipCount, field6=talentEquip, field7=rageIdx, field8=rageCount, field9=rage, and marks count fields as wire5/int32 struct. Actual layout (from writer + DebugFormat): f2=skillLearnCount(byte,wire1), f3=skillLearn[], f4=talentLearnCount(byte), f5=talentLearn[], f6=talentEquipCount(byte), f7=talentEquip[], f8=rageIdx(byte), f9=rageCount(byte), f10=rage[](int32 array), f11=bushidoRageCount(byte), f12=bushidoRage[](int32 array). Doc omits bushidoRageCount/bushidoRage entirely and mis-types the count fields.",
+      "notes": "Count fields are wire1 single bytes, NOT LEN-delimited. rage/bushidoRage are scalar int32 arrays (wire5 LEN body of raw int32s)."
+    },
+    {
+      "address": "0x101efad0",
+      "currentName": "FUN_101efad0",
+      "proposedName": "TlvSkillWeaponItem_Write_fixed_101efad0",
+      "purpose": "Second TDR writer for the SAME SkillWeaponItem struct, differing only in element/scalar encoding: skillLearn inner element uses field-1 tag 0x13 (wire3, fixed 4-byte) via FUN_1010c190; talentLearn elements via FUN_101ee110 (fixed variant); talentEquip elements via FUN_101ee7d0; rage/bushidoRage int32 values via FUN_1010c190. Same field ids/tags/offsets and same range checks as FUN_101ef630.",
+      "subsystem": "tlv-serializer",
+      "confidence": "high",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 2: skillLearnCount byte, tag 0x21 @ src+0",
+        "field 3: skillLearn[] tag 0x35; inner field1 Id tag 0x13 (wire3, 4B) via FUN_1010c190",
+        "field 4: talentLearnCount byte, tag 0x41 @ src+0x21",
+        "field 5: talentLearn[] tag 0x55 — elements via FUN_101ee110",
+        "field 6: talentEquipCount byte, tag 0x61 @ src+0xb2",
+        "field 7: talentEquip[] tag 0x75 — elements via FUN_101ee7d0",
+        "field 8: rageIdx byte, tag 0x81 @ src+0xfb",
+        "field 9: rageCount byte, tag 0x91 @ src+0xfc",
+        "field 10: rage[] int32 array, tag 0xa5 @ src+0xfd (FUN_1010c190)",
+        "field 11: bushidoRageCount byte, tag 0xb1 @ src+0x111",
+        "field 12: bushidoRage[] int32 array, tag 0xc5 @ src+0x112"
+      ],
+      "relatedTlv": ["SkillWeaponItem", "TlvSkillLearnIdItem", "TlvTalentLearnItem", "TlvTalentEquipItem"],
+      "serverRelevance": "High — alternate (fixed-width) encoding of SkillWeaponItem; server must handle whichever variant the wire uses. Same layout/limits as FUN_101ef630.",
+      "tlvDocDiscrepancy": "Same discrepancy as FUN_101ef630 vs SkillWeaponItem.md (field names shifted, missing bushidoRage*, count fields mis-typed). Additionally the doc does not capture that two TDR encoding variants exist (varint inner-Id 0x10 vs fixed inner-Id 0x13).",
+      "notes": "Fixed-width sibling of FUN_101ef630; picked based on TDR variant/version."
+    },
+    {
+      "address": "0x101f0b50",
+      "currentName": "FUN_101f0b50",
+      "proposedName": "TlvSkillWeaponItem_DebugFormat_101f0b50",
+      "purpose": "Debug/ToString formatter for SkillWeaponItem (TdrBufUtil.cpp). Emits labelled hex via FUN_1024a290/FUN_1010c010 with literal field names: [skillLearnCount],[skillLearn],[talentLearnCount],[talentLearn],[talentEquipCount],[talentEquip],[rageIdx],[rageCount],[rage],[bushidoRageCount],[bushidoRage]. Confirms the true SkillWeaponItem field set (12 fields) and their offsets, matching writer FUN_101ef630. Not a wire (de)serializer — human-readable dump only.",
+      "subsystem": "other",
+      "confidence": "high",
+      "direction": "unknown",
+      "msgId": "n/a",
+      "protocolFields": [
+        "skillLearnCount @ src+0 (byte, max4)",
+        "skillLearn[] @ src+1 stride8",
+        "talentLearnCount @ src+0x21 (byte, max0x10)",
+        "talentLearn[]",
+        "talentEquipCount @ src+0xb2 (byte, max8)",
+        "talentEquip[]",
+        "rageIdx @ src+0xfb (byte)",
+        "rageCount @ src+0xfc (byte, max5)",
+        "rage[] @ src+0xfd (int32)",
+        "bushidoRageCount @ src+0x111 (byte)",
+        "bushidoRage[] @ src+0x112 (int32)"
+      ],
+      "relatedTlv": ["SkillWeaponItem"],
+      "serverRelevance": "None on the wire — client-side/logging DebugFormat. Useful only as ground truth for field names when rebuilding the server struct.",
+      "tlvDocDiscrepancy": "This DebugFormat is the authoritative source proving SkillWeaponItem.md's 8-field/shifted-name table is wrong (see FUN_101ef630 discrepancy).",
+      "notes": "sub_101F0B50 named as SkillWeaponItem printer in reconstructed C# (TlvSkillLearnIdItem.cs). Called by ManuSkill DebugFormat FUN_101f26e0 for skillWeapon[13]."
+    },
+    {
+      "address": "0x101f26e0",
+      "currentName": "FUN_101f26e0",
+      "proposedName": "TlvManuSkill_DebugFormat_101f26e0",
+      "purpose": "Debug/ToString formatter for ManuSkill (TdrBufUtil.cpp). Emits labelled fields: [version](int32 @+0), [manuSkillCount](int16 @+4, max5) + [manuSkill][] via FUN_101ed330, [ingredientCount](int16 @+0x56, max0x280) + [ingredient][] via FUN_101ed8d0, [skillWeapon][] fixed 13 entries via FUN_101f0b50 (SkillWeaponItem), [formulaBitCount](int32 @+0x237a, max0x280) + [formulaBit][] raw bytes @+0x237e, [expressionCount](int16 @+0x25fe, max0x100) + [expression][] via FUN_101ef2f0. Reveals the true ManuSkill layout/order. Not a wire serializer.",
+      "subsystem": "other",
+      "confidence": "high",
+      "direction": "unknown",
+      "msgId": "n/a",
+      "protocolFields": [
+        "version int32 @ +0",
+        "manuSkillCount int16 @ +4 (max 5)",
+        "manuSkill[] sub-struct via FUN_101ed330",
+        "ingredientCount int16 @ +0x56 (max 0x280)",
+        "ingredient[] sub-struct via FUN_101ed8d0",
+        "skillWeapon[13] fixed array of SkillWeaponItem via FUN_101f0b50",
+        "formulaBitCount int32 @ +0x237a (max 0x280)",
+        "formulaBit[] byte array @ +0x237e",
+        "expressionCount int16 @ +0x25fe (max 0x100)",
+        "expression[] sub-struct via FUN_101ef2f0"
+      ],
+      "relatedTlv": ["ManuSkill", "SkillWeaponItem", "ExpressionItem"],
+      "serverRelevance": "None on the wire — DebugFormat/logging. Ground truth for ManuSkill field names/offsets/limits when rebuilding server serialization.",
+      "tlvDocDiscrepancy": "Generated ManuSkill.md field table is scrambled: it lists field3=ingredientCount, field4=skillWeapon, field5=formulaBitCount, field9=ingredient, etc., with wrong sub-struct pointers and offsets. Real member order (from this DebugFormat): version, manuSkill[], ingredient[], skillWeapon[13], formulaBit[](bytes), expression[]. skillWeapon is a FIXED 13-element array of SkillWeaponItem (doc marks it 'unknown'). formulaBit is a raw byte array, not int32.",
+      "notes": "sub_101F20F0 in ManuSkill.md is the read/write; this 0x101f26e0 is the DebugFormat sibling (doc note 'DebugFormat has 10' matches the 10 labels here)."
+    },
+    {
+      "address": "0x101f3a10",
+      "currentName": "FUN_101f3a10",
+      "proposedName": "Tlv_WriteStructArray_Elem101b01d0_101f3a10",
+      "purpose": "Auto-generated TDR/TLV serializer (writer) for a large struct/collection whose ~50 members are each a LEN-delimited nested element written by FUN_101b01d0 (element = {field1 byte tag 0x11, field2 nested struct tag 0x25 via FUN_101afb30}). param_1 is the TdrBuf object (pos @+4, len @+8). Emits members at tags 0x45,0x55,0x75,0x85,0x95,0xa5,0x125,0x135,0x145,0x155,0x175,0x185,0x195,0x1e5,0x1f5,0x205,0x225,0x235,0x245,0x2a5..0x2f5,0x305..0x385,0x435..0x5b5,0x8e5,0x8f5,0x915,0x925 (all wire5), each framed by FUN_1010bf70/FUN_1010c3c0. Concrete struct identity not recoverable here.",
+      "subsystem": "tlv-serializer",
+      "confidence": "low",
+      "direction": "both",
+      "msgId": "unknown",
+      "protocolFields": [
+        "field 4: tag 0x45 wire5 nested element (sub_101b01d0)",
+        "field 5: tag 0x55 wire5 nested element",
+        "field 7: tag 0x75 wire5 nested element",
+        "... ~50 members, all wire5 nested elements of type sub_101b01d0 {byte, sub-struct}"
+      ],
+      "relatedTlv": [],
+      "serverRelevance": "Unknown parent struct; each element is a {byte, nested} record the server would produce/consume if this struct is identified. Name not recovered.",
+      "tlvDocDiscrepancy": "",
+      "notes": "4658-byte single-path writer. Element writer sub_101b01d0 lives in net_chunk_004.c. Non-contiguous field ids (gaps) suggest a large struct with many optional/typed members rather than a homogeneous array."
+    }
+  ]
+}

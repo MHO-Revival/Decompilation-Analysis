@@ -1,0 +1,169 @@
+{
+  "batchIndex": 0,
+  "classes": [
+    {
+      "className": "CAvatarInfo",
+      "category": "misc",
+      "purpose": "Client-side avatar/appearance controller for a player (and pet) character. It turns an appearance description (gender + equipment part ids + face/eye/weapon ids) into a live CryEngine skinned character: it creates/rebuilds the character instance, binds equipment part skin-attachments across ~8 slots, attaches eye_left/eye_right offsets, spawns master/slave weapon entities, and precaches all avatar-related assets. All 18 methods were auto-tagged 'GetManagers' by the RTTI-string heuristic; only the first is the manager singleton accessor, the rest are appearance/model logic.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "1052bb90",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::GetInfoManagerSingleton",
+          "purpose": "One-time-init accessor that registers/returns the StcMbrNameSvr<CInfoManager> singleton for CAvatarInfo records (guarded by DAT_123be984, returns DAT_123be968). This is the CInfoManager<CAvatarInfo> lookup table used by FUN_11679e10(&x,\"CAvatarInfo\",0) everywhere else. This is the only method that genuinely matches the 'GetManagers' name."
+        },
+        {
+          "address": "10ae4120",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::UpdateAsyncLoadState",
+          "purpose": "State-machine step (this+0x14 = 0/1/3/4) that advances async loading of the avatar; checks the owning entity (this+0x10), counts pending resource loads, walks the 8 part-decal slots (this+0x10 base +0x899), reads mh_sharemem_addrinfo / .chrparams / fxparams, gates on CAvatarInfo::ResolveEntityModel(10f02e50), and sets this+0xc0 'ready' flag. References special model id 0x530e8."
+        },
+        {
+          "address": "10aea920",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyAppearanceToCharacter",
+          "purpose": "Applies an appearance-description struct (param_2) to a character instance (this+0x24): sets base model (atoi param_2+0x14 via FUN_10aebd60), applies gender/face part (param_2+0x44 via FUN_10aec690), iterates the equipment red-black-tree at param_2+0x4c binding each part model, binds base skin (param_2+0x2c), and applies the decal/tint vector at param_2+0x7c."
+        },
+        {
+          "address": "10aeadc0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::DiffAndRebuildParts",
+          "purpose": "Diffs the new appearance data (param_2 tree) against current cached part ids (this+0x1fc+slot*4, slots 1..6), sets per-slot changed/hidden flags (this+0x221+slot), copies the pending attachment-string block (this+0x230.. -> this+0xdc, 8 x 0x24), recreates the character via ICharacterManager, and re-attaches eye_left/eye_right. Returns a 'changed' bool. Reads eye_left/eye_right bone names."
+        },
+        {
+          "address": "10aecda0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::CollectPartModelNamesFromTree",
+          "purpose": "Reads the 6 equipment part ids from an appearance tree (param_2 map at +0x4c and atoi param_2+0x2c), looks up each CAvatarInfo record's model string (+0x2c), copies each into a local string vector and pushes the base name via FUN_1083ab70. Used to gather the model file list for one appearance."
+        },
+        {
+          "address": "10aed240",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::CollectPartModelNamesFromIdArray",
+          "purpose": "Same collection as 10aecda0 but the source is an explicit int id array (param_1[1..param_2]): for each id, looks up the record and its model string (+0x2c), building a string vector. First arg param_3 is a name pushed via FUN_1083ab70."
+        },
+        {
+          "address": "10aed640",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyAttachmentsAndEffects",
+          "purpose": "Walks an appearance tree (param_3 at +0x4c) resolving ids via FUN_1052bc30, and for the base (+0x14), each tree entry (+0x28), face (+0x2c) and extra (+0x44) calls FUN_10ad9880 to bind attachments/particle effects to the character (param_1). local_8 carries a resolved context id (from +0x28 of the '1' entry)."
+        },
+        {
+          "address": "10aedad0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyPetAttachmentsAndEffects",
+          "purpose": "Pet variant of ApplyAttachmentsAndEffects: same tree walk but resolves records against the CPetAvatarInfo manager (CPetAvatarInfo::GetManagers) and binds via FUN_10ad9c00. Handles base(+0x14), tree entries(+0x28), and extra(+0x44)."
+        },
+        {
+          "address": "10aeddc0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::RebuildCharacterFromData",
+          "purpose": "Full rebuild of the avatar character from the embedded avatar-data block (this+0x18c). Resolves the 8 decal/tint slots (data+0x354..0x369) via the CAvatarInfo manager, copies pending state (data+0x230->0xdc, data+0x1fc->..), destroys old attachment objects, creates a fresh ICharacter (ICharacterManager +0xc/+0x14), attaches eye_left/eye_right, applies base model (data+0x1fc), per-slot equipment models (data+0x200..0x214), and skin tint via FUN_10aebd60/FUN_10ad9400."
+        },
+        {
+          "address": "10af7200",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::UpdateLocalPlayerAppearance",
+          "purpose": "Incremental appearance update for the local player: compares 8 slot triples in param_2 (each {id,x,y} at +i*0xc) against cached (this+0x4d+i*3), tracks per-slot model-changed (local_34) and transform-changed (local_7c) flags, updates decal/tint streaming flags (this+0x224), re-binds eyes, and plays the customization anim 'Co_0001c_anim'. param_3 forces full detach of all 8 slots."
+        },
+        {
+          "address": "10b7b3a0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::PrecacheAllResources",
+          "purpose": "Global precache of every avatar-related asset. Iterates CFaceInfo manager records to stream male/female_skeleton_<faceId>.cdf, precaches weapon *_firemode.xml (CatWeapon/Jade/M015/GiantSword/Hammer/Dagger/GunWeapon/LongSword/Bow), pet skeleton + AI blackboard XMLs, UIInput.xml, novice weapon fxparams, PlayerFSM WE00..WE10 FSMStates.xml, and ambient character cdf (meat, fish pole, float, fish, bridge) plus fallback player body .chr files."
+        },
+        {
+          "address": "10bfec50",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyAppearanceToNetEntity",
+          "purpose": "Builds appearance for a networked/other entity (param_2 = character). Reads gender (vtbl +0x2ec). Live path (editor flag DAT_1202e818+0x209==0): loads eye/face texture ids (FUN_11348ac0 indices 0xf7..0x110 and 0x144..0x159), then FUN_10c0a6a0/FUN_10ad9400/FUN_10c09510/FUN_10c09690 to build body+equipment+skin. Preview path: applies default outfit using fixed CEquipInfo ids ('20002'/'620002' male, base/'610002' female)."
+        },
+        {
+          "address": "10bff6c0",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::SpawnWeaponEntities",
+          "purpose": "Creates the two weapon-holder entities '<name>_Master' and '<name>_Slave' as class 'BasicEntity' (spawn flags |0x480000) via the entity system, then applies weapon models: base weapon (param_2+0x14), per-tree weapon parts (+0x28), main weapon (+0x2c), and firemode/effect resources (record +0x6c/+0x94) via FUN_10c09510/FUN_10c09690/FUN_10c0aee0. Copies parent transform to both weapon entities."
+        },
+        {
+          "address": "10c00130",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::CollectValidPartModels",
+          "purpose": "Returns (param_1) a string vector of the model names for the 6 body/equipment parts (from param_2 tree/atoi) that actually resolve to an existing streamable resource — validated by the resource-exists checks (DAT_1202e818+0x58 vtbl+0xf4 then +100 vtbl+0x100). Used to compute the set of models needing load."
+        },
+        {
+          "address": "10f01650",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyEquipmentByIdList",
+          "purpose": "Applies an explicit equipment id list (param_2 = int vector) to the large player-info layout: maps each record to its slot (record+0x14, <8), compares vs cached this+0x899+slot, marks changed slots (this+0x2284+slot) and dirty flag (this+0x8ff). On dirty, rebuilds skin attachments (vtbl +0x1dc), and if param_3 clears/reloads the character (+0x4b0), resets slot cache and reattaches (FUN_10ad9400 with this+0x8a4)."
+        },
+        {
+          "address": "10f02190",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ApplyAppearanceData",
+          "purpose": "Main 'apply full appearance from data tree' for the player-info layout. Reads 6 part ids (param_2 tree +0x4c / atoi +0x2c), diffs vs this+0x899, sets per-slot flags this+0x2284 and dirty this+0x8ff, rebuilds skinning (vtbl +0x1dc). Also reads gender (vtbl +0x2ec) and, per param_2 flags (+0x8d/+0x8e), toggles a movement/physics param (this+0x8e3, skeleton vtbl +0x134 with 0.1f) and updates a sub-controller (FUN_10f1dee0)."
+        },
+        {
+          "address": "10f02e50",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::ResolvePartsAndEntityModel",
+          "purpose": "Collects the 6 resolved part model strings into caller vector (param_4) checking streamability (vtbl +0xf4), diffs vs this+0x2264 cache; if changed, queries the entity script table for 'Properties.fileModel' (via entity proxy vtbl +0x150/+0x38/+0x28) and stores it. Returns 1 when a fileModel was found. Used as the load gate in UpdateAsyncLoadState(10ae4120)."
+        },
+        {
+          "address": "1103bc00",
+          "currentName": "CAvatarInfo::GetManagers",
+          "proposedName": "CAvatarInfo::SetupPlayerEntityFromScript",
+          "purpose": "Master builder for a player entity from its script + avatar data. Reads gender and 'ChangeModel', swaps body model ('male_fileModel'/'female_fileModel'), gathers equipment models (live: from character; preview: fixed CEquipInfo ids), applies skin, then reads entity-script tables: Properties/PlayerProxy for MasterWeapon/SlaveWeapon/SyncWeapon, spawns '<name>_Master'/'<name>_Slave' BasicEntity weapons, and applies EyeAttachmentOffset (male/female) with Leye_offset/Reye_offset/Leye_rotation/Reye_rotation to the eye_left/eye_right attachments."
+        }
+      ],
+      "fields": [
+        {"name": "loadState", "type": "int32", "offset": "0x14", "source": "inferred", "note": "async-load state on the avatar-data layout: 0=idle,1=loading,3=partial/done,4=error/complete (10ae4120)"},
+        {"name": "baseModelIdStr", "type": "char* (atoi'd)", "offset": "0x2c", "source": "inferred", "note": "on the appearance-description param struct: base/body part id as string; also this+0x2c is used as attach context in several paths"},
+        {"name": "modelIdStr_field", "type": "char* (atoi'd)", "offset": "0x14", "source": "inferred", "note": "appearance-description struct: primary model/base id string (param+0x10 begin, +0x14 end/data)"},
+        {"name": "faceIdStr", "type": "char* (atoi'd)", "offset": "0x44", "source": "inferred", "note": "appearance-description struct: gender/face part id string (+0x48 companion int)"},
+        {"name": "equipPartsMap", "type": "std::map<uint slot,std::string>", "offset": "0x4c", "source": "inferred", "note": "appearance-description struct: red-black tree of equipment part model ids keyed by slot 1..5 (root at +0x54)"},
+        {"name": "decalTintVector", "type": "std::vector<int>", "offset": "0x7c", "source": "inferred", "note": "appearance-description struct: decal/tint id list applied via FUN_10afe4e0"},
+        {"name": "cachedPartIds_A", "type": "int32[7]", "offset": "0x1fc", "source": "inferred", "note": "avatar-data layout: current resolved part ids per slot (this+0x1fc+slot*4, slots 1..6); baseline for diffing"},
+        {"name": "slotStreamFlags_A", "type": "char[8]", "offset": "0x221", "source": "inferred", "note": "avatar-data layout: per-slot 'model streaming/hidden' flags"},
+        {"name": "pendingAttachStrings", "type": "struct[8] (0x24 each)", "offset": "0x230", "source": "inferred", "note": "avatar-data layout: staged attachment records copied down to +0xdc on apply (RebuildCharacterFromData)"},
+        {"name": "readyFlag", "type": "uint8", "offset": "0xc0", "source": "inferred", "note": "avatar-data layout: set when all 8 decal slots loaded and character valid (10ae4120)"},
+        {"name": "characterInstance", "type": "ICharacterInstance*", "offset": "0x24", "source": "inferred", "note": "the created skinned character the appearance is applied to (this+0x24 in apply funcs; via ICharacterManager)"},
+        {"name": "resourceHandleVector", "type": "DynArray<void*>", "offset": "0x124", "source": "inferred", "note": "on the precache layout: growable array of streamed resource/statobj handles (PrecacheAllResources)"},
+        {"name": "cachedPartIds_B", "type": "int32[8]", "offset": "0x899*4", "source": "inferred", "note": "player-info layout (word index 0x899): current part ids per slot; baseline for ApplyEquipmentByIdList/ApplyAppearanceData"},
+        {"name": "slotStreamFlags_B", "type": "char[]", "offset": "0x2284", "source": "inferred", "note": "player-info layout: per-slot streaming flags (this+0x2284+slot)"},
+        {"name": "appearanceDirtyFlag", "type": "uint8", "offset": "0x8ff*4", "source": "inferred", "note": "player-info layout: set when any part changed; triggers skin rebuild"},
+        {"name": "attachmentContext", "type": "struct", "offset": "0x8a4", "source": "inferred", "note": "player-info layout: context block passed to FUN_10ad9400 (skin/attachment binder)"},
+        {"name": "avatarDataPtr", "type": "AvatarData*", "offset": "0x18c", "source": "inferred", "note": "player-info layout: pointer to the embedded/owned avatar-data sub-object that uses the 0x1fc/0x221 layout (RebuildCharacterFromData)"},
+        {"name": "genderVFunc", "type": "int16 (vtbl +0x2ec)", "offset": "vtbl", "source": "inferred", "note": "gender obtained by virtual call vtbl+0x2ec (0=male,1=female) throughout"}
+      ],
+      "constants": [
+        "SlotCount=8 (decal/tint + equipment attach slots)",
+        "PartCount=6 (body/equipment parts iterated 1..6)",
+        "SpecialModelId=0x530e8 (=340200, checked in UpdateAsyncLoadState)",
+        "SpawnFlags=0x480000 (BasicEntity weapon spawn flags)",
+        "DefaultEquipIds: male 20002/620002, female base/610002",
+        "PlayerFSM files WE00..WE10 (11 FSM state XMLs)"
+      ],
+      "formulas": [
+        "CInfoManager record lookup (used everywhere): idx = id - mgr[+0x30]; valid if id!=-1 and 0<=idx<mgr[+0x24] and stride mgr[+0x28]!=0; record = mgr[+0x20][idx/stride][idx%stride] (2-level page table).",
+        "Eye attachment world offset: Leye/Reye position from 'Leye_offset'/'Reye_offset' + rotation quats from 'Leye_rotation'/'Reye_rotation', gender-selected via 'male'/'female' EyeAttachmentOffset table (SetupPlayerEntityFromScript).",
+        "Skeleton precache path = 'Objects/characters/player/{female|male}/{female|male}_skeleton_' + itoa(faceRecord+0x10) + '.cdf'.",
+        "Physics/movement toggle uses factor 0.1f (0x3dcccccd) via skeleton vtbl+0x134 (ApplyAppearanceData)."
+      ],
+      "relatedTlv": ["TlvAvatarBriefInfo", "TlvEquips", "TlvEquipData", "TlvPetAvatarData"],
+      "nameNext": [
+        {"address": "10ad9400", "proposedName": "CAvatarInfo::BindSkinAttachments", "why": "Called by nearly every apply/rebuild path with the (character, attachmentContext) pair; core skin/attachment binder."},
+        {"address": "10ad4d20", "proposedName": "CAvatarInfo::ClearSlotAttachment", "why": "Called to detach/clear a slot when its part id becomes empty; complements the binder."},
+        {"address": "10aebd60", "proposedName": "CAvatarInfo::SetBodyPartModel", "why": "Applies a resolved part model id to the character (base + per-slot) in ApplyAppearanceToCharacter/RebuildCharacterFromData."},
+        {"address": "10c09510", "proposedName": "CAvatarInfo::AttachEquipModelByName", "why": "Repeatedly called with (character,name,context) to bind an equipment/weapon model string; part of the net-entity + weapon builders."},
+        {"address": "10c09690", "proposedName": "CAvatarInfo::AttachFaceOrGenderModel", "why": "Applies gender/face model with scale in ApplyAppearanceToNetEntity/SpawnWeaponEntities."},
+        {"address": "1052bc30", "proposedName": "CAvatarInfo::ResolveRecordById", "why": "id->CAvatarInfo record resolver used in the attachment/effect appliers (10aed640/10aedad0)."},
+        {"address": "104f6c30", "proposedName": "CInfoRecord::GetModelString", "why": "Fetches the record's model-path string (record+0x2c) as a refcounted CryString; used in every model-name collector."},
+        {"address": "10ae74b0", "proposedName": "CryStringVector::Free", "why": "Frees the temporary std::vector<CryString> built by the model-name collectors."},
+        {"address": "11679e10", "proposedName": "CInfoManager::FindByName", "why": "Resolves the named singleton CInfoManager (\"CAvatarInfo\"/\"CFaceInfo\"/\"CEquipInfo\") used by the record-lookup macro."},
+        {"address": "10f1dee0", "proposedName": "CAvatarInfo::UpdatePetOrMountController", "why": "Sub-controller updated from ApplyAppearanceData based on the +0x8d/+0x8e flags."}
+      ],
+      "notes": "CAvatarInfo is the CLIENT-side rendering/appearance controller (CryGame.dll), not a pure TLV data record; the auto-tag 'GetManagers' on all 18 methods is a false RTTI-string match (the singleton-accessor string \"CAvatarInfo::GetManagers\" is reused as an allocator tag inside every method). Only 1052bb90 is a real manager accessor. IMPORTANT: two distinct object layouts appear under this class: (a) a compact avatar-data layout using cachedPartIds at +0x1fc and stream flags at +0x221 (used by 10ae4120/10aeadc0/10aeddc0 etc.), and (b) a larger player-info layout using +0x899 (word idx) part ids, +0x2284 flags and +0x8ff dirty flag (used by 10f01650/10f02190/10f02e50/1103bc00). Layout (a) is likely the object pointed to by (b)'s +0x18c field. The param_2 'appearance-description' struct (fields +0x10/+0x14/+0x2c/+0x44 strings and a std::map at +0x4c) is a parsed XML/entity-property description, NOT a TLV wire struct; it maps conceptually to TlvAvatarBriefInfo (sex/equips) but the offsets do not match the TLV field ids, so treat the TLV link as directional only. All field offsets are inferred from control flow (no DebugFormat/printer method exists in this bundle), hence medium confidence."
+    }
+  ]
+}

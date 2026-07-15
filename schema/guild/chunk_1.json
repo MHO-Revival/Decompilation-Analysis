@@ -1,0 +1,1073 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x1035abf0",
+      "currentName": "FUN_1035abf0",
+      "proposedName": "TdrPack_CommerceGood",
+      "subsystem": "guild-commerce",
+      "purpose": "TDR text-packer entry point for a guild commerce-good struct. Guards buf==NULL -> -0x13 (-19). Serializes [dwCommerceId] (u32 @off 0) then [dwGoodNumber] (u32 @off 4) as TdrText_FieldScalar decimal fields.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u32 dwCommerceId",
+        "off 0x04 u32 dwGoodNumber",
+        "DAT_11d9f574 = unsigned-decimal fmt (\"%u\") sentinel",
+        "buf NULL -> return -0x13 (-19)"
+      ],
+      "serverRelevance": "shared plumbing; struct layout is authoritative for wire compat (commerce good id + quantity)",
+      "notes": "Companion binary TDR is TlvCommerceGuild family (see TLV_DOCS). This is the debug-text variant."
+    },
+    {
+      "address": "0x1035ac90",
+      "currentName": "FUN_1035ac90",
+      "proposedName": "TdrFmtField_CommerceGood",
+      "subsystem": "guild-commerce",
+      "purpose": "Field-format variant of the commerce-good struct: [dwCommerceId] u32@0, [dwGoodNumber] u32@4.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u32 dwCommerceId", "off 0x04 u32 dwGoodNumber"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x1035b3e0",
+      "currentName": "FUN_1035b3e0",
+      "proposedName": "TdrFmtField_GuildBrief",
+      "subsystem": "guild",
+      "purpose": "Formats a guild-brief struct: [ullGuildId] u64@0 (\"%I64u\"), [szGuildName] string@8 (TdrText_FieldValueFmt), [bBoatsCount] u8@0x28 (\"0x%02x\"). Guild owns commerce boats; bBoatsCount = number of boats.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u64 ullGuildId",
+        "off 0x08 string szGuildName",
+        "off 0x28 u8 bBoatsCount (param_1+10 words)"
+      ],
+      "serverRelevance": "authoritative struct layout: guild id, name, boat count owned by guild"
+    },
+    {
+      "address": "0x1035c6a0",
+      "currentName": "FUN_1035c6a0",
+      "proposedName": "TdrPack_GuildIdList",
+      "subsystem": "guild",
+      "purpose": "Packs a guild-id list: [wCount] u16@0, then bounds-checks count>6 -> -7, emits [guildIds] array of u64 (each at word offset 1+idx*4 => byte off 4+idx*8) via ' %I64u'. Terminates with U8Z.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u16 wCount",
+        "CAP: wCount > 6 -> return -7 (max 6 guild ids)",
+        "guildIds[i] u64 at byte off 0x04 + i*8"
+      ],
+      "costs": ["membership/list limit: max 6 guild ids in this message"],
+      "serverRelevance": "validation: server must enforce/expect max 6 guild ids"
+    },
+    {
+      "address": "0x1035ca60",
+      "currentName": "FUN_1035ca60",
+      "proposedName": "TdrPack_GuildIdList_dup",
+      "subsystem": "guild",
+      "purpose": "Byte-identical duplicate of 0x1035c6a0 (guild-id list, cap 6). Separate TDR command instance.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u16 wCount", "CAP wCount>6 -> -7", "guildIds[i] u64 @ 0x04+i*8"],
+      "serverRelevance": "validation: max 6 guild ids"
+    },
+    {
+      "address": "0x1035e290",
+      "currentName": "FUN_1035e290",
+      "proposedName": "TdrFmtField_GuildCommerceStamp",
+      "subsystem": "guild-commerce",
+      "purpose": "Formats: [ullGuildId] u64@0, [iTimeStamp] i32@8, [iCommerceid] i32@0xc.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullGuildId", "off 0x08 i32 iTimeStamp", "off 0x0c i32 iCommerceid"],
+      "serverRelevance": "client-only debug formatter; layout authoritative"
+    },
+    {
+      "address": "0x1037b560",
+      "currentName": "FUN_1037b560",
+      "proposedName": "TdrFmtField_NameGuildValArg",
+      "subsystem": "social",
+      "purpose": "Formats a name/guild/value record: [szName] string@0 (32B slot), [szGuild] string@0x20 (32B slot), [iVal] i32@0x40, [iArg1] i32@0x44.",
+      "confidence": "high",
+      "formulas": ["off 0x00 char[0x20] szName", "off 0x20 char[0x20] szGuild", "off 0x40 i32 iVal", "off 0x44 i32 iArg1"],
+      "serverRelevance": "client-only debug formatter; 0x20-byte name fields authoritative"
+    },
+    {
+      "address": "0x10388330",
+      "currentName": "FUN_10388330",
+      "proposedName": "TdrPack_FrienderList",
+      "subsystem": "friends",
+      "purpose": "Packs a friend/friender byte list: [iFriendSize] i32@0, checks <0 -> -6 and >0x200 -> -7, then emits [szFriender] as an array of single bytes (each byte at off 4+idx) via DAT_11d9f710 fmt. U8Z terminated.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iFriendSize",
+        "CAP: iFriendSize < 0 -> -6, iFriendSize > 0x200 (512) -> -7",
+        "szFriender[i] u8 at byte off 4+i"
+      ],
+      "costs": ["friend list cap: max 512 (0x200) entries"],
+      "serverRelevance": "validation: server enforces friend-list max 512"
+    },
+    {
+      "address": "0x1038de20",
+      "currentName": "FUN_1038de20",
+      "proposedName": "TdrPack_FriendlyValue",
+      "subsystem": "friends",
+      "purpose": "Packs [ullDBID] u64@0, [dwFriendly] u32@8 (friendliness/intimacy value). Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullDBID", "off 0x08 u32 dwFriendly"],
+      "serverRelevance": "authoritative: dwFriendly (friend-point value) is server-owned social-graph state"
+    },
+    {
+      "address": "0x1038dec0",
+      "currentName": "FUN_1038dec0",
+      "proposedName": "TdrFmtField_FriendlyValue",
+      "subsystem": "friends",
+      "purpose": "Field-format variant: [ullDBID] u64@0, [dwFriendly] u32@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullDBID", "off 0x08 u32 dwFriendly"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103a2de0",
+      "currentName": "FUN_103a2de0",
+      "proposedName": "TdrFmtField_LeagueMatchTeam",
+      "subsystem": "league-matchmaking",
+      "purpose": "Formats a league/guild match sign-up + team struct. Fields: [iMatchID] i32@0, [dwSignUpID] u32@4, [iSignUpTM] i32@8, [ullGuildID] u64@0xc, [szGuildName] string@0x14, [iBestScore] i32@0x34, [iBestScoreTm] i32@0x38, [chAcceptRound] u8@0x3c, [szTeamName] string@0x3d, [dwCount] u32@0x65, then [astMembers] array capped at 4, each member formatted via FUN_103a2730.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iMatchID",
+        "off 0x04 u32 dwSignUpID",
+        "off 0x08 i32 iSignUpTM (signup timestamp)",
+        "off 0x0c u64 ullGuildID",
+        "off 0x14 string szGuildName (words 5..12)",
+        "off 0x34 i32 iBestScore",
+        "off 0x38 i32 iBestScoreTm",
+        "off 0x3c u8 chAcceptRound",
+        "off 0x3d string szTeamName",
+        "off 0x65 u32 dwCount (member count)",
+        "CAP: dwCount > 4 -> return -7 (max 4 team members)",
+        "astMembers base at byte off 0x69"
+      ],
+      "costs": ["team size cap: max 4 members per match team"],
+      "serverRelevance": "authoritative: league match scoring (iBestScore/iBestScoreTm) and team roster (max 4); server owns match state"
+    },
+    {
+      "address": "0x103ae4e0",
+      "currentName": "FUN_103ae4e0",
+      "proposedName": "TdrFmtField_MailHead",
+      "subsystem": "mail",
+      "purpose": "Formats a mail header: [ullMailId] u64@0, [bMailSource] u8@8, [bMailType] u8@9, [bMailSubType] u8@0xa, [bMailStatus] u8@0xb, [dwMailTime] u32@0xc, [dwMailLeftTime] u32@0x10, [dwMailBitmap] u32@0x14.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u64 ullMailId",
+        "off 0x08 u8 bMailSource",
+        "off 0x09 u8 bMailType",
+        "off 0x0a u8 bMailSubType",
+        "off 0x0b u8 bMailStatus",
+        "off 0x0c u32 dwMailTime",
+        "off 0x10 u32 dwMailLeftTime (TTL seconds remaining)",
+        "off 0x14 u32 dwMailBitmap"
+      ],
+      "serverRelevance": "authoritative struct: mail metadata incl TTL/expiry; server owns mail store"
+    },
+    {
+      "address": "0x103aead0",
+      "currentName": "FUN_103aead0",
+      "proposedName": "TdrDbgFmt_MailHeadMemo",
+      "subsystem": "mail",
+      "purpose": "Formats mail memo/content: [szTitle] string@0 (0x40 slot), [szMailFromName] string@0x40, [ullMailFrom] u64@0x61, [iAccessoriesNum] i32@0x69, [dwItemId] u32@0x6d, [bItemCount] u8@0x71. This is the shared MailHeadMemo formatter referenced by mail-list loops.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 char[0x40] szTitle",
+        "off 0x40 char[~0x21] szMailFromName",
+        "off 0x61 u64 ullMailFrom",
+        "off 0x69 i32 iAccessoriesNum (attachment count)",
+        "off 0x6d u32 dwItemId (attached item)",
+        "off 0x71 u8 bItemCount"
+      ],
+      "serverRelevance": "authoritative: mail attachment (item id + count) is server-owned"
+    },
+    {
+      "address": "0x103b22d0",
+      "currentName": "FUN_103b22d0",
+      "proposedName": "TdrFmtField_MailPosTypeWhy",
+      "subsystem": "mail",
+      "purpose": "Formats: [wMailListPos] u16@0, [bMailType] u8@2, [bMailSubType] u8@3, [bMailWhy] u8@4.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u16 wMailListPos", "off 0x02 u8 bMailType", "off 0x03 u8 bMailSubType", "off 0x04 u8 bMailWhy"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b27c0",
+      "currentName": "FUN_103b27c0",
+      "proposedName": "TdrFmt_MailListNotify",
+      "subsystem": "mail",
+      "purpose": "Formats a mail-list notify: [wMailListPos] u16@0, [bMailType] u8@2, [bMailSubType] u8@3, [iMailCount] i32@4, [iCount] i32@8, then [astMailListEntry] array capped at 300 formatted via TdrDbgFmt_MailHeadMemo.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u16 wMailListPos",
+        "off 0x02 u8 bMailType",
+        "off 0x03 u8 bMailSubType",
+        "off 0x04 i32 iMailCount",
+        "off 0x08 i32 iCount (entries in array)",
+        "CAP: iCount < 0 -> -6, iCount > 300 -> -7 (max 300 mail entries)"
+      ],
+      "costs": ["mailbox list cap: max 300 mail entries per notify"],
+      "serverRelevance": "validation: server bounds mail list to 300"
+    },
+    {
+      "address": "0x103b4d00",
+      "currentName": "FUN_103b4d00",
+      "proposedName": "TdrPack_MailTypeAndId",
+      "subsystem": "mail",
+      "purpose": "Packs [bMailType] u8@0, [ullMailId] u64@1 (unaligned, bytes 1..8). Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u8 bMailType", "off 0x01 u64 ullMailId (unaligned)"],
+      "serverRelevance": "client request packer; layout authoritative"
+    },
+    {
+      "address": "0x103b4db0",
+      "currentName": "FUN_103b4db0",
+      "proposedName": "TdrFmtField_MailTypeAndId",
+      "subsystem": "mail",
+      "purpose": "Field-format variant: [bMailType] u8@0, [ullMailId] u64@1.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u8 bMailType", "off 0x01 u64 ullMailId"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b54d0",
+      "currentName": "FUN_103b54d0",
+      "proposedName": "TdrPack_MailIdErrMsg",
+      "subsystem": "mail",
+      "purpose": "Packs [ullMailID] u64@0, [szErrMsg] string@8. Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailID", "off 0x08 string szErrMsg"],
+      "serverRelevance": "server->client response packer (mail op result + error text)"
+    },
+    {
+      "address": "0x103b5570",
+      "currentName": "FUN_103b5570",
+      "proposedName": "TdrFmtField_MailIdErrMsg",
+      "subsystem": "mail",
+      "purpose": "Field-format variant: [ullMailID] u64@0, [szErrMsg] string@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailID", "off 0x08 string szErrMsg"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b5f00",
+      "currentName": "FUN_103b5f00",
+      "proposedName": "TdrPack_MailId_A",
+      "subsystem": "mail",
+      "purpose": "Single-field packer: [ullMailId] u64@0. Buf NULL -> 0xffffffed (-19). One of several distinct mail-command packers carrying only a mail id.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client request packer (e.g. read/open/delete mail by id)"
+    },
+    {
+      "address": "0x103b5f80",
+      "currentName": "FUN_103b5f80",
+      "proposedName": "TdrFmtField_MailId_A",
+      "subsystem": "mail",
+      "purpose": "Field-format of single [ullMailId] u64@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b5fb0",
+      "currentName": "FUN_103b5fb0",
+      "proposedName": "TdrUnpackToStr_MailId_A",
+      "subsystem": "mail",
+      "purpose": "String-target variant of the ullMailId packer: writes into caller buffer of size param_3, NUL-terminating at min(len, size-1). Returns &DAT_11d9d32b (empty string) on bad args.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "NUL clamp: idx = min(written, bufsize-1)"],
+      "serverRelevance": "client-only debug/string formatter"
+    },
+    {
+      "address": "0x103b6040",
+      "currentName": "FUN_103b6040",
+      "proposedName": "TdrUnpackToBuf_MailId_A",
+      "subsystem": "mail",
+      "purpose": "Buffer-target variant (TdrBuf_PutNulAt) of the ullMailId packer.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only debug/buffer formatter"
+    },
+    {
+      "address": "0x103b61f0",
+      "currentName": "FUN_103b61f0",
+      "proposedName": "TdrPack_MailId_B",
+      "subsystem": "mail",
+      "purpose": "Another distinct single [ullMailId] u64@0 command packer (buf NULL -> -19).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client request packer (mail op by id)"
+    },
+    {
+      "address": "0x103b6270",
+      "currentName": "FUN_103b6270",
+      "proposedName": "TdrFmtField_MailId_B",
+      "subsystem": "mail",
+      "purpose": "Field-format of single ullMailId (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b62a0",
+      "currentName": "FUN_103b62a0",
+      "proposedName": "TdrUnpackToStr_MailId_B",
+      "subsystem": "mail",
+      "purpose": "String-target ullMailId variant (command B), clamps NUL to bufsize.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b6330",
+      "currentName": "FUN_103b6330",
+      "proposedName": "TdrUnpackToBuf_MailId_B",
+      "subsystem": "mail",
+      "purpose": "Buffer-target ullMailId variant (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b65f0",
+      "currentName": "FUN_103b65f0",
+      "proposedName": "TdrPack_MailIdErrMsg_B",
+      "subsystem": "mail",
+      "purpose": "[ullMailId] u64@0, [szErrMsg] string@8 packer (distinct command from 0x103b54d0).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 string szErrMsg"],
+      "serverRelevance": "server->client response packer"
+    },
+    {
+      "address": "0x103b6690",
+      "currentName": "FUN_103b6690",
+      "proposedName": "TdrFmtField_MailIdErrMsg_B",
+      "subsystem": "mail",
+      "purpose": "Field-format variant of ullMailId+szErrMsg (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 string szErrMsg"],
+      "serverRelevance": "client-only debug formatter"
+    },
+    {
+      "address": "0x103b71d0",
+      "currentName": "FUN_103b71d0",
+      "proposedName": "TdrPack_MailAccessoryDelReq",
+      "subsystem": "mail",
+      "purpose": "Packs a delete-accessory / batch-mail request: [iAccStoreLocation] i32@0, [iDelType] i32@4, [iCount] i32@8, then [mailId] array capped at 300 of u64 (each pair of words from param_1+3). U8Z terminated.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iAccStoreLocation",
+        "off 0x04 i32 iDelType",
+        "off 0x08 i32 iCount",
+        "CAP: iCount < 0 -> -6, iCount > 300 -> -7 (max 300 mail ids)",
+        "mailId[i] u64 at word off 3 + i*2 (byte off 0x0c + i*8)"
+      ],
+      "costs": ["batch mail-id cap: 300"],
+      "serverRelevance": "validation: server bounds batch to 300 mail ids"
+    },
+    {
+      "address": "0x103b75e0",
+      "currentName": "FUN_103b75e0",
+      "proposedName": "TdrFmtField_MailAccessoryOp",
+      "subsystem": "mail",
+      "purpose": "Formats mail-accessory op: [ullMailId] u64@0, [bMailType] u8@8, [iMailAccessoryIndex] i32@9, [iAccStoreLocation] i32@0xd, [iDelType] i32@0x11.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u64 ullMailId",
+        "off 0x08 u8 bMailType",
+        "off 0x09 i32 iMailAccessoryIndex",
+        "off 0x0d i32 iAccStoreLocation",
+        "off 0x11 i32 iDelType"
+      ],
+      "serverRelevance": "client-only debug formatter; layout authoritative"
+    },
+    {
+      "address": "0x103b79c0",
+      "currentName": "FUN_103b79c0",
+      "proposedName": "TdrFmtField_MailAccessoryResult",
+      "subsystem": "mail",
+      "purpose": "Formats mail-accessory result: [iResult] i32@0, [iArg1] i32@4, [ullMailId] u64@8, [iMailIndex] i32@0x10, [iMailAccType] i32@0x14, [bLocation] u8@0x18.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iResult",
+        "off 0x04 i32 iArg1",
+        "off 0x08 u64 ullMailId",
+        "off 0x10 i32 iMailIndex",
+        "off 0x14 i32 iMailAccType",
+        "off 0x18 u8 bLocation"
+      ],
+      "serverRelevance": "server->client result formatter"
+    },
+    {
+      "address": "0x103b7e00",
+      "currentName": "FUN_103b7e00",
+      "proposedName": "TdrFmt_MailNotify",
+      "subsystem": "mail",
+      "purpose": "Formats a mail push notify: [bMailType] u8@0, [chMailNotifyType] u8@1, [dwMailCount] u32@2, [stMailListEntry] nested via TdrDbgFmt_MailHeadMemo, [dwUin] u32@0x90.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u8 bMailType",
+        "off 0x01 u8 chMailNotifyType",
+        "off 0x02 u32 dwMailCount",
+        "nested MailHeadMemo at off 0x06",
+        "off 0x90 u32 dwUin (sender uin)"
+      ],
+      "serverRelevance": "server->client push formatter"
+    },
+    {
+      "address": "0x103b80f0",
+      "currentName": "FUN_103b80f0",
+      "proposedName": "TdrPack_MailId_C",
+      "subsystem": "mail",
+      "purpose": "Distinct single [ullMailId] u64@0 command packer.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client request packer"
+    },
+    {
+      "address": "0x103b8170",
+      "currentName": "FUN_103b8170",
+      "proposedName": "TdrFmtField_MailId_C",
+      "subsystem": "mail",
+      "purpose": "Field-format single ullMailId (command C).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b81a0",
+      "currentName": "FUN_103b81a0",
+      "proposedName": "TdrUnpackToStr_MailId_C",
+      "subsystem": "mail",
+      "purpose": "String-target ullMailId variant (command C).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b8230",
+      "currentName": "FUN_103b8230",
+      "proposedName": "TdrUnpackToBuf_MailId_C",
+      "subsystem": "mail",
+      "purpose": "Buffer-target ullMailId variant (command C).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b8430",
+      "currentName": "FUN_103b8430",
+      "proposedName": "TdrPack_MailIdResult_A",
+      "subsystem": "mail",
+      "purpose": "Packs [ullMailID] u64@0, [iResult] i32@8. Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailID", "off 0x08 i32 iResult"],
+      "serverRelevance": "server->client result packer"
+    },
+    {
+      "address": "0x103b84d0",
+      "currentName": "FUN_103b84d0",
+      "proposedName": "TdrFmtField_MailIdResult_A",
+      "subsystem": "mail",
+      "purpose": "Field-format variant: [ullMailID] u64@0, [iResult] i32@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailID", "off 0x08 i32 iResult"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b8eb0",
+      "currentName": "FUN_103b8eb0",
+      "proposedName": "TdrFmtField_MailRemind",
+      "subsystem": "mail",
+      "purpose": "Formats mail-remind: [bMailType] u8@0, [bMailRemind] u8@1 (param_1[1] byte), [iMailRemindCount] i32@8 (param_1+2 word).",
+      "confidence": "medium",
+      "formulas": ["off 0x00 u8 bMailType", "off 0x04 u8 bMailRemind (param_1[1])", "off 0x08 i32 iMailRemindCount"],
+      "serverRelevance": "client-only formatter",
+      "notes": "bMailRemind read as param_1[1] (word) but formatted 0x%02x; offset ambiguity noted"
+    },
+    {
+      "address": "0x103b9140",
+      "currentName": "FUN_103b9140",
+      "proposedName": "TdrPack_MailId_D",
+      "subsystem": "mail",
+      "purpose": "Distinct single [ullMailId] u64@0 command packer.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client request packer"
+    },
+    {
+      "address": "0x103b91c0",
+      "currentName": "FUN_103b91c0",
+      "proposedName": "TdrFmtField_MailId_D",
+      "subsystem": "mail",
+      "purpose": "Field-format single ullMailId (command D).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b91f0",
+      "currentName": "FUN_103b91f0",
+      "proposedName": "TdrUnpackToStr_MailId_D",
+      "subsystem": "mail",
+      "purpose": "String-target ullMailId variant (command D).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b9280",
+      "currentName": "FUN_103b9280",
+      "proposedName": "TdrUnpackToBuf_MailId_D",
+      "subsystem": "mail",
+      "purpose": "Buffer-target ullMailId variant (command D).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b9480",
+      "currentName": "FUN_103b9480",
+      "proposedName": "TdrPack_MailIdResult_B",
+      "subsystem": "mail",
+      "purpose": "Packs [ullMailId] u64@0, [iResult] i32@8 (distinct command).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 i32 iResult"],
+      "serverRelevance": "server->client result packer"
+    },
+    {
+      "address": "0x103b9520",
+      "currentName": "FUN_103b9520",
+      "proposedName": "TdrFmtField_MailIdResult_B",
+      "subsystem": "mail",
+      "purpose": "Field-format variant: [ullMailId] u64@0, [iResult] i32@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 i32 iResult"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103b9890",
+      "currentName": "FUN_103b9890",
+      "proposedName": "TdrFmtField_MailCountSummary",
+      "subsystem": "mail",
+      "purpose": "Formats mail summary counts: [bMailType] u8@0, [bMailCount] u8@1 (param_1[1]), [bMailunRead] u8@2 (param_1[2]).",
+      "confidence": "medium",
+      "formulas": ["off 0x00 u8 bMailType", "bMailCount (param_1[1])", "bMailunRead (param_1[2])"],
+      "serverRelevance": "client-only formatter",
+      "notes": "param_1[1]/[2] read as words but formatted 0x%02x; likely byte fields, offset ambiguity"
+    },
+    {
+      "address": "0x103ba400",
+      "currentName": "FUN_103ba400",
+      "proposedName": "TdrPack_MailIdList",
+      "subsystem": "mail",
+      "purpose": "Packs a mail-id list: [iCount] i32@0, cap 300, then [mailId] array of u64 (word off 1 + i*2). U8Z terminated.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iCount",
+        "CAP: iCount < 0 -> -6, iCount > 300 -> -7",
+        "mailId[i] u64 at byte off 0x04 + i*8"
+      ],
+      "costs": ["mail-id list cap: 300"],
+      "serverRelevance": "validation: max 300 mail ids"
+    },
+    {
+      "address": "0x103ba720",
+      "currentName": "FUN_103ba720",
+      "proposedName": "TdrPack_MailIdResult_C",
+      "subsystem": "mail",
+      "purpose": "Packs [ullMailId] u64@0, [iResult] i32@8 (distinct command).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 i32 iResult"],
+      "serverRelevance": "server->client result packer"
+    },
+    {
+      "address": "0x103ba7c0",
+      "currentName": "FUN_103ba7c0",
+      "proposedName": "TdrFmtField_MailIdResult_C",
+      "subsystem": "mail",
+      "purpose": "Field-format variant: [ullMailId] u64@0, [iResult] i32@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullMailId", "off 0x08 i32 iResult"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103ca230",
+      "currentName": "FUN_103ca230",
+      "proposedName": "TdrFmtField_LeagueApply",
+      "subsystem": "league",
+      "purpose": "Formats a league/faction apply struct: [iPhase] i32@0, [iCamp] i32@4, [iApplyType] i32@8, [ullGuild] u64@0xc.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iPhase",
+        "off 0x04 i32 iCamp",
+        "off 0x08 i32 iApplyType",
+        "off 0x0c u64 ullGuild"
+      ],
+      "serverRelevance": "authoritative: league phase/camp/apply state server-owned"
+    },
+    {
+      "address": "0x103ca4e0",
+      "currentName": "FUN_103ca4e0",
+      "proposedName": "TdrPack_GuildId_A",
+      "subsystem": "guild",
+      "purpose": "Single-field [ullGuild] u64@0 command packer (buf NULL -> -19).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullGuild"],
+      "serverRelevance": "client request packer (guild op by id)"
+    },
+    {
+      "address": "0x103ca560",
+      "currentName": "FUN_103ca560",
+      "proposedName": "TdrFmtField_GuildId_A",
+      "subsystem": "guild",
+      "purpose": "Field-format single [ullGuild] u64@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullGuild"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103ca590",
+      "currentName": "FUN_103ca590",
+      "proposedName": "TdrUnpackToStr_GuildId_A",
+      "subsystem": "guild",
+      "purpose": "String-target [ullGuild] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullGuild"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103ca620",
+      "currentName": "FUN_103ca620",
+      "proposedName": "TdrUnpackToBuf_GuildId_A",
+      "subsystem": "guild",
+      "purpose": "Buffer-target [ullGuild] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullGuild"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103ca8e0",
+      "currentName": "FUN_103ca8e0",
+      "proposedName": "TdrFmt_GuildSoulCurrency",
+      "subsystem": "guild-funds",
+      "purpose": "Formats guild soul currencies + nested guild struct: [ullRedSoul] u64@0, [ullYellowSoul] u64@8, [stGuild] nested via FUN_1033ac40. Red/Yellow Soul are guild resource currencies.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u64 ullRedSoul (guild red-soul balance)",
+        "off 0x08 u64 ullYellowSoul (guild yellow-soul balance)",
+        "nested guild struct after off 0x10 via FUN_1033ac40"
+      ],
+      "costs": ["guild resource currencies: RedSoul, YellowSoul (64-bit balances)"],
+      "serverRelevance": "authoritative: guild fund/resource balances server-owned"
+    },
+    {
+      "address": "0x103dc0a0",
+      "currentName": "FUN_103dc0a0",
+      "proposedName": "TdrPack_ClanerId_A",
+      "subsystem": "guild-membership",
+      "purpose": "Single-field [ullClaner] u64@0 packer (claner = clan/guild member id). Buf NULL -> -19.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client request packer (member op by id)"
+    },
+    {
+      "address": "0x103dc120",
+      "currentName": "FUN_103dc120",
+      "proposedName": "TdrFmtField_ClanerId_A",
+      "subsystem": "guild-membership",
+      "purpose": "Field-format single [ullClaner] u64@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc150",
+      "currentName": "FUN_103dc150",
+      "proposedName": "TdrUnpackToStr_ClanerId_A",
+      "subsystem": "guild-membership",
+      "purpose": "String-target [ullClaner] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc1e0",
+      "currentName": "FUN_103dc1e0",
+      "proposedName": "TdrUnpackToBuf_ClanerId_A",
+      "subsystem": "guild-membership",
+      "purpose": "Buffer-target [ullClaner] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc390",
+      "currentName": "FUN_103dc390",
+      "proposedName": "TdrPack_ClanerId_B",
+      "subsystem": "guild-membership",
+      "purpose": "Distinct single [ullClaner] u64@0 command packer.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client request packer"
+    },
+    {
+      "address": "0x103dc410",
+      "currentName": "FUN_103dc410",
+      "proposedName": "TdrFmtField_ClanerId_B",
+      "subsystem": "guild-membership",
+      "purpose": "Field-format single ullClaner (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc440",
+      "currentName": "FUN_103dc440",
+      "proposedName": "TdrUnpackToStr_ClanerId_B",
+      "subsystem": "guild-membership",
+      "purpose": "String-target ullClaner variant (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc4d0",
+      "currentName": "FUN_103dc4d0",
+      "proposedName": "TdrUnpackToBuf_ClanerId_B",
+      "subsystem": "guild-membership",
+      "purpose": "Buffer-target ullClaner variant (command B).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dc780",
+      "currentName": "FUN_103dc780",
+      "proposedName": "TdrPack_ClanerIdNote",
+      "subsystem": "guild-membership",
+      "purpose": "Packs [ullClaner] u64@0, [szNote] string@8 (member note/reason). Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner", "off 0x08 string szNote"],
+      "serverRelevance": "client request packer (member action with note)"
+    },
+    {
+      "address": "0x103dc820",
+      "currentName": "FUN_103dc820",
+      "proposedName": "TdrFmtField_ClanerIdNote",
+      "subsystem": "guild-membership",
+      "purpose": "Field-format variant: [ullClaner] u64@0, [szNote] string@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClaner", "off 0x08 string szNote"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dd070",
+      "currentName": "FUN_103dd070",
+      "proposedName": "TdrPack_ClanId_A",
+      "subsystem": "guild",
+      "purpose": "Single-field [ullClan] u64@0 command packer (clan = guild).",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan"],
+      "serverRelevance": "client request packer (guild op by id)"
+    },
+    {
+      "address": "0x103dd0f0",
+      "currentName": "FUN_103dd0f0",
+      "proposedName": "TdrFmtField_ClanId_A",
+      "subsystem": "guild",
+      "purpose": "Field-format single [ullClan] u64@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dd120",
+      "currentName": "FUN_103dd120",
+      "proposedName": "TdrUnpackToStr_ClanId_A",
+      "subsystem": "guild",
+      "purpose": "String-target [ullClan] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dd1b0",
+      "currentName": "FUN_103dd1b0",
+      "proposedName": "TdrUnpackToBuf_ClanId_A",
+      "subsystem": "guild",
+      "purpose": "Buffer-target [ullClan] u64@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103dd3b0",
+      "currentName": "FUN_103dd3b0",
+      "proposedName": "TdrPack_ClanIdReason",
+      "subsystem": "guild",
+      "purpose": "Packs [ullClan] u64@0, [iReason] i32@8 (e.g. quit/kick/reject reason code). Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan", "off 0x08 i32 iReason"],
+      "serverRelevance": "server<->client: guild action reason code"
+    },
+    {
+      "address": "0x103dd450",
+      "currentName": "FUN_103dd450",
+      "proposedName": "TdrFmtField_ClanIdReason",
+      "subsystem": "guild",
+      "purpose": "Field-format variant: [ullClan] u64@0, [iReason] i32@8.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u64 ullClan", "off 0x08 i32 iReason"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103ddae0",
+      "currentName": "FUN_103ddae0",
+      "proposedName": "TdrPack_LeagueLevelList_A",
+      "subsystem": "league",
+      "purpose": "Packs a league level list: [iLeagueID] i32@0, [iCount] i32@4, cap 10, then [levelIDs] array of i32 (word off 2 + i). U8Z terminated.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iLeagueID",
+        "off 0x04 i32 iCount",
+        "CAP: iCount < 0 -> -6, iCount > 10 -> -7 (max 10 level ids)",
+        "levelIDs[i] i32 at byte off 0x08 + i*4"
+      ],
+      "costs": ["league level list cap: 10"],
+      "serverRelevance": "validation: max 10 league level ids"
+    },
+    {
+      "address": "0x103de7d0",
+      "currentName": "FUN_103de7d0",
+      "proposedName": "TdrPack_LeagueType",
+      "subsystem": "league",
+      "purpose": "Single-field [iLeagueType] i32@0 command packer. Buf NULL -> -19.",
+      "confidence": "high",
+      "formulas": ["off 0x00 i32 iLeagueType"],
+      "serverRelevance": "client request packer (query by league type)"
+    },
+    {
+      "address": "0x103de850",
+      "currentName": "FUN_103de850",
+      "proposedName": "TdrFmtField_LeagueType",
+      "subsystem": "league",
+      "purpose": "Field-format single [iLeagueType] i32@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 i32 iLeagueType"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103de880",
+      "currentName": "FUN_103de880",
+      "proposedName": "TdrUnpackToStr_LeagueType",
+      "subsystem": "league",
+      "purpose": "String-target [iLeagueType] i32@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 i32 iLeagueType"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103de910",
+      "currentName": "FUN_103de910",
+      "proposedName": "TdrUnpackToBuf_LeagueType",
+      "subsystem": "league",
+      "purpose": "Buffer-target [iLeagueType] i32@0 variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 i32 iLeagueType"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103deee0",
+      "currentName": "FUN_103deee0",
+      "proposedName": "TdrPack_LeagueLevelList_B",
+      "subsystem": "league",
+      "purpose": "Packs [iLeagueType] i32@0, [iCount] i32@4, cap 10, [levelIDs] array i32. Same shape as 0x103ddae0 but keyed by league type.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 i32 iLeagueType",
+        "off 0x04 i32 iCount",
+        "CAP: iCount < 0 -> -6, iCount > 10 -> -7",
+        "levelIDs[i] i32 at byte off 0x08 + i*4"
+      ],
+      "costs": ["league level list cap: 10"],
+      "serverRelevance": "validation: max 10 league level ids"
+    },
+    {
+      "address": "0x103df6f0",
+      "currentName": "FUN_103df6f0",
+      "proposedName": "TdrPack_ClanName",
+      "subsystem": "guild",
+      "purpose": "Single-field [szClanName] string@0 packer. Buf NULL -> -19.",
+      "confidence": "high",
+      "formulas": ["off 0x00 string szClanName"],
+      "serverRelevance": "client request packer (create/query guild by name)"
+    },
+    {
+      "address": "0x103df760",
+      "currentName": "FUN_103df760",
+      "proposedName": "TdrFmtField_ClanName",
+      "subsystem": "guild",
+      "purpose": "Field-format single [szClanName] string@0.",
+      "confidence": "high",
+      "formulas": ["off 0x00 string szClanName"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103df780",
+      "currentName": "FUN_103df780",
+      "proposedName": "TdrUnpackToStr_ClanName",
+      "subsystem": "guild",
+      "purpose": "String-target [szClanName] variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 string szClanName"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103df800",
+      "currentName": "FUN_103df800",
+      "proposedName": "TdrUnpackToBuf_ClanName",
+      "subsystem": "guild",
+      "purpose": "Buffer-target [szClanName] variant.",
+      "confidence": "high",
+      "formulas": ["off 0x00 string szClanName"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x103e2c60",
+      "currentName": "FUN_103e2c60",
+      "proposedName": "TdrFmt_GuildRankInfo",
+      "subsystem": "guild-ranking",
+      "purpose": "Formats a guild ranking/leaderboard record. Fields: [ullId] u64@0, [szName] string@8, [iScore] i32@0x28, [iRank] i32@0x2c, [iCapacity] i32@0x30 (member cap), [iClanersCount] i32@0x34 (current members), [iOnlineClanersCount] i32@0x38, [iClanersAvgLevel] i32@0x3c, [llScoreUpdate] i64@0x40, [iPVEScore] i32@0x48, [iINDScore] i32@0x4c, [iINDPV] i32@0x50.",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 u64 ullId (guild id)",
+        "off 0x08 string szName (words 2..9, 0x20 slot)",
+        "off 0x28 i32 iScore (total guild score)",
+        "off 0x2c i32 iRank",
+        "off 0x30 i32 iCapacity (max member slots)",
+        "off 0x34 i32 iClanersCount (current member count)",
+        "off 0x38 i32 iOnlineClanersCount",
+        "off 0x3c i32 iClanersAvgLevel",
+        "off 0x40 i64 llScoreUpdate (score timestamp)",
+        "off 0x48 i32 iPVEScore",
+        "off 0x4c i32 iINDScore",
+        "off 0x50 i32 iINDPV"
+      ],
+      "costs": ["iCapacity = guild member cap (server-configured max slots)"],
+      "serverRelevance": "authoritative: guild score/rank/capacity/member counts server-computed; PVE and IND(individual?) score components"
+    },
+    {
+      "address": "0x103e4a50",
+      "currentName": "FUN_103e4a50",
+      "proposedName": "TdrFmtField_NameGuildIntegral",
+      "subsystem": "guild-ranking",
+      "purpose": "Formats a ranking/contribution row: [szName] string@0 (0x20), [szGuild] string@0x20 (0x20), [iTime] i32@0x40, [iIntegral] i32@0x44 (points/integral score).",
+      "confidence": "high",
+      "formulas": [
+        "off 0x00 char[0x20] szName",
+        "off 0x20 char[0x20] szGuild",
+        "off 0x40 i32 iTime",
+        "off 0x44 i32 iIntegral (contribution/score points)"
+      ],
+      "serverRelevance": "authoritative: iIntegral (contribution points) server-owned"
+    },
+    {
+      "address": "0x10414da0",
+      "currentName": "FUN_10414da0",
+      "proposedName": "TdrPack_FactionAgree",
+      "subsystem": "faction",
+      "purpose": "Packs a faction agree/vote: [chAgree] u8@0, [wFaction] u16@1. Buf NULL -> -0x13.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u8 chAgree (0/1 vote)", "off 0x01 u16 wFaction (faction id)"],
+      "serverRelevance": "client request packer (faction agreement); server owns faction state"
+    },
+    {
+      "address": "0x10414e50",
+      "currentName": "FUN_10414e50",
+      "proposedName": "TdrFmtField_FactionAgree",
+      "subsystem": "faction",
+      "purpose": "Field-format variant: [chAgree] u8@0, [wFaction] u16@1.",
+      "confidence": "high",
+      "formulas": ["off 0x00 u8 chAgree", "off 0x01 u16 wFaction"],
+      "serverRelevance": "client-only formatter"
+    },
+    {
+      "address": "0x104d92b0",
+      "currentName": "FUN_104d92b0",
+      "proposedName": "CLeagueInfo::LookupById",
+      "subsystem": "league-config",
+      "purpose": "Looks up a CLeagueInfo config record by id using a 2D paged table. Resolves the CLeagueInfo manager singleton (CLeagueInfo::GetManager, else CInfoManager::FindByName(\"CLeagueInfo\")). For a valid id: page = (id - base)/stride, slot = (id - base)%stride; returns table[page][slot] or 0.",
+      "confidence": "medium",
+      "formulas": [
+        "mgr[0xc] = id base offset (subtracted from param_1)",
+        "mgr[9] = total count (id-base must be < this)",
+        "mgr[10] = stride (records per page)",
+        "mgr[8] = page-pointer table base",
+        "record = *(mgr[8] + (idx/stride)*4); return *(record + (idx%stride)*4)",
+        "id==-1 or (id==0 && mgr[0xc]==0) or mgr[10]==0 -> return 0"
+      ],
+      "serverRelevance": "client-side static config table lookup for league definitions (data-driven; server needs same league config table)"
+    },
+    {
+      "address": "0x104e4f00",
+      "currentName": "FUN_104e4f00",
+      "proposedName": "CNpcGiftUI::BuildGiftList",
+      "subsystem": "social-npc",
+      "purpose": "Builds the NPC friendship-gift list UI data model. Iterates an NPC gift group (CNpcAtdGroupInfo::FindGroupId) and for each gift entry populates a script table with itemIconPathName, ItemID, slotid, IsUnLock, itemName, friendvalue under _giftList/NPC_GIFT_CLASS_NAME. Empty slots get default/zeroed fields.",
+      "confidence": "medium",
+      "formulas": [
+        "per-entry fields: itemIconPathName, ItemID, slotid, IsUnLock, itemName, friendvalue",
+        "friendvalue derived from FUN_113f9300(5,...) + FUN_113f9300(0,...) sum for unlocked entries"
+      ],
+      "serverRelevance": "client-only UI builder; NPC gift->friendvalue mapping comes from static config",
+      "notes": "friendvalue = friendship points granted by gifting item to NPC; actual application is server-authoritative"
+    },
+    {
+      "address": "0x10521420",
+      "currentName": "FUN_10521420",
+      "proposedName": "CSoulBeastView::RegisterScriptMethods",
+      "subsystem": "ui-registration",
+      "purpose": "Large stock UI-model registration for the Soul Beast (pet/companion) view. Binds ~40 Flash/script callbacks (InitModel, GetSoulStoneData, StageUp, UnlockStage, LearnAttr, FeedSoulBeast, GetSoulBeastData/Detail/Face/Food, SendSoulBeastSocialAction, IsAchieveMaxLevel, etc.) via FUN_100b62c0/FUN_10527090. Sets gfx_draw_only/gfx_draw cvar handles at obj+0x2c/+0x30.",
+      "confidence": "medium",
+      "formulas": ["obj+0x2c = cvar \"gfx_draw_only\"", "obj+0x30 = cvar \"gfx_draw\""],
+      "serverRelevance": "client-only UI plumbing (CryEngine ScaleForm binding); no server logic",
+      "notes": "Soul Beast is social/companion progression; only method names are informative here"
+    },
+    {
+      "address": "0x107eca30",
+      "currentName": "FUN_107eca30",
+      "proposedName": "CPlayerTaskView::RegisterScriptMethods",
+      "subsystem": "ui-registration",
+      "purpose": "Large stock UI-model registration for the Player Task/Quest view. Binds getters (_getPlayerTasksList, _getNpcTaskInfo, _getPlayerTasksChapter, _getTaskTimeLeftFunc, GetNpcOrgInfo) and handlers (OnAcceptTask, OnGiveupTask, OnPlayerShareTask, OnCompleteNpcTaskDlg, NpcTaskAwardClick, QuestTrace*, etc.) via FUN_100b62c0/FUN_107ff5b0/FUN_104d0ee0.",
+      "confidence": "medium",
+      "formulas": [],
+      "serverRelevance": "client-only UI plumbing; method names catalog quest/task client actions",
+      "notes": "Not guild tasks per se — player/NPC quest UI. Related task reward preview in 0x107eef70."
+    },
+    {
+      "address": "0x107eef70",
+      "currentName": "FUN_107eef70",
+      "proposedName": "CPlayerTaskView::BuildTaskDetailModel",
+      "subsystem": "quest-rewards",
+      "purpose": "Builds the player-task detail UI data model including a client-side REWARD PREVIEW. Reads the task's reward groups and computes displayed amounts scaled by CPlayer::GetHuntRankOrCount. Populates task_awardList / task_selectawardList (icon/slotid/ItemID/count) and scalar fields taskName, taskLevel, queststatus, cantGiveup, bTeam, bRepeat, plus reward scalars: farm_actuarialpoint, gold_bind, hunter_exp, hunter_fund, hunter_contribution, huntingCredit, npcfriendvalue. Also fills task_targets (nTargetID1..5, strTarget1..3, nOpType, nCurCount, nMaxCount).",
+      "confidence": "medium",
+      "formulas": [
+        "reward preview = (float)(int)reward[2] * (float)GetHuntRankOrCount(...) cast to int  (rank-scaled quantity)",
+        "reward group selector FUN_10804cd0/40/80/900/9c0/a00 keyed by type codes: 0x18, 0x19, 0x21, 0x24",
+        "type 0x18 -> gold_bind (reward[3]*cnt) and DAT_11dc0944 (reward[2]*cnt)",
+        "type 0x21 -> hunter_exp = reward[2], hunter_fund = reward[3], hunter_contribution = *(rec+4)",
+        "farm_actuarialpoint = reward[2] * huntRankValue",
+        "queststatus = *(questState+0x14); bTeam = (teamMemberCount>=2); bRepeat = *(task+0x80)",
+        "npcfriendvalue = *(npcInfo+8)"
+      ],
+      "costs": [
+        "reward channels: gold_bind (bound gold), hunter_exp, hunter_fund, hunter_contribution, huntingCredit, farm_actuarialpoint, npcfriendvalue",
+        "reward type codes: 0x18 gold, 0x19 farm actuarial, 0x21 exp/fund/contribution, 0x24 hunting credit"
+      ],
+      "serverRelevance": "client-only display/preview; ACTUAL reward grant is server-authoritative. Values are rank-scaled predictions from static task config x hunt-rank multiplier",
+      "notes": "Confirms hunter_fund and hunter_contribution as distinct player-progression currencies granted by quests; useful for server reward-grant parity but numbers come from task config tables not this code"
+    }
+  ]
+}

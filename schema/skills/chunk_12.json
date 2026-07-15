@@ -1,0 +1,1016 @@
+{
+  "chunkIndex": 12,
+  "functions": [
+    {
+      "address": "0x11685450",
+      "currentName": "FUN_11685450",
+      "proposedName": "CLemonSkillInfo::ParseConfig",
+      "subsystem": "skills",
+      "purpose": "XML/attr config loader for a 'LemonSkill' record. Reads sub-record at param_1+0x9c (0x24-byte stride records), then reads the wide-string attribute 'LemonSkill', tokenizes it on ';' and atoi()s each token into an int vector (the skill-id list).",
+      "formulas": [
+        "Delimiter = 0x3b = ';' (passed to tokenizer FUN_100e4b30).",
+        "Per token: local_470 = atoi(token); token records stride 0x18 (24) bytes (iVar8 += 0x18).",
+        "Sub-record vector at param_1+0x9c grows by 0x24 (36) bytes per element; when *(param_1+0x9c)==*(param_1+0xa0) a new element is emplaced (FUN_11690f00) else FUN_1167a440 fills in place and advances +0x24.",
+        "int vector push: *(iVar5-8) == *(iVar5-4) -> grow (FUN_10463c40) else *piVar1=val; *(iVar5-8)+=4."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only config loader, but defines the authoritative schema: 'LemonSkill' is a ';'-separated list of skill IDs stored as an int vector.",
+      "confidence": "medium",
+      "notes": "vtbl calls on param_2: +0x10=HasAttr, +0x24=GetString. FUN_100f67b0 registers the attr name; DAT flag bits are one-time init guards. FUN_11a89daa=stack-cookie check."
+    },
+    {
+      "address": "0x1168b9e0",
+      "currentName": "FUN_1168b9e0",
+      "proposedName": "CMonsterPartInfo::ParseConfig",
+      "subsystem": "monster/skills",
+      "purpose": "Config loader for a monster body-part record (part-break / stagger / elemental-buildup definition). Reads PartID (looks up/creates part record iVar2 via FUN_11680c60), PartName, then per-element resistance/accumulation values, Scar, and a 5-row table of per-attack-type loot/damage columns.",
+      "formulas": [
+        "iVar2+0x14 = Unbalance (float, KO/stagger buildup), iVar2+0x18 = UnbalanceMulti (float, default DAT_11de9978)",
+        "iVar2+0x1c = Fall (float, topple/mount buildup), iVar2+0x20 = FallMulti (float)",
+        "iVar2+0x24 = WaterAcc (uint), iVar2+0x28 = WaterAccMulti (float)",
+        "iVar2+0x2c = FireAcc (uint), iVar2+0x30 = FireAccMulti (float)",
+        "iVar2+0x34 = ElectricAcc (uint), iVar2+0x38 = ElectricAccMulti (float)",
+        "iVar2+0x3c = DragonAcc (uint), iVar2+0x40 = DragonAccMulti (float)",
+        "iVar2+0x44 = IceAcc (uint), iVar2+0x48 = IceAccMulti (float)",
+        "iVar2+0x4c = Scar (float, wound buildup)",
+        "Column loop: 5 iterations (index 0..4, iVar3 step 0x10 until <0x50). Per row it reads string arrays LootSkillLv%d, DmgVal%d, Cut%d, Hammer%d, Shoot%d, Fire%d, Water%d, Electric%d, Dragon%d, Ice%d, ProcessLv%d (each %d = 1..5).",
+        "Row records: one at iVar2+0x58 stride 0xd*4=0x34 (52 bytes) carrying {back-ptr=iVar2, index}; one at iVar2+0x198 stride 4 (float LootSkillLv). Bitmasks built: field local_558 bit0=Cut present, bit1=Hammer; field uVar9 bits0..4 = Shoot/Fire/Water/Electric/Dragon (per-column present flags).",
+        "iVar2+4 set to 1 (record-loaded flag) at end."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-relevant: defines monster part-break thresholds (Unbalance/Fall/Scar), elemental status accumulation caps per part, and multipliers the server needs to compute KO/topple/wound and elemental buildup.",
+      "confidence": "medium",
+      "notes": "DAT_11de9978 = default multiplier constant (uninitialized in dump; likely 1.0f). Also formats 'Parts.%s.' and recurses FUN_1188e230. vtbl +0x20=GetInt, +0x2c=GetUInt(byref), +0x30=GetFloat, +0x34=GetDouble(byref)."
+    },
+    {
+      "address": "0x116aa680",
+      "currentName": "FUN_116aa680",
+      "proposedName": "CPlayerBuffState::Refresh",
+      "subsystem": "buffs/status",
+      "purpose": "Refreshes an entity's active buff/abnormal-state display+selection. Iterates the buff-entry vector (param_1+0x42c..0x430), calls per-buff update (FUN_1186e760, FUN_116ab0a0), selects the highest-priority abnormal state, extracts two special buff values, and does {token} text substitution for status HUD strings.",
+      "formulas": [
+        "Buff-entry vector: base=*(param_1+0x42c), end=*(param_1+0x430), stride 4; each entry object has buff-info sub at *entry+0x118 and secondary at *entry+0x168; entries collected when either is nonzero (cap 100).",
+        "Priority selection scans for entry with *(buff+0xf4)==1, then ==2, then ==3 (abnormal-status priority order 1>2>3).",
+        "If a buff has *(buff+0x50)==0x3ed (1005): param_1+0x420 = *(buff+0x144).",
+        "If a buff has *(buff+0x50)==0x3ef (1007): param_1+0x428 = *(buff+0x144).",
+        "Text substitution tokens '{'=0x7b, '}'=0x7d; 4 replacement key/value pairs (local_84/local_5c/local_34/local_c) via FUN_116a71d0/FUN_10897f50."
+      ],
+      "costs": [],
+      "serverRelevance": "mixed: abnormal-status priority ordering (fields at buff+0xf4 values 1/2/3) and buff-type ids (buff+0x50) are gameplay-authoritative concepts; the {token} string build is client HUD. Value read from buff+0x144.",
+      "confidence": "medium",
+      "notes": "Buff struct offsets: +0x50=type/id, +0xf4=priority class, +0x144=magnitude/value, +0x118 & +0x168=sub-info ptrs. Buff-id constants 0x3ed(1005) and 0x3ef(1007)."
+    },
+    {
+      "address": "0x116cb450",
+      "currentName": "FUN_116cb450",
+      "proposedName": "CBuffEffect_PlayerLockHP::ctor",
+      "subsystem": "buffs",
+      "purpose": "Constructor for the 'PlayerLockHPBuff' buff-effect object. Installs vtable PTR_FUN_11d3f5b4 and sets the effect name string 'PlayerLockHPBuff'. Object size 0x24.",
+      "formulas": ["Allocated size 0x24 (FUN_10c3d580(0x24)). *param_1 = &PTR_FUN_11d3f5b4."],
+      "costs": [],
+      "serverRelevance": "client-side buff-effect instance (HP-lock buff behavior class). Named effect the server may also reference by name.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x116cd660",
+      "currentName": "FUN_116cd660",
+      "proposedName": "CSkillInfo::FindBySkillId",
+      "subsystem": "skills",
+      "purpose": "Looks up a static skill definition by skill id via the CSkillInfo manager, bounds-checks the group array, and on success returns the resolved row (FUN_116cd100).",
+      "formulas": [
+        "groupIndex = skillId/100000 - *(mgr+0x24) (base group id).",
+        "Valid if groupIndex in [0, (*(mgr+0x18)-*(mgr+0x14))>>2) and *(mgr+0x14 array[groupIndex]) != 0.",
+        "So skill IDs encode group = skillId/100000."
+      ],
+      "costs": [],
+      "serverRelevance": "validation/lookup: server must use the same skill-id encoding (skillId / 100000 = skill group) to resolve skill definitions.",
+      "confidence": "high",
+      "notes": "CSkillInfo manager via CSkillInfo__GetInfoManager. mgr+0x14=array base, +0x18=array end, +0x24=base group id."
+    },
+    {
+      "address": "0x116cd6c0",
+      "currentName": "FUN_116cd6c0",
+      "proposedName": "CSkillInfo::wrapper_116cd1b0",
+      "subsystem": "skills",
+      "purpose": "Thin wrapper: ensures the CSkillInfo manager singleton is initialized then calls FUN_116cd1b0(param_1).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "low"
+    },
+    {
+      "address": "0x116cd6e0",
+      "currentName": "FUN_116cd6e0",
+      "proposedName": "CSkillInfo::callVtbl0x28",
+      "subsystem": "skills",
+      "purpose": "Gets the CSkillInfo manager and tail-calls its vtable slot +0x28 (count/clear/iterate accessor).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "low"
+    },
+    {
+      "address": "0x116cdd50",
+      "currentName": "FUN_116cdd50",
+      "proposedName": "CSkillInfo::ParseConfig",
+      "subsystem": "skills",
+      "purpose": "Core static skill-definition config parser. Reads skill id, level, the four special-attack status buildup values, town/angry flags, then branches on skill-type code to read fire-mode/anim/group/attack fields, and finally common event/name fields. Registers itself into a vector at param_1+0x137.",
+      "formulas": [
+        "param_1[5] = skillid; param_1[6] = level (forced to 1 if 0).",
+        "skillType = vtbl+0x3c() (local_464/piVar1); switch cases 1,2,3,9 vs 4-8 vs 5,6,7 select different field sets.",
+        "SkillSpecialAttack_Paraylze -> param_1[9] (read as double, stored (int)(float)); SkillSpecialAttack_Poison -> param_1[7]; SkillSpecialAttack_Sleep -> param_1[8]; SkillSpecialAttack_Dynamite -> param_1[10].",
+        "IsTown -> *(bool*)(param_1+0xb) = (val==1); IsAngry -> *(bool*)((int)param_1+0x2d) = (val==1).",
+        "group1..group4 -> param_1[0x2c],[0x2d],[0x2e],[0x2f].",
+        "type in {1,2,9}: FireModeName -> param_1+0x30. type in {5,6,7}: AnimSeq -> param_1+0x36. type in {1,3,9} also FireModeName -> param_1+0xe.",
+        "type in {1,4,5,6,7,9}: SkillAttack -> param_1[0x3c], SkillAttrAttack -> param_1[0x3d], SkillSpecialAttack -> param_1[0x3e] (all double default DAT_11de9978), AttackInfo string -> param_1+0x3f.",
+        "type in {1,9}: three ids -> param_1[0x45],[0x46],[0x49]; type 2: CBEvent string -> param_1+0x4b.",
+        "Common: FUN_1186f860 parsed lists -> param_1[0x58], param_1[0xa4], param_1[0xf0]; string fields param_1+0x59, +99(0x63), +0x9d(eventname), +0xa5, +0xaf, +0xf1, +0xfb."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: this is the master skill definition. Special-attack status buildup magnitudes (Paralyze/Poison/Sleep/Dynamite), skill level, damage multipliers (SkillAttack/SkillAttrAttack/SkillSpecialAttack), and skill-type classification are server-authoritative for effect application.",
+      "confidence": "medium",
+      "notes": "param_1[N] = param_1+N*4. FUN_116d0aa0 / FUN_116d0d60 parse type-specific subsections. DAT_11de9978 = default value for the Attack floats (likely 1.0f)."
+    },
+    {
+      "address": "0x116d28d0",
+      "currentName": "FUN_116d28d0",
+      "proposedName": "CItemBuffRewardEntry::ParseConfig",
+      "subsystem": "item/buffs",
+      "purpose": "Config loader for an item-grant entry that can also apply a buff. Reads ItemID, ItemAmountMin/Max, DeleteWhenFull flag, BuffID, and BindType.",
+      "formulas": [
+        "param_1[0] = ItemID; param_1[1] = ItemAmountMin; param_1[2] = ItemAmountMax.",
+        "*(bool*)(param_1+3) = (DeleteWhenFull != 0).",
+        "param_1[4] = BuffID.",
+        "BindType (uint): only stored to param_1[5] if value < 5 (valid range 0..4)."
+      ],
+      "costs": ["ItemAmountMin / ItemAmountMax = quantity range of item granted."],
+      "serverRelevance": "authoritative: defines item quantity granted, buff applied, and bind type; server grants items/buffs so must honor these.",
+      "confidence": "medium",
+      "notes": "BindType validated to <5."
+    },
+    {
+      "address": "0x117175c0",
+      "currentName": "FUN_117175c0",
+      "proposedName": "CResourceGatherInfo::ParseConfig",
+      "subsystem": "gathering/skills",
+      "purpose": "Config loader for a gatherable-resource type. Reads ResourceType index (bound <20), ResourceName, DefaultSkillID, MainType, MidType, SubType, IgnoreTool flag, CollectPriority; writes into an indexed record array (first-write-wins).",
+      "formulas": [
+        "ResourceType (uVar3) must be < 0x14 (20) or record is skipped.",
+        "Record base = param_1 + ResourceType*0x1c (28-byte stride).",
+        "Written only if *(base+0x48)==0 (empty slot): base+0x48=DefaultSkillID, base+0x3c=MainType, base+0x40=MidType, base+0x44=SubType, base+0x4c=CollectPriority (default = ResourceType+1), base+0x50=(bool)IgnoreTool."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-relevant: maps a gathering resource to its default gather skill and collection priority; server validates gather actions.",
+      "confidence": "medium",
+      "notes": "CollectPriority defaults to ResourceType+1 when attr absent."
+    },
+    {
+      "address": "0x1174c730",
+      "currentName": "FUN_1174c730",
+      "proposedName": "CPetSkillSlotUnlockInfo::FindByKey",
+      "subsystem": "pet-skills",
+      "purpose": "2D-sparse-map lookup into the CPetSkillSlotUnlockInfo table (pet skill-slot unlock requirements) by key.",
+      "formulas": [
+        "key valid if key!=-1 and (key!=0 or mgr+0x30==0) and mgr+0x28!=0.",
+        "k = key - *(mgr+0x30); valid if 0<=k<*(mgr+0x24).",
+        "row = array[k / *(mgr+0x28)]; if row!=0 return row[k % *(mgr+0x28)].",
+        "mgr+0x28 = row stride, +0x30 = base key, +0x24 = capacity, +0x20 = row-array base."
+      ],
+      "costs": [],
+      "serverRelevance": "validation/lookup: pet-skill-slot unlock table accessor.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11753c90",
+      "currentName": "FUN_11753c90",
+      "proposedName": "CPetSupportSkillInfo::GetByIndex",
+      "subsystem": "pet-skills",
+      "purpose": "Linear-index lookup into the CPetSupportSkillInfo table (pet support-skill definitions).",
+      "formulas": ["valid if 0<=index<((mgr+0x18 - mgr+0x14)>>2); return array[index]."],
+      "costs": [],
+      "serverRelevance": "validation/lookup.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11759cb0",
+      "currentName": "FUN_11759cb0",
+      "proposedName": "CBuffInfo::touchManagerIfNonZero",
+      "subsystem": "buffs",
+      "purpose": "If param_1 != 0, forces initialization of the CBuffInfo manager singleton. Guard/prefetch helper.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "low"
+    },
+    {
+      "address": "0x11759d60",
+      "currentName": "FUN_11759d60",
+      "proposedName": "GetEnumId_SkillGroup",
+      "subsystem": "skills",
+      "purpose": "Returns the registered enum/type id for 'SkillGroup' (one-time registered via FUN_1024f010), writing DAT_12391d84 to *param_1.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only reflection/enum registration.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11761710",
+      "currentName": "FUN_11761710",
+      "proposedName": "ResolveBuffInfoOrDefault",
+      "subsystem": "buffs",
+      "purpose": "Reads an id from param_1 (FUN_118a68a0), looks it up in the CBuffInfo 2D map; if missing/zero falls back to the default buff (FUN_118a6ef0). Result written to *param_2.",
+      "formulas": [
+        "id via FUN_118a68a0. Same 2D-map math as other CBuffInfo lookups (base mgr+0x30, stride mgr+0x28, capacity mgr+0x24).",
+        "On invalid/0 -> *param_2 = FUN_118a6ef0() (default buff id 10000)."
+      ],
+      "costs": [],
+      "serverRelevance": "validation: resolves a buff reference with a default fallback.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177eb00",
+      "currentName": "FUN_1177eb00",
+      "proposedName": "EquipRandPassiveSkillActivateActionDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-definition constructor: initializes list head (+0x10/+0x14 = self) and sets type name 'EquipRandPassiveSkillActivateActionDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only reflection/content-def object; name denotes an equip random-passive-skill activation action.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177eb30",
+      "currentName": "FUN_1177eb30",
+      "proposedName": "EquipRandPassiveSkillActivateSetDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'EquipRandPassiveSkillActivateSetDef' (list head init + name).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def; equip random-passive-skill activation set.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177eb60",
+      "currentName": "FUN_1177eb60",
+      "proposedName": "EquipSkillPointCheckDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'EquipSkillPointCheckDef' (skill-point requirement condition).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def; the underlying skill-point check condition is server-enforced.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177eb90",
+      "currentName": "FUN_1177eb90",
+      "proposedName": "EquipSkillsPointAllCheckDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'EquipSkillsPointAllCheckDef' (total-skill-points condition).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def; underlying condition server-enforced.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f490",
+      "currentName": "FUN_1177f490",
+      "proposedName": "SoulBeastSoulStoneSkillLevelCheckDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'SoulBeastSoulStoneSkillLevelCheckDef' (soul-stone skill-level condition).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f4c0",
+      "currentName": "FUN_1177f4c0",
+      "proposedName": "SoulBeastSoulStoneSkillLevelsCheckDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'SoulBeastSoulStoneSkillLevelsCheckDef' (multi soul-stone skill-level condition).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f520",
+      "currentName": "FUN_1177f520",
+      "proposedName": "SpeakAddBuffContentDef::ctor",
+      "subsystem": "buffs/content",
+      "purpose": "Trivial content-def constructor for 'SpeakAddBuffContentDef' (NPC-speak action that adds a buff).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def; add-buff action is server-applied.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f550",
+      "currentName": "FUN_1177f550",
+      "proposedName": "SpeakAddBuffGeneContentDef::ctor",
+      "subsystem": "buffs/content",
+      "purpose": "Trivial content-def constructor for 'SpeakAddBuffGeneContentDef' (speak action adding a buff-gene).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f580",
+      "currentName": "FUN_1177f580",
+      "proposedName": "SpeakAddBuffGroupContentDef::ctor",
+      "subsystem": "buffs/content",
+      "purpose": "Trivial content-def constructor for 'SpeakAddBuffGroupContentDef' (speak action adding a buff-group).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f640",
+      "currentName": "FUN_1177f640",
+      "proposedName": "SpeakUseSkillContentDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'SpeakUseSkillContentDef' (speak action that uses a skill).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f730",
+      "currentName": "FUN_1177f730",
+      "proposedName": "TaskAccSuitSkillUnlockContentDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'TaskAccSuitSkillUnlockContentDef' (task content unlocking an accessory-suit skill).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1177f850",
+      "currentName": "FUN_1177f850",
+      "proposedName": "TaskBuffFilterDef::ctor",
+      "subsystem": "buffs/content",
+      "purpose": "Trivial content-def constructor for 'TaskBuffFilterDef' (task buff-filter condition).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def; buff filter logic is gameplay-relevant.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117805d0",
+      "currentName": "FUN_117805d0",
+      "proposedName": "TaskUseSkillContentDef::ctor",
+      "subsystem": "skills/content",
+      "purpose": "Trivial content-def constructor for 'TaskUseSkillContentDef' (task content requiring skill use).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117807e0",
+      "currentName": "FUN_117807e0",
+      "proposedName": "EquipRandPassiveSkillActivateActionDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate/second-registration constructor for 'EquipRandPassiveSkillActivateActionDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11780810",
+      "currentName": "FUN_11780810",
+      "proposedName": "EquipRandPassiveSkillActivateSetDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'EquipRandPassiveSkillActivateSetDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11780840",
+      "currentName": "FUN_11780840",
+      "proposedName": "EquipSkillPointCheckDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'EquipSkillPointCheckDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11780870",
+      "currentName": "FUN_11780870",
+      "proposedName": "EquipSkillsPointAllCheckDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'EquipSkillsPointAllCheckDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781170",
+      "currentName": "FUN_11781170",
+      "proposedName": "SoulBeastSoulStoneSkillLevelCheckDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'SoulBeastSoulStoneSkillLevelCheckDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117811a0",
+      "currentName": "FUN_117811a0",
+      "proposedName": "SoulBeastSoulStoneSkillLevelsCheckDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'SoulBeastSoulStoneSkillLevelsCheckDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781200",
+      "currentName": "FUN_11781200",
+      "proposedName": "SpeakAddBuffContentDef::ctor_dup",
+      "subsystem": "buffs/content",
+      "purpose": "Duplicate constructor for 'SpeakAddBuffContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781230",
+      "currentName": "FUN_11781230",
+      "proposedName": "SpeakAddBuffGeneContentDef::ctor_dup",
+      "subsystem": "buffs/content",
+      "purpose": "Duplicate constructor for 'SpeakAddBuffGeneContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781260",
+      "currentName": "FUN_11781260",
+      "proposedName": "SpeakAddBuffGroupContentDef::ctor_dup",
+      "subsystem": "buffs/content",
+      "purpose": "Duplicate constructor for 'SpeakAddBuffGroupContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781320",
+      "currentName": "FUN_11781320",
+      "proposedName": "SpeakUseSkillContentDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'SpeakUseSkillContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781410",
+      "currentName": "FUN_11781410",
+      "proposedName": "TaskAccSuitSkillUnlockContentDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'TaskAccSuitSkillUnlockContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11781530",
+      "currentName": "FUN_11781530",
+      "proposedName": "TaskBuffFilterDef::ctor_dup",
+      "subsystem": "buffs/content",
+      "purpose": "Duplicate constructor for 'TaskBuffFilterDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117822b0",
+      "currentName": "FUN_117822b0",
+      "proposedName": "TaskUseSkillContentDef::ctor_dup",
+      "subsystem": "skills/content",
+      "purpose": "Duplicate constructor for 'TaskUseSkillContentDef'.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only content-def.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11782630",
+      "currentName": "FUN_11782630",
+      "proposedName": "EquipSkillPointCheckDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads an EquipSkillPointCheck condition from a data node: reads 'SkillGroup' -> param_1+4 and 'Point' -> param_1+8.",
+      "formulas": ["param_1+4 = SkillGroup id; param_1+8 = required Point (skill points)."],
+      "costs": ["Point = required skill-point threshold."],
+      "serverRelevance": "validation: skill-point requirement the server enforces for equip.",
+      "confidence": "medium",
+      "notes": "FUN_118a6e60=get child node by key, FUN_118a68a0=read int."
+    },
+    {
+      "address": "0x11782680",
+      "currentName": "FUN_11782680",
+      "proposedName": "EquipSkillsPointAllCheckDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads an EquipSkillsPointAllCheck condition: reads 'SkillsPointAll' -> param_1+4.",
+      "formulas": ["param_1+4 = SkillsPointAll (total skill points required)."],
+      "costs": ["SkillsPointAll = total-skill-points threshold."],
+      "serverRelevance": "validation: total skill-point requirement.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11783ad0",
+      "currentName": "FUN_11783ad0",
+      "proposedName": "SoulBeastSoulStoneSkillLevelCheckDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a soul-stone skill-level condition: 'Skill' -> param_1+4, 'Level' -> param_1+8.",
+      "formulas": ["param_1+4 = Skill id; param_1+8 = required Level."],
+      "costs": ["Level = required soul-stone skill level."],
+      "serverRelevance": "validation.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11783c00",
+      "currentName": "FUN_11783c00",
+      "proposedName": "SpeakAddBuffGeneContentDef::Load",
+      "subsystem": "buffs/content",
+      "purpose": "Loads a speak-add-buff-gene content node: id(DAT_11dbe654) -> +4, 'BuffGene' -> +8, 'Count' -> +0xc.",
+      "formulas": ["param_1+4 = id; param_1+8 = BuffGene id; param_1+0xc = Count."],
+      "costs": ["Count = number of buff-genes added."],
+      "serverRelevance": "authoritative-relevant: add-buff-gene action applied by server.",
+      "confidence": "medium",
+      "notes": "DAT_11dbe654 is the first key (likely 'id'/'ID')."
+    },
+    {
+      "address": "0x11783c70",
+      "currentName": "FUN_11783c70",
+      "proposedName": "SpeakAddBuffGroupContentDef::Load",
+      "subsystem": "buffs/content",
+      "purpose": "Loads a speak-add-buff-group content node: id -> +4, 'BuffGroup' -> +8, 'Count' -> +0xc.",
+      "formulas": ["param_1+4 = id; param_1+8 = BuffGroup id; param_1+0xc = Count."],
+      "costs": ["Count = number of buffs from the group added."],
+      "serverRelevance": "authoritative-relevant: add-buff-group action.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11783f50",
+      "currentName": "FUN_11783f50",
+      "proposedName": "SpeakUseSkillContentDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a speak-use-skill content node: id -> +4, 'Skill' -> +8, 'Count' -> +0xc.",
+      "formulas": ["param_1+4 = id; param_1+8 = Skill id; param_1+0xc = Count."],
+      "costs": ["Count = number of skill uses."],
+      "serverRelevance": "validation/authoritative-relevant.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11784560",
+      "currentName": "FUN_11784560",
+      "proposedName": "TaskBuffFilterDef::Load",
+      "subsystem": "buffs/content",
+      "purpose": "Loads a buff-filter definition: id -> +4, 'Order' -> +8, 'IsDebuff' (bool) -> +0xc, 'ClearType' -> +0x10, 'EventFilters' (list) -> +0x14.",
+      "formulas": [
+        "param_1+4 = id; param_1+8 = Order; param_1+0xc = IsDebuff (bool via FUN_118a6e00); param_1+0x10 = ClearType; param_1+0x14 = EventFilters (parsed by FUN_1176a620)."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-relevant: buff filtering (debuff flag, clear-type, event filters) governs which buffs match/clear.",
+      "confidence": "medium",
+      "notes": "Base 0x0-0x1c layout reused by FUN_11785870/FUN_11785f50."
+    },
+    {
+      "address": "0x117857d0",
+      "currentName": "FUN_117857d0",
+      "proposedName": "SkillDegreeContentDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a skill/degree node: 'Skill' -> +4, 'Degree' -> +8.",
+      "formulas": ["param_1+4 = Skill id; param_1+8 = Degree."],
+      "costs": ["Degree = skill degree/rank value."],
+      "serverRelevance": "validation.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11785820",
+      "currentName": "FUN_11785820",
+      "proposedName": "SkillManufactureLevelContentDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a skill/manufacture-level node: 'Skill' -> +4 (int), 'ManufactureLevel' -> +8 (read via FUN_118a6e70/FUN_118a68e0, likely float/typed).",
+      "formulas": ["param_1+4 = Skill id; param_1+8 = ManufactureLevel."],
+      "costs": ["ManufactureLevel = required manufacture (crafting) skill level."],
+      "serverRelevance": "validation: crafting-skill-level requirement.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11785870",
+      "currentName": "FUN_11785870",
+      "proposedName": "TaskUseSkillContentDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a task-use-skill content node: first parses the TaskBuffFilterDef base (FUN_11784560), then 'Skill' -> +0x20, 'Level' -> +0x24.",
+      "formulas": ["Base filter fields 0x4-0x14 (via FUN_11784560); param_1+0x20 = Skill id; param_1+0x24 = Level."],
+      "costs": ["Level = required skill level."],
+      "serverRelevance": "validation.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11785f50",
+      "currentName": "FUN_11785f50",
+      "proposedName": "SkillUseCountContentDef::Load",
+      "subsystem": "skills/content",
+      "purpose": "Loads a skill-use-count content node: parses TaskBuffFilterDef base, then resolves 'Skill' via CSkillInfo::FindBySkillId (FUN_116cd660) into +0x20 (fallback FUN_118a70b0), and 'Count' -> +0x24.",
+      "formulas": [
+        "Skill id resolved through FUN_116cd660(skillId); if 0 -> fallback FUN_118a70b0() stored at +0x20.",
+        "param_1+0x24 = Count."
+      ],
+      "costs": ["Count = required number of skill uses."],
+      "serverRelevance": "validation: uses the same skillId/100000 encoding to resolve.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117bdb00",
+      "currentName": "FUN_117bdb00",
+      "proposedName": "CLootEntityInfo::ParseConfig",
+      "subsystem": "gathering/loot",
+      "purpose": "Config loader for a loot/gather entity: EntityClass string -> +0x18, LootSize (float) -> +0x30, LootSkillID (uint) -> +0x34, LifeTime (float) -> +0x38. Chains FUN_117bd8b0.",
+      "formulas": [
+        "param_1+0x18 = EntityClass; param_1+0x30 = LootSize (float, default = existing value); param_1+0x34 = LootSkillID (uint); param_1+0x38 = LifeTime (float)."
+      ],
+      "costs": ["LifeTime = despawn timer of the loot entity."],
+      "serverRelevance": "authoritative-relevant: LootSkillID (gather skill needed) and LifeTime are server-managed.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117cb800",
+      "currentName": "FUN_117cb800",
+      "proposedName": "CAbnormalStatePriorityInfo::FindByKey",
+      "subsystem": "status-effects",
+      "purpose": "2D-sparse-map lookup into the CAbnormalStatePriorityInfo table by abnormal-state key; returns the configured priority value.",
+      "formulas": [
+        "valid if key!=-1 and (key!=0 or mgr+0x30==0) and mgr+0x28!=0; k=key-mgr+0x30; 0<=k<mgr+0x24; return array[k/stride][k%stride]. stride=mgr+0x28, base=mgr+0x30, cap=mgr+0x24."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: abnormal-status priority table — server uses this to decide which status wins when multiple apply.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117cb940",
+      "currentName": "CAbnormalStatePriorityInfo__GetManagers_117cb940",
+      "proposedName": "CAbnormalStatePriorityInfo::GetManagers",
+      "subsystem": "status-effects",
+      "purpose": "Singleton accessor for the CAbnormalStatePriorityInfo manager (registers on first call). Returns *DAT_123935e8 when param==0.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "plumbing (info-manager singleton).",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117ccbd0",
+      "currentName": "FUN_117ccbd0",
+      "proposedName": "CAbnormalStateRelationInfo::FindByKey",
+      "subsystem": "status-effects",
+      "purpose": "2D-sparse-map lookup into the CAbnormalStateRelationInfo table by abnormal-state key; returns the relation entry (which statuses override/conflict/replace each other).",
+      "formulas": [
+        "Same 2D-map math: k=key-mgr+0x30; valid 0<=k<mgr+0x24; return array[k/stride][k%stride]; stride=mgr+0x28."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: abnormal-status relation table — server uses this for status interaction rules.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117d60c0",
+      "currentName": "FUN_117d60c0",
+      "proposedName": "CBuffFilterInfo::ResolveBuffId",
+      "subsystem": "buffs",
+      "purpose": "Given a buff id (param_1) and a mode (param_2), looks up CBuffFilterInfo and returns a substituted/filtered buff id depending on mode.",
+      "formulas": [
+        "Lookup CBuffFilterInfo by (param_1 - mgr+0x30) with stride mgr+0x28; entry = array[k/stride][k%stride].",
+        "If entry found: mode 0 -> return entry+0x18; mode 1 -> entry+0x14; mode 8 -> entry+0x1c; else return entry+0x18.",
+        "If not found -> return param_1 unchanged (identity)."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: buff substitution/filter — remaps a buff id by context mode (0/1/8). Server must apply the same remap.",
+      "confidence": "medium",
+      "notes": "Buff-filter entry offsets: +0x14, +0x18, +0x1c hold alternative buff ids."
+    },
+    {
+      "address": "0x117d6460",
+      "currentName": "FUN_117d6460",
+      "proposedName": "CBuffFilterInfo::validateReferences",
+      "subsystem": "buffs",
+      "purpose": "For a buff-filter entry, for each of the three alt-buff-id fields (+0x14, +0x18, +0x1c) that is nonzero, touches the CBuffInfo and CBuffFilterInfo managers (reference validation/precache).",
+      "formulas": ["Checks entry+0x14, +0x18, +0x1c."],
+      "costs": [],
+      "serverRelevance": "client-only validation/precache of buff-filter references.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117d64e0",
+      "currentName": "FUN_117d64e0",
+      "proposedName": "ResolveBuffThroughFilter",
+      "subsystem": "buffs",
+      "purpose": "If param_1 (buff id) != 0, touches CBuffInfo then resolves it via CBuffFilterInfo::ResolveBuffId(param_1, param_2).",
+      "formulas": ["Delegates to FUN_117d60c0(param_1, param_2)."],
+      "costs": [],
+      "serverRelevance": "validation: buff-id resolution wrapper.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117e6cb0",
+      "currentName": "FUN_117e6cb0",
+      "proposedName": "GetEnumId_StorageBox",
+      "subsystem": "misc",
+      "purpose": "Returns the registered enum id for 'StorageBox' (DAT_12394854) into *param_1; one-time register via FUN_1024f010.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only enum registration (not skill-related).",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117e6ce0",
+      "currentName": "FUN_117e6ce0",
+      "proposedName": "GetEnumId_StorageBoxConst",
+      "subsystem": "misc",
+      "purpose": "Returns the registered enum id for 'StorageBoxConst' (DAT_1239485c) into *param_1.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only enum registration (not skill-related).",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1181c060",
+      "currentName": "FUN_1181c060",
+      "proposedName": "RewardContentFactory::CreateByType",
+      "subsystem": "reward/content",
+      "purpose": "Factory that dispatches on a content-type string and allocates the matching effect object (sizes indicate the object layout). Covers reward and effect content including AddBuff.",
+      "formulas": [
+        "ItemPrize -> alloc 0xc; ItemReclaim -> 0xc; GoldPrize -> 0xc; GoldReclaim -> 0xc; AddBuff -> 8; Teleport -> 0x40; PlayCutScene -> 0x1c; SendFGEvent -> 0x34."
+      ],
+      "costs": ["ItemPrize/ItemReclaim/GoldPrize/GoldReclaim are the currency/item reward content types (12-byte objects)."],
+      "serverRelevance": "authoritative-relevant: reward/effect content types (item & gold grant/reclaim, AddBuff, teleport) the server executes.",
+      "confidence": "medium",
+      "notes": "Object sizes are load-bearing for the layout of each content type."
+    },
+    {
+      "address": "0x1181c250",
+      "currentName": "FUN_1181c250",
+      "proposedName": "CBuffInfo::FindByField4",
+      "subsystem": "buffs",
+      "purpose": "Reads a buff id from the object at param_1+4 and looks it up in the CBuffInfo 2D map, returning the buff-info row.",
+      "formulas": [
+        "id = *(param_1+4); lookup CBuffInfo: k=id-mgr+0x30; 0<=k<mgr+0x24; return array[k/stride][k%stride]; stride=mgr+0x28."
+      ],
+      "costs": [],
+      "serverRelevance": "validation/lookup: buff definition by id.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1181db80",
+      "currentName": "FUN_1181db80",
+      "proposedName": "CPetSkillInfo::IsType9",
+      "subsystem": "pet-skills",
+      "purpose": "Looks up a CPetSkillInfo row by id and returns whether its type field (+0x58) equals 9.",
+      "formulas": [
+        "2D-map lookup (base mgr+0x30, stride mgr+0x28, cap mgr+0x24); returns (*(row+0x58) == 9) as bool.",
+        "Pet-skill type code 9 at row+0x58."
+      ],
+      "costs": [],
+      "serverRelevance": "validation: classifies pet skill by type (matches skill-type field also used in CSkillInfo::ParseConfig).",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1182d330",
+      "currentName": "FUN_1182d330",
+      "proposedName": "CSkillDisplayInfo::ParseConfig",
+      "subsystem": "skills",
+      "purpose": "Config loader for a skill display/definition record with associated buffs. Reads id fields, resolves skill type/category, level, group counters, name/ICON/Tips/SkillVideoID, and a decoded buff-id list; registers each buff and adds itself to a vector at +0xac.",
+      "formulas": [
+        "+0x10, +0x14 = two id/int fields; +0x18 = wide-string name; type = FUN_118998f0(name) -> +0x40.",
+        "Guard: proceeds only if type != 0xd (13) and FUN_11679c30() != 0 (context/server-side flag).",
+        "+0x44 = level field, then decremented by 1: if result == -1 increments counter array &DAT_12397564[type*4], else increments &DAT_12397598[type*4] and reads +0x48, +0x4c and registers mapping (FUN_1169f290).",
+        "String name -> +0x54 area name, ICON -> +0x8c, Tips wide-string, SkillVideoID string.",
+        "buffCount = DecodeBuffIdList(SkillVideoID-string, param_1+0x54, 0xd) -> +0x50; loops registering each buff via FUN_1169ef30(buffId, *(param_1+0x10)).",
+        "Self appended to vector at param_1+0xac (grow at +0xb0)."
+      ],
+      "costs": [],
+      "serverRelevance": "mixed: ICON/Tips/Video are client UI, but the skill type classification, level, and the associated buff-id list (DecodeBuffIdList) and skill->buff registration are gameplay-relevant.",
+      "confidence": "medium",
+      "notes": "FUN_11679c30 appears to gate server/context-only work (also used in FUN_119fbfb0). type range indexes counter arrays DAT_12397564/DAT_12397598."
+    },
+    {
+      "address": "0x1183fb70",
+      "currentName": "FUN_1183fb70",
+      "proposedName": "CLevelRewardInfo::ParseConfig",
+      "subsystem": "reward/buffs",
+      "purpose": "Config loader for a per-level reward record: LEVEL_ID, a second field, an (ITEM_ID, ITEM_COUNT) pair pushed into a vector, and a (BUFF_ID, BUFF_COUNT) -> BUFF_ITEM_ID mapping.",
+      "formulas": [
+        "param_1+0x10 = LEVEL_ID; param_1+0x14 = second field (DAT_11d4ed68 key, unknown).",
+        "If ITEM_ID>0 and ITEM_COUNT>0: push {ITEM_ID, ITEM_COUNT} (8-byte pair) into vector at param_1+0x1c (advance +8).",
+        "If BUFF_ID>0 and BUFF_COUNT>0 and BUFF_ITEM_ID>0: build key {BUFF_ID, BUFF_COUNT} (FUN_115b6a40), map-insert (FUN_104ef0a0) value = BUFF_ITEM_ID."
+      ],
+      "costs": ["ITEM_COUNT = item quantity granted; BUFF_COUNT = buff stack/count."],
+      "serverRelevance": "authoritative: defines items and buffs granted at a level; server dispenses rewards.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x118a6ef0",
+      "currentName": "FUN_118a6ef0",
+      "proposedName": "CBuffInfo::GetDefaultBuff10000",
+      "subsystem": "buffs",
+      "purpose": "Returns the CBuffInfo row for the hard-coded default buff id 10000.",
+      "formulas": ["k = 10000 - *(mgr+0x30); valid 0<=k<mgr+0x24; return array[k/stride][k%stride]; stride=mgr+0x28."],
+      "costs": [],
+      "serverRelevance": "validation: default/fallback buff (id 10000).",
+      "confidence": "high"
+    },
+    {
+      "address": "0x118ff610",
+      "currentName": "FUN_118ff610",
+      "proposedName": "CNewSkillLearnInfo::GetByIndex",
+      "subsystem": "skills",
+      "purpose": "Linear-index lookup into the CNewSkillLearnInfo table (skill learning/unlock config).",
+      "formulas": ["valid if 0<=index<((mgr+0x18 - mgr+0x14)>>2); return array[index]."],
+      "costs": [],
+      "serverRelevance": "validation/lookup.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11901b70",
+      "currentName": "FUN_11901b70",
+      "proposedName": "AttrDesc_SkillName::get",
+      "subsystem": "skills",
+      "purpose": "Reflection attribute-descriptor accessor for 'SkillName' (type tag 0xac). One-time initializes the descriptor block and returns it.",
+      "formulas": ["Descriptor tag _DAT_1239e784 = 0xac."],
+      "costs": [],
+      "serverRelevance": "client-only reflection metadata.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x119177c0",
+      "currentName": "FUN_119177c0",
+      "proposedName": "GetEnumId_AbnormalState_a",
+      "subsystem": "status-effects",
+      "purpose": "Returns the registered enum id for 'AbnormalState' (DAT_1239ef28) into *param_1.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only enum registration; identifies the AbnormalState enum type.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11917e10",
+      "currentName": "FUN_11917e10",
+      "proposedName": "GetEnumId_AbnormalState_b",
+      "subsystem": "status-effects",
+      "purpose": "Returns the registered enum id for 'AbnormalState' (DAT_1239ef54) into *param_1 (second registration site).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only enum registration.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11921420",
+      "currentName": "FUN_11921420",
+      "proposedName": "GetEnumId_SkillVideo",
+      "subsystem": "skills",
+      "purpose": "Returns the registered enum id for 'SkillVideo' (DAT_1239f318) into *param_1.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only enum registration.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x119214a0",
+      "currentName": "FUN_119214a0",
+      "proposedName": "AttrDesc_SkillVideoInfo::get",
+      "subsystem": "skills",
+      "purpose": "Reflection attribute-descriptor accessor for 'SkillVideoInfo' (type tag 0xaa).",
+      "formulas": ["Descriptor tag _DAT_1239f320 = 0xaa."],
+      "costs": [],
+      "serverRelevance": "client-only reflection metadata.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11928460",
+      "currentName": "FUN_11928460",
+      "proposedName": "CPetFarmSkill::GetByIndex",
+      "subsystem": "pet-skills",
+      "purpose": "Linear-index lookup into the CPetFarmSkill table (pet farm/gather-skill config).",
+      "formulas": ["valid if 0<=index<((mgr+0x18 - mgr+0x14)>>2); return array[index]."],
+      "costs": [],
+      "serverRelevance": "validation/lookup.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11928510",
+      "currentName": "CPetFarmSkill__GetManagers_11928510",
+      "proposedName": "CPetFarmSkill::precacheAllRows",
+      "subsystem": "pet-skills",
+      "purpose": "Iterates all CPetFarmSkill rows at load, registering/precaching each valid row (FUN_11a17f70).",
+      "formulas": ["count = vtbl+0x28(); loops 0..count precaching rows."],
+      "costs": [],
+      "serverRelevance": "plumbing (row precache).",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11949650",
+      "currentName": "FUN_11949650",
+      "proposedName": "AttrDesc_buff::get",
+      "subsystem": "buffs",
+      "purpose": "Reflection attribute-descriptor accessor for 'buff' (type tag 0xff).",
+      "formulas": ["Descriptor tag _DAT_123a019c = 0xff."],
+      "costs": [],
+      "serverRelevance": "client-only reflection metadata.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11958c30",
+      "currentName": "FUN_11958c30",
+      "proposedName": "CMonsterSpawnInfo::ParseConfig",
+      "subsystem": "monster/buffs",
+      "purpose": "Config loader for a monster spawn record: id, MonsterID, MonsterGroupID, SpawnAmount, RegionId, Delay, RespawnAmount, RespawnDelay, Scale (float), BuffID.",
+      "formulas": [
+        "param_1+0x10 = id (first field, DAT_11d38d6c key); +0x14 = MonsterID; +0x18 = MonsterGroupID; +0x1c = SpawnAmount; +0x20 = RegionId; +0x24 = Delay; +0x28 = RespawnAmount; +0x2c = RespawnDelay; +0x30 = Scale (float); +0x34 = BuffID."
+      ],
+      "costs": ["SpawnAmount / RespawnAmount = spawn counts; Delay / RespawnDelay = spawn timers."],
+      "serverRelevance": "authoritative: monster spawn parameters incl. a BuffID applied to the spawned monsters; server manages spawns.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1197cc00",
+      "currentName": "FUN_1197cc00",
+      "proposedName": "CEquipRandPassiveSkillActivateSetInfo::GetByIndex",
+      "subsystem": "skills",
+      "purpose": "Linear-index lookup into the CEquipRandPassiveSkillActivateSetInfo table (equip random-passive-skill activation sets).",
+      "formulas": ["valid if 0<=index<((mgr+0x18 - mgr+0x14)>>2); return array[index]."],
+      "costs": [],
+      "serverRelevance": "validation/lookup.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x119ada30",
+      "currentName": "FUN_119ada30",
+      "proposedName": "CEquipSuitSkillInfo::GetByIndex",
+      "subsystem": "skills",
+      "purpose": "Linear-index lookup into the CEquipSuitSkillInfo table (armor/equipment set-bonus skills).",
+      "formulas": ["valid if 0<=index<((mgr+0x18 - mgr+0x14)>>2); return array[index]."],
+      "costs": [],
+      "serverRelevance": "validation/lookup: equipment suit (set) skill definitions.",
+      "confidence": "high"
+    },
+    {
+      "address": "0x119e40d0",
+      "currentName": "FUN_119e40d0",
+      "proposedName": "CEquipExcellentRankInfo::ParseConfig",
+      "subsystem": "equip/buffs",
+      "purpose": "Config loader for an equipment 'Excellent' (appraisal) rank record. Reads Rank, Excellent_Point, Excellent_Judegement_Rank, Excellent_Rank_Name, then up to 10 Buff_N strings each parsed 'buffId;degree' and pushed into a buff vector.",
+      "formulas": [
+        "param_1+0x10 = Rank; +0x18 = Excellent_Point; +0x1c = Excellent_Judegement_Rank; +0x20 = Excellent_Rank_Name (string).",
+        "Buff_1..Buff_10: each read as string then sscanf_s(str, \"%d;%d\", &buffId, &degree). If parsed==2 and (buffId!=0 || degree!=0): push {buffId, degree} (8-byte pair) into vector at param_1+0x3c (advance +8). Grow via FUN_119e5100.",
+        "Format string '%d;%d' = buffId;degree."
+      ],
+      "costs": ["Excellent_Point = appraisal points threshold; degree = per-buff magnitude."],
+      "serverRelevance": "authoritative: equipment appraisal rank -> up to 10 (buff, degree) grants; server applies these buffs.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x119fbfb0",
+      "currentName": "FUN_119fbfb0",
+      "proposedName": "CPetMonsterSkillInfo::onDestroyOrUnregister",
+      "subsystem": "pet-skills",
+      "purpose": "If the context flag FUN_11679c30() is set, unregisters a skill mapping (FUN_1169e9d0 with *(param_1+0x14)) and touches the CPetMonsterSkillInfo manager. Cleanup/teardown of a pet-monster skill record.",
+      "formulas": ["Uses skill id at param_1+0x14."],
+      "costs": [],
+      "serverRelevance": "plumbing/cleanup; the skill-id unregistration mirrors the registration in the display parser.",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11a08470",
+      "currentName": "FUN_11a08470",
+      "proposedName": "CHRLevelBuffInfo::ParseConfig",
+      "subsystem": "buffs",
+      "purpose": "Config loader mapping a Hunter-Rank (HR) level to buffs. Reads HRLevel -> +0x10, two uint fields -> +0x14/+0x18, and a 'Buffs' string parsed into a buff container at +0x1c (FUN_1162bea0).",
+      "formulas": [
+        "param_1+0x10 = HRLevel; +0x14 = uint field (DAT_11d6d28c key, default 0); +0x18 = uint field (DAT_11d522e8 key, default 0); +0x1c = parsed Buffs list (FUN_1162bea0)."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: HR-level -> buff-set mapping (rank/world buffs); server applies rank buffs.",
+      "confidence": "medium",
+      "notes": "+0x14/+0x18 keys not resolved to names in dump (DAT_11d6d28c, DAT_11d522e8)."
+    }
+  ]
+}

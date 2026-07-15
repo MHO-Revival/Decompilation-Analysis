@@ -1,0 +1,358 @@
+{
+  "chunkIndex": 4,
+  "functions": [
+    {
+      "address": "1085b470",
+      "currentName": "FUN_1085b470",
+      "proposedName": "MHUI::BuildRandPassiveSkillVO",
+      "subsystem": "skills/passive",
+      "purpose": "Scaleform VO builder for an equipment 'random passive skill' panel. Gated on param_5==3. Reads a GFx-arg struct at param_4 (offsets +4/+8 obj, +0x1c/+0x20 str, +0x34 flags, +0x38 handler, +0x3c/+0x40). Requires the local player's active weapon/equip context (DAT_1202e818->0xd0->0x90 vtbl+0xb4 -> character, needs *(char+0x2d1c)!=0). Resolves the equip's rand-passive-skill data via FUN_113f9bb0 and, when the item is a hidden skill (bIsHidden, iVar3==1 branch), computes the reveal cost via CEquipHiddenSkillCondOpenInfo::GetInfoManagerInstance -> nVisibleMoney. Emits title, PASSIVESKILL_VO_CLASSNAME rows, arrayRandPassiveSkillDesc, and per-entry activateInfoList (ACTIVATE_VO_CLASSNAME, nType) via CPet::SetName/FUN_104d15xx setters.",
+      "formulas": [
+        "gate: param_5 == 3",
+        "GFx value type mask: (*(param_4+k) & 0x8f) with 3/4=number-ref used to deref obj/str fields; (flags>>6&1) => managed/heap-string pointer indirection (stock GFx Value plumbing)",
+        "bIsHidden set from iVar3(entry)==1; only then nVisibleMoney (reveal cost) is emitted",
+        "per-passive-entry iteration stride = 0x1c bytes (piStack_118 = (iStack_d0 - piStack_d4)/0x1c); entry fields read at +0(id/type), +4,+8(iStack_88 group/id), +0xc,+0x10,+0x18 (uStack_80 pair)",
+        "activate-name string id = 0x13a5 + (iStack_88 < 0)  (negative -> 0x13a6)"
+      ],
+      "costs": [
+        "nVisibleMoney: currency required to reveal a hidden equip passive skill (value produced by CEquipHiddenSkillCondOpenInfo::GetInfoManagerInstance for the entry). Amount is data-driven; this code only reads/displays it."
+      ],
+      "serverRelevance": "client-only (Scaleform VO display builder). The nVisibleMoney reveal cost and hidden-skill unlock conditions it surfaces are server-authoritative and must be validated server-side on the reveal transaction.",
+      "confidence": "medium",
+      "notes": "0x2d1c on the character struct is the equip/skill subsystem gate reused across this chunk. FUN_116698a0/FUN_1166e120 are local-player weapon-context predicates."
+    },
+    {
+      "address": "1085bcb0",
+      "currentName": "FUN_1085bcb0",
+      "proposedName": "MHUI::BuildPassiveSkillListVO",
+      "subsystem": "skills/passive",
+      "purpose": "Scaleform VO builder for the equipment passive-skill list (passiveSkillTitle + parallel arrays arrayPassiveSkillValue / arrayPassiveSkillDesc / arrayPassiveSkillEnabled). Gated on arg count==4. Resolves an info record via FUN_10254130 (equip/item info by id) and requires *(rec+0x34)==2. Iterates the record's passive-skill vector [rec+0x21c .. rec+0x220) (stride 8: [0]=skillId, [1]=value/level). Looks up each skill name/desc via FUN_1050ebc0 and FUN_108199e0 and pushes rows.",
+      "formulas": [
+        "gate: argCount(in_stack_00000014) == 4 and *(rec+0x34) == 2",
+        "passive-entry vector at rec+0x21c(begin)..rec+0x220(end), stride = 8 bytes: entry[0]=skillId, entry[1]=passiveValue",
+        "value string id = 0x13a5 if entry[1] >= 0 else 0x13a6 (sign-encoded +/- passive)",
+        "FUN_1050ebc0(skillId) resolves skill; 0 => name-only fallback"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display. Passive skill ids/values are server-authoritative gear stats; server owns which passives are enabled.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10862710",
+      "currentName": "FUN_10862710",
+      "proposedName": "MHUI::BuildEquipSuitSetBonusVO",
+      "subsystem": "skills/suit-set-bonus",
+      "purpose": "Scaleform VO builder for equipment SUIT (armor set) bonuses. Reads GFx args (param_4 +8 obj, +0x20 bool m_bIsLocal-style flag, +0x34 flags, +0x38 handler). Requires local-player character (DAT_1202e818->0xd0->0x90 vtbl+0xb4). If not the 'other-config' path (uStack_160._3_1_==0), builds the player's own active suit-skill set: scans an active-suit-skill id array at char+0x5b2 (17 slots, index 0..0x10), copies nonzero ids into a working list via FUN_10871a00; then resolves the suit skill group (CEquipSuitSkillGroupInfo::GetSuitSkillId) and finds the matching group by scanning char+0x8b6 with stride 0x102 for up to 0x80 groups. Calls CEquipInfo::BuildSuitSetBonusDisplay to fill display records, then emits per-equip rows (m_strEquipName/m_bIsAct) and per-effect rows (m_strEffectName, m_strEffectTips, m_nEffectTotalNeed, m_nOtherEquipNeed, m_nOtherEquipAct, m_nSelfConfigSkillNeedCnt, m_nSelfConfigSkillActCnt, m_nType, m_nIndentationIndex, m_vecDesc) plus m_vecSuitDesc/m_vecEffectDesc.",
+      "formulas": [
+        "active-suit-skill id array: char[0x5b2 + i], i in [0,0x11) (17 entries); nonzero => appended",
+        "suit-group table: base char+0x8b6, stride 0x102 ints, up to 0x80 groups; match where *ptr == GetSuitSkillId result; matched group id = char[i*0x102 + 0x8b7]",
+        "effect-descriptor vector: base puStack_10c/uStack_104, element stride = 0x38 (56) bytes; count = (end - begin)/0x38. Fields: +8 m_bIsAct(byte), +0xc m_nEffectTotalNeed, +0x1c m_nOtherEquipNeed, +0x20 m_nOtherEquipAct, +0x24 m_nSelfConfigSkillNeedCnt, +0x28 m_nSelfConfigSkillActCnt, +0x2c m_nType, +0x30 m_nIndentationIndex, +0x10/+0x14 inner equip-name vector (stride 8, +4 m_bIsAct)",
+        "equip-list vector element stride = 8 bytes; local_120[i*2+1] = m_bIsAct byte"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; the underlying activation math (total needed vs active piece counts, threshold = CEquipSuitSkillInfo value>=threshold per schema) is server-authoritative. Server must recompute active suit skills from equipped gear, not trust client.",
+      "confidence": "medium",
+      "notes": "Aligns with recovered schema CEquipSuitSkillGroupInfo / CEquipSuitSkillInfo (skillId+0x1c, value+0x24, threshold+0x20). char+0x260e4/+0x260e0 are equip-subsystem fields."
+    },
+    {
+      "address": "10864360",
+      "currentName": "FUN_10864360",
+      "proposedName": "MHUI::BuildWeaponSlashGaugeVO",
+      "subsystem": "weapon/gauge",
+      "purpose": "Scaleform VO builder returning current weapon 'slash'/charge-gauge values. Gated arg count==1. Reads a 3-int + 1-byte struct via FUN_107ccc30 x3 + FUN_107cccb0 (local_2c[0]=weapon type, local_2d=local/valid flag). Requires local player character. Only for weapon type 3 or 8 (m_bIsLocal true): emits m_nWeaponCurrentSlash = FUN_113509f0(2) and m_nWeaponCurrentSlashBuffer = FUN_113509f0(4). Sets out-VO ready flag byte at in_stack_00000018[2].",
+      "formulas": [
+        "gate: argCount==1 AND weaponType(local_2c[0]) in {3,8} AND local_2d(isLocal)!=0",
+        "m_nWeaponCurrentSlash = FUN_113509f0(2)",
+        "m_nWeaponCurrentSlashBuffer = FUN_113509f0(4)",
+        "out flag: in_stack_00000018[1]=2, byte[+8]=1 on success"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of a weapon gauge/meter. Actual gauge state is server-authoritative combat state; args 2 and 4 select gauge-current vs gauge-buffer channels.",
+      "confidence": "medium",
+      "notes": "Weapon types 3/8 likely the gauge-bearing weapon classes (e.g. long/charge weapons)."
+    },
+    {
+      "address": "10865c50",
+      "currentName": "FUN_10865c50",
+      "proposedName": "MHUI::BuildRandomWeaponSkillVO",
+      "subsystem": "weapon/random-recast",
+      "purpose": "Scaleform VO builder for a random/recast weapon's skill info panel. Parses a large GFx arg struct (fields at word indices 1,7-8,0xd-0xe,0x13-0x14,0x19-0x1a,0x1f-0x20,0x25-0x26,0x31-0x32,0x36-0x3a,0x3d). Resolves weapon item via FUN_107cb630/FUN_10858a70/FUN_10858670 depending on flags. Emits: canUnbind, isRandomWeapon, isRecast, rareScore, m_strComments, m_nRareType, m_nWeaponCurrentSlash, plus randomWeaponSkillName/Desc arrays.",
+      "formulas": [
+        "canUnbind initially 1 when item[8]!=0 AND *(FUN_11669250()+0x108)!=0 AND *(+0x10c)>0; then forced 0 if isRandomWeapon(FUN_1166e250) AND (recastCount FUN_1166dc70 > 0 OR uStack_100._1_1_ flag)",
+        "isRandomWeapon = FUN_1166e250() != 0",
+        "isRecast = FUN_1166dc70() (recast count) > 0",
+        "rareScore = FUN_1166dbb0()",
+        "m_nRareType = weapon vtbl+0x2c",
+        "m_nWeaponCurrentSlash = FUN_1166dff0()",
+        "skill list iterates ppiStack_f8..piStack_f4 (stride 4 pointers); per entry reads *(entryPtr+0x18)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display. canUnbind / isRecast / rareScore / recast state are server-authoritative weapon-instance properties; server validates unbind and recast operations.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10866ba0",
+      "currentName": "FUN_10866ba0",
+      "proposedName": "MHUI::BuildEquipSkillBuffVO",
+      "subsystem": "skills/equip-buff",
+      "purpose": "Scaleform VO builder for an equipment-skill buff tooltip. Gated arg count==1. Requires local player character with *(char+0x2d1c)!=0. Looks up equip-skill-buff record via FUN_113f9820(index). Emits m_nEquipSkillBuffLevel = rec+0x24 and m_nEquipSkillBuffDesc (formatted string from rec+0x1c/+0x20/+0x24).",
+      "formulas": [
+        "gate: argCount==1 AND char+0x2d1c != 0",
+        "rec = FUN_113f9820(bufIndex local_44)",
+        "m_nEquipSkillBuffLevel = *(rec+0x24)",
+        "m_nEquipSkillBuffDesc = format(*(rec+0x20), *(rec+0x1c)) into local_24 buffer (rec+0xc)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display. Equip skill buff level is server-authoritative.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108765a0",
+      "currentName": "FUN_108765a0",
+      "proposedName": "CTalentInfo::GetTalentRecordById",
+      "subsystem": "skills/talent",
+      "purpose": "Data-table accessor: returns the talent record pointer for a given talent id from the CTalentInfo manager (2D row/column table). Singleton via CTalentInfo::GetInfoMgrSingleton, fallback CInfoManager::FindByName(\"CTalentInfo\"). This is the core id->record resolver used across talent UI.",
+      "formulas": [
+        "mgr fields: [8]=row-pointer array base, [9]=totalCount, [10]=columnCount(rowStride), [0xc]=baseId",
+        "guard: param_1 != -1; if param_1==0 require mgr[0xc]==0; require mgr[10]!=0",
+        "idx = param_1 - mgr[0xc]; guard 0 <= idx < mgr[9]",
+        "row = *(mgr[8] + (idx / mgr[10]) * 4); if row!=0 return *(row + (idx % mgr[10]) * 4)",
+        "else return 0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative data-table accessor (static talent config). Server that owns talent validation would use the same id->record mapping; both sides read this table. Layout is load-bearing for server-side talent lookup.",
+      "confidence": "high"
+    },
+    {
+      "address": "10876810",
+      "currentName": "FUN_10876810",
+      "proposedName": "CNewSkillInfo::GetRecordByIndex",
+      "subsystem": "skills/weapon-skill",
+      "purpose": "Data-table accessor: returns the CNewSkillInfo record pointer at a linear index. Singleton via CNewSkillInfo::GetInfoManager, fallback CInfoManager::FindByName(\"CNewSkillInfo\").",
+      "formulas": [
+        "mgr fields: [5]=array begin, [6]=array end",
+        "count = (mgr[6] - mgr[5]) >> 2",
+        "guard 0 <= param_1 < count; return *(mgr[5] + param_1*4) else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative static-data accessor (weapon skill config). Both sides index this table.",
+      "confidence": "high"
+    },
+    {
+      "address": "108768a0",
+      "currentName": "FUN_108768a0",
+      "proposedName": "CNewSkillInfo::GetRecordCount",
+      "subsystem": "skills/weapon-skill",
+      "purpose": "Returns the CNewSkillInfo record count by calling manager vtbl+0x28. Used as the loop bound paired with GetRecordByIndex (see FUN_1087a4c0 which does count=FUN_108768a0() then loops FUN_10876810(i)).",
+      "formulas": [
+        "return = mgr->vtbl[0x28/4]()  (record count)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative static-data accessor (count).",
+      "confidence": "medium"
+    },
+    {
+      "address": "10876d10",
+      "currentName": "FUN_10876d10",
+      "proposedName": "MHUI::RegisterWeaponSkillWindowCallbacks",
+      "subsystem": "ui/registration",
+      "purpose": "One-time registration of Scaleform->native callbacks for the weapon/skill/talent window. Binds named callbacks (via FUN_100b62c0 string ctor + FUN_1087c9e0 map insert) to handler functions: InitModel, WeaponGeneralViewWindowHide, InitGeneral, WeaponUnlockUIOpened, InitWeaponUnlockView, ApplyWeaponTutorial, WeaponSelect, SetCurrentPlayerWeapon, VideoViewAlready, WeaponTalentActived, CloseUI, InitViewModel, InitTalentCom, GetProfoundSkillData(->FUN_1087a4c0), GetActiveProfoundSkillData(->FUN_1087a9e0), ActivateWeaponProfound, UnactivateWeaponProfound, SetWeaponStyle, GetWeaponStyleData(->FUN_1087b3e0), GetItemColumnGridByID, plus _getSkillListData(->FUN_10877440->FUN_10877c00), BuildWeaponDeriveTreeData, GetWeaponDeriveTipsMaterial. Then fires several one-shot init hooks (FUN_10d17440/FUN_10d17870 gates).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (UI callback registration plumbing). Handler NAMES are a useful catalog of client->server weapon/talent/profound operations the server must service (ActivateWeaponProfound, SetWeaponStyle, WeaponTalentActived, etc.).",
+      "confidence": "high",
+      "notes": "MHUI__RegisterWeaponTalentCallbacks and MHUI__BuildWeaponDeriveTreeData already named by decompiler; ordering of handler binds maps 1:1 to the string list."
+    },
+    {
+      "address": "10877440",
+      "currentName": "FUN_10877440",
+      "proposedName": "MHUI::RegisterGetSkillListDataCallback",
+      "subsystem": "ui/registration",
+      "purpose": "Registers the '_getSkillListData' Scaleform callback bound to FUN_10877c00, and installs a related handler via FUN_104f42b0. Gated arg count==1.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only UI plumbing.",
+      "confidence": "high"
+    },
+    {
+      "address": "10877c00",
+      "currentName": "FUN_10877c00",
+      "proposedName": "MHUI::BuildWeaponSkillListVO",
+      "subsystem": "skills/weapon-skill",
+      "purpose": "Scaleform VO builder producing the full weapon skill list ('SkillListData'). Iterates the runtime skill-record list (manager via FUN_107d45b0; list at mgr+0x14, count via vtbl+0x28) and, for records whose weapon-class field (rec[5]) matches the requested class (piStack_130), emits per-skill rows: skillid (vtbl+0x18 GetId), skill_name, skill_status, skill_content, video_file, special, profoundIcon, unlockTips, gp_num, skill_gp_op_str1/2/3, skill_gp_op_img1/2/3, gp_skill_content, bequipped, bIsProFoundMeaning, profoundmeaning1/2, unlockHunterstarLevel. Uses CNewSkillInfo::BuildSkillDisplayList for profound-meaning rows.",
+      "formulas": [
+        "record fields read: rec[4]=skillId(for bequipped compare), rec[5]=weaponClassId(filter == piStack_130), rec[0x15]==2 selects gp/dual-mode branch, rec[0x30]=gp_num, rec[0x3d]/[0x4a]/[0x57]=skill_gp_op_img1/2/3, rec[0x5f]=special/video, rec[0x65]=video_file, rec[0x67]=byte(isProfound flag)",
+        "list iterate: for i in [0,count): rec = *(mgr[0x14] + i*4); count clamp via (*(mgr+0x18)-*(mgr+0x14))>>2",
+        "profound-meaning slot counter pppiStack_190 increments; slot 1 -> 'profoundmeaning1', slot 2 -> 'profoundmeaning2'",
+        "bequipped = (displayEntry[0x12] == 1) for entry whose [3]==rec[4]; display-entry stride 0x13 words (0x4c bytes, matches schema CNewSkillInfo display stride)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display builder. bequipped/status reflect server-authoritative equipped-skill state.",
+      "confidence": "medium",
+      "notes": "iVar9(iStack_134) is a profound-enabled flag from char+0x14 subobject vtbl+4; gates the profound branch. Very heavy string-object churn is stock GFx Value handling."
+    },
+    {
+      "address": "10878ba0",
+      "currentName": "FUN_10878ba0",
+      "proposedName": "MHUI::BuildSkillCompletionRatesVO",
+      "subsystem": "skills/progression",
+      "purpose": "Scaleform VO builder emitting three completion-percentage values for the current weapon: profoundFinishRate (FUN_112f04a0), skillFinishRate (FUN_112f04b0), talentFinishRate (FUN_112f04c0). Requires local player character + weapon subobject (char+0x14 vtbl+4). Uses FUN_112b3da0 to init a stats context from the weapon type arg.",
+      "formulas": [
+        "profoundFinishRate = FUN_112f04a0()",
+        "skillFinishRate = FUN_112f04b0()",
+        "talentFinishRate = FUN_112f04c0()",
+        "weapon type arg deref: args[7] type 3/4 => args[8], else 0xdeadbeaf"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of progression ratios; underlying unlock counts are server-authoritative.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1087a4c0",
+      "currentName": "FUN_1087a4c0",
+      "proposedName": "MHUI::BuildProfoundSkillDataVO",
+      "subsystem": "skills/profound",
+      "purpose": "'GetProfoundSkillData' callback: builds the profound-skill (deep/awaken weapon skill) list VO for a weapon type. Emits SKILL_VIDEO_PROFOUND_DATA_VO_CLASSNAME rows with status, isWeaponProfound, profoundID, strprofoundTips, isActivateSkill(=0), profoundIcon, profoundName, weaponType, video_file, profoundDescribe. Iterates all CNewSkillInfo records (count=FUN_108768a0, record=FUN_10876810(i)), filtering by effectId(rec+0x40)==weaponType (or 0) and rank(rec+0x44)>=0. Enforces a hunt-rank unlock gate via CPlayer::GetHuntRankOrCount.",
+      "formulas": [
+        "record filter: *(rec+0x44) >= 0 AND ( *(rec+0x40)==weaponType OR (*(rec+0x40)==0 AND weaponType==0) )",
+        "unlock gate: if profound info not already unlocked (FUN_112b4000/FUN_112b4040 both false) AND CPlayer::GetHuntRankOrCount() < requiredRank(puStack_48) => skip record",
+        "status = FUN_1087c890(weaponType, profoundId=*(rec+0x10))",
+        "profoundID = *(rec+0x10); profoundIcon = infoRec[0x6d]; video_file = infoRec[0x65]",
+        "weaponType arg deref: args[7] type 3/4 => args[8] else 0xdeadbeaf"
+      ],
+      "costs": [
+        "unlock requirement: hunter-rank/hunt-count threshold (puStack_48) gating profound skill availability; server-authoritative."
+      ],
+      "serverRelevance": "validation-adjacent display: it mirrors the server's profound-unlock rules (hunt rank threshold, activation status). Server must authoritatively enforce these when a client requests ActivateWeaponProfound.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1087a9e0",
+      "currentName": "FUN_1087a9e0",
+      "proposedName": "MHUI::BuildActiveProfoundSkillDataVO",
+      "subsystem": "skills/profound",
+      "purpose": "'GetActiveProfoundSkillData' callback: builds the currently-active/equipped profound-skill slot VO for a weapon. Enumerates up to 3 profound slots (minus one if a set is active), resolving each slot's profound record through a 2D config table lookup, and emits status(=1), profoundID, profoundIndex, strprofoundTips, isActivateSkill(=1), profoundIcon(rec+0x1b4), profoundName, weaponType, video_file(rec+0x194), profoundDescribe.",
+      "formulas": [
+        "slotCount iStack_5c = 3 - (currentSet(iVar3 from vtbl 0x2af4->0x10)(weaponType) != 0 ? 1 : 0)",
+        "per-slot profound id resolution differs by *(profoundInfo+0x40): ==0 uses slot index array *(info+0x50 + resolvedIdx*4); !=0 uses *(info+0x54); resolvedIdx then run through a 2D table on FUN_107d45b0 result: base+0x20 rows, +0x24 count, +0x28 colCount, +0x30 baseId (idx = raw - base; row=*(tbl+0x20 + (idx/col)*4); val=*(row + (idx%col)*4))",
+        "guard: idx != -1, (idx!=0 || *(t+0x30)==0), *(t+0x28)!=0, 0 <= idx-*(t+0x30) < *(t+0x24)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of active profound loadout; the equipped-profound state is server-authoritative.",
+      "confidence": "medium",
+      "notes": "The 2D-table lookup shape matches CTalentInfo::GetTalentRecordById pattern (idx-base, row/col split)."
+    },
+    {
+      "address": "1087b3e0",
+      "currentName": "FUN_1087b3e0",
+      "proposedName": "MHUI::BuildWeaponStyleDataVO",
+      "subsystem": "weapon/style",
+      "purpose": "'GetWeaponStyleData' callback: emits the current weaponStyle for a weapon type. Requires local player character; reads style via character vtbl (char+0x2af4)->0x10 (uStack_90 = weapon type/id). Single field VO: weaponStyle.",
+      "formulas": [
+        "weaponStyle = (*(char+0x2af4))->vtbl[0x10](weaponTypeArg)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; equipped weapon style is server-authoritative.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1088eaa0",
+      "currentName": "FUN_1088eaa0",
+      "proposedName": "MHUI::BuildPassiveSkillDataRows",
+      "subsystem": "skills/passive",
+      "purpose": "Populates passive-skill rows into a GFx object from a source record. Reads passiveSkillLength and arrayPassiveSkillData from the object, then walks the source record's passive vector [rec+0x21c..rec+0x220) (stride 8: [0]=groupID, [1]=value), bounded by passiveSkillLength. For each entry resolves the skill via FUN_1050ebc0 and emits passiveSkillGroupID, passiveSkillValue, passiveSkillName (from resolved rec+0x24/+0x28).",
+      "formulas": [
+        "passive vector: rec+0x21c(begin)..rec+0x220(end), stride 8: entry[0]=passiveSkillGroupID, entry[1]=passiveSkillValue",
+        "iteration bound = min(vectorCount, passiveSkillLength(local_24))",
+        "passiveSkillName built via FUN_100b62c0(*(skillRec+0x28), *(skillRec+0x24))"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; passive group/value data is server-authoritative gear stats.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108a7660",
+      "currentName": "FUN_108a7660",
+      "proposedName": "MHUI::BuildStorageExpandCostVO",
+      "subsystem": "economy/storage-expand",
+      "purpose": "Scaleform VO builder for bag/storage-expansion cost lines. Gated arg count==2. Requires local player character with char+0x260e0!=0. Storage kind (piVar6) must be 2 (bag) or 0xa (warehouse/storage). Computes number of expansion lines and, per line, the item+credit cost, then emits EXPAND_COST_VO_CLASSNAME rows (nItemID, nItemCost, nCreditCost, strIconPath) into lineCostList, plus nStorageExpandFunc.",
+      "formulas": [
+        "gate: argCount==2 AND storageKind in {2, 0xa} AND FUN_113f9390() != 0",
+        "lineCount = FUN_113f9390() / FUN_11522b10(storageKind)  (total capacity units / units-per-line)",
+        "per line L (1-based), offset = (L-1)*unitsPerLine: FUN_115226e0(kind, offset); cost table = (kind==2 ? FUN_108ad830(L)+0x10 : kind==0xa ? FUN_108aca50(L)+0x18)",
+        "cost fields: nItemID=cost[0], nItemCost=cost[1], nCreditCost=cost[2]; strIconPath from FUN_10254130(nItemID)+0xb4",
+        "nStorageExpandFunc = *(FUN_11727ff0()+0x54)"
+      ],
+      "costs": [
+        "Per storage-expansion line: nItemCost (quantity of item nItemID) AND/OR nCreditCost (credits/currency). Amounts are data-driven from FUN_108ad830 (bag) / FUN_108aca50 (storage) cost tables.",
+        "unitsPerLine = FUN_11522b10(storageKind) (grid slots granted per expansion purchase)."
+      ],
+      "serverRelevance": "validation: server must own storage capacity and charge nItemCost/nCreditCost on the expand transaction. This function only reads the cost tables for display, but the tables (FUN_108ad830/FUN_108aca50) and expand-function id are authoritative and must be mirrored server-side.",
+      "confidence": "medium",
+      "notes": "Not a skill; belongs to inventory/economy. Included per chunk contents."
+    },
+    {
+      "address": "108a86a0",
+      "currentName": "FUN_108a86a0",
+      "proposedName": "MHUI::BuildSkillItemInfoVO",
+      "subsystem": "skills/skill-item",
+      "purpose": "Scaleform VO builder for a 'skill item' (consumable/equippable that grants an active skill with a cooldown). Given an item id, checks the special-skill-item id (FUN_116a6a70()+0x100) vs a skill-count table (FUN_108a8a30). Emits m_bSkillItem, m_nSkillCount, m_nSkillCDTime, m_strSkillName, m_nSkillId, and m_nCDTime. Converts the CD to milliseconds.",
+      "formulas": [
+        "if *(FUN_116a6a70()+0x100) == itemId: use FUN_108a8910 (equipped-skill path) else if FUN_108a8a30(itemId) >= 1: use FUN_108a89a0(FUN_108a8a30(itemId))",
+        "on success: m_nSkillCount=uStack_44, m_nSkillCDTime=iStack_40, m_nSkillId=puStack_14, m_strSkillName=puStack_18; m_nCDTime = iStack_40 * 1000  (seconds -> milliseconds)",
+        "on failure: all zeroed, m_nCDTime = 0",
+        "out-VO ready byte = success char"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/authoritative-adjacent: skill-item cooldown (m_nCDTime = seconds*1000 ms) and skill counts are enforced server-side. The *1000 CD-seconds-to-ms conversion is load-bearing for matching client/server CD units.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108d7da0",
+      "currentName": "FUN_108d7da0",
+      "proposedName": "MHUI::BuildTitleListVO",
+      "subsystem": "titles/equip-buff",
+      "purpose": "Scaleform VO builder for the achievement-title list. Emits a per-title VO (TITLE_VO_CLASS_NAME) with bcarry(equipped), titleId, name, description, bNull, bGetInHand(owned), curproperty, detail, and nEquipBuffID (the equip buff a title grants). Iterates owned titles via FUN_11442b40/FUN_108d1a20; the currently-carried title (FUN_11442b60/FUN_1025b060) is emitted first with bcarry=1, then a null/none entry, then all other owned titles.",
+      "formulas": [
+        "title record fields: +0x10 titleId, +0x14 name, +0x90 description, +0x98 buffid (see 108d8370), +0xac curproperty, +0xc0 detail",
+        "bcarry = (record == currentCarriedTitleId); bGetInHand(owned) = FUN_10a03d10(record)",
+        "nEquipBuffID = piStack_7c (the equip-buff pointer/id associated with the title view)",
+        "owned-title iteration count = uStack_c8 from FUN_11442b40; skip current-carried when re-listing"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display, BUT titles apply equipment buffs (nEquipBuffID / buffid at rec+0x98). Server must apply/validate the buff granted by the player's equipped title. Buff-id mapping is the load-bearing datum here.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108d8370",
+      "currentName": "FUN_108d8370",
+      "proposedName": "MHUI::BuildTitlePropertyListVO",
+      "subsystem": "titles/equip-buff",
+      "purpose": "Scaleform VO builder for the property/buff list of owned titles (TITLEPROPERTY_VO_CLASS_NAME -> propertyList). For each owned title (FUN_11442b40 count, FUN_108d1a20 record, FUN_10a03d10 owned-check) emits name, description, buffid=*(rec+0x98), propertyType=*(rec+0x1c).",
+      "formulas": [
+        "per owned title: buffid = *(rec+0x98), propertyType = *(rec+0x1c), name = rec+0xac, description = rec+0xc0",
+        "iterate i in [0, FUN_11442b40()) filtering FUN_10a03d10(record)!=0 (owned)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; the title->buffid and propertyType mapping is server-authoritative (server applies the buff). Same title record layout as 108d7da0.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108d8b00",
+      "currentName": "FUN_108d8b00",
+      "proposedName": "MHUI::BuildCatCuisineBuffVO",
+      "subsystem": "buffs/canteen-cuisine",
+      "purpose": "Scaleform VO builder for cat/canteen 'cuisine' meal buffs ('Buffer' = buff). Requires local player character with cuisine subobject at char+0x2d60. Reads the cuisine object via vtbl +0x10 (count), +0x14, +0x18, +0x1c. Fills three parallel arrays: arrayBufferID (buff ids), arrayBuffer (buff display names, resolved via FUN_104fd710 buff lookup + CPet::SetName), arrayBufferTips (buff tooltip strings). Also emits catCuisineName (FUN_108d15f0). Uses raw memcpy over the buff vectors (with an out-of-memory guard: >0x3FFFFFFF elements -> puts/exit).",
+      "formulas": [
+        "cuisine counts: n0 = cuisine->vtbl[0x10](); flags = vtbl[0x18]()&0xff, vtbl[0x1c]()&0xff; gate 0 < n0",
+        "arrayBufferID from int vector [unaff_EDI..], stride 4",
+        "arrayBuffer/arrayBufferTips resolved per buff id via FUN_104fd710(buffId) (buff-info lookup); name via CPet::SetName",
+        "OOM guard: if (elementCount) > 0x3FFFFFFF -> puts(\"out of memory\") + exit(1) (stock allocator guard)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of the active canteen-meal buffs. The buff ids (arrayBufferID) and their application/duration are server-authoritative — server grants the cuisine buff set. FUN_104fd710 is the shared buff-definition resolver.",
+      "confidence": "medium",
+      "notes": "char+0x2d60 = player's cat/canteen cuisine state object. This is the buff-relevant function in the chunk (canteen food buffs)."
+    }
+  ]
+}

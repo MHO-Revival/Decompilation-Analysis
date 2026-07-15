@@ -1,0 +1,951 @@
+{
+  "chunkIndex": 11,
+  "functions": [
+    {
+      "address": "0x11522770",
+      "currentName": "FUN_11522770",
+      "proposedName": "CEquipHiddenSkillCondOpenInfo::GetByIndex",
+      "subsystem": "skills/equip-hidden-skill",
+      "purpose": "Linear-list accessor: returns the CEquipHiddenSkillCondOpenInfo* stored at ordinal index param_1 in the manager's flat vector.",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CEquipHiddenSkillCondOpenInfo::GetInfoManager()",
+        "if 0 <= idx < ((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14] + idx*4) else 0",
+        "standard CInfoManager flat-vector accessor (base=+0x14, end=+0x18, stride 4)"
+      ],
+      "serverRelevance": "client-only (static-config table accessor; stock CInfoManager plumbing)",
+      "notes": "Hidden equip skill that opens under a condition."
+    },
+    {
+      "address": "0x11522920",
+      "currentName": "FUN_11522920",
+      "proposedName": "CEquipPassiveSkillGroupInfo::ComputeLevelById",
+      "subsystem": "skills/equip-passive",
+      "purpose": "Looks up a CEquipPassiveSkillGroupInfo row by id (2D sparse lookup) and, if present, returns ComputeSuitSkillLevel(param_2) for it.",
+      "confidence": "medium",
+      "formulas": [
+        "CInfoManager 2D lookup: id2=id-mgr[0x30]; guard id!=-1, (id!=0 || mgr[0x30]==0), mgr[0x28]!=0, 0<=id2<mgr[0x24]; row=mgr[0x20][id2/mgr[0x28]]; entry=row[id2%mgr[0x28]]",
+        "if entry present: return ComputeSuitSkillLevel(param_2)"
+      ],
+      "serverRelevance": "validation/authoritative (passive skill group level feeds equip-suit skill activation)"
+    },
+    {
+      "address": "0x1154c960",
+      "currentName": "FUN_1154c960",
+      "proposedName": "CBuffInfo::GetByIndex",
+      "subsystem": "buffs",
+      "purpose": "Flat-vector accessor returning CBuffInfo* at ordinal index (base +0x14, stride 4).",
+      "confidence": "high",
+      "formulas": ["if 0<=idx<((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14]+idx*4)"],
+      "serverRelevance": "client-only (static buff-definition table accessor)"
+    },
+    {
+      "address": "0x1154de30",
+      "currentName": "FUN_1154de30",
+      "proposedName": "CPetMonsterSkillInfo::GetByIndex",
+      "subsystem": "pet/monster-skill",
+      "purpose": "Flat-vector accessor returning CPetMonsterSkillInfo* at ordinal index.",
+      "confidence": "high",
+      "formulas": ["if 0<=idx<((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14]+idx*4)"],
+      "serverRelevance": "client-only (static-config accessor)"
+    },
+    {
+      "address": "0x1154de90",
+      "currentName": "FUN_1154de90",
+      "proposedName": "CPetSkillConditionInfo::GetByIndex",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Flat-vector accessor returning CPetSkillConditionInfo* at ordinal index.",
+      "confidence": "high",
+      "formulas": ["if 0<=idx<((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14]+idx*4)"],
+      "serverRelevance": "client-only (static-config accessor)"
+    },
+    {
+      "address": "0x11572f60",
+      "currentName": "FUN_11572f60",
+      "proposedName": "CEquipSuitSkillSystem::AddOrUpdateSuitEntry",
+      "subsystem": "skills/equip-suit",
+      "purpose": "Inserts/updates a suit-skill activation record. Looks up CEquipSuitSkillInfo by id (param_3); keyed on param_2 (suit-piece count/tier) in a red-black tree at param_1+4. New node accumulates threshold from info+0x38 plus a base from FUN_11759f80()+0x30; existing node accumulates (node+0x18 += info+0x38) and pushes (param_3, value) into node's paired vector (node+0x20/+0x24). Emits UI/event 0x183a at end.",
+      "confidence": "medium",
+      "formulas": [
+        "info(param_3) via CEquipSuitSkillInfo 2D lookup (guards id==0->mgr[0x30]==0, mgr[0x28]!=0, id2 in [0,mgr[0x24]))",
+        "new-entry value: local_28 = FUN_11759f80()[0x30] + info[0x38]",
+        "existing node: node[0x18] += info[0x38]; append pair (param_3, uVar1&0xffffff00) to vector node[0x20..0x24]",
+        "tree keyed/compared on node[0x10] vs param_2 (BST: key<param_2 -> right child +0xc else left +8)",
+        "event header {0x183a, -1, -1, suitCount} dispatched via vtbl(+0x1c)(+0x14)"
+      ],
+      "serverRelevance": "authoritative (server tracks how many suit pieces are equipped and which suit-skill tiers activate; info+0x38 is the piece-count contribution)",
+      "notes": "0x38 = per-piece contribution/threshold field on CEquipSuitSkillInfo."
+    },
+    {
+      "address": "0x1157a0c0",
+      "currentName": "FUN_1157a0c0",
+      "proposedName": "CNewSkillList::AddSkill",
+      "subsystem": "skills/new-skill",
+      "purpose": "Adds a CNewSkillInfo id (param_1) to the player's per-group skill list. Group index = info+0x40 (effectId/group). Skips if already present; only adds if current count < FUN_11744050()[0x40] (per-group cap). Also pushes up to 5 auxiliary related-skill ids (from FUN_1182d280) into a parallel list at group (info+0x40 + 0xd).",
+      "confidence": "medium",
+      "formulas": [
+        "info via CNewSkillInfo 2D lookup by param_1",
+        "grp = info[0x40]; primary vector at param_1 + grp*0xc; dup-scan (*p==id)",
+        "cap check: existingCount < FUN_11744050()[0x40]",
+        "aux vector at param_1 + (grp + 0xd)*0xc; push each nonzero of 5 aux ids from FUN_1182d280",
+        "stack-cookie guarded (DAT_11e11390 ^ esp)"
+      ],
+      "serverRelevance": "authoritative (server maintains learned/active weapon-skill lists; enforces per-group cap FUN_11744050[0x40])",
+      "notes": "CNewSkillInfo: skillId 0x10, level 0x14, effectId/group 0x40, rank 0x44 (per recovered schema)."
+    },
+    {
+      "address": "0x1157a380",
+      "currentName": "FUN_1157a380",
+      "proposedName": "CTalentTree::SetNode",
+      "subsystem": "talents",
+      "purpose": "Sets the value (param_3) of a talent-tree node. Looks up CTalentInfo by id (param_2); stores param_3 into a flattened 3-axis grid at param_1+0x2d8.",
+      "confidence": "high",
+      "formulas": [
+        "info via CTalentInfo 2D lookup by param_2",
+        "flatIndex = ((info[0x44]*3 + info[0x4c])*3 + info[0x50])",
+        "*(param_1 + 0x2d8 + flatIndex*4) = param_3",
+        "axes info[0x44], info[0x4c], info[0x50] each 0..2 (3x3x3 grid = 27 nodes)"
+      ],
+      "serverRelevance": "authoritative (server stores talent node selections at owner+0x2d8 grid)",
+      "notes": "0x44/0x4c/0x50 = talent tree coordinate triplet (branch/tier/node)."
+    },
+    {
+      "address": "0x1157a470",
+      "currentName": "FUN_1157a470",
+      "proposedName": "CNewSkillList::IsSkillInList",
+      "subsystem": "skills/new-skill",
+      "purpose": "Returns 1 if new-skill id (param_2) is present in the per-group vector (group=info+0x40) at param_1, else 0. Returns 1 if id/info invalid (treated as trivially satisfied).",
+      "confidence": "medium",
+      "formulas": [
+        "grp=info[0x40]; scan vector [param_1+grp*0xc .. count]; match *p==param_2 -> return 1",
+        "not found -> 0; invalid id/info -> 1"
+      ],
+      "serverRelevance": "validation (gate for whether a weapon skill is available/learned)"
+    },
+    {
+      "address": "0x1157a720",
+      "currentName": "FUN_1157a720",
+      "proposedName": "CTalentTree::GetNode",
+      "subsystem": "talents",
+      "purpose": "Reads the talent-tree node value for CTalentInfo id (param_2) from the param_1+0x2d8 grid (mirror of SetNode).",
+      "confidence": "high",
+      "formulas": [
+        "flatIndex = ((info[0x44]*3 + info[0x4c])*3 + info[0x50])",
+        "return *(param_1 + 0x2d8 + flatIndex*4)"
+      ],
+      "serverRelevance": "authoritative (read current talent selection/level)"
+    },
+    {
+      "address": "0x1157a850",
+      "currentName": "FUN_1157a850",
+      "proposedName": "CTalentTree::HasTalentInBranch",
+      "subsystem": "talents",
+      "purpose": "Checks whether talent id (param_2) is present in the learned-list of its branch. Branch = CTalentInfo+0x44; scans 8 slots (stride 4) at base param_1 + info[0x44]*0x20 + 0x138.",
+      "confidence": "medium",
+      "formulas": [
+        "info via CTalentInfo 2D lookup by param_2",
+        "branchBase = param_1 + info[0x44]*0x20 + 0x138",
+        "for i in 0..7: if *(branchBase + i*4) == param_2 return true",
+        "per-branch learned array = 8 entries * 4 bytes; branch stride 0x20"
+      ],
+      "serverRelevance": "authoritative/validation (server tracks per-branch learned talents, 8 slots each)"
+    },
+    {
+      "address": "0x1157a8d0",
+      "currentName": "FUN_1157a8d0",
+      "proposedName": "CNewSkillList::RemoveSkill",
+      "subsystem": "skills/new-skill",
+      "purpose": "Removes new-skill id (param_2) from primary group vector (group=info+0x40) and from the aux vector (group+0xd) for up to 5 related aux ids (FUN_1182d280). Uses swap-with-last + shrink.",
+      "confidence": "medium",
+      "formulas": [
+        "primary vector at param_1+grp*0xc: on match, *slot = *(end-4); end -= 4",
+        "aux vector at param_1+(grp+0xd)*0xc (data ptr at param_1+0x9c+grp*0xc, end at +0xa0): same swap-remove for each of 5 aux ids"
+      ],
+      "serverRelevance": "authoritative (server updates active/learned skill lists on unequip/relearn)"
+    },
+    {
+      "address": "0x1157b670",
+      "currentName": "FUN_1157b670",
+      "proposedName": "CTalentSkillSystem::ctor",
+      "subsystem": "talents",
+      "purpose": "Constructor for a talent/active-skill system object (~0x29 dwords). Sets vtable PTR_FUN_11d2ddb4, stores owner (param_2) and param_3, zero-inits many list/pair members, then queries CTalentActiveInfo manager (vtbl +0x28) and runs FUN_11744050/FUN_1157d4f0 init.",
+      "confidence": "medium",
+      "formulas": [
+        "param_1[1]=owner; param_1[2]=param_3; vtbl=&PTR_FUN_11d2ddb4",
+        "CTalentActiveInfo::GetManager() then vtbl+0x28 called"
+      ],
+      "serverRelevance": "client-only (object construction/plumbing)"
+    },
+    {
+      "address": "0x1157bc20",
+      "currentName": "FUN_1157bc20",
+      "proposedName": "CSkillSystem::CanChooseSkill",
+      "subsystem": "skills/casting",
+      "purpose": "Validates that a target skill can be chosen/cast. Resolves target via vtbl(+0x90); reads its type via vtbl(+0x3c). type==2 or type==3 branches require the owner's action state (vtbl +0xa8) to be idle (==0) else -2. If no combo context (FUN_11398e60==null) applies a rate-limited retry counter (DAT_11dfa7d0=10 / DAT_11dfa7d4=9 budget) returning -3 when exhausted; otherwise calls combo vtbl(+0x11c)(target[0x13]) and returns 0 on success or -4.",
+      "confidence": "medium",
+      "formulas": [
+        "return 0 = OK; -1 (0xffffffff) no target; -2 (0xfffffffe) busy state; -3 (0xfffffffd) throttled/no-context; -4 (0xfffffffc) predicate failed",
+        "type 2 retry budget DAT_11dfa7d0 init 10, type 3 budget DAT_11dfa7d4 init 9; decrement each fail, <1 -> reject",
+        "throttled log id \"CSkillSystem_CanChooseSkill\""
+      ],
+      "serverRelevance": "validation (authoritative gate for skill selection/cast eligibility; server should replicate the state/type checks, ignore the client-side log throttle)"
+    },
+    {
+      "address": "0x1157c3f0",
+      "currentName": "FUN_1157c3f0",
+      "proposedName": "CNewSkillSystem::CanUseSkill",
+      "subsystem": "skills/new-skill",
+      "purpose": "Checks usability of a CNewSkillInfo (param_2). If info+0x44 (rank) == -1: usable when IsSkillInList (FUN_1157a470). Otherwise queries via vtbl(+0x8c)(info[0x40], info[0x44]) then FUN_1141c9e0()==0 => usable. Returns 1 usable, 0 not.",
+      "confidence": "medium",
+      "formulas": [
+        "if info[0x44]==-1: usable = FUN_1157a470(param_2)",
+        "else: vtbl+0x8c(info[0x40], info[0x44]); usable = (FUN_1141c9e0()==0)"
+      ],
+      "serverRelevance": "validation (server-side gate for using a weapon new-skill)"
+    },
+    {
+      "address": "0x1157e310",
+      "currentName": "FUN_1157e310",
+      "proposedName": "CPetMonsterSkillSystem::CastSkill",
+      "subsystem": "pet/monster-skill",
+      "purpose": "Activates the pet-monster skill whose id is at this+0x2a. Guards with FUN_1157d5a0 (cooldown/lock). Stops any current action (vtbl+0x48/+0x38), stores skill ptr at this+7. If this+0x23 matches skill+0x14 (same category) copies cached per-slot cooldown/state pairs (this+0x17..0x22 -> this+0x9..0x14); otherwise invalidates 3 cached callback pairs (this+0x1d..). Dispatches cast event 0x6a6 (with skill+0x18 anim, skill[5], skill[6]).",
+      "confidence": "medium",
+      "formulas": [
+        "skillId = this[0x2a]; info via CPetMonsterSkillInfo 2D lookup",
+        "event {0x6a6, -1, -1, ownerId, vtbl+0x18(skill), skill[5], skill[6], 0}",
+        "same-category test: this[0x23] == skill[0x14]",
+        "returns 0 on cast, -1 on guard/invalid"
+      ],
+      "serverRelevance": "authoritative (server executes pet-monster skill activation, cooldown state, category grouping)"
+    },
+    {
+      "address": "0x1157e5f0",
+      "currentName": "FUN_1157e5f0",
+      "proposedName": "CPetMonsterSkillSystem::SelectUsableSkill",
+      "subsystem": "pet/monster-skill",
+      "purpose": "Picks a usable pet-monster skill from a skill's candidate list. Resolves group id from param_2 (FUN_1182e200); guards FUN_1157d650 and owner-can-act vtbl(+0x58). Iterates candidate list [skill+0x4e4 .. +0x4e8] backwards; accepts a candidate iVar1 only if its resolved level-info (FUN_1157a660(cand+0x14))[4] >= cand[0x18]>>1 AND cand+0x2e byte==0 AND FUN_1157e800(cand). Out status: 1=invalid id, 2=no candidate matched.",
+      "confidence": "medium",
+      "formulas": [
+        "candidate count = (skill[0x4e8]-skill[0x4e4])>>2 (iterated high->low)",
+        "accept when NOT( info[4] < (cand[0x18]>>1) || cand[0x2e]!=0 || !FUN_1157e800(cand) )",
+        "threshold uses cand[0x18] halved (>>1)"
+      ],
+      "serverRelevance": "authoritative (server-side pet skill AI selection incl. resource/level gating)"
+    },
+    {
+      "address": "0x1157e880",
+      "currentName": "FUN_1157e880",
+      "proposedName": "CPetMonsterSkillInfo::GetById",
+      "subsystem": "pet/monster-skill",
+      "purpose": "2D-sparse lookup returning CPetMonsterSkillInfo* for id resolved from (param_1,param_2) via FUN_1182e200.",
+      "confidence": "high",
+      "formulas": ["id=FUN_1182e200(p1,p2); standard 2D lookup (base +0x30, stride +0x28, count +0x24, rows +0x20)"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x1157f2f0",
+      "currentName": "FUN_1157f2f0",
+      "proposedName": "CPetSkillConditionInfo::GetProbabilityPermille",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Looks up CPetSkillConditionInfo by id; returns FUN_1154bc80(cond+0x10)/1000 (probability expressed per-mille -> integer permille count). Requires this+8 nonzero.",
+      "confidence": "high",
+      "formulas": [
+        "return FUN_1154bc80(cond[0x10]) / 1000",
+        "cond[0x10] is a per-mille probability/value (matches recovered schema note)"
+      ],
+      "serverRelevance": "authoritative (server evaluates pet skill trigger probability; /1000 scaling is load-bearing)"
+    },
+    {
+      "address": "0x1157f370",
+      "currentName": "FUN_1157f370",
+      "proposedName": "CPetSkillConditionInfo::ComputeValueById",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Looks up condition by id and returns FUN_115803e0(cond) (resolved condition magnitude/type).",
+      "confidence": "medium",
+      "formulas": ["return FUN_115803e0(cond)"],
+      "serverRelevance": "authoritative (condition value used for pet-skill triggering)"
+    },
+    {
+      "address": "0x1157f470",
+      "currentName": "FUN_1157f470",
+      "proposedName": "CPetSkillConditionInfo::GetById",
+      "subsystem": "pet/skill-condition",
+      "purpose": "2D-sparse lookup returning CPetSkillConditionInfo* by id.",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x1157f8c0",
+      "currentName": "FUN_1157f8c0",
+      "proposedName": "CPetSkillSystem::ApplyPetSkillConditionEffects",
+      "subsystem": "pet/skill-condition",
+      "purpose": "On pet-skill activation, resets any prior condition entity (owner+0x1ed4 vtbl+0x54 then +0x28), then looks up both CPetSkillConditionInfo and CPetSkillInfo by same id. Registers timers/tunes (info+0xbc, +0xc0 via combat-tune vtbl +0x44, class 0xc). Iterates three effect lists on CPetSkillInfo: self-target list [+0xdc..+0xe0], targeted list [+0x124..+0x128] (resolves target via player pathfind vtbl +0x7c/+0xa8 needing state==1), and owner list [+0x100..+0x104]; each effect: vtbl+0xc(target,0) check then vtbl+0x10(target,&ctx) apply. If owner-current-skill (+0x84) != id, runs FUN_11580310 (dispatch condition update).",
+      "confidence": "medium",
+      "formulas": [
+        "condition entity at owner[+4][0x1ed4]",
+        "tune ids info[0xbc], info[0xc0] registered via vtbl+0x44(playerId, tuneId, 0, 1, 0xc)",
+        "effect lists: self +0xdc/+0xe0, targeted +0x124/+0x128, owner +0x100/+0x104 (dword arrays)",
+        "target eligibility requires vtbl+0xa8()==1",
+        "returns 0 ok / -1 invalid"
+      ],
+      "serverRelevance": "authoritative (server applies pet-skill buffs/effects and tunes to self/target/owner)"
+    },
+    {
+      "address": "0x1157fc90",
+      "currentName": "FUN_1157fc90",
+      "proposedName": "CPetSkillConditionInfo::IsConditionSatisfied",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Returns 0 (satisfied) when condition value (FUN_115803e0) > 0 AND this+8 set AND probability FUN_1154bc80(cond+0x10)/1000 > 0; returns 1 when value>0 but probability not met; 0 otherwise.",
+      "confidence": "medium",
+      "formulas": [
+        "if FUN_115803e0(cond) > 0: if this[8]!=0 && (FUN_1154bc80(cond[0x10])/1000) > 0 -> 0 else 1"
+      ],
+      "serverRelevance": "authoritative/validation (server gate for whether a pet skill's condition triggers)"
+    },
+    {
+      "address": "0x1157fd30",
+      "currentName": "FUN_1157fd30",
+      "proposedName": "CPetSkillSystem::ActivateCondition",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Activates a resolved condition: dispatches event 0x423 (with owner+4[8] and skill id) via combat vtbl (+0x1c/+0x14), runs FUN_11580310(cond), and records current skill at owner+0x84.",
+      "confidence": "medium",
+      "formulas": [
+        "event {0x423, -1, -1, skillId, ownerCtx}",
+        "owner[0x84] = skillId"
+      ],
+      "serverRelevance": "authoritative (server marks active pet-skill condition and applies it)"
+    },
+    {
+      "address": "0x11580040",
+      "currentName": "FUN_11580040",
+      "proposedName": "CPetSkillConditionInfo::ComparePriority",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Comparator over two condition ids: returns (b.priority < a.priority) using field +0x18, else true when equal/invalid. Used for sorting/selecting highest-priority condition.",
+      "confidence": "medium",
+      "formulas": [
+        "a=cond(param_1), b=cond(param_2); pa=a[0x18], pb=b[0x18]; if pa!=pb return pb<pa; else true"
+      ],
+      "serverRelevance": "authoritative (priority ordering of pet-skill conditions; +0x18 is priority)"
+    },
+    {
+      "address": "0x11580190",
+      "currentName": "FUN_11580190",
+      "proposedName": "CPetSkillSystem::ApplyConditionTune_A",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Reads condition record (param_2: id at +0x10, value at +0x1c) and, via CPetSkillInfo lookup on same id, pushes a tune payload (info+0x24) with UI/display vtbl(+0x14). If this+8 set, applies FUN_1154bee0(condId, value, 0) to the buff/attribute system.",
+      "confidence": "low",
+      "formulas": [
+        "local_8 = cond[0x1c] (value); id = cond[0x10]",
+        "FUN_1154bee0(cond[0x10], value, 0) when this[8]!=0",
+        "display tunes from _DAT_11d2df20.. / _DAT_11d2df30.. templates"
+      ],
+      "serverRelevance": "authoritative (server applies condition-derived attribute value)"
+    },
+    {
+      "address": "0x11580310",
+      "currentName": "FUN_11580310",
+      "proposedName": "CPetSkillSystem::DispatchConditionUpdate",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Given a condition object (param_2), resolves the best matching condition row by value key (vtbl+0x18) via a BST (this+0x6c/+0x70) then CPetSkillConditionInfo lookup; then runs four sub-updaters FUN_115806f0/FUN_11580490/FUN_11580190/FUN_11580540 on the resolved condition.",
+      "confidence": "low",
+      "formulas": [
+        "key = param_2->vtbl+0x18(); BST search in tree at this+0x6c keyed on node[0x10]",
+        "if found node[0x14] -> resolve CPetSkillConditionInfo; else use param_2"
+      ],
+      "serverRelevance": "authoritative (server recomputes/applies all condition-driven effects)"
+    },
+    {
+      "address": "0x11580540",
+      "currentName": "FUN_11580540",
+      "proposedName": "CPetSkillSystem::ApplyConditionTune_Random",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Like ApplyConditionTune_A but computes a RANDOM magnitude within a range. From condition record: base=cond+0x1c, lo=cond+0x20, hi=cond+0x24. value = lo + (base + (lo - rand01*(hi-lo))). Applies FUN_1154bda0(condId*100) then FUN_1154bee0(condId*100, value, 0).",
+      "confidence": "medium",
+      "formulas": [
+        "rand01 = FUN_100ee450() * _DAT_11de9a60 (uniform 0..1 scale constant _DAT_11de9a60)",
+        "value = cond[0x1c] + ( cond[0x20] - (int)(rand01 * (cond[0x24] - cond[0x20])) )",
+        "apply key = condId*100: FUN_1154bda0(id*100); FUN_1154bee0(id*100, value, 0)"
+      ],
+      "serverRelevance": "authoritative (random magnitude roll MUST be server-side; _DAT_11de9a60 is the 1/RAND_MAX-style normalizing constant)",
+      "notes": "cond[0x20]=range min, cond[0x24]=range max, cond[0x1c]=base add. Key offset *100 distinguishes randomized tune slot."
+    },
+    {
+      "address": "0x115823a0",
+      "currentName": "FUN_115823a0",
+      "proposedName": "CPetSkillSystem::AutoTriggerSkills",
+      "subsystem": "pet/skill-ai",
+      "purpose": "Pet-skill AI tick: guarded by owner idle (vtbl+0xa8==0) and a once-flag (this+6). Iterates equipped skills (count this[3][0x34]) via FUN_1158d020; for category-1 skills whose action is free (vtbl+0x4c==0) issues cast via this[2] vtbl(+0x1c). When a farm/collect context is active (this[1][0xc] vtbl+0x168), collects category-8 skill ids (CPetSkillInfo::CollectSkillIdsByCategory(8)), registers their tunes (info+0xb8) for non-category-4 skills, and casts the found farm skill (records this+0x21 = skill+0x24).",
+      "confidence": "low",
+      "formulas": [
+        "equipped count = this[3][0x34]",
+        "CollectSkillIdsByCategory(8) -> id list; skip skill where info[0x5c]==4; register tune info[0xb8]",
+        "this[0x21] = selected skill[0x24]"
+      ],
+      "serverRelevance": "authoritative (server-driven pet skill/farm auto-cast; categories 1=combat,8=farm,4=excluded)"
+    },
+    {
+      "address": "0x11582f70",
+      "currentName": "FUN_11582f70",
+      "proposedName": "CPetSkillSystem::FillSkillDisplayRecord",
+      "subsystem": "pet/skill-condition",
+      "purpose": "Populates a display/status struct (param_2) for a pet skill (param_3): flag param_2[0]=1, param_2+0x34=skillLevel(info+0x10), param_2+8=cond+0x1c, param_2+4=cond+0x28. In farm context, overrides param_2+4 with FUN_1157f370 (computed condition value). Builds a localized name string (FUN_100e5c10/61d0).",
+      "confidence": "low",
+      "formulas": [
+        "param_2[0]=1; param_2[0x34]=skillInfo[0x10]; param_2[8]=cond[0x1c]; param_2[4]=cond[0x28]",
+        "farm override: param_2[4] = FUN_1157f370(condId)"
+      ],
+      "serverRelevance": "validation (mostly client display; the condition value fields are authoritative)"
+    },
+    {
+      "address": "0x11583140",
+      "currentName": "FUN_11583140",
+      "proposedName": "CPetSkillInfo::ResolveEffectById",
+      "subsystem": "pet/skill",
+      "purpose": "If FUN_11679c30() (context available), looks up CPetSkillInfo by id and returns FUN_1169ea20(info+0x24) (resolved skill-group/effect handle).",
+      "confidence": "low",
+      "formulas": ["return FUN_1169ea20(info[0x24]) (0x24=skillGroupId per schema)"],
+      "serverRelevance": "client-only (resolves display/effect handle)"
+    },
+    {
+      "address": "0x11583f10",
+      "currentName": "FUN_11583f10",
+      "proposedName": "CPetSkillSystem::UnequipSkill",
+      "subsystem": "pet/skill",
+      "purpose": "Unequips a pet skill (param_3): FUN_11566bd0(info+0x64), notifies via this+8 vtbl(+0x18)(param_2+0x28, id), then removes from equipped list via FUN_115871c0. Returns error 0x7598 (invalid skill).",
+      "confidence": "medium",
+      "formulas": ["info[0x64] passed to FUN_11566bd0; returns FUN_115871c0(id) or 0x7598"],
+      "serverRelevance": "authoritative (server processes skill unequip)",
+      "costs": ["error code 0x7598 = invalid/unknown skill id"]
+    },
+    {
+      "address": "0x11584070",
+      "currentName": "FUN_11584070",
+      "proposedName": "CPetSkillSystem::EquipSkill",
+      "subsystem": "pet/skill",
+      "purpose": "Equips a pet skill (param_2): if a conflicting skill of the same slot/group (FUN_115877f0(info+0x58, param_3)) is equipped, unequips it first (FUN_11583f10). Runs FUN_11568140(info+0x64), then FUN_11587270 (actual equip-on with cap checks). On success (0) calls FUN_11588c60. Returns FUN_11587270 result or 0x7598.",
+      "confidence": "medium",
+      "formulas": [
+        "conflict = FUN_115877f0(info[0x58], param_3); if >0 unequip it",
+        "result = FUN_11587270(param_2, param_3)"
+      ],
+      "serverRelevance": "authoritative (server processes skill equip; enforces slot conflict + cap)",
+      "costs": ["0x7598 invalid skill"]
+    },
+    {
+      "address": "0x11584d90",
+      "currentName": "FUN_11584d90",
+      "proposedName": "CPetSkillInfo::IsActiveSkill",
+      "subsystem": "pet/skill",
+      "purpose": "Returns true when CPetSkillInfo category (info+0x58) > 5 (i.e. an active skill category rather than passive 0..5).",
+      "confidence": "medium",
+      "formulas": ["return info[0x58] > 5"],
+      "serverRelevance": "validation (category>5 => active skill; server uses to enforce active-skill cap)"
+    },
+    {
+      "address": "0x11584f30",
+      "currentName": "FUN_11584f30",
+      "proposedName": "CPetSkillSystem::CanLearnSkill",
+      "subsystem": "pet/skill",
+      "purpose": "Validates learning/upgrading a pet skill (param_3). Requires FUN_1158d040(owner) context else 0x7597. Rejects if already known or an equal/higher level already in list (FUN_11588430 or CPetSkillInfo::HasEqualOrHigherLevelInList) -> 0x75d0. Checks generic prereq FUN_11586df0. If skill level>=2, requires the previous-level skill (same skillGroupId info+0x24, level == this.level-1) to be present in the category-group list (CollectSkillIdsByCategory(info+0x58)); success 0, missing prereq 0x75c3, bad entry 0x7598.",
+      "confidence": "medium",
+      "formulas": [
+        "level < 2 -> return 0 (no prereq)",
+        "prereq match: prev[0x24]==info[0x24] && prev[0x14] == info[0x14]-1 (level-1 of same group)",
+        "codes: 0x7597 no-context, 0x75d0 already/higher owned, 0x75c3 prereq missing, 0x7598 invalid"
+      ],
+      "serverRelevance": "authoritative (server validates skill learn prerequisites and level chain)",
+      "costs": ["0x7597 no context", "0x75d0 duplicate/higher", "0x75c3 missing prereq level", "0x7598 invalid"]
+    },
+    {
+      "address": "0x11585710",
+      "currentName": "CPetFarmSkill__GetManagers",
+      "proposedName": "CPetFarmSkill::GetManagers",
+      "subsystem": "pet/farm-skill",
+      "purpose": "Singleton manager accessor for CPetFarmSkill info table (RegisterAndGetSingleton + CInfoManager::FindByName fallback).",
+      "confidence": "high",
+      "formulas": ["stock CInfoManager singleton registration (flag DAT_122df244, ptr DAT_122df228)"],
+      "serverRelevance": "client-only (stock CryEngine/CInfoManager plumbing)"
+    },
+    {
+      "address": "0x115871c0",
+      "currentName": "FUN_115871c0",
+      "proposedName": "CPetSkillList::RemoveEquipped",
+      "subsystem": "pet/skill",
+      "purpose": "Removes the equipped-skill record (3-dword stride 0xc) whose id matches param_2 from the vector at this+4..+8, via memmove compaction; shrinks end by 0xc. Returns 0 on removal, 0x75d8 if not found, 0x7598 if invalid id.",
+      "confidence": "high",
+      "formulas": [
+        "record stride = 0xc (3 dwords: id, +4, +8)",
+        "memmove to compact; this[8] -= 0xc",
+        "codes: 0 ok, 0x75d8 not in list, 0x7598 invalid"
+      ],
+      "serverRelevance": "authoritative (server maintains equipped pet-skill list)",
+      "costs": ["0x75d8 not equipped", "0x7598 invalid"]
+    },
+    {
+      "address": "0x11587270",
+      "currentName": "FUN_11587270",
+      "proposedName": "CPetSkill::EquipOn",
+      "subsystem": "pet/skill",
+      "purpose": "Core equip-on: enforces active-skill cap and duplicate rules. If skill is active (info+0x54==1), rejects when equipped active count (CountActiveSkillsInList) >= cap (petStats+0x48) or cap<1 -> 0x7611. Requires category info+0x58 > 5 (active) to proceed; scans existing list for duplicate -> 0x75d0; otherwise appends via FUN_1158cba0, applies weight/anim (FUN_1158ac80 if info+0x94>0) and FUN_11589640. Non-active (<=5) path throttle-logs \"CPetSkill_EquipOn\" and returns 0x760c.",
+      "confidence": "medium",
+      "formulas": [
+        "active cap: petStats[0x48]; reject if <1 or CountActiveSkillsInList() >= cap -> 0x7611",
+        "must have info[0x58] > 5 else 0x760c (retry budget DAT_11dfa7d8 init 10)",
+        "duplicate id -> 0x75d0",
+        "codes: 0 ok, 0x7611 cap reached, 0x75d0 duplicate, 0x760c not-active/throttled, 0x7598 invalid"
+      ],
+      "serverRelevance": "authoritative (server enforces active-skill slot cap petStats+0x48 and duplicates)",
+      "costs": ["0x7611 active slot cap reached", "0x75d0 duplicate", "0x760c wrong category", "0x7598 invalid"]
+    },
+    {
+      "address": "0x115873d0",
+      "currentName": "CPetFarmSkill__GetManagers_115873d0",
+      "proposedName": "CPetFarmSkill::AggregateFarmBonuses",
+      "subsystem": "pet/farm-skill",
+      "purpose": "Iterates the equipped farm-skill list (this+4..+8, stride 3) and aggregates farming bonus stats into a 10-field output block (param_2). Only runs when context (*this[0][0x1c][0x1c])==1 else returns 0x759a. Per matching farm-skill row (via FUN_1158ad60 predicate), mutates the accumulator.",
+      "confidence": "high",
+      "formulas": [
+        "out[2] += row[0x1c]  (flat add)",
+        "out[3] = ((row[0x20] + 100) / 100) * out[3]  (percent multiplier, +row%)",
+        "out[4] = ((100 - row[0x24]) / 100) * out[4]  (percent reduction, -row%)",
+        "out[5] -= row[0x28]  (flat subtract)",
+        "out[7] = ((row[0x2c] + 100) / 100) * out[7]  (percent multiplier)",
+        "out[6] += row[0x30]  (flat add)",
+        "global counter _DAT_122df248 incremented per applied skill"
+      ],
+      "serverRelevance": "authoritative (server computes farm gathering yields/rates from equipped farm skills; the +100/100 integer percent math and add/sub fields are load-bearing)",
+      "costs": ["row[0x1c] flat bonus", "row[0x20] % increase", "row[0x24] % reduction", "row[0x28] flat reduction", "row[0x2c] % increase", "row[0x30] flat bonus", "0x759a not-in-farm-context"]
+    },
+    {
+      "address": "0x11587970",
+      "currentName": "CPetFarmSkill__GetManagers_11587970",
+      "proposedName": "CPetFarmSkill::GetSingleton",
+      "subsystem": "pet/farm-skill",
+      "purpose": "Returns the CPetFarmSkill manager singleton pointer (or 0).",
+      "confidence": "high",
+      "formulas": ["stock singleton accessor (DAT_122df228)"],
+      "serverRelevance": "client-only (plumbing)"
+    },
+    {
+      "address": "0x11587f60",
+      "currentName": "FUN_11587f60",
+      "proposedName": "CPetFarmSkill::GetById",
+      "subsystem": "pet/farm-skill",
+      "purpose": "2D-sparse lookup returning CPetFarmSkill* by id.",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x11587fb0",
+      "currentName": "FUN_11587fb0",
+      "proposedName": "CPetSkillInfo::GetByIndex",
+      "subsystem": "pet/skill",
+      "purpose": "Flat-vector accessor returning CPetSkillInfo* at ordinal index.",
+      "confidence": "high",
+      "formulas": ["if 0<=idx<((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14]+idx*4)"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x11587ff0",
+      "currentName": "FUN_11587ff0",
+      "proposedName": "CPetSkillInfo::GetPairedBuffInfo",
+      "subsystem": "pet/skill",
+      "purpose": "For a pet skill with a linked buff (info+0x94 nonzero = buff count/id), outputs *param_4 = info+0x94 and *param_3 = paired-buff field (+0x14) looked up in a map at info+0x24 relative to this+0x1c.",
+      "confidence": "low",
+      "formulas": [
+        "if info[0x94] != 0: *param_4 = info[0x94]; map lookup FUN_107e00f0(this+0x1c, info+0x24); *param_3 = found[0x14]"
+      ],
+      "serverRelevance": "validation (resolves skill->buff link; server needs buff id for application)"
+    },
+    {
+      "address": "0x11588660",
+      "currentName": "FUN_11588660",
+      "proposedName": "CPetSkillSystem::IsSkillReady",
+      "subsystem": "pet/skill",
+      "purpose": "Scans equipped list (this+4, stride 3) for id param_2; if found and info+0x94==0 returns true, else defers to FUN_1158add0(info) (buff/cooldown readiness). Returns false when not equipped.",
+      "confidence": "low",
+      "formulas": ["if equipped: (info[0x94]==0) ? true : FUN_1158add0(info)"],
+      "serverRelevance": "validation (server readiness check for a pet skill)"
+    },
+    {
+      "address": "0x115af1a0",
+      "currentName": "FUN_115af1a0",
+      "proposedName": "CBuffAreaSystem::SpawnBuffArea",
+      "subsystem": "buffs/area",
+      "purpose": "Spawns a buff-area entity (type 4). Creates entity via factory (this+4 vtbl+8), defaults its name to \"BuffArea%d\" (entity index) when none given, sets model (param_5), position (FUN_11414fc0/fe0), name (FUN_11414fa0), then places it (vtbl+0xcc, +0x18).",
+      "confidence": "low",
+      "formulas": ["entity type = 4; default name sprintf(\"BuffArea%d\", entityIndex)"],
+      "serverRelevance": "authoritative (server spawns AoE buff-field entities; positions/model are gameplay-relevant) but much is client presentation"
+    },
+    {
+      "address": "0x115b7cf0",
+      "currentName": "FUN_115b7cf0",
+      "proposedName": "CEquipPassiveSkillSystem::AddOrUpdatePassiveEntry",
+      "subsystem": "skills/equip-passive",
+      "purpose": "Inserts/updates a passive-skill activation record (5-dword stride 0x14) keyed by group id (param_2) in the vector at this+0x48..+0x50. Computes level via ComputeSuitSkillLevel(param_3). If an existing entry has a higher level (entry[1][0x24] > newLevel[0x24]) it bails (keeps higher); otherwise removes old (memmove) and appends {group, levelInfo, flags, param_5, param_4}.",
+      "confidence": "medium",
+      "formulas": [
+        "levelInfo = ComputeSuitSkillLevel(param_3)",
+        "keep-higher: if newLevelInfo[0x24] < existing[1][0x24] return (don't downgrade)",
+        "record = {group, levelInfo, flags&0xffffff00, param_5, param_4} stride 0x14"
+      ],
+      "serverRelevance": "authoritative (server tracks active passive-skill levels; keeps highest level per group; +0x24 is the level/rank compare key)"
+    },
+    {
+      "address": "0x115bc720",
+      "currentName": "CRageSkillSystem__CRageSkillSystem",
+      "proposedName": "CRageSkillSystem::ctor",
+      "subsystem": "rage/bushido",
+      "purpose": "Constructs the rage/bushido skill system for an owner. Looks up CRageInfo by id (param_3) into this+4. Reads several rage-config float thresholds (FUN_117193e0/f0/a0/c0/470) and, when a threshold > 0 (DAT_11de98f8==0.0f baseline), registers callbacks/events: 0xc25, 0x42b, a 1000ms periodic rage tick timer (this+0xe) invoking FUN_115bceb0 (id \"CRageSkillSystem::CRageSkillSystem\"), and 0x42a. Requires (owner vtbl+0x4fc)!=0 to enable.",
+      "confidence": "medium",
+      "formulas": [
+        "this[4] = CRageInfo(param_3); this[3]=FUN_11719490(); this[0xb]=owner vtbl+0x17c",
+        "threshold compare: cfgFloat > DAT_11de98f8 (0.0f)",
+        "periodic rage timer: FUN_100ea610(name, 1000ms, 0, this, FUN_115bceb0, 0) requires this[0xb]!=0",
+        "event ids 0xc25 (FUN_115bcc40), 0x42b (FUN_115bccc0), 0x42a (FUN_115bcd60)"
+      ],
+      "serverRelevance": "authoritative (server-owned rage/bushido state machine; rage config thresholds and 1000ms tick drive rage accrual/decay)",
+      "notes": "CRageInfo row layout not exposed here; threshold getters FUN_117193e0/f0/a0/c0/470 read config values compared to 0."
+    },
+    {
+      "address": "0x115d60b0",
+      "currentName": "FUN_115d60b0",
+      "proposedName": "CBuffSystem::CheckBuffPersistence",
+      "subsystem": "buffs",
+      "purpose": "For a CBuffInfo id: if info+0xe8==1 (persistent/skip) returns early. Otherwise queries active-buff snapshot (FUN_116a72b0, cap 10); if none active and info+0xf0==0 returns. (Cleanup/validation stub.)",
+      "confidence": "low",
+      "formulas": ["skip if info[0xe8]==1; early-out if activeCount==0 && info[0xf0]==0"],
+      "serverRelevance": "validation (buff lifetime/persistence flags 0xe8, 0xf0)"
+    },
+    {
+      "address": "0x115d6540",
+      "currentName": "FUN_115d6540",
+      "proposedName": "CBuffSystem::ForEachActiveInstance",
+      "subsystem": "buffs",
+      "purpose": "For a CBuffInfo id (non-persistent, info+0xe8!=1), enumerates up to 100 active buff instances (FUN_116a7380) and calls FUN_115d66b0(instance+0x4c, param_2) on each.",
+      "confidence": "low",
+      "formulas": ["instance list cap 100; per-instance FUN_115d66b0(inst[0x4c], param_2)"],
+      "serverRelevance": "authoritative (iterates live buff instances to apply/update something)"
+    },
+    {
+      "address": "0x115e3e20",
+      "currentName": "FUN_115e3e20",
+      "proposedName": "CBuffEffect::TryApplyReviveGuard",
+      "subsystem": "buffs/status",
+      "purpose": "For the owning CBuffInfo (this+4), when a specific buff event (FUN_116a7300(0x42f)) is active and target action-state is idle (param_2 vtbl+0xa8==0): if target has a special sub-object (param_2[0xb47]) and quest/state condition FUN_113f95f0(0,{3}) passes but FUN_113f9970 fails, writes {sub+0x170=0x3f5, sub+0x174=0} (a pending state) and returns 0; returns 1 to block.",
+      "confidence": "low",
+      "formulas": [
+        "event id 0x42f; state value 0x3f5 written to obj+0x170 (with 0 at +0x174)",
+        "condition token {3} for FUN_113f95f0"
+      ],
+      "serverRelevance": "authoritative (server evaluates buff-triggered state transition; return 1 blocks buff)"
+    },
+    {
+      "address": "0x115e3f00",
+      "currentName": "FUN_115e3f00",
+      "proposedName": "CBuffEffect::ApplyWithSpecialTag27",
+      "subsystem": "buffs/status",
+      "purpose": "For the owning CBuffInfo (this+4): if buff status-tag (info+0x4c)==0x27, first sets attribute 0x27 flag (target vtbl+0x58(0x27,1)). Then applies the buff to the target via combat vtbl+0x44(0, buffId, 0, this+8 flag, class 0x2c). Always returns 1.",
+      "confidence": "medium",
+      "formulas": [
+        "if info[0x4c]==0x27: vtbl+0x58(0x27, 1)",
+        "apply: vtbl+0x44(0, buffId=this[4], 0, this[8], 0x2c)"
+      ],
+      "serverRelevance": "authoritative (server applies buff; tag 0x27 sets a companion attribute flag; class 0x2c = buff apply channel)"
+    },
+    {
+      "address": "0x115e50f0",
+      "currentName": "FUN_115e50f0",
+      "proposedName": "CBuffEffect::ApplyIfLinkedBuffValid",
+      "subsystem": "buffs/status",
+      "purpose": "If a precondition vtbl+0xc(param_2,param_3) passes and the owning CBuffInfo has a linked buff (info+0x424 != -1), applies the buff via combat vtbl+0x44 with a 2-field context (PTR_FUN_11cd72a0, subtype 2) and class 0x2c. Returns true if apply count > 0.",
+      "confidence": "medium",
+      "formulas": [
+        "gate: info[0x424] != -1 (linked buff id)",
+        "apply: vtbl+0x44(0, buffId, &ctx{vtbl,2,0,targetField,0}, 1, 0x2c); return result>0"
+      ],
+      "serverRelevance": "authoritative (server applies a linked/chained buff; 0x424 = linked buff id)"
+    },
+    {
+      "address": "0x115e9bf0",
+      "currentName": "FUN_115e9bf0",
+      "proposedName": "CBuffEffect::RemoveBuffByMatch",
+      "subsystem": "buffs/status",
+      "purpose": "Removes/cleanses a buff instance based on a match mode (this+8). Modes: 1=only if buff-source(inst+0x420)==0; 10=source == this+0xc (specific caster); 0xb=buffId == this+0xc; 0xc=FUN_116a7820(this+0xc) (group/tag match); 0xd=FUN_116a78d0(this+0xc); 0xf=probabilistic: if inst+0x428 != -1, roll rand()%100 <= chance FUN_113dbde0(). On match, dispatches removal event {_DAT_11d26040..} via FUN_1142f470(1, buffId) and clears the slot.",
+      "confidence": "medium",
+      "formulas": [
+        "case 0xf random cleanse: (float)(rand()%100) <= (float)FUN_113dbde0() [chance in 0..100]",
+        "case 1: inst[0x420]==0 (no source); case 10: inst[0x420]==this[0xc]; case 0xb: buffId==this[0xc]",
+        "on match: FUN_1142f470(1, buffId); clear *(param_2[0xc])=0"
+      ],
+      "serverRelevance": "authoritative (server-side buff dispellation; random cleanse chance MUST be server-rolled; match modes are the dispel-relation table)",
+      "notes": "inst+0x420 = buff source/caster id; inst+0x428 = removable/dispellable flag (-1 = not)."
+    },
+    {
+      "address": "0x115ef4f0",
+      "currentName": "FUN_115ef4f0",
+      "proposedName": "CBuffEffect::AdjustStackByMatch",
+      "subsystem": "buffs/status/stacking",
+      "purpose": "Matches a buff instance by mode (this+4): 0x7dc = buffId(inst+0x10)==this+0x10; 0x7dd = FUN_116a78d0(this+0x10); 0x7de = FUN_116a7820(this+0x10). On match, adjusts the instance stack counter (*inst[0xc]) via FUN_115e8570(counter, this+8, this+0xc); if stacks fall below 1 (and not 0/1 sentinel) clamps to 1.",
+      "confidence": "medium",
+      "formulas": [
+        "match modes: 0x7dc exact id, 0x7dd/0x7de tag/group match",
+        "stack adjust: FUN_115e8570(stackPtr, this[8], this[0xc]); if 0<result<1 clamp *stackPtr=1",
+        "skip when *stackPtr is 0 or 1 (already min)"
+      ],
+      "serverRelevance": "authoritative (server manages buff stack counts; this is the stacking-adjust path)"
+    },
+    {
+      "address": "0x116126f0",
+      "currentName": "FUN_116126f0",
+      "proposedName": "CBuffContainer::CollectInstancesById",
+      "subsystem": "buffs",
+      "purpose": "Collects all active buff-instance handles whose definition id == param_2 into an output vector (param_3). Selects one of up to 3 group sub-trees by buff group (info+0x44, if <2 use param_1+4+group*0x18) and in-order-traverses that red-black tree, skipping instances flagged deleted (inst+0x14[+0x3c]!=0). Returns collected count.",
+      "confidence": "medium",
+      "formulas": [
+        "group = info[0x44]; container = this+4 (+ group*0x18 if group<2)",
+        "per instance: skip if inst->def[0x3c]!=0 (deleted); match FUN_1141bd30()==param_2",
+        "returns (out[1]-out[0])>>2 count"
+      ],
+      "serverRelevance": "authoritative (server enumerates a target's active buffs of a given type; group buckets 0/1/2 stride 0x18)"
+    },
+    {
+      "address": "0x11612820",
+      "currentName": "FUN_11612820",
+      "proposedName": "CBuffContainer::FindFirstInstanceById",
+      "subsystem": "buffs",
+      "purpose": "Finds the first active (non-deleted) buff instance whose definition id == param_2, optionally filtered by an extra predicate (param_3 -> FUN_1141bec0). In-order RB-tree walk over the group bucket (info+0x44). Returns instance ptr or 0.",
+      "confidence": "medium",
+      "formulas": [
+        "group = info[0x44]; bucket = this + group*0x18 (if group<2)",
+        "match: def[0x3c]==0 (alive) && (!param_3 || FUN_1141bec0()) && FUN_1141bd30()==param_2"
+      ],
+      "serverRelevance": "authoritative (server queries whether a specific buff is active)"
+    },
+    {
+      "address": "0x116139e0",
+      "currentName": "CBuffGarbageSystem__SetDel",
+      "proposedName": "CBuffGarbageSystem::SetDel",
+      "subsystem": "buffs/lifecycle",
+      "purpose": "Marks a buff instance for deletion (inst+0x3c=1) and, if the GC has no pending timer (this+4==-1) and not suspended (this+8==0), schedules a 1ms one-shot GC timer (FUN_11613a30).",
+      "confidence": "high",
+      "formulas": ["inst[0x3c]=1 (deleted flag); timer FUN_100ea610(name, 1ms, 1, this, FUN_11613a30, 0)"],
+      "serverRelevance": "authoritative (server buff removal/GC; 0x3c = per-instance deleted flag)"
+    },
+    {
+      "address": "0x11615040",
+      "currentName": "SkillSysChecker___RegisterTimer",
+      "proposedName": "SkillSysChecker::RegisterTimer",
+      "subsystem": "skills/checker",
+      "purpose": "Runs FUN_116151a0(playerId from FUN_1141bd30) then, if no timer registered (this+0x4c==-1), schedules a 1000ms periodic skill-check timer (FUN_11615090).",
+      "confidence": "high",
+      "formulas": ["periodic timer 1000ms: FUN_100ea610(name, 1000, 0, this, FUN_11615090, 0)"],
+      "serverRelevance": "authoritative (periodic skill/buff validation tick)"
+    },
+    {
+      "address": "0x116151a0",
+      "currentName": "FUN_116151a0",
+      "proposedName": "SkillSysChecker::ScheduleBuffCheck",
+      "subsystem": "skills/checker",
+      "purpose": "For player param_2 not already tracked (BST at this+0x34), schedules a buff-consistency check with a fixed deviation of 1000ms: deadline = serverTime(vtbl+0xb4) + BuffCheckDeviation(1000), enqueued via FUN_11615550.",
+      "confidence": "medium",
+      "formulas": [
+        "deviation constant = 1000 (config key \"BuffCheckDeviation\")",
+        "deadline = playerNet->vtbl+0xb4() + 1000",
+        "BST search on node[0x10] vs param_2 to avoid duplicates"
+      ],
+      "serverRelevance": "authoritative (server schedules anti-desync buff re-check; 1000ms window)",
+      "costs": ["BuffCheckDeviation = 1000 (ms)"]
+    },
+    {
+      "address": "0x116152a0",
+      "currentName": "SkillSysChecker___RegisterTimer_116152a0",
+      "proposedName": "SkillSysChecker::EnsureTimer",
+      "subsystem": "skills/checker",
+      "purpose": "Registers the 1000ms periodic skill-check timer if not already set; returns the timer handle (this+0x4c).",
+      "confidence": "high",
+      "formulas": ["periodic 1000ms timer FUN_11615090"],
+      "serverRelevance": "authoritative (periodic checker plumbing)"
+    },
+    {
+      "address": "0x11635240",
+      "currentName": "CSkillSystem___CheckRage",
+      "proposedName": "CSkillSystem::_CheckRage",
+      "subsystem": "rage/casting",
+      "purpose": "Validates rage cost before casting skill (this+0x14 = skillId). If skill is an angry/rage skill (FUN_117194d0==1): reads its rage cost (FUN_11719420); if cost==0 logs 'angryskill but no ragecost' error; else checks CLogicPlayer::IsRagePowerEnough(owner, cost) — if insufficient sets *param_3=2 and logs 'rage not enough'; if enough consumes/validates via FUN_11348ac0(...,1) expecting result 1.",
+      "confidence": "high",
+      "formulas": [
+        "isRageSkill = FUN_117194d0(skillId)==1; rageCost = FUN_11719420(skillId)",
+        "gate: CLogicPlayer::IsRagePowerEnough(owner, rageCost)==1",
+        "failure: *param_3 = 2 (error code); logs skill id"
+      ],
+      "serverRelevance": "authoritative (server MUST validate rage/bushido cost before executing skill; *param_3=2 = insufficient-rage error)",
+      "costs": ["rage cost per skill = FUN_11719420(skillId); error 2 = rage not enough"]
+    },
+    {
+      "address": "0x11638ac0",
+      "currentName": "FUN_11638ac0",
+      "proposedName": "CEquipRandPassiveSkill::RollGroup",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "Clears the output list then, for the equipment's rand-passive group (id at this+0x20c), dispatches the roll: group type (row+0x3c)==1 -> RollRandomPassiveSkills; ==2 -> RollRandomPassiveSkills_Variant.",
+      "confidence": "medium",
+      "formulas": ["group type row[0x3c]: 1=standard roll, 2=variant roll"],
+      "serverRelevance": "authoritative (server rolls an equipment's random passive skills)"
+    },
+    {
+      "address": "0x11638b60",
+      "currentName": "FUN_11638b60",
+      "proposedName": "CEquipRandPassiveSkillActivateGroup::GetActivatedSkill",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "Validates the activate-group id exists, then outputs *param_2 = *FUN_11866860() (currently activated random-passive skill id). Returns 1 if resolved.",
+      "confidence": "low",
+      "formulas": ["out = *FUN_11866860() when group id valid"],
+      "serverRelevance": "authoritative (server resolves which random passive is active)"
+    },
+    {
+      "address": "0x11638bd0",
+      "currentName": "FUN_11638bd0",
+      "proposedName": "CEquipRandPassiveSkillSubGroup::RollValue",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "Rolls a random passive-skill magnitude for a sub-group. Resolves sub-group (FUN_11865190(param_2)) with min=sub+0x14, max=sub+0x18; adds a uniform random offset to param_3 then clamps to [sub+0x1c, sub+0x20].",
+      "confidence": "high",
+      "formulas": [
+        "rand01 = FUN_100ee450() * _DAT_11de9a60  (uniform 0..1)",
+        "param_3 += ( min - (int)(rand01 * ((max - min) + 1)) )  where min=sub[0x14], max=sub[0x18]",
+        "clamp: if param_3 > sub[0x20] -> sub[0x20]; if param_3 < sub[0x1c] -> sub[0x1c]",
+        "returns clamped value (0 if unresolved)"
+      ],
+      "serverRelevance": "authoritative (random passive-skill value roll MUST be server-computed; +0x14/+0x18 = roll range, +0x1c/+0x20 = clamp bounds; _DAT_11de9a60 = RNG normalize constant)",
+      "costs": ["roll range [sub+0x14, sub+0x18]", "clamp bounds [sub+0x1c, sub+0x20]"]
+    },
+    {
+      "address": "0x11639a40",
+      "currentName": "FUN_11639a40",
+      "proposedName": "CEquipRandPassiveSkillActivateGroup::GetById",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "2D-sparse lookup returning CEquipRandPassiveSkillActivateGroupInfo* by id.",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x11639a90",
+      "currentName": "FUN_11639a90",
+      "proposedName": "CEquipRandPassiveSkillGroup::GetById",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "2D-sparse lookup returning CEquipRandPassiveSkillGroupInfo* by id.",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x11639ae0",
+      "currentName": "FUN_11639ae0",
+      "proposedName": "CEquipRandPassiveSkillSubGroup::GetById",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "2D-sparse lookup returning CEquipRandPassiveSkillSubGroupInfo* by id.",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x1163a930",
+      "currentName": "FUN_1163a930",
+      "proposedName": "CEquipRandPassiveSkillGroup::SelectSubGroupForSkill",
+      "subsystem": "skills/equip-rand-passive",
+      "purpose": "Builds the candidate sub-group id list for a rand-passive group (type row+0x3c: 1 = copy list at row+0x2c..+0x30; 2 = FUN_11868050(param_2) then FUN_116367f0(row+0xc, row+0x10)), then selects one via CEquipRandPassiveSkillSubGroupInfo::SelectSubGroupForSkill(param_3, param_4, &list).",
+      "confidence": "medium",
+      "formulas": ["type 1 = static candidate list [row+0x2c..+0x30]; type 2 = dynamic (FUN_11868050/116367f0)"],
+      "serverRelevance": "authoritative (server picks which random-passive sub-group applies to a skill/slot)"
+    },
+    {
+      "address": "0x1164a990",
+      "currentName": "CBuffEffectEOT___AddTimer",
+      "proposedName": "CBuffEffectEOT::AddTimer",
+      "subsystem": "buffs/dot-hot",
+      "purpose": "Starts an effect-over-time (DoT/HoT) periodic timer for a buff. Period = this+0x10 (ms). Registers repeating timer (FUN_1164ab00). On success sets running flag this+0x18=1; if the effect targets a special group (FUN_116a77f0(this+8)) and caster is idle, triggers vtbl+0x2ec + FUN_113599d0. If this+0xc==1 (fire-on-apply) invokes the tick immediately.",
+      "confidence": "high",
+      "formulas": [
+        "period = this[0x10] (ms) via FUN_100ea610(name, this[0x10], 0, this, FUN_1164ab00, 0)",
+        "this[0xc]==1 -> immediate first tick FUN_1164ab00(0,0)",
+        "this[0x18] = running flag"
+      ],
+      "serverRelevance": "authoritative (server drives DoT/HoT tick timing; this+0x10 = tick period)",
+      "costs": ["EOT tick period = this+0x10 (ms)"]
+    },
+    {
+      "address": "0x1164aa60",
+      "currentName": "CBuffEffectEOT___AddTimer_1164aa60",
+      "proposedName": "CBuffEffectEOT::EnsureTimer",
+      "subsystem": "buffs/dot-hot",
+      "purpose": "Registers the EOT tick timer (period this+0x10) if not already running; returns true if the timer handle is valid.",
+      "confidence": "high",
+      "formulas": ["timer period = this[0x10] ms; returns handle != -1"],
+      "serverRelevance": "authoritative (DoT/HoT timer plumbing)"
+    },
+    {
+      "address": "0x1165ffb0",
+      "currentName": "FUN_1165ffb0",
+      "proposedName": "CEquipSuitSkillSystem::ReevaluateSuitSkills",
+      "subsystem": "skills/equip-suit",
+      "purpose": "Walks the suit-skill activation tree (this+0xb) and, for each CEquipSuitSkillInfo, checks activation via FUN_11572a20(info+0x18, info+0x10) (suit id + required piece count); if satisfied notifies vtbl+8(1) to activate the suit skill. Only runs when a valid equip context exists (this[5][0x10][0x1c]!=0).",
+      "confidence": "medium",
+      "formulas": [
+        "per node key node[4] -> CEquipSuitSkillInfo lookup",
+        "activation test: FUN_11572a20(info[0x18], info[0x10])  (info[0x18]=suit id/group, info[0x10]=required count)"
+      ],
+      "serverRelevance": "authoritative (server re-evaluates which suit-set skills are active based on equipped-piece counts)"
+    },
+    {
+      "address": "0x11660630",
+      "currentName": "FUN_11660630",
+      "proposedName": "CRageInfo::GetByIndex",
+      "subsystem": "rage/bushido",
+      "purpose": "Flat-vector accessor returning CRageInfo* at ordinal index.",
+      "confidence": "high",
+      "formulas": ["if 0<=idx<((mgr[0x18]-mgr[0x14])>>2): return *(mgr[0x14]+idx*4)"],
+      "serverRelevance": "client-only (accessor)"
+    },
+    {
+      "address": "0x11660950",
+      "currentName": "FUN_11660950",
+      "proposedName": "CBuffEffect::MatchGuardBuffEvent",
+      "subsystem": "buffs/status",
+      "purpose": "Matches an incoming event (param_2[0]) of type 0x1f8 or 0x1f9 against a CBuffInfo (resolved from current caster FUN_1141bd30). Match mode via (this+8 - 3): 0/1 -> casterId == this+0xc; 2/3 -> FUN_116a78d0(this+0xc) (group/tag match). Returns bool.",
+      "confidence": "medium",
+      "formulas": [
+        "event ids 0x1f8, 0x1f9",
+        "mode = *(this+8) - 3: {0,1} exact caster match, {2,3} tag match FUN_116a78d0"
+      ],
+      "serverRelevance": "authoritative (server buff event/trigger matching)"
+    },
+    {
+      "address": "0x11681860",
+      "currentName": "FUN_11681860",
+      "proposedName": "CAbnormalStatusConfig::LoadFromNode",
+      "subsystem": "status/abnormal",
+      "purpose": "Reads the full abnormal-status tolerance/effect config from an XML/data node (param_2 reader vtbl: +0x10 HasKey, +0x2c GetInt) into the owner struct starting at +0x218. Covers all abnormal statuses with per-status fields. Uses lazy interned-key caching (bitmask flags DAT_12389990 / DAT_12389ad4 / DAT_12389c18 / DAT_12389d5c / DAT_12389ea0). Base value + Max fields default to -1 (0xffffffff), all others default 0.",
+      "confidence": "high",
+      "formulas": [
+        "Poison:  Tol=+0x218, base=+0x21c(-1), Add=+0x220, Max=+0x224(-1), Weaken=+0x228, Buff=+0x22c, Dmg=+0x230, Count=+0x234, WeakenScale=+0x238",
+        "Paralysis: Tol=+0x23c, base=+0x240(-1), Add=+0x244, Max=+0x248(-1), Weaken=+0x24c, Buff=+0x250, Count=+0x254, WeakenScale=+0x258",
+        "Stun: Tol=+0x25c, base=+0x260(-1), Add=+0x264, Max=+0x268(-1), Weaken=+0x26c, Buff=+0x270, Count=+0x274, WeakenScale=+0x278",
+        "Sleep: Tol=+0x27c, base=+0x280(-1), Add=+0x284, Max=+0x288(-1), Weaken=+0x28c, Buff=+0x290, Count=+0x294, WeakenScale=+0x298",
+        "Trap: Tol=+0x29c, TimeLower=+0x2a0, Count=+0x2a4, WeakenScale=+0x2a8",
+        "ParaTrap: Tol=+0x2ac, TimeLower=+0x2b0, Count=+0x2b4, WeakenScale=+0x2b8",
+        "AdvTrap: Tol=+0x2bc, TimeLower=+0x2c0, Count=+0x2c4, WeakenScale=+0x2c8",
+        "Flare: Tol=+0x2cc, TimeLower=+0x2d0, Count=+0x2d4, WeakenScale=+0x2d8",
+        "Sonic: Tol=+0x2dc, WeakenScale=+0x2e0, TimeLower=+0x2e4",
+        "Falldown: Tol=+0x2e8, WeakenScale=+0x2ec, TimeLower=+0x2f0",
+        "Anesthesia: Count=+0x2f4, base=+0x2f8, WeakenScale=+0x2fc",
+        "Dynamite: Tol=+0x300, base=+0x304(-1), Add=+0x308, Max=+0x30c(-1), Weaken=+0x310, Buff=+0x314, Dmg=+0x318, Count=+0x31c, WeakenScale=+0x320",
+        "default rule: base-value keys (Poison/Paralysis/Stun/Sleep/Dynamite) and all Max keys default 0xffffffff; every other field defaults 0"
+      ],
+      "serverRelevance": "authoritative (server MUST apply these abnormal-status thresholds: Tol=buildup tolerance, base/Add/Max=accumulation curve, Weaken/WeakenScale=decay, Count=trigger count, Dmg=DoT damage, TimeLower=duration reduction; drives poison/paralysis/stun/sleep/trap/flare/sonic/falldown/anesthesia/dynamite mechanics)",
+      "costs": ["per-status: Tol (buildup threshold), Max (cap), Add (per-hit accumulation), Dmg (tick damage), Count (trigger count), Weaken/WeakenScale (decay), TimeLower (duration reduction)"],
+      "notes": "Config-load reader shared by client and server; the server side is the authority for status buildup/resistance. Status set (in order): Poison, Paralysis, Stun, Sleep, Trap, ParaTrap, AdvTrap, Flare, Sonic, Falldown, Anesthesia, Dynamite. Full 8-field statuses (Tol/base/Add/Max/Weaken/Buff/Dmg/Count/WeakenScale) = elemental damage-type statuses; trap-family use Tol/TimeLower/Count/WeakenScale."
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+{
+  "chunkIndex": 5,
+  "functions": [
+    {
+      "address": "10845600",
+      "currentName": "FUN_10845600",
+      "proposedName": "CShopUI::PushCurrencyAndResetInfoToAS3",
+      "purpose": "Client-side marshaller that reads the local player's six secondary-currency balances and the current shop-reset schedule, then pushes them into an ActionScript3 data object (FUN_104d1550 = AS3 setInt property) for the shop / currency panel. Values are queried from the client player object; server remains authoritative for the underlying balances.",
+      "subsystem": "currency / shop",
+      "serverRelevance": "client-only (display marshalling; the balances and reset times originate from server-replicated player state)",
+      "formulas": [
+        "Player object chain: DAT_1202e818 -> +0xd0 -> +0x90 (vtable call +0xb4) -> player context; requires context+0x2afc != 0 (shop sub-object present) before reading currencies.",
+        "Each currency read via FUN_114b7530(idx) with idx 1..6 mapped in order: 1=currencyFarmValue, 2=currencyGuildValue, 3=currencyClanMoney, 4=currencyClanMoneyPvp, 5=currencyCatMoney, 6=currencyPvpMoney (idx passed to FUN_114b7530 selects the currency slot).",
+        "shopLibType source: uVar3 = DAT_1200acdc by default, or *(param_3[0]) when param_4==0 (caller-provided shop lib type); resolved via FUN_114b7910(uVar3).",
+        "nextResetTime = FUN_11182210(shopLibType) high dword; resetBindCredit/resetCredit obtained from FUN_114b7650(&local_2c) -> FUN_11720a30 (local_28=resetCredit=local_2c, _param_4=resetBindCredit=local_28 pre-swap).",
+        "currentTime = FUN_111f8d20() (64-bit server/game time, low dword pushed).",
+        "context+0x2afc = shop/library sub-object pointer (gate for all currency reads)."
+      ],
+      "costs": [
+        "Currencies surfaced: currencyFarmValue, currencyGuildValue, currencyClanMoney, currencyClanMoneyPvp, currencyCatMoney, currencyPvpMoney (six secondary currencies beyond primary gold/credit).",
+        "resetBindCredit / resetCredit = credit refunded or granted at shop reset (bound vs unbound credit)."
+      ],
+      "confidence": "medium",
+      "notes": "FUN_104d1550 is the stock AS3 int-property setter used throughout this chunk. Currency-slot->index mapping is inferred from the ordered FUN_114b7530(1..6) calls paired with the string keys; verify exact slot numbering against CCurrencyInfo."
+    },
+    {
+      "address": "10848370",
+      "currentName": "FUN_10848370",
+      "proposedName": "CCurrencyInfo::GetInfoManager",
+      "purpose": "Singleton accessor for the CCurrencyInfo static-data manager (currency-type definition table). Returns cached manager, else looks it up by name via CInfoManager::FindByName(\"CCurrencyInfo\"), else lazily initializes a fallback default (FUN_10848b50) guarded by DAT_123bf3b4 bit0.",
+      "subsystem": "currency (static data)",
+      "serverRelevance": "client-only (info-manager plumbing; same table exists server-side)",
+      "formulas": [
+        "DAT_123bf3b4 & 1 guards one-time fallback init; fallback object = &DAT_123bf3f0."
+      ],
+      "costs": [],
+      "confidence": "high",
+      "notes": "Stock CryEngine/MHO CInfoManager singleton pattern (identical shape to FUN_10876b30/FUN_10876bc0 for CCraftInfo)."
+    },
+    {
+      "address": "108570a0",
+      "currentName": "FUN_108570a0",
+      "proposedName": "MHUI::RegisterGlobalAS3Callbacks",
+      "purpose": "Large ActionScript3 <-> C++ bridge registration table. Repeatedly builds std::string names and binds native handler function pointers (via FUN_100b62c0 / FUN_10866f40 / cleanup FUN_10c3d5d0) for the whole tooltip / equipment / item-icon / static-data UI surface. Registers e.g. global_registerGetAttribute, global_registerGetStaticData, GetPetSkillItemInfo/Limit, MHUI_SetEquipPassiveSkillTips, MHUI_SetEquipAwakeningTips, MHUI_RegisteCommonFunction, etc.",
+      "subsystem": "UI bridge (registration)",
+      "serverRelevance": "client-only (Scaleform/AS3 UI plumbing)",
+      "formulas": [
+        "Pure registration; no economic arithmetic. Handler targets in this chunk include FUN_1085c900 (equip tooltip), FUN_10860b90 (item fact-level), and dozens of MHUI handlers."
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "Stock UI-registration boilerplate; only the bound handler addresses matter for cross-referencing. Not authoritative."
+    },
+    {
+      "address": "1085c900",
+      "currentName": "FUN_1085c900",
+      "proposedName": "MHUI::BuildEquipTooltipData",
+      "purpose": "Client equipment-tooltip / item-icon data builder. Reads an item instance and emits enforce level, break level, other-equip-position, instance-channel, jewel/socket data and enforce-rule info for display. Formats strings like \"%s + %d\" (name+enforce), \"%d*%d\" (jewel grid), jewelEmpty markers.",
+      "subsystem": "equipment tooltip (enchant/upgrade display)",
+      "serverRelevance": "client-only (display; all values are server-replicated item state)",
+      "formulas": [
+        "Entry gated on param_6==6 (variant tag). Reads item fields: m_nEnforceLevel, m_nBreakLevel, m_bCanBreak, m_nOtherEquipPos, itemEnforceRuleID, m_bIsLocal, instanceChannel/instanceChannelType.",
+        "Format strings: \"%s + %d  \" (name + enforce level), \"%s %d  \", \"%d*%d-\" and \"%d*%d\" (jewel/socket column layout), \"jewelEmpty\" and \"collumn\" keys."
+      ],
+      "costs": [],
+      "confidence": "low",
+      "notes": "Very large decompile with many unreachable-block warnings; only the tooltip-field intent is confidently recovered. Not authoritative; enforce/break levels are read-only mirrors of server item state."
+    },
+    {
+      "address": "10860b90",
+      "currentName": "FUN_10860b90",
+      "proposedName": "MHUI::PushItemFactLevelAndTransmogInfo",
+      "purpose": "Client marshaller: given an item-instance pointer (in_stack_00000010), resolves the item's static definition and pushes computed 'factual' item level, factual rank, rare type, and (if transmogrify/quench supported) transmogrify item id and quench level to AS3.",
+      "subsystem": "item / transmogrify / quench (display)",
+      "serverRelevance": "client-only (reads server-replicated item state and shared static tables)",
+      "formulas": [
+        "Type-tag test pattern used throughout chunk: (*(u32)(inst+off) & 0x8f)==<tag> selects a Lua/variant value slot; e.g. off+0x34 tag 2 -> byte at +0x38; off+0x64 tag 2 -> byte at +0x68; off+0x7c tag 5 -> u64 at +0x80.",
+        "Reads inst+0xac (flags; bit6 = has-owner-object at inst+0xa8), inst+0xb0/0xb4/0xb8.",
+        "Def resolution: cVar2!=0 -> FUN_107cb630(); else FUN_10858a70(); alt path FUN_10858670(u64,uVar1).",
+        "m_nFactItemLevel = def->vfunc(+0x18)(); m_nFactRank = FUN_11669840(); m_nRareType = def->vfunc(+0x2c)().",
+        "If FUN_116698a0()!=0 (transmog/quench enabled): m_nTransmogrifyItemId = def[0x7d]; m_nQuenchLevel = (short)def[0x7e]."
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "The 0x8f mask + tag compares are the game's variant-cell decoding (tag in low nibble+0x80 bit), recurring in every AS3 handler in this chunk."
+    },
+    {
+      "address": "10876b30",
+      "currentName": "FUN_10876b30",
+      "proposedName": "CCraftInfo::GetCraftEntryByIndex",
+      "purpose": "Accessor: gets the CCraftInfo static-data manager (singleton pattern) then returns the craft-entry pointer at array index param_1 (bounds-checked against the entry vector).",
+      "subsystem": "crafting/forge (static data)",
+      "serverRelevance": "client-only (shared static table; server has same table)",
+      "formulas": [
+        "Manager singleton via CCraftInfo::GetInfoManagerSingleton, else CInfoManager::FindByName(\"CCraftInfo\"), else fallback &DAT_123bf070 (guard DAT_123bf0e0 bit0, init FUN_10806120).",
+        "Entry vector: begin=mgr[5], end=mgr[6]; count = (end-begin)>>2; if 0<=param_1<count return *(begin + param_1*4)."
+      ],
+      "costs": [],
+      "confidence": "high",
+      "notes": "Craft-entry struct layout is defined by FUN_10894040 consumers (see that entry)."
+    },
+    {
+      "address": "10876bc0",
+      "currentName": "FUN_10876bc0",
+      "proposedName": "CCraftInfo::GetCraftCount_or_Rebuild",
+      "purpose": "Gets the CCraftInfo manager (same singleton pattern) and invokes its vtable method at +0x28 (returns craft-entry count / triggers list build). Used to size iteration in FUN_10894040.",
+      "subsystem": "crafting/forge (static data)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Same manager resolution as FUN_10876b30; then call mgr->vfunc(+0x28)()."
+      ],
+      "costs": [],
+      "confidence": "high",
+      "notes": "PTR_FUN_11dcaec4 / PTR_FUN_11da54a8 are the info-manager vtables."
+    },
+    {
+      "address": "10878e40",
+      "currentName": "FUN_10878e40",
+      "proposedName": "MHUI::RegisterWeaponTalentCallbacks",
+      "purpose": "Registers the AS3 callback handlers for the weapon-talent-skill UI: _getActivateTalentData, _getTalentSkillData, _activateWeaponTalentSkill, _unactivateWeaponTalentSkill, _upgradeWeaponTalentSkill (FUN_104d13b0 = AS3 register-native-function).",
+      "subsystem": "weapon talent (registration)",
+      "serverRelevance": "client-only (the activate/upgrade handlers send requests; server validates and applies)",
+      "formulas": [
+        "Handler map: _getActivateTalentData->FUN_10878f20, _getTalentSkillData->FUN_10878f40, _activateWeaponTalentSkill->FUN_10878f60, _unactivateWeaponTalentSkill->FUN_10879000, _upgradeWeaponTalentSkill->FUN_108790b0."
+      ],
+      "costs": [],
+      "confidence": "high",
+      "notes": "FUN_10879150 (below) is the data-provider for _getTalentSkillData."
+    },
+    {
+      "address": "10879150",
+      "currentName": "FUN_10879150",
+      "proposedName": "MHUI::BuildWeaponTalentSkillData",
+      "purpose": "Data provider for the weapon-talent-skill panel. Reads the active-talent list and, per talent, pushes status/level info plus the full per-level upgrade cost table (level-up value, credit cost, level cap, and required material items with owned counts) to AS3. Also surfaces the player's current bound and unbound money for affordability checks.",
+      "subsystem": "weapon talent / leveling (cost display)",
+      "serverRelevance": "validation-mirror / client-only (server computes and validates the actual talent upgrade; this recomputes costs client-side for the confirm dialog)",
+      "formulas": [
+        "Talent entry (piVar8): [-1]=status, [0]=currentLevel, [1]=maxLevel, [2]=talentID, [3]=talentIndex, [7]=unlockLevel.",
+        "Per-level upgrade record (puVar9, iterated): [-3]=levelupValue, [-2]=levelupCost (currency), [-1]=levelLimit (level cap for this step).",
+        "Material sub-records per level step: [0]=itemID, [1]=itemCounts (required); currentItemCounts = FUN_113fa380(itemID) (player's owned amount of that item/credit).",
+        "roleBindMoney and roleMoney read from player context (piStack_8c chain via FUN_1025b060; talent list at context+0x260e0).",
+        "Active talent list built via CTalentActiveInfo::BuildActiveTalentList; level-up records enumerated via FUN_112b3940 / detailed via FUN_112b3e60."
+      ],
+      "costs": [
+        "levelupCost = currency (money) charged per talent level-up step.",
+        "Per-step material requirements: itemID x itemCounts.",
+        "roleBindMoney (bound money) + roleMoney (unbound money) are the affordability pools."
+      ],
+      "confidence": "medium",
+      "notes": "FUN_113fa380(id) is the recurring 'get player's owned quantity of currency/item by id' helper (appears here, in FUN_1088eca0, and FUN_10894040)."
+    },
+    {
+      "address": "1087c070",
+      "currentName": "FUN_1087c070",
+      "proposedName": "MHUI::BuildWeaponDeriveTreeData",
+      "purpose": "Builds the weapon-derive (weapon evolution/forge tree) node data for the UI. For each derive node emits weaponID, isForge, isAcquired, parentNodeID into a weaponArr, sourced from the CWeaponDerive static manager. Uses SKILL_VIDEO_WEAPON_DERIVE VO class names for the presentation objects.",
+      "subsystem": "weapon derive / forge (display)",
+      "serverRelevance": "client-only (isAcquired reflects server-owned progress; tree topology is static data)",
+      "formulas": [
+        "Manager via CWeaponDerive::GetManagers / CInfoManager::FindByName(\"CWeaponDerive\").",
+        "Per node: weaponID, parentNodeID, boolean isForge (craftable), boolean isAcquired (player already owns/unlocked)."
+      ],
+      "costs": [],
+      "confidence": "low",
+      "notes": "Cost/material data for a derive is fetched elsewhere; this fn only builds the tree topology + ownership flags."
+    },
+    {
+      "address": "1088c9c0",
+      "currentName": "FUN_1088c9c0",
+      "proposedName": "MHUI::RegisterEquipUpgradeCallbacks",
+      "purpose": "Registers the AS3 handlers for the equipment-upgrade/enforce UI: _checkEquipUpgrade, _requestEquipUpgrade, _canEquipUpgrade, _requestPutItemIn, _requestEquipUpgradeInfo, _requrestAttributeData, _openEquipShow, _checkItemBindStateChange, _getLeveRange, plus native helpers GetNewEquipDeriveLevel and CheckSlotChange. Gated on registration mode param==1.",
+      "subsystem": "equipment upgrade/enforce (registration)",
+      "serverRelevance": "client-only (the _request* handlers issue server RPCs; server validates cost and applies)",
+      "formulas": [
+        "Handler map: _checkEquipUpgrade->FUN_1088d230, _requestEquipUpgrade->FUN_1088d770, _canEquipUpgrade->FUN_1088cbb0, _requestPutItemIn->FUN_1088dc50, _requestEquipUpgradeInfo->FUN_1088e010, _requrestAttributeData->FUN_1088e550, _openEquipShow->FUN_1088e940, _checkItemBindStateChange->FUN_1088ff50, _getLeveRange->FUN_10891b00.",
+        "Native helpers: GetNewEquipDeriveLevel->FUN_108912a0, CheckSlotChange->FUN_108913c0."
+      ],
+      "costs": [],
+      "confidence": "high",
+      "notes": "Cross-refs FUN_1088e010 (info provider) and FUN_1088eca0 (cost detail provider) in this chunk."
+    },
+    {
+      "address": "1088e010",
+      "currentName": "FUN_1088e010",
+      "proposedName": "MHUI::BuildEquipUpgradeContextData",
+      "purpose": "Provider for _requestEquipUpgradeInfo (gated param_5==5). Reads player and source-equip state to populate the upgrade dialog header: isWeapon, roleLevel, srcEquipEnforceLv, awakeningLevel, roleHunterStarLv, hasWakeup, sourceRare, itemLevel, ItemRank, sourceItemName, bPointType, and the destination-equip candidate array (destEquipArray / destArrayLength).",
+      "subsystem": "equipment upgrade/enforce (context display)",
+      "serverRelevance": "client-only (all values server-replicated; feeds the confirm UI)",
+      "formulas": [
+        "Player context via DAT_1202e818->+0xd0->+0x90 vfunc(+0xb4); source-equip def via FUN_113f9bb0(equipId).",
+        "roleHunterStarLv via CPlayer::GetHuntRankOrCount; player field ctx[0xb47] gates the destination-array build.",
+        "srcEquipEnforceLv / awakeningLevel / rare / itemLevel / rank read from the source item + its static def.",
+        "Sentinels 0xdeadbeaf / -0x21524151 used when a variant cell is absent."
+      ],
+      "costs": [],
+      "confidence": "low",
+      "notes": "Header/context only; the money/material costs come from FUN_1088eca0."
+    },
+    {
+      "address": "1088eca0",
+      "currentName": "FUN_1088eca0",
+      "proposedName": "MHUI::BuildEquipUpgradeCostData",
+      "purpose": "Provider that iterates the server-supplied equip-upgrade candidate entries (stride 0x88 bytes) and pushes the full cost/requirement breakdown per candidate to AS3: upgrade money, current money, craft-credit costs, enforce/break levels, requirements, and per-material availability (equipHasEnoughMaterial).",
+      "subsystem": "equipment upgrade/enforce (cost display)",
+      "serverRelevance": "validation-mirror (server computes these cost fields; client re-surfaces them and computes affordability. Server must remain authoritative on upgradeMoney/nCraftMoney and material consumption).",
+      "formulas": [
+        "Candidate entry base = param_3+4; iterated with stride 0x88 until reaching *(param_3_ctx+8). Entry field offsets:",
+        "+0x10 -> itemID (DAT_11dbb0b4 key); +0xc -> equipID; +0x24 -> equipRare; +0x28 -> itemLevel; +0x54 -> playerUseLevelMin; +0x58 -> playerUseLevelMax; +0x2c -> equipCounts.",
+        "+0x30 -> upgradeMoney (currency cost); +0x34 -> currentMoney (player-owned money snapshot); +0x6c(byte) -> needUnboundGold.",
+        "+0x04 -> enforceRequirement; +0x08 -> hunterstarRequirement; +0x38 -> rankDownLevel; +0x3c -> enforceDownLevel; +0x40 -> newRankLevel.",
+        "+0x4c(byte) -> bBindState; +0x18 -> enforceLevel; +0x1c -> breakLevel; +0x20(byte) -> canBreak; +0x50 -> enforceRuleID.",
+        "+0x60 -> nCraftCreditID; nOwnCraftCredit = FUN_113fa380(nCraftCreditID) (player-owned craft credit); +0x64 -> nCraftCreditMax; +0x68 -> nCraftMoney.",
+        "+0x7c -> material array; equipHasEnoughMaterial (byte at +0x14) set after checking arrayMaterialData counts via FUN_108910e0/FUN_1088f110.",
+        "Iteration gated on player ctx present and *(param_3+4) != *(local_4c+8)."
+      ],
+      "costs": [
+        "upgradeMoney = primary money cost of the equip upgrade/enforce step.",
+        "needUnboundGold = flag that cost must be paid in unbound gold.",
+        "nCraftMoney = secondary money cost; nCraftCreditID/nCraftCreditMax = craft-credit currency spent (capped at nCraftCreditMax); nOwnCraftCredit = player's owned amount.",
+        "Per-material requirement list at entry+0x7c with owned-vs-needed check driving equipHasEnoughMaterial."
+      ],
+      "confidence": "medium",
+      "notes": "Strong offset recovery from the sequential FUN_104d1550/104d15e0 marshalling calls (0x88-byte entry stride is confident). Server must validate upgradeMoney, nCraftMoney, craft-credit and material consumption; client is display + affordability only."
+    },
+    {
+      "address": "10891950",
+      "currentName": "FUN_10891950",
+      "proposedName": "MHUI::FormatUpgradeItemName",
+      "purpose": "Helper that formats/looks up the display name of an upgrade item and pushes it to AS3 as strUpgradeItemName.",
+      "subsystem": "equipment upgrade (display helper)",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Resolves item name string and calls FUN_104d1670(\"strUpgradeItemName\", ...) (AS3 string setter)."
+      ],
+      "costs": [],
+      "confidence": "low",
+      "notes": "Small string-formatting helper; no economic logic."
+    },
+    {
+      "address": "10893f30",
+      "currentName": "FUN_10893f30",
+      "proposedName": "MHUI::RegisterForgeCallbacks",
+      "purpose": "Registers the forge UI AS3 handlers: InitModel, setPointMaterialData, requestForge.",
+      "subsystem": "crafting/forge (registration)",
+      "serverRelevance": "client-only (requestForge issues the server RPC; server validates cost and grants item)",
+      "formulas": [
+        "Registers InitModel, setPointMaterialData, requestForge handlers via the AS3 register-native-function path."
+      ],
+      "costs": [],
+      "confidence": "medium",
+      "notes": "requestForge is the client->server forge request; FUN_10894040 provides the forge list/costs shown before the request."
+    },
+    {
+      "address": "10894040",
+      "currentName": "FUN_10894040",
+      "proposedName": "MHUI::BuildForgeCraftListData",
+      "purpose": "Builds the forge/craft item list (gated mode param==2). Iterates all CCraftInfo entries, applies visibility filters (type, job/class-restriction arrays, map/distance-restriction arrays), and for each craftable entry pushes recipe metadata + costs + material requirements to a cached AS3 list (FORGE_ITEM_DATA_CLASS / forgeitemdataCacheList), supporting a strSearchKeyword filter.",
+      "subsystem": "crafting/forge (recipe + cost display)",
+      "serverRelevance": "validation-mirror (server owns the CCraftInfo table and validates cost/material consumption on the actual forge; client renders the same static data for the shop UI).",
+      "formulas": [
+        "Iteration count = FUN_10876bc0(); per-index entry = FUN_10876b30(i). Visibility: FUN_108496a0()!=0 AND entry[0x11] (offset 0x44) != 2.",
+        "Job/class filter: entry[0x42]/[0x43] (0x108/0x10c) begin/end pointer pair; passes if empty or contains player's class token (compared vs puVar8 = player class).",
+        "Map/distance filter: entry[0x45]/[0x46] (0x114/0x118) begin/end pair; each id resolved via FUN_107d7930 then checked against current-map object vfunc(+0x2c); count=(end-begin)>>2.",
+        "Craft-entry field offsets (int index): [0x10]=canCraft base flag; vfunc(+0x18)=craftID; [0x12]=craftType; [0x13]=craftSubType; [0x17]=itemID (DAT_11dbb0b4 key); [0x15]=nLevelLimit; [0x20]=nMoney; [0x16]=nStarLimit; [0x14]=nDistanceType.",
+        "[0x21]=nCraftCreditID; nOwnCraftCredit = FUN_113fa380(nCraftCreditID); [0x22]=nCraftCreditMax; [0x23]=nCraftMoney.",
+        "Material list: entry[0x48]/[0x49] (0x120/0x124) begin/end pair, each record 2 ints: [0]=materialID (DAT_11dbb0b4 key), [1]=nNeedItemNum. Materials emitted into materialIDArr.",
+        "Item presentation: def = FUN_10254130(itemID); strItemIconName = def+0xb4; strItemDescrbie/strItemName from FUN_116bd4d0; empty (&DAT_11d9d32b) when def==0.",
+        "Final list committed via CCraftInfo::BuildCraftLists."
+      ],
+      "costs": [
+        "nMoney = primary money cost to craft the recipe.",
+        "nCraftMoney = secondary money cost; nCraftCreditID/nCraftCreditMax = craft-credit currency spent (capped at nCraftCreditMax); nOwnCraftCredit = player-owned craft credit.",
+        "nLevelLimit = min player level; nStarLimit = min hunter-star; nDistanceType = required proximity/facility to craft.",
+        "Material requirements: list of {materialID, nNeedItemNum}."
+      ],
+      "confidence": "high",
+      "notes": "Craft-entry offset map is well recovered from the ordered marshalling and matches the CCraftInfo layout hinted in schema/docs/economy.md (costA/costB = nMoney/nCraftMoney, credit component = nCraftCredit*). DAT_11dbb0b4 is the reused \"itemID\" AS3 key. Authoritative craft must be validated server-side against this same table."
+    }
+  ]
+}

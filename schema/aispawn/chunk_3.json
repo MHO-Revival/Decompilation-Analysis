@@ -1,0 +1,431 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "10bdbc20",
+      "currentName": "FUN_10bdbc20",
+      "proposedName": "CGame::UnregisterDevConsoleCommands",
+      "purpose": "Calls a method at *(param_1+0x10) vtable+0x80 once per hard-coded command name, unregistering (removing) the game's console/dev commands: camgoto, freeze, loadactionmap, restartgame, v_kill, sv_restart, sv_say, i_reload, dumpss, g_reloadGameRules, g_quickGame(Stop), g_nextlevel, g_vote, g_startKickVoting, g_startNextMapVoting, g_battleDust_reload, bulletTimeMode, GOCMode, ShowGODMode, test_pathfinder, Cmd(Start/End)VideoCapture, g_hitDeathReactions_reload/dumpAssetUsage.",
+      "confidence": "high",
+      "subsystem": "console/dev-commands",
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine/GameSDK console-command teardown (object at +0x10 is the console/IConsole). vtable+0x80 = RemoveCommand. No spawn/AI logic; listed for completeness."
+    },
+    {
+      "address": "10be99f0",
+      "currentName": "FUN_10be99f0",
+      "proposedName": "CActor::InitFromSpawn",
+      "purpose": "Large actor/monster spawn-initialization routine. Selects a branch on FUN_113a2790()==0 (fresh) vs ==1/==3 (respawn/other). Reads monster spawn params (EmCommon table via CSculptureInfo: nMonsterDifficulty, nMonsterSizeScale, NPCSkillFile, NpcAnimationName1..8, DeadPose, CanLemon), builds a per-instance name via _snprintf(\"%s_%08x\"), attaches the animated character/skeleton, plays DeadPose if the actor's vtable+0x180 (isDead) is set, wires the BehaviorTreeBase controller (BTCtrlObject), and fires the \"Spawned\" script event through two spawn-listener slots at actor+0x125c and actor+0x1260. Also pushes LastState/OnConnect/State onto the actor's script table and replays queued state/transform arrays (param_1+0x18 and +0x19).",
+      "confidence": "medium",
+      "subsystem": "monster-spawn/actor-init",
+      "formulas": [
+        "param_1[0x10]=param_2 (owning entity/gameobject ptr); param_1[0x11]=character-instance ptr (via vtable+4)",
+        "instance name = snprintf(buf,0x104,\"%s_%08x\", baseName, id) from FUN_113a23b0 record",
+        "size/height adjust: local_14 = height(local_d8) + (float)local_30 when vtable+0x164 (DAT_1202e818+0xd0) true; DAT_11de9918 used as additive constant",
+        "hp/scale from difficulty record iVar3+0xb0/+0xb4/+0xb8 iterated in 0x18-byte strides (up to 8 slots), each *(entry+0x14..+0xbc) passed to FUN_10ab3600",
+        "scale = (float)FUN_10bec810() / DAT_11de9a30 (DAT_11de9a30 = frame/time or 1000.0 divisor)",
+        "diff record +0x20==3 gates monster-difficulty branch (local_ac = (localTeam==0))",
+        "state event flags: local_30 hi-dword written to script key \"State\"; \"LastState\" written only if param_2 != current",
+        "actor+0x40b4 nonzero triggers FUN_104753a0/FUN_1046dc90 property-record path (param_2=-1)"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "This is MHO monster/NPC spawn wiring (not stock). \"Spawned\" event is dispatched to the entity's script; server authoritatively spawns and this reconstructs client-side state. DAT_1202e818 = global game context (+0x50 entity system, +0xd0 gamerules/env, +0x30 3d-engine, +4 framework)."
+    },
+    {
+      "address": "10c05b30",
+      "currentName": "FUN_10c05b30",
+      "proposedName": "CGameRules::RequestSpawnGroup_ClientRMI",
+      "purpose": "Client->server RMI. If the RMI dispatcher (obj+0x5c) resolves \"RequestSpawnGroup\" to type 4, it opens the message on the net channel (obj+0x50 vtable+0x34), serializes one param (FUN_10a69520) and sends (vtable+0x44). Requests that the server assign/activate a spawn group for the caller.",
+      "confidence": "high",
+      "subsystem": "spawn-group/net",
+      "serverRelevance": "validation",
+      "notes": "Client-initiated request; the server validates and applies the spawn group. obj+0x5c = scriptbind/RMI table, obj+0x50 = net/RMI serializer."
+    },
+    {
+      "address": "10c05b90",
+      "currentName": "FUN_10c05b90",
+      "proposedName": "CGameRules::SetPlayerSpawnGroup_RMI",
+      "purpose": "RMI \"SetPlayerSpawnGroup\" carrying two serialized params (player id + spawn-group id). Same dispatch pattern as RequestSpawnGroup (checks method type==4, serializes param_2 then param_3 via FUN_10a69520).",
+      "confidence": "high",
+      "subsystem": "spawn-group/net",
+      "serverRelevance": "authoritative",
+      "notes": "Assigns a player's spawn group. Server-authoritative state; RMI is the transport."
+    },
+    {
+      "address": "10c05c00",
+      "currentName": "FUN_10c05c00",
+      "proposedName": "CGameRules::GetPlayerSpawnGroup_RMI",
+      "purpose": "RMI \"GetPlayerSpawnGroup\": resolves method type==4, serializes an argument obtained from param_2 script context (vtable+0x150(2) then +0x38 -> entity/spawngroup id via FUN_10a69450), and returns the resulting spawn-group value (local_8).",
+      "confidence": "medium",
+      "subsystem": "spawn-group/net",
+      "serverRelevance": "validation",
+      "notes": "Query of a player's current spawn group."
+    },
+    {
+      "address": "10c05d50",
+      "currentName": "FUN_10c05d50",
+      "proposedName": "CGameRules::OnSpawnGroupInvalid",
+      "purpose": "Handles invalidation of a spawn group (param_2 = spawnGroupId). Looks the id up in a red-black tree rooted at param_1+0x8d/+0x8e (nodes keyed by [4]=id, [2]/[3]=children), verifies the group still exists in the entity/spawn system (DAT_1202e818+0x50 vtable+0x2c) and passes actor+0x208 gate. Then walks the entity list [param_1+0x22 .. +0x23], and for every entity whose current spawn group (vtable+0x2b0) == param_2, fires the \"OnSpawnGroupInvalid\" script/RMI event (method type==4) with (entityId, spawnGroupId). Skips entities that share the same +0x208 result when the group is still valid.",
+      "confidence": "medium",
+      "subsystem": "spawn-group",
+      "formulas": [
+        "RB-tree search: descend right (piVar2[3]) when node key piVar2[4] < param_2 else left (piVar2[2]); match requires !(param_2 < found[4])",
+        "per-entity dispatch condition: (*(param_1+0x2b0))(entity) == param_2 AND (!bValid OR (*(param_1+0x208))(entityGroup) != (*(param_1+0x208))(param_2))"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "vtable+0x2b0 = GetEntitySpawnGroup, vtable+0x208 = spawn-group validity/zone class. Server-side spawn-group lifecycle."
+    },
+    {
+      "address": "10c21d10",
+      "currentName": "FUN_10c21d10",
+      "proposedName": "CProjectileEffect::SpawnWeakBloodHit",
+      "purpose": "Spawns the blood-hit particle 'Water_Ability_Mst.HIT.N_Blood_Red_Weak' (Particle.SpawnEffect) at the impact point when both source(param_4) and target(param_5) are live monster entities (vtable+0xa8==1 twice) and target passes vtable+0x1c4. Computes the effect orientation from the joint/weapon transform (bone matrix, quaternion-from-matrix conversion) then calls FUN_10a7b9f0 to emit. Guarded by ceil() thresholds on param_2 damage-component array (param_2[0]+param_2[1..5]) so it only fires when total > 0.",
+      "confidence": "medium",
+      "subsystem": "combat-vfx",
+      "formulas": [
+        "gate: (int)ceil(param_2[0]) + (int)ceil(param_2[1]+0.0+param_2[2]+param_2[3]+param_2[4]+param_2[5]) > 0",
+        "orientation from bone matrix at param_2[0x22]; quaternion built via matrix-trace branches using DAT_11de98e8=0.5 and DAT_11de9918=1.0",
+        "half-angle rotation seed uStack_2c=0x3fc90fdb (pi/2)"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "Pure client VFX; the damage-component array is combat data but only read here for the visual threshold. Quaternion-from-matrix math is boilerplate."
+    },
+    {
+      "address": "10c225a0",
+      "currentName": "FUN_10c225a0",
+      "proposedName": "CProjectileEffect::SpawnShootBloodEffect",
+      "purpose": "Large client VFX routine: on a projectile/hit resolves the shooter entity (FUN_10c007c0), verifies it is a monster or type 8, gets the target entity via param_3[1], and spawns a directional blood effect. Two paths: monster type 5/10 uses fixed 'Water_Ability_Mst.HIT.ShootBlood_S'/'_M' (indexed by local_34 = (hitFlag @param_5+0x34 == 2)); otherwise resolves an effect name via FUN_11104780 and aims it along the shot direction with asin-based cone spreading. mat_default / weapon_bone are used to sample the emitter transform.",
+      "confidence": "low",
+      "formulas": [
+        "local_34 = (*(param_5+0x34) == 2) selects ShootBlood variant (0=_S index, 1=_M index)",
+        "monster-type switch: piVar6[0x56d] in {5,10}",
+        "cone spread via libm_sse2_asin_precise, rsqrtss Newton refine (DAT_11de9938 - r*x*x*0.5)*x; epsilons DAT_11cbf070, DAT_11de98bc, DAT_11de98b4",
+        "local_18 = *(param_5+0x38) = effect scale/param passed to FUN_10dbff80 etc."
+      ],
+      "subsystem": "combat-vfx",
+      "serverRelevance": "client-only",
+      "notes": "Client-side blood/shoot decal-effect placement; extensive quaternion/vector math is CryEngine-style boilerplate. monster type field @+0x56d*4 also seen in CSingle shoot paths."
+    },
+    {
+      "address": "10c330b0",
+      "currentName": "FUN_10c330b0",
+      "proposedName": "CGame::RegisterMHODebugConsoleCommands",
+      "purpose": "Registers MHO debug/GM console commands via param_1 vtable+0x80 (AddCommand): notice, buyammo, g_debug_spawns, g_debug_minimap/teams/objectives, debugmonsterskel, debugenablesvranimopt, debugmonsterphyspart, syscmd, setdmglog, GetMonstersAround, GetPlayersAround, farmpet, PetEquipChg, PetTalk, TestFirework, IterateNext/PrevFace/Hair, ChangeMonster, g_playmonsterskill, addbuffP/delbuffP/getbuffP, CtrlM, ViewTeamPlayer/Pet, ChangeArea, SpawnItem, PlayBuffFX, PDAnim, load/unload/reloadui, g_firstAtkRotEnable/g_otherAtkRotEnable, setfaction, GotoLogin, ReloadData, buy/sellnpcshopitem, manuprod, lmanuskl, lmanuingd, catcs, warninglevel.",
+      "confidence": "high",
+      "subsystem": "console/dev-commands",
+      "serverRelevance": "client-only",
+      "notes": "Names reveal MHO subsystems (spawns debug, monster skills, factions, pet, crafting) but this fn is just registration. g_debug_spawns / GetMonstersAround / ChangeMonster / g_playmonsterskill are AI-adjacent debug hooks."
+    },
+    {
+      "address": "10c36430",
+      "currentName": "FUN_10c36430",
+      "proposedName": "CmdDisableMonsterAI_GM",
+      "purpose": "GM/dev handler: parses atoi(arg0) as a target monster/entity id, iterates all monsters in the monster manager (DAT_1202e818+0xd0 -> +0x90 iterator: FUN_113a58c0/58d0 loop), and when a monster's id (FUN_113a2390) matches and it has a valid gameobject (+0xc), issues the network command \"gm disablemonsterai %d\" via the console/net (vtable+0x5b4). Only runs when the not-a-server-authoritative check (vtable+0x164) is false, i.e. it forwards to the server.",
+      "confidence": "medium",
+      "subsystem": "monster-ai/gm",
+      "serverRelevance": "validation",
+      "notes": "Client GM command that asks the server to toggle a monster's AI. Actual AI-disable is server-side."
+    },
+    {
+      "address": "10c3c550",
+      "currentName": "FUN_10c3c550",
+      "proposedName": "CEntity::PlaySpawnEffectFromProperty",
+      "purpose": "Reads the \"SpawnEffectName\" string from the entity's property record (via property system FUN_11438280/FUN_104753a0/FUN_113168d0) and, if present, loads it (FUN_10520400) and spawns/attaches the named spawn effect onto the entity (FUN_116eb990 -> FUN_1025bc60). Guarded on actor+0x10 present and property record valid.",
+      "confidence": "low",
+      "subsystem": "spawn-vfx",
+      "serverRelevance": "client-only",
+      "notes": "\"SpawnEffectName\" is a per-entity property; this is the client visual on spawn."
+    },
+    {
+      "address": "10c5dcb0",
+      "currentName": "FUN_10c5dcb0",
+      "proposedName": "CTrigger::NotifyBTNewComers_All",
+      "purpose": "Iterates all players (monster/player manager DAT_1202e818+0xd0 -> +0x90 iterator). For each entity not already inside this trigger's set (obj vtable+0x68 returns -1 == not present) whose faction/team (vtable+0x88) matches obj+8, and that resolves to a live entity, it writes the newcomer's id into the trigger's BehaviorTreeBase blackboard key \"NewComerID\" (vtable+0x70) and fires the \"NewCome\" BT event (event descriptor: 0x124, 0x4ffff, type 2, name \"NewCome\", payload = obj+2 id) via vtable+0x24.",
+      "confidence": "medium",
+      "subsystem": "behavior-tree/trigger",
+      "formulas": [
+        "event descriptor struct: {0x124, 0x4ffff, payloadPtr->obj[2], 0(flags), name=\"NewCome\", type=2}",
+        "membership test: (*(obj+0x68))(entityId) != -1 means already tracked"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Drives monster/trigger behavior trees: 0x124 / 0x4ffff are the BT event id/mask constants for \"NewCome\". Server-side AI event. Blackboard key \"NewComerID\" carries the entering entity id."
+    },
+    {
+      "address": "10c5e3d0",
+      "currentName": "FUN_10c5e3d0",
+      "proposedName": "CTrigger::NotifyBTNewComer_Single",
+      "purpose": "Single-entity variant of the NewCome notifier. If param_3 (leaving flag) is 0 it just calls vtable+0x7c(param_2) (untrack/remove). Otherwise, if the entity is not yet tracked (vtable+0x68 == -1), writes \"NewComerID\"=param_2 into the BehaviorTreeBase blackboard and fires the \"NewCome\" BT event with the same descriptor {0x124, 0x4ffff, obj[2], type 2}.",
+      "confidence": "medium",
+      "subsystem": "behavior-tree/trigger",
+      "serverRelevance": "authoritative",
+      "notes": "Same BT event constants as 10c5dcb0; per-entity enter path."
+    },
+    {
+      "address": "10c63300",
+      "currentName": "CSingle::Shoot",
+      "proposedName": "CSingle::Shoot",
+      "purpose": "Fires one shot of a single-fire weapon. Reads/updates fire timing and ammo, computes muzzle pos/dir (vtable+0x18c/+0x188), optionally draws aim debug ('g_aimdebug', 'CSingle::Shoot'), spawns the projectile (server path vtable+0x1fc when not dedicated-server flag @DAT_1202e818+0x209, else spawn-only +0x158), sets projectile owner/params, plays muzzle-flash CST particles ('Fire_Ability_Pc.CST.WN_MultipleCST' / '...MultipleChargeCST' selected by param_6 0/1), applies recoil, decrements ammo and advances the fire counter, and enqueues hit/notification RMIs.",
+      "confidence": "medium",
+      "subsystem": "weapon-fire",
+      "formulas": [
+        "debug predicted pos: base + velocity*DAT_11de9a30 (DAT_11de9a30 = frametime/time-step)",
+        "burst gating: fire only when (shotIndex==currentFrame) OR (shotIndex % fireRate@+0xb4 ==0); fireRate forced to 1 if DAT_120286b8+0x360/+0x364 set",
+        "ammo consumed: iVar9 = shotIndex (-1 if DAT_120286b8+0x3e0==0); with spread mult @weapon+0x62+0x80: iVar9 -= (rand*mult)>>32, clamp>=0",
+        "muzzle-flash CST rotation quaternion seeded from euler (-0.7853982, 0, 0) (= -pi/4)",
+        "fire-count: param_1[9]++ resets to 0 at *(weapon+0x62+0x1c) (magazine size)",
+        "cooldown timers: param_1[7]=nextTime=curTime+rate@[6]; param_1[0x47]=param_1[7]+0.5 (DAT_11de98e8)"
+      ],
+      "costs": ["ammo decrement per shot via vtable+0x160(local_18, iVar9)"],
+      "serverRelevance": "authoritative",
+      "notes": "Dedicated-server branch keyed on *(DAT_1202e818+0x209). CSingle is stock CryEngine/GameSDK weapon class; MHO-specific bits are the Fire_Ability_Pc CST effects and the spread/fireRate globals. Projectile spawn is server-authoritative when server."
+    },
+    {
+      "address": "10c65a10",
+      "currentName": "CGunTurret::PredictTargetPos",
+      "proposedName": "CGunTurret::PredictTargetPos",
+      "purpose": "Target-leading / aim-prediction. Given a target entity, gets its current pos and physics velocity (physical entity status vtable+0x18). Computes the offset needed to lead the target based on relative closing speed and the projectile's muzzle speed, and writes predicted position into param_2. If prediction is disabled (turret+0x4ea flag set, or prediction scale turret+0x4cc == 0) it returns the raw target position. When debug level DAT_120286b8+0x8a8==2 it draws a sphere and logs 'Predict %s: speed %.1f (dspeed %.1f), acc %.1f, time %.1f'.",
+      "confidence": "medium",
+      "subsystem": "target-prediction",
+      "formulas": [
+        "targetSpeed local_60 = sqrt(vx^2+vy^2+vz^2); if >= DAT_11de98bc normalize dir (dir = vel * (1.0/speed))",
+        "distance local_70 = |targetPos - shooterPos(status vtable+0x198(1))|",
+        "closingSpeed local_2c = dot(velDir, rangeVec) * (1/dist)  (component of target velocity along line of sight)",
+        "projectileSpeed = *(projInfo+0x2c) (FUN_1111b3f0, valid iff +0x24 != 0)",
+        "relSpeed fVar5 = projectileSpeed - closingSpeed; clamp to >= DAT_11de9918 (=1.0)",
+        "timeToImpact local_70 = distance / relSpeed",
+        "targetSpeed clamped to max DAT_11cc4180",
+        "fVar6 = targetSpeed * 0.5 (DAT_11de98e8)",
+        "predOffset.axis = (vel.axis*time + accComponent.axis * fVar6 * time^2) * predScale(turret+0x4cc)",
+        "predictedPos = predOffset + currentTargetPos"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "CGunTurret is a stock CryEngine class but MHO reuses it for auto-firing monsters/turrets; the lead math is genuine aim prediction. turret+0x4cc = prediction strength scalar, turret+0x4ea = prediction-disable bool, DAT_11cc4180 = max target speed used for prediction. Whether server or client owns this depends on turret authority."
+    },
+    {
+      "address": "10c8a390",
+      "currentName": "FUN_10c8a390",
+      "proposedName": "CUIEntityDynTexTag::RegisterFlowNode",
+      "purpose": "Constructs/registers the 'CUIEntityDynTexTag' UI flowgraph node in class 'UIEntityTagsDynTex'. Declares node functions AddEntityTag / UpdateEntityTag / RemoveEntityTag / RemoveAllEntityTag with their input port descriptors (EntityID, uiElements_UIElement, EntityClass, Material, OffsetX/Y/Z, TagIDX, LerpSpeed) and binds each to handler fns FUN_10c8b6b0/10c8b8d0/10c8ba20/10c8bab0.",
+      "confidence": "high",
+      "subsystem": "ui-flowgraph",
+      "serverRelevance": "client-only",
+      "notes": "'EntityClass of the spawned entity' string is UI-tag boilerplate, not monster spawning. Stock CryEngine flownode registration pattern (repeated 4-dword port descriptor writes)."
+    },
+    {
+      "address": "10ccea90",
+      "currentName": "FUN_10ccea90",
+      "proposedName": "CPickableItem::LoadPropertiesFromScript",
+      "purpose": "Loads a pickable/interactable entity's properties from its script table into struct fields: HitPoints (float @+0x2a8), bPickable(+0x2ac), bMounted(+0x2ad), bPhysics(+0x2ae), bUsable(+0x2af), bAutoPickup(+0x2b0), and from the 'Respawn' sub-table: bRespawn(+0x2a5), nTimer(+0x2a0), bUnique(+0x2a4).",
+      "confidence": "high",
+      "subsystem": "item/pickup-spawn",
+      "formulas": [
+        "HitPoints -> +0x2a8 (float, FUN_10ab32a0)",
+        "bPickable +0x2ac, bMounted +0x2ad, bPhysics +0x2ae, bUsable +0x2af, bAutoPickup +0x2b0 (bytes, FUN_10ccf320)",
+        "Respawn.bRespawn -> +0x2a5, Respawn.nTimer -> +0x2a0 (int), Respawn.bUnique -> +0x2a4"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "nTimer = respawn delay; bRespawn/bUnique govern item respawn behavior. Server owns respawn timing. Stock GameSDK CPickableItem-style property read."
+    },
+    {
+      "address": "10d07650",
+      "currentName": "FUN_10d07650",
+      "proposedName": "CThreatModifier::DebugDrawCollisionPath",
+      "purpose": "Debug-only render of an AI threat/collision-avoidance path. Gated on DAT_120286b8+0xc0c (debug cvar). Draws lines/spheres between the agent pos, a target pos, and param_1+1, and labels the path with 'ThreatCollisionPath [%s]' where the type comes from param_1[7]: 1='Anti-Parallel Path', 2='Parallel Path', 3='Perpendicular Path', else 'None'.",
+      "confidence": "medium",
+      "subsystem": "ai-threat/debug",
+      "formulas": [
+        "path-type enum param_1[7]: 1=Anti-Parallel, 2=Parallel, 3=Perpendicular",
+        "distance label = sqrt((dx)^2 + dy^2 + (dz)^2) * DAT_11de98e8 (=0.5) when dy>=0"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine AI collision-avoidance (threat) debug visualization; the path-type enum is the useful takeaway for threat-avoidance steering."
+    },
+    {
+      "address": "10d14690",
+      "currentName": "FUN_10d14690",
+      "proposedName": "CFlockWanderBehavior::CalcWanderTarget",
+      "purpose": "Stock CryEngine 'wander' steering: reads Steer_WanderRadius(+0x78), Steer_WanderDistance(+0x90), Steer_WanderJitter(+0xa8), Steer_WanderTimePeriod(+0xcc) params, picks a random angle, and writes the wander target offset into +0xc0 (xy) and +0xc8/+200 (z).",
+      "confidence": "medium",
+      "subsystem": "patrol/wander",
+      "formulas": [
+        "angle local_8 = rand() * DAT_11ce1f28 * DAT_11de99b0 * DAT_11de9990 (rand normalized then scaled to 2*pi range)",
+        "wander target = radius(+0x8c after resolve) * (sin(angle), cos(angle)*..., sin(angle)) written to param_1+0xc0 and +0xc8"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "CryEngine steering-behavior boilerplate (not MHO monster BT). Included because 'wander/patrol' is in-scope; params are asset-driven Steer_Wander* values. Uses rand() -> not deterministic."
+    },
+    {
+      "address": "10d14c70",
+      "currentName": "FUN_10d14c70",
+      "proposedName": "CFlockWanderBehavior::ctor",
+      "purpose": "Constructor for the 'Wander' steering behavior object: sets self-pointers at +0x10/+0x14 and registers the behavior name 'Wander'.",
+      "confidence": "medium",
+      "subsystem": "patrol/wander",
+      "serverRelevance": "client-only",
+      "notes": "Stock steering-behavior registration."
+    },
+    {
+      "address": "10d15c60",
+      "currentName": "FUN_10d15c60",
+      "proposedName": "CEntityCustomRoot::LoadAIAndModelSettings",
+      "purpose": "Parses an 'EntityCustomRoot' script definition and loads: sfileModel (model), HitPartSetting.sHitPartInfo (hit-part/hitbox info), and AISetting -> sBlackBoardFile + sBTFolder, resolving behavior-tree file paths under '/Scripts/AI/BehaviorTree/' (folder + '/' + file). Iterates ClientBehaviorTree array loading each sFileName under the same folder, and loads sEventBT under '/Scripts/AI/EventBT/'.",
+      "confidence": "high",
+      "subsystem": "behavior-tree/asset",
+      "formulas": [
+        "BT path = '/Scripts/AI/BehaviorTree/' (len 0x19) + sBTFolder + '/' + sBlackBoardFile-or-sFileName",
+        "EventBT path = '/Scripts/AI/EventBT/' (len 0x14) + sEventBT"
+      ],
+      "serverRelevance": "validation",
+      "notes": "Reveals the monster AI data layout: each monster type has sBlackBoardFile, sBTFolder, a ClientBehaviorTree list (client-side trees) and sEventBT. Server likely loads the server-side trees from the same folder. HitPartSetting/sHitPartInfo -> hit-zone data. High value for rebuild: BT/blackboard file naming convention."
+    },
+    {
+      "address": "10d1ee70",
+      "currentName": "FUN_10d1ee70",
+      "proposedName": "CMHGameFramework::RegisterScriptBindings",
+      "purpose": "Registers the MHO gameplay Lua/script binding table (via manager obj+0x44 vtable+0x64 with descriptor {handlerThunk FUN_10d3ee40/60/b0/40, self=param_1, name, argSig}). Bindings include the spawn/logic API: SpawnMonster, SpawnCollectPoint, SpawnGameObjItem, SpawnCollectPointUnderEntity, EnableSpawner, Spawner_DoSpawn, Spawner_Reset, plus GetEntityLogicId, GetEntityIDByLogicId, GetLocalPlayer, GetAllPlayers, RegisterBattleGroundEvent, RegisterLogicPlayerEvent, RegisterLogicMonsterEvent, AddGameEventListener, RemoveGameEventListener, DispatchGameEvent, SetGameObjProperty, SetMHScnObjProperty, RemoveLogicEntity, UIShowFallPrompt, PrintLog.",
+      "confidence": "high",
+      "subsystem": "spawn/script-api",
+      "formulas": [
+        "binding handlers: SpawnMonster->FUN_10d1fa00(params); SpawnCollectPoint->FUN_10d1fe80(params); SpawnGameObjItem->FUN_10d20680(spawner,ItemCEClass); SpawnCollectPointUnderEntity->FUN_10d20450(spawner,resid); GetEntityLogicId->FUN_10d207f0; GetEntityIDByLogicId->FUN_10d208e0(LogicEntityId); GetLocalPlayer->FUN_10d20bf0; GetAllPlayers->FUN_10d20c50; RegisterBattleGroundEvent->FUN_10d20d40; RegisterLogicPlayerEvent->FUN_10d20d60; RegisterLogicMonsterEvent->FUN_10d20d80; AddGameEventListener->FUN_10d20da0; RemoveGameEventListener->FUN_10d22090; DispatchGameEvent->FUN_10d22230; UIShowFallPrompt->FUN_10d222f0; EnableSpawner->FUN_10d223d0(spawner,enable); Spawner_DoSpawn->FUN_10d224f0(spawner,param); Spawner_Reset->FUN_10d226b0(spawner); SetGameObjProperty->FUN_10d20940(entityId,key,value); SetMHScnObjProperty->FUN_10d20a80; RemoveLogicEntity->FUN_10d20b80(LogicId)"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Primary MHO server-side spawn/logic script surface. 'Logic entities' and 'MHScnObj' are MHO server object concepts; RegisterLogicMonsterEvent(nMonsterNetID,nEventID,...) confirms server-driven monster events. Very high value: enumerates the authoritative spawn API and its argument signatures."
+    },
+    {
+      "address": "10d20450",
+      "currentName": "FUN_10d20450",
+      "proposedName": "ScriptBind::SpawnCollectPointUnderEntity",
+      "purpose": "Script handler for SpawnCollectPointUnderEntity(spawner, resid). Resolves the spawner entity (FUN_10d1f790 -> entity system +0x2c), reads its rotation (vtable+0xb4) and position (vtable+0x94), and spawns an 'EffectSpawnedCollectPoint' at that transform via the level-spawn manager (DAT_1202e818+0xd0 -> +0x90 vtable+0x48). Returns the new entity id (itoa'd) or nil.",
+      "confidence": "medium",
+      "subsystem": "spawn/collect-point",
+      "formulas": [
+        "arg count < 2 -> falls through to cleanup path; else reads resid (arg2) via FUN_10d3f100 into local_b8+0x28",
+        "spawn call: (...+0x48)(\"EffectSpawnedCollectPoint\", pos&local_10, rot&local_24, resid&local_e4, 0, spawnGroupId)",
+        "spawnGroupId uVar2 = spawner->GetSpawnGroup (vtable+0x288 then +0x88) else 0xffffffff"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Server spawns a gatherable/collect-point entity anchored to an existing entity. resid = resource/collectable id."
+    },
+    {
+      "address": "10d224f0",
+      "currentName": "FUN_10d224f0",
+      "proposedName": "ScriptBind::Spawner_DoSpawn",
+      "purpose": "Script handler Spawner_DoSpawn(spawner, param). Resolves the spawner entity, gets its spawner logic component (gamerules +0xd0 -> +0x9c -> vtable+0xc), and calls the correct spawn method based on the component subtype (vtable+4 returns 1/2/3): type1 -> vtable+0x9c(0); type2 -> vtable+0xb4(boolArg); type3 -> vtable+0xc0(boolArg). Then fires the 'Spawned' entity script event and returns the spawn result.",
+      "confidence": "medium",
+      "subsystem": "spawn/spawner",
+      "formulas": [
+        "spawner subtype (vtable+4): 1->DoSpawn(vtable+0x9c,0); 2->DoSpawn(vtable+0xb4, arg-bool default 1); 3->DoSpawn(vtable+0xc0, arg-bool default 0)",
+        "on success dispatches script event 'Spawned' on the spawner entity (vtable+0x110)"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Server-side manual spawn trigger for a spawner entity; the three subtypes correspond to distinct spawner implementations (batch/single/conditional)."
+    },
+    {
+      "address": "10d49870",
+      "currentName": "FUN_10d49870",
+      "proposedName": "CSpawnRegion::SerializeProperties",
+      "purpose": "Read/write serialization of a spawn-region/trigger entity's linked-entity GUIDs. When reading (param_3!=0): loads TriggerEntGuid(+0x18), ShapeEntGuid(+0x10), SpawnPointEntGuid(+0x20), LinkedSection(+0x28) and a base guid (DAT_11dbabc0 -> +8). When writing: emits the same GUID pairs plus AffectExtent(+0x30).",
+      "confidence": "medium",
+      "subsystem": "spawn-region",
+      "formulas": [
+        "fields: baseGuid@+8, ShapeEntGuid@+0x10(+0x14 hi), TriggerEntGuid@+0x18(+0x1c hi), SpawnPointEntGuid@+0x20(+0x24 hi), LinkedSection@+0x28, AffectExtent@+0x30"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Links a spawn region to its trigger/shape/spawn-point entities and a 'LinkedSection'. AffectExtent likely the region radius/extent that gates spawns. Server owns spawn regions."
+    },
+    {
+      "address": "10d604a0",
+      "currentName": "FUN_10d604a0",
+      "proposedName": "CProximityTrigger::FireBTEnterEvent",
+      "purpose": "On an entity entering a proximity trigger, writes 'EnterEntityID'=param_2 into the trigger's BehaviorTreeBase blackboard (vtable+0x70) and fires the 'EnterEntity' BT event (descriptor {0x124, 0x4ffff, ownerId=obj+8, type 2}).",
+      "confidence": "medium",
+      "subsystem": "behavior-tree/trigger",
+      "serverRelevance": "authoritative",
+      "notes": "Same BT event constants (0x124/0x4ffff/type2) as NewCome. Drives AI/quest triggers on region enter."
+    },
+    {
+      "address": "10d60510",
+      "currentName": "FUN_10d60510",
+      "proposedName": "CProximityTrigger::FireBTLeaveEvent",
+      "purpose": "On an entity leaving a proximity trigger, writes 'LeaveEntityID'=param_2 into BehaviorTreeBase blackboard and fires the 'LeaveEntity' BT event (descriptor {0x124, 0x4ffff, ownerId=obj+8, type 2}).",
+      "confidence": "medium",
+      "subsystem": "behavior-tree/trigger",
+      "serverRelevance": "authoritative",
+      "notes": "Leave counterpart to 10d604a0."
+    },
+    {
+      "address": "10d72ff0",
+      "currentName": "FUN_10d72ff0",
+      "proposedName": "CShotgun::ShootBurst",
+      "purpose": "Multi-pellet weapon fire (CommonShoot/ChargeShoot). Iterates the pending-shot list (weapon param+0x44..+0x48, 0xa8-byte stride), for each computes the muzzle CST particle orientation (euler -pi/4) using 'Fire_Ability_Pc.CST.WN_MultipleCST' or '...MultipleChargeCST', spawns via CSingle::Shoot_10d73980, and after all pellets (when local_20==1 single-pellet mode) applies a camera-shake/recoil profile selected from three parameter blocks at DAT_1202e818+0x7c (+0x494 / +0x4b0 / +0x4cc) based on charge level (0/1/2).",
+      "confidence": "low",
+      "subsystem": "weapon-fire",
+      "formulas": [
+        "pellet count local_20: 2 if secondary-fire flag (vtable+0x494), else 1 or 3 depending on vtable+0x7f0",
+        "muzzle rotation quaternion from euler (-0.7853982,0,0)=(-pi/4)",
+        "recoil param block by charge: 0->+0x494, 1->+0x4b0, 2->+0x4cc (7 dwords each) at *(DAT_1202e818+0x7c)"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "Client-side burst visuals + recoil; actual damage/spawn goes through CSingle::Shoot_10d73980. monster type gate piVar5[0x56d]==5. Stock GameSDK shotgun with MHO CST effects."
+    },
+    {
+      "address": "10d858d0",
+      "currentName": "FUN_10d858d0",
+      "proposedName": "CProjectileSpawnEffectInfo::GetByIndex",
+      "purpose": "2D-array accessor into the CProjectileSpawnEffectInfo record table. Given a linear index param_1, subtracts base offset (+0x30), bounds-checks against count (+0x24), and returns table[+0x20][idx/stride][idx%stride] where stride=*(+0x28). Returns 0 if out of range or -1.",
+      "confidence": "medium",
+      "subsystem": "projectile/data-table",
+      "formulas": [
+        "idx = param_1 - *(rec+0x30); valid if 0<=idx< *(rec+0x24) and *(rec+0x28)!=0 (and not param_1==-1)",
+        "row = *(*(rec+0x20) + (idx / stride)*4); return *(row + (idx % stride)*4)"
+      ],
+      "serverRelevance": "validation",
+      "notes": "Standard CInfoManager chunked-array lookup; maps a projectile-spawn-effect id to its record."
+    },
+    {
+      "address": "10d8ccc0",
+      "currentName": "FUN_10d8ccc0",
+      "proposedName": "CLogicEntity::LoadPropertiesFromScript",
+      "purpose": "Loads a logic/spawn entity's script 'Properties' table into fields: file_propertyFile (string), obj_ModelFile (string), n_LogicEntityType(+9 int), s_SpawnEntityName (string), b_InitTrigger(+0xa bool), vector_triggerBox(+0xb vec3).",
+      "confidence": "high",
+      "subsystem": "spawn/logic-entity",
+      "formulas": [
+        "n_LogicEntityType -> param_1+9 (int)",
+        "b_InitTrigger -> param_1+0xa (bool)",
+        "vector_triggerBox -> param_1+0xb (vec3)",
+        "file_propertyFile / obj_ModelFile / s_SpawnEntityName read as trimmed strings (FUN_1083ab70)"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "MHO 'logic entity' spawn descriptor. n_LogicEntityType classifies what gets spawned; s_SpawnEntityName is the target entity class; triggerBox defines its activation volume. Server-relevant spawn config."
+    },
+    {
+      "address": "10d8d3a0",
+      "currentName": "FUN_10d8d3a0",
+      "proposedName": "CVehicleWeapon::ShootBurstWithEffect",
+      "purpose": "Iterates a pending-shot list (param_2+0x44..+0x48, 0xa8 stride) and for each: spawns the projectile via CSingle::Shoot_10d73980, sets its lifetime (vtable+0xd0 from weapon-system +0xac), optionally emits a camera/screen effect block (if *(param_2+4)) and a 'Particle.SpawnEffect' muzzle effect oriented by euler angles at param_2+0x2c/+0x30/+0x34 (deg->rad via DAT_11de98c0). Uses libm_sse2_sqrt_precise for the aim-cone basis.",
+      "confidence": "low",
+      "subsystem": "weapon-fire",
+      "formulas": [
+        "euler radians = deg * DAT_11de98c0 (pi/180) * DAT_11de98e8 (0.5, half-angle)",
+        "effect direction basis built from FSSE sqrt normalization with epsilon DAT_11de98e0"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "Mostly client VFX around a shared shoot core (CSingle::Shoot_10d73980); euler offsets @param_2+0x2c/+0x30/+0x34 are the effect's spawn rotation params."
+    },
+    {
+      "address": "10d9c1b0",
+      "currentName": "FUN_10d9c1b0",
+      "proposedName": "CAnimEventHandler::OnCustomAnimEvent",
+      "purpose": "Handles custom animation events (param_3 = anim-event record). Dispatches on event type id (compared against globals DAT_1201fffc/12020074/78/7c/00/0c -> handlers at self vtable+0x6b8/+0x6bc/+0x6c0), then handles named string effects: 'sound_tp' (spawn a sound/teleport marker at a joint, path chosen 0x44000 vs 0x244000 by presence of ':'), 'watereffect' / 'fireStareffect' / 'dusteffect' (spawn 'Particle.SpawnEffect' at a bone with offset from param_3+0x30/+0x34/+0x38 scaled by DAT_11de98c0). Gated on a distance/LOD check (vtable+0x164, monster manager) and monster-vs-not (vtable+0x25c).",
+      "confidence": "low",
+      "subsystem": "anim-event/vfx",
+      "formulas": [
+        "sound flag = 0x44000 if strchr(name,':') else 0x244000",
+        "effect pos offset = bonePos + (param_3+0x30,+0x34,+0x38) * DAT_11de98c0",
+        "event-type globals: DAT_1201fffc/12020074/12020078/1202007c -> handler +0x6b8; DAT_12020000 -> +0x6bc; DAT_1202000c -> +0x6c0"
+      ],
+      "serverRelevance": "client-only",
+      "notes": "Client anim-driven effect/sound spawning; 'MH_ROOT' is the default attach bone. vtable+0x25c distinguishes monster entities. Not authoritative gameplay."
+    }
+  ]
+}

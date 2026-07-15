@@ -1,0 +1,658 @@
+{
+  "chunkIndex": 4,
+  "functions": [
+    {
+      "address": "0x10199de0",
+      "currentName": "FUN_10199de0",
+      "proposedName": "TlvMiscGameData_DebugFormat",
+      "purpose": "Human-readable text dump (DebugFormat) of the master 'misc game data' player blob. Walks every field of the struct at param_1 and appends a labelled line to an output buffer via the FUN_1024a2xx / FUN_1010c010 formatting helpers. NOT a wire codec: it emits text (\"0x%02x\", \"%I64u\", field-name labels), never TDR tags. Fields dumped (in order): itemColumnData, iCreditCount, creditValue[], wGuideStepCount, astGuideSteps[], mailInfo, schedulePrizeInfo, giftBag, npcAtd, iCatCuisineID, wCatCuisineCount, bCatCuisineLevel, bCatCuisineBuffs, dwCatCuisineLastTm, equipTitle, equipTitleBuff, guild, videoSize/video[], stClientSettings, spoor, rapidHunt, activity, itemRebuild, itemBox, shop, catTreature, normalLimitInfo, reportInfo, trace, equipPlan, shortcutCount/shortcutData[], catCuisineFormulaCount/catCuisineID[]/catCuisineState[], titleInfoCount/titleID[]/titleUnlockTime[], starStoneData, dataRepairFlag, itemSnapshot, personalLeagueData, speak, supplyPlanData, cDCount/cDGroupID[]/cDType[]/cD(0x02x)[]/cDTime[], creditVersion, equipSuitSkill, weaponTrial, astrolabe, creditNoChangeCount, wildHunt, soulStone, monolopy, growHigher, achieve, illustrate, weaponStyle, weaponHavenInfoCount/weaponHavenInfo[], silverStorageBox, guideBook, monsterTalkData, secretResearchData, dragonBoxShopID, rewardActivityCost, count/rewardActivityState[].",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvMiscGameData"],
+      "protocolFields": [
+        "itemColumnData: substruct @ off 0xa (fid6/tag 0x63 on wire)",
+        "iCreditCount: int32 @ off 0xa (array count, max 9)",
+        "creditValue: int32[] @ off 0xe",
+        "wGuideStepCount: uint16 @ off 0x32 (array count, max 0x100)",
+        "astGuideSteps: substruct[] (element FUN_10166cf0)",
+        "iCatCuisineID: int32 @ off 0x1c05",
+        "wCatCuisineCount: uint16 @ off 0x1c09",
+        "bCatCuisineLevel: uint8 @ off 0x1c0b",
+        "bCatCuisineBuffs: uint8 @ off 0x1c0c",
+        "dwCatCuisineLastTm: uint32 @ off 0x1c0d",
+        "equipTitle: int32 @ off 0x1c11",
+        "equipTitleBuff: uint32 @ off 0x1c15",
+        "videoSize: uint16 @ off 0x1d1e (max 0x80); video: uint8[] @ off 0x1d20",
+        "shortcutCount: int32 @ off 0x193bd (max 0x3c); shortcutData: int32[] @ off 0x193c1",
+        "catCuisineFormulaCount: int32 @ off 0x194b1 (max 0x80)",
+        "titleInfoCount: uint32 @ off 0x198b5 (max 500); titleID[] @ off 0x198b9; titleUnlockTime[] @ off 0x1a089",
+        "dataRepairFlag: uint64 @ off 0x1a8d5",
+        "cDCount: int32 @ off 0x1b66e (max 0x32)",
+        "creditVersion: int32 @ off 0x1b834",
+        "creditNoChangeCount: int32 @ off 0x249a8",
+        "weaponHavenInfoCount: int32 @ off 0x31ffb (max 0x2ee)",
+        "dragonBoxShopID: int32 @ off 0x32763; rewardActivityCost: int32 @ off 0x32767; count: int32 @ off 0x3276b (max 6)"
+      ],
+      "serverRelevance": "Debug-only text dump; the server never needs to emit this format. HOWEVER it is the authoritative field map for the TlvMiscGameData wire struct the server MUST (de)serialize (~71 fields). Use it to reconstruct the full struct layout.",
+      "confidence": "high",
+      "notes": "DebugFormat counterpart of the real 0x99 wire codec at 0x101983A0 (TlvMiscGameData). Helper map: FUN_1024a290=dump scalar w/ format, FUN_1024a140=indent, FUN_1024a1e0=open substruct, FUN_1024a230=array elem header, FUN_1024a3b0=array size guard, FUN_1010c010=printf-append. Return codes -6=negative-count, -7=count-overflow.",
+      "tlvDocDiscrepancy": "TLV_DOCS/docs/TlvMiscGameData.md self-flags 'schema has 1, DebugFormat has 71' and only documents field 6 (itemColumnData). The generated 0x99 schema is a severe subset — 70 fields are undocumented. This DebugFormat dump recovers the full field list above."
+    },
+    {
+      "address": "0x1019b360",
+      "currentName": "FUN_1019b360",
+      "proposedName": "TlvPair_Write_varA",
+      "purpose": "TDR wire WRITE serializer for a 2-field container: field2 (tag 0x25, wire5 len-delim substruct via FUN_10164ff0) and field3 (tag 0x35, wire5 substruct via FUN_102152f0). Reserves a 4-byte length placeholder (FUN_1010bf70), writes each sub-struct, then backpatches the length (FUN_1010c3c0).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_2: substruct @ tag 0x25 (fid2 wire5) -> FUN_10164ff0",
+        "field_3: substruct @ tag 0x35 (fid3 wire5) -> FUN_102152f0"
+      ],
+      "serverRelevance": "Server must produce/parse this exact tag layout for the owning message.",
+      "confidence": "medium",
+      "notes": "FUN_1010c5f0=WriteTag, FUN_1010bf70=reserve 4B len, FUN_1010c3c0=backpatch len. Paired with FUN_1019b420 (alternate encoding variant).",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019b420",
+      "currentName": "FUN_1019b420",
+      "proposedName": "TlvPair_Write_varB",
+      "purpose": "Alternate-encoding twin of FUN_1019b360: same 2-field container (tag 0x25 substruct via FUN_101651b0, tag 0x35 substruct via FUN_102154b0). The .._varB functions in this chunk are the 'fixed/other cut-version' encoding of the same struct.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_2: substruct @ tag 0x25 -> FUN_101651b0",
+        "field_3: substruct @ tag 0x35 -> FUN_102154b0"
+      ],
+      "serverRelevance": "Server must match layout; encoding variant of FUN_1019b360.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019b8a0",
+      "currentName": "FUN_1019b8a0",
+      "proposedName": "TlvSaveMapStar_DebugFormat",
+      "purpose": "DebugFormat text dump of a small struct with a [saveMap] substruct (FUN_10165a70) and [starLevel] substruct (FUN_10215c50). Text output, not wire.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "saveMap: substruct -> FUN_10165a70",
+        "starLevel: substruct -> FUN_10215c50"
+      ],
+      "serverRelevance": "Debug-only; confirms field names saveMap/starLevel for the underlying wire struct.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019e250",
+      "currentName": "FUN_1019e250",
+      "proposedName": "TlvKeyByteVal_Read_varA",
+      "purpose": "TDR wire READ deserializer for a tiny leaf struct. Reads TDR tags in a length-bounded loop (FUN_1010ccb0), switching on tag>>4: field_id 1 (value via FUN_1010cbd0 signed-varint into param_1), field_id 2 (single byte into param_1+4). Sets presence-flag bits at param_1+5. Unknown fields skipped via FUN_1010d4f0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: signed varint @ off 0 (FUN_1010cbd0)",
+        "field_2: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Server must serialize this leaf with matching tags when sending the parent struct.",
+      "confidence": "medium",
+      "notes": "Read side; the switch cases ARE the field_ids. Paired encoding twin FUN_1019e340 (reads field_2 via unsigned FUN_1010c870).",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019e340",
+      "currentName": "FUN_1019e340",
+      "proposedName": "TlvKeyByteVal_Read_varB",
+      "purpose": "Encoding twin of FUN_1019e250 (field_1 read via FUN_1010c870 unsigned varint instead of FUN_1010cbd0). Same 2-field leaf, field_ids 1 & 2.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: unsigned varint @ off 0 (FUN_1010c870)",
+        "field_2: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Encoding variant of FUN_1019e250.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019e9a0",
+      "currentName": "FUN_1019e9a0",
+      "proposedName": "TlvWord2ByteEntry_Read",
+      "purpose": "TDR wire READ deserializer. field_id 1 = a 2-byte little-endian value read directly (param_1[0]=hi/lo bytes, advances pos by 2); field_id 2 = varint via FUN_1010c870 into param_1+2. Presence flags at param_1+6. Length-bounded tag loop.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: 2 raw bytes @ off 0 (wire1 pair)",
+        "field_2: varint @ off 2 (FUN_1010c870)",
+        "presence_flags: uint32 @ off 6"
+      ],
+      "serverRelevance": "Server must match this 2-field leaf layout.",
+      "confidence": "medium",
+      "notes": "Return 0xfffffffe (-2) on buffer-underrun.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019ef80",
+      "currentName": "FUN_1019ef80",
+      "proposedName": "TlvVarintPlusByte_Read_varA",
+      "purpose": "TDR wire READ deserializer for a 2-field leaf: field_id 1 (varint via FUN_1010ccb0 into param_1), field_id 3 (single byte into param_1+4). Presence flags param_1+5. Note the second case is field_id 3 (not 2).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: varint @ off 0 (FUN_1010ccb0)",
+        "field_3: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Server must match layout; twin FUN_1019f070.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x1019f070",
+      "currentName": "FUN_1019f070",
+      "proposedName": "TlvVarintPlusByte_Read_varB",
+      "purpose": "Encoding twin of FUN_1019ef80: field_id 1 read via FUN_1010c870, field_id 3 = byte. Same layout.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: varint @ off 0 (FUN_1010c870)",
+        "field_3: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Encoding variant of FUN_1019ef80.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a0860",
+      "currentName": "FUN_101a0860",
+      "proposedName": "TlvPetList_DebugFormat",
+      "purpose": "DebugFormat text dump of a pet list: [count] (int32 @ off0, max 0x14=20) followed by [pets] array whose elements are dumped by FUN_1019fe20. Uses \"%s[%u]%c\" indexed-element labels. Text output, not wire.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "count: int32 @ off 0 (max 20)",
+        "pets: substruct[] (element FUN_1019fe20)"
+      ],
+      "serverRelevance": "Debug-only; confirms 'pets' array field name and max=20 for the wire struct.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a1300",
+      "currentName": "FUN_101a1300",
+      "proposedName": "TlvVarintPlusByte_Read_varA_2",
+      "purpose": "TDR wire READ deserializer, identical shape to FUN_1019e250: field_id 1 (varint via FUN_1010cbd0 into param_1), field_id 2 (byte into param_1+4), flags at param_1+5. Distinct struct instance (separate leaf type) with same 2-field pattern.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: varint @ off 0 (FUN_1010cbd0)",
+        "field_2: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Server must match layout; twin FUN_101a13f0.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a13f0",
+      "currentName": "FUN_101a13f0",
+      "proposedName": "TlvVarintPlusByte_Read_varB_2",
+      "purpose": "Encoding twin of FUN_101a1300 (field_1 via FUN_1010c870). Fields 1 & 2.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "C2S",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_1: varint @ off 0 (FUN_1010c870)",
+        "field_2: uint8 @ off 4",
+        "presence_flags: uint32 @ off 5"
+      ],
+      "serverRelevance": "Encoding variant of FUN_101a1300.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a28a0",
+      "currentName": "FUN_101a28a0",
+      "proposedName": "TlvSkillAndSlotList_DebugFormat",
+      "purpose": "DebugFormat text dump of a skill+slot struct: [count] (int16 @ off0, max 10) then [skill] array (elements via FUN_101a0f20); then [slotCount] (int16 @ off 0x7a i.e. param_1[0x3d], max 10) then [slotLock] array (elements via FUN_101a1c00). Text output.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "count: int16 @ off 0 (max 10)",
+        "skill: substruct[] (element FUN_101a0f20)",
+        "slotCount: int16 @ off 0x7a (max 10)",
+        "slotLock: substruct[] (element FUN_101a1c00)"
+      ],
+      "serverRelevance": "Debug-only; recovers field names skill/slotLock and max counts.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a3300",
+      "currentName": "FUN_101a3300",
+      "proposedName": "TlvSkillList_DebugFormat",
+      "purpose": "DebugFormat text dump of a skill list: [count] (int16 @ off0, max 10) then [skill] array (elements via FUN_101a15e0). Text output.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "count: int16 @ off 0 (max 10)",
+        "skill: substruct[] (element FUN_101a15e0)"
+      ],
+      "serverRelevance": "Debug-only.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a3db0",
+      "currentName": "FUN_101a3db0",
+      "proposedName": "TlvAvatarRecord_Write_varA",
+      "purpose": "TDR wire WRITE serializer for a large record (~0x489 bytes) containing two 32-byte name strings, level/exp scalars, and several nested sub-structs. This is the compact/varint encoding cut. Written by FUN_101a6710 as an array element (up to 12 per container), so it is one entry of a roster/list. Field->tag map recovered from the FUN_1010c5f0(tag) calls.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_2: uint8 @ off 0 (tag 0x21)",
+        "field_3: int32 varint @ off 1 (tag 0x30, FUN_1010c560)",
+        "field_4: int32 varint @ off 5 (tag 0x40)",
+        "field_5: char[32] string @ off 9 (tag 0x55 wire5, FUN_1010c2b0)",
+        "field_6: char[32] string @ off 0x29 (tag 0x65 wire5)",
+        "field_7: uint8 @ off 0x49 (tag 0x71)",
+        "field_8: uint8 @ off 0x4a (tag 0x81)",
+        "field_9: int32 @ off 0x4b (tag 0x90)",
+        "field_10: int32 @ off 0x4f (tag 0xa0)",
+        "field_11: int16 @ off 0x53 (tag 0xb0, FUN_1010c430)",
+        "field_12: int16 @ off 0x55 (tag 0xc0)",
+        "field_14: int16 @ off 0x57 (tag 0xe0)",
+        "field_15: int16 @ off 0x59 (tag 0xf0)",
+        "field_16: int32 @ off 0x5b (tag 0x100)",
+        "field_17: int32 @ off 0x5f (tag 0x110)",
+        "field_18: uint8 @ off 0x63 (tag 0x121)",
+        "field_21_count: int16 @ off 0x64 (tag 0x150, max 0x46); field_22 array @ tag 0x165 (element FUN_1019e0e0)",
+        "field_23_count: int16 @ off 0x2dc (tag 0x170, max 10); field_24 array @ tag 0x185 (element FUN_1019e790)",
+        "field_28: substruct @ tag 0x1c5 (FUN_1019ee10)",
+        "field_29: substruct @ tag 0x1d5 (FUN_1019f540)",
+        "field_30: uint8 @ off 0x38f (tag 0x1e1, FUN_101150a0)",
+        "field_31: substruct @ tag 0x1f5 (FUN_101a1ec0)",
+        "field_32: int32 fixed @ off 0x488 (tag 0x203 wire3, FUN_1010c190)",
+        "field_33: substruct @ tag 0x215 (FUN_101a2cc0)",
+        "field_34: substruct @ tag 0x225 (FUN_101a3620)"
+      ],
+      "serverRelevance": "HIGH — server must (de)serialize this record with exactly these tags/field_ids to exchange the roster list. Compact/varint cut.",
+      "confidence": "high",
+      "notes": "Encoding twin: FUN_101a44d0 (fixed cut, same field_ids, wire types 2/3). FUN_1010c560=write signed varint, FUN_1010c190=write 4B fixed, FUN_1010c430=write 2B varint, FUN_1010c2b0=write string bytes, FUN_1010bf70/FUN_1010c3c0=reserve/backpatch length.",
+      "tlvDocDiscrepancy": "unknown — could not bind to a named TLV_DOCS entry; two char[32] names + weapon-style scalars suggest an avatar/role brief record."
+    },
+    {
+      "address": "0x101a44d0",
+      "currentName": "FUN_101a44d0",
+      "proposedName": "TlvAvatarRecord_Write_varB",
+      "purpose": "Fixed-width encoding twin of FUN_101a3db0: same record and same field_ids, but scalars use fixed wire types (tags 0x33/0x43 wire3, 0xb2/0xc2/0xe2/0xf2 wire2, 0x93/0xa3/0x103/0x113 wire3, 0x152/0x172 wire2). Array element sub-codecs are the fixed variants (FUN_1019e130, FUN_1019e7e0, FUN_1019ee60, FUN_1019f6d0, FUN_101a20a0, FUN_101a2db0, FUN_101a3670).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "same field_ids as FUN_101a3db0; scalar fields encoded with fixed wire types (wire2=2B FUN_1010c120, wire3=4B FUN_1010c190)"
+      ],
+      "serverRelevance": "HIGH — fixed-cut encoding of the same roster record.",
+      "confidence": "high",
+      "notes": "TDR dual-encoding: varA=varint cut (FUN_101a3db0), varB=fixed cut (this).",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a6710",
+      "currentName": "FUN_101a6710",
+      "proposedName": "TlvAvatarRoster_Write_varA",
+      "purpose": "TDR wire WRITE serializer for a roster/list container. field2 (tag 0x21, uint8 @off0), field3 (tag 0x30, int32 @off1), field4 (tag 0x41, uint8 count @off5, max 0xc=12) with array (tag 0x55 wire5) of TlvAvatarRecord elements via FUN_101a3db0; field6 (tag 0x61, uint8 @off 0x3bd6); field7 (tag 0x70, int16 count @off 0x3bd7, max 0x46) with byte-array (tag 0x85) via FUN_1010c0c0 @off 0x3bd9; field9 (tag 0x90, int16 count @off 0x3c1f, max 0x46) with byte-array (tag 0xa5) @off 0x3c21; field11 (tag 0xb1, uint8 @off 0x3c67); field12 (tag 0xc1, uint8 @off 0x3c68).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_2: uint8 @ off 0 (tag 0x21)",
+        "field_3: int32 @ off 1 (tag 0x30)",
+        "field_4: uint8 count @ off 5 (tag 0x41, max 12); records[] @ tag 0x55 -> FUN_101a3db0",
+        "field_6: uint8 @ off 0x3bd6 (tag 0x61)",
+        "field_7: int16 count @ off 0x3bd7 (tag 0x70, max 0x46); bytes[] @ tag 0x85 @ off 0x3bd9",
+        "field_9: int16 count @ off 0x3c1f (tag 0x90, max 0x46); bytes[] @ tag 0xa5 @ off 0x3c21",
+        "field_11: uint8 @ off 0x3c67 (tag 0xb1)",
+        "field_12: uint8 @ off 0x3c68 (tag 0xc1)"
+      ],
+      "serverRelevance": "HIGH — top-level list struct; server must build this to send the roster of up to 12 avatar records.",
+      "confidence": "high",
+      "notes": "Encoding twin FUN_101a6a80. Contains FUN_101a3db0 as element codec.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101a6a80",
+      "currentName": "FUN_101a6a80",
+      "proposedName": "TlvAvatarRoster_Write_varB",
+      "purpose": "Fixed-cut encoding twin of FUN_101a6710: same container, field3 uses tag 0x33 (wire3 fixed), field7/field9 counts use tag 0x72/0x92 (wire2 fixed), array element codec is FUN_101a44d0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "same field_ids as FUN_101a6710; scalar counts fixed-width (wire2/wire3); records[] -> FUN_101a44d0"
+      ],
+      "serverRelevance": "HIGH — fixed-cut roster container.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101ae970",
+      "currentName": "FUN_101ae970",
+      "proposedName": "TlvTypedVariant_Write_varA",
+      "purpose": "TDR wire WRITE serializer for a 2-field 'typed variant' leaf: field1 (tag 0x11, uint8 type @off0) then field2 (tag 0x25 wire5 substruct via FUN_101ae230, the value union). Reserves+backpatches length. Part of the TlvTypedVariant/TlvBaseOrBonus attribute family.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type/wType @ off 0 (tag 0x11)",
+        "field_2: substruct value @ tag 0x25 -> FUN_101ae230"
+      ],
+      "serverRelevance": "HIGH — attribute variant leaf; server must emit type+value with these tags.",
+      "confidence": "medium",
+      "notes": "DebugFormat counterpart FUN_101aeeb0 labels these [wType]/[stValue]. Twin FUN_101aea20.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101aea20",
+      "currentName": "FUN_101aea20",
+      "proposedName": "TlvTypedVariant_Write_varB",
+      "purpose": "Encoding twin of FUN_101ae970 (value substruct via FUN_101ae330). Same 2-field typed-variant leaf.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 @ off 0 (tag 0x11)",
+        "field_2: substruct @ tag 0x25 -> FUN_101ae330"
+      ],
+      "serverRelevance": "HIGH — variant of FUN_101ae970.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101aeba0",
+      "currentName": "FUN_101aeba0",
+      "proposedName": "TlvTypedVariant_Read_varA",
+      "purpose": "TDR wire READ deserializer for the typed-variant leaf. field_id 1 = uint8 type @off0 (read raw byte); field_id 2 = wire2 length-delimited value: reads a length (FUN_1010c870) then decodes the union via FUN_101ae4e0, storing result byte at off0. Presence flags @ off9.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0",
+        "field_2: len-delim value -> FUN_101ae4e0",
+        "presence_flags: uint32 @ off 9"
+      ],
+      "serverRelevance": "HIGH — read side of the attribute variant leaf.",
+      "confidence": "medium",
+      "notes": "Twin FUN_101aecc0.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101aecc0",
+      "currentName": "FUN_101aecc0",
+      "proposedName": "TlvTypedVariant_Read_varB",
+      "purpose": "Encoding twin of FUN_101aeba0 (value decode via FUN_101ae5f0). Same typed-variant leaf, fields 1 & 2.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0",
+        "field_2: len-delim value -> FUN_101ae5f0",
+        "presence_flags: uint32 @ off 9"
+      ],
+      "serverRelevance": "HIGH — variant of FUN_101aeba0.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101aeeb0",
+      "currentName": "FUN_101aeeb0",
+      "proposedName": "TlvTypedVariant_DebugFormat",
+      "purpose": "DebugFormat text dump of the typed-variant leaf: [wType] (uint8 @off0) and [stValue] (the value union, dumped by FUN_101ae7b0). Text output.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvTypedVariant", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "wType: uint8 @ off 0",
+        "stValue: union -> FUN_101ae7b0"
+      ],
+      "serverRelevance": "Debug-only; confirms field names wType/stValue.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101af1a0",
+      "currentName": "FUN_101af1a0",
+      "proposedName": "TlvTypedVariantArray7_Write_varA",
+      "purpose": "TDR wire WRITE serializer for a fixed array of 7 typed-variant elements. Writes tag 0x15 (fid1 wire5), reserves the 4-byte length, loops exactly 7 times writing each element via FUN_101ae970 (each with its own reserved+backpatched length), then backpatches the outer length. This is an attribute-set of 7 base/bonus variants.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant"],
+      "protocolFields": [
+        "field_1: array[7] of typed-variant @ tag 0x15 (element FUN_101ae970)"
+      ],
+      "serverRelevance": "HIGH — server must emit exactly 7 elements in this LEN-delimited block.",
+      "confidence": "high",
+      "notes": "Manual length backpatch: 4 big-endian-ish bytes written into reserved slot. Twin FUN_101af2f0.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101af2f0",
+      "currentName": "FUN_101af2f0",
+      "proposedName": "TlvTypedVariantArray7_Write_varB",
+      "purpose": "Encoding twin of FUN_101af1a0 (elements via FUN_101aea20). Same 7-element array.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedVariant"],
+      "protocolFields": [
+        "field_1: array[7] @ tag 0x15 (element FUN_101aea20)"
+      ],
+      "serverRelevance": "HIGH — variant of FUN_101af1a0.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101af840",
+      "currentName": "FUN_101af840",
+      "proposedName": "TlvTypedVariantArray7_DebugFormat",
+      "purpose": "DebugFormat text dump of the 7-element typed-variant array: [value][index] up to 7 elements (each dumped via FUN_101aeeb0). Text output.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvTypedVariant"],
+      "protocolFields": [
+        "value: array[<=7] (element FUN_101aeeb0)"
+      ],
+      "serverRelevance": "Debug-only.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101affd0",
+      "currentName": "FUN_101affd0",
+      "proposedName": "TlvBaseOrBonus_DebugFormat",
+      "purpose": "DebugFormat text dump of a discriminated union (base-or-bonus). If discriminator==1: dump [base] (single typed-variant via FUN_101aeeb0). If discriminator==2: dump [bonus] (7-element array via FUN_101af840). Text output. Matches TLV_DOCS TlvBaseOrBonus / TlvTypedBaseOrBonus.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvBaseOrBonus", "TlvTypedBaseOrBonus"],
+      "protocolFields": [
+        "selector==1: base (typed-variant, FUN_101aeeb0)",
+        "selector==2: bonus (typed-variant array[7], FUN_101af840)"
+      ],
+      "serverRelevance": "Debug-only; confirms the base/bonus union field names.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": "TLV_DOCS/docs/TlvBaseOrBonus.md documents only 'field_1 -> sub_101AECC0' (single field). The union nature (base vs bonus, selector 1/2) and the [base]/[bonus] labels are absent from the generated schema."
+    },
+    {
+      "address": "0x101b01d0",
+      "currentName": "FUN_101b01d0",
+      "proposedName": "TlvTypedBaseOrBonus_Write_varA",
+      "purpose": "TDR wire WRITE serializer for the type+union leaf: field1 (tag 0x11, uint8 type @off0), field2 (tag 0x25 wire5 substruct via FUN_101afb30 = the base/bonus union value). Reserve+backpatch length.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedBaseOrBonus", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0 (tag 0x11)",
+        "field_2: union value @ tag 0x25 -> FUN_101afb30"
+      ],
+      "serverRelevance": "HIGH — server must emit type+base/bonus value.",
+      "confidence": "medium",
+      "notes": "DebugFormat counterpart FUN_101b0710 ([type]/[value]). Twin FUN_101b0280.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101b0280",
+      "currentName": "FUN_101b0280",
+      "proposedName": "TlvTypedBaseOrBonus_Write_varB",
+      "purpose": "Encoding twin of FUN_101b01d0 (value substruct via FUN_101afbc0).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedBaseOrBonus", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0 (tag 0x11)",
+        "field_2: union value @ tag 0x25 -> FUN_101afbc0"
+      ],
+      "serverRelevance": "HIGH — variant of FUN_101b01d0.",
+      "confidence": "medium",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101b0400",
+      "currentName": "FUN_101b0400",
+      "proposedName": "TlvTypedBaseOrBonus_Read_varA",
+      "purpose": "TDR wire READ deserializer for the type+union leaf. field_id 1 = uint8 type @off0; field_id 2 = wire2 len-delim value: read length (FUN_1010c870) then decode union via FUN_101afd20, result byte @off0. Presence flags @ off 0x60.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvTypedBaseOrBonus", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0",
+        "field_2: len-delim union value -> FUN_101afd20",
+        "presence_flags: uint32 @ off 0x60"
+      ],
+      "serverRelevance": "HIGH — read side of the type+base/bonus leaf.",
+      "confidence": "medium",
+      "notes": "Twin FUN_101b0520 -> FUN_101afe20, which is the address (0x101AFE20) the generated doc labels 'TlvBaseOrBonus'.",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101b0520",
+      "currentName": "FUN_101b0520",
+      "proposedName": "TlvTypedBaseOrBonus_Read_varB",
+      "purpose": "Encoding twin of FUN_101b0400; union value decoded via FUN_101afe20 (the function the generated TlvBaseOrBonus.md maps to address 0x101AFE20). Fields 1 & 2, presence flags @ off 0x60.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvBaseOrBonus", "TlvTypedBaseOrBonus"],
+      "protocolFields": [
+        "field_1: uint8 type @ off 0",
+        "field_2: len-delim union value -> FUN_101afe20",
+        "presence_flags: uint32 @ off 0x60"
+      ],
+      "serverRelevance": "HIGH — variant of FUN_101b0400.",
+      "confidence": "medium",
+      "notes": "Confirms the doc's TlvBaseOrBonus address 0x101AFE20 is actually the inner union-value read helper, invoked by this wrapper.",
+      "tlvDocDiscrepancy": "The generated TlvBaseOrBonus.md attributes struct 0x101AFE20 with a single 'field_1' — it is actually the union-value decoder called from this type+value wrapper (fields type + value), so the doc's field list is incomplete."
+    },
+    {
+      "address": "0x101b0710",
+      "currentName": "FUN_101b0710",
+      "proposedName": "TlvTypedBaseOrBonus_DebugFormat",
+      "purpose": "DebugFormat text dump of the type+union leaf: [type] (uint8 @off0) and [value] (base/bonus union via FUN_101affd0). Text output.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvTypedBaseOrBonus", "TlvBaseOrBonus"],
+      "protocolFields": [
+        "type: uint8 @ off 0",
+        "value: base/bonus union -> FUN_101affd0"
+      ],
+      "serverRelevance": "Debug-only; confirms type/value field names.",
+      "confidence": "high",
+      "notes": "",
+      "tlvDocDiscrepancy": ""
+    },
+    {
+      "address": "0x101d1470",
+      "currentName": "FUN_101d1470",
+      "proposedName": "TlvCharBattleAttributes_DebugFormat",
+      "purpose": "Massive (19762-byte) DebugFormat text dump of the full character battle/public attributes struct (245 field-print calls, all 'o'-prefixed: oCharLevel, oCharSex, oCharExp, oStarLevel, oCharHP/MaxHP, oCharReju, elemental attack/accum/threshold sets, weapon exps, ammo, bottle counts, facial info 1..25+, ghost values, title/guild/team fields, etc.). Emits labelled text, not TDR wire (no FUN_1010c5f0 / FUN_1010ccb0 calls; 245x FUN_1024a290).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvCharBattleAttributes", "TlvCharPublicAttributes", "TlvCharRoleAttributes"],
+      "protocolFields": [
+        "oCharLevel, oCharSex, oCharExp, oStarLevel, oCharHP, oCharMaxHP, oCharReju, oCharMaxReju, oDeath, oCharSta.. (245 'o'-prefixed fields; full ordered list captured in analysis)",
+        "elemental sets: oWater/Fire/Lightning/Dragon/Ice/Non/Poison/Sleepy/Paralysis {Attack,Accum,Thrsh}",
+        "weapon exps: oClaymore/Hammer/Katana/DuelSword/Sword/Spear/Gun/Bow/Crossbow/Flute Exp",
+        "oFacialInfo1..25+, oGhost*/oJinLi*/oEquipTitle*/oGuild*/oTeam* fields"
+      ],
+      "serverRelevance": "Debug-only text dump; server does not emit this format. Authoritative field map (245 fields) for the TlvCharBattleAttributes wire struct the server MUST populate/parse.",
+      "confidence": "high",
+      "notes": "DebugFormat counterpart of the 0x99 wire codec at 0x101DACC0. Full field-name list extracted during analysis.",
+      "tlvDocDiscrepancy": "TLV_DOCS/docs/TlvCharBattleAttributes.md self-flags 'schema has 4, DebugFormat has 112' and documents only fields 2,4,6,7 (oCharLevel/oCharSex/oCharExp/oStarLevel). This DebugFormat actually enumerates ~245 labelled fields — the generated 0x99 schema is a tiny subset. Field offsets in the .md (e.g. oCharSex @ offset 28 same as oCharLevel) also look unreliable."
+    }
+  ]
+}

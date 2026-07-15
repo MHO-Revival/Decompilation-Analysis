@@ -1,0 +1,1991 @@
+{
+  "batchIndex": 16,
+  "classes": [
+    {
+      "className": "CMartCutCardInfo",
+      "category": "economy",
+      "purpose": "Data table for a Mart (in-game shop) 'cut card'/coupon or discount-card entry.",
+      "methods": [
+        {
+          "address": "0x1092cc70",
+          "currentName": "CMartCutCardInfo::GetManagers",
+          "proposedName": "CMartCutCardInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CMartCutCardInfo records."
+        },
+        {
+          "address": "0x119749e0",
+          "currentName": "CMartCutCardInfo::GetManagers_119749e0",
+          "proposedName": "CMartCutCardInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CMartCutCardInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPetAvatarInfo",
+      "category": "pet",
+      "purpose": "Data table describing pet (companion) avatar/appearance entries.",
+      "methods": [
+        {
+          "address": "0x10ae7180",
+          "currentName": "CPetAvatarInfo::GetManagers",
+          "proposedName": "CPetAvatarInfo::FindInfoByKey",
+          "purpose": "Looks up a CPetAvatarInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10ae8e50",
+          "currentName": "CPetAvatarInfo::GetManagers_10ae8e50",
+          "proposedName": "CPetAvatarInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPetAvatarInfo record used when a lookup misses."
+        },
+        {
+          "address": "0x11a1b510",
+          "currentName": "CPetAvatarInfo::GetManagers_11a1b510",
+          "proposedName": "CPetAvatarInfo::GetOrCreateDefaultInfo",
+          "purpose": "Returns the shared default CPetAvatarInfo record, constructing it on first use."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLeagueRewardInfo",
+      "category": "social",
+      "purpose": "Reward table for the League (guild/clan competitive) system.",
+      "methods": [
+        {
+          "address": "0x1094c8e0",
+          "currentName": "CLeagueRewardInfo::GetManagers",
+          "proposedName": "CLeagueRewardInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CLeagueRewardInfo records."
+        },
+        {
+          "address": "0x119a19b0",
+          "currentName": "CLeagueRewardInfo::GetManagers_119a19b0",
+          "proposedName": "CLeagueRewardInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CLeagueRewardInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CDialogInfo",
+      "category": "ui",
+      "purpose": "NPC/system dialog text table; loader links each entry to a CMessageColorInfo record.",
+      "methods": [
+        {
+          "address": "0x1024f7f0",
+          "currentName": "CDialogInfo::GetManagers",
+          "proposedName": "CDialogInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CDialogInfo records."
+        },
+        {
+          "address": "0x118e1430",
+          "currentName": "CDialogInfo::GetManagers_118e1430",
+          "proposedName": "CDialogInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CDialogInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CHubEntryPageInfo",
+      "category": "ui",
+      "purpose": "Config for a hub (town/gathering-hall) entry menu page.",
+      "methods": [
+        {
+          "address": "0x107ca500",
+          "currentName": "CHubEntryPageInfo::GetManagers",
+          "proposedName": "CHubEntryPageInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CHubEntryPageInfo records."
+        },
+        {
+          "address": "0x118ee390",
+          "currentName": "CHubEntryPageInfo::GetManagers_118ee390",
+          "proposedName": "CHubEntryPageInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CHubEntryPageInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CBabecueInfo",
+      "category": "activity",
+      "purpose": "Barbecue/cooking (BBQ spit) recipe/config table; records keyed by an id field.",
+      "methods": [
+        {
+          "address": "0x108a2b70",
+          "currentName": "CBabecueInfo::GetManagers",
+          "proposedName": "CBabecueInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CBabecueInfo records."
+        },
+        {
+          "address": "0x11719200",
+          "currentName": "CBabecueInfo::GetManagers_11719200",
+          "proposedName": "CBabecueInfo::FindById",
+          "purpose": "Iterates all CBabecueInfo records and returns the one whose id (field @0x24) matches the argument; returns 0 if not found."
+        }
+      ],
+      "confidence": "medium",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "offset": "0x24",
+          "source": "reader",
+          "note": "Primary key used by FindById loop (compared against the argument)."
+        }
+      ],
+      "notes": "'Babecue'=Barbecue, the MH felyne cooking mini-system. Loader form is a FindById (id @0x24). Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CDailySchedulePrizeInfo",
+      "category": "activity",
+      "purpose": "Prize table for the daily-schedule (daily login/quota) activity.",
+      "methods": [
+        {
+          "address": "0x1089a600",
+          "currentName": "CDailySchedulePrizeInfo::GetManagers",
+          "proposedName": "CDailySchedulePrizeInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CDailySchedulePrizeInfo records."
+        },
+        {
+          "address": "0x11923210",
+          "currentName": "CDailySchedulePrizeInfo::GetManagers_11923210",
+          "proposedName": "CDailySchedulePrizeInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CDailySchedulePrizeInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CRandomWeaponRandBaseInfo",
+      "category": "weapon",
+      "purpose": "Base rolls table for randomly-generated weapons.",
+      "methods": [
+        {
+          "address": "0x11675c20",
+          "currentName": "CRandomWeaponRandBaseInfo::GetManagers",
+          "proposedName": "CRandomWeaponRandBaseInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CRandomWeaponRandBaseInfo records."
+        },
+        {
+          "address": "0x119b7a20",
+          "currentName": "CRandomWeaponRandBaseInfo::GetManagers_119b7a20",
+          "proposedName": "CRandomWeaponRandBaseInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CRandomWeaponRandBaseInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Registrar uses the FUN_102500e0 variant (no StcMbrNameSvr string) but same singleton role. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSpoorPrizeBonusInfo",
+      "category": "activity",
+      "purpose": "Bonus-prize table tied to 'spoor' (monster tracks/footprints) gathering.",
+      "methods": [
+        {
+          "address": "0x10947990",
+          "currentName": "CSpoorPrizeBonusInfo::GetManagers",
+          "proposedName": "CSpoorPrizeBonusInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CSpoorPrizeBonusInfo records."
+        },
+        {
+          "address": "0x1197af40",
+          "currentName": "CSpoorPrizeBonusInfo::GetManagers_1197af40",
+          "proposedName": "CSpoorPrizeBonusInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CSpoorPrizeBonusInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEffectInfo",
+      "category": "misc",
+      "purpose": "Visual/gameplay effect definition table.",
+      "methods": [
+        {
+          "address": "0x10a9f020",
+          "currentName": "CEffectInfo::GetManagers",
+          "proposedName": "CEffectInfo::FindInfoByKey",
+          "purpose": "Looks up a CEffectInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10a9f800",
+          "currentName": "CEffectInfo::GetManagers_10a9f800",
+          "proposedName": "CEffectInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEffectInfo record used when a lookup misses."
+        },
+        {
+          "address": "0x116e91f0",
+          "currentName": "CEffectInfo::GetManagers_116e91f0",
+          "proposedName": "CEffectInfo::PreCacheEffectList",
+          "purpose": "Walks a supplied vector of CEffectInfo pointers and registers/precaches each via the info registry."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Has an extra list-precache method (@116e91f0) that walks a supplied vector. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFarmCDInfo",
+      "category": "activity",
+      "purpose": "Cooldown (CD) config for the farm/plantation activity; loader touches CItemBaseInfo.",
+      "methods": [
+        {
+          "address": "0x108e1b70",
+          "currentName": "CFarmCDInfo::GetManagers",
+          "proposedName": "CFarmCDInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CFarmCDInfo records."
+        },
+        {
+          "address": "0x11944110",
+          "currentName": "CFarmCDInfo::GetManagers_11944110",
+          "proposedName": "CFarmCDInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CFarmCDInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CNpcAtdStageInfo",
+      "category": "social",
+      "purpose": "NPC attitude ('Atd') stage/level thresholds table.",
+      "methods": [
+        {
+          "address": "0x104d8b10",
+          "currentName": "CNpcAtdStageInfo::GetManagers",
+          "proposedName": "CNpcAtdStageInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CNpcAtdStageInfo records."
+        },
+        {
+          "address": "0x11931ae0",
+          "currentName": "CNpcAtdStageInfo::GetManagers_11931ae0",
+          "proposedName": "CNpcAtdStageInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CNpcAtdStageInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Atd' read as Attitude (affinity/relationship stages). Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CNpcAtdOrgInfo",
+      "category": "social",
+      "purpose": "NPC attitude ('Atd') organisation/faction table.",
+      "methods": [
+        {
+          "address": "0x107ec020",
+          "currentName": "CNpcAtdOrgInfo::GetManagers",
+          "proposedName": "CNpcAtdOrgInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CNpcAtdOrgInfo records."
+        },
+        {
+          "address": "0x11931c10",
+          "currentName": "CNpcAtdOrgInfo::GetManagers_11931c10",
+          "proposedName": "CNpcAtdOrgInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CNpcAtdOrgInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Atd'=Attitude, 'Org'=organisation/faction. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CItemBoxInfo",
+      "category": "item",
+      "purpose": "Item-box / container definition table.",
+      "methods": [
+        {
+          "address": "0x1052c470",
+          "currentName": "CItemBoxInfo::GetManagers",
+          "proposedName": "CItemBoxInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CItemBoxInfo records."
+        },
+        {
+          "address": "0x119245c0",
+          "currentName": "CItemBoxInfo::GetManagers_119245c0",
+          "proposedName": "CItemBoxInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CItemBoxInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelRewardInfo",
+      "category": "economy",
+      "purpose": "Per-level (mission/quest level) completion reward table.",
+      "methods": [
+        {
+          "address": "0x10976de0",
+          "currentName": "CLevelRewardInfo::GetManagers",
+          "proposedName": "CLevelRewardInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CLevelRewardInfo records."
+        },
+        {
+          "address": "0x1182cb30",
+          "currentName": "CLevelRewardInfo::GetManagers_1182cb30",
+          "proposedName": "CLevelRewardInfo::PreCacheAllInstances",
+          "purpose": "Iterates every CLevelRewardInfo record held by the manager and runs a per-record precache/registration step."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFGModuleOnMonsterStateAbnormalInfo",
+      "category": "combat",
+      "purpose": "Fight-game module: trigger/config fired when a monster enters an abnormal (status) state.",
+      "methods": [
+        {
+          "address": "0x116ffda0",
+          "currentName": "CFGModuleOnMonsterStateAbnormalInfo::GetManagers",
+          "proposedName": "CFGModuleOnMonsterStateAbnormalInfo::FindInfoByKey",
+          "purpose": "Looks up a CFGModuleOnMonsterStateAbnormalInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11704b60",
+          "currentName": "CFGModuleOnMonsterStateAbnormalInfo::GetManagers_11704b60",
+          "proposedName": "CFGModuleOnMonsterStateAbnormalInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFGModuleOnMonsterStateAbnormalInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "'CFGModule' = combat/fight-game rule module (event hook). Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CManufactureIngredientLearnInfo",
+      "category": "item",
+      "purpose": "Crafting: config for learning/unlocking manufacture (crafting) ingredients.",
+      "methods": [
+        {
+          "address": "0x11207500",
+          "currentName": "CManufactureIngredientLearnInfo::GetManagers",
+          "proposedName": "CManufactureIngredientLearnInfo::FindInfoByKey",
+          "purpose": "Looks up a CManufactureIngredientLearnInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11209f60",
+          "currentName": "CManufactureIngredientLearnInfo::GetManagers_11209f60",
+          "proposedName": "CManufactureIngredientLearnInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CManufactureIngredientLearnInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFGModuleOnMonsterPartBreakInfo",
+      "category": "combat",
+      "purpose": "Fight-game module: trigger/config fired when a monster body part is broken.",
+      "methods": [
+        {
+          "address": "0x116ffc60",
+          "currentName": "CFGModuleOnMonsterPartBreakInfo::GetManagers",
+          "proposedName": "CFGModuleOnMonsterPartBreakInfo::FindInfoByKey",
+          "purpose": "Looks up a CFGModuleOnMonsterPartBreakInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11704ac0",
+          "currentName": "CFGModuleOnMonsterPartBreakInfo::GetManagers_11704ac0",
+          "proposedName": "CFGModuleOnMonsterPartBreakInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFGModuleOnMonsterPartBreakInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFGModuleOnMonsterCapturedInfo",
+      "category": "combat",
+      "purpose": "Fight-game module: trigger/config fired when a monster is captured.",
+      "methods": [
+        {
+          "address": "0x116ffbc0",
+          "currentName": "CFGModuleOnMonsterCapturedInfo::GetManagers",
+          "proposedName": "CFGModuleOnMonsterCapturedInfo::FindInfoByKey",
+          "purpose": "Looks up a CFGModuleOnMonsterCapturedInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11704a70",
+          "currentName": "CFGModuleOnMonsterCapturedInfo::GetManagers_11704a70",
+          "proposedName": "CFGModuleOnMonsterCapturedInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFGModuleOnMonsterCapturedInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFGModuleOnMonsterPartHitInfo",
+      "category": "combat",
+      "purpose": "Fight-game module: trigger/config fired when a monster part is hit.",
+      "methods": [
+        {
+          "address": "0x116ffd00",
+          "currentName": "CFGModuleOnMonsterPartHitInfo::GetManagers",
+          "proposedName": "CFGModuleOnMonsterPartHitInfo::FindInfoByKey",
+          "purpose": "Looks up a CFGModuleOnMonsterPartHitInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11704b10",
+          "currentName": "CFGModuleOnMonsterPartHitInfo::GetManagers_11704b10",
+          "proposedName": "CFGModuleOnMonsterPartHitInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFGModuleOnMonsterPartHitInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPlayerLvAppraisalRewardInfo",
+      "category": "economy",
+      "purpose": "Reward table for player-level appraisal/evaluation milestones.",
+      "methods": [
+        {
+          "address": "0x11984c10",
+          "currentName": "CPlayerLvAppraisalRewardInfo::GetManagers",
+          "proposedName": "CPlayerLvAppraisalRewardInfo::FindInfoByKey",
+          "purpose": "Looks up a CPlayerLvAppraisalRewardInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11986ae0",
+          "currentName": "CPlayerLvAppraisalRewardInfo::GetManagers_11986ae0",
+          "proposedName": "CPlayerLvAppraisalRewardInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPlayerLvAppraisalRewardInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CMHLevelAdditonalTargetInfo",
+      "category": "quest",
+      "purpose": "Additional (optional/sub) objectives table for a MH mission level.",
+      "methods": [
+        {
+          "address": "0x11735220",
+          "currentName": "CMHLevelAdditonalTargetInfo::GetManagers",
+          "proposedName": "CMHLevelAdditonalTargetInfo::FindInfoByKey",
+          "purpose": "Looks up a CMHLevelAdditonalTargetInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11738250",
+          "currentName": "CMHLevelAdditonalTargetInfo::GetManagers_11738250",
+          "proposedName": "CMHLevelAdditonalTargetInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CMHLevelAdditonalTargetInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CManufactureProficiencyInfo",
+      "category": "item",
+      "purpose": "Crafting proficiency (skill-level) progression table.",
+      "methods": [
+        {
+          "address": "0x112075a0",
+          "currentName": "CManufactureProficiencyInfo::GetManagers",
+          "proposedName": "CManufactureProficiencyInfo::FindInfoByKey",
+          "purpose": "Looks up a CManufactureProficiencyInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11209fb0",
+          "currentName": "CManufactureProficiencyInfo::GetManagers_11209fb0",
+          "proposedName": "CManufactureProficiencyInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CManufactureProficiencyInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CAbnormalStateRelationInfo",
+      "category": "combat",
+      "purpose": "Relations/interactions between abnormal (status) states.",
+      "methods": [
+        {
+          "address": "0x117cc2f0",
+          "currentName": "CAbnormalStateRelationInfo::GetManagers",
+          "proposedName": "CAbnormalStateRelationInfo::FindInfoByKey",
+          "purpose": "Looks up a CAbnormalStateRelationInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x117ccd10",
+          "currentName": "CAbnormalStateRelationInfo::GetManagers_117ccd10",
+          "proposedName": "CAbnormalStateRelationInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CAbnormalStateRelationInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipRandBaseItemRuleInfo",
+      "category": "item",
+      "purpose": "Rule table for random base-item selection when generating equipment.",
+      "methods": [
+        {
+          "address": "0x1184cf00",
+          "currentName": "CEquipRandBaseItemRuleInfo::GetManagers",
+          "proposedName": "CEquipRandBaseItemRuleInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipRandBaseItemRuleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x118518c0",
+          "currentName": "CEquipRandBaseItemRuleInfo::GetManagers_118518c0",
+          "proposedName": "CEquipRandBaseItemRuleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipRandBaseItemRuleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFGModuleOnKillMonsterInfo",
+      "category": "combat",
+      "purpose": "Fight-game module: trigger/config fired when a monster is killed.",
+      "methods": [
+        {
+          "address": "0x116ffb20",
+          "currentName": "CFGModuleOnKillMonsterInfo::GetManagers",
+          "proposedName": "CFGModuleOnKillMonsterInfo::FindInfoByKey",
+          "purpose": "Looks up a CFGModuleOnKillMonsterInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11704a20",
+          "currentName": "CFGModuleOnKillMonsterInfo::GetManagers_11704a20",
+          "proposedName": "CFGModuleOnKillMonsterInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFGModuleOnKillMonsterInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CManufactureInitUnlockInfo",
+      "category": "item",
+      "purpose": "Crafting: initially-unlocked manufacture recipes table.",
+      "methods": [
+        {
+          "address": "0x1151c7e0",
+          "currentName": "CManufactureInitUnlockInfo::GetManagers",
+          "proposedName": "CManufactureInitUnlockInfo::FindInfoByKey",
+          "purpose": "Looks up a CManufactureInitUnlockInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1151e260",
+          "currentName": "CManufactureInitUnlockInfo::GetManagers_1151e260",
+          "proposedName": "CManufactureInitUnlockInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CManufactureInitUnlockInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CProjectileSpawnEffectInfo",
+      "category": "combat",
+      "purpose": "Effect spawned when a projectile is created/fired.",
+      "methods": [
+        {
+          "address": "0x10d83c80",
+          "currentName": "CProjectileSpawnEffectInfo::GetManagers",
+          "proposedName": "CProjectileSpawnEffectInfo::FindInfoByKey",
+          "purpose": "Looks up a CProjectileSpawnEffectInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10d85730",
+          "currentName": "CProjectileSpawnEffectInfo::GetManagers_10d85730",
+          "proposedName": "CProjectileSpawnEffectInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CProjectileSpawnEffectInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSRLItemBoxDescriptionInfo",
+      "category": "item",
+      "purpose": "'SRL' subsystem: description entries for item boxes.",
+      "methods": [
+        {
+          "address": "0x1153b200",
+          "currentName": "CSRLItemBoxDescriptionInfo::GetManagers",
+          "proposedName": "CSRLItemBoxDescriptionInfo::FindInfoByKey",
+          "purpose": "Looks up a CSRLItemBoxDescriptionInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1153e6f0",
+          "currentName": "CSRLItemBoxDescriptionInfo::GetManagers_1153e6f0",
+          "proposedName": "CSRLItemBoxDescriptionInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSRLItemBoxDescriptionInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'SRL' subsystem meaning not recovered. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipFoundCostFactorInfo",
+      "category": "economy",
+      "purpose": "Cost-scaling factors for the equipment 'Found' (forge/appraisal) system.",
+      "methods": [
+        {
+          "address": "0x11833520",
+          "currentName": "CEquipFoundCostFactorInfo::GetManagers",
+          "proposedName": "CEquipFoundCostFactorInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipFoundCostFactorInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11836000",
+          "currentName": "CEquipFoundCostFactorInfo::GetManagers_11836000",
+          "proposedName": "CEquipFoundCostFactorInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipFoundCostFactorInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Found'=equipment forging/appraisal ('Cast/Found') subsystem. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CGuildCommodityUnlockInfo",
+      "category": "social",
+      "purpose": "Unlock conditions for guild-shop commodities.",
+      "methods": [
+        {
+          "address": "0x1145daf0",
+          "currentName": "CGuildCommodityUnlockInfo::GetManagers",
+          "proposedName": "CGuildCommodityUnlockInfo::FindInfoByKey",
+          "purpose": "Looks up a CGuildCommodityUnlockInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1145f660",
+          "currentName": "CGuildCommodityUnlockInfo::GetManagers_1145f660",
+          "proposedName": "CGuildCommodityUnlockInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CGuildCommodityUnlockInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelCatExtRewardCfgInfo",
+      "category": "economy",
+      "purpose": "Extra Felyne ('Cat') reward config for mission levels.",
+      "methods": [
+        {
+          "address": "0x11824e00",
+          "currentName": "CLevelCatExtRewardCfgInfo::GetManagers",
+          "proposedName": "CLevelCatExtRewardCfgInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelCatExtRewardCfgInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11827100",
+          "currentName": "CLevelCatExtRewardCfgInfo::GetManagers_11827100",
+          "proposedName": "CLevelCatExtRewardCfgInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelCatExtRewardCfgInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Cat'=Felyne (MH cat companion). Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CMHLoseLevelConditionInfo",
+      "category": "quest",
+      "purpose": "Failure (lose) conditions for a MH mission level.",
+      "methods": [
+        {
+          "address": "0x117352c0",
+          "currentName": "CMHLoseLevelConditionInfo::GetManagers",
+          "proposedName": "CMHLoseLevelConditionInfo::FindInfoByKey",
+          "purpose": "Looks up a CMHLoseLevelConditionInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x117382a0",
+          "currentName": "CMHLoseLevelConditionInfo::GetManagers_117382a0",
+          "proposedName": "CMHLoseLevelConditionInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CMHLoseLevelConditionInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CWeaponWakeUpRandRuleInfo",
+      "category": "weapon",
+      "purpose": "Random-roll rules for weapon 'wake up'/awakening.",
+      "methods": [
+        {
+          "address": "0x1184cfa0",
+          "currentName": "CWeaponWakeUpRandRuleInfo::GetManagers",
+          "proposedName": "CWeaponWakeUpRandRuleInfo::FindInfoByKey",
+          "purpose": "Looks up a CWeaponWakeUpRandRuleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11851910",
+          "currentName": "CWeaponWakeUpRandRuleInfo::GetManagers_11851910",
+          "proposedName": "CWeaponWakeUpRandRuleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CWeaponWakeUpRandRuleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCharmFoundTimesCostInfo",
+      "category": "economy",
+      "purpose": "Per-attempt cost table for charm forging ('Found') by number of times.",
+      "methods": [
+        {
+          "address": "0x116362a0",
+          "currentName": "CCharmFoundTimesCostInfo::GetManagers",
+          "proposedName": "CCharmFoundTimesCostInfo::FindInfoByKey",
+          "purpose": "Looks up a CCharmFoundTimesCostInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11639e90",
+          "currentName": "CCharmFoundTimesCostInfo::GetManagers_11639e90",
+          "proposedName": "CCharmFoundTimesCostInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCharmFoundTimesCostInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Charm Found'=charm forging/appraisal system. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelCatExtraStrateInfo",
+      "category": "quest",
+      "purpose": "Extra Felyne ('Cat') strategy config for mission levels.",
+      "methods": [
+        {
+          "address": "0x11573fd0",
+          "currentName": "CLevelCatExtraStrateInfo::GetManagers",
+          "proposedName": "CLevelCatExtraStrateInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelCatExtraStrateInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11574fb0",
+          "currentName": "CLevelCatExtraStrateInfo::GetManagers_11574fb0",
+          "proposedName": "CLevelCatExtraStrateInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelCatExtraStrateInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Strate'=strategy; 'Cat'=Felyne. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CMHWinLevelConditionInfo",
+      "category": "quest",
+      "purpose": "Success (win/clear) conditions for a MH mission level.",
+      "methods": [
+        {
+          "address": "0x11735360",
+          "currentName": "CMHWinLevelConditionInfo::GetManagers",
+          "proposedName": "CMHWinLevelConditionInfo::FindInfoByKey",
+          "purpose": "Looks up a CMHWinLevelConditionInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x117382f0",
+          "currentName": "CMHWinLevelConditionInfo::GetManagers_117382f0",
+          "proposedName": "CMHWinLevelConditionInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CMHWinLevelConditionInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CProjectileExplosionInfo",
+      "category": "combat",
+      "purpose": "Explosion parameters for projectiles.",
+      "methods": [
+        {
+          "address": "0x10d83be0",
+          "currentName": "CProjectileExplosionInfo::GetManagers",
+          "proposedName": "CProjectileExplosionInfo::FindInfoByKey",
+          "purpose": "Looks up a CProjectileExplosionInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10d856e0",
+          "currentName": "CProjectileExplosionInfo::GetManagers_10d856e0",
+          "proposedName": "CProjectileExplosionInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CProjectileExplosionInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCharmFoundLockCostInfo",
+      "category": "economy",
+      "purpose": "Cost to lock a result during charm forging ('Found').",
+      "methods": [
+        {
+          "address": "0x11636200",
+          "currentName": "CCharmFoundLockCostInfo::GetManagers",
+          "proposedName": "CCharmFoundLockCostInfo::FindInfoByKey",
+          "purpose": "Looks up a CCharmFoundLockCostInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11639e40",
+          "currentName": "CCharmFoundLockCostInfo::GetManagers_11639e40",
+          "proposedName": "CCharmFoundLockCostInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCharmFoundLockCostInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCharmRebuildResultInfo",
+      "category": "item",
+      "purpose": "Result table for charm rebuild/reroll.",
+      "methods": [
+        {
+          "address": "0x115bf0e0",
+          "currentName": "CCharmRebuildResultInfo::GetManagers",
+          "proposedName": "CCharmRebuildResultInfo::FindInfoByKey",
+          "purpose": "Looks up a CCharmRebuildResultInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115c40e0",
+          "currentName": "CCharmRebuildResultInfo::GetManagers_115c40e0",
+          "proposedName": "CCharmRebuildResultInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCharmRebuildResultInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipFoundLockCostInfo",
+      "category": "economy",
+      "purpose": "Cost to lock a result during equipment forging ('Found').",
+      "methods": [
+        {
+          "address": "0x11833660",
+          "currentName": "CEquipFoundLockCostInfo::GetManagers",
+          "proposedName": "CEquipFoundLockCostInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipFoundLockCostInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x118360a0",
+          "currentName": "CEquipFoundLockCostInfo::GetManagers_118360a0",
+          "proposedName": "CEquipFoundLockCostInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipFoundLockCostInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelBaseNumericalInfo",
+      "category": "misc",
+      "purpose": "Base numerical/balance constants per mission level.",
+      "methods": [
+        {
+          "address": "0x115301f0",
+          "currentName": "CLevelBaseNumericalInfo::GetManagers",
+          "proposedName": "CLevelBaseNumericalInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelBaseNumericalInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11531ce0",
+          "currentName": "CLevelBaseNumericalInfo::GetManagers_11531ce0",
+          "proposedName": "CLevelBaseNumericalInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelBaseNumericalInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPetSupportCatSkillInfo",
+      "category": "pet",
+      "purpose": "Support Felyne ('Cat') skill table for pets/companions.",
+      "methods": [
+        {
+          "address": "0x10bf0950",
+          "currentName": "CPetSupportCatSkillInfo::GetManagers",
+          "proposedName": "CPetSupportCatSkillInfo::FindInfoByKey",
+          "purpose": "Looks up a CPetSupportCatSkillInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10bf1930",
+          "currentName": "CPetSupportCatSkillInfo::GetManagers_10bf1930",
+          "proposedName": "CPetSupportCatSkillInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPetSupportCatSkillInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CProjectileDmgRangeInfo",
+      "category": "combat",
+      "purpose": "Damage-vs-range falloff table for projectiles.",
+      "methods": [
+        {
+          "address": "0x10f2cc30",
+          "currentName": "CProjectileDmgRangeInfo::GetManagers",
+          "proposedName": "CProjectileDmgRangeInfo::FindInfoByKey",
+          "purpose": "Looks up a CProjectileDmgRangeInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10f2d510",
+          "currentName": "CProjectileDmgRangeInfo::GetManagers_10f2d510",
+          "proposedName": "CProjectileDmgRangeInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CProjectileDmgRangeInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CStaticLevelWeatherInfo",
+      "category": "misc",
+      "purpose": "Static (fixed) weather config per level.",
+      "methods": [
+        {
+          "address": "0x116ab8b0",
+          "currentName": "CStaticLevelWeatherInfo::GetManagers",
+          "proposedName": "CStaticLevelWeatherInfo::FindInfoByKey",
+          "purpose": "Looks up a CStaticLevelWeatherInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x116ae8e0",
+          "currentName": "CStaticLevelWeatherInfo::GetManagers_116ae8e0",
+          "proposedName": "CStaticLevelWeatherInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CStaticLevelWeatherInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CDailyScheduleGoldInfo",
+      "category": "economy",
+      "purpose": "Gold reward config for the daily-schedule activity.",
+      "methods": [
+        {
+          "address": "0x11863480",
+          "currentName": "CDailyScheduleGoldInfo::GetManagers",
+          "proposedName": "CDailyScheduleGoldInfo::FindInfoByKey",
+          "purpose": "Looks up a CDailyScheduleGoldInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11863cd0",
+          "currentName": "CDailyScheduleGoldInfo::GetManagers_11863cd0",
+          "proposedName": "CDailyScheduleGoldInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CDailyScheduleGoldInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipEnchaseRuleInfo",
+      "category": "item",
+      "purpose": "Rules for equipment enchase (gem/decoration inlay).",
+      "methods": [
+        {
+          "address": "0x1184cd20",
+          "currentName": "CEquipEnchaseRuleInfo::GetManagers",
+          "proposedName": "CEquipEnchaseRuleInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipEnchaseRuleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x118517d0",
+          "currentName": "CEquipEnchaseRuleInfo::GetManagers_118517d0",
+          "proposedName": "CEquipEnchaseRuleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipEnchaseRuleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "'Enchase'=socketing/inlaying decorations. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipEnforceRuleInfo",
+      "category": "item",
+      "purpose": "Rules for equipment enforce (upgrade/strengthen).",
+      "methods": [
+        {
+          "address": "0x1184cdc0",
+          "currentName": "CEquipEnforceRuleInfo::GetManagers",
+          "proposedName": "CEquipEnforceRuleInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipEnforceRuleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11851820",
+          "currentName": "CEquipEnforceRuleInfo::GetManagers_11851820",
+          "proposedName": "CEquipEnforceRuleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipEnforceRuleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "'Enforce'=upgrade/strengthen. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CMonsterBattleBgmInfo",
+      "category": "misc",
+      "purpose": "Battle BGM (music) assignments per monster.",
+      "methods": [
+        {
+          "address": "0x11310190",
+          "currentName": "CMonsterBattleBgmInfo::GetManagers",
+          "proposedName": "CMonsterBattleBgmInfo::FindInfoByKey",
+          "purpose": "Looks up a CMonsterBattleBgmInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11310cc0",
+          "currentName": "CMonsterBattleBgmInfo::GetManagers_11310cc0",
+          "proposedName": "CMonsterBattleBgmInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CMonsterBattleBgmInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipRandRuleInInfo",
+      "category": "item",
+      "purpose": "Input rules for equipment random generation.",
+      "methods": [
+        {
+          "address": "0x115fada0",
+          "currentName": "CEquipRandRuleInInfo::GetManagers",
+          "proposedName": "CEquipRandRuleInInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipRandRuleInInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115fb7e0",
+          "currentName": "CEquipRandRuleInInfo::GetManagers_115fb7e0",
+          "proposedName": "CEquipRandRuleInInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipRandRuleInInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Doubled 'In' likely 'RandRule In(put)'. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelSpawnBatchInfo",
+      "category": "monster",
+      "purpose": "Monster spawn-batch (wave) config for a level.",
+      "methods": [
+        {
+          "address": "0x10e95b00",
+          "currentName": "CLevelSpawnBatchInfo::GetManagers",
+          "proposedName": "CLevelSpawnBatchInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelSpawnBatchInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10e9add0",
+          "currentName": "CLevelSpawnBatchInfo::GetManagers_10e9add0",
+          "proposedName": "CLevelSpawnBatchInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelSpawnBatchInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSRLMonsterClassInfo",
+      "category": "monster",
+      "purpose": "'SRL' subsystem: monster class/category table.",
+      "methods": [
+        {
+          "address": "0x1153b480",
+          "currentName": "CSRLMonsterClassInfo::GetManagers",
+          "proposedName": "CSRLMonsterClassInfo::FindInfoByKey",
+          "purpose": "Looks up a CSRLMonsterClassInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1153e830",
+          "currentName": "CSRLMonsterClassInfo::GetManagers_1153e830",
+          "proposedName": "CSRLMonsterClassInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSRLMonsterClassInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'SRL' subsystem meaning not recovered. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CTutorialCounterInfo",
+      "category": "ui",
+      "purpose": "Counter/progress tracking config for tutorials.",
+      "methods": [
+        {
+          "address": "0x11a3de10",
+          "currentName": "CTutorialCounterInfo::GetManagers",
+          "proposedName": "CTutorialCounterInfo::FindInfoByKey",
+          "purpose": "Looks up a CTutorialCounterInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11a3e180",
+          "currentName": "CTutorialCounterInfo::GetManagers_11a3e180",
+          "proposedName": "CTutorialCounterInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CTutorialCounterInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CVIPEntrustTimesInfo",
+      "category": "economy",
+      "purpose": "VIP-tier limits on entrust (consignment/quest-delegation) times.",
+      "methods": [
+        {
+          "address": "0x11546ce0",
+          "currentName": "CVIPEntrustTimesInfo::GetManagers",
+          "proposedName": "CVIPEntrustTimesInfo::FindInfoByKey",
+          "purpose": "Looks up a CVIPEntrustTimesInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115490f0",
+          "currentName": "CVIPEntrustTimesInfo::GetManagers_115490f0",
+          "proposedName": "CVIPEntrustTimesInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CVIPEntrustTimesInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCombatNPCComboInfo",
+      "category": "combat",
+      "purpose": "Attack-combo definitions for combat NPCs (allies/mercenaries).",
+      "methods": [
+        {
+          "address": "0x10aa46f0",
+          "currentName": "CCombatNPCComboInfo::GetManagers",
+          "proposedName": "CCombatNPCComboInfo::FindInfoByKey",
+          "purpose": "Looks up a CCombatNPCComboInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10aa4ee0",
+          "currentName": "CCombatNPCComboInfo::GetManagers_10aa4ee0",
+          "proposedName": "CCombatNPCComboInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCombatNPCComboInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCombatNPCLevelInfo",
+      "category": "combat",
+      "purpose": "Level/stat progression for combat NPCs.",
+      "methods": [
+        {
+          "address": "0x1130eec0",
+          "currentName": "CCombatNPCLevelInfo::GetManagers",
+          "proposedName": "CCombatNPCLevelInfo::FindInfoByKey",
+          "purpose": "Looks up a CCombatNPCLevelInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1130f910",
+          "currentName": "CCombatNPCLevelInfo::GetManagers_1130f910",
+          "proposedName": "CCombatNPCLevelInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCombatNPCLevelInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipFoundCostInfo",
+      "category": "economy",
+      "purpose": "Base cost table for equipment forging ('Found').",
+      "methods": [
+        {
+          "address": "0x118335c0",
+          "currentName": "CEquipFoundCostInfo::GetManagers",
+          "proposedName": "CEquipFoundCostInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipFoundCostInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11836050",
+          "currentName": "CEquipFoundCostInfo::GetManagers_11836050",
+          "proposedName": "CEquipFoundCostInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipFoundCostInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipFoundRuleInfo",
+      "category": "item",
+      "purpose": "Rules for the equipment forging ('Found') system.",
+      "methods": [
+        {
+          "address": "0x1184ce60",
+          "currentName": "CEquipFoundRuleInfo::GetManagers",
+          "proposedName": "CEquipFoundRuleInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipFoundRuleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11851870",
+          "currentName": "CEquipFoundRuleInfo::GetManagers_11851870",
+          "proposedName": "CEquipFoundRuleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipFoundRuleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CGunLanceWeaponInfo",
+      "category": "weapon",
+      "purpose": "Gunlance weapon-type data table.",
+      "methods": [
+        {
+          "address": "0x10b682c0",
+          "currentName": "CGunLanceWeaponInfo::GetManagers",
+          "proposedName": "CGunLanceWeaponInfo::FindInfoByKey",
+          "purpose": "Looks up a CGunLanceWeaponInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10b68cc0",
+          "currentName": "CGunLanceWeaponInfo::GetManagers_10b68cc0",
+          "proposedName": "CGunLanceWeaponInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CGunLanceWeaponInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "high",
+      "notes": "Weapon-type Info; recognizable MH weapon class. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPianShouWeaponInfo",
+      "category": "weapon",
+      "purpose": "Sword-and-shield ('PianShou' \u7247\u624b = one-handed) weapon data table.",
+      "methods": [
+        {
+          "address": "0x119dac50",
+          "currentName": "CPianShouWeaponInfo::GetManagers",
+          "proposedName": "CPianShouWeaponInfo::FindInfoByKey",
+          "purpose": "Looks up a CPianShouWeaponInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x119daf00",
+          "currentName": "CPianShouWeaponInfo::GetManagers_119daf00",
+          "proposedName": "CPianShouWeaponInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPianShouWeaponInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "'PianShou'=\u7247\u624b, one-handed / sword&shield. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSRLItemLotteryInfo",
+      "category": "economy",
+      "purpose": "'SRL' subsystem: item lottery/gacha table.",
+      "methods": [
+        {
+          "address": "0x1153b2a0",
+          "currentName": "CSRLItemLotteryInfo::GetManagers",
+          "proposedName": "CSRLItemLotteryInfo::FindInfoByKey",
+          "purpose": "Looks up a CSRLItemLotteryInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1153e740",
+          "currentName": "CSRLItemLotteryInfo::GetManagers_1153e740",
+          "proposedName": "CSRLItemLotteryInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSRLItemLotteryInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'SRL' subsystem meaning not recovered. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSRLMonsterTypeInfo",
+      "category": "monster",
+      "purpose": "'SRL' subsystem: monster type table.",
+      "methods": [
+        {
+          "address": "0x1153b520",
+          "currentName": "CSRLMonsterTypeInfo::GetManagers",
+          "proposedName": "CSRLMonsterTypeInfo::FindInfoByKey",
+          "purpose": "Looks up a CSRLMonsterTypeInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1153e880",
+          "currentName": "CSRLMonsterTypeInfo::GetManagers_1153e880",
+          "proposedName": "CSRLMonsterTypeInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSRLMonsterTypeInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'SRL' subsystem meaning not recovered. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSlashCalculateInfo",
+      "category": "combat",
+      "purpose": "Slash/cutting-damage calculation parameters.",
+      "methods": [
+        {
+          "address": "0x115d9210",
+          "currentName": "CSlashCalculateInfo::GetManagers",
+          "proposedName": "CSlashCalculateInfo::FindInfoByKey",
+          "purpose": "Looks up a CSlashCalculateInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115da820",
+          "currentName": "CSlashCalculateInfo::GetManagers_115da820",
+          "proposedName": "CSlashCalculateInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSlashCalculateInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CThousandsLayerInfo",
+      "category": "activity",
+      "purpose": "Config for a 'thousand layers' tower/endless activity.",
+      "methods": [
+        {
+          "address": "0x10e9f3d0",
+          "currentName": "CThousandsLayerInfo::GetManagers",
+          "proposedName": "CThousandsLayerInfo::FindInfoByKey",
+          "purpose": "Looks up a CThousandsLayerInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10ea38b0",
+          "currentName": "CThousandsLayerInfo::GetManagers_10ea38b0",
+          "proposedName": "CThousandsLayerInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CThousandsLayerInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Name interpreted as a multi-floor tower activity. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CContributeBoxInfo",
+      "category": "social",
+      "purpose": "Reward-box table for guild/community contribution.",
+      "methods": [
+        {
+          "address": "0x1183ed70",
+          "currentName": "CContributeBoxInfo::GetManagers",
+          "proposedName": "CContributeBoxInfo::FindInfoByKey",
+          "purpose": "Looks up a CContributeBoxInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1183f930",
+          "currentName": "CContributeBoxInfo::GetManagers_1183f930",
+          "proposedName": "CContributeBoxInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CContributeBoxInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CDamageDampingInfo",
+      "category": "combat",
+      "purpose": "Damage damping/reduction curve parameters.",
+      "methods": [
+        {
+          "address": "0x1142a4f0",
+          "currentName": "CDamageDampingInfo::GetManagers",
+          "proposedName": "CDamageDampingInfo::FindInfoByKey",
+          "purpose": "Looks up a CDamageDampingInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1142bb90",
+          "currentName": "CDamageDampingInfo::GetManagers_1142bb90",
+          "proposedName": "CDamageDampingInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CDamageDampingInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPvpDamageParmInfo",
+      "category": "combat",
+      "purpose": "PvP damage parameter/scaling table.",
+      "methods": [
+        {
+          "address": "0x115d73d0",
+          "currentName": "CPvpDamageParmInfo::GetManagers",
+          "proposedName": "CPvpDamageParmInfo::FindInfoByKey",
+          "purpose": "Looks up a CPvpDamageParmInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115d8700",
+          "currentName": "CPvpDamageParmInfo::GetManagers_115d8700",
+          "proposedName": "CPvpDamageParmInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPvpDamageParmInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CXHunterRandomInfo",
+      "category": "misc",
+      "purpose": "Randomisation config for the 'X Hunter' feature.",
+      "methods": [
+        {
+          "address": "0x10e2b420",
+          "currentName": "CXHunterRandomInfo::GetManagers",
+          "proposedName": "CXHunterRandomInfo::FindInfoByKey",
+          "purpose": "Looks up a CXHunterRandomInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10e38fe0",
+          "currentName": "CXHunterRandomInfo::GetManagers_10e38fe0",
+          "proposedName": "CXHunterRandomInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CXHunterRandomInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'X Hunter' feature meaning not recovered. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelBalanceInfo",
+      "category": "misc",
+      "purpose": "Balance-tuning constants per mission level.",
+      "methods": [
+        {
+          "address": "0x114617c0",
+          "currentName": "CLevelBalanceInfo::GetManagers",
+          "proposedName": "CLevelBalanceInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelBalanceInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11464e50",
+          "currentName": "CLevelBalanceInfo::GetManagers_11464e50",
+          "proposedName": "CLevelBalanceInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelBalanceInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPetGiftSkillInfo",
+      "category": "pet",
+      "purpose": "Gift-skill table for pets/companions.",
+      "methods": [
+        {
+          "address": "0x112f0a60",
+          "currentName": "CPetGiftSkillInfo::GetManagers",
+          "proposedName": "CPetGiftSkillInfo::FindInfoByKey",
+          "purpose": "Looks up a CPetGiftSkillInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x112f6030",
+          "currentName": "CPetGiftSkillInfo::GetManagers_112f6030",
+          "proposedName": "CPetGiftSkillInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPetGiftSkillInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CItemAutoUseInfo",
+      "category": "item",
+      "purpose": "Config for items that are auto-used (auto-consume) conditions.",
+      "methods": [
+        {
+          "address": "0x1122e850",
+          "currentName": "CItemAutoUseInfo::GetManagers",
+          "proposedName": "CItemAutoUseInfo::FindInfoByKey",
+          "purpose": "Looks up a CItemAutoUseInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x112304b0",
+          "currentName": "CItemAutoUseInfo::GetManagers_112304b0",
+          "proposedName": "CItemAutoUseInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CItemAutoUseInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSwordWeaponInfo",
+      "category": "weapon",
+      "purpose": "Sword (great-sword class) weapon data table.",
+      "methods": [
+        {
+          "address": "0x119db4f0",
+          "currentName": "CSwordWeaponInfo::GetManagers",
+          "proposedName": "CSwordWeaponInfo::FindInfoByKey",
+          "purpose": "Looks up a CSwordWeaponInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x119db760",
+          "currentName": "CSwordWeaponInfo::GetManagers_119db760",
+          "proposedName": "CSwordWeaponInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSwordWeaponInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Weapon-type Info. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CTadaoWeaponInfo",
+      "category": "weapon",
+      "purpose": "Long-sword ('Tadao' \u592a\u5200) weapon data table.",
+      "methods": [
+        {
+          "address": "0x119dbe10",
+          "currentName": "CTadaoWeaponInfo::GetManagers",
+          "proposedName": "CTadaoWeaponInfo::FindInfoByKey",
+          "purpose": "Looks up a CTadaoWeaponInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x119dc0f0",
+          "currentName": "CTadaoWeaponInfo::GetManagers_119dc0f0",
+          "proposedName": "CTadaoWeaponInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CTadaoWeaponInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "'Tadao'=\u592a\u5200, long sword. Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CVIPExpLimitInfo",
+      "category": "economy",
+      "purpose": "VIP-tier experience gain/limit table.",
+      "methods": [
+        {
+          "address": "0x113adbe0",
+          "currentName": "CVIPExpLimitInfo::GetManagers",
+          "proposedName": "CVIPExpLimitInfo::FindInfoByKey",
+          "purpose": "Looks up a CVIPExpLimitInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x113b3970",
+          "currentName": "CVIPExpLimitInfo::GetManagers_113b3970",
+          "proposedName": "CVIPExpLimitInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CVIPExpLimitInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CBuffFilterInfo",
+      "category": "combat",
+      "purpose": "Filter rules controlling which buffs apply.",
+      "methods": [
+        {
+          "address": "0x1143ea60",
+          "currentName": "CBuffFilterInfo::GetManagers",
+          "proposedName": "CBuffFilterInfo::FindInfoByKey",
+          "purpose": "Looks up a CBuffFilterInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1143f4b0",
+          "currentName": "CBuffFilterInfo::GetManagers_1143f4b0",
+          "proposedName": "CBuffFilterInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CBuffFilterInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipGroupInfo",
+      "category": "item",
+      "purpose": "Equipment grouping/set-classification table.",
+      "methods": [
+        {
+          "address": "0x11461720",
+          "currentName": "CEquipGroupInfo::GetManagers",
+          "proposedName": "CEquipGroupInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipGroupInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11464e00",
+          "currentName": "CEquipGroupInfo::GetManagers_11464e00",
+          "proposedName": "CEquipGroupInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipGroupInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEquipSkillInfo",
+      "category": "skill",
+      "purpose": "Equipment skill (armor-skill) definition table.",
+      "methods": [
+        {
+          "address": "0x113f3cc0",
+          "currentName": "CEquipSkillInfo::GetManagers",
+          "proposedName": "CEquipSkillInfo::FindInfoByKey",
+          "purpose": "Looks up a CEquipSkillInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x113fa4f0",
+          "currentName": "CEquipSkillInfo::GetManagers_113fa4f0",
+          "proposedName": "CEquipSkillInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEquipSkillInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelMusicInfo",
+      "category": "misc",
+      "purpose": "Music/BGM assignments per mission level.",
+      "methods": [
+        {
+          "address": "0x112ac620",
+          "currentName": "CLevelMusicInfo::GetManagers",
+          "proposedName": "CLevelMusicInfo::FindInfoByKey",
+          "purpose": "Looks up a CLevelMusicInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x112ad480",
+          "currentName": "CLevelMusicInfo::GetManagers_112ad480",
+          "proposedName": "CLevelMusicInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CLevelMusicInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CVIPServiceInfo",
+      "category": "economy",
+      "purpose": "VIP service/privilege definitions table.",
+      "methods": [
+        {
+          "address": "0x11546d80",
+          "currentName": "CVIPServiceInfo::GetManagers",
+          "proposedName": "CVIPServiceInfo::FindInfoByKey",
+          "purpose": "Looks up a CVIPServiceInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11549140",
+          "currentName": "CVIPServiceInfo::GetManagers_11549140",
+          "proposedName": "CVIPServiceInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CVIPServiceInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CBenchmarkInfo",
+      "category": "misc",
+      "purpose": "Benchmark/performance-test config table.",
+      "methods": [
+        {
+          "address": "0x10b07910",
+          "currentName": "CBenchmarkInfo::GetManagers",
+          "proposedName": "CBenchmarkInfo::FindInfoByKey",
+          "purpose": "Looks up a CBenchmarkInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10b080f0",
+          "currentName": "CBenchmarkInfo::GetManagers_10b080f0",
+          "proposedName": "CBenchmarkInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CBenchmarkInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCombatNPCInfo",
+      "category": "combat",
+      "purpose": "Definition table for combat NPCs (allies/mercenaries).",
+      "methods": [
+        {
+          "address": "0x10aade90",
+          "currentName": "CCombatNPCInfo::GetManagers",
+          "proposedName": "CCombatNPCInfo::FindInfoByKey",
+          "purpose": "Looks up a CCombatNPCInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10aaeae0",
+          "currentName": "CCombatNPCInfo::GetManagers_10aaeae0",
+          "proposedName": "CCombatNPCInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCombatNPCInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CEffectAOEInfo",
+      "category": "combat",
+      "purpose": "Area-of-effect parameters for effects.",
+      "methods": [
+        {
+          "address": "0x115f1b20",
+          "currentName": "CEffectAOEInfo::GetManagers",
+          "proposedName": "CEffectAOEInfo::FindInfoByKey",
+          "purpose": "Looks up a CEffectAOEInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115f2b50",
+          "currentName": "CEffectAOEInfo::GetManagers_115f2b50",
+          "proposedName": "CEffectAOEInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CEffectAOEInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CFarmAwardInfo",
+      "category": "activity",
+      "purpose": "Award/reward table for the farm activity.",
+      "methods": [
+        {
+          "address": "0x1141ff10",
+          "currentName": "CFarmAwardInfo::GetManagers",
+          "proposedName": "CFarmAwardInfo::FindInfoByKey",
+          "purpose": "Looks up a CFarmAwardInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x114217c0",
+          "currentName": "CFarmAwardInfo::GetManagers_114217c0",
+          "proposedName": "CFarmAwardInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CFarmAwardInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CSpecRulesInfo",
+      "category": "misc",
+      "purpose": "Special-rules config table.",
+      "methods": [
+        {
+          "address": "0x115d92b0",
+          "currentName": "CSpecRulesInfo::GetManagers",
+          "proposedName": "CSpecRulesInfo::FindInfoByKey",
+          "purpose": "Looks up a CSpecRulesInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115da870",
+          "currentName": "CSpecRulesInfo::GetManagers_115da870",
+          "proposedName": "CSpecRulesInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CSpecRulesInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "low",
+      "notes": "'Spec'=special (generic rules table). Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CCutSceneInfo",
+      "category": "ui",
+      "purpose": "Cutscene definition/trigger table.",
+      "methods": [
+        {
+          "address": "0x111602c0",
+          "currentName": "CCutSceneInfo::GetManagers",
+          "proposedName": "CCutSceneInfo::FindInfoByKey",
+          "purpose": "Looks up a CCutSceneInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x11162e40",
+          "currentName": "CCutSceneInfo::GetManagers_11162e40",
+          "proposedName": "CCutSceneInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CCutSceneInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CItemConvInfo",
+      "category": "item",
+      "purpose": "Item conversion/exchange table.",
+      "methods": [
+        {
+          "address": "0x115f72d0",
+          "currentName": "CItemConvInfo::GetManagers",
+          "proposedName": "CItemConvInfo::FindInfoByKey",
+          "purpose": "Looks up a CItemConvInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115f80f0",
+          "currentName": "CItemConvInfo::GetManagers_115f80f0",
+          "proposedName": "CItemConvInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CItemConvInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CItemAOEInfo",
+      "category": "item",
+      "purpose": "Area-of-effect parameters for items (e.g. traps/bombs).",
+      "methods": [
+        {
+          "address": "0x115f1bc0",
+          "currentName": "CItemAOEInfo::GetManagers",
+          "proposedName": "CItemAOEInfo::FindInfoByKey",
+          "purpose": "Looks up a CItemAOEInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x115f2ba0",
+          "currentName": "CItemAOEInfo::GetManagers_115f2ba0",
+          "proposedName": "CItemAOEInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CItemAOEInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CPetTalkInfo",
+      "category": "pet",
+      "purpose": "Pet/companion dialogue (talk) line table.",
+      "methods": [
+        {
+          "address": "0x112b6800",
+          "currentName": "CPetTalkInfo::GetManagers",
+          "proposedName": "CPetTalkInfo::FindInfoByKey",
+          "purpose": "Looks up a CPetTalkInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x112b7440",
+          "currentName": "CPetTalkInfo::GetManagers_112b7440",
+          "proposedName": "CPetTalkInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CPetTalkInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CVehicleInfo",
+      "category": "misc",
+      "purpose": "Vehicle/mount definition table.",
+      "methods": [
+        {
+          "address": "0x10f21210",
+          "currentName": "CVehicleInfo::GetManagers",
+          "proposedName": "CVehicleInfo::FindInfoByKey",
+          "purpose": "Looks up a CVehicleInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x10f26510",
+          "currentName": "CVehicleInfo::GetManagers_10f26510",
+          "proposedName": "CVehicleInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CVehicleInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CNoticeInfo",
+      "category": "ui",
+      "purpose": "In-game notice/announcement text table.",
+      "methods": [
+        {
+          "address": "0x11294820",
+          "currentName": "CNoticeInfo::GetManagers",
+          "proposedName": "CNoticeInfo::FindInfoByKey",
+          "purpose": "Looks up a CNoticeInfo record by key via the info registry (FUN_11679e10); returns the shared default record when key==0 or not found."
+        },
+        {
+          "address": "0x1129b740",
+          "currentName": "CNoticeInfo::GetManagers_1129b740",
+          "proposedName": "CNoticeInfo::GetDefaultInfo",
+          "purpose": "Returns the shared default/singleton CNoticeInfo record used when a lookup misses."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CHubEntryConfigLetterQuestInfo",
+      "category": "quest",
+      "purpose": "Hub-entry config for letter (mail-triggered) quests.",
+      "methods": [
+        {
+          "address": "0x107caa50",
+          "currentName": "CHubEntryConfigLetterQuestInfo::GetManagers",
+          "proposedName": "CHubEntryConfigLetterQuestInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CHubEntryConfigLetterQuestInfo records."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CHubEntryConfigKingQuestInfo",
+      "category": "quest",
+      "purpose": "Hub-entry config for 'King' (special boss) quests.",
+      "methods": [
+        {
+          "address": "0x107ca810",
+          "currentName": "CHubEntryConfigKingQuestInfo::GetManagers",
+          "proposedName": "CHubEntryConfigKingQuestInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CHubEntryConfigKingQuestInfo records."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "CLevelAppraiseRewardBoxInfo",
+      "category": "economy",
+      "purpose": "Reward-box table for post-level appraisal/evaluation.",
+      "methods": [
+        {
+          "address": "0x1095c1a0",
+          "currentName": "CLevelAppraiseRewardBoxInfo::GetManagers",
+          "proposedName": "CLevelAppraiseRewardBoxInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all CLevelAppraiseRewardBoxInfo records."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "COperationActivityGroupInfo",
+      "category": "activity",
+      "purpose": "Grouping table for operational (live-ops) activities.",
+      "methods": [
+        {
+          "address": "0x10961f00",
+          "currentName": "COperationActivityGroupInfo::GetManagers",
+          "proposedName": "COperationActivityGroupInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all COperationActivityGroupInfo records."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    },
+    {
+      "className": "COperationActivityDataInfo",
+      "category": "activity",
+      "purpose": "Data table for operational (live-ops) activity entries.",
+      "methods": [
+        {
+          "address": "0x10962010",
+          "currentName": "COperationActivityDataInfo::GetManagers",
+          "proposedName": "COperationActivityDataInfo::GetInfoManager",
+          "purpose": "Lazily registers (one-time guard) and returns the CInfoManager singleton that owns all COperationActivityDataInfo records."
+        }
+      ],
+      "confidence": "medium",
+      "notes": "Only CInfoManager registration/accessor boilerplate recovered (no printer/reader/TLV), so field layout is unknown; purpose/category inferred from class name."
+    }
+  ]
+}

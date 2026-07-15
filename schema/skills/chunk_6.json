@@ -1,0 +1,548 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "0x10970c70",
+      "currentName": "FUN_10970c70",
+      "proposedName": "CPetMonsterSkillInfo::LookupRecordById",
+      "purpose": "Indexed lookup into the CPetMonsterSkillInfo data table (pet-monster skill definitions). Resolves the InfoManager singleton (CInfoManager::FindByName(\"CPetMonsterSkillInfo\")), lazily initializes it once via a bitflag guard, then does a paged 2D-array lookup to return the record pointer for a given global skill id.",
+      "confidence": "high",
+      "subsystem": "pet-monster-skills",
+      "formulas": [
+        "record = *CPetMonsterSkillInfo::GetInfoMgrSingleton(); if null -> CInfoManager::FindByName(vtbl=PTR_FUN_11dde0d4, \"CPetMonsterSkillInfo\", 0)",
+        "lazy-init guard: if (DAT_123c87a0 & 1)==0 { DAT_123c87a0|=1; FUN_10972180(); register(&LAB_11c79bf0); } fallback record=&DAT_123c87a4",
+        "reject if param_1 == -1 (0xffffffff) -> return 0",
+        "guard: (param_1!=0 || record[+0x30]==0) && record[+0x28]!=0",
+        "idx = param_1 - record[+0x30]  (base-id offset)",
+        "bounds: 0 <= idx < record[+0x24]  (total element count)",
+        "row = *(int*)(record[+0x20] + (idx / record[+0x28]) * 4)   // record[+0x20]=array-of-row-pointers, record[+0x28]=stride/elems-per-row",
+        "if row!=0 return *(record4)(row + (idx % record[+0x28]) * 4)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation — this is the shared skill-definition table indexed by skill id; server must maintain an equivalent CPetMonsterSkillInfo table (offsets +0x20 rows, +0x24 count, +0x28 stride, +0x30 base-id) to resolve pet-monster skill records. Here used client-side.",
+      "notes": "Stock InfoManager paged-array accessor pattern (repeats verbatim at 0x109a4960 and 0x109a4ae0)."
+    },
+    {
+      "address": "0x10971020",
+      "currentName": "FUN_10971020",
+      "proposedName": "RegisterHandler_GetPetMonsterSkillData",
+      "purpose": "Registers the client command/RPC handler named \"GetPetMonsterSkillData\" -> FUN_10971170 via FUN_104d13b0. Wraps registration in an object begin/end (vtbl+4 / vtbl+8) guarded by presence-flag bit 6 of arg[1] (>>6 & 1).",
+      "confidence": "medium",
+      "subsystem": "pet-monster-skills",
+      "formulas": [
+        "if arg[+0x14]==1 (call kind) proceed",
+        "presence check: (local_1c >> 6 & 1) where local_1c = in_arg[1]",
+        "FUN_104d13b0(\"GetPetMonsterSkillData\", FUN_10971170)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI data request handler registration).",
+      "notes": "Thin registration shim; real logic in FUN_10971170."
+    },
+    {
+      "address": "0x10971170",
+      "currentName": "FUN_10971170",
+      "proposedName": "BuildPetMonsterSkillListVO",
+      "purpose": "Builds the VO/data payload returned to UI for a pet-monster's skill loadout. Reads the pet's skill array (from the game context object at DAT_1202e818+0xd0->+0x90 vtbl+0xb4) and emits a list of up to 5 skill entries, each with nSkillIndex, nSkillID, strSkillName, bEnabled.",
+      "confidence": "medium",
+      "subsystem": "pet-monster-skills",
+      "formulas": [
+        "class name PET_MONSTER_SKILL_VO_CLASSNAME; array key \"skillList\"",
+        "loop iVar3 = 1; do { ...; iVar3++ } while (iVar3 < 6)   // 5 skill slots, 1-indexed",
+        "per slot: nSkillIndex = iVar3; nSkillID = uVar8 (read from pet skill container)",
+        "if nSkillID > 0: skillId->def via uVar4=FUN_1182e200(nSkillID,0); iVar5=FUN_10970c70(uVar4) (CPetMonsterSkillInfo lookup); name record iVar5=FUN_100e5b40(); strSkillName = *(iVar5+0x14)",
+        "bEnabled = ( (vtbl+0x1c)(nSkillID) == 0 )   // note inverted sense",
+        "field setters: FUN_104d1550=int, FUN_104d1670=string, FUN_104d15e0=bool"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (constructs display VO). Reveals pet skill loadout is 5 slots; skill records carry name at +0x14. Server owns the authoritative slot->skillID mapping.",
+      "notes": "FUN_1182e200 = skillID normalizer; FUN_10970c70 = CPetMonsterSkillInfo lookup; name at record+0x14."
+    },
+    {
+      "address": "0x109a4960",
+      "currentName": "FUN_109a4960",
+      "proposedName": "CEquipSuitSkillInfo::LookupRecordById",
+      "purpose": "Paged 2D-array lookup into the CEquipSuitSkillInfo data table (equipment-suit skill definitions), keyed by global suit-skill id. Same InfoManager singleton + lazy-init + bounds pattern as 0x10970c70.",
+      "confidence": "high",
+      "subsystem": "suit-skills",
+      "formulas": [
+        "record(words) = *CEquipSuitSkillInfo::GetInfoManager(); fallback CInfoManager::FindByName(vtbl=PTR_FUN_11de1868,\"CEquipSuitSkillInfo\",0); lazy guard DAT_123c8a9c bit0 -> FUN_109a7fe0()+register(LAB_11c7b280); fallback &DAT_123c8aa0",
+        "reject param_1==-1",
+        "guard (param_1!=0 || record[0xc]==0) && record[10]!=0",
+        "idx = param_1 - record[0xc]  (base id, byte offset 0x30)",
+        "bounds 0 <= idx < record[9]  (count, byte 0x24)",
+        "row = *(record[8] + (idx / record[10]) * 4)  (record[8]=rows byte0x20, record[10]=stride byte0x28)",
+        "return *(row + (idx % record[10]) * 4)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation — server must hold the same CEquipSuitSkillInfo table to validate suit-skill ids/costs. Client-side accessor here.",
+      "notes": "Word indices [8]=rows,[9]=count,[10]=stride,[0xc]=base equal byte offsets 0x20/0x24/0x28/0x30."
+    },
+    {
+      "address": "0x109a4ae0",
+      "currentName": "FUN_109a4ae0",
+      "proposedName": "CEquipSuitSkillGroupInfo::LookupRecordById",
+      "purpose": "Paged 2D-array lookup into the CEquipSuitSkillGroupInfo table (suit-skill group definitions). Identical accessor pattern to 0x10970c70.",
+      "confidence": "high",
+      "subsystem": "suit-skills",
+      "formulas": [
+        "record = *CEquipSuitSkillGroupInfo::GetManager(); fallback FindByName(vtbl=PTR_FUN_11de1860,\"CEquipSuitSkillGroupInfo\",0); lazy guard DAT_123c8ad8 bit0 -> FUN_109a8080()+register(LAB_11c7b220); fallback &DAT_123c8adc",
+        "idx = param_1 - record[+0x30]; bounds 0<=idx<record[+0x24]; row=*(record[+0x20]+(idx/record[+0x28])*4); return *(row+(idx%record[+0x28])*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation — shared suit-skill-group table.",
+      "notes": "Same paged-array offsets 0x20/0x24/0x28/0x30 as the other two accessors."
+    },
+    {
+      "address": "0x109a4c60",
+      "currentName": "FUN_109a4c60",
+      "proposedName": "RegisterSuitSkillMessageHandlers",
+      "purpose": "Registers the client<->AppServer message handlers for the equipment-suit-skill system. Each block builds a string key (FUN_100b62c0) and binds it to a handler function via FUN_109a6730.",
+      "confidence": "high",
+      "subsystem": "suit-skills",
+      "formulas": [
+        "\"C2AS_GetCurrentSkillGroupId\" -> FUN_109a4e50",
+        "\"C2AS_GetSkillGroupData\"      -> FUN_109a4ef0 (BuildSuitSkillGroupDataVO)",
+        "\"C2AS_ActiveSkill\"            -> FUN_109a5f40",
+        "\"C2AS_EditSkills\"             -> FUN_109a61f0",
+        "\"C2AS_GetResetItemId\"         -> FUN_109a6380",
+        "\"C2AS_GetResetRecoveryCount\"  -> FUN_109a63c0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative — these C2AS_ (Client-to-AppServer) message names define the suit-skill RPC surface the server must implement: query current group, query group data, activate a skill, edit skills, get reset-item id, get reset-recovery-count.",
+      "notes": "Handler->message mapping inferred from string list order and the VO strings inside FUN_109a4ef0."
+    },
+    {
+      "address": "0x109a4ef0",
+      "currentName": "FUN_109a4ef0",
+      "proposedName": "BuildSuitSkillGroupDataVO",
+      "purpose": "Response builder for C2AS_GetSkillGroupData: constructs the full suit-skill UI tree (group -> skill-types -> skills, plus per-skill activation item/material costs and passive-skill-group activation info). Reads the authoritative suit-skill state from game context (DAT_1202e818+0xd0->+0x90 vtbl+0xb4, records at +0x260d8 / +0x2cd4).",
+      "confidence": "medium",
+      "subsystem": "suit-skills",
+      "formulas": [
+        "top VO class \"mh.view.SuitSkill.Data.SuitSkillGroupData\": GroupId, GroupName(str at unaff_EBX+0x14), ResetCount = piVar9[1], SkillTypeDatas[]",
+        "SkillTypeData \"mh.view.SuitSkill.Data.SuitSkillTypeData\" per typeRecord puVar7: TypeName, CurrentCostLimit = CEquipSuitSkillInfo::GetSuitSkillTotal(ppppiVar12, puVar7[0]), MaxCostLimit = puVar7[3], SkillDatas[]; type-record stride: skill list = [puVar7[4] .. puVar7[5]), typeRecord advances puVar7 += 7 words",
+        "SkillData \"mh.view.SuitSkill.Data.SuitSkillData\" per record pppiVar10 (word indices): SkillId=[4], SkillType=[7], field(0x11de16c8)=[8], CostLimitAdd=[9], PassiveGroup=[10], IsNotOpen(byte)=[0xd], AddResetCount=[0xe], ActiveMoney=[0xf], ClientTitleId=[0x3a], ClientPageId=[0x3c]",
+        "name/desc: grp=FUN_1050ebc0(pppiVar10[10]) (passive-group lookup); if grp && lvl=ComputeSuitSkillLevel(pppiVar10[0xc]) : SkillName=*(lvl+0x18), PassiveGroupPoint=*(lvl+0x24)",
+        "IsActive = FUN_11572a20(grpId, pppiVar10[4]); CanActive = (IsActive==0) ? FUN_109a6400(pppiVar10) : 0",
+        "ActiveItemDatas: iterate 6 slots (iStack_188=6, pppiVar10 += 0x10 then +1 each iter): ItemId=*pppiVar10, Count=pppiVar10[6]; CanRapidBuy = ( materialInfo(FUN_112d6f00(*(item+0x104)))+0x28 == *(item+0x10) )",
+        "ActiveCommonMaterialDatas: ItemId=pppiVar10[0xc], Count=pppiVar10[0x12], CoinId=pppiVar10[0x18], CoinValue=pppiVar10[0x24], CoinLimit=pppiVar10[0x1e]; material tag desc via CMaterialTagDescInfo paged lookup (offsets 0x20/0x24/0x28/0x30)",
+        "EquipSkillList emitted from piStack_158 entries where *(entry+4)!='\\0' (stride 8)",
+        "PassiveSkillGroup activation blocks: NeedActiveSkillCount = ppiVar11[-1][1]; PassiveSkillGroupId = *ppiVar11[-5]; sprintf(buf,\"+%d\", level) for '+N' point display; grp record via FUN_1050ebc0, name ptr at grp+0x2c (fallback &DAT_11d9d32b)"
+      ],
+      "costs": [
+        "ActiveMoney (currency to activate a suit skill) = SkillData word[0xf]",
+        "AddResetCount = word[0xe] (reset charges granted)",
+        "ResetCount (group) = groupRecord[1]",
+        "ActiveCommonMaterialData: CoinValue = word[0x24], CoinLimit = word[0x1e] (per-coin spend cap), Count = word[0x12]",
+        "ActiveItemData: Count = word[6] (required item quantity), up to 6 item slots per skill"
+      ],
+      "serverRelevance": "client-only builder, but authoritative-mirror: the offsets expose the server's CEquipSuitSkillInfo skill record layout (SkillId[4], SkillType[7], CostLimitAdd[9], PassiveGroup[10], ActiveMoney[0xf], AddResetCount[0xe], up to 6 activation items + common-material coin costs) and the CurrentCostLimit/MaxCostLimit cost-budget concept. Server must compute GetSuitSkillTotal, IsActive (FUN_11572a20), CanActive (FUN_109a6400) and validate activation cost/material.",
+      "notes": "FUN_1050ebc0 = passive-skill-group lookup (record: +0x10 groupID, +0x18 name, +0x24 point, +0x2c name-ptr). ComputeSuitSkillLevel resolves skill level record (name +0x18, point +0x24). CanRapidBuy is a shop convenience flag."
+    },
+    {
+      "address": "0x109ef110",
+      "currentName": "FUN_109ef110",
+      "proposedName": "BuildEquipPassiveSkillDataVO_A",
+      "purpose": "Builds an \"mh.model.equip.EquipPassiveSkillData\" array for an equipment item's passive skills. Decodes a TDR-style source struct at param_4 (presence-flag byte checks &0x8f ==3/4), resolves each passive-skill-group record and emits {passiveSkillGroupID, passiveSkillValue, passiveSkillName}. Has two branches: direct equip (iStack_cc==-1 -> FUN_10855a60) or pet/mount-sourced (FUN_113f9bb0/FUN_116698c0/FUN_11673530).",
+      "confidence": "medium",
+      "subsystem": "passive-skills",
+      "formulas": [
+        "TDR field extract idiom: t=*(src+off)&0x8f; if (t==3||t==4) value=*(src+off+4) else value=0xdeadbeaf (sentinel = missing)",
+        "reads src offsets: +0x4/+0x8 (group id A, local_d0), +0x34/+0x38 (iStack_cc), +0x4c/+0x50 (iStack_c8), +0x60..+0x88 (nested VO writer objects)",
+        "if iStack_cc == -1: equip = FUN_10855a60(local_d0); passive list = [*(equip+0x198) .. *(equip+0x19c)) stride 3 words",
+        "per entry: grp = FUN_1050ebc0(*puVar5); passiveSkillGroupID = *(grp+0x10); passiveSkillValue = *(grp+0x24) (+ accumulator); passiveSkillName from grp string; source per-entry level = puVar5[1]",
+        "else branch: guarded by game-context (DAT_1202e818+0xd0->+0x90 vtbl+0xb4, record+0x2d1c!=0), FUN_113f9bb0(id,sub) && FUN_116698c0() -> local_d0=FUN_11669730(); FUN_11673530(); goto equip branch",
+        "array key \"arrayPassiveSkillData\""
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder. Confirms equip record layout: passive-skill list at equip+0x198/+0x19c (stride 3 words: [0]=groupId, [1]=value/level). Passive-group record: +0x10 groupID, +0x24 point value.",
+      "notes": "0xdeadbeaf and -0x21524151 are 'field-absent' sentinels from TDR decode. FUN_1050ebc0 shared with 0x109a4ef0."
+    },
+    {
+      "address": "0x109f4f80",
+      "currentName": "FUN_109f4f80",
+      "proposedName": "BuildEquipPassiveSkillDataVO_B",
+      "purpose": "Variant of 0x109ef110 (param_5==6 call kind). Emits TWO arrayPassiveSkillData lists of EquipPassiveSkillData {passiveSkillGroupID, passiveSkillValue, passiveSkillName}: one from a pet/mount equip source (FUN_116734c0 -> list at +0x66/+0x67 words) and one from an inline list (piStack_cc[0]..[1] stride 3).",
+      "confidence": "medium",
+      "subsystem": "passive-skills",
+      "formulas": [
+        "same TDR extract idiom (&0x8f==3||4) for src offsets +0x4/+0x8, +0x1c/+0x20, +0x34/+0x38, +0x4c/+0x50",
+        "gated by game-context record+0x2d1c!=0 && FUN_113f9bb0(local_c8,puStack_bc) && FUN_116698c0()",
+        "source obj = FUN_116734c0(); passive list #1 = [obj[0x66] .. obj[0x67]) stride 3 words; equip = FUN_10855a60(piStack_cc); equip passive base = equip+0x198",
+        "per entry: grp = FUN_1050ebc0(*puVar5); passiveSkillGroupID = *(grp+0x10); passiveSkillName via FUN_108199e0 buffer; passiveSkillValue = accumulator+ptr",
+        "list #2: for (p=*piStack_cc; p!=piStack_cc[1]; p+=3) { grp=FUN_1050ebc0(*p); emit }",
+        "both flushed with key \"arrayPassiveSkillData\""
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder. Same passive-group record offsets (+0x10 groupID) as sibling; stride-3 passive entry layout confirmed.",
+      "notes": "FUN_116734c0/FUN_11669730/FUN_11673530/FUN_116698c0 = pet/mount context accessors (out of this chunk)."
+    },
+    {
+      "address": "0x109f5c90",
+      "currentName": "FUN_109f5c90",
+      "proposedName": "RegisterGuildAirshipCommerceMessageHandlers",
+      "purpose": "Bulk registration of ~20 guild / airship-occupy / sea-sand / hunter-team-battle commerce message handlers (C2AS_GetBoLaiDaoDatas, C2AS_GetGuildCommerceBuffData, ExecuteLevelMatch, AS2C_GetDynamicShipData, ReqAllCommerce, ReqSeaSandData, etc.). Same key->handler binding idiom as 0x109a4c60.",
+      "confidence": "medium",
+      "subsystem": "guild-commerce (tangential)",
+      "formulas": [
+        "notable handlers: FUN_109f6650 (BuildCommerceBufferIconVO), FUN_109f7eb0 (ship/rank VO), AirshipOccupyView::BuildLevelInfoVO",
+        "\"C2AS_GetGuildCommerceBuffData\" among the registered keys"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative for the guild-commerce/airship RPC surface, but NOT combat buffs/skills. Included only because C2AS_GetGuildCommerceBuffData touches commerce 'buff' icons.",
+      "notes": "Largely out-of-category (guild sailing/commerce). Documented for completeness."
+    },
+    {
+      "address": "0x109f6650",
+      "currentName": "FUN_109f6650",
+      "proposedName": "BuildCommerceBufferIconVO",
+      "purpose": "Builds bufferIconArray of BufferIconVo for the hunter-team-battle/guild commerce buff display: {deadlineTime, iconIndex, isOwned, commerceName, buffDes}. Iterates the available-goods list (CCommerceInfo::BuildAvailableGoodsList) stride 0xc.",
+      "confidence": "medium",
+      "subsystem": "guild-commerce (tangential)",
+      "formulas": [
+        "server time uStack_44 = FUN_111f8d20(); localtime64_s(&tm,&uStack_44)",
+        "goods list built into [iStack_98..iStack_94) stride 0xc; count = (iStack_94-iStack_98)/0xc",
+        "per entry (base = iStack_9c+iStack_98): iconIndex = *(base); isOwned(bool) = *(base+4); deadlineTime = *(base+8) - uStack_44._4_4_   (expiry - current time)",
+        "commerceName = *(commerceRec+0x28); buffDes = buffRec+0x3ac (via FUN_104fd710)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO. These are guild-commerce buffs (time-limited), not combat status effects; deadlineTime = remaining seconds computed client-side from server timestamp.",
+      "notes": "buffDes text at record+0x3ac recurs in the ship VO too."
+    },
+    {
+      "address": "0x109f7eb0",
+      "currentName": "FUN_109f7eb0",
+      "proposedName": "BuildHunterTeamBattleShipVO",
+      "purpose": "Airship/guild-sail selection VO builder: shipName, shipDes, bufferDes, requireDes, indexIcon, shipID, chosenShipId/Name, isAuthority, and rankInfoArray of RankVo {hunterGroupName, currentValue, commerceID, isLock, guildID}. Out of skills category.",
+      "confidence": "low",
+      "subsystem": "guild-commerce (tangential)",
+      "formulas": [
+        "rank entries stride 0x36; count = (piVar1 - iVar4)/0x36",
+        "bufferDes = buffRec+0x3ac; isLock = (*(base+4) != 0)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only. Not skill/buff related.",
+      "notes": "Documented briefly; guild airship UI."
+    },
+    {
+      "address": "0x10a18d70",
+      "currentName": "FUN_10a18d70",
+      "proposedName": "FormatRingBufferStatsDebugString",
+      "purpose": "Debug/telemetry: formats \"Count=%d,Average=%d\" plus per-sample values from a ring buffer into a 256-byte string. CryEngine debug helper.",
+      "confidence": "medium",
+      "subsystem": "cryengine-plumbing",
+      "formulas": [
+        "count = (*param_1=='\\0') ? *(param_1+4) : *(param_1+0x14); average = FUN_10a18ed0()",
+        "ring wrap: idx' = idx + *(param_1+4) + 1; if idx'>=cap idx'-=cap; sample = *(*(param_1+8) + idx'*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only debug.",
+      "notes": "Not skill-related. Stack-canary DAT_11e11390 present."
+    },
+    {
+      "address": "0x10a21390",
+      "currentName": "FUN_10a21390",
+      "proposedName": "ThrowBufferOverflow",
+      "purpose": "Throws std::exception(\"buffer overflow\") via _CxxThrowException. Compiler/CRT boilerplate.",
+      "confidence": "high",
+      "subsystem": "cryengine-plumbing",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only.",
+      "notes": "Stock. Duplicate of 0x10a21a90."
+    },
+    {
+      "address": "0x10a21a90",
+      "currentName": "FUN_10a21a90",
+      "proposedName": "ThrowBufferOverflow_dup",
+      "purpose": "Identical std::exception(\"buffer overflow\") thrower.",
+      "confidence": "high",
+      "subsystem": "cryengine-plumbing",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only.",
+      "notes": "Stock CRT."
+    },
+    {
+      "address": "0x10a42e30",
+      "currentName": "FUN_10a42e30",
+      "proposedName": "zlib_deflate",
+      "purpose": "zlib deflate() compression state machine. Writes gzip header (magic 0x1f 0x8b, method 0x08) and trailer, drives the block compressor via the state-function table PTR_FUN_11d9b5d0. Pure stock zlib.",
+      "confidence": "high",
+      "subsystem": "cryengine-plumbing",
+      "formulas": [
+        "flush arg param_2 must be <=4; states 0x2a(INIT), 0x71(BUSY), 0x29a(FINISH); gzip header bytes 0x1f,0x8b,0x08; return codes 0 / 1(STREAM_END) / 0xfffffffb(BUF_ERROR) / 0xfffffffe(STREAM_ERROR)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (network/asset compression). Not skill logic.",
+      "notes": "Strings \"buffer error\"/\"stream error\". Textbook zlib; do not re-document."
+    },
+    {
+      "address": "0x10a4ca80",
+      "currentName": "FUN_10a4ca80",
+      "proposedName": "CacheAnimEventNameIds",
+      "purpose": "One-time (guard byte at param_1+0x49) caching of ~0x49 animation-event name string ids via FUN_10a76aa0 (footstep/foley/sound/ForceFeedback/rage events/monster locomotion variants). Populates an id table indexed 0..0x48.",
+      "confidence": "medium",
+      "subsystem": "cryengine-animation",
+      "formulas": [
+        "guard: if *(param_1+0x49)=='\\0' populate; then set *(param_1+0x49)=1",
+        "rage-related anim events cached at [0x1a]=ragep,[0x1b]=raged,[0x1c]=ragen,[0x1d]=rageg,[0x1e]=ragec"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (animation/audio event name interning). Rage anim-event names noted but not the rage mechanic itself.",
+      "notes": "The ragep/raged/ragen/rageg/ragec names correspond to rage animation cues (bushido/rage system visuals); mechanic lives elsewhere."
+    },
+    {
+      "address": "0x10a51180",
+      "currentName": "FUN_10a51180",
+      "proposedName": "CActor::LoadNpcSkillFile",
+      "purpose": "During entity/actor init, resolves the NPC skill definition file from entity properties: tries \"PropertiesInstance.NPCSkillFile\", then \"Skill\", then CInfoRecord::GetModelString(\"PropertyCustom\", \".AISetting.Skill\"). Loads the resolved skill file (FUN_11070f80 -> FUN_11071b90) and stores the skill-set handle at param_1+0xbc; also caches a bbox at +0x149c/+0x14a8.",
+      "confidence": "medium",
+      "subsystem": "npc-monster-skills",
+      "formulas": [
+        "skill file lookup priority: PropertiesInstance.NPCSkillFile > Skill > PropertyCustom.AISetting.Skill",
+        "on success: handle = FUN_110785d0(param_1); *(param_1+0xbc) = handle",
+        "ref-counted string cleanup via DAT_123be268 allocator accounting (-0xd - len)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-relevant: identifies how a monster/NPC binds its skill set (NPCSkillFile property). A server simulating monster skills needs the same skill-file->skillset association; loading itself is client-side here.",
+      "notes": "param_1+0xbc = active NPC skill-set pointer used by AI."
+    },
+    {
+      "address": "0x10a54e40",
+      "currentName": "FUN_10a54e40",
+      "proposedName": "CActor::LoadStanceAndCharacterParams",
+      "purpose": "Loads player/actor stance definitions (stanceId + movement speeds, colliders, view/weapon offsets, lean offsets) and character sound/footstep-effect params from entity properties. FOV values scaled by DAT_11de98c0 (deg->rad). Pure CryEngine actor setup.",
+      "confidence": "medium",
+      "subsystem": "cryengine-actor",
+      "formulas": [
+        "stance fields: stanceId, normalSpeed, maxSpeed, walkSpeed, runSpeed, playbackRunSpeed, customStrafeMultiplier, customBackwardsMultiplier, sprintSpeed, heightCollider, heightPivot",
+        "aimFOV/lookFOV/lookInVehicleFOV *= DAT_11de98c0; lookInVehicleFOV defaults to lookFOV if absent",
+        "swimming: enableswimming -> waterlevel(+0x533), groundbottom(+0x534); enablescar(+0x535)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (rendering/movement params). Movement speeds could matter for server movement validation but are not skill/buff data.",
+      "notes": "Not skill/buff. Large but stock actor-param loader."
+    },
+    {
+      "address": "0x10a63ae0",
+      "currentName": "FUN_10a63ae0",
+      "proposedName": "CItem::SetupWeaponAttachmentsAndBowRage",
+      "purpose": "Rebuilds a weapon's render attachments and enables bow rage-charge visual attachments. Explicitly force-shows attachments \"weapon_item_attachment\", \"melee_arrow_item\", \"melee_arrow_secrect\", \"bow_rage01_A\", \"bow_rage01_B\" (vtbl+0x44 = SetHidden(1)->show). Client-side item visuals.",
+      "confidence": "medium",
+      "subsystem": "cryengine-item-visuals",
+      "formulas": [
+        "attachment names hard-coded; bow_rage01_A / bow_rage01_B are the bow rage/charge stage effect attachments",
+        "scale local_28 = 0x3f800000 (=1.0f)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (weapon model attachment rendering, incl. bow rage visuals). Rage mechanic itself is elsewhere.",
+      "notes": "bow_rage attachments are the only skill-adjacent detail (bow charge/rage visuals)."
+    },
+    {
+      "address": "0x10a958d0",
+      "currentName": "FUN_10a958d0",
+      "proposedName": "CBTNode_TemptGasBuffCheck::CacheBlackboardKeys",
+      "purpose": "Behavior-tree node init: resolves the target entity and caches two blackboard-key handles \"CurState\" (-> param_1[10]) and \"TemptGasBuffCheck\" (-> param_1[0xb]). Used by monster AI to branch on the tempt-gas (bait/lure) buff state.",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "entity = ctx(0x50 vtbl+0x2c)(param_1[2]); param_1[9] = FUN_104789d0(entity vtbl+0x48)",
+        "if param_1[9]!=0: param_1[10] = blackboard-key(\"CurState\"); param_1[0xb] = blackboard-key(\"TemptGasBuffCheck\")",
+        "blackboard-key id = FUN_1046dc60(FUN_113168d0(name))"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: monster AI reads a 'TemptGasBuffCheck' blackboard flag to alter behavior when the tempt-gas (bait) buff is active. A server that simulates monster AI must set/read this state.",
+      "notes": "TemptGas = lure/bait buff area (see MHBuffArea nodes below)."
+    },
+    {
+      "address": "0x10a9ff40",
+      "currentName": "FUN_10a9ff40",
+      "proposedName": "CBTNode_MHBuffArea::Enter",
+      "purpose": "Behavior-tree action node: finds the entity's \"MHBuffArea\" game-object extension and activates a buff area, passing a buff id read from the node's parameter array (param_1+0x2c). Returns 2 (success/running) if the extension exists, else 1.",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "ext = entityScriptTable(+0x144)(entityId)->QueryExtension(\"MHBuffArea\")",
+        "params vec at param_1+0x2c: require count>1 ((p[1]-p[0]>>2)>1) and second-vec size>4; buffId source = *(p[3]+4) if >=0 -> FUN_10493d50(buffId,&local_8)",
+        "ext->vtbl+0x74 (StartBuffArea)(buffId(local_8), enableFlag(local_c=1))",
+        "return 2 on success else 1"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: creates/activates an AoE buff zone tied to a buff id. Server owning monster AI/AoE buffs must replicate MHBuffArea start with this buff id.",
+      "notes": "Pairs with exit node 0x10aa0190 (StartBuffArea vtbl+0x74 vs Stop vtbl+0x84)."
+    },
+    {
+      "address": "0x10aa0000",
+      "currentName": "FUN_10aa0000",
+      "proposedName": "CBuffAreaPorcess::RegisterNodeParams",
+      "purpose": "Registers the behavior-tree node type \"CBuffAreaPorcess\" and its parameter schema: param slot 0 (attribute, type 3) and \"BuffIDBBName\" as blackboard-input (type 1, index 1). Node-definition boilerplate (FUN_1048b080 param registration).",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "FUN_1048b080(node=\"CBuffAreaPorcess\", key=DAT_11cc0668, slot=0, type=3, isBB=0)",
+        "FUN_1048b080(node=\"CBuffAreaPorcess\", key=\"BuffIDBBName\", slot=1, type=1, isBB=1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: declares the buff-area BT node reads its buff id from a blackboard variable named by BuffIDBBName.",
+      "notes": "(slot,type,isBB) args from FUN_1048b080; type codes: 1=string/bb-name,2=?,3=attr,5=int (see sibling registrations)."
+    },
+    {
+      "address": "0x10aa0190",
+      "currentName": "FUN_10aa0190",
+      "proposedName": "CBTNode_MHBuffArea::Exit",
+      "purpose": "Behavior-tree node exit counterpart to 0x10a9ff40: queries the \"MHBuffArea\" extension and stops/deactivates the buff area (vtbl+0x84). Returns 2 on success else 1.",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "local_8 = FUN_10496940(0,&local_8) (read stored buff-area handle)",
+        "ext = QueryExtension(\"MHBuffArea\"); ext->vtbl+0x84 (StopBuffArea)(handle)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: ends an AoE buff zone.",
+      "notes": "vtbl+0x84 = stop vs +0x74 = start."
+    },
+    {
+      "address": "0x10aa5760",
+      "currentName": "FUN_10aa5760",
+      "proposedName": "CNpcSkillPlay::RegisterNodeParams",
+      "purpose": "Registers the behavior-tree node \"CNpcSkillPlay\" (NPC/monster skill cast/play node) and its parameter schema: StateName(str), Duration, bWaitCombo(bool), bWaitDodge(bool).",
+      "confidence": "high",
+      "subsystem": "npc-monster-skills",
+      "formulas": [
+        "FUN_1048b080(\"CNpcSkillPlay\",\"StateName\", slot=0, type=1, isBB=0)",
+        "FUN_1048b080(\"CNpcSkillPlay\",\"Duration\", slot=1, type=2, isBB=0)",
+        "FUN_1048b080(\"CNpcSkillPlay\",\"bWaitCombo\", slot=2, type=3, isBB=0)",
+        "FUN_1048b080(\"CNpcSkillPlay\",\"bWaitDodge\", slot=3, type=3, isBB=0)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: defines the monster skill-play action — a named animation State, a Duration, and flags to wait for combo continuation / dodge window. A server driving monster skills should honor Duration and the wait-combo/wait-dodge semantics.",
+      "notes": "type 2 = numeric/float (Duration), type 3 = bool, type 1 = string. Key node for monster skill timing."
+    },
+    {
+      "address": "0x10aa5ed0",
+      "currentName": "FUN_10aa5ed0",
+      "proposedName": "CPetAddGroupBuff::RegisterNodeParams",
+      "purpose": "Registers the behavior-tree node \"CPetAddGroupBuff\" and its parameters: GroupId(int, slot0 type5) and InputBBName(blackboard input, slot1 type1). Pet applies a group buff by GroupId.",
+      "confidence": "high",
+      "subsystem": "pet-buff",
+      "formulas": [
+        "FUN_1048b080(\"CPetAddGroupBuff\",\"GroupId\", slot=0, type=5, isBB=0)",
+        "FUN_1048b080(\"CPetAddGroupBuff\",\"InputBBName\", slot=1, type=1, isBB=1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: a pet action node that applies a buff GROUP (GroupId) to targets, with an optional blackboard-driven input. Server must map GroupId -> set of buffs and apply.",
+      "notes": "type 5 = integer literal param. Complements suit-skill 'PassiveGroup' grouping concept."
+    },
+    {
+      "address": "0x10aaa460",
+      "currentName": "FUN_10aaa460",
+      "proposedName": "InitCombatBehaviorTreeSystem",
+      "purpose": "Initializes the combat behavior-tree subsystem: lazily creates BT manager singletons, calls RegisterCombatBehaviorTreeNodes(), then reads cvars g_BT_LoadAtStartup / g_BT_BuffLoad / g_BT_OptimizeMode to optionally preload BT assets and buff BTs.",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "if cvar g_BT_LoadAtStartup != 0 -> FUN_10aac650() (preload trees)",
+        "if g_BT_BuffLoad != 0 && g_BT_OptimizeMode != 0 && !dedicated(DAT_1202e818+0x209) -> FUN_10aaa7d0() (preload/optimize buff BTs)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: RegisterCombatBehaviorTreeNodes wires up all the monster combat/skill/buff BT nodes (incl. CNpcSkillPlay, CBuffAreaPorcess, CPetAddGroupBuff). g_BT_BuffLoad gates buff-tree loading; optimize path skipped on dedicated server (offset +0x209 = isDedicated flag).",
+      "notes": "DAT_1202e818+0x209 recurs as the dedicated-server / no-render flag across the codebase."
+    },
+    {
+      "address": "0x10ab9690",
+      "currentName": "FUN_10ab9690",
+      "proposedName": "CBTNode_AddBuff::LoadConfig",
+      "purpose": "XML config loader for a buff-related BT node (node name at DAT_11cc19cc). Reads Weight (float @ param_1+4), \"BuffID\" (@ param_1+0x18), \"Enable\" (bool @ param_1+0x1c). Returns true if Weight>=0.",
+      "confidence": "medium",
+      "subsystem": "monster-ai-buff",
+      "formulas": [
+        "node-name compare against DAT_11cc19cc; on match:",
+        "Weight = float(attr 0x11dbb648) @ param_1+4",
+        "BuffID (int attr \"BuffID\") @ param_1+0x18",
+        "Enable (bool attr \"Enable\") @ param_1+0x1c",
+        "valid if (*pfWeight >= 0.0)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: this BT node applies/toggles a specific BuffID with an Enable flag. Buff id and enable are the load-bearing fields.",
+      "notes": "vtbl+0x74 = read-int attr, +0x50 = read-bool, +0x64(100) = read-float, +0x7c = read-string. Weight+0x11dbb648 pattern shared by sibling node loaders."
+    },
+    {
+      "address": "0x10ab97c0",
+      "currentName": "FUN_10ab97c0",
+      "proposedName": "CBTNode_SkillEffect::LoadConfig",
+      "purpose": "XML config loader for the \"SkillEffect\" BT node: reads node id (0x11da7300), Weight (float @ param_1+4), and \"SkillEffectName\". Plays a named skill effect during a skill.",
+      "confidence": "medium",
+      "subsystem": "npc-monster-skills",
+      "formulas": [
+        "match node name \"SkillEffect\"; Weight @ param_1+4 (attr 0x11dbb648); read string \"SkillEffectName\"; valid if Weight>=0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only mostly (visual/audio skill effect), but part of the skill BT; server generally need not simulate the effect name.",
+      "notes": "Sibling loader idiom to 0x10ab9690/0x10ab9cd0."
+    },
+    {
+      "address": "0x10ab9cd0",
+      "currentName": "FUN_10ab9cd0",
+      "proposedName": "CBTNode_SkillRotate::LoadConfig",
+      "purpose": "XML config loader for the \"SkillRotate\" BT node: makes the monster rotate/aim toward its target during a skill within angle limits. Reads EventName, Weight, NeedRotate(bool), EnableLeftMaxAngle/EnableRightMaxAngle(bool), and LeftMaxAngle/RightMaxAngle/AdditionalAngle (floats).",
+      "confidence": "high",
+      "subsystem": "npc-monster-skills",
+      "formulas": [
+        "match \"SkillRotate\"; read string \"EventName\"; Weight(float) @ param_1+4",
+        "NeedRotate(bool) @ param_1+0x28",
+        "EnableLeftMaxAngle(bool) @ param_1+0x29, EnableRightMaxAngle(bool) @ param_1+0x2a",
+        "LeftMaxAngle(float) @ param_1+0x18, RightMaxAngle(float) @ param_1+0x1c, AdditionalAngle(float) @ param_1+0x20",
+        "valid if Weight>=0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative-if-server-sim: defines how far a monster may re-orient toward its target during a skill cast (asymmetric left/right max angles + additional angle). Directly affects hit geometry a server must reproduce for skill attack validation.",
+      "notes": "Angle fields are floats (likely degrees). NeedRotate gates whether rotation happens at the named EventName."
+    },
+    {
+      "address": "0x10b2b510",
+      "currentName": "FUN_10b2b510",
+      "proposedName": "LoadBuffEffectsConfig",
+      "purpose": "Loads /Libs/BuffEffects.xml (root \"BuffEffects\"), iterating an effects table and an \"EffectsTMConfig\" table keyed by \"bodysize\" with per-entry \"attachment\", Position, Angle, Scale. Registers buff visual-effect definitions. Client rendering config.",
+      "confidence": "medium",
+      "subsystem": "buff-visuals",
+      "formulas": [
+        "reads bodysize-keyed transform config: attachment name + Position/Angle/Scale (FUN_10b312e0 registers the parsed TM entry)",
+        "TM entry copied: fields piVar10[1..4] + [5..6] (transform) + [7] (id)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (buff particle/effect placement per monster body-size).",
+      "notes": "Buff EFFECT visuals, not buff mechanics. Twin of 0x10b348e0."
+    },
+    {
+      "address": "0x10b348e0",
+      "currentName": "FUN_10b348e0",
+      "proposedName": "LoadBuffEffectsConfig_Instanced",
+      "purpose": "Instance-guarded variant (flag byte @ param_1+0x1d) of the BuffEffects.xml loader: parses the same BuffEffects/EffectsTMConfig structure but dispatches per-entry through an object-method table (piVar13[idx+7]) to build effect factory objects, then sets the loaded flag.",
+      "confidence": "medium",
+      "subsystem": "buff-visuals",
+      "formulas": [
+        "guard: if (char)param_1[0x1d]==0 load...; then *(param_1+0x1d)=1",
+        "per effect index (local_30 < 0x16): factory = (param_1[local_30+7])(); store via FUN_10b34f00",
+        "EffectsTMConfig entries parsed identically to 0x10b2b510 (bodysize/attachment/Position/Angle/Scale)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (buff effect object registry).",
+      "notes": "0x16 (22) = number of effect-type slots. Rendering only."
+    },
+    {
+      "address": "0x10b57fe0",
+      "currentName": "FUN_10b57fe0",
+      "proposedName": "LoadCommercializeWeaponConfig",
+      "purpose": "Loads /Libs/common/commercializeWeapon.xml, reading per-entry weaponID, strState, strAGEventName, (0x11dca14c) and effectID. Config for cosmetic 'commercialized' weapon state effects. (Function aborts via FUN_10c3d580 mid-parse in this build.)",
+      "confidence": "low",
+      "subsystem": "item-visuals (tangential)",
+      "formulas": [
+        "fields: weaponID(int), strState(str), strAGEventName(str), field 0x11dca14c(int), effectID(int)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (weapon cosmetic/effect binding).",
+      "notes": "Two unreachable blocks flagged by decompiler; likely inlined/aborted. Not core skill logic."
+    }
+  ]
+}

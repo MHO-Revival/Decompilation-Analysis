@@ -1,0 +1,356 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "0x10189ae0",
+      "currentName": "FUN_10189ae0",
+      "proposedName": "TlvSuitSkillGroups_PackArray_v1",
+      "purpose": "TDR pack (write) of the repeated 'suitSkillGroupData' array of TlvSuitSkillGroups. Writes a 1-byte element count (*param_1, hard-capped at 0x28=40, returns -7 if exceeded) then, per element, reserves a 4-byte length via FUN_1010bf70, serializes one element via FUN_10188df0, and backfills the length via FUN_1010c3c0. Whole array is itself length-prefixed. FUN_1010c5f0 emits the TDR tag.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "protocolFields": [
+        "count: uint8 @ offset 0 — element count, max 0x28",
+        "elements[]: sub-struct (FUN_10188df0) — length-delimited repeated, wire type 5"
+      ],
+      "serverRelevance": "Server must produce this exact wire layout (count byte + per-element length-prefixed blobs, 40-element cap) when sending suit-skill-group data.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Write-side counterpart of read function sub_10189FA0 (TlvSuitSkillGroups). Element cap 0x28 confirms max 40 groups."
+    },
+    {
+      "address": "0x10189bf0",
+      "currentName": "FUN_10189bf0",
+      "proposedName": "TlvSuitSkillGroups_PackArray_v2",
+      "purpose": "Near-identical twin of FUN_10189ae0: TDR pack of the suitSkillGroupData array (count byte max 0x28, per-element length-prefixed) but serializes each element via FUN_10188f70 instead of FUN_10188df0. Represents the second generated encoding variant of the same struct (differing scalar int encoding).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "protocolFields": [
+        "count: uint8 @ offset 0 — element count, max 0x28",
+        "elements[]: sub-struct (FUN_10188f70) — length-delimited repeated"
+      ],
+      "serverRelevance": "Same wire format as FUN_10189ae0; server must match whichever variant the client uses on a given channel.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Paired write variant with FUN_10189ae0 (FUN_10188f70 vs FUN_10188df0 element codec)."
+    },
+    {
+      "address": "0x10189dd0",
+      "currentName": "FUN_10189dd0",
+      "proposedName": "TlvSuitSkillGroups_Unpack_v1",
+      "purpose": "TDR unpack (read) of TlvSuitSkillGroups. Reads tag via FUN_1010ccb0, switches on field_id (tag>>4): field_id 1 => reads 1 byte into *param_1 (groupCnt) and sets presence bit 0x1 in flags word @ +0x8ea9; field_id 2 => reads a byte-size length (FUN_1010c870), loops reading repeated elements via FUN_101891c0 until position == start+length (max 0x28 iterations), stores element count in *param_1, sets presence bit 0x2; unknown field_ids skipped via FUN_1010d4f0. Bounds-checks against buffer length.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "protocolFields": [
+        "field_id 1: groupCnt uint8 @ offset 0 (presence bit 0x1)",
+        "field_id 2: suitSkillGroupData repeated sub-struct via FUN_101891c0 (presence bit 0x2), len-delimited, max 0x28 elements",
+        "presence_flags: uint32 @ offset 0x8ea9"
+      ],
+      "serverRelevance": "Server must parse this to consume client-supplied suit-skill-group data; enforce 0x28 element cap and length framing.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Auto-doc TlvSuitSkillGroups gives field2 tag 0x23 (wire3); decompiled read treats field2 as a length-delimited repeated sub-struct (reads byte-size prefix then loops elements) — semantically a repeated struct array, not a scalar. Field count/wire framing matches; wire-type nibble in doc is misleading.",
+      "notes": "Twin of FUN_10189fa0 (doc address sub_10189FA0). This variant uses FUN_101891c0 element reader."
+    },
+    {
+      "address": "0x10189fa0",
+      "currentName": "FUN_10189fa0",
+      "proposedName": "TlvSuitSkillGroups_Unpack_v2",
+      "purpose": "TDR unpack of TlvSuitSkillGroups, twin of FUN_10189dd0 but reads repeated elements via FUN_10189400. field_id 1 => groupCnt uint8 @0 (presence 0x1); field_id 2 => length-delimited repeated suitSkillGroupData via FUN_10189400 (presence 0x2), element count -> *param_1, max 0x28. This is the address the auto-doc names sub_10189FA0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "protocolFields": [
+        "field_id 1: groupCnt uint8 @ offset 0 (presence bit 0x1)",
+        "field_id 2: suitSkillGroupData repeated sub-struct via FUN_10189400 (presence bit 0x2), len-delimited, max 0x28",
+        "presence_flags: uint32 @ offset 0x8ea9"
+      ],
+      "serverRelevance": "Authoritative read path for TlvSuitSkillGroups; server must reproduce framing.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Matches auto-doc field set (groupCnt uint8 f1, suitSkillGroupData f2->sub_10189400). No material discrepancy; doc field2 wire nibble 0x23 vs actual len-delimited repeated is a wire-type labelling nuance.",
+      "notes": "Confirmed as doc's sub_10189FA0 by matching element codec FUN_10189400."
+    },
+    {
+      "address": "0x1018a240",
+      "currentName": "FUN_1018a240",
+      "proposedName": "TlvSuitSkillGroups_TextDump",
+      "purpose": "TdrBufUtil debug/human-readable text serializer for TlvSuitSkillGroups. Prints [groupCnt] as '0x%02x' (uint8, *param_1, capped 0x28), then iterates the suitSkillGroupData array formatting each element header '%s[%u]%c' with label '[suitSkillGroupData]' and recursing into element text-dump FUN_10189710. Not a wire codec — produces diagnostic text.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "protocolFields": [
+        "groupCnt: uint8 @ offset 0",
+        "suitSkillGroupData[]: element text via FUN_10189710"
+      ],
+      "serverRelevance": "Diagnostic only (TdrBufUtil.cpp text dump); confirms field names/types but server does not need to emit this format.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Field-name source ('groupCnt','suitSkillGroupData') corroborates TlvSuitSkillGroups doc."
+    },
+    {
+      "address": "0x1018a9d0",
+      "currentName": "FUN_1018a9d0",
+      "proposedName": "TlvAttrsSubstruct_TextDump",
+      "purpose": "TdrBufUtil debug text serializer for a sub-struct containing an '[attrs]' field. Prints a leading count/scalar (via FUN_1024a290) then recurses into an attribute-array text-dump FUN_102074e0 under label '[attrs]'. Diagnostic text, not wire.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "count/scalar: @ offset 0 (*param_1)",
+        "attrs[]: attribute sub-array via FUN_102074e0"
+      ],
+      "serverRelevance": "Diagnostic only; identifies an 'attrs' attribute-list container but exact parent TLV struct unresolved.",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Parent struct name not resolvable from strings alone; the '[attrs]' label suggests an attribute/stat container (candidate TlvAttrData/TlvAttributeItem family)."
+    },
+    {
+      "address": "0x1018c5b0",
+      "currentName": "FUN_1018c5b0",
+      "proposedName": "TlvByteBufStruct_Unpack_v1",
+      "purpose": "TDR unpack of a struct with a scalar field + a fixed-capacity byte array. field_id 1 => scalar read via FUN_1010cbd0 (presence bit 0x1, flags word @ +0x84 (param_1[0x21])); field_id 2 => length-delimited raw byte array copied byte-by-byte into buffer at (param_1+4), capped at 0x80 (128) bytes, count stored in *param_1; other field_ids skipped via FUN_1010d4f0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_id 1: scalar via FUN_1010cbd0 @ offset 0 (presence bit 0x1)",
+        "field_id 2: byte[] @ offset 4, len-delimited, max 0x80 bytes (presence bit 0x2)",
+        "presence_flags: uint32 @ offset 0x84 (word index 0x21)"
+      ],
+      "serverRelevance": "Server must honor the 128-byte cap on the byte array and the length framing when exchanging this struct.",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Twin of FUN_1018c730 (doc sub_1018C730). A scalar + 128-byte blob = likely a name/string or opaque payload container; exact TLV name unresolved."
+    },
+    {
+      "address": "0x1018c730",
+      "currentName": "FUN_1018c730",
+      "proposedName": "TlvByteBufStruct_Unpack_v2",
+      "purpose": "Twin of FUN_1018c5b0 (this is doc address sub_1018C730). Same layout: field_id 1 scalar (here read via FUN_1010c870, the alternate int codec), field_id 2 length-delimited byte array into (param_1+4) capped 0x80, count -> *param_1. Presence flags @ param_1[0x21].",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_id 1: scalar via FUN_1010c870 @ offset 0 (presence bit 0x1)",
+        "field_id 2: byte[] @ offset 4, len-delimited, max 0x80 (presence bit 0x2)",
+        "presence_flags: uint32 @ word index 0x21"
+      ],
+      "serverRelevance": "Same as FUN_1018c5b0; 128-byte cap and framing must be reproduced.",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "XML structure sub_1018C730.xml exists in TLV_DOCS/structures but no named .md; struct name unresolved. Layout (scalar + 0x80 byte buffer) recovered here.",
+      "notes": "FUN_1010c870 vs FUN_1010cbd0 is the only diff from FUN_1018c5b0 (scalar int width/signedness variant)."
+    },
+    {
+      "address": "0x1018ed90",
+      "currentName": "FUN_1018ed90",
+      "proposedName": "TlvGuideBookAutoOpen_Unpack_v1",
+      "purpose": "TDR unpack of the small sub-struct referenced as 'isFisrtAutoOpenGuideBook' (sub_1018EE90 in docs). Three fields: field_id 1 => scalar via FUN_1010cbd0 into (param_1) (presence 0x1); field_id 2 => scalar via FUN_1010cbd0 into (param_1+4) (presence 0x2); field_id 3 => 1 byte into (param_1+8) (presence 0x4). Flags word @ (param_1+9). Unknown fields skipped.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvGuideBookData"],
+      "protocolFields": [
+        "field_id 1: int32 @ offset 0 (presence bit 0x1)",
+        "field_id 2: int32 @ offset 4 (presence bit 0x2)",
+        "field_id 3: uint8 @ offset 8 (presence bit 0x4)",
+        "presence_flags: uint32 @ offset 9"
+      ],
+      "serverRelevance": "Sub-struct of the guide-book data; server must serialize its 3 fields correctly (2x int32 + 1x uint8).",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "Auto-doc TlvGuideBookData labels field2 'isFisrtAutoOpenGuideBook' as a single int32 pointing at sub_1018EE90 — but sub_1018EE90 is itself a 3-field struct (two int32 + a uint8), not a scalar. Doc collapses the sub-struct into a scalar.",
+      "notes": "Twin of FUN_1018ee90."
+    },
+    {
+      "address": "0x1018ee90",
+      "currentName": "FUN_1018ee90",
+      "proposedName": "TlvGuideBookAutoOpen_Unpack_v2",
+      "purpose": "Twin of FUN_1018ed90 (this is doc address sub_1018EE90). Same 3-field layout but scalar fields read via FUN_1010c870 (alternate int codec). field1 int32 @0, field2 int32 @4, field3 uint8 @8, flags @ +9.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvGuideBookData"],
+      "protocolFields": [
+        "field_id 1: int32 @ offset 0 (presence bit 0x1)",
+        "field_id 2: int32 @ offset 4 (presence bit 0x2)",
+        "field_id 3: uint8 @ offset 8 (presence bit 0x4)",
+        "presence_flags: uint32 @ offset 9"
+      ],
+      "serverRelevance": "Same as FUN_1018ed90; part of guide-book sync.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Confirms sub_1018EE90 is a 3-field struct, contradicting the TlvGuideBookData doc which treats field2 as a plain int32.",
+      "notes": "Matches doc's sub_1018EE90 reference for TlvGuideBookData.field2."
+    },
+    {
+      "address": "0x1018fc30",
+      "currentName": "FUN_1018fc30",
+      "proposedName": "TlvGuideBookData_TextDump",
+      "purpose": "TdrBufUtil debug text serializer for TlvGuideBookData. Prints [guideBookChapterCount] (int32, *param_1, range 0..8, returns -6/-7 on out-of-range), iterates guideBookChapterInfos array (0..count, each via FUN_1018f060), then [isFisrtAutoOpenGuideBook] uint8 @ param_1[0x1b], [weaopnId] uint8 @ (param_1+0x6d), and [guideActionInfos] via FUN_1018e890. Diagnostic text, not wire.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvGuideBookData"],
+      "protocolFields": [
+        "guideBookChapterCount: int32 @ offset 0 (0..8)",
+        "guideBookChapterInfos[]: repeated sub-struct via FUN_1018f060, max 8",
+        "isFisrtAutoOpenGuideBook: uint8 @ word 0x1b",
+        "weaopnId: uint8 @ byte offset 0x6d",
+        "guideActionInfos: sub-struct via FUN_1018e890"
+      ],
+      "serverRelevance": "Diagnostic only, but reveals true cardinality: server must send guideBookChapterInfos as a bounded array (max 8), not a scalar.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvGuideBookData auto-doc is materially wrong: (1) 'guideBookChapterInfos' (field5) is a REPEATED sub-struct array (max 8, FUN_1018f060/text FUN_1018e580), not a single int32 @ offset 43; (2) 'isFisrtAutoOpenGuideBook' is uint8 not int32; (3) 'weaopnId' is uint8 @0x6d not a generic struct. Field ordering in the dump (count, chapterInfos[], autoOpen, weaopnId, guideActionInfos) also differs from the doc's field_id order.",
+      "notes": "'weaopnId' typo preserved from original strings."
+    },
+    {
+      "address": "0x10190f10",
+      "currentName": "FUN_10190f10",
+      "proposedName": "TlvSearchItemPool_TextDump",
+      "purpose": "TdrBufUtil debug text serializer for TlvSearchItemPool. Prints [iSearchCount] (*param_1), [iRrefreshCount] (param_1[1]), [iVipRefreshCount] (param_1[2]) as int32, then a FIXED array of 8 [vItemPoolList] entries (each via FUN_10190480), then [iLastUpdateTime] (param_1[0x2b]). Diagnostic text.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvSearchItemPool"],
+      "protocolFields": [
+        "iSearchCount: int32 @ word 0",
+        "iRrefreshCount: int32 @ word 1",
+        "iVipRefreshCount: int32 @ word 2",
+        "vItemPoolList[8]: sub-struct via FUN_10190480 (words 3..0x2a)",
+        "iLastUpdateTime: int32 @ word 0x2b"
+      ],
+      "serverRelevance": "Server sends item-pool/search state; must emit vItemPoolList as an 8-element array and iLastUpdateTime after it.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvSearchItemPool auto-doc calls vItemPoolList a single int32 @ offset 43; it is actually a fixed array of 8 sub-structs (words 3..42). iLastUpdateTime is @ word 0x2b (43), consistent with doc's '@ offset 43' once vItemPoolList's 8 slots are accounted for.",
+      "notes": "Field names match doc (iSearchCount/iRrefreshCount/iVipRefreshCount/vItemPoolList/iLastUpdateTime)."
+    },
+    {
+      "address": "0x10192230",
+      "currentName": "FUN_10192230",
+      "proposedName": "TlvLotteryBoxItemPool_TextDump",
+      "purpose": "TdrBufUtil debug text serializer for TlvLotteryBoxItemPool. Prints [iReSearchCount] (*param_1), [iRrefreshCount] (param_1[1]), [iVipRefreshCount] (param_1[2]), a FIXED array of 8 [vItemPoolList] entries (each via FUN_10191700), then [iBoxId] (param_1[0x2b]) and [iLastClockRefreshTime] (param_1[0x2c]). Diagnostic text.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvLotteryBoxItemPool"],
+      "protocolFields": [
+        "iReSearchCount: int32 @ word 0",
+        "iRrefreshCount: int32 @ word 1",
+        "iVipRefreshCount: int32 @ word 2",
+        "vItemPoolList[8]: sub-struct via FUN_10191700 (words 3..0x2a)",
+        "iBoxId: int32 @ word 0x2b",
+        "iLastClockRefreshTime: int32 @ word 0x2c"
+      ],
+      "serverRelevance": "Server sends lottery-box item pool state; vItemPoolList must be 8 elements, then iBoxId + iLastClockRefreshTime.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvLotteryBoxItemPool auto-doc calls vItemPoolList a single int32 @ offset 43; actually a fixed array of 8 sub-structs (words 3..42). iBoxId @ word 43 and iLastClockRefreshTime @ word 44 do match doc's offsets 43/44.",
+      "notes": "Corresponds to element type sub_10191F50 / sub_10191530 in docs."
+    },
+    {
+      "address": "0x10192610",
+      "currentName": "FUN_10192610",
+      "proposedName": "TlvLotteryBoxContainer_Pack_v1",
+      "purpose": "TDR pack (write) of TlvLotteryBoxContainer. Writes tag 0x15 (field_id 1) as a length-delimited group, reserves the 4-byte size prefix, then serializes a FIXED array of 3 cLotteryBox elements via FUN_101919f0 (each individually length-framed), backfills the group size, then writes field iLastDailyRefreshTime from (param_1+0x228) via FUN_1010c560 (tag 0x20). Uses FUN_1010c5f0 for tags, FUN_1010c3c0 to backfill.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvLotteryBoxContainer"],
+      "protocolFields": [
+        "field_id 1: cLotteryBox[3] repeated sub-struct via FUN_101919f0, length-delimited",
+        "field_id 2: iLastDailyRefreshTime int32 @ byte offset 0x228 (tag 0x20)"
+      ],
+      "serverRelevance": "Server must emit exactly 3 cLotteryBox entries then iLastDailyRefreshTime; this is the outgoing lottery container blob.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvLotteryBoxContainer auto-doc treats cLotteryBox (field1) as a single sub-struct @ offset 138 and iLastDailyRefreshTime @ offset 138; actually cLotteryBox is a FIXED array of 3 sub-structs and iLastDailyRefreshTime is at byte offset 0x228.",
+      "notes": "Twin of FUN_10192780. Element codec FUN_101919f0; text-dump is FUN_10192d70."
+    },
+    {
+      "address": "0x10192780",
+      "currentName": "FUN_10192780",
+      "proposedName": "TlvLotteryBoxContainer_Pack_v2",
+      "purpose": "Twin of FUN_10192610: TDR pack of TlvLotteryBoxContainer, 3-element cLotteryBox array serialized via FUN_10191b30, and iLastDailyRefreshTime written via FUN_1010c190 (alternate int codec) with field tag 0x23. Second generated encoding variant.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvLotteryBoxContainer"],
+      "protocolFields": [
+        "field_id 1: cLotteryBox[3] repeated sub-struct via FUN_10191b30",
+        "field_id 2: iLastDailyRefreshTime int32 @ byte offset 0x228 (FUN_1010c190, tag 0x23)"
+      ],
+      "serverRelevance": "Same container as FUN_10192610 with alternate scalar encoding.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Same as FUN_10192610: cLotteryBox is a 3-element array, not a scalar; iLastDailyRefreshTime @ 0x228.",
+      "notes": "FUN_10191b30 element codec + FUN_1010c190 scalar variant distinguish it from FUN_10192610."
+    },
+    {
+      "address": "0x10192d70",
+      "currentName": "FUN_10192d70",
+      "proposedName": "TlvLotteryBoxContainer_TextDump",
+      "purpose": "TdrBufUtil debug text serializer for TlvLotteryBoxContainer. Iterates 3 [cLotteryBox] entries (each via FUN_10192230, the item-pool dump), then prints [iLastDailyRefreshTime] from (param_1+0x228). Diagnostic text.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["TlvLotteryBoxContainer"],
+      "protocolFields": [
+        "cLotteryBox[3]: sub-struct via FUN_10192230 (TlvLotteryBoxItemPool)",
+        "iLastDailyRefreshTime: int32 @ byte offset 0x228"
+      ],
+      "serverRelevance": "Diagnostic only; confirms 3-element cLotteryBox array and 0x228 offset for the refresh timestamp.",
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Confirms the FUN_10192610 discrepancy: cLotteryBox is an array of 3 TlvLotteryBoxItemPool, not a single sub-struct @ offset 138.",
+      "notes": "Element is FUN_10192230 => TlvLotteryBoxItemPool, nesting the item-pool struct inside the container."
+    },
+    {
+      "address": "0x10193b80",
+      "currentName": "FUN_10193b80",
+      "proposedName": "TlvPlayerRoleFullData_Pack_v1",
+      "purpose": "Very large (~5864 byte) TDR pack (write) of the top-level aggregate player/role data blob. Sequentially writes ~40+ optional fields and sub-structs, each length-framed via FUN_1010bf70/FUN_1010c3c0 with tags emitted by FUN_1010c5f0. Aggregates most game subsystems: a leading sub-struct (FUN_10163fe0) at tag 0x65, a varint array (max 9) @ +10, a short-counted sub-struct array (max 0x100) @ +0x32 via FUN_101667e0, then guide-book/item-pool/skill/attribute/lottery/suit-skill sub-structs (FUN_10170ea0, FUN_10172210, FUN_1024c5c0, FUN_1022a650, FUN_1016fd00, FUN_1016a880, FUN_10175de0, FUN_101773c0, FUN_101582f0, FUN_1017b1c0, FUN_102315f0, FUN_10211220, FUN_1017dd20, FUN_10181b80, FUN_101843c0, FUN_1017d3a0, FUN_101117c0, ... FUN_10189ae0 [suit skills], FUN_10192610 [lottery container], ... FUN_10193050 array), plus scalar/byte-array fields with hard caps (e.g. 0x3c, 0x80, 0x2ee, 0x32, 6). Struct spans >0x32770 bytes.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field_id 6 (tag 0x65): sub-struct via FUN_10163fe0",
+        "field_id 0xa (tag 0xa0): int32/varint array, count @ word 10, max 9, elements tag 0xb5",
+        "field_id 0xc (tag 0xc0): sub-struct array, count uint16 @ +0x32, max 0x100, element FUN_101667e0 (tag 0xd5)",
+        "field_id 0x10..0x13: sub-structs FUN_10170ea0/FUN_10172210/FUN_1024c5c0/FUN_1022a650",
+        "field_id 0x14 (0x140): int32 @ +0x1c05; 0x15 (0x150): uint16 @ +0x1c09; 0x16 (0x161): uint8 @ +0x1c0b; 0x17 (0x171): uint8 @ +0x1c0c; 0x18 (0x180): varint @ +0x1c0d",
+        "field_id 0x1c (0x1c0): int32 @ +0x1c11; 0x1d (0x1d0): varint @ +0x1c15; 0x1e (0x1e5): sub-struct FUN_1016fd00",
+        "field_id 0x1f (0x1f0): uint8 array count uint16 @ +0x1d1e, max 0x80 (tag 0x205)",
+        "field_id 0x21 (0x215): sub-struct FUN_1016a880; then FUN_10175de0/FUN_101773c0/FUN_101582f0/FUN_1017b1c0/FUN_102315f0/FUN_10211220/FUN_1017dd20/FUN_10181b80/FUN_101843c0/FUN_1017d3a0/FUN_101117c0",
+        "int32 array @ +0x193bd, max 0x3c (tag 0x3d5); array @ +0x194b1 twice (max 0x80, tags 0x3f5/0x405); uint32-counted arrays @ +0x198b5 max 500 (tags 0x465/0x475)",
+        "suit-skill array via FUN_10189ae0 (tag 0x535); lottery container via FUN_10192610 (tag 0x635); trailing sub-struct array @ +0x3276b max 6 via FUN_10193050 (tag 0x685)"
+      ],
+      "serverRelevance": "Critical: this is the master role/player-state serializer the server produces (login/full-sync). All bounds (element caps 9/0x100/0x80/0x3c/500/0x2ee/0x32/6) and field tags must be reproduced exactly, or the client rejects (-6 count-negative, -7 count-overflow).",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "No single auto-doc matches this top-level struct; it composes many documented sub-structs (TlvSuitSkillGroups, TlvLotteryBoxContainer, guide-book/item-pool families). Exact top-level TLV name unresolved.",
+      "notes": "Paired with FUN_10195270. Both are PACK (write). Distinguished by scalar codec (FUN_1010c560 here) and sub-serializer choices (FUN_10192610, FUN_101809e0, FUN_1018f330, FUN_10193050). Likely the 'network' encoding variant of the full role snapshot."
+    },
+    {
+      "address": "0x10195270",
+      "currentName": "FUN_10195270",
+      "proposedName": "TlvPlayerRoleFullData_Pack_v2",
+      "purpose": "Twin of FUN_10193b80 (~5864 bytes): the second generated PACK variant of the same top-level player/role aggregate. Identical field/sub-struct sequence but uses the alternate scalar codec FUN_1010c190 for several trailing fields (tags 0x643/0x663/0x673 vs 0x640/0x660/0x670) and alternate sub-serializers (FUN_10192780 lottery, FUN_101809e0->FUN_10180a60, FUN_1018f330->FUN_1018f4a0, FUN_10190770->FUN_10190890, FUN_10193050->FUN_101930a0). Same bounds and error codes.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "S2C",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "same top-level layout as FUN_10193b80",
+        "trailing fields use FUN_1010c190 scalar codec (tags 0x643/0x663/0x673)",
+        "lottery container via FUN_10192780; final array via FUN_101930a0 (max 6, tag 0x685)"
+      ],
+      "serverRelevance": "Critical: alternate encoding of the master role snapshot; server must select the correct variant per channel/context.",
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "Same as FUN_10193b80: composite top-level struct, no single matching auto-doc entry.",
+      "notes": "Two-variant pack pattern (network vs storage/DB encoding) consistent across the whole chunk; this is the second of the pair."
+    }
+  ]
+}

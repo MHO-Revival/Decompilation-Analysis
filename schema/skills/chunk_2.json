@@ -1,0 +1,1158 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x102b1930",
+      "currentName": "FUN_102b1930",
+      "proposedName": "TlvEntitySpawnInfo::PrintText",
+      "purpose": "TDR text-dump serializer for a generic CE entity spawn/sync struct. Emits fields to a text buffer (debug/log formatter), returns 0 on success or a negative TDR error.",
+      "subsystem": "netpacket-serialization",
+      "confidence": "high",
+      "formulas": [
+        "Field layout (offsets into param_1, byte offsets): dwNetID @0x0; szEntityName @0x4 (32B); szClassName @0x24 (via param_1+9); stPose sub-struct via TdrDebugFormat_ByteThenFloatSub; iSubTypeID @0x60 (param_1[0x18]); bSync2CE @0x64 (u8); chSpawnType @0x65 (i8, '0x%02x'); iBone @0x66; dwHolder @0x6a; dwOwner @0x6e; iFaction @0x72; iRegionId @0x76; iDataLen @0x7a; szUsrData[] @0x7e",
+        "CAP: iDataLen<0 -> return -6; iDataLen>100 -> return -7 (szUsrData max 100 bytes)",
+        "ullEntGUID (u64 '%I64u') @0xe2/0xe6; szPropertityFile @0xea; nMHSpawnType (i16) @0x12a; szBTState @0x12c (param_1+0x4b); stBBVars via TdrDebugFormat_VarsList16",
+        "wBuffSize (u16) @0xb6e; CAP >0x2800 -> -7 (szBuff max 0x2800=10240 bytes) @0xb70",
+        "dwParentID @0x3370 (param_1[0xcdc]); ullParentGUID (u64) @0x3374/0x3378 (param_1[0xcdd/0xcde])"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (text/debug formatter); but the struct field layout and array caps (szUsrData<=100, szBuff<=0x2800) mirror the shared TDR wire struct the server must decode/validate.",
+      "notes": "Format-string DATs: &DAT_11d9e0b4='%d' (signed int), &DAT_11d9f574 unsigned/hex dword (dwXxx fields), &DAT_11da0cf4='%f', &DAT_11d9f710=' 0x%02x' (byte array elem). FUN_1010c010 = write one array element; TdrBuf_PutU8Z terminates array."
+    },
+    {
+      "address": "0x102b5700",
+      "currentName": "FUN_102b5700",
+      "proposedName": "TlvProjectileLaunchSync::PrintText",
+      "purpose": "TDR text serializer for a projectile / vehicle-launch sync packet (skill/item spawned projectile with ballistics).",
+      "subsystem": "skill-projectile",
+      "confidence": "high",
+      "formulas": [
+        "llSyncTime (i64) @0x0/0x4; iNetID @0x8 (param_1[2]); iLauncherID @0xc; dwVehicleID @0x10; iTypeID @0x14; stPos/stDir/stAdditiveVel vec3 via FUN_102713d0",
+        "iSkillId @0x3c (param_1[0xf]); iItemId @0x40 (param_1[0x10]); fDelay/fSpeedScale/fDamageScale (three TdrText_FieldScalar with args omitted) ~param_1[0x11..0x13]; iOverrideTrail @0x50 (param_1[0x14])",
+        "stAcc/stVel vec3; fRadius (float) @param_1[0x1b]; fGravityChangeTime @param_1[0x1c]; fAdditiveGravity @param_1[0x1d]; iLaunchType @param_1[0x1e]; iAdditiveAccXYZMode @param_1[0x1f]",
+        "iAdditiveAccCount @param_1[0x20]; CAP <0 -> -6, >=6 -> -7 (astAdditiveAccXYZ max 5 elems @param_1+0x21 stride vec3); additiveAccTime[] floats @param_1+0x30, same count cap 6"
+      ],
+      "costs": [],
+      "serverRelevance": "validation: server must enforce iAdditiveAccCount<6; overall client-only text formatter of a shared struct.",
+      "notes": "FUN_102713d0 = vec3 (3-float) sub-serializer used throughout this chunk."
+    },
+    {
+      "address": "0x102cd750",
+      "currentName": "FUN_102cd750",
+      "proposedName": "TlvHunterAppearanceSync::PrintText",
+      "purpose": "TDR text serializer for a hunter/player full appearance+equipment+skill sync struct (character enters view / self load).",
+      "subsystem": "skill-loadout",
+      "confidence": "high",
+      "formulas": [
+        "iErrNo @0x0; iNetID @0x4; dwSessionID @0x8; szName @0xc (param_1+3, 32B); bGender (u8) @0x2c; bAvatarSetID (u8) @0x2d; iWeapon @0x2e; iWeaponAtkFlag @0x32; wEquipSize (u16) @0x36",
+        "CAP wEquipSize>0x1000 -> -7 (szEquipItem byte[] @0x38 max 0x1000=4096)",
+        "wAttrSize (u16) @0x1038 (param_1+0x40e); wEquipSkillCnt (u16) @0x103a; CAP wEquipSkillCnt>0x19 -> -7 (max 25 equip skills)",
+        "Five parallel arrays each length wEquipSkillCnt (<=0x19): skillGroup u32[] @0x103c (param_1+0x40f), skillId u32[] @0x10a0 (param_1+0x428), skillActFlag u32[] @0x1104 (+0x441), skillType u32[] @0x1168 (+0x45a)",
+        "szAttr byte[] @0x11cc len wAttrSize; CAP >0x5000 -> -7 (max 0x5000=20480)",
+        "szHunterStar @0x61cc (param_1+0x1873); dwSuitSkillLen @0x624c (param_1[0x1893]); CAP >0x2800 -> -7; szSuitSkillData byte[] @0x6250",
+        "iSoulStoneLen @0x8a50 (param_1[0x2294]); CAP <0 -> -6, >0x400 -> -7; szSoulStone byte[] @0x8a54 (max 0x400=1024)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation: these caps (25 equip skills, attr blob 0x5000, suit-skill 0x2800, soulstone 0x400) are the wire limits the server must enforce; text formatter itself is client-only.",
+      "notes": "The 5 parallel equip-skill arrays (group/id/actFlag/type) are the equipped active/passive skill set. skillActFlag = active vs passive/activation flag."
+    },
+    {
+      "address": "0x102dcf40",
+      "currentName": "FUN_102dcf40",
+      "proposedName": "TlvDamageHitResult::PrintText",
+      "purpose": "TDR text serializer for a damage/hit resolution result struct (per-hit outcome: elemental damage split, stun/stamina, applied status buffs).",
+      "subsystem": "combat-damage",
+      "confidence": "high",
+      "formulas": [
+        "Result block (floats/ints): fDamageResult @0x0; fWaterDamageResult @0x4; fFireDamageResult @0x8; fElectricDamageResult @0xc; fDragonDamageResult @0x10; fIceDamageResult @0x14; fNonDamageResult @0x18; iPIYOResut(stun) @0x1c; iStaminaResult @0x20; iDamageMode @0x24; iDefenceLevel @0x28; iInjuryLevel @0x2c",
+        "nTanDao (i16) @0x30; iAttack_levelP @0x32; iHitIndex @0x36; iAttackLogicEntityId @0x3a; iHitLogicEntityId @0x3e; iDefenceLogicEntityId @0x42",
+        "Gener(base/pre-mitigation) block floats: fDamageGener @0x46; fWaterDamageGener @0x4a; fFireDamageGener @0x4e; fElectricDamageGener @0x52; fDragonDamageGener @0x56; fIceDamageGener @0x5a",
+        "iPartId @0x5e; iSkillResID @0x62; iItemType @0x66; iAttackDataID @0x6a; stDir/stPos/stNormal vec3 via FUN_102713d0",
+        "stateBuffID: FIXED array of 0x11 (17) u32 entries @0x92 (param_1+0x92) — status/abnormal buffs applied by this hit"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative source data: the SERVER computes fDamageResult (per-element) from fXxxGener base values, iDamageMode, defence/injury levels, and populates the 17-slot stateBuffID list. This struct documents the exact damage-result fields the server must produce.",
+      "notes": "'Gener' = generated/base damage before mitigation; 'Result' = final. iPIYOResut = stun (PIYO). nTanDao likely counter/guard flag. stateBuffID[17] = fixed slot list of abnormal-status buff IDs triggered on the hit — directly relevant to status-effect application."
+    },
+    {
+      "address": "0x102e36e0",
+      "currentName": "FUN_102e36e0",
+      "proposedName": "TlvPaidItemsBuffsResult::PrintText",
+      "purpose": "TDR text serializer for a result packet listing purchased/consumed paid items and paid buffs.",
+      "subsystem": "buff-purchase",
+      "confidence": "high",
+      "formulas": [
+        "iErrCode @0x0; iNetID @0x4; iItemDataCount @0x8 (param_1[2]); CAP <0->-6, >100->-7; astPaidItems[] @param_1+3 each serialized by FUN_102ada60",
+        "iBuffDataCount @param_1[0xcb]; CAP <0->-6, >100->-7; astPaidBuffs[] @param_1+0xcc each via FUN_102ada60",
+        "Element stride between count fields: (0xcb-3)=0xc8 dwords = 200 dwords per astPaidItems block of 100 -> 2 dwords (8 bytes) per element"
+      ],
+      "costs": [
+        "Max 100 paid items and 100 paid buffs per packet"
+      ],
+      "serverRelevance": "validation of counts; item/buff element structs are shared. Client-only formatter.",
+      "notes": "FUN_102ada60 = single paid-item/paid-buff element serializer (8-byte element)."
+    },
+    {
+      "address": "0x102ebf70",
+      "currentName": "FUN_102ebf70",
+      "proposedName": "TlvMonsterSkillSync::PrintText",
+      "purpose": "TDR text serializer for a monster skill-cast sync packet (animation, movement/rotation speeds, multi-target attack positions).",
+      "subsystem": "skill-monster-cast",
+      "confidence": "high",
+      "formulas": [
+        "llSyncTime (i64) @0x0; dwMonsterID @0x8 (param_1[2]); szAnimSeqName @0xc (param_1+3, 256B); iSkillID @0x10c (param_1[0x43]); iSkillLv @0x110 (param_1[0x44]); dwSyncFlag @0x114 (param_1[0x45]); iTargetSrvID @0x118 (param_1[0x46])",
+        "stMoveSpeed/stRotSpeed/stMonsterPos/stMonsterRot vec3 via FUN_102713d0; fSkillSpeed via TdrDebugFormat_FloatField_at0xc",
+        "bRestartAnim (u8 '0x%02x') @0x154 (param_1+0x55); iTargetAttackNum @0x155; CAP <0->-6, >8->-7 (astTargetMultiAttackPos max 8, each vec3 via FUN_102713d0)",
+        "stTargetAttackPos vec3; bNeedTargetAttackPos (u8) @0x1c5; dwAckFlag @0x1c6; bSetRotate @0x1ca; bSetPos @0x1cb; bNoTransferCorrection @0x1cc (param_1+0x73); bNeedMoveSpeedAcc @0x1cd; stMoveSpeedAccelerate vec3",
+        "fMoveSpeedAccStart (float) @0x1da; fMoveSpeedAccEnd @0x1de; stMoveSplineScale vec3"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server drives monster skill casts and populates skill id/level, sync flags, target positions (max 8), move-speed acceleration curve. Caps are validation constraints.",
+      "notes": "TdrDebugFormat_FloatField_at0xc = float sub-serializer. Sibling of FUN_102ed140 (v2 with more fields)."
+    },
+    {
+      "address": "0x102ed140",
+      "currentName": "FUN_102ed140",
+      "proposedName": "TlvMonsterSkillSyncV2::PrintText",
+      "purpose": "Extended monster skill-cast sync serializer (adds steering, part-bone target, per-target rotation/flags, user params). Called as sub-serializer of monster full-sync FUN_102ee200 (stLcmState).",
+      "subsystem": "skill-monster-cast",
+      "confidence": "high",
+      "formulas": [
+        "bSteeringEnabled (u8) @0x0; llSyncTime (i64) @0x1; dwMonsterID @0x9; szAnimSeqName @0xd (256B); szPartBoneName @0x10d (256B); iSkillID @0x12b (param_1+299); iSkillLv @0x12f; dwSyncFlag @0x133; dwTargetID @0x137; iTargetSrvID @0x13b; dwFlag @0x13f",
+        "stTargetDis/stMoveSpeed/stTargetRot/stRotSpeed vec3; bRotSpeedByAnim (u8) @0x173; stMonsterPos/stMonsterRot vec3; fSkillSpeed via TdrDebugFormat_FloatField_at0xc",
+        "bRestartAnim (u8) @0x194; iRotFlag @0x195; iTargetAttackNum @0x199; CAP <0->-6, >8->-7 (astTargetMultiAttackPos max 8 vec3)",
+        "stTargetAttackPos vec3; bNeedTargetAttackPos @0x209; dwAckFlag @0x20a; iUserParam1 @0x20e; iUserParam2 @0x212; bSetRotate @0x216; bSetPos @0x217; bNoTransferCorrection @0x218; bNeedMoveSpeedAcc @0x219; stMoveSpeedAccelerate vec3",
+        "fMoveSpeedAccStart @0x226; fMoveSpeedAccEnd @0x22a; stMoveSplineScale vec3"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: same as FUN_102ebf70; server-authored monster skill state embedded in monster snapshot.",
+      "notes": "iUserParam1/2 = skill-specific parameters. This is the LcmState (locomotion/skill-machine state) embedded in monster full-sync."
+    },
+    {
+      "address": "0x102ee200",
+      "currentName": "FUN_102ee200",
+      "proposedName": "TlvMonsterFullSnapshot::PrintText",
+      "purpose": "TDR text serializer for a monster full spawn/snapshot struct (identity, pose, faction, BT state, attributes, active projectiles, buffs, current skill state).",
+      "subsystem": "skill-monster-cast",
+      "confidence": "high",
+      "formulas": [
+        "iNetID @0x0; nSpawnType (i16) @0x4; iMonsterInfoID @0x6; ullEntGUID (u64) @0xa/0xe; szName @0x12 (32B); szClass @0x32; stPose via TdrDebugFormat_ByteThenFloatSub; iFaction @0x6e; szBTState @0x72; stBBVars via TdrDebugFormat_VarsList16",
+        "bDead (u8) @0xcac (param_1+0x2ad); stLcmState via FUN_102ed140 (monster skill/locomotion sub-state)",
+        "nAttrCount (i16) @0xcef; CAP <0->-6, >100->-7; astAttrInit[] via FUN_102850c0 (attribute init records, max 100)",
+        "iProjIdCount @0x1a39; CAP <0->-6, >0x14->-7 (max 20 active projectiles); astProjIds[] @0x1a3d via FUN_102a4760",
+        "nBuffSize (i16) @0x1add; CAP <0->-6, >0x2800->-7; szBuff byte[] @0x1adf (buff blob max 10240)",
+        "ullParentGUID (u64) @0x42df; iLastChildID @0x42e7"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: full monster state the server sends on spawn/resync, including active buff blob (szBuff), attribute inits, and current skill state. Caps are validation limits.",
+      "notes": "FUN_102850c0 = attribute-init element serializer; FUN_102a4760 = projectile-id element serializer. szBuff = serialized active buff list (relevant to buff/status persistence)."
+    },
+    {
+      "address": "0x102f2b50",
+      "currentName": "FUN_102f2b50",
+      "proposedName": "TlvBuffRelationResult::PrintText",
+      "purpose": "TDR text serializer for a buff-interaction/relation result (two buffs colliding, hit-type, change/result). Directly a buff-relation/priority record.",
+      "subsystem": "buff-relations",
+      "confidence": "high",
+      "formulas": [
+        "iFirstBuffId @0x0; iFirstBuffOwner @0x4; iSecondBuffId @0x8; iSecondBuffOwner @0xc; chChange (i8 '0x%02x') @0x10; iHittype @0x11; iResult @0x15; iParam1 @0x19"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server computes buff-vs-buff interaction outcome (iResult) between First and Second buff given iHittype; chChange = which buff changed. Server must own abnormal-status relation/priority logic that produces this result.",
+      "notes": "Key struct for abnormal-status relations: when two buffs interact, iHittype + the two (buffId,owner) pairs -> iResult/chChange/iParam1."
+    },
+    {
+      "address": "0x10305b50",
+      "currentName": "FUN_10305b50",
+      "proposedName": "TlvSkillEventNotify::PrintText",
+      "purpose": "TDR text serializer for a skill event notification (entity, skill id/level, event type, named event).",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": [
+        "dwEntityId @0x0; iSkillID @0x4; iSkillLevel @0x8; iType @0xc; szEventName @0x10 (param_1+4)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative/validation: server sends skill lifecycle events (named phases) per skill cast.",
+      "notes": ""
+    },
+    {
+      "address": "0x10306c30",
+      "currentName": "FUN_10306c30",
+      "proposedName": "TlvTalentReq::PackToBuffer",
+      "purpose": "TDR pack of a single-field talent request struct {iTalentID} into a caller buffer (variant with buffer/length out-params and cleanup).",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": [
+        "iTalentID @0x0. Returns 0xffffffed (-19) if buffer NULL. Writes consumed length to *param_4."
+      ],
+      "costs": [],
+      "serverRelevance": "validation: server decodes talent-activation request carrying iTalentID.",
+      "notes": "FUN_10c3da30 = cleanup/free of the TDR scratch context; local_8 = 'needs cleanup' flag. Same idiom repeats across many pack functions in this chunk."
+    },
+    {
+      "address": "0x10306cb0",
+      "currentName": "FUN_10306cb0",
+      "proposedName": "TlvTalentReq::PrintText",
+      "purpose": "TDR text dump of {iTalentID}.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0"],
+      "costs": [],
+      "serverRelevance": "client-only text formatter of the talent request struct.",
+      "notes": ""
+    },
+    {
+      "address": "0x10306ce0",
+      "currentName": "FUN_10306ce0",
+      "proposedName": "TlvTalentReq::PackToBuffer_Bounded",
+      "purpose": "TDR pack of {iTalentID} into a bounded byte buffer (param_3 = capacity); NUL-terminates at min(len,cap-1).",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": [
+        "iTalentID @0x0. If buffer NULL or cap==0 returns &DAT_11d9d32b (empty string). NUL at index min(local_10,param_3-1)."
+      ],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10306d70",
+      "currentName": "FUN_10306d70",
+      "proposedName": "TlvTalentReq::PackToStream",
+      "purpose": "TDR pack of {iTalentID} into a stream/desc struct (param_2 = {ptr,len,cap}); writes NUL via TdrBuf_PutNulAt.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; NUL at min(len@param_2[1], cap@param_2[2]-1)"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10306f60",
+      "currentName": "FUN_10306f60",
+      "proposedName": "TlvTalentResult::PackToBuffer",
+      "purpose": "TDR pack of talent result {iTalentID, iErrorID}.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; iErrorID @0x4. Returns -0x13 (-19) if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "authoritative: server returns talent operation result + error code.",
+      "notes": ""
+    },
+    {
+      "address": "0x10307000",
+      "currentName": "FUN_10307000",
+      "proposedName": "TlvTalentResult::PrintText",
+      "purpose": "TDR text dump of talent result {iTalentID, iErrorID}.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; iErrorID @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x103072b0",
+      "currentName": "FUN_103072b0",
+      "proposedName": "TlvTalentIdxReq::PackToBuffer",
+      "purpose": "TDR pack of {iTalentID, iIdx} (talent at a tree index/slot).",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; iIdx @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation: talent-tree index request.",
+      "notes": "iIdx = talent-tree slot/branch index."
+    },
+    {
+      "address": "0x10307350",
+      "currentName": "FUN_10307350",
+      "proposedName": "TlvTalentIdxReq::PrintText",
+      "purpose": "TDR text dump of {iTalentID, iIdx}.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; iIdx @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x103076c0",
+      "currentName": "FUN_103076c0",
+      "proposedName": "TlvTalentIdxResult::PrintText",
+      "purpose": "TDR text dump of talent-index result {iTalentID, iIdx, iErrorID}.",
+      "subsystem": "talent",
+      "confidence": "high",
+      "formulas": ["iTalentID @0x0; iIdx @0x4; iErrorID @0x8"],
+      "costs": [],
+      "serverRelevance": "authoritative result struct (server error code); formatter is client-only.",
+      "notes": ""
+    },
+    {
+      "address": "0x10308810",
+      "currentName": "FUN_10308810",
+      "proposedName": "TlvWeaponSkillReq::PrintText",
+      "purpose": "TDR text dump of a weapon-skill selection {iWeaponType, iIdx, iSkillID}.",
+      "subsystem": "skill-weapon",
+      "confidence": "high",
+      "formulas": ["iWeaponType @0x0; iIdx @0x4; iSkillID @0x8"],
+      "costs": [],
+      "serverRelevance": "validation: assign skill to a weapon-type slot index.",
+      "notes": ""
+    },
+    {
+      "address": "0x10308b60",
+      "currentName": "FUN_10308b60",
+      "proposedName": "TlvWeaponSkillResult::PrintText",
+      "purpose": "TDR text dump of {iWeaponType, iIdx, iSkillID, iErrorID}.",
+      "subsystem": "skill-weapon",
+      "confidence": "high",
+      "formulas": ["iWeaponType @0x0; iIdx @0x4; iSkillID @0x8; iErrorID @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result; formatter client-only.",
+      "notes": ""
+    },
+    {
+      "address": "0x103092c0",
+      "currentName": "FUN_103092c0",
+      "proposedName": "TlvSkillTagList::PrintText",
+      "purpose": "TDR serializer for a skill-tag data struct {iGroup, iSkill, iTagCnt, astTagItemData[]}.",
+      "subsystem": "skill-tags",
+      "confidence": "high",
+      "formulas": [
+        "iGroup @0x0; iSkill @0x4; iTagCnt @0x8; CAP <0->-6, >8->-7 (astTagItemData max 8, each via FUN_10272300)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation: skill-tag/talent-tag records (max 8 tags per skill).",
+      "notes": "FUN_10272300 = tag-item element serializer."
+    },
+    {
+      "address": "0x103096b0",
+      "currentName": "FUN_103096b0",
+      "proposedName": "TlvSkillGroupOpResult::PrintText",
+      "purpose": "TDR text dump of {iRetCode, iArg, iGroup, iSkill}.",
+      "subsystem": "skill-group",
+      "confidence": "high",
+      "formulas": ["iRetCode @0x0; iArg @0x4; iGroup @0x8; iSkill @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result of a skill-group operation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10309ad0",
+      "currentName": "FUN_10309ad0",
+      "proposedName": "TlvSkillGroupList::PrintText",
+      "purpose": "TDR serializer for a skill-group list {iGroup, iSkillCnt, skillID[], iItemFlag}.",
+      "subsystem": "skill-group",
+      "confidence": "high",
+      "formulas": [
+        "iGroup @0x0; iSkillCnt @0x4; CAP <0->-6, >0x28->-7 (skillID u32[] @param_1+2 max 40); iItemFlag @param_1[0x2a] (offset 0xa8)"
+      ],
+      "costs": ["Max 40 skills per group"],
+      "serverRelevance": "validation: skill-group membership list (max 40).",
+      "notes": ""
+    },
+    {
+      "address": "0x10309f70",
+      "currentName": "FUN_10309f70",
+      "proposedName": "TlvSkillGroupListResult::PrintText",
+      "purpose": "TDR serializer for skill-group list result {iRet, iArg, iGroup, iSkillCnt, skillID[]}.",
+      "subsystem": "skill-group",
+      "confidence": "high",
+      "formulas": [
+        "iRet @0x0; iArg @0x4; iGroup @0x8; iSkillCnt @0xc; CAP <0->-6, >0x28->-7 (skillID u32[] @param_1+4 max 40)"
+      ],
+      "costs": ["Max 40 skills"],
+      "serverRelevance": "authoritative: server returns the resulting skill-group list.",
+      "notes": ""
+    },
+    {
+      "address": "0x10310470",
+      "currentName": "FUN_10310470",
+      "proposedName": "TlvEntitySkillReq::PackToBuffer",
+      "purpose": "TDR pack of {dwEntityId, dwSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["dwEntityId @0x0; dwSkillID @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation: cast/query skill on an entity.",
+      "notes": ""
+    },
+    {
+      "address": "0x10310510",
+      "currentName": "FUN_10310510",
+      "proposedName": "TlvEntitySkillReq::PrintText",
+      "purpose": "TDR text dump of {dwEntityId, dwSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["dwEntityId @0x0; dwSkillID @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x1031b4a0",
+      "currentName": "FUN_1031b4a0",
+      "proposedName": "TlvBuffState::PrintText",
+      "purpose": "TDR text dump of a buff-state record {iBuffId, iBuffRetainTime, iBuffStackCount} — core buff duration/stack element.",
+      "subsystem": "buff-state",
+      "confidence": "high",
+      "formulas": ["iBuffId @0x0; iBuffRetainTime @0x4 (remaining duration); iBuffStackCount @0x8 (stack count)"],
+      "costs": [],
+      "serverRelevance": "authoritative: server owns buff remaining-time (iBuffRetainTime) and stack count (iBuffStackCount). This is the canonical buff-state element.",
+      "notes": "Directly relevant to buff duration & stacking. iBuffRetainTime is remaining time (server decrements/expires)."
+    },
+    {
+      "address": "0x1031ca70",
+      "currentName": "FUN_1031ca70",
+      "proposedName": "TlvBuffOpNotify::PrintText",
+      "purpose": "TDR text dump of a buff apply/remove/update notification {dwNetId, iBuffOp, iBuffId, iBuffRetainTime, iBuffStackCount, ullDbid}.",
+      "subsystem": "buff-state",
+      "confidence": "high",
+      "formulas": [
+        "dwNetId @0x0 (target); iBuffOp @0x4 (op code: add/remove/refresh); iBuffId @0x8; iBuffRetainTime @0xc; iBuffStackCount @0x10; ullDbid (u64) @0x14/0x18"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server broadcasts buff operations (iBuffOp) with duration and stack count to target dwNetId. Central to buff application/stacking network flow.",
+      "notes": "iBuffOp = enum of buff operation (apply/remove/refresh). ullDbid = persistent owner/db id."
+    },
+    {
+      "address": "0x1032f9d0",
+      "currentName": "FUN_1032f9d0",
+      "proposedName": "TlvSkillBeadItemUse::PrintText",
+      "purpose": "TDR serializer for a skill-bead / item-use request {ullItemId, iItemType, bTargetPos, bCurCol, iCurGrid, astSkillBeadsInfo[<=3]}.",
+      "subsystem": "skill-item",
+      "confidence": "high",
+      "formulas": [
+        "ullItemId (u64) @0x0; iItemType @0x8; bTargetPos (u8) @0xc; bCurCol (u8) @0xd; iCurGrid @0xe; astSkillBeadsInfo[] via FUN_1032f5d0, loop breaks when idx>2 (max 3 beads)"
+      ],
+      "costs": ["Max 3 skill beads"],
+      "serverRelevance": "validation: item/skill-bead socketing use.",
+      "notes": "FUN_1032f5d0 = skill-bead-info element serializer."
+    },
+    {
+      "address": "0x1033a080",
+      "currentName": "FUN_1033a080",
+      "proposedName": "TlvSkillLevel::PackToBuffer",
+      "purpose": "TDR pack of {iSkill, iLevel}.",
+      "subsystem": "skill-level",
+      "confidence": "high",
+      "formulas": ["iSkill @0x0; iLevel @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation: skill level-up / query.",
+      "notes": ""
+    },
+    {
+      "address": "0x1033a120",
+      "currentName": "FUN_1033a120",
+      "proposedName": "TlvSkillLevel::PrintText",
+      "purpose": "TDR text dump of {iSkill, iLevel}.",
+      "subsystem": "skill-level",
+      "confidence": "high",
+      "formulas": ["iSkill @0x0; iLevel @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x1034a870",
+      "currentName": "FUN_1034a870",
+      "proposedName": "TlvSkillLevel::PackToBuffer_Dup",
+      "purpose": "Duplicate TDR pack of {iSkill, iLevel} (different packet id/context).",
+      "subsystem": "skill-level",
+      "confidence": "high",
+      "formulas": ["iSkill @0x0; iLevel @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": "Byte-identical to FUN_1033a080; separate generated instance for another message."
+    },
+    {
+      "address": "0x1034a910",
+      "currentName": "FUN_1034a910",
+      "proposedName": "TlvSkillLevel::PrintText_Dup",
+      "purpose": "Duplicate TDR text dump of {iSkill, iLevel}.",
+      "subsystem": "skill-level",
+      "confidence": "high",
+      "formulas": ["iSkill @0x0; iLevel @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x10368f40",
+      "currentName": "FUN_10368f40",
+      "proposedName": "TlvSkillId::PackToBuffer",
+      "purpose": "TDR pack of {iSkillId}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillId @0x0. Returns 0xffffffed (-19) if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10368fc0",
+      "currentName": "FUN_10368fc0",
+      "proposedName": "TlvSkillId::PrintText",
+      "purpose": "TDR text dump of {iSkillId}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillId @0x0"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x10368ff0",
+      "currentName": "FUN_10368ff0",
+      "proposedName": "TlvSkillId::PackToBuffer_Bounded",
+      "purpose": "TDR pack of {iSkillId} into a bounded buffer with NUL-terminate.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillId @0x0. NUL at min(len,cap-1); empty string if NULL/cap 0."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10369080",
+      "currentName": "FUN_10369080",
+      "proposedName": "TlvSkillId::PackToStream",
+      "purpose": "TDR pack of {iSkillId} into a stream desc struct.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillId @0x0"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10369ca0",
+      "currentName": "FUN_10369ca0",
+      "proposedName": "TlvSkillProficiency::PrintText",
+      "purpose": "TDR text dump of skill-proficiency record {iSkillId, iProficiencyLevel, iProficiencyDegree}.",
+      "subsystem": "skill-proficiency",
+      "confidence": "high",
+      "formulas": ["iSkillId @0x0; iProficiencyLevel @0x4; iProficiencyDegree @0x8"],
+      "costs": [],
+      "serverRelevance": "authoritative: server tracks per-skill proficiency level and progress (degree). Relevant to skill mastery/passive progression.",
+      "notes": "iProficiencyDegree = XP/progress toward next proficiency level."
+    },
+    {
+      "address": "0x10391e30",
+      "currentName": "FUN_10391e30",
+      "proposedName": "TlvPetSupportInfo::PrintText",
+      "purpose": "TDR serializer for a pet/felyne support info block {iTalkStype, iQuality, iCharacter, iAtkTarget, iAtkMode, szName, iSkin, iSupportSkill}. Used as sub-struct in pet snapshots.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": [
+        "iTalkStype @0x0; iQuality @0x4; iCharacter @0x8; iAtkTarget @0xc; iAtkMode @0x10; szName @0x14 (param_1+5, 32B); iSkin @0x34 (param_1[0xd]); iSupportSkill @0x38 (param_1[0xe])"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative pet-companion behavior/support-skill config; formatter client-only.",
+      "notes": "iSupportSkill = the pet's support skill id; iAtkMode/iAtkTarget = AI attack behavior."
+    },
+    {
+      "address": "0x103921a0",
+      "currentName": "FUN_103921a0",
+      "proposedName": "TlvPetSkillCount::PackToBuffer",
+      "purpose": "TDR pack of {iSkillID, iCount}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0; iCount @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10392240",
+      "currentName": "FUN_10392240",
+      "proposedName": "TlvPetSkillCount::PrintText",
+      "purpose": "TDR text dump of {iSkillID, iCount} (pet astSkill element serializer).",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0; iCount @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter; element of pet skill array in FUN_10392bd0.",
+      "notes": ""
+    },
+    {
+      "address": "0x10392bd0",
+      "currentName": "FUN_10392bd0",
+      "proposedName": "TlvPetFullSnapshot::PrintText",
+      "purpose": "TDR serializer for a pet full spawn/snapshot {identity, pose, equip, attrs, buffs, rand-attrs, skills, growth}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": [
+        "iNetID @0x0; iOwnerID @0x4; iInfoID @0x8; ullEntGUID (u64) @0xc/0x10; iPetUID @0x14; iPetIdx @0x18; szName @0x1c (param_1+7); stPose via TdrDebugFormat_ByteThenFloatSub; bAvatarSetID (u8) @0x58; fHealth (float) @0x59; wEquipCount (u16) @0x5d",
+        "CAP wEquipCount>10 -> -7 (equip u32[] @0x5f max 10, stride 4)",
+        "wAttrSize (u16) @0x87; CAP >0x5000 -> -7 (szAttr byte[] @0x89 max 0x5000)",
+        "wBuffSize (u16) @0x5089; CAP >0x2800 -> -7 (szBuff byte[] @0x508b max 0x2800)",
+        "stRandAttrs via FUN_10391e30; bSupport (u8) @0x78c7; iSkillNum @param_1[0x1e32] (offset 0x78c8); CAP <0->-6, >10->-7 (astSkill[] @param_1+0x1e33 via FUN_10392240, max 10)",
+        "iGrowHighDay @param_1[0x1e47]; iGrowHeight @param_1[0x1e48]"
+      ],
+      "costs": ["Max 10 equip, 10 skills; attr blob 0x5000; buff blob 0x2800"],
+      "serverRelevance": "authoritative: full pet state on spawn/resync incl. fHealth, buff blob, skills, growth. Caps are validation limits.",
+      "notes": "stRandAttrs reuses the support-info sub-struct (FUN_10391e30)."
+    },
+    {
+      "address": "0x10393dc0",
+      "currentName": "FUN_10393dc0",
+      "proposedName": "TlvPetGiftRand::PrintText",
+      "purpose": "TDR serializer {iPetID, iIdx, iUID, chSex, iGiftSkill, stRandAttrs}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": [
+        "iPetID @0x0; iIdx @0x4; iUID @0x8; chSex (i8 '0x%02x') @0xc; iGiftSkill @0xd; stRandAttrs via FUN_10391e30"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: pet innate/gift skill + random attributes.",
+      "notes": "iGiftSkill = innate/talent skill of the pet."
+    },
+    {
+      "address": "0x10396b40",
+      "currentName": "FUN_10396b40",
+      "proposedName": "TlvPetSkillSlotSet::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSlot, iSkillID} (equip pet skill into slot).",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSlot @0x8; iSkillID @0xc"],
+      "costs": [],
+      "serverRelevance": "validation: assign pet skill to a slot.",
+      "notes": ""
+    },
+    {
+      "address": "0x10396ef0",
+      "currentName": "FUN_10396ef0",
+      "proposedName": "TlvPetSkillReq::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSkillID @0x8"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10397240",
+      "currentName": "FUN_10397240",
+      "proposedName": "TlvPetSkillResult::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iIdx @0x4; iUID @0x8; iSkillID @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result.",
+      "notes": ""
+    },
+    {
+      "address": "0x103975b0",
+      "currentName": "FUN_103975b0",
+      "proposedName": "TlvPetSkillSlot2::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSkillID, iSlot}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSkillID @0x8; iSlot @0xc"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": "Field order differs from FUN_10396b40 (skillID before slot)."
+    },
+    {
+      "address": "0x10397950",
+      "currentName": "FUN_10397950",
+      "proposedName": "TlvPetSkillSlot2Result::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iIdx, iUID, iSkillID, iSlot}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iIdx @0x4; iUID @0x8; iSkillID @0xc; iSlot @0x10"],
+      "costs": [],
+      "serverRelevance": "authoritative result.",
+      "notes": ""
+    },
+    {
+      "address": "0x10397d20",
+      "currentName": "FUN_10397d20",
+      "proposedName": "TlvPetSkillReq2::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSkillID @0x8"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": "Duplicate shape of FUN_10396ef0 for another message id."
+    },
+    {
+      "address": "0x10398070",
+      "currentName": "FUN_10398070",
+      "proposedName": "TlvPetSkillResult2::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iIdx @0x4; iUID @0x8; iSkillID @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result (duplicate shape).",
+      "notes": ""
+    },
+    {
+      "address": "0x10398eb0",
+      "currentName": "FUN_10398eb0",
+      "proposedName": "TlvPetSkillResult3::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iIdx @0x4; iUID @0x8; iSkillID @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result (duplicate shape).",
+      "notes": ""
+    },
+    {
+      "address": "0x10399570",
+      "currentName": "FUN_10399570",
+      "proposedName": "TlvPetSkillResult4::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iIdx, iUID, iSkillID}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iIdx @0x4; iUID @0x8; iSkillID @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result (duplicate shape).",
+      "notes": ""
+    },
+    {
+      "address": "0x10399920",
+      "currentName": "FUN_10399920",
+      "proposedName": "TlvPetBuffReq::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iBuffID} (pet buff operation).",
+      "subsystem": "pet-buff",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iBuffID @0x8"],
+      "costs": [],
+      "serverRelevance": "validation: pet buff apply/query.",
+      "notes": ""
+    },
+    {
+      "address": "0x10399cb0",
+      "currentName": "FUN_10399cb0",
+      "proposedName": "TlvPetBuffReq2::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iBuffID} (duplicate shape).",
+      "subsystem": "pet-buff",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iBuffID @0x8"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039b510",
+      "currentName": "FUN_1039b510",
+      "proposedName": "TlvPetSkillReq3::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSkill}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSkill @0x8"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039b860",
+      "currentName": "FUN_1039b860",
+      "proposedName": "TlvPetSkillResult5::PrintText",
+      "purpose": "TDR text dump of {iResult, iIdx, iUID, iSkill}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iResult @0x0; iIdx @0x4; iUID @0x8; iSkill @0xc"],
+      "costs": [],
+      "serverRelevance": "authoritative result.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039c3c0",
+      "currentName": "FUN_1039c3c0",
+      "proposedName": "TlvPetSkillList::PrintText",
+      "purpose": "TDR serializer for a pet skill list {iIdx, iUID, nCount, skill[], szNewFlag[]} (learned skills + per-skill 'new' flag).",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": [
+        "iIdx @0x0; iUID @0x4; nCount (i16) @0x8; CAP <0->-6, >10->-7; skill u32[] @0xa (param_1+ ...+10, stride 4) length nCount; szNewFlag i8[] @0x32 (' 0x%02x') length nCount"
+      ],
+      "costs": ["Max 10 pet skills"],
+      "serverRelevance": "authoritative: server sends learned pet skills and a parallel 'new/unseen' flag byte per skill.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039c860",
+      "currentName": "FUN_1039c860",
+      "proposedName": "TlvPetSkillReq4::PrintText",
+      "purpose": "TDR text dump of {iIdx, iUID, iSkill}.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "formulas": ["iIdx @0x0; iUID @0x4; iSkill @0x8"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039d1d0",
+      "currentName": "FUN_1039d1d0",
+      "proposedName": "TlvSkillDebugToggle::PackToBuffer",
+      "purpose": "TDR pack of {iEnableSkillDebug}.",
+      "subsystem": "skill-debug",
+      "confidence": "high",
+      "formulas": ["iEnableSkillDebug @0x0. Returns 0xffffffed (-19) if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation: dev/GM skill-debug toggle. Server should gate/ignore in production.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039d250",
+      "currentName": "FUN_1039d250",
+      "proposedName": "TlvSkillDebugToggle::PrintText",
+      "purpose": "TDR text dump of {iEnableSkillDebug}.",
+      "subsystem": "skill-debug",
+      "confidence": "high",
+      "formulas": ["iEnableSkillDebug @0x0"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039d280",
+      "currentName": "FUN_1039d280",
+      "proposedName": "TlvSkillDebugToggle::PackToBuffer_Bounded",
+      "purpose": "Bounded-buffer pack of {iEnableSkillDebug}.",
+      "subsystem": "skill-debug",
+      "confidence": "high",
+      "formulas": ["iEnableSkillDebug @0x0; NUL at min(len,cap-1)."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039d310",
+      "currentName": "FUN_1039d310",
+      "proposedName": "TlvSkillDebugToggle::PackToStream",
+      "purpose": "Stream-desc pack of {iEnableSkillDebug}.",
+      "subsystem": "skill-debug",
+      "confidence": "high",
+      "formulas": ["iEnableSkillDebug @0x0"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039d5e0",
+      "currentName": "FUN_1039d5e0",
+      "proposedName": "TlvSkillCooldownSync::PrintText",
+      "purpose": "TDR text dump of a skill sync/cooldown record {iSkillInfo, iSkillID, llSyncTime, iServerTimeHour, iServerTimeMin, iServerTimeSec}.",
+      "subsystem": "skill-cooldown",
+      "confidence": "high",
+      "formulas": [
+        "iSkillInfo @0x0; iSkillID @0x4; llSyncTime (i64) @0x8/0xc; iServerTimeHour @0x10; iServerTimeMin @0x14; iServerTimeSec @0x18"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server supplies authoritative sync time / server clock used to reconcile skill cooldown timers on the client.",
+      "notes": "llSyncTime + server H:M:S let the client anchor cooldown countdowns to server time."
+    },
+    {
+      "address": "0x1039dc20",
+      "currentName": "FUN_1039dc20",
+      "proposedName": "TlvSkillID2::PackToBuffer",
+      "purpose": "TDR pack of {iSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0. Returns 0xffffffed if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039dca0",
+      "currentName": "FUN_1039dca0",
+      "proposedName": "TlvSkillID2::PrintText",
+      "purpose": "TDR text dump of {iSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039dcd0",
+      "currentName": "FUN_1039dcd0",
+      "proposedName": "TlvSkillID2::PackToBuffer_Bounded",
+      "purpose": "Bounded-buffer pack of {iSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0; NUL at min(len,cap-1)."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x1039dd60",
+      "currentName": "FUN_1039dd60",
+      "proposedName": "TlvSkillID2::PackToStream",
+      "purpose": "Stream-desc pack of {iSkillID}.",
+      "subsystem": "skill-casting",
+      "confidence": "high",
+      "formulas": ["iSkillID @0x0"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x103af940",
+      "currentName": "FUN_103af940",
+      "proposedName": "TlvItemBlob::PrintText",
+      "purpose": "TDR serializer for a generic item record with opaque buffer {ullItemId, dwItemType, dwItemCount, bBindType, iLen, szBuffer[]}.",
+      "subsystem": "item",
+      "confidence": "high",
+      "formulas": [
+        "ullItemId (u64) @0x0; dwItemType @0x8; dwItemCount @0xc; bBindType (u8) @0x10; iLen @0x11; CAP <0->-6, >0x800->-7 (szBuffer byte[] @0x15 max 0x800=2048, ' 0x%02x')"
+      ],
+      "costs": ["Item opaque buffer max 2048 bytes"],
+      "serverRelevance": "validation: item extension blob (e.g. socketed skills/attrs). Client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x103be970",
+      "currentName": "FUN_103be970",
+      "proposedName": "TlvCatCompanionItem::PrintText",
+      "purpose": "TDR text dump of a cat/companion item {iId, wCount, bLevel, bBuffs, dwCatLastTm}.",
+      "subsystem": "companion",
+      "confidence": "medium",
+      "formulas": [
+        "iId @0x0; wCount (u16) @0x4; bLevel (u8) @0x6; bBuffs (u8 '0x%02x') @0x7; dwCatLastTm @0x8 (param_1[2])"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: companion item level/buffs and last-active timestamp.",
+      "notes": "bBuffs likely a bitmask of active companion buffs."
+    },
+    {
+      "address": "0x10400cc0",
+      "currentName": "FUN_10400cc0",
+      "proposedName": "TlvBuffID::PackToBuffer",
+      "purpose": "TDR pack of {iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iBuffID @0x0. Returns 0xffffffed if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "validation: buff apply/remove/query by id.",
+      "notes": ""
+    },
+    {
+      "address": "0x10400d40",
+      "currentName": "FUN_10400d40",
+      "proposedName": "TlvBuffID::PrintText",
+      "purpose": "TDR text dump of {iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iBuffID @0x0"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x10400d70",
+      "currentName": "FUN_10400d70",
+      "proposedName": "TlvBuffID::PackToBuffer_Bounded",
+      "purpose": "Bounded-buffer pack of {iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iBuffID @0x0; NUL at min(len,cap-1)."],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10400e00",
+      "currentName": "FUN_10400e00",
+      "proposedName": "TlvBuffID::PackToStream",
+      "purpose": "Stream-desc pack of {iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iBuffID @0x0"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10400ff0",
+      "currentName": "FUN_10400ff0",
+      "proposedName": "TlvBuffIDResult::PackToBuffer",
+      "purpose": "TDR pack of {iErrCode, iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iBuffID @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "authoritative result of a buff operation.",
+      "notes": ""
+    },
+    {
+      "address": "0x10401090",
+      "currentName": "FUN_10401090",
+      "proposedName": "TlvBuffIDResult::PrintText",
+      "purpose": "TDR text dump of {iErrCode, iBuffID}.",
+      "subsystem": "buff",
+      "confidence": "high",
+      "formulas": ["iErrCode @0x0; iBuffID @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter.",
+      "notes": ""
+    },
+    {
+      "address": "0x1040a880",
+      "currentName": "FUN_1040a880",
+      "proposedName": "TlvSignatureBlob::PrintText",
+      "purpose": "TDR serializer for a signed-payload/signature block {nSigVer, dwSigTime, nSigLen, szSigBuff[]}.",
+      "subsystem": "anti-cheat",
+      "confidence": "high",
+      "formulas": [
+        "nSigVer (i16) @0x0; dwSigTime @0x4 (param_1+1); nSigLen (i16) @0x6 (param_1[3]); CAP <0->-6, >0x400->-7 (szSigBuff byte[] @0x8 max 0x400=1024)"
+      ],
+      "costs": ["Signature buffer max 1024 bytes"],
+      "serverRelevance": "validation: anti-cheat/authentication signature; server verifies. Only tangentially skill-related.",
+      "notes": "Generic signature TLV, not skill-specific; appears in this chunk due to build layout."
+    },
+    {
+      "address": "0x1040e420",
+      "currentName": "FUN_1040e420",
+      "proposedName": "TlvRageValue::PackToBuffer",
+      "purpose": "TDR pack of a rage-slot value {fRageValue, iRageSlot}.",
+      "subsystem": "rage-bushido",
+      "confidence": "high",
+      "formulas": ["fRageValue (float, '%f') @0x0; iRageSlot @0x4. Returns -0x13 if buffer NULL."],
+      "costs": [],
+      "serverRelevance": "authoritative: server owns rage/bushido meter value per slot (fRageValue) and pushes to client.",
+      "notes": "iRageSlot indexes which rage meter (e.g. bushido stance / rage type). Central to rage/bushido subsystem."
+    },
+    {
+      "address": "0x1040e4d0",
+      "currentName": "FUN_1040e4d0",
+      "proposedName": "TlvRageValue::PrintText",
+      "purpose": "TDR text dump of {fRageValue, iRageSlot}.",
+      "subsystem": "rage-bushido",
+      "confidence": "high",
+      "formulas": ["fRageValue (float) @0x0; iRageSlot @0x4"],
+      "costs": [],
+      "serverRelevance": "client-only formatter of the rage-value struct.",
+      "notes": ""
+    },
+    {
+      "address": "0x104a2af0",
+      "currentName": "FUN_104a2af0",
+      "proposedName": "CMonsterEntity::LoadAISettingsFromBlackboard",
+      "purpose": "Real logic (not a serializer): loads a monster's AISetting overrides from its BlackBoardFile property node and pushes Health, RageDec, TailFire values into the entity's blackboard/behavior-tree variables. Reads Properties.<...>.AISetting[.PropertyCustom] node.",
+      "subsystem": "monster-ai",
+      "confidence": "medium",
+      "formulas": [
+        "Guard: if param_1[0x4d]!=0 OR param_1[5]==0 OR blackboard-holder null -> skip. param_1[0x3f] = result of vtbl+0x24 call (node id).",
+        "Reads sub-node path 'Properties.' then optional 'PropertyCustom' + '.AISetting.' / '.AISetting'.",
+        "Health: node->GetFloat('Health', out); if found AND out>0.0 -> format float (fmt &DAT_11da0cf4) and set BB var 'Health' via FUN_113168d0/FUN_1046d130.",
+        "RageDec (via DAT_11dbc56c string) and 'RageDec': if found AND >0.0 -> set BB var.",
+        "TailFire: GetString via vtbl+0x3c; if found and differs from empty -> set BB var 'TailFire' (string).",
+        "Uses FUN_104a1b30 to stringify float with a printf-style format DAT."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server-side AI): Health/RageDec/TailFire are per-monster AI tuning overrides read from the monster's property/blackboard file. RageDec = rate at which monster rage decays; Health scalar; TailFire = tail-fire state var. Server driving monster AI must apply these overrides.",
+      "notes": "CryEngine blackboard/BT plumbing (FUN_113168d0 = find BB key, FUN_1046d130 = set BB value, FUN_1046dc90 = key-valid check). DAT_11dbc56c is a string constant (likely 'RageDec' or a Rage key); exact key unverified. Confidence medium due to heavy pointer aliasing in decompile."
+    },
+    {
+      "address": "0x104bc010",
+      "currentName": "FUN_104bc010",
+      "proposedName": "CBehaviorTreeProfiler::DumpNodeRuntimeStats",
+      "purpose": "Iterates a behavior-tree node stats map (in-order tree walk) and emits per-node runtime profiling records (NodePathRT, TimeStamp, NodeName, NodeId, TotalMiliSec, AccountTime, SuccessTime, FailureTime, Average, Percent) into an output object.",
+      "subsystem": "monster-ai",
+      "confidence": "medium",
+      "formulas": [
+        "Node record offsets (from iVar6 node): NodePathRT(string, lowercased) built from +0x20/+0x24; TimeStamp @+0x3c; NodeName resolved via FUN_11317f30; NodeId @+0x4c; TotalMiliSec @+0x44; AccountTime @+0x50; SuccessTime @+0x54; FailureTime @+0x58; Average(float) @+0x5c; Percent(float) @+0x60",
+        "Path chars uppercase->lowercase normalization: if '@'<c<'[' then c+=0x20.",
+        "Tree walk over red-black tree nodes rooted at param_1+0x28 (successor iteration)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (debug/telemetry profiler for behavior-tree nodes). Not gameplay-authoritative.",
+      "notes": "Stock CryEngine/AI profiler dump; documents BT node stat layout only."
+    },
+    {
+      "address": "0x104fd710",
+      "currentName": "FUN_104fd710",
+      "proposedName": "CBuffInfoManager::GetRecordById",
+      "purpose": "Looks up a CBuffInfo static-data record (buff definition) by buff id using the CInfoManager sparse 2D-bucket index. Returns pointer to the buff config record or 0.",
+      "subsystem": "buff-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CBuffInfo::GetInfoManagerSingleton() -> *mgr, fallback CInfoManager::FindByName('CBuffInfo',0).",
+        "Lookup (sparse-id): base@mgr+0x30, stride@mgr+0x28, count@mgr+0x24, buckets@mgr+0x20.",
+        "Valid if id!=-1 AND (id!=0 OR base==0) AND stride!=0 AND (idx=id-base) in [0,count).",
+        "record = buckets[idx/stride][idx%stride]; return 0 if bucket null."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative data-table accessor: fetches the buff DEFINITION (duration, magnitude, stacking rules, category) by id. Server must load the equivalent CBuffInfo table. The record struct itself is defined elsewhere (cross-ref schema/docs/skill.md CBuffInfo).",
+      "notes": "Standard MHO CInfoManager sparse-id lookup idiom; matches the formula documented in schema/docs/pet.md."
+    },
+    {
+      "address": "0x1050eb10",
+      "currentName": "CEquipPassiveSkillGroupInfo__GetManagers",
+      "proposedName": "CEquipPassiveSkillGroupInfo::GetInfoManagerSingleton",
+      "purpose": "Lazy-initializes and returns the CInfoManager singleton holding CEquipPassiveSkillGroupInfo static records (thread-safe one-time init guarded by DAT_123be514 bit 0).",
+      "subsystem": "skill-passive-config",
+      "confidence": "high",
+      "formulas": [
+        "One-time init sets DAT_123be52c/530 = &DAT_123be51c, registers singleton name 'CEquipPassiveSkillGroupInfo::GetManagers' and 'StcMbrNameSvr<class CInfoManager>::GetSingletonName'. Returns DAT_123be518."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative data-table registration for equipment passive-skill activation groups.",
+      "notes": "Ghidra mislabels the method name as ::GetManagers (see schema/docs/pet.md caveat)."
+    },
+    {
+      "address": "0x1050ebc0",
+      "currentName": "FUN_1050ebc0",
+      "proposedName": "CEquipPassiveSkillGroupInfo::GetRecordById",
+      "purpose": "Sparse-id lookup of a CEquipPassiveSkillGroupInfo record (equipment random-passive-skill activation group) by id.",
+      "subsystem": "skill-passive-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr via CEquipPassiveSkillGroupInfo::GetInfoManagerSingleton, fallback CInfoManager::FindByName('CEquipPassiveSkillGroupInfo',0).",
+        "Sparse-id (dword layout): base@puVar2[0xc], stride@puVar2[0xa], count@puVar2[9], buckets@puVar2[8]. Valid if id!=-1 && (id!=0||base==0) && stride!=0 && 0<=id-base<count. record=buckets[idx/stride][idx%stride]."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: defines which passive skills activate for equipment sets/groups. Server must own the same table to validate/grant equip passive skills.",
+      "notes": "Cross-ref schema/docs/skill.md CEquipPassiveSkillGroupInfo."
+    },
+    {
+      "address": "0x1050ef40",
+      "currentName": "FUN_1050ef40",
+      "proposedName": "CPetSkillInfo::GetRecordById",
+      "purpose": "Sparse-id lookup of a CPetSkillInfo record (pet skill definition) by pet-skill id.",
+      "subsystem": "pet-skill-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr via CPetSkillInfo::GetInfoManagerSingleton, fallback CInfoManager::FindByName('CPetSkillInfo',0).",
+        "Sparse-id (byte layout): base@mgr+0x30, stride@mgr+0x28, count@mgr+0x24, buckets@mgr+0x20. Valid if id!=-1 && (id!=0||base==0) && stride!=0 && 0<=id-base<count. record=buckets[idx/stride][idx%stride]."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative data-table accessor: fetches pet skill DEFINITION (id, level, name, type, weight, tier, linked CBuffInfo refs, effect anim) by id. Cross-ref schema/docs/pet.md CPetSkillInfo (fields incl. buffRef_0xb4/0xb8).",
+      "notes": ""
+    },
+    {
+      "address": "0x10511480",
+      "currentName": "FUN_10511480",
+      "proposedName": "CPetPanelUI::OnRefreshPetSkillPanel",
+      "purpose": "Client UI callback (fires only when param_6==1) that refreshes the pet panel: registers Flash/ActionScript callbacks (rename cost, skill-unlock item names, IsSkillUnlock), computes rename money, builds equipped-skill lists, and pushes SetRequireItemId / setPetTempSkillMaxNum / RefreshPetPropertyUI to the UI.",
+      "subsystem": "pet-skill-ui",
+      "confidence": "low",
+      "formulas": [
+        "Early-out unless param_6==1.",
+        "Registers AS handlers: _HasEnoughItemOfRename, _getRenameItemName, _getSkillUnlockItemName, _IsSkillUnlock, _renameMoney/SetRennameMoney.",
+        "setPetTempSkillMaxNum <- MAX_NUM_ADVANCED_SKILL (advanced-skill cap, exact constant not resolved in decompile).",
+        "Calls CPetPanelUI::BuildEquippedSkillLists; on avatar refresh invokes _root.Global_PetAvatarRefresh."
+      ],
+      "costs": [
+        "Pet rename money (SetRennameMoney / _renameMoney) — amount computed via FUN_112d62a0, exact value not resolved.",
+        "MAX_NUM_ADVANCED_SKILL = max advanced pet-skill slots (constant not resolved here)."
+      ],
+      "serverRelevance": "client-only UI glue (Scaleform Flash). Rename-cost and skill-unlock-item requirements are authoritative on the server; this only displays them.",
+      "notes": "Heavy Scaleform/ActionScript invocation (DAT_123bcdb0 = UI movie interface). Decompile is noisy (stack-var callbacks); low confidence on exact arithmetic. Rename/unlock costs must be validated server-side."
+    }
+  ]
+}

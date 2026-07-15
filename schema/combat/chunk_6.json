@@ -1,0 +1,59 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "0x11a0f9e0",
+      "currentName": "FUN_11a0f9e0",
+      "proposedName": "CWeaponFireModeDef::LoadFromXml",
+      "purpose": "Parses a weapon 'firemode' definition node from an XmlNodeRef (param_2) into a config struct (param_1). Iterates a fixed list of named attributes; for each it (1) lazily registers the attribute name string via FUN_100f67b0 and resolves/caches its interned id in a per-attribute static DAT_ global, guarded by bitmask flags in DAT_123a7238 / DAT_123a737c, then (2) calls the XmlNode reader vtable to fetch the value, and on a missing attribute (vtable+0x10 returns 0) formats and logs a 'missing attribute' error via FUN_100ea3b0/FUN_100ee330 using format string DAT_11d389ec. The reader vtable overloads are: +0x10 = HasAttr(name)->bool, +0x20 = GetAttrInt(name)->int, +0x24 = GetAttr into vector/struct (e.g. parse composite), +0x28 = GetAttr as string, +0x30 = GetAttrFloat(name)->float.",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "client-only (CryEngine XmlNodeRef config loader for weapon firemode/aim tuning). The DATA it loads is shared with combat, but the pitch/Yaw fields are camera/aim constraints (client). The server needs the equivalent skillid and firemode identity from the same config, but this parsing routine itself runs client-side.",
+      "constants": [
+        "lookup table base PTR_DAT_11e080e4, stride 0xb pointers (0x2c bytes) per entry, terminates at 0x11e08168; value read from &DAT_11e080e8 + index*0x2c into param_1+0x88",
+        "0x5a (=90) additive offset applied to the id hash when the name-lookup enum (param_1+0x88) resolves to 0"
+      ],
+      "formulas": [
+        "param_1+0x88 (firemode enum/type) = table lookup: compare the parsed name string (local_458) against each PTR_DAT_11e080e4 table entry (UTF-16 length+content compare); on match store *(u32*)(&DAT_11e080e8 + matchIndex*0x2c)",
+        "param_1+0x8c (id/name hash) = FUN_11820cc0(local_458); if param_1+0x88 == 0 then param_1+0x8c = FUN_11820cc0(local_458) + 0x5a",
+        "param_1+0x5c = param_1+0x8c  (duplicate/copy of the computed id at the end)",
+        "attribute-id resolution per field: id = FUN_100e1bf0(nameW); if id == -1 then id = FUN_100e1c30(nameW)  (find-or-add interned attribute id)"
+      ],
+      "protocolFields": [
+        "firemode: composite (read via reader+0x24) -> param_1+0x10",
+        "skillid: int (reader+0x20) -> param_1+0x7c",
+        "attr DAT_11d4cd94: int (reader+0x20) -> param_1+0x58",
+        "pitchspeed: float (reader+0x30) -> param_1+0x68",
+        "pitchlower: float -> param_1+0x60",
+        "pitchupper: float -> param_1+0x64",
+        "Yawspeed: float -> param_1+0x74",
+        "Yawlower: float -> param_1+0x6c",
+        "Yawupper: float -> param_1+0x70",
+        "attr DAT_11d6dc7c: float -> param_1+0x78",
+        "attr DAT_11d6dc84: composite (reader+0x24) -> param_1+0x28",
+        "attr DAT_11d6dc94: composite (reader+0x24) -> param_1+0x40",
+        "attr DAT_11d6dca0: int -> bool at param_1+0x90",
+        "attr DAT_11d6dcac: float -> param_1+0x84",
+        "attr DAT_11d6dcb8: int (reader+0x20) -> param_1+0x80",
+        "name1 (DAT_11d6dbcc): string -> local_458 (used for enum lookup + id hash)",
+        "name2 (DAT_11d6dbd8): string -> local_480"
+      ],
+      "notes": "Classic per-attribute lazy-interned XmlNode reader pattern (CryEngine). Names visible as strings: firemode, skillid, pitchspeed/pitchlower/pitchupper, Yawspeed/Yawlower/Yawupper. Several attribute name strings are only referenced by data address (DAT_11d6dbcc, DAT_11d6dbd8, DAT_11d4cd94, DAT_11d6dc7c, DAT_11d6dc84, DAT_11d6dc94, DAT_11d6dca0, DAT_11d6dcac, DAT_11d6dcb8) and were not resolved to text in this chunk. FUN_11820cc0 is a string->id/hash helper (CRC/name hash). FUN_100e1bf0/FUN_100e1c30 = interned-attr find / find-or-create. Offsets are decimal-mixed in source: param_1+100 == 0x64 (pitchupper).",
+      "category": "config-parse"
+    },
+    {
+      "address": "0x123f6da5",
+      "currentName": "FUN_123f6da5",
+      "proposedName": "Game::TriggerScriptEvent_GameOnHit",
+      "purpose": "Fires the named script/framework event 'GameOnHit'. Fetches a manager off the game framework global (DAT_1202e818): mgr = ((*(DAT_1202e818+4))->vtbl[0x3c])(); then calls mgr->vtbl[0x60](); then dispatches the event via FUN_123eef39(\"GameOnHit\") (a named script-event / Lua callback dispatcher).",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "client-only (script/flowgraph notification hook triggered locally on a hit; not an authoritative damage or validation path). Named 'GameOnHit' — relevant to hit-event flow but this is a client-side script-event trigger, not the server hit checker.",
+      "constants": [],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Small dispatch stub. FUN_123eef39 is the generic named-event/script-callback fire function; 'GameOnHit' is the event name. No damage arithmetic or field validation here.",
+      "category": "script-event"
+    }
+  ]
+}

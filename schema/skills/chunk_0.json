@@ -1,0 +1,166 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x10006530",
+      "currentName": "FUN_10006530",
+      "proposedName": "Tdr::FormatEntryValue",
+      "subsystem": "tdr-serialization",
+      "purpose": "Formats a single TDR meta-entry value into a text buffer for human-readable dump/logging. Dispatches on the entry's iType (switch on *(param_3+8)) and appends a formatted string via FUN_1000f770 (sprintf-append helper), then advances the read cursor by the entry's host unit size (*(param_3+0x18)). NOT skill logic — this is the debug/text-dump path of the TDR codec that (de)serializes all game TLV structures (SkillItem, ManuSkill, TlvAttributeItem, etc.).",
+      "confidence": "medium",
+      "serverRelevance": "client-only (debug/tooling text dump). Server uses the pack/unpack routines below, not this formatter.",
+      "formulas": [
+        "Dispatch on TDR iType at *(param_3+8): case 2/5/6/7/9 = integer -> '%d'(&DAT_11d9e0dc); case 3/4 = int8/char; case 8/10 = unsigned '%u'(&DAT_11d9f574); case 0xb/0xc = two 32-bit words printed together; case 0xd = 16-byte hex (FUN_1000ee40 base 0x10); case 0xe = 16-byte alt-hex (FUN_1000ef00); case 0xf = 32-byte hex/GUID (FUN_1000efa0); case 0x11 = float32 (*(float*)_Str, promoted to double, '%f'=&DAT_11da0cf4); case 0x12 = double; case 0x13 = IPv4/host string (FUN_1000f0d0, 0x20 buf); case 0x14 = uint16 big-endian (FUN_1000e5c0, 2 bytes); case 0x15 = C string (max len from *(param_3+0x20), else host_end-cursor); case 0x16 = wstring->utf8 (FUN_1000e630, len>>1)",
+        "cursor advance per entry: _Str += *(int*)(param_3+0x18)  (host unit size)",
+        "type 0x15 string: max = *(param_3+0x20); if 0 use (host_end - cursor); strnlen must be < max else err -0x7dfefbfa (=0x82010406)",
+        "error format 'failed to output value of entry<%s>, consume input buffer from %p to %p' guarded by iVar5<0"
+      ],
+      "costs": [],
+      "notes": "Establishes TDR iType enum values reused across the codec: 0x11=float32, 0x12=float64/double, 0x13=IP/inet string, 0x14=uint16-BE, 0x15=string, 0x16=wstring. Entry-descriptor offsets: +0x08 iType, +0x18 host unit size, +0x20 custom/max size. Meta-relocation offset at +0xa4, +0x3c, +0x0c used to compute entry name pointer for the error message."
+    },
+    {
+      "address": "0x10009ab0",
+      "currentName": "FUN_10009ab0",
+      "proposedName": "Tdr::FprintfMetaToFile",
+      "subsystem": "tdr-serialization",
+      "purpose": "Validates params (meta, format, fp, host all non-null; host->pszBuff & host->iBuff>0) and clamps the requested cut-off version, then delegates to FUN_100086c0 to write a meta instance to a file/stream using a format. Stock TDR API entry (tdr_fprintf-style).",
+      "confidence": "medium",
+      "serverRelevance": "client-only/tooling (file text output). Not on the authoritative packet path.",
+      "formulas": [
+        "version clamp: if (a_iCutOffVersion==0 || meta.curVer < a_iCutOffVersion) a_iCutOffVersion = meta.curVer  (meta.curVer at *(param_1+0xc))",
+        "if (a_iCutOffVersion < meta.baseVer) return 0x82010401  (meta.baseVer at *(param_1+8))",
+        "host struct layout: param_3[0]=pszBuff, param_3[1]=iBuff; both must be nonzero else return 0x82010468"
+      ],
+      "costs": [],
+      "notes": "Meta descriptor offsets confirmed: +0x08 = base/min version, +0x0c = current version. Error codes: 0x82010468 invalid-parameter, 0x82010401 version-too-old. FUN_10003330 = meta->name accessor (used in all error messages)."
+    },
+    {
+      "address": "0x10009bc0",
+      "currentName": "FUN_10009bc0",
+      "proposedName": "Tdr::FprintfMetaToFile_NoFormat",
+      "subsystem": "tdr-serialization",
+      "purpose": "Same as FUN_10009ab0 but without an explicit format arg — builds a default format context (FUN_10007840 on a 16-byte stack struct) then calls FUN_100086c0. Version validation identical.",
+      "confidence": "medium",
+      "serverRelevance": "client-only/tooling.",
+      "formulas": [
+        "version default: if a_iCutOffVersion==0 -> meta.curVer(*(param_1+0xc)); if < meta.baseVer(*(param_1+8)) return 0x82010401",
+        "host validity: param_3[0]!=0 && param_3[1]!=0 else 0x82010468"
+      ],
+      "costs": [],
+      "notes": "FUN_10007840 initializes a default TDR format/visual descriptor (16 bytes)."
+    },
+    {
+      "address": "0x10009cc0",
+      "currentName": "FUN_10009cc0",
+      "proposedName": "Tdr::SprintfMetaToBuffer",
+      "subsystem": "tdr-serialization",
+      "purpose": "Renders a meta instance into an output text buffer (a_pstOut) instead of a file. Validates out/host buffers, clamps version, calls FUN_100086c0, and on success writes consumed length into out[1] = out.pszBuff_end - out.pszBuff.",
+      "confidence": "medium",
+      "serverRelevance": "client-only/tooling (text serialization).",
+      "formulas": [
+        "on success: param_2[1] = iVar1 - *param_2  (bytes written to out buffer; iVar1 captured = *param_2 at entry)",
+        "on any error: param_2[1] = 0",
+        "version: if a_iCutOffVersion==0 -> meta.curVer(+0xc); if < baseVer(+8) return 0x82010401 (and out[1]=0)"
+      ],
+      "costs": [],
+      "notes": "out/host struct: [0]=pszBuff,[1]=iBuff. Errors: 0x82010468, 0x82010401."
+    },
+    {
+      "address": "0x10009f50",
+      "currentName": "FUN_10009f50",
+      "proposedName": "Tdr::VisualizeMetaWithFormat",
+      "subsystem": "tdr-serialization",
+      "purpose": "'Visual' variant: validates meta/format/visual/host, requires the format string to be at most 1 char (single separator), mallocs a private copy of the host buffer, strncpy's it (NUL-terminated), then calls FUN_10007870 to produce output; frees the copy. Stock TDR tdr_visualize-style API.",
+      "confidence": "medium",
+      "serverRelevance": "client-only/tooling.",
+      "formulas": [
+        "format-length check: walk *param_5 as C string; if (strlen) i.e. (end-(start+1)) > 1 return 0x82010468  (format must be a single-char separator or empty)",
+        "version: if (a_ver==0 || meta.curVer(+0xc) < a_ver) a_ver=meta.curVer; if a_ver < baseVer(+8) return 0x82010401 (visual[1]=0)",
+        "buffer copy: pcVar3 = malloc(host.iBuff); strncpy(copy, host.pszBuff, host.iBuff-1); copy[host.iBuff-1]=0; if malloc fails return 0x82010409",
+        "visual/host struct: [0]=pszBuff,[1]=iBuff (both nonzero required else 0x82010468)"
+      ],
+      "costs": [],
+      "notes": "New error code 0x82010409 = memory-allocation-failed ('failed to allocate memory<size:%u>')."
+    },
+    {
+      "address": "0x1000a1f0",
+      "currentName": "FUN_1000a1f0",
+      "proposedName": "Tdr::PackHostToNet",
+      "subsystem": "tdr-serialization",
+      "purpose": "CORE host->network packer (tdr_host2net). Walks the meta tree with an explicit stack of frames (stride 0x2f ints = 188 bytes/frame, in aiStack_1784[]), converting each host struct field to big-endian (network) byte order and writing it into the net buffer. Handles: primitive scalars (1/2/4/8-byte BE swap), fixed arrays, refer/count-driven arrays, unions, version-indicator emission, C strings (type 0x15) and wstrings (type 0x16, UTF16 via FUN_100108a0). This is the codec that emits every TLV/TDR network message the server sends and parses — protocol-critical.",
+      "confidence": "medium",
+      "serverRelevance": "authoritative infrastructure: server MUST use byte-identical packing (BE order, size prefixes, version indicator, bounds checks) for wire compatibility with the client. Not skill computation itself, but every skill/buff TLV packet flows through this.",
+      "formulas": [
+        "version clamp: if (a_iVersion==0 || meta.curVer(+0xc) < a_iVersion) a_iVersion = meta.curVer; error if a_iVersion < meta.baseVer(+8) OR (meta.hasVerIndicator(+0x74)!=0 && a_iVersion < verIndicator.minVer(+0x58)) -> 0x82010401",
+        "max nesting depth = 0x20 (32) layers; iStack_17cc>0x1f -> 0x82010404 'too complex, more than 32 layers'",
+        "sizeinfo overflow check uses 64-bit limit table at DAT_11e11420(lo)/DAT_11e11424(hi) indexed by sizeinfoSize*8: if value exceeds limit -> 0x82010479",
+        "refer/array count read from entry+0x58 (size 0/2/4/8) at host offset entry+0x5c; validated 0 <= refer <= arrayCount(entry+0x24) else 0x82010403",
+        "BE swap 16-bit: (v<<8)|(v>>8); 32-bit: ((v&0xff0000|v>>0x10)>>8)|((v<<0x10|v&0xff00)<<8); 64-bit swaps both dwords and exchanges them",
+        "version-indicator emit into net at (meta+0x70)+hostBase, width meta+0x74 (2->i16,4->i32,8->i64 sign-extended,else i8); host-buffer bounds checked -> 0x82010407",
+        "net-buffer overrun -> 0x82010402; string/wstring length errors -> 0x82010406",
+        "wstring byte length = FUN_100108a0(...)*2 + 2 (UTF16 + NUL); string length = strnlen+1"
+      ],
+      "costs": [],
+      "notes": "Meta offsets: +0x08 baseVer, +0x0c curVer, +0x10 iType, +0x1c host-stride, +0x2c memberCount, +0x3c meta self-reloc base, +0x58 verIndicator.minVer, +0x5c verIndicator host-off, +0x64 verIndicator size, +0x68 sign flag, +0x70 verIndicator net-off, +0x74 verIndicator size-bytes, +0x78 sub-meta ptr, +0x64/100 childCount. Entry stride = 0xb4 (180B) starting at meta+0xb8. Entry offsets: +0x04 minVer, +0x08 iType, +0x14 elem host-off, +0x18 host unit size, +0x1c net unit size, +0x20 custom/max size, +0x24 arrayCount, +0x28 host array bytes, +0x2c count/member, +0x44 flags(bit1=2 select/union,bit2=4 pointer/refer-indirect), +0x48 refer host-off, +0x50 sizeinfo size, +0x54 select-default(-1), +0x58 refer count size, +0x5c refer count host-off. Source file 'lib_src\\tdr\\tdr_net.c'. Error codes: 0x82010401 version,0x82010402 net-buf,0x82010403 refer,0x82010404 depth,0x82010406 string-len,0x82010407 host-buf,0x82010479 overflow,0x82010468 param."
+    },
+    {
+      "address": "0x1000b780",
+      "currentName": "FUN_1000b780",
+      "proposedName": "Tdr::UnpackNetToHost",
+      "subsystem": "tdr-serialization",
+      "purpose": "CORE network->host unpacker (tdr_net2host), mirror of FUN_1000a1f0. Reads big-endian fields from the net buffer, validates version indicator against [base_ver, cur_ver] and the meta's versionindicator min_ver, converts to host byte order, applies default values for absent select/union branches, and validates string/wstring NUL-termination. Same 0x2f-int frame stack, same 32-layer depth cap.",
+      "confidence": "medium",
+      "serverRelevance": "authoritative infrastructure: server parses all inbound TLV/TDR packets (skill cast requests, item ops, etc.) through this; bounds/version/length validation here IS server input validation. Byte-identical behavior required.",
+      "formulas": [
+        "version resolve: if (a_iVersion==0 || meta.curVer(+0xc) < a_iVersion) a_iVersion=meta.curVer; error if a_iVersion < baseVer(+8) OR a_iVersion > curVer -> 0x82010468 'expect in [base_ver,cur_ver]'",
+        "version-indicator read from net: width meta+0x74 (2/4/8/1) with BE decode; validated indicator in [base_ver,cur_ver] AND >= verIndicator.minVer(+0x58) else version error; if meta+0x74==0 use a_iVersion directly",
+        "string min length = 1, wstring min length = 2 (must include NUL); last char must be NUL (0) else format-error",
+        "'has NO space for string/wstring null' when host buffer too small for terminator",
+        "net-buffer sufficiency: end - start >= length + sizeinfo, else 0x82010402",
+        "absent optional (refer==0) fills host with 0 across unit size (memset)",
+        "max depth 32 layers -> 0x82010404; sizeinfo overflow via DAT_11e11420/24 table",
+        "BE decode 16/32/64-bit inverse of the pack swaps"
+      ],
+      "costs": [],
+      "notes": "Same meta/entry offset layout as FUN_1000a1f0. Additional entry offsets used: +0x8c min-net-size, +0x98 sub-meta/version-indicator net-off, +0x134/+0x138 union-tag range table (per-branch [min,max] version selectors, stride 0xb4). Error strings enumerate all length/format checks. Depth cap 32, frame stride 0x2f ints."
+    },
+    {
+      "address": "0x1000cfa0",
+      "currentName": "FUN_1000cfa0",
+      "proposedName": "Tdr::PackArrayFieldHostToNet",
+      "subsystem": "tdr-serialization",
+      "purpose": "Helper for packing one array-typed entry host->net. For nested-struct elements (entry iType==1) it recurses into FUN_1000a1f0 per element; for iType 0x15 (string array) and 0x16 (wstring array) it emits per-element length prefix + bytes; otherwise it BE-swaps fixed 1/2/4/8-byte elements in a tight loop. Writes total consumed net length back into param_3[1].",
+      "confidence": "medium",
+      "serverRelevance": "authoritative infrastructure (array packing path). Same wire-compat requirement as the parent packer.",
+      "formulas": [
+        "entry base = param_2*0xb4 + 0xb8 + param_1 (meta base + entry index * 180 + 0xb8)",
+        "iType==1 (struct): for i in 0..arrayCount(entry+0x24): elem_host = host + (entry+0x18)*i; call FUN_1000a1f0(sub_meta, netOut, elem_host, version); advance net by returned length",
+        "iType==0x15 (string[]): per elem: len=strnlen(src, custom_size(entry+0x20) or remaining)+1; write BE size-prefix of width entry+0x50; memcpy len bytes; src advances by custom_size stride",
+        "iType==0x16 (wstring[]): per elem: byteLen=FUN_100108a0(src,avail)*2+2; write BE size-prefix width entry+0x50; copy bytes",
+        "default fixed array: unit=entry+0x1c net size (1/2/4/8) BE-swap * arrayCount; host unit stride entry+0x18",
+        "bounds: host_end < src+unit*count -> -0x7dfefbf9 (0x82010407); net_end < dst+unit*count -> -0x7dfefbfe (0x82010402); string overflow -0x7dfefb87 (0x82010479)",
+        "param_3[1] set to (dst - *param_3) = bytes written on every exit"
+      ],
+      "costs": [],
+      "notes": "param_1=meta base, param_2=entry index, param_3=net {pszBuff,len}, param_4=host {pszBuff,len}, param_5=version. sub_meta pointer relocated as (entry+0x78) - (meta+0x3c) + meta. sizeinfo limit table DAT_11e11420/24 as elsewhere."
+    },
+    {
+      "address": "0x1000d800",
+      "currentName": "FUN_1000d800",
+      "proposedName": "Tdr::UnpackArrayFieldNetToHost",
+      "subsystem": "tdr-serialization",
+      "purpose": "Mirror of FUN_1000cfa0: unpacks one array-typed entry net->host. Reads per-element BE size prefixes for string(0x15)/wstring(0x16) arrays, validates min lengths and NUL termination, recurses for nested structs, and BE-decodes fixed 1/2/4/8-byte elements. Enforces the same 'net-buffer NOT enough' / 'string from net-buffer format error' / min_string_len=1 / min_wstring_len=2 rules as the scalar unpacker.",
+      "confidence": "medium",
+      "serverRelevance": "authoritative infrastructure (array unpack path); part of server-side inbound packet validation.",
+      "formulas": [
+        "entry base = param*0xb4 + 0xb8 + meta (180-byte entry stride)",
+        "string element: length>=1, last byte must be NUL else 'string from net-buffer format error'; needs end > start+sizeinfo",
+        "wstring element: length>=2 ('min_wstring_len<2>'), last wchar must be 0 else format error",
+        "fixed array BE-decode 1/2/4/8-byte inverse swaps; host/net buffer sufficiency checks -> host-buffer/net-buffer NOT enough errors",
+        "sizeinfo prefix width from entry+0x50; custom size entry+0x20"
+      ],
+      "costs": [],
+      "notes": "Direct counterpart to FUN_1000cfa0 for the receive direction. Only first ~30 lines of body inspected in this chunk (function spans to end of file); role established from its string set and symmetry with the pack helper."
+    }
+  ]
+}

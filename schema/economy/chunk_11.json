@@ -1,0 +1,326 @@
+{
+  "chunkIndex": 11,
+  "functions": [
+    {
+      "address": "0x109d36e0",
+      "currentName": "data__XmasRewardItemMo",
+      "proposedName": "XmasRewardItemMo::XmasRewardItemMo",
+      "purpose": "Constructor for the ActionScript/UI data object 'mh.data::XmasRewardItemMo' (a Christmas 'meat/height' event reward row). Zeroes fields [0],[1], stores flag param_2 at [6], and if non-zero registers the AS class name via FUN_11a98de0.",
+      "subsystem": "activity/xmas-reward (UI view-model)",
+      "confidence": "high",
+      "serverRelevance": "client-only (UI data-object ctor, CryEngine/ActionScript bridge plumbing)",
+      "formulas": ["*param_1=0; param_1[1]=0; param_1[6]=param_2; if(param_2!=0) register 'mh.data::XmasRewardItemMo'"],
+      "notes": "Stock UI VO allocation."
+    },
+    {
+      "address": "0x109d3900",
+      "currentName": "FUN_109d3900",
+      "proposedName": "XmasActivityModel::RegisterHandlers",
+      "purpose": "Builds the command dispatch table for the Xmas (secret/giant meat) activity model. Registers named callbacks InitModel, FetchActivityData, GetSecretMeat, GetGiantMeat, SubmitGiantMeat, FetchRewardData (->FUN_109d3b20), DrawReward (->FUN_109d3f10) via FUN_100b62c0/FUN_109d4230 string-keyed registration.",
+      "subsystem": "activity/xmas (command registration)",
+      "confidence": "medium",
+      "serverRelevance": "client-only (client-side model command table). GetSecretMeat/GetGiantMeat/SubmitGiantMeat/DrawReward correspond to server operations that must be authoritative.",
+      "notes": "Handler slots: FetchActivityData=FUN_109d3e00, GetSecretMeat=LAB_109d3f70, GetGiantMeat=LAB_109d3fb0, SubmitGiantMeat=LAB_109d3ff0, FetchRewardData=FUN_109d3b20, DrawReward=FUN_109d3f10."
+    },
+    {
+      "address": "0x109d3b20",
+      "currentName": "FUN_109d3b20",
+      "proposedName": "XmasActivityModel::BuildRewardArray",
+      "purpose": "FetchRewardData handler: serializes the Xmas 'height/meat' reward ladder into a 'rewardArray' of XmasRewardItemMo VOs for the UI. Reads the activity data block obtained from the activity manager (DAT_1202e818->0xd0->0x90->vtbl+0xb4 -> +0x2acc). Emits currentHeight plus per-entry fields.",
+      "subsystem": "activity/xmas-reward (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; the reward-eligibility values (currentHeight, bClaimed, bEnabled) originate from server activity state.",
+      "formulas": [
+        "entry count = *(byte*)(actData+0xad2)",
+        "entry stride = 0x423 bytes, first entry ptr = actData+0xada",
+        "per-entry emit only if type byte *(char*)(entry-6)=='@' (0x40)",
+        "iItemIndex = entry[-1]; iItemId = entry[0x43]; iItemDataId = entry[2]; iNeedHeight = entry[1]; bIsDaily = (entry[0]==1)",
+        "currentHeight fetched via FUN_1141f8e0() when *(activityObj+0x4e8)()!=0"
+      ],
+      "notes": "FUN_1141fab0(entryId, isDaily) toggles per-entry claim/enable; bClaimed/bEnabled written from that state."
+    },
+    {
+      "address": "0x109d4690",
+      "currentName": "FUN_109d4690",
+      "proposedName": "NewOperationActivityService::RegisterC2ASHandlers",
+      "purpose": "Registers the client->ActivityServer (C2AS) RPC dispatch table for the NewOperationActivity system: C2AS_GetActivitySimpleDatas (->FUN_109d4990), C2AS_GetActivityDetailData (->FUN_109d4bc0), C2AS_GetConstTableData (->FUN_109d87e0), C2AS_GetServerId (->FUN_109d8a90), C2AS_SetCacheActivityId (->FUN_109d8b00), C2AS_GetCacheActivityId (->FUN_109d8b30), C2AS_ExecuteEntry (->FUN_109d8b70), C2AS_ExecuteLevelMatch (->FUN_109d8c70), C2AS_GetNewYearRedPacket (->FUN_109d8cf0), C2AS_ReqRewardActivity (->LAB_109dbfc0).",
+      "subsystem": "activity/newoperation (C2AS RPC registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: these C2AS_* names are the client->activity-server request opcodes. Server must own ExecuteEntry, ReqRewardActivity (reward grant), GetNewYearRedPacket (currency/item grant) and validate all reward claims.",
+      "costs": ["C2AS_ReqRewardActivity and C2AS_GetNewYearRedPacket trigger server-side reward/currency grants (amounts server-defined)"]
+    },
+    {
+      "address": "0x109d4990",
+      "currentName": "FUN_109d4990",
+      "proposedName": "NewOperationActivityService::BuildActivitySimpleDataList",
+      "purpose": "Handler for C2AS_GetActivitySimpleDatas: iterates the activity list at (activityMgr+0x260fc) and builds an array of 'mh.view.NewOperationActivity.Data.ActivitySimpleData' VOs (ActivityType, ActivityId, ActivityName, ActivityIcon, HasRewardCanFetch) for the operation-activity panel.",
+      "subsystem": "activity/newoperation (view-model build)",
+      "confidence": "high",
+      "serverRelevance": "client-only serialization of server-provided activity list; HasRewardCanFetch is a display flag (FUN_109db010(activityId)) — server remains authoritative on actual fetch eligibility.",
+      "formulas": [
+        "activity container = *(activityMgr+0x260fc); each element *puVar7 resolved via FUN_1122b9d0(*obj), gated by FUN_109d8df0(obj,cfg)",
+        "ActivityType = *cfg (byte at cfg[0]); ActivityId = *obj; ActivityName = CPet::SetName(cfg+0xd); ActivityIcon = cfg+0x94d",
+        "HasRewardCanFetch = FUN_109db010(activityId)"
+      ]
+    },
+    {
+      "address": "0x109d8fc0",
+      "currentName": "FUN_109d8fc0",
+      "proposedName": "NewOperationActivityService::BuildActivityRewardDataList",
+      "purpose": "Handler (C2AS_GetActivityDetailData family) that serializes an activity's reward/condition rows into 'RewardDatas' array of 'mh.view.NewOperationActivity.Data.ActivityRewardData'. Large switch on ConditionType drives per-type extra fields; separate switch on the activity-type byte (*param_4[0]) drives needItemCount / exchange fields.",
+      "subsystem": "activity/newoperation (reward/condition view-model)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; FetchCount/CurrentAchieveCount/MaxFetchCount come from server activity state (FUN_109d8f20 reads counters). Server authoritative on actual fetch/exchange.",
+      "formulas": [
+        "entry count = *(byte*)(param_4+0xad2); entry stride 0x423; iVar6 = idx*0x423",
+        "skip row unless (param_4[iVar6+0xad4]!='0') etc. (visibility gating on type/state bytes at +0xad4,+0xae3)",
+        "ItemId = *(param_4+iVar6+0xad6); ItemCount = *(short*)(param_4+iVar6+0xada); EntryId = param_4[iVar6+0xad3]",
+        "FetchCount = FUN_109d8f20(byte param_4[iVar6+0xad3]); MaxFetchCount = *(short*)(param_4+iVar6+0xb0d)",
+        "ConditionType = param_4[iVar6+0xae3]; nCondParam1 = *(param_4+iVar6+0xae5); nCondParam2 = *(param_4+iVar6+0xae9)",
+        "ConditionType switch: 2=LoginDayTime(nCondParam1), 3=NeedOnlineTime(nCondParam1), 8=CurrentAchieve via FUN_109d8f20(byte +0xae4) & need=+0xae5, 9=FUN_114e00a0 via vtbl+0x46c(short +0xae5), 11=exchange (ExchangeSourceItemDataArray built from source list at +0xb8f and dest at +0xc0f, entries parsed with atoi, stride 0x18/6-dword; emits ActivitySimpleItemData{ItemId,ItemCount}), 13=need=1 gated by FUN_107ca5b0/FUN_116b8a70/FUN_114cdd70",
+        "exchange loop count uStack_e8 = ((int)piStack_100 - iStack_104)/0x18 (0x18=24-byte records)",
+        "activity-type byte (*param_4) branches: 0x7f/0x0c/0x10/0x16/0x1c/0x1b/0x1f/0x22 -> currentItemCount+needItemCount; 0x18,0x19 -> needItemCount; 0x7c(+cond 0x0a) -> time-based ItemCount via FUN_10a13c30 with (now-0x2a30) offset (0x2a30=10800s=3h); 0x0a/0x17 with cond 0x0a and subtype at +0xadf (==4 or ==2) -> FUN_113fa0d0/FUN_113fa380 count deltas; 0x25,0x2a(strParam5/name),0x2b(atoi +0xc0f),0x2c(FetchCount/MaxFetchCount/Desc)"
+      ],
+      "costs": ["needItemCount / currentItemCount / exchange source-dest item pairs are the exchange 'price' the server must validate on ReqRewardActivity"],
+      "notes": "0x2a30=10800 (3h) time offset; 0x18=24-byte exchange record. Many sub-branches call FUN_104d1550/1440/15e0 to write UI props (int/int/bool)."
+    },
+    {
+      "address": "0x109d9ec0",
+      "currentName": "FUN_109d9ec0",
+      "proposedName": "NewOperationActivityService::BuildTaskRewardArray",
+      "purpose": "Serializes a task's fixed reward list into 'arrTaskReward' array of ActivityRewardData {ItemId, ItemCount}. Reads a compact reward table on the task struct.",
+      "subsystem": "activity/newoperation (task reward view-model)",
+      "confidence": "high",
+      "serverRelevance": "client-only display of server-defined task rewards.",
+      "formulas": [
+        "reward count = *(byte*)(param_3+0x1b9); first entry = param_3+0x1be; stride 8 bytes (psVar3+=4 shorts)",
+        "ItemId = *(int*)(psVar3-2); ItemCount = *(short*)psVar3"
+      ]
+    },
+    {
+      "address": "0x109da2a0",
+      "currentName": "FUN_109da2a0",
+      "proposedName": "NewOperationActivityService::BuildExchangeRewardDataList",
+      "purpose": "Serializes an exchange-type activity's 'RewardDatas'. Per entry, type byte at (entry-0x39)==' '(0x20) produces {EntryId,nParam1,nParam2} where nParam2 flags server exchange-availability (FUN_11513b40); otherwise produces full reward row {ItemId,ItemCount,FetchCount,MaxFetchCount,EntryId,ConditionType,CurrentAchieveCount,NeedAchieveCount}.",
+      "subsystem": "activity/newoperation (exchange view-model)",
+      "confidence": "medium",
+      "serverRelevance": "validation surface: FetchCount and nParam2/availability are computed by server call FUN_11513b40(cacheId, subId, entryId, out). Client only displays.",
+      "formulas": [
+        "entry count = *(byte*)(local_90+0xad2); psVar7 starts at local_90+0xb0d; stride 0x423",
+        "type byte = *(char*)(psVar7-0x39); ==0x20 -> EntryId=(char)psVar7[-0x1d], nParam1=*(int*)(psVar7-0x17), nParam2 = (FUN_11513b40(...,&cnt) && cnt>=1)?1:0",
+        "else: ItemId=*(int*)(psVar7-0x37); ItemCount=*(short*)(psVar7-0x33); FetchCount = FUN_11513b40 out[0] when obj[0xab3]!=0; MaxFetchCount=*(short*)psVar7; EntryId=(char)psVar7[-0x1d]; ConditionType=(char)psVar7[-0x15]",
+        "if EntryId type==2: CurrentAchieveCount=FUN_109d8f20(DAT_1201fce4), NeedAchieveCount=1; else CurrentAchieveCount = (FUN_109d8f20(DAT_1201fce4)<1)?0:FUN_109d8f20(byte at +0x11b19), NeedAchieveCount=*(int*)(psVar7-0x14)"
+      ]
+    },
+    {
+      "address": "0x109dade0",
+      "currentName": "FUN_109dade0",
+      "proposedName": "NewOperationActivityService::BuildConstTableRewardData",
+      "purpose": "Serializes reward data from a const/config table (loaded via FUN_10540d00 / FUN_1052c520) into 'RewardDatas' when the table id == 0xbc9 (3017). Iterates nested config lists.",
+      "subsystem": "activity/newoperation (config-table reward view-model)",
+      "confidence": "medium",
+      "serverRelevance": "client-only; reads static config table, not player state.",
+      "formulas": [
+        "guard: config record stride 0x114 (iVar2/0x114), only when table field local_124==0xbc9 (3017)",
+        "outer list nodes stride 0x14; inner reward records stride 9 dwords (puVar4+=9, 0x24 bytes)",
+        "ItemId = *puVar4; ItemCount = puVar4[3]"
+      ],
+      "notes": "0xbc9 = decimal 3017 (activity/table id)."
+    },
+    {
+      "address": "0x109dbdd0",
+      "currentName": "FUN_109dbdd0",
+      "proposedName": "NewOperationActivityService::BuildAchieveRewardDataList",
+      "purpose": "Serializes an achievement-progress reward set into 'RewardDatas' {ItemId, ItemCount, CurrentAchieveCount, NeedAchieveCount, nParam1, nParam2}. Walks a red-black-tree container at (activityObj+0x2dd0); shared CurrentAchieveCount at (activityObj+0x2dc8).",
+      "subsystem": "activity/newoperation (achievement reward view-model)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; achievement counters from server state.",
+      "formulas": [
+        "gated by *(activityObj+11000/0x2af8)!=0",
+        "CurrentAchieveCount = *(int*)(activityObj+0x2dc8) (shared)",
+        "per node: ItemId=*(node+0x20); ItemCount=*(node+0x24); NeedAchieveCount=*(node+0x18); nParam1=*(node+0x14); nParam2=*(node+0x1c)",
+        "tree iterated via std::map successor (offsets +4 parent, +8 right, +0xc left)"
+      ]
+    },
+    {
+      "address": "0x109dd880",
+      "currentName": "FUN_109dd880",
+      "proposedName": "RankRewardActivityModel::RegisterHandlers",
+      "purpose": "Registers a small activity model command table: InitModel, IsActivityOpen (->FUN_109de2e0), IsRankRewardFetched (->FUN_109de3e0), and wires the model into the manager (FUN_10d17440/FUN_10d17870/FUN_109de770).",
+      "subsystem": "activity/rank-reward (command registration)",
+      "confidence": "medium",
+      "serverRelevance": "client-only model registration; IsRankRewardFetched reflects server fetch state.",
+      "notes": "Clears flag *(param_1+0x20)=0 at end."
+    },
+    {
+      "address": "0x109ddd60",
+      "currentName": "FUN_109ddd60",
+      "proposedName": "RankRewardActivityModel::BuildExchangeAndRankInfo",
+      "purpose": "Builds rewardItemIdArray, entryIdArray and exchangeItemCount plus per-entry flags for a rank/level/fashion-ticket exchange activity. Switch on entry type byte: 0x20=rank, 0x25=level(lottery chances), 0x30=ticket/fashion, 0x40=rankReward(time window).",
+      "subsystem": "activity/rank-reward (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; counts and fetched-flags are server-provided. remainderChance/exchangeItemCount are display computations of server state.",
+      "formulas": [
+        "entry count = *(byte*)(actData+0xad2); base = actData+0xb66; stride 0x423",
+        "case 0x20 (rank): rankEntryId=byte(entry-0x93); isRankRewardFetched=1 if FUN_107e6320()>0",
+        "case 0x25 (level/lottery): remainderChance = 3 (default, no state) OR local_10 - FUN_1156c660() (maxChances - usedChances); levelEntryId=byte(entry-0x93)",
+        "case 0x30 (ticket/fashion): ticketEntryId (first, bVar-guarded) or fashionExchangeNeedTicketCount=(entry+0xa9); isFashionRewardFetched=1 if FUN_107e6320()>0",
+        "case 0x40 (rankReward window): remainderTime = (endTime - now) / 0x15180 when startTime<=now<endTime (0x15180 = 86400 s/day -> days remaining); isActivityFinish flag = now>=endTime; times read now=FUN_111f8d20, window at (entry-0x8c start, entry+0x80 end)",
+        "exchangeItemCount = (obj[0xb47]==0)?0 : FUN_113fa680(ticketId,0,1) + FUN_113fa680(ticketId,1,1)"
+      ],
+      "costs": ["fashionExchangeNeedTicketCount = ticket price for fashion exchange (config at entry+0xa9)", "remainderChance = per-day lottery chances left (default cap 3)"],
+      "notes": "0x15180 = 86400 (seconds/day)."
+    },
+    {
+      "address": "0x109dfac0",
+      "currentName": "FUN_109dfac0",
+      "proposedName": "GuildActivityModel::RegisterHandlers",
+      "purpose": "Registers the guild activity/guilder-task model command table: InitModel, ReqGroupMemberList, ReqGuildActivityInfo, ReqGuildDetailInfo, ReqGuilderInfo, GetLocalGuilderActivityInfo, GetGuilderTaskInfoById, AcceptGuilderTaskById, GiveUpGuilderTaskById, FinishGuilderTaskById, GetSpecialTaskReward, GiveUpHiddenLevel, EnterHiddenLevel. Wires three sub-listeners at the end.",
+      "subsystem": "guild/activity (command registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: Accept/GiveUp/FinishGuilderTaskById and GetSpecialTaskReward drive server-side task-state and reward grants; server must own completion validation and reward payout.",
+      "costs": ["GetSpecialTaskReward -> server reward grant (amount server-defined)"]
+    },
+    {
+      "address": "0x109e0250",
+      "currentName": "FUN_109e0250",
+      "proposedName": "GuildActivityModel::BuildGroupMemberList",
+      "purpose": "ReqGroupMemberList handler: serializes guild members into 'groupMemberArray' of GUILDMEMBER_CLASS_NAME VOs with paging and celebration/attendance stats (name, level, HRlevel, title, currentP, nCelebrationScore/Reward/Task/PreCelebrationTask, online state, offlineTimeSpan, 64-bit id via _i64toa).",
+      "subsystem": "guild/activity (member list view-model)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display of server-provided guild member data.",
+      "formulas": [
+        "GroupMemberMaxPageNum = *(guild+0x2a8); GroupMemberCurrentPage = *(guild+0x2a4)",
+        "guildersCount = vtbl+0x18; m_nOnlineGuildersCount = vtbl+0x1c",
+        "per member: level_member=vtbl+8; HRlevel_member=vtbl+0x3c; currentP=vtbl+0x14; nCelebrationScore=vtbl+0x18; nCelebrationReward=vtbl+0x1c; nCelebrationTask=vtbl+0x34; nPreCelebrationTask=vtbl+0x38; 64-bit uid=vtbl+0x20 (_i64toa base 10)",
+        "state: online=vtbl+0x10; if offline offlineTimeSpan = max(0, now - member[0x25])"
+      ]
+    },
+    {
+      "address": "0x109e27e0",
+      "currentName": "FUN_109e27e0",
+      "proposedName": "GuildActivityModel::BuildDailyTaskRewardArray",
+      "purpose": "Serializes a weekly/daily task activity into weekCount, processingTaskId, and a 'dayRewardArray' where each day holds a rewardItemArray {ItemId,ItemCount} plus FetchCount/CurrentAchieveCount/NeedAchieveCount/entryId/taskDesc. Groups reward entries 3-per-day.",
+      "subsystem": "guild/activity or daily-task (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; counters (FetchCount, CurrentAchieveCount, weekCount) from server task state.",
+      "formulas": [
+        "weekCount = FUN_109d8f20(byte at actData+0x11b1d); processingTaskId = FUN_109d8f20(byte at actData+0x11b19)",
+        "entry count = *(byte*)(actData+0xad2); entry base = actData+0xae9; stride 0x423; per-entry type byte at (entry-0x15)=='0'",
+        "day grouping: new day when (idx == idx/3*3) i.e. every 3 entries; puStack_164 advances 6 dwords (0x18) per day",
+        "FetchCount = FUN_109d8f20(byte at entry-0x16 = entryId); CurrentAchieveCount = FUN_109d8f20(byte at entry-1); NeedAchieveCount = *entry(+0xae9 dword); entryId = byte(entry-0x16)",
+        "taskDesc = CPet::SetName(entry+0x26); rewardItemArray: ItemId=*puVar10, ItemCount=(short)puVar10[1], count=*(byte*)(entry+0x1a6), stride 2 dwords"
+      ]
+    },
+    {
+      "address": "0x109e3f50",
+      "currentName": "FUN_109e3f50",
+      "proposedName": "GoalGuideModel::RegisterHandlers",
+      "purpose": "Registers the Goal Guide (achievement guide) model command table: InitModel, GetGoalGuideData (->FUN_109e4150), FetchReward (->FUN_109e4980), GetNextRewardData (->FUN_109e49e0), UpdateAchieveNotice (->FUN_109e4de0), CheckSystemUnlock (->FUN_109e4f70).",
+      "subsystem": "achievement/goal-guide (command registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: FetchReward triggers server reward grant for a completed achievement goal; server must validate goal completion and pay out.",
+      "costs": ["FetchReward -> server grants itemId x itemNum (defined per achievement goal)"]
+    },
+    {
+      "address": "0x109e4150",
+      "currentName": "FUN_109e4150",
+      "proposedName": "GoalGuideModel::BuildGoalGuideData",
+      "purpose": "GetGoalGuideData handler (mode param_5==1): builds 'pageDataList' of achievement groups, each 'GOALGUIDE_VO_CLASSNAME' with the current in-progress goal (groupID, strName, goalValue, curValue, strDesc, rewardAchieveID, rewardValue, itemId, itemNum, strTips, hasRewards) and an achieveList. Uses CPlayer::GetHuntRankOrCount to evaluate current progress vs goalValue.",
+      "subsystem": "achievement/goal-guide (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; curValue from CPlayer::GetHuntRankOrCount and reward-fetched state (FUN_115350b0) are server-authoritative sources. Actual reward via FetchReward.",
+      "formulas": [
+        "per achievement node: goalValue = node[9]; itemId = node[10]; itemNum = node[0xb]; rewardAchieveID = vtbl+0x18",
+        "hasRewards set to 1 when an unfetched achievement (FUN_115350b0(id)=='\\0') is found",
+        "curValue = piStack_e8 (server-provided current count); selected goal = first node with node[9] > curValue (else last completed)",
+        "iterates groups 0..FUN_109e3df0() (group count)"
+      ]
+    },
+    {
+      "address": "0x109e49e0",
+      "currentName": "FUN_109e49e0",
+      "proposedName": "GoalGuideModel::BuildNextRewardData",
+      "purpose": "GetNextRewardData handler (mode param_5==2): finds the next unclaimed achievement in the active group and builds a single 'goalGuideVo' {groupID, strName, strDesc, curValue, rewardAchieveID, rewardValue, itemId, itemNum, hasRewards=1}; writes result presence flag into out param_6.",
+      "subsystem": "achievement/goal-guide (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; unclaimed determination uses server reward-fetched check FUN_115350b0.",
+      "formulas": [
+        "iterate achievement list; pick first node where FUN_115350b0(rewardAchieveID)=='\\0' (not yet fetched)",
+        "itemId = node[10]; itemNum = node[0xb]; curValue = piStack_40; hasRewards=1",
+        "out: param_6[1]=2, *(byte*)(param_6+2)=foundFlag"
+      ]
+    },
+    {
+      "address": "0x109eacd0",
+      "currentName": "FUN_109eacd0",
+      "proposedName": "SuperHunterModel::RegisterHandlers",
+      "purpose": "Registers the SuperHunter activity model command table: C2AS_GetSuperHunterData (->FUN_109eaf00), AS2C_RequestSuperHunterRankData (->FUN_109eba30), C2AS_GetSuperHunterRankData (->FUN_109eba90), EnterInstance (->FUN_109ec540), TeamMatch (->FUN_109ec5c0), GainReward (->FUN_109ec630), GetSuperHunterInfo (->FUN_109ec4b0).",
+      "subsystem": "activity/superhunter (command registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: EnterInstance, TeamMatch and GainReward (reward grant) are server operations; server must validate entry limits (remainGainTimes/maxGainTimes) and pay rewards.",
+      "costs": ["GainReward -> server grants rewardID x rewardCount, bounded by maxGainTimes"]
+    },
+    {
+      "address": "0x109eaf00",
+      "currentName": "FUN_109eaf00",
+      "proposedName": "SuperHunterModel::BuildSuperHunterData",
+      "purpose": "C2AS_GetSuperHunterData handler (mode==1): builds the SuperHunter panel data - difficulty, remainNum, vipLevel, isVip, ruleStr, monster character path/state/tips, a BossVo list (bossID, bossName, bossData), and a 4-tier RewardVo array (rewardID, rewardCount, gainedTimes, remainGainTimes, maxGainTimes) under rewardData.",
+      "subsystem": "activity/superhunter (view-model build)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; difficulty/remainNum/vip/reward-times are server-provided. GainReward remains server-authoritative.",
+      "formulas": [
+        "difficulty = boss vtbl+0x3c; remainNum = boss vtbl+0x38; vipLevel = FUN_1025b060(actData+0x2348)",
+        "isVip emitted only when *(actData+11000/0x2af8)!=0, value = FUN_11549be0()&0xff",
+        "boss list from (actData->0x2b84)->vtbl+0x30 iterated at (list+0x3c..+0x40), stride 0x12 dwords",
+        "reward tiers: loop uVar3 0..3 (4 tiers); even idx uses boss vtbl+0x44, odd uses vtbl+0x40 with page arg = clamp(bossCount,>=1); builds 'mh.view.SuperHunter.model.RewardVo'"
+      ]
+    },
+    {
+      "address": "0x109eda60",
+      "currentName": "FUN_109eda60",
+      "proposedName": "LegendPearlModel::RegisterHandlers",
+      "purpose": "Registers the Legend Pearl (equipment enhance/upgrade) model handlers (mode==1): C2AS_RequestLegendPearlPutItemIn (->FUN_109edb40), C2AS_RequestLegendPearlUpgradeInfo (->FUN_109edfd0), C2AS_RequestLegendPearlUpgrade (->FUN_109ef720), C2AS_RequestLegendPearlReplaceAbility (->FUN_109efc10).",
+      "subsystem": "equipment/legend-pearl-upgrade (command registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: C2AS_RequestLegendPearlUpgrade and PutItemIn / ReplaceAbility are server mutations that spend money+materials and change equipment; server must validate costs, requirements and consume items.",
+      "costs": ["Upgrade consumes upgradeMoney (currency) and material items; requirement gates enforceRequirement/hunterstarRequirement (see FUN_109edfd0)"]
+    },
+    {
+      "address": "0x109edfd0",
+      "currentName": "FUN_109edfd0",
+      "proposedName": "LegendPearlModel::BuildUpgradeInfo",
+      "purpose": "C2AS_RequestLegendPearlUpgradeInfo handler (mode==3): builds the equipment-upgrade info panel from source item + config table - role/hunter-star levels, source rarity/level/rank, and a destEquipArray of candidate upgrade targets each with cost (upgradeMoney/currentMoney), level/rank requirements, break/enforce parameters, craft credit id, and a per-target arrayMaterialData with required vs owned counts and equipHasEnoughMaterial flag.",
+      "subsystem": "equipment/legend-pearl-upgrade (upgrade-info view-model)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display of upgrade requirements/costs; the actual charge (money) and material consumption happen server-side on C2AS_RequestLegendPearlUpgrade. Server must recompute and validate these exact costs.",
+      "formulas": [
+        "roleLevel = CPlayer::GetHuntRankOrCount(); roleHunterStarLv = ownerObj vtbl+0x18 sum of FUN_1025b060 pair",
+        "sourceRare = srcItem vtbl+0x2c; itemLevel = srcItem vtbl+0x18; ItemRank = FUN_11669840()",
+        "destEquip config record stride 0x22 dwords (ppuVar13 += 0x22); per record:",
+        "equipID = ppuVar13[0]; equipRare = ppuVar13[6]; itemLevel = ppuVar13[7]; playerUseLevelMin = ppuVar13[0x12]; playerUseLevelMax = ppuVar13[0x13]",
+        "equipCounts = ppuVar13[8]; upgradeMoney(cost) = ppuVar13[9]; currentMoney(owned) = ppuVar13[10]",
+        "enforceRequirement = ppuVar13[-2]; hunterstarRequirement = ppuVar13[-1]; rankDownLevel = ppuVar13[0xb]; enforceDownLevel = ppuVar13[0xc]; newRankLevel = ppuVar13[0xd]",
+        "enforceLevel = ppuVar13[3]; breakLevel = ppuVar13[4]; canBreak = byte ppuVar13[5]; enforceRuleID = ppuVar13[0x11]; nCraftCreditID = ppuVar13[0x15]; bBindState = byte ppuVar13[0x10]",
+        "arrayMaterialData per entry: requireItemCounts, currentItemCounts, item id/cost at (matRec+0x4c); up to 6 materials (iVar6<=5 loop); equipHasEnoughMaterial=false when material sub-array absent"
+      ],
+      "costs": [
+        "upgradeMoney = ppuVar13[9] (currency cost of the upgrade, server must validate against owned currency)",
+        "currentMoney = ppuVar13[10] (player-owned currency snapshot)",
+        "material requirement: requireItemCounts vs currentItemCounts per material (server must consume requireItemCounts)",
+        "requirements: enforceRequirement (ppuVar13[-2]) and hunterstarRequirement (ppuVar13[-1]) gate eligibility"
+      ],
+      "notes": "Sentinel 0xdeadbeaf used for missing AS array args. Unreachable-block loop builds material rows (itemID/itemName/requireItemCounts/currentItemCounts/bPointType)."
+    },
+    {
+      "address": "0x109f0f10",
+      "currentName": "FUN_109f0f10",
+      "proposedName": "GuideBookModel::RegisterHandlers",
+      "purpose": "Registers the Guide Book model handlers: C2AS_GetAllGuideChapters, C2AS_GetGuideBookDataByID, C2AS_GetReward (->FUN_109f1bb0), C2AS_SetAlreadyOpenGuide, C2AS_IsNeedAutoOpenGuideBook, C2AS_IsShowGuideBook, C2AS_SetChooseWeaponType, C2AS_SetChapterNotNew, C2AS_GetWeaponDesByType, C2AS_GetGuideBookCanReward (->FUN_109f2120).",
+      "subsystem": "guidebook (command registration)",
+      "confidence": "high",
+      "serverRelevance": "validation/authoritative: C2AS_GetReward grants the guide-book chapter reward; server must validate chapter completion/eligibility (GetGuideBookCanReward) and pay out. Cross-ref TLV_DOCS/TlvGuideBookData.md.",
+      "costs": ["C2AS_GetReward -> server grants guide-book chapter reward (items, server-defined)"]
+    }
+  ]
+}

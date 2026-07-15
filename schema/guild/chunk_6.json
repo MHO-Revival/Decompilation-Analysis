@@ -1,0 +1,1000 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "0x109f58d0",
+      "currentName": "FUN_109f58d0",
+      "proposedName": "CCommerceBoatInfo::GetRecordById",
+      "purpose": "Config-table accessor: fetches a CCommerceBoatInfo static record by ID using the standard InfoManager chunked 2D-array lookup, with lazy singleton init on miss.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": [
+        "InfoManager singleton at puVar2 (from CCommerceBoatInfo::GetInfoManagerSingleton). row = *(int*)(mgr[8] + (id/mgr[10])*4); return *(row + (id%mgr[10])*4)",
+        "bounds: id!=-1 && (id!=0 || mgr[0xc]==0) && mgr[10]!=0; id -= mgr[0xc]; require 0<=id<mgr[9]",
+        "mgr offsets (dwords): [8]=chunk-ptr-array base, [9]=count, [10]=chunk size, [0xc]=id base offset"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (reads shared static commerce-boat config table)",
+      "notes": "Standard CryEngine CInfoManager table getter. Commerce boat = guild trade-ship (see TlvCommerceBoat/TlvCommerceGuild)."
+    },
+    {
+      "address": "0x109f5a80",
+      "currentName": "FUN_109f5a80",
+      "proposedName": "CCommerceInfo::GetRecordById",
+      "purpose": "Config-table accessor for CCommerceInfo static records; identical chunked 2D-array lookup pattern as CCommerceBoatInfo.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": [
+        "row = *(int*)(mgr[8] + (id/mgr[10])*4); return *(row + (id%mgr[10])*4); id -= mgr[0xc]; 0<=id<mgr[9]"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (shared static commerce config)",
+      "notes": "Same accessor template as 0x109f58d0."
+    },
+    {
+      "address": "0x109f6970",
+      "currentName": "FUN_109f6970",
+      "proposedName": "HunterGroupShipView::BuildTransportShipData",
+      "purpose": "Builds the client UI data VO (mh.view.HunterTeamBattle.Data.HunterGroupShipEntryVo) for the guild commerce/transport-ship (HunterTeamBattle) panel: boss timer, boss number, login/transport counts, and per-ship gold cost / required item counts.",
+      "subsystem": "guild-commerce",
+      "confidence": "medium",
+      "formulas": [
+        "bossTime seconds = iStack_48 + iStack_44*0x3c + iStack_40*0xe10 (H*3600 + M*60 + S; 0x3c=60, 0xe10=3600)",
+        "currentBoss branch 1: bossTime = (iStack_9c*0x3c + iStack_a0*0xe10) - baseSecs + iStack_98; sets currentBoss=1, bossNum=2",
+        "currentBoss branch 2: bossTime = (iStack_8c*0x3c + iStack_90*0xe10) - baseSecs + prev; sets currentBoss=2, bossNum=2",
+        "per-ship entry reads: shipID=*(rec+0x10), hunterShipName=*(rec+0x28), goldType=*(rec+0x68), goldNum=*(rec+0x6c), requireItemCounts=*(rec+0x64), tagType/itemTypeID=*(rec+0x60), shipDesc=*(rec+0x58); isUnlock from FUN_111755e0(shipID)",
+        "sets currentItemCounts=0, bindState=1, bPointType=1, guildID=<empty via 104d14d0>, field 11dcc18c=0xb"
+      ],
+      "costs": [
+        "goldType @rec+0x68, goldNum @rec+0x6c = currency type & amount to unlock/use a transport ship",
+        "requireItemCounts @rec+0x64 = required item quantity"
+      ],
+      "serverRelevance": "client-only (UI VO populate); costs shown are read from shared config, server is authoritative on actual spend",
+      "notes": "loginTimes=FUN_11497fc0(), transportNum=FUN_114981c0(). Reached via DAT_1202e818+0xd0 player-mgr chain; ship list at playerObj[0xaaf]."
+    },
+    {
+      "address": "0x109f7090",
+      "currentName": "FUN_109f7090",
+      "proposedName": "HunterTeamBattleView::BuildSimplePlayerShipList",
+      "purpose": "Builds SimplePlayerShipVo list for the HunterTeamBattle guild-vs-guild panel: per-player name, id, ship icon, ship status, guild name, enemy/self flag, and a currentValue (score/progress delta). Handles two data sources (in_stack_00000014==2).",
+      "subsystem": "guild-league",
+      "confidence": "medium",
+      "formulas": [
+        "shipStatus = (rawStatus << 0x1d) >> 0x1d  (sign-extract low 3 bits)",
+        "playerShipIconIndex = *(entry + 0x28)",
+        "currentValue = iStack_68 - *(entry + 0x2c)  (loop A) ; currentValue = apuStack_70[0] - *(entry+0x2c) (loop B)",
+        "enemyOrSelf = (ppiStack_138==ppiStack_130 && piStack_158==piStack_12c) ? 0 : 1  (self==0, enemy==1)",
+        "entry stride = 0x38 bytes; count = (piVar3[1]-*piVar3)/0x38",
+        "selfGuildPlayer flag = (bStack_108 & 0x8f) == 10"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI list build); underlying scores are server-authoritative",
+      "notes": "Uses _localtime64_s on FUN_111f8d20() timestamp. Guild name via CPet::SetName-style string copy. Second block iterates a separate roster (stride 0x38) from FUN_11398f30()."
+    },
+    {
+      "address": "0x109f7ad0",
+      "currentName": "FUN_109f7ad0",
+      "proposedName": "HunterTeamBattleView::BuildPlayerShipEntries",
+      "purpose": "Builds SimplePlayerShipVo entries (playerName/ID/shipIcon/shipStatus/guildID/guildName/enemyOrSelf/currentValue) from a roster at playerObj+0x2abc (stride 0x104). currentValue clamps at >=0.",
+      "subsystem": "guild-league",
+      "confidence": "medium",
+      "formulas": [
+        "roster base = *(int*)(record+0x2abc); entry stride = 0x104; count = (base[0x40]-*base)/0x104",
+        "playerShipIconIndex = *(entry + 0x00); shipStatus = (*(entry+0x60) << 0x1d) >> 0x1d",
+        "enemyOrSelf = (iStack_74==*(entry+0x18) && local_6c==*(entry+0x1c)) ? 0 : 1",
+        "currentValue = (targetVal < myShipVal) ? (myShipVal - targetVal) : 0  where myShipVal=local_60 (double->int), targetVal=*(uint*)(entry+0xc)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI VO build)",
+      "notes": "Only runs when param_5==1. guildID field emitted empty; guildName copied from *(entry+0x20)."
+    },
+    {
+      "address": "0x109f8330",
+      "currentName": "FUN_109f8330",
+      "proposedName": "GuildSearchView::BuildGuildNameList",
+      "purpose": "Builds SearchGuildNameVo list (guildName, guildID) from a guild-search result array at record+0x108..+0x10c (entry stride 0x29). Populates guildSimpleInfoArray.",
+      "subsystem": "guild",
+      "confidence": "medium",
+      "formulas": [
+        "entry stride = 0x29 (41 bytes); count = (*(rec+0x10c) - *(rec+0x108)) / 0x29"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI list build from server-provided search results)",
+      "notes": "record = *(int*)(playerMgr+0x2abc) (same guild-search container as 0x109f7ad0). Per-entry field emit elided by decompiler (CPet::SetName loop body)."
+    },
+    {
+      "address": "0x10a8cb00",
+      "currentName": "FUN_10a8cb00",
+      "proposedName": "CombatStatsRecord::EmitPlayTimeStats",
+      "purpose": "Computes and emits per-session combat/action statistics to a model record (PlayTime, action/attack success ratios, damage taken, stamina, frequencies). Not guild-specific.",
+      "subsystem": "combat-stats",
+      "confidence": "medium",
+      "formulas": [
+        "PlayTime = XMM0*DAT_11de98b0 - *(param+0x78); stored @param+0x64",
+        "timesOfActionSucceed = *(param+4) - *(param+8); timeOfActionFailed = *(param+8)",
+        "ActionMistake = *(param+8)/(float)*(param+4); ActionAccuracy = DAT_11de9918 - mistake (DAT_11de9918=1.0f)",
+        "timesOfAttackSucceed = *(param+0x14) - *(param+0x1c)",
+        "Frequency_X = PlayTime / (float)countX  for Action(+4), Attack(+0x14), Damaged(+0x48), Dead(+0x50), LowHP(+0x60), LowSta(+0x58)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (stats display/report; derived from counters)",
+      "notes": "struct offsets: +4 actions, +8 action-fail, +0x14 attacks, +0x1c attack-fail, +0x30 stamina, +0x3c attackTime, +0x44 dmg-taken, +0x48 timesDamaged, +0x50 deaths, +0x58 lowSta, +0x60 lowHP. Included as guild-adjacent 'social/report' but is combat telemetry."
+    },
+    {
+      "address": "0x10b5bdc0",
+      "currentName": "FUN_10b5bdc0",
+      "proposedName": "ChatCommandPanel::ctor_RegisterHandlers",
+      "purpose": "Constructor for a chat UI/command controller: initializes 4 embedded string buffers and registers command callbacks (SubmitHornMessage, SubmitLogMessage, InitChatData, CopyChatData, chatSwapIndex, chatDel/Edit/AddLabel, HornNumDialogOK/Cancel).",
+      "subsystem": "chat",
+      "confidence": "high",
+      "formulas": [
+        "vtable = PTR_FUN_11cc79cc; 4 inline std::string members at param_1+2,+8,+0xe,+0x14",
+        "SubmitHornMessage->CGmChatCommand::HandleGiveItemCommand; SubmitLogMessage->FUN_10b5c840; InitChatData->FUN_10b5cf10; CopyChatData->FUN_10b5cde0; chatSwapIndex->FUN_10b5cf60; chatDelLabel->FUN_10b5cfc0; chatEditLabel->FUN_10b5d010; chatAddLabel->FUN_10b5d1e0; HornNumDialogOK->FUN_10b5d3f0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (chat UI wiring); horn messages themselves are server-relayed",
+      "notes": "'Horn' = guild/world broadcast chat item. Handler bodies are outside this chunk."
+    },
+    {
+      "address": "0x10c308c0",
+      "currentName": "FUN_10c308c0",
+      "proposedName": "ProjectileExplosionParams::Serialize",
+      "purpose": "Serializes projectile/explosion parameters (shooterId, weaponId, damage, radii, pressure, shake, flashbang, impact, friendlyfire). Combat, not guild.",
+      "subsystem": "combat",
+      "confidence": "medium",
+      "formulas": [
+        "struct offsets: +0=shooterId, +4=weaponId, +8=projectileId, +0x10=damage, +0x2c=minRadius, +0x30=radius, +0x34=soundRadius, +0x40=angle, +0x44=pressure, +0x48=hole_size, +0x84=friendlyfire, +0x88/0x8c shakeMin/MaxR, +0x98=blindAmount, +0x60=impact flag",
+        "flashbang active when *(float*)(param+0x98) != DAT_11de9890 (0.0f)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (effect params); damage is server-authoritative elsewhere",
+      "notes": "Included only because 'friendlyfire' string; unrelated to guild/social. Stock combat serialization."
+    },
+    {
+      "address": "0x10e06bf0",
+      "currentName": "FUN_10e06bf0",
+      "proposedName": "NamePad::UpdateRelationColorAndStars",
+      "purpose": "Computes over-head name-plate color and star display based on social relationship: friend / same-team / enemy-team / neutral / hostile, PVP team coloring, and hunter-rank stars. Reads guild/friend membership to pick friend color.",
+      "subsystem": "social-render",
+      "confidence": "medium",
+      "formulas": [
+        "default color 0xffd2dce0; self/party 0xff9cd0ee; NPC state3 0xff8eca24 else 0xff0000ff (red)",
+        "team1/team2/neutral/friend/hostile colors from CVars r_Team1Color/r_Team2Color/r_NeutralColor/r_FriendColor/r_HostileColor; toggle r_UseTeamColor",
+        "hunt-rank gate: requires CPlayer::GetHuntRankOrCount() > 0x27 (39) for local_20 assignment",
+        "star count: iterate name string 2 chars at a time; count '1' and '2' chars, '2' also sets bitmask bit (uVar13). starCount clamped to 7 (if >6 -> 7). half-length = (len+1)/2",
+        "r_NamePadDebug forces all flags = 1"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (rendering); friend/guild relationship data is server-provided",
+      "notes": "Friend color chosen when FUN_10a63700 (is-friend?) true; guild-mate iteration over local_c list at iVar6+0x2d5c checking FUN_100e5810. CVar handles cached in DAT_12031274 bitset."
+    },
+    {
+      "address": "0x10e4bce0",
+      "currentName": "FUN_10e4bce0",
+      "proposedName": "GetGuildInfo::InitRmiDescriptor",
+      "purpose": "Lazily initializes the RMI/network method descriptor for 'GetGuildInfo' with reply fields Success, HallModelName, RecruitingModelName, ResourcingModelName, TradingModelName, TrainingModelName. Returns descriptor into param_1.",
+      "subsystem": "guild-network",
+      "confidence": "high",
+      "formulas": [
+        "reply fields (all type 5/6 = string): Success(6), HallModelName(5), RecruitingModelName(5), ResourcingModelName(5), TradingModelName(5), TrainingModelName(5)",
+        "param_1[2] = (param_1[2] & 0xfffff01f) | 0x10 (flags)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/network schema — defines GetGuildInfo RPC reply layout (server fills the 5 guild building model names + Success)",
+      "notes": "The 5 model names correspond to guild buildings: Hall, Recruiting, Resourcing, Trading, Training. Confirms guild has these 5 building slots."
+    },
+    {
+      "address": "0x10e5cc70",
+      "currentName": "FUN_10e5cc70",
+      "proposedName": "FactionTriggerNode::InitSchema",
+      "purpose": "Initializes a flow-graph/entity node schema with inputs enable/disable/triggerOnce and output OnEvent carrying playerNetID and playerFactionID.",
+      "subsystem": "faction",
+      "confidence": "high",
+      "formulas": [
+        "outputs: OnEvent, playerNetID, playerFactionID; param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"
+      ],
+      "costs": [],
+      "serverRelevance": "network/flownode schema (faction event fired to trigger); server drives the event",
+      "notes": "Stock CryEngine node-descriptor init pattern (DAT bitset guarded)."
+    },
+    {
+      "address": "0x10e90480",
+      "currentName": "FUN_10e90480",
+      "proposedName": "FactionNode::InitSchema",
+      "purpose": "Initializes an entity/flow node schema with input playerNetID and output 'faction'.",
+      "subsystem": "faction",
+      "confidence": "high",
+      "formulas": [
+        "input playerNetID; output faction (type 1); param_1[2]=(param_1[2]&0xfffff01f)|0x10"
+      ],
+      "costs": [],
+      "serverRelevance": "network/flownode schema",
+      "notes": "Stock descriptor init."
+    },
+    {
+      "address": "0x1103d2d0",
+      "currentName": "FUN_1103d2d0",
+      "proposedName": "GameRules::RegisterScriptRmis",
+      "purpose": "Registers a large table of client/script RPC bindings on the game-rules object, including guild-camp entry/exit and level/teleport controls.",
+      "subsystem": "guild-social-network",
+      "confidence": "high",
+      "formulas": [
+        "guild-relevant RMIs: EnterGuildCamp(FUN_1103b570), LeaveGuildCamp(FUN_1103b5e0), TeleportToFarm, LeaveFarm; also PromptPlayerLevelTooLow(requiredLevel), LevelCtrlSwitchToNewLevel(levelname), TeleportToLevel(levelid), RegionJumpTriggerHandle, SyncPlayerAvatar(id,PlayerIndex), SyncPetAvatar(id,index,nTrainingType,nPetID)",
+        "each binding registered via vtable+0x64 on obj at param_1+0x44 with reliability class 8"
+      ],
+      "costs": [],
+      "serverRelevance": "network binding table (server invokes these client RMIs); EnterGuildCamp/LeaveGuildCamp are guild-instance travel commands",
+      "notes": "Stock CryEngine RMI registration; only guild-camp/farm entries are subsystem-relevant."
+    },
+    {
+      "address": "0x11043df0",
+      "currentName": "FUN_11043df0",
+      "proposedName": "GameRules::RegisterChatAndMessageEnums",
+      "purpose": "Registers chat/text-message channel enum constants used by the game-rules script binding: TextMessageCenter/Console/Error/Info/Server, ChatToTarget/ChatToTeam/ChatToAll, TextMessageToAll/ToAllRemote/ToClient, and mission-objective states.",
+      "subsystem": "chat",
+      "confidence": "high",
+      "formulas": [
+        "each enum registered as a float constant via vtable+0x70 on obj @param_1+0x68; values encoded as float bit patterns: 0x0=0.0, 0x3f800000=1.0, 0x40000000=2.0, 0x40400000=3.0, 0x40800000=4.0, 0x41000000=8.0, 0x47800400=65537.0-ish",
+        "ChatToTarget=0.0, ChatToTeam=1.0, ChatToAll=2.0, TextMessageToAll=8.0, TextMessageToAllRemote=0x47800400, TextMessageToClient=1.0",
+        "MO_DEACTIVATED=0.0, MO_COMPLETED=1.0, MO_FAILED=2.0, MO_ACTIVATED=3.0"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/enum registration (defines chat channel routing constants shared client/server)",
+      "notes": "Chat channels: Target/Team/All. Confirms team & guild-adjacent chat routing enums."
+    },
+    {
+      "address": "0x110fa850",
+      "currentName": "FUN_110fa850",
+      "proposedName": "Weapon::CheckFriendlyFireRay",
+      "purpose": "Periodic ray-cast from a mounted/aimed weapon to detect a friendly target ahead and toggle a no-friendly-fire block flag. Combat, not guild.",
+      "subsystem": "combat",
+      "confidence": "low",
+      "formulas": [
+        "cooldown timer @param_1[0x138]: decremented by dt; when <=0 (DAT_11de9890=0.0f) reset to 0x3e19999a (0.15f) and re-cast",
+        "aim vector scaled by DAT_11ceb528; ray type 0x11f/0x40f",
+        "checks entity 'Properties'/'bNoFriendlyFire' and team relationship; sets block via vtable+0x378(1)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only prediction (friendly-fire UI/aim block)",
+      "notes": "Uses faction/team relation (FUN_10a77a10, xxx+0x80 team mgr). Guild-adjacent only via team relation."
+    },
+    {
+      "address": "0x11106330",
+      "currentName": "FUN_11106330",
+      "proposedName": "Weapon::IsFriendlyFireBlocked",
+      "purpose": "Predicate: returns whether a target should block friendly-fire, based on entity 'bNoFriendlyFire' property and team/faction relationship of shooter vs target.",
+      "subsystem": "combat",
+      "confidence": "low",
+      "formulas": [
+        "reads Properties->bNoFriendlyFire; if unset, queries team manager relation via (+4)->0x80->0x30->0xf4",
+        "returns true when same-team/no-FF, false otherwise"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only/validation helper",
+      "notes": "Helper for 0x110fa850. Faction-relation only."
+    },
+    {
+      "address": "0x111743d0",
+      "currentName": "FUN_111743d0",
+      "proposedName": "CCommerceBoatInfo::GetRecordByIndex",
+      "purpose": "1D config-table accessor: returns the CCommerceBoatInfo record pointer at a raw vector index.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": [
+        "vec base=*(mgr+0x14), end=*(mgr+0x18); if 0<=idx<((end-base)>>2) return *(base+idx*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (static table)",
+      "notes": "1D variant of the InfoManager getter (contiguous pointer vector)."
+    },
+    {
+      "address": "0x11174440",
+      "currentName": "FUN_11174440",
+      "proposedName": "CCommerceInfo::GetRecordByIndex",
+      "purpose": "1D config-table accessor for CCommerceInfo records by raw index.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2; return *(mgr[0x14]+idx*4)"],
+      "costs": [],
+      "serverRelevance": "client-only (static table)",
+      "notes": "1D vector accessor."
+    },
+    {
+      "address": "0x11175b20",
+      "currentName": "FUN_11175b20",
+      "proposedName": "CGuildMatchInfo::SetMatchStateAndNotify",
+      "purpose": "Looks up a CGuildMatchInfo record by ID, stores it plus two params into the match controller (offsets 0x114/0x11c/0x120), then fires UI event 0xe76 and, when param_3==1, triggers match-start callbacks.",
+      "subsystem": "guild-league",
+      "confidence": "medium",
+      "formulas": [
+        "obj+0x114 = matchInfo record; obj+0x11c = param_3 (state); obj+0x120 = param_4",
+        "event struct: local_18=0xe76 (event id 3702), local_14=-1, local_10=-1, local_c=param_3, local_8=param_4; dispatched via obj+4 chain (+0x1c,+0xc/+0x98) and FUN_113f3640+0x4c",
+        "if param_3==1: FUN_11172ef0/11172e60 + conditional FUN_1149f860 (obj+0x34) + FUN_11443140 (obj+4)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI/state update reacting to server guild-match state)",
+      "notes": "param_3 appears to be a match phase/state flag; 1 = active/start."
+    },
+    {
+      "address": "0x111765f0",
+      "currentName": "FUN_111765f0",
+      "proposedName": "CGuildMatchInfo::SetMatchState",
+      "purpose": "Lighter variant of 0x11175b20: looks up CGuildMatchInfo by ID and stores record + two params into obj+0x114/0x11c/0x120 without notification.",
+      "subsystem": "guild-league",
+      "confidence": "medium",
+      "formulas": ["obj+0x114=record, obj+0x11c=param_3, obj+0x120=param_4"],
+      "costs": [],
+      "serverRelevance": "client-only state store",
+      "notes": "No event dispatch."
+    },
+    {
+      "address": "0x111e3320",
+      "currentName": "FUN_111e3320",
+      "proposedName": "CChatTabInfo::GetRecordById",
+      "purpose": "Config-table accessor (chunked 2D) for CChatTabInfo static records by ID.",
+      "subsystem": "chat",
+      "confidence": "high",
+      "formulas": ["standard 2D lookup: id-=mgr+0x30; row=*(mgr[0x20]+(id/mgr[0x28])*4); return *(row+(id%mgr[0x28])*4)"],
+      "costs": [],
+      "serverRelevance": "client-only (chat tab config)",
+      "notes": "Chat tab/channel definitions."
+    },
+    {
+      "address": "0x111e3370",
+      "currentName": "FUN_111e3370",
+      "proposedName": "CChatTabInfo::GetRecordByIndex",
+      "purpose": "1D vector accessor for CChatTabInfo records.",
+      "subsystem": "chat",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "1D variant."
+    },
+    {
+      "address": "0x111f2d90",
+      "currentName": "FUN_111f2d90",
+      "proposedName": "CGuildQuestPrizeInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildQuestPrizeInfo — guild-task/quest reward table.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (reads shared guild-task prize config); prize grant is server-authoritative",
+      "notes": "Guild quest prize definitions."
+    },
+    {
+      "address": "0x111f2de0",
+      "currentName": "FUN_111f2de0",
+      "proposedName": "CGuildRandCommodityInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildRandCommodityInfo — guild random commodity/shop table.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (shared guild-shop config)",
+      "notes": "Random-commodity refresh definitions (see TlvCommodityRefresh)."
+    },
+    {
+      "address": "0x111f2e40",
+      "currentName": "FUN_111f2e40",
+      "proposedName": "CGuildTaskGroupInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildTaskGroupInfo — guild task group definitions.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (shared guild-task config)",
+      "notes": "Task groups referenced by guild-level content (see 0x117d6f40)."
+    },
+    {
+      "address": "0x111f2e90",
+      "currentName": "FUN_111f2e90",
+      "proposedName": "CGuildTaskLibInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildTaskLibInfo — guild task library definitions.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (shared guild-task config)",
+      "notes": "Task-lib entries drive guild task refresh (TlvRefreshLibTasks)."
+    },
+    {
+      "address": "0x11260f90",
+      "currentName": "FUN_11260f90",
+      "proposedName": "GuildChat::ShowGuildNameOrNoGuildPrompt",
+      "purpose": "Displays either the player's guild name (if in a guild) or the message \"your don't have guild yet\" via the chat/notification system (FUN_1115cba0 channel 8).",
+      "subsystem": "guild-chat",
+      "confidence": "medium",
+      "formulas": [
+        "if FUN_11398f30()==0 (no guild): show 'your don\\'t have guild yet'",
+        "else: guild name string from FUN_114a75c0(); dispatched via FUN_1115cba0(channel=8, ..., 0xffffffff, ...)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (chat message display); guild membership state is server-provided",
+      "notes": "FUN_11398f30 returns the player's guild-data pointer (0 = no guild)."
+    },
+    {
+      "address": "0x1145e690",
+      "currentName": "FUN_1145e690",
+      "proposedName": "CGuildCommodityUnlockInfo::IsCommodityUnlocked",
+      "purpose": "Validates whether a guild commodity is unlocked for the given player/guild: looks up CGuildCommodityUnlockInfo by ID, then checks required guild level and a second guild metric against player state. Returns 1 if unlocked.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": [
+        "record found by 2D lookup on param_2 (commodity id)",
+        "unlock cond 1: record+0x18 (requiredGuildLevel) <= (uint)*(byte*)(param_1+0x223) (player/guild level byte)",
+        "unlock cond 2: record+0x1c (requiredMetric) <= FUN_114a8610() (current guild value)",
+        "returns 1 only if both hold, else 0"
+      ],
+      "costs": [
+        "record+0x18 = required guild level to unlock commodity",
+        "record+0x1c = required secondary guild metric (from FUN_114a8610)"
+      ],
+      "serverRelevance": "validation — this exact gate should be enforced server-side before allowing purchase/unlock",
+      "notes": "param_1 is player/guild-member object; byte @0x223 = guild level. Mirror this check authoritatively on server."
+    },
+    {
+      "address": "0x1145eed0",
+      "currentName": "FUN_1145eed0",
+      "proposedName": "CGuildCommodityUnlockInfo::GetManagerTailcall",
+      "purpose": "Fetches the CGuildCommodityUnlockInfo manager and tail-calls its vtable+0x28 method (count/iterator). Thin wrapper.",
+      "subsystem": "guild-commerce",
+      "confidence": "low",
+      "formulas": ["mgr = GetManager(); jmp *(mgr+0x28)"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Decompiler could not recover jumptable; likely returns record count."
+    },
+    {
+      "address": "0x1145f170",
+      "currentName": "FUN_1145f170",
+      "proposedName": "CGuildCommodityUnlockInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildCommodityUnlockInfo records.",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config)",
+      "notes": "Used by 0x1145e690."
+    },
+    {
+      "address": "0x1145f1c0",
+      "currentName": "FUN_1145f1c0",
+      "proposedName": "CGuildCommodityUnlockInfo::GetRecordById_dup",
+      "purpose": "Duplicate 2D config-table accessor for CGuildCommodityUnlockInfo (same body as 0x1145f170).",
+      "subsystem": "guild-commerce",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Identical to 0x1145f170."
+    },
+    {
+      "address": "0x114891e0",
+      "currentName": "FUN_114891e0",
+      "proposedName": "GuildMatchSchedule::LoadTripleInfo",
+      "purpose": "Populates a match-schedule object with three config records by the same ID: CGuildMatchInfo (param_1[0]), CQualifierMatchInfo (param_1[1]), CEliminateMatchInfo (param_1[2]); then calls the offset-computing helper.",
+      "subsystem": "guild-league",
+      "confidence": "high",
+      "formulas": [
+        "param_1[0]=CGuildMatchInfo[id], param_1[1]=CQualifierMatchInfo[id], param_1[2]=CEliminateMatchInfo[id] (all via 2D lookup on param_2)",
+        "then FUN_114896e0(id, param_3, param_4)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (loads shared guild-match schedule config)",
+      "notes": "Guild match has 3 phases: overall + qualifier + elimination rounds."
+    },
+    {
+      "address": "0x114896e0",
+      "currentName": "FUN_114896e0",
+      "proposedName": "GuildMatchSchedule::ComputeRoundOffsets",
+      "purpose": "Lazily fills the three match-info records if missing, then computes qualifier and elimination round time-offset base pointers from record counts and a base time (param_4).",
+      "subsystem": "guild-league",
+      "confidence": "medium",
+      "formulas": [
+        "obj[4]=param_4 (base time), obj[5]=0, obj[0xc]=param_3",
+        "qualifier: n=*(qualRec+0x14); obj[7]=0; obj[6]=param_4 + (n*0x10 - n)*4 = param_4 + n*0x3c  (0x3c=60s per round-slot)",
+        "qualifier round2: m=*(qualRec+0x18); obj[9]=0; obj[8]=param_4 + (m + n)*0x3c",
+        "elimination: k=*(elimRec+0x18); obj[0xb]=0; obj[10]=param_4 + k*0x3c"
+      ],
+      "costs": [
+        "0x3c (60) = seconds per round slot; record+0x14 = qualifier round count, record+0x18 = secondary/elim round count"
+      ],
+      "serverRelevance": "client-only (schedule display); actual round timing is server-authoritative from base time",
+      "notes": "param_4 is a base timestamp; offsets locate qualifier/elimination phase start times."
+    },
+    {
+      "address": "0x114a6a70",
+      "currentName": "FUN_114a6a70",
+      "proposedName": "CGuildTaskInfo::IsTaskAvailableForGuild",
+      "purpose": "Validates whether a guild task (by ID) is currently available to a guild: not already taken (FUN_114a73a0), guild meets four numeric requirements, and all sub-conditions pass (FUN_114a9700).",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": [
+        "record via 2D lookup on param_2 (task id)",
+        "require FUN_114a73a0(id)==0 (task not already active)",
+        "req: record+0x24 <= guild+0x44  (e.g. guild level)",
+        "req: record+0x28 <= guild+0x4c",
+        "req: record+0x2c <= guild+0x54",
+        "req: record+0x30 <= guild+0x68",
+        "then iterate record+0x34..+0x38 (dword list), each must satisfy FUN_114a9700(entry); all pass -> return 1"
+      ],
+      "costs": [
+        "record+0x24/+0x28/+0x2c/+0x30 = four guild threshold requirements (level/repute/arena/plot per guild-content mapping)"
+      ],
+      "serverRelevance": "validation — server must enforce these guild-task prerequisites before assigning the task",
+      "notes": "guild object offsets +0x44/+0x4c/+0x54/+0x68 parallel the GuildLevel/GuildRepute/GuildArena/GuildPlot fields loaded in 0x117d6f40."
+    },
+    {
+      "address": "0x114a8660",
+      "currentName": "FUN_114a8660",
+      "proposedName": "CGuildTaskInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildTaskInfo records.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config)",
+      "notes": "Base getter used across guild-task functions."
+    },
+    {
+      "address": "0x114a9ad0",
+      "currentName": "FUN_114a9ad0",
+      "proposedName": "GuildTaskState::LoadFromPacket",
+      "purpose": "Parses a guild-task-state network payload (param_2): resolves TaskLibInfo (offset +1) and TaskGroupInfo (offset +5), stores refresh time (+9) and a flag (+0xd), then reads up to 0x40 task IDs (count at +0x11, array of int16 at +0x15 stride 7) resolving each CGuildTaskInfo, and finally walks the task tree and validates state.",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": [
+        "guard: if *param_2==0 return; obj+0x168 = 1 (loaded flag)",
+        "obj+0x160 = CGuildTaskLibInfo[ *(param_2+1) ]; obj+0x164 = CGuildTaskGroupInfo[ *(param_2+5) ]",
+        "obj+0x16c = *(param_2+0xd)",
+        "refresh: FUN_10a142d0 with *(libRec+0x24) and *(param_2+9)",
+        "task count = min(*(int*)(param_2+0x11), 0x40); iterate int16 ids at (param_2+0x15) stride 7 bytes",
+        "then CGuildTaskInfo::ValidateGuildTaskState(param_2)"
+      ],
+      "costs": [
+        "max task IDs per guild = 0x40 (64); per-id record stride in packet = 7 bytes (int16 id + 5 bytes)"
+      ],
+      "serverRelevance": "client-only parse of server-authoritative guild-task state; the 64-task cap and layout are wire contract",
+      "notes": "Contains a decompiler-flagged 'Subroutine does not return' (FUN_10c3d580(0x14) allocator) inside the id loop; tree walk is a red-black-tree traversal over obj+0x10c..+0x114."
+    },
+    {
+      "address": "0x114f7270",
+      "currentName": "FUN_114f7270",
+      "proposedName": "CGuildTitleInfo::GetTitleValueOrDefault",
+      "purpose": "Returns the title value (record+0x18) for a guild title looked up by ID at param_1+4; falls back to a default value (FUN_11720120()+0xa0) when not found.",
+      "subsystem": "guild",
+      "confidence": "high",
+      "formulas": [
+        "id = *(param_1+4); record = CGuildTitleInfo[id]; return *(record+0x18)",
+        "default: return *(FUN_11720120()+0xa0)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (title display from shared config)",
+      "notes": "record+0x18 = numeric title attribute (e.g. rank/perm value)."
+    },
+    {
+      "address": "0x114f74f0",
+      "currentName": "FUN_114f74f0",
+      "proposedName": "CGuildTitleInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CGuildTitleInfo records.",
+      "subsystem": "guild",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Guild title/rank definitions (see TlvGuildTitleData/TlvGuildTitleList)."
+    },
+    {
+      "address": "0x114f7a70",
+      "currentName": "FUN_114f7a70",
+      "proposedName": "CGuildTitleInfo::GetTitleName",
+      "purpose": "Copies the guild title's display-name string (record+0x14) into an output; emits empty string when the title id is not found.",
+      "subsystem": "guild",
+      "confidence": "high",
+      "formulas": ["id=*(param_1+4); record=CGuildTitleInfo[id]; copy string @record+0x14 to param_1+8"],
+      "costs": [],
+      "serverRelevance": "client-only (UI display)",
+      "notes": "record+0x14 = title name string; +0x18 = numeric value (0x114f7270)."
+    },
+    {
+      "address": "0x115b7980",
+      "currentName": "FUN_115b7980",
+      "proposedName": "LeaguePersonalParagraph::TryAdvance",
+      "purpose": "League/personal-paragraph progression: if the personal-paragraph config count is exhausted for the player's value, invokes a callback; otherwise, for a positive counter with an unset flag, looks up CLeagueInfo index 4, validates league eligibility, and fires the advance callback with computed args.",
+      "subsystem": "league",
+      "confidence": "low",
+      "formulas": [
+        "paragraph index = param_1[3] / 100 + 1; if CPersonalParagraphInfo::count() <= that index, call (*param_1[0])()  (exhausted)",
+        "advance gate: param_1[9] > 0 && (param_1[10] & 1) == 0",
+        "CLeagueInfo lookup at fixed index 4 (iVar4 = 4 - mgr+0x30)",
+        "on success: param_1[10] |= 1; FUN_115b7040(*(leagueRec+0x68), &flagA, &flagB); (*(param_1[0]+8))(param_1[3], flagA, flagB, leagueRec)"
+      ],
+      "costs": [
+        "100 = personal-paragraph point divisor (paragraph = points/100 + 1)",
+        "league index 4 hardcoded; leagueRec+0x68 = param passed to FUN_115b7040"
+      ],
+      "serverRelevance": "client-only progression check; league standings/points are server-authoritative",
+      "notes": "param_1[3]=accumulated points/value; param_1[9]=some count; param_1[10] bit0 = advanced flag. Eligibility chain FUN_11842650/11846180/115b73e0."
+    },
+    {
+      "address": "0x115d00c0",
+      "currentName": "FUN_115d00c0",
+      "proposedName": "CFactionInfo::GetRecordById",
+      "purpose": "Config-table accessor (2D) for CFactionInfo records.",
+      "subsystem": "faction",
+      "confidence": "high",
+      "formulas": ["standard 2D chunked lookup by id"],
+      "costs": [],
+      "serverRelevance": "client-only (faction config)",
+      "notes": "Faction definitions."
+    },
+    {
+      "address": "0x116173a0",
+      "currentName": "FUN_116173a0",
+      "proposedName": "CGuildTaskInfoWrapper::ctor",
+      "purpose": "Constructs a small guild-task view/wrapper object: sets vtable PTR_FUN_11d34210, stores task id (param_1[1]), a flag (param_1[2]=1), and the resolved CGuildTaskInfo record (param_1[4]); then allocates a 0x28 sub-object.",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["param_1[1]=id, param_1[2]=1, param_1[4]=CGuildTaskInfo[id]; then FUN_10c3d580(0x28) alloc"],
+      "costs": [],
+      "serverRelevance": "client-only (UI wrapper)",
+      "notes": "'Subroutine does not return' is the allocator tail-call, not a real no-return."
+    },
+    {
+      "address": "0x11617b20",
+      "currentName": "FUN_11617b20",
+      "proposedName": "CGuildTaskRef::Init",
+      "purpose": "Initializes a 3-field guild-task reference struct: param_1[0]=task id, param_1[1]=CGuildTaskInfo record (or 0), param_1[2]=param_3.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["param_1[0]=id; param_1[1]=CGuildTaskInfo[id] or 0; param_1[2]=param_3"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Simple record-binding struct."
+    },
+    {
+      "address": "0x11629520",
+      "currentName": "FUN_11629520",
+      "proposedName": "CGuildTitleRef::Resolve",
+      "purpose": "Resolves a guild title: param_1[2] = *(param_1[5]); param_1[3] = title value (record+0x18) or default (FUN_11720120()+0xa0).",
+      "subsystem": "guild",
+      "confidence": "high",
+      "formulas": ["id=*param_1; param_1[2]=*(param_1[5]); param_1[3]= *(CGuildTitleInfo[id]+0x18) else *(default+0xa0)"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Same default-title fallback as 0x114f7270."
+    },
+    {
+      "address": "0x1171c640",
+      "currentName": "FUN_1171c640",
+      "proposedName": "CGuildMatchInfo::GetRecordByIndex",
+      "purpose": "1D vector accessor for CGuildMatchInfo records.",
+      "subsystem": "guild-league",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "1D variant."
+    },
+    {
+      "address": "0x1171e080",
+      "currentName": "FUN_1171e080",
+      "proposedName": "GetConfig_GuildWar",
+      "purpose": "Lazily loads and returns the 'GuildWar' config-data section singleton.",
+      "subsystem": "guild-league",
+      "confidence": "high",
+      "formulas": ["one-time FUN_1024f010(\"GuildWar\"); *param_1 = DAT_1238f790"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config section)",
+      "notes": "Guild-war global config block."
+    },
+    {
+      "address": "0x1171e0b0",
+      "currentName": "FUN_1171e0b0",
+      "proposedName": "GetConfig_GuildWarConst",
+      "purpose": "Lazily loads and returns the 'GuildWarConst' config-data section singleton (guild-war constants).",
+      "subsystem": "guild-league",
+      "confidence": "high",
+      "formulas": ["one-time FUN_1024f010(\"GuildWarConst\"); *param_1 = DAT_1238f798"],
+      "costs": [],
+      "serverRelevance": "client-only (shared constants); values (scoring/timing constants) are the authoritative guild-war tuning",
+      "notes": "GuildWarConst likely holds numeric league/war constants; contents not in this chunk."
+    },
+    {
+      "address": "0x1171e0e0",
+      "currentName": "FUN_1171e0e0",
+      "proposedName": "RanCommerceCount::ctor",
+      "purpose": "Constructor for a 'RanCommerceCount' object (guild random-commerce counter): sets vtable PTR_FUN_11d439e0, initializes several inline string members, then allocates a 0x24 sub-object.",
+      "subsystem": "guild-commerce",
+      "confidence": "medium",
+      "formulas": ["vtable=PTR_FUN_11d439e0; inits inline strings at +0x19/+0x1f/+0x25/+0x2b/+0x34; FUN_10c3d580(0x24)"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Name 'RanCommerceCount' = random-commodity/commerce refresh count tracking."
+    },
+    {
+      "address": "0x1171ed30",
+      "currentName": "FUN_1171ed30",
+      "proposedName": "GetConfig_Guild",
+      "purpose": "Lazily loads and returns the top-level 'Guild' config-data section singleton.",
+      "subsystem": "guild",
+      "confidence": "high",
+      "formulas": ["one-time FUN_1024f010(\"Guild\"); *param_1 = DAT_1238f89c"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config); membership limits / fund caps likely live in this section",
+      "notes": "Root guild config block; numeric contents not present in this chunk."
+    },
+    {
+      "address": "0x117341a0",
+      "currentName": "FUN_117341a0",
+      "proposedName": "GetConfig_GuildMatch",
+      "purpose": "Lazily loads and returns the 'GuildMatch' config-data section singleton.",
+      "subsystem": "guild-league",
+      "confidence": "high",
+      "formulas": ["one-time FUN_1024f010(\"GuildMatch\"); *param_1 = DAT_12390100"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config)",
+      "notes": "Guild-match tuning block."
+    },
+    {
+      "address": "0x1177f430",
+      "currentName": "FUN_1177f430",
+      "proposedName": "SoulBeastSocialActionDef::ctor",
+      "purpose": "Trivial constructor initializing an intrusive list head (self-pointers at +0x10/+0x14) and naming the def 'SoulBeastSocialActionDef'.",
+      "subsystem": "social",
+      "confidence": "medium",
+      "formulas": ["*(p+0x10)=p; *(p+0x14)=p; name='SoulBeastSocialActionDef'"],
+      "costs": [],
+      "serverRelevance": "client-only (config def container ctor)",
+      "notes": "Empty-list-head + name init boilerplate."
+    },
+    {
+      "address": "0x1177fc70",
+      "currentName": "FUN_1177fc70",
+      "proposedName": "TaskGuildCelebrationScoreDef::ctor",
+      "purpose": "List-head+name constructor for TaskGuildCelebrationScoreDef (guild celebration scoring def container).",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["*(p+0x10)=p; *(p+0x14)=p; name='TaskGuildCelebrationScoreDef'"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Guild celebration = a guild-wide scored event."
+    },
+    {
+      "address": "0x1177fca0",
+      "currentName": "FUN_1177fca0",
+      "proposedName": "TaskGuildLevelContentDef::ctor",
+      "purpose": "List-head+name constructor for TaskGuildLevelContentDef (guild level-up content def container).",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["*(p+0x10)=p; *(p+0x14)=p; name='TaskGuildLevelContentDef'"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Loaded by 0x117d6f40."
+    },
+    {
+      "address": "0x1177fcd0",
+      "currentName": "FUN_1177fcd0",
+      "proposedName": "TaskGuildPrizeDef::ctor",
+      "purpose": "List-head+name constructor for TaskGuildPrizeDef (guild task/level prize def container).",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["*(p+0x10)=p; *(p+0x14)=p; name='TaskGuildPrizeDef'"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Prize definitions for guild tasks."
+    },
+    {
+      "address": "0x11781110",
+      "currentName": "FUN_11781110",
+      "proposedName": "SoulBeastSocialActionDef::ctor_dup",
+      "purpose": "Duplicate of 0x1177f430 (SoulBeastSocialActionDef ctor).",
+      "subsystem": "social",
+      "confidence": "medium",
+      "formulas": ["*(p+0x10)=p; *(p+0x14)=p; name='SoulBeastSocialActionDef'"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Identical body (separate template instantiation)."
+    },
+    {
+      "address": "0x11781950",
+      "currentName": "FUN_11781950",
+      "proposedName": "TaskGuildCelebrationScoreDef::ctor_dup",
+      "purpose": "Duplicate of 0x1177fc70.",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["list-head+name init"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Duplicate ctor."
+    },
+    {
+      "address": "0x11781980",
+      "currentName": "FUN_11781980",
+      "proposedName": "TaskGuildLevelContentDef::ctor_dup",
+      "purpose": "Duplicate of 0x1177fca0.",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["list-head+name init"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Duplicate ctor."
+    },
+    {
+      "address": "0x117819b0",
+      "currentName": "FUN_117819b0",
+      "proposedName": "TaskGuildPrizeDef::ctor_dup",
+      "purpose": "Duplicate of 0x1177fcd0.",
+      "subsystem": "guild-task",
+      "confidence": "medium",
+      "formulas": ["list-head+name init"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Duplicate ctor."
+    },
+    {
+      "address": "0x11784c80",
+      "currentName": "FUN_11784c80",
+      "proposedName": "TaskFilterDef_CountIsFriend::Load",
+      "purpose": "Loads a task-buff/filter def variant reading fields Count and IsFriend from XML into +0x20 (int) and +0x24 (bool).",
+      "subsystem": "social-task",
+      "confidence": "high",
+      "formulas": ["Count -> int @+0x20; IsFriend -> bool @+0x24 (after TaskBuffFilterDef::Load base)"],
+      "costs": ["Count = required count for a social/friend-related task condition"],
+      "serverRelevance": "client-only (shared task-condition config); server enforces the condition",
+      "notes": "Social task filter (friend-based)."
+    },
+    {
+      "address": "0x11784ce0",
+      "currentName": "FUN_11784ce0",
+      "proposedName": "TaskFilterDef_CollectionCountIsFriend::Load",
+      "purpose": "Loads task-filter def variant reading ColletionPoint(+0x20), Count(+0x24, int), IsFriend(+0x28, bool).",
+      "subsystem": "social-task",
+      "confidence": "high",
+      "formulas": ["ColletionPoint->int@+0x20; Count->int@+0x24; IsFriend->bool@+0x28"],
+      "costs": ["ColletionPoint, Count = task requirement values"],
+      "serverRelevance": "client-only (config); server enforces",
+      "notes": "Note the config-authored typo 'ColletionPoint'."
+    },
+    {
+      "address": "0x117854b0",
+      "currentName": "FUN_117854b0",
+      "proposedName": "TaskFilterDef_Guild::Load",
+      "purpose": "Loads a guild-oriented task-filter def reading Level, Group, Appraisal, Count, GuildersCount (ints) and IsOfficer (bool) from XML.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": [
+        "Level->int@+0x20; Group->int@+0x24; Appraisal->int@+0x28; Count->int@+0x2c; GuildersCount(DAT_11dbb648)->int@+0x30; IsOfficer->bool@+0x34; (second GuildersCount 'GuildersCount' string)->int@+0x38"
+      ],
+      "costs": [
+        "Level, Group, Appraisal, Count, GuildersCount = guild-task condition thresholds; IsOfficer = officer-only flag"
+      ],
+      "serverRelevance": "client-only (shared config); these guild-task conditions must be validated server-side",
+      "notes": "DAT_11dbb648 is likely 'GuildersCount' string too; two guilder-count fields (+0x30 and +0x38). 'IsOfficer' ties task to guild rank."
+    },
+    {
+      "address": "0x117d6be0",
+      "currentName": "FUN_117d6be0",
+      "proposedName": "CGuildTaskLibInfo::GetRecordByIndex",
+      "purpose": "1D vector accessor for CGuildTaskLibInfo records.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "1D variant."
+    },
+    {
+      "address": "0x117d6f40",
+      "currentName": "FUN_117d6f40",
+      "proposedName": "TaskGuildLevelContentDef::LoadFromXml",
+      "purpose": "Parses a guild level-up content definition from XML, reading Name, Groups, RefreshPeriod, RefreshTime, GuildLevel, GuildRepute, GuildArena, GuildPlot, PreTasks, CompleteTasksCount into the def struct. Defines what a guild must achieve to level up.",
+      "subsystem": "guild-level",
+      "confidence": "high",
+      "formulas": [
+        "id -> +0x10 (int); Name -> string @+0x14-ish (via CPet::SetName); Groups -> vector @+0x18 (FUN_1162bea0)",
+        "RefreshPeriod -> int @+0x24; RefreshTime -> string/struct @+0x28",
+        "GuildLevel -> int @+0x4c; GuildRepute -> int @+0x50; GuildArena -> int @+0x54; GuildPlot -> int @+0x58",
+        "PreTasks -> vector @+0x5c (FUN_1162bea0); CompleteTasksCount -> int @+0x68",
+        "each field guarded by DAT_12393cc0 bitset (one-time attribute-name registration via FUN_100f67b0)"
+      ],
+      "costs": [
+        "GuildLevel/GuildRepute/GuildArena/GuildPlot = guild level-up requirement thresholds (mirror guild obj offsets +0x44/+0x4c/+0x54/+0x68 in 0x114a6a70)",
+        "CompleteTasksCount = number of tasks that must be completed; RefreshPeriod/RefreshTime = task refresh cadence"
+      ],
+      "serverRelevance": "client-only parse of shared config; the level-up thresholds (level/repute/arena/plot/completeTasksCount) are the authoritative guild progression rules the server must enforce",
+      "notes": "Uses wide-char (u\"...\") attribute names; DAT_12393cbc etc. are cached wide-string handles. Central to guild leveling — capture these four resource axes: Level, Repute, Arena, Plot."
+    },
+    {
+      "address": "0x117d7b00",
+      "currentName": "FUN_117d7b00",
+      "proposedName": "GetConfig_GuildCelebration",
+      "purpose": "Lazily loads and returns the 'GuildCelebration' config-data section singleton.",
+      "subsystem": "guild-task",
+      "confidence": "high",
+      "formulas": ["one-time FUN_1024f010(\"GuildCelebration\"); *param_1 = DAT_12393da4"],
+      "costs": [],
+      "serverRelevance": "client-only (shared config)",
+      "notes": "Guild celebration event tuning block."
+    },
+    {
+      "address": "0x117f87a0",
+      "currentName": "FUN_117f87a0",
+      "proposedName": "MailConfig_MaxAccMailSendTimes::ctor",
+      "purpose": "Constructor for a config object named 'nMaxAccMailSendTimes' (per-account max mail send count), sets vtable PTR_FUN_11d4b9b8 and allocates a 0x24 sub-object.",
+      "subsystem": "mail",
+      "confidence": "medium",
+      "formulas": ["vtable=PTR_FUN_11d4b9b8; name='nMaxAccMailSendTimes'; FUN_10c3d580(0x24)"],
+      "costs": ["nMaxAccMailSendTimes = per-account mail send limit (value stored elsewhere)"],
+      "serverRelevance": "validation — mail send cap should be server-enforced",
+      "notes": "Only the config-key name is defined here; the numeric cap lives in the loaded config value."
+    },
+    {
+      "address": "0x11840d90",
+      "currentName": "CLeagueSchedule__GetManagers",
+      "proposedName": "CLeagueSchedule::GetManagerSingleton",
+      "purpose": "Returns the CLeagueSchedule InfoManager singleton (lazy register + FindByName fallback with static default).",
+      "subsystem": "league",
+      "confidence": "high",
+      "formulas": ["singleton at DAT_12398070; fallback CInfoManager::FindByName; default &DAT_12398108"],
+      "costs": [],
+      "serverRelevance": "client-only (config manager)",
+      "notes": "Stock StcMbrNameSvr<CInfoManager> singleton pattern."
+    },
+    {
+      "address": "0x11842860",
+      "currentName": "FUN_11842860",
+      "proposedName": "CLeagueSchedule::GetRecordByIndex",
+      "purpose": "1D vector accessor for CLeagueSchedule records.",
+      "subsystem": "league",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "League schedule entries."
+    },
+    {
+      "address": "0x118428c0",
+      "currentName": "FUN_118428c0",
+      "proposedName": "CLeagueScoreInfo::GetRecordByIndex",
+      "purpose": "1D vector accessor for CLeagueScoreInfo records (league scoring table).",
+      "subsystem": "league",
+      "confidence": "high",
+      "formulas": ["idx bound (mgr+0x18 - mgr+0x14)>>2"],
+      "costs": [],
+      "serverRelevance": "client-only (shared league-score config); scoring rules authoritative on server",
+      "notes": "CLeagueScoreInfo defines league score tiers/rewards."
+    },
+    {
+      "address": "0x11842920",
+      "currentName": "CLeagueSchedule__GetManagers_11842920",
+      "proposedName": "CLeagueSchedule::GetManagerSingletonRaw",
+      "purpose": "Returns the raw CLeagueSchedule singleton pointer (*DAT_12398070) when param==0, else 0.",
+      "subsystem": "league",
+      "confidence": "high",
+      "formulas": ["if param==0 return *DAT_12398070 else 0"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Thin singleton getter."
+    },
+    {
+      "address": "0x11842f20",
+      "currentName": "CLeagueSchedule__GetManagers_11842f20",
+      "proposedName": "LeagueScheduleQuery::CollectPlayerSchedulesAndScores",
+      "purpose": "Builds, for the given player/league context, a sorted list of CLeagueSchedule records matching the context's league id (obj+0x10) into obj+0x18..+0x1c, then collects matching CLeagueScoreInfo records (whose +0x14 equals obj+0x10) into obj+0x28..+0x2c.",
+      "subsystem": "league",
+      "confidence": "medium",
+      "formulas": [
+        "schedule match: record[5] == *(ctx+0x10) (league id) -> pushed to vector at ctx+0x1c (grows by 4)",
+        "sort: heapsort/introsort via FUN_118412f0/FUN_11841250/FUN_118418b0 with comparator FUN_11843a60; threshold 0x10 (16) elements switches sort strategy; depth = 2*floor(log2(n))",
+        "post-sort: for each pair (stride from +0x18), FUN_10a1a330(scheduleRec+0x50)",
+        "score match: record+0x14 == *(ctx+0x10) -> pushed to vector at ctx+0x28"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (query/sort of shared league config for display); actual standings server-authoritative",
+      "notes": "ctx+0x10 = league id key; uses a temporary red-black tree (puStack_30) to dedupe schedule entries by record[6] before inserting. Sort threshold 16 = insertion-sort cutoff."
+    }
+  ]
+}

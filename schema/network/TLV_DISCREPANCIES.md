@@ -1,0 +1,266 @@
+# TLV generated-doc discrepancies found by re-reading the decompiled serializers
+
+131 functions flagged a mismatch vs the auto-generated TLV docs/C#.
+
+- **TlvEquipPlan_Pack_varint** (TlvEquipPlan)
+  - TlvEquipPlan.md is WRONG: field2 name is a char[20] STRING with tag 0x25 (wire 5), NOT 'int32 tag 0x23'; field4 equipList is a length-delimited sub-struct ARRAY with tag 0x45 (wire 5), NOT 'int32 tag 0x43'. Also doc places name @ offset 21 but name is @ offset 1 (equipCnt is @ offset 21).
+- **TlvEquipPlan_Pack_be** (TlvEquipPlan)
+  - Same as FUN_10110a90 - name/equipList wire types in the doc are wrong.
+- **TlvEquipPlanList_Pack_varint** (TlvEquipPlanList)
+  - TlvEquipPlanList.md field3 equipPlanList is documented as 'int32 tag 0x33 (wire 3)'; ACTUAL is a length-delimited sub-struct array with tag 0x35 (wire 5).
+- **TlvEquipPlanList_Pack_be** (TlvEquipPlanList)
+  - Same equipPlanList wire-type mismatch as FUN_101117c0.
+- **TlvSupplyPlanList_Pack_varint** (TlvSupplyPlanList)
+  - TlvSupplyPlanList.md field3 supplyPlanList documented as 'int32 tag 0x33'; ACTUAL is a length-delimited sub-struct array, tag 0x35 (wire 5), max 5 elements.
+- **TlvSupplyPlanList_Pack_be** (TlvSupplyPlanList)
+  - Same supplyPlanList wire-type mismatch as FUN_101145e0.
+- **TlvRoleBrief_Pack_varint** (TlvBasicRoleInfo, TlvAvatarBriefInfo)
+  - If a doc labels field1 (name) as int32 it is wrong: it is a char[32] string, tag 0x15 (wire 5).
+- **TlvRoleProfile_Pack_varint** (TlvRoleProfile)
+  - hunterStar, name, note are char-array STRINGS (wire 5, tags 0x35/0x45/0x65) - any doc calling them int32 is wrong; role is a sub-struct (tag 0x15) not a scalar.
+- **TlvGuildMemberData_Pack_varint** (TlvGuildMemberData, TlvGuildMemberList)
+  - note and hunterStar are char-array STRINGS (tags 0x25/0x45, wire 5), not int32; role and guildWar are sub-structs (tags 0x15/0x195).
+- **TlvGuildMemberInfo_Print** (TlvGuildMemberInfo)
+  - TlvGuildMemberInfo.md marks hunterStar/note as int32; the printer uses the string formatter (FUN_1024a410) so they are char-array strings (wire 5).
+- **TlvIdName8_Pack_varint** (unknown)
+  - field2 is a char[8] string (tag 0x25, wire 5); any doc calling it int32/tag 0x23 would be wrong.
+- **TlvU8Str_Unpack** (unknown)
+  - field2 is a length-delimited string (wire 5, 4-byte BE length prefix), not an int32.
+- **TlvStoreData_Store_Unpack_v** (TlvStoreData, TlvIdxName)
+  - This is the 'stores' element reader referenced by TlvStoreData doc as sub_10128D30; C# TlvStoreData confirms List<TlvIdxName> (idx+name), consistent with reversed {uint8 idx, char[8] name}.
+- **TlvStoreData_Pack_varint** (TlvStoreData)
+  - TlvStoreData.md is WRONG: field2 'count' typed 'unknown' — it is uint8 (tag 0x21); field3 'stores' typed 'int32 @106' — it is a nested TlvIdxName array (offset 1 is count, 106/0x6a is storeSize); field5 'storeData' typed 'int32' — it is a variable-length uint8[] (len=storeSize) @0x6e. C# TlvStoreData matches this corrected view (List<TlvIdxName>, byte[] StoreData).
+- **TlvStoreData_Pack_fixed** (TlvStoreData)
+  - Same field-type corrections as FUN_101292e0. Doc tag 0x43 for storeSize matches THIS fixed variant (not the varint sibling).
+- **TlvStoreData_DebugPrint** (TlvStoreData)
+  - Confirms field names/types over the doc's wrong 'unknown'/'int32' entries.
+- **TlvGuildCommerceData_DebugPrint** (TlvGuildCommerceData)
+  - TlvGuildCommerceData.md misorders/mistypes: it lists commerceInfo as field6 int32 and commerceBuffInfo as field5 int32; the printer shows commerceInfo is a nested ARRAY (count=commerceCount, max10) and commerceBuffInfo a nested ARRAY (count=buffCount, max5). commerceCount/buffCount are the loop counters, not simple int32 leaves.
+- **TlvGlobalLevelStatContainer_Pack_varint** (TlvGlobalLevelStatContainer)
+  - Field names confirmed by printer FUN_10149410 ([globalStatCnt][globalStatDataType][globalStatDataVal][levelDataCnt][levelStatDataInfo][levelModeDataCnt][levelModeStatDataInfo]).
+- **TlvLevelHubSystemData_DebugPrint** (TlvLevelHubSystemData)
+  - TlvLevelHubSystemData.md self-admits 'schema has 1, DebugFormat has 20'. This printer recovers all 20 fields with offsets; the doc only lists field2 entrustMoneyLastTm. Server implementers should use this full list, not the doc.
+- **TlvProcs_Proc_Unpack_varint** (TlvProcs)
+  - TlvProcs.md lists procs element reader as sub_10152C90 (the fixed sibling of this varint reader).
+- **TlvProcs_DebugPrint** (TlvProcs)
+  - TlvProcs.md gives max via schema; printer confirms bound 0x14 (20) and names.
+- **Tdr_Unpack_U8U8U32_fixed** (TlvCounterData)
+  - TlvCounterData.md field2 'counterData -> sub_10153F00': this IS that element reader; element has fields at ids 1,3,4 (id2 gap), types uint8/uint8/uint32.
+- **TlvCounterData_Unpack_fixed** (TlvCounterData)
+  - TlvCounterData.md 'Address 0x10154870' is THIS function. Doc calls field1 counterNum(uint8) and field2 counterData(nested sub_10153F00) — consistent; note field1 here doubles as the element count (max 64).
+- **TlvOnlineTime_Pack_varint** (TlvAlarmTimeData, TlvOnlineTime)
+  - Field names from printer FUN_10157f00 ([daily][weekly][monthly][count][selfDefs]). This is TlvAlarmTimeData's body: TlvAlarmTimeData.md field4 'count' typed 'unknown@96' is actually uint8@0x60 (tag 0x41); field5 'selfDefs -> sub-struct' is actually a nested ARRAY (count elems, max10), and daily/weekly/monthly are single nested sub-structs.
+- **TlvOnlineTime_Pack_fixed** (TlvAlarmTimeData, TlvOnlineTime)
+  - Same corrections as FUN_10157480.
+- **TlvAlarmTimeData_DebugPrint** (TlvAlarmTimeData)
+  - Confirms count is uint8@0x60 and selfDefs is an array, correcting TlvAlarmTimeData.md.
+- **TlvScriptProcData_Pack_varint** (TlvScriptProcData)
+  - Field names from printer FUN_10158990 ([fetchProcs][scriptVars][onlineTime]).
+- **TlvPetFullAttrData_Write** (TlvPetFullAttrData)
+  - TlvPetFullAttrData.md lists only 5 fields (auto-schema subset) and encodes them as wire-type 3 int32 (tag 0x43/0x53/...). The real writer emits ALL 54 fields as wire-type 5 length-delimited nested values (tag 0x45/0x55/...), confirming the doc's own '54 in DebugFormat' warning. Field_ids 6,11-17,22,26-29,33,37-41,57-66,71-75 are unused/reserved. Full 54-field name->id map recovered here.
+- **TlvPetOptionData_Write** (TlvPetOptionData)
+  - TlvPetOptionData.md (@101FA900, parent 101FA320) lists only 4 fields (oPetName/oPetSex/oOwner/oPetSignature) as wire3 int32. Real struct has 11 fields incl oPetLevel(10) and appearance IDs 85-90, all wire5 nested. Field names/ids confirmed against DebugFormat FUN_10243900.
+- **TlvPetOptionDataB_Write** (TlvPetOptionDataB)
+  - TlvPetOptionDataB.md lists 4 fields (wire3). Real struct = 11 fields (wire5 nested), same as the A variant. Sub-writer FUN_101b0280 differs from A's FUN_101b01d0.
+- **TlvPetOptionData_DebugFormat** (TlvPetOptionData, TlvPetOptionDataB)
+  - Confirms the 11-field pet-option layout that the generated PetOption docs truncate to 4.
+- **TlvGiftListElemArray_WriteA** (TlvGiftList)
+  - TlvGiftList.md lists giftList as field_id 2 tag 0x23 (wire3); the real writer uses tag 0x25 (wire5, length-delimited element array). Wire type in doc is wrong.
+- **TlvGiftListElemArray_WriteB** (TlvGiftList)
+  - Same as FUN_1024b510: doc's field-2 wire3 (0x23) vs real wire5 (0x25).
+- **TlvGiftList_ReadA** (TlvGiftList)
+  - Confirms 2-field TlvGiftList (giftNum + giftList array). Element reader is FUN_1024afa0 here.
+- **TlvGiftList_ReadB** (TlvGiftList)
+  - Matches TlvGiftList.md exactly (giftNum uint8 field1, giftList sub_1024B090 field2). No mismatch.
+- **TlvGiftData_Write** (TlvGiftData)
+  - TlvGiftData.md gives giftAttr tag 0x23 (field2, wire3 int32); the real writer emits it as tag 0x25 (wire5 nested sub-struct via FUN_1024bf30). Doc marks giftNum tag/type 'unknown' — real is field_id 3 tag 0x31 uint8. giftId(0x45)/giftState(0x55) arrays and max 100 match the doc.
+- **TdrWrite_GiftData** (TlvGiftData)
+  - TlvGiftData.md marks giftId (field_id 4) as 'bytes[]'; the writer actually stores giftId as an array of u32 (FUN_1010c190), not raw bytes.
+- **TdrWrite_WeaponRecord** (TlvWeaponRecord)
+  - TlvWeaponRecord.md describes weaponRecord (field_id 2) as a scalar int32; the actual struct is a fixed array of 20 u32 PLUS a second 20xu32 weaponRecordTime array @0x50 that the doc omits entirely.
+- **TdrDebugFormat_WeaponRecord** (TlvWeaponRecord)
+  - Confirms discrepancy: doc treats weaponRecord as int32 scalar but it is u32[20]; second array weaponRecordTime[20] missing from doc.
+- **TdrDebugFormat_WeaponStyleData** (TlvWeaponStyleData)
+  - TlvWeaponStyleData.md describes weaponStyleData (field_id 1) as scalar int32; it is actually a fixed array of 20 u32.
+- **TdrDebugFormat_ActionPointData** (TlvActionPointData)
+  - TlvActionPointData.md 0x99 subset lists only actionPoint(fid2) and nextResetTime(fid4) as scalar int32; the full struct also has iAdditionalActionPoint@0x8 and dwActionPointFlags@0x10, and actionPoint is a fixed u32[2] array, not a scalar. Doc already flags 'schema has 2, DebugFormat has 3'.
+- **TdrDump_EquipPlan_iPlanId_szPlanName_astEquipList** (EquipPlan (iPlanId/iReNameFlag/szPlanName/astEquipList))
+  - No generated TLV doc/C# contains szPlanName/iPlanId/astEquipList; this EquipPlan struct appears MISSING from the auto-generated set.
+- **TdrDump_Guilder_MemberData** (TlvGuildMemberData)
+  - Generated TlvGuildMemberData.cs DIFFERS from this dumper: (1) C# has NO bIsOnline field (decompiled field 5); (2) C# includes WildHuntSoul/WildHuntPhase (fields 13-14) which this dumper does NOT show; (3) celebration ordering differs (C# CelebrationTask/PreCelebrationTask/CelebrationScore/CelebrationReward vs decompiled CelebrationScore/CelebrationTask/PreCelebrationTask/CelebrationRewardType); (4) C# ContributionWeekAcc is 'long' but dumper prints iContributionWeekAcc with %d (i32). FUN_1033e300 (client crygame.dll) is authoritative and likely a different/newer guilder layout than the auto-generated TlvGuildMemberData (whose printer was sub_10121D40, a different function). Reconcile before use.
+- **TdrDump_CommerceBuff_iBuffCount_astCommerceBuffInfo_dwHistory** (TlvGuildCommerceData)
+  - Field ORDER differs: this dumper prints iBuffCount THEN astCommerceBuffInfo THEN dwHistory(=history), whereas TlvGuildCommerceData.cs writes GuildWarHistoryInfo(field4) BEFORE BuffCount(field5)+CommerceBuffInfo. The dumper prints history LAST. TDR field-id order (4=history,5=count) in C# vs print order suggests the printer emits history after the array; verify field-id assignment (dwHistory may actually be a distinct field, not the same as GuildWarHistoryInfo).
+- **TdrDump_SculptureData_iRound_astCurrent_stBest_astHistory** (TlvSculptureData)
+  - Print order differs from TlvSculptureData.cs field-id order: dumper shows Round, Current-list, Best, History-list — while C# declares Id(1),Round(2),Best(3),Histories(4),Currents(5),Avatar(6). This dumper appears to be an INNER container (currents+best+histories, no Id/Avatar), i.e. it likely corresponds to a different sub-struct (SculptureCurrentList/HistoryList combined) rather than the top-level TlvSculptureData. Caps: current=5, history=3. Verify which sub-struct this maps to.
+- **TdrPack_FriendOnlineEntry_10388590** (TlvFriendRoleInfo.md)
+  - This is the pack side of the stFriender struct whose DebugFormat is FUN_10388930; the generated TlvFriendRoleInfo.md (0x99 subset, 9 fields) OMITS iNetID, bOnline, iLineId and renames iFarmCanBGatheredCount->iFarmCanBeGatheredCount. Full struct has 10+ fields (doc itself flags the 9-vs-10 mismatch).
+- **TdrDbgFmt_FrienderRoleInfo** (TlvFriendRoleInfo.md)
+  - Authoritative DebugFormat contradicts TlvFriendRoleInfo.md: extra fields iNetID/bOnline/iLineId present here, field name is iFarmCanBGatheredCount (no 'e'). Doc's 0x99 form is a strict subset.
+- **TdrDump_GiftList** 
+  - Name overlaps generated TlvGiftList.md (fields giftNum u8, giftList sub-struct via tag 0x11/0x23). That doc is the CryGame 0x99 tag-based reader (sub_1024B9B0); this is the packetcode dump. Different serializer families - do not conflate offsets.
+- **TdrDump_AvatarUpdate** 
+  - Name overlaps generated TlvAvatarBriefInfo/TlvPetAvatarData; those are CryGame 0x99 tag readers, not this packetcode dump. Do not merge.
+- **TdrDump_TitleDataList** 
+  - Related to generated TlvGuildTitleData/TlvGuildTitleList (0x99 tag readers). Different serializer family.
+- **TdrDump_CatCuisineOpenInfo** 
+  - Generated TlvCatCuisineData.md (sub_1017E210, 0x99 tag reader) lists: tCatTime int64 (0x14), vCatSeq int32 (0x23), iOpen u8 (0x31), tOpenTime int64 (0x44), iTools u8 (0x51). This packetcode struct instead has: llTCatTime int64, szVOpenInfo as a 7-byte blob, bITools u8, bIOpenID u8 - field set and types differ. The generated doc reflects the CryGame config-TLV path, not this network struct.
+- **TdrDump_GuideBookData** 
+  - Generated TlvGuideBookData.md (sub_1018F920) says field2 isFisrtAutoOpenGuideBook = int32 sub-struct and field3 weaopnId = struct. This packetcode dump shows chIsFisrtAutoOpenGuideBook and chWeaopnId are u8 (printed via '0x%02x'). The generated doc's types are wrong for this network struct (it modeled the CryGame tag reader). Misspellings 'Fisrt'/'Weaopn' are in the binary.
+- **PkgHead_TdrDebugFormat** (CPkgHead / packet frame header)
+  - No packet-header doc present in TLV_DOCS to compare against; layout recovered here (size 0x10). Uses DebugFormat helper FUN_1024a290 with u16 meta DAT_11d9e0b4 and u32 meta DAT_11d9f574.
+- **FlowNode_GetFarmInfo_RegisterPorts** (TlvFarmData, GetFarmInfo (response))
+  - These UI port names (skill LVs) do not appear in TlvFarmData.md (which lists farmID/ownerUID/ownerDBID/credit/hits...). This is a different, UI-facing farm summary not the TlvFarmData wire struct - not a direct doc conflict but note the two 'farm' structures are distinct.
+- **TlvActionPointData_Write_VarintA** (TlvActionPointData)
+  - TLV doc TlvActionPointData (read @0x101662D0) lists only 2 fields (actionPoint field2 int32 tag0x23, nextResetTime field4 tag0x43) and DROPS actionPointFlags. Actual code has 3 fields: nextResetTime is field 3 (not 4) and actionPointFlags is field 4; actionPoint is a packed 2xint32 (8 bytes), not a scalar int32.
+- **TlvActionPointData_Write_FixedB** (TlvActionPointData)
+  - Doc mislabels: it assigns nextResetTime to field4 (tag 0x43) which is really actionPointFlags, and omits the actual field3 nextResetTime and the flags field name.
+- **TlvFriendListContainer_DebugFormat** (TlvFriendListContainer)
+  - The generated TlvFriendListContainer doc is scrambled: it lists astFriendData as field 8 -> sub_1016DA60 and mislabels iPasserbyCount/iBlacklistCount/iFriendGroupCount as int32 sub-structs. Actual layout (from this DebugFormat) pairs each count with its array immediately: friends(sub_1016bdf0,500), passerby(sub_1016c990,20), blacklist(sub_1016d370,20), groups(sub_1016dcf0,10). Element sub-struct addresses in the doc do not match the real element dumpers.
+- **TlvCatCuisineData_Write_A** (TlvCatCuisineData)
+  - Doc TlvCatCuisineData lists field2 vCatSeq as int32 (tag 0x23). Actual code encodes vCatSeq as a 7-byte uint8 array (len-delimited, tag 0x25), not a scalar int32. Other fields (tCatTime int64, iOpen u8, tOpenTime int64, iTools u8) match.
+- **TlvCatCuisineData_Write_B** (TlvCatCuisineData)
+  - Same as FUN_1017dd20: doc's vCatSeq (field2) is int32 tag 0x23 but real wire is uint8[7] len-delim tag 0x25.
+- **TlvWeaponRecord_Write_A** (TlvWeaponRecord)
+  - Doc TlvWeaponRecord shows only ONE field (weaponRecord, field2, scalar int32) and drops weaponRecordTime. Actual: TWO fixed arrays of 20 int32 each (weaponRecord field1 tag 0x15, weaponRecordTime field2 tag 0x25). Not a scalar.
+- **TlvWeaponRecord_Write_B** (TlvWeaponRecord)
+  - Same as FUN_1017f5b0: doc omits weaponRecordTime and treats weaponRecord as scalar.
+- **TlvWeaponStyleData_Write_A** (TlvWeaponStyleData)
+  - Doc TlvWeaponStyleData describes field1 as a scalar int32. Actual is a fixed array of 20 int32 (packed, tag 0x15, wire5). Field id and tag match; cardinality differs.
+- **TlvWeaponStyleData_Write_B** (TlvWeaponStyleData)
+  - Same as FUN_10180180: array[20] not scalar.
+- **TlvSuitSkillGroups_Unpack_v1** (TlvSuitSkillGroups)
+  - Auto-doc TlvSuitSkillGroups gives field2 tag 0x23 (wire3); decompiled read treats field2 as a length-delimited repeated sub-struct (reads byte-size prefix then loops elements) — semantically a repeated struct array, not a scalar. Field count/wire framing matches; wire-type nibble in doc is misleading.
+- **TlvSuitSkillGroups_Unpack_v2** (TlvSuitSkillGroups)
+  - Matches auto-doc field set (groupCnt uint8 f1, suitSkillGroupData f2->sub_10189400). No material discrepancy; doc field2 wire nibble 0x23 vs actual len-delimited repeated is a wire-type labelling nuance.
+- **TlvByteBufStruct_Unpack_v2** (unknown)
+  - XML structure sub_1018C730.xml exists in TLV_DOCS/structures but no named .md; struct name unresolved. Layout (scalar + 0x80 byte buffer) recovered here.
+- **TlvGuideBookAutoOpen_Unpack_v1** (TlvGuideBookData)
+  - Auto-doc TlvGuideBookData labels field2 'isFisrtAutoOpenGuideBook' as a single int32 pointing at sub_1018EE90 — but sub_1018EE90 is itself a 3-field struct (two int32 + a uint8), not a scalar. Doc collapses the sub-struct into a scalar.
+- **TlvGuideBookAutoOpen_Unpack_v2** (TlvGuideBookData)
+  - Confirms sub_1018EE90 is a 3-field struct, contradicting the TlvGuideBookData doc which treats field2 as a plain int32.
+- **TlvGuideBookData_TextDump** (TlvGuideBookData)
+  - TlvGuideBookData auto-doc is materially wrong: (1) 'guideBookChapterInfos' (field5) is a REPEATED sub-struct array (max 8, FUN_1018f060/text FUN_1018e580), not a single int32 @ offset 43; (2) 'isFisrtAutoOpenGuideBook' is uint8 not int32; (3) 'weaopnId' is uint8 @0x6d not a generic struct. Field ordering in the dump (count, chapterInfos[], autoOpen, weaopnId, guideActionInfos) also differs from the doc's field_id order.
+- **TlvSearchItemPool_TextDump** (TlvSearchItemPool)
+  - TlvSearchItemPool auto-doc calls vItemPoolList a single int32 @ offset 43; it is actually a fixed array of 8 sub-structs (words 3..42). iLastUpdateTime is @ word 0x2b (43), consistent with doc's '@ offset 43' once vItemPoolList's 8 slots are accounted for.
+- **TlvLotteryBoxItemPool_TextDump** (TlvLotteryBoxItemPool)
+  - TlvLotteryBoxItemPool auto-doc calls vItemPoolList a single int32 @ offset 43; actually a fixed array of 8 sub-structs (words 3..42). iBoxId @ word 43 and iLastClockRefreshTime @ word 44 do match doc's offsets 43/44.
+- **TlvLotteryBoxContainer_Pack_v1** (TlvLotteryBoxContainer)
+  - TlvLotteryBoxContainer auto-doc treats cLotteryBox (field1) as a single sub-struct @ offset 138 and iLastDailyRefreshTime @ offset 138; actually cLotteryBox is a FIXED array of 3 sub-structs and iLastDailyRefreshTime is at byte offset 0x228.
+- **TlvLotteryBoxContainer_Pack_v2** (TlvLotteryBoxContainer)
+  - Same as FUN_10192610: cLotteryBox is a 3-element array, not a scalar; iLastDailyRefreshTime @ 0x228.
+- **TlvLotteryBoxContainer_TextDump** (TlvLotteryBoxContainer)
+  - Confirms the FUN_10192610 discrepancy: cLotteryBox is an array of 3 TlvLotteryBoxItemPool, not a single sub-struct @ offset 138.
+- **TlvPlayerRoleFullData_Pack_v1** (unknown)
+  - No single auto-doc matches this top-level struct; it composes many documented sub-structs (TlvSuitSkillGroups, TlvLotteryBoxContainer, guide-book/item-pool families). Exact top-level TLV name unresolved.
+- **TlvPlayerRoleFullData_Pack_v2** (unknown)
+  - Same as FUN_10193b80: composite top-level struct, no single matching auto-doc entry.
+- **TlvMiscGameData_DebugFormat** (TlvMiscGameData)
+  - TLV_DOCS/docs/TlvMiscGameData.md self-flags 'schema has 1, DebugFormat has 71' and only documents field 6 (itemColumnData). The generated 0x99 schema is a severe subset — 70 fields are undocumented. This DebugFormat dump recovers the full field list above.
+- **TlvAvatarRecord_Write_varA** (unknown)
+  - unknown — could not bind to a named TLV_DOCS entry; two char[32] names + weapon-style scalars suggest an avatar/role brief record.
+- **TlvBaseOrBonus_DebugFormat** (TlvBaseOrBonus, TlvTypedBaseOrBonus)
+  - TLV_DOCS/docs/TlvBaseOrBonus.md documents only 'field_1 -> sub_101AECC0' (single field). The union nature (base vs bonus, selector 1/2) and the [base]/[bonus] labels are absent from the generated schema.
+- **TlvTypedBaseOrBonus_Read_varB** (TlvBaseOrBonus, TlvTypedBaseOrBonus)
+  - The generated TlvBaseOrBonus.md attributes struct 0x101AFE20 with a single 'field_1' — it is actually the union-value decoder called from this type+value wrapper (fields type + value), so the doc's field list is incomplete.
+- **TlvCharBattleAttributes_DebugFormat** (TlvCharBattleAttributes, TlvCharPublicAttributes, TlvCharRoleAttributes)
+  - TLV_DOCS/docs/TlvCharBattleAttributes.md self-flags 'schema has 4, DebugFormat has 112' and documents only fields 2,4,6,7 (oCharLevel/oCharSex/oCharExp/oStarLevel). This DebugFormat actually enumerates ~245 labelled fields — the generated 0x99 schema is a tiny subset. Field offsets in the .md (e.g. oCharSex @ offset 28 same as oCharLevel) also look unreliable.
+- **TlvCharBattleAttributes_Pack_Varint** (TlvCharBattleAttributes)
+  - (1) TlvCharBattleAttributes.md/.cs model fields 2 OCharLevel, 17 OCharMaxHP, 19 OCharMaxReju, 75 OCharAnimSpeed, 136 OPVPDef, 137 OPVPDefAngle, 176 OCharRejuPer as scalar int32, but the real serializer encodes them as length-delimited int32[7] arrays; fields 360 ODefenseReduceHPModifyRate, 361 ODefenseReduceStaModifyRate are float[7] arrays (raw fixed4). (2) The generated doc only captured 4 fields (2,4,6,7) from the 0x99 reader ('DebugFormat has 112') - the remaining 108 field names here are taken from the C# printer reconstruction and match by field_id. (3) Array wire_type is 5 (LEN_DELIM) with a 4-byte size prefix, not wire_type 3 as the generic TDR note assumes.
+- **TlvCharBattleAttributes_Pack_FixedBE** (TlvCharBattleAttributes)
+  - Same discrepancies as FUN_101d6660: fields 2,17,19,75,136,137,176 are int32[7] arrays (C# says scalar int), fields 360,361 are float[7]. This variant differs only in scalar wire encoding (fixed BE vs zigzag varint); tag low-nibble is 3 for int32 and 2 for int16.
+- **TlvCharPublicAttributes_Pack_Varint** (TlvCharPublicAttributes)
+  - (1) TlvCharPublicAttributes.cs contains field 175 (OStateFlag) which this serializer DOES NOT emit (serializer field set = 180, C# = 181; 175 absent). Verify whether 175 is real or a doc over-generation. (2) Many fields the C# models as scalar int are int32[7] arrays on the wire: 2,17,22,26,27,28,29,32,33,34,35,39-52,68,134,135,136,137,210,222,226,233,234,406,407; and fields 30,31,211,214,360,361 are float[7]. (3) Array wire_type is 5 (LEN_DELIM)+4B size prefix. Field names by field_id match C# exactly otherwise.
+- **TlvTalentEquipItem_Read_fixed_101ee9e0** (TlvTalentEquipItem)
+  - Generated SkillWeaponItem.md maps sub_101EE9E0 to scalar field 'rageIdx' (0x73); in reality sub_101EE9E0 is a 2-field element reader {Id:int32, Idx:byte}, not a scalar. The doc's field->sub_addr mapping is unreliable.
+- **TlvSkillWeaponItem_Write_varint_101ef630** (SkillWeaponItem, TlvSkillLearnIdItem, TlvTalentLearnItem, TlvTalentEquipItem)
+  - Generated SkillWeaponItem.md is materially WRONG. It lists only 8 fields with SHIFTED names/types: it labels field3=talentLearnCount, field4=talentLearn, field5=talentEquipCount, field6=talentEquip, field7=rageIdx, field8=rageCount, field9=rage, and marks count fields as wire5/int32 struct. Actual layout (from writer + DebugFormat): f2=skillLearnCount(byte,wire1), f3=skillLearn[], f4=talentLearnCount(byte), f5=talentLearn[], f6=talentEquipCount(byte), f7=talentEquip[], f8=rageIdx(byte), f9=rageCount(byte), f10=rage[](int32 array), f11=bushidoRageCount(byte), f12=bushidoRage[](int32 array). Doc omits bushidoRageCount/bushidoRage entirely and mis-types the count fields.
+- **TlvSkillWeaponItem_Write_fixed_101efad0** (SkillWeaponItem, TlvSkillLearnIdItem, TlvTalentLearnItem, TlvTalentEquipItem)
+  - Same discrepancy as FUN_101ef630 vs SkillWeaponItem.md (field names shifted, missing bushidoRage*, count fields mis-typed). Additionally the doc does not capture that two TDR encoding variants exist (varint inner-Id 0x10 vs fixed inner-Id 0x13).
+- **TlvSkillWeaponItem_DebugFormat_101f0b50** (SkillWeaponItem)
+  - This DebugFormat is the authoritative source proving SkillWeaponItem.md's 8-field/shifted-name table is wrong (see FUN_101ef630 discrepancy).
+- **TlvManuSkill_DebugFormat_101f26e0** (ManuSkill, SkillWeaponItem, ExpressionItem)
+  - Generated ManuSkill.md field table is scrambled: it lists field3=ingredientCount, field4=skillWeapon, field5=formulaBitCount, field9=ingredient, etc., with wrong sub-struct pointers and offsets. Real member order (from this DebugFormat): version, manuSkill[], ingredient[], skillWeapon[13], formulaBit[](bytes), expression[]. skillWeapon is a FIXED 13-element array of SkillWeaponItem (doc marks it 'unknown'). formulaBit is a raw byte array, not int32.
+- **TlvPetExtAttrData_Write** (TlvPetExtAttrData)
+  - Generated TlvPetExtAttrData doc lists only the 5-field 0x99 subset and types the fields as plain int32 with wire3 tags (e.g. oPetName 0x43). Actual writer emits ALL 58 fields as wire5 (LEN_DELIM) nested sub-structs (oPetName tag 0x45, not 0x43). The 'oXxx' fields are nested observed-value wrappers (sub_101B0520), not scalar int32. Doc field count (5) vs real (58).
+- **TlvPetFullAttrData_DebugFormat** (TlvPetFullAttrData)
+  - Generated TlvPetFullAttrData doc shows only 5 fields (0x99 subset). This DebugFormat proves the struct actually carries ~54 pet-attribute fields (Exp/Level/Spirit/Vigour/HP/MaxHP/Melee/Defence/CritLevel/Execution/Observation/LoadBearing/MaxSp/Sp and more). Field names recovered here should populate the real struct definition.
+- **TlvPetOptionData_Serialize_variantA** (TlvPetOptionData)
+  - Generated TlvPetOptionData doc lists only 4 fields (oPetName/oPetSex/oOwner/oPetSignature) typed as int32 with wire3 tags (0x43 etc). Actual code emits 12 fields, all wire5 (LEN_DELIM) nested sub-structs (oPetName tag 0x45), adding oPetLevel(10) and appearance/fashion fields at ids 85-91.
+- **TlvPetOptionData_Serialize_variantB** (TlvPetOptionData)
+  - Same as FUN_101f9b60: doc under-counts (4 vs 12) and mistypes the wire3/int32 tags; real fields are wire5 nested sub-structs.
+- **TlvPetOptionData_DebugFormat** (TlvPetOptionData)
+  - Confirms the 12-field real layout vs the generated doc's 4 fields. Note the source typo 'oFashionWwaponID'.
+- **TlvPetFarmShowData_Serialize_variantA** (TlvPetFarmShowData, TlvPetAvatarData)
+  - Generated TlvPetFarmShowData doc lists sPFData as a single int16 @+108 (tag 0x22) and petAvatarCount as field3. Actual struct: field1=sPFData is a fixed array[6] of the 32-byte PetTimeSlot sub-struct (tag 0x15 wire5), field2=petAvatarCount int16, field3=petAvatarInfo array[count]. Doc field ids/types/widths are wrong.
+- **TlvPetFarmShowData_Serialize_variantB** (TlvPetFarmShowData, TlvPetAvatarData)
+  - Same as FUN_10201d10: real sPFData is array[6] of a sub-struct, not a scalar int16; doc mis-shapes fields 2/3.
+- **TlvPetFarmShowData_DebugFormat** (TlvPetFarmShowData, TlvPetAvatarData)
+  - Confirms sPFData is a 6-element array (not scalar int16 as the generated doc states) and that petAvatarInfo is a count-prefixed array.
+- **TlvFarmData_DebugFormat** (TlvFarmData, TlvPetAvatarData)
+  - Generated TlvFarmData doc lists only 8 fields (farmID..maxGatherCount) as the 0x99 subset. This DebugFormat proves the real struct has 27 fields incl. autoGatherPetID/autoGatherBCPType, the sACPOpen/sOFOpen byte arrays, sBCPData[6]/sPFData[6]/sPlowLandData[3] nested arrays, timestamp/flag fields, petAvatarInfo[] and equipShowInfo[] arrays, gender and skipCutScene. Offsets above from the dumper's member reads.
+- **TlvSoulBeastStatsArray_Write_Varint** (TlvSoulBeastStatsArray)
+  - Generated doc TlvSoulBeastStatsArray lists each of fields 2/4/5/6/7/8/9 as a SCALAR int32 with wire3 tags (0x23,0x43,...). The actual write code emits them as wire5 LEN_DELIM fields (tags 0x25,0x45,...) each carrying an int32[7] array (7 elements, struct stride 0x1c). Fields are arrays, not scalars, and wire type is 5 not 3. Field 3 is absent (doc also omits it).
+- **TlvSoulBeastStatsArray_Write_Fixed** (TlvSoulBeastStatsArray)
+  - Same discrepancy as FUN_10207890: doc labels these fields scalar int32/wire3, code emits wire5 len-delimited int32[7] arrays.
+- **TlvSoulBeastStatsArray_DebugFormat** (TlvSoulBeastStatsArray)
+  - Confirms the array nature: each labeled field is dumped as 7 int64-formatted elements, not a single scalar as the generated doc implies.
+- **TlvSoulBeastStatsArrayB_Write_Varint** (TlvSoulBeastStatsArrayB)
+  - Same as FUN_10207890: doc TlvSoulBeastStatsArrayB lists scalar int32/wire3; code emits wire5 len-delimited int32[7] arrays.
+- **TlvSoulBeastStatsArrayB_Write_Fixed** (TlvSoulBeastStatsArrayB)
+  - Same discrepancy: wire5 int32[7] arrays vs doc scalar int32/wire3.
+- **TlvSoulBeastStatsArrayB_DebugFormat** (TlvSoulBeastStatsArrayB)
+  - Confirms array (7-element) nature vs doc scalar.
+- **TlvSoulBeastStatsArrayC_Write_Varint** (TlvSoulBeastStatsArrayC)
+  - Same as FUN_10207890 vs TlvSoulBeastStatsArrayC doc: wire5 int32[7] arrays not scalar int32/wire3.
+- **TlvSoulBeastStatsArrayC_Write_Fixed** (TlvSoulBeastStatsArrayC)
+  - Same discrepancy: wire5 int32[7] arrays vs scalar int32/wire3.
+- **TlvSoulBeastStatsArrayC_DebugFormat** (TlvSoulBeastStatsArrayC)
+  - Confirms array nature vs doc scalar.
+- **TlvShopBuyLimitData_DebugFormat** (TlvShopBuyLimitData)
+  - Generated doc TlvShopBuyLimitData lists shopType/shopID/saleID as scalar int32 (fields 5/6/7) and buyCount as scalar int32 (field 8). Actual structure: they are PARALLEL ARRAYS sized by limitDataCnt, and buyCount elements are int16 (2 bytes), not int32. shopType elements are uint8. Doc field-id/type mapping for 5..8 is wrong.
+- **TlvShopEntry_Read** (TlvShopDataContainer)
+  - Doc TlvShopDataContainer references 'shops sub-struct -> sub_10210C80' but does not enumerate this element's own fields (int16 + 2x int32). Recovered here.
+- **TlvShopDataContainer_DebugFormat** (TlvShopDataContainer, TlvShopBuyLimitData)
+  - Doc TlvShopDataContainer assigns field ids as f1 shopCount, f2 dayBuyItemLimitData, f3 week, f4 month, f5 forever, f6 groupCount, f7 groups, f8 shops, and types all as scalar int32. Actual layout: shops/groups are arrays, the four *BuyItemLimitData are TlvShopBuyLimitData sub-structs, shopCount/groupCount are counts with bounds 20/128. The doc's flat scalar-int32 typing for f2..f8 is wrong (these are sub-structs/arrays).
+- **TlvMultiShopRefresh_DebugFormat** (TlvMultiShopRefresh)
+  - Doc TlvMultiShopRefresh lists refreshTimeD as 'sub-struct -> sub_102132D0' and shops as scalar int32. Actual: shops is an array of count sub-structs; refreshTimeD/W/M are plain int32 scalars at the tail. Doc's sub-struct/scalar assignment is off.
+- **TlvStarStatList_Elem_Read** (TlvStarStatData)
+  - TlvStarStatData doc references field4 statList -> sub_10214E60 but leaves this element's fields unspecified. Recovered: int16 + int32.
+- **TlvStarStatData_Write_Varint** (TlvStarStatData)
+  - Doc TlvStarStatData lists field2 starList as scalar int32 (@off21) and field3 statNum type 'unknown'. Actual: field2 starList is a uint8[] array (wire5, sized by starNum), field3 statNum is a uint8 count, field4 statList is an array of sub_10214E60 structs. starPoints @off122(0x7a) matches doc.
+- **TlvStarStatData_Write_Fixed** (TlvStarStatData)
+  - Same as FUN_102152f0: doc mistypes field2 (byte array not scalar int32) and field3 (uint8 count not 'unknown').
+- **TlvStarStatData_DebugFormat** (TlvStarStatData)
+  - Confirms starList is a uint8 array and statNum a uint8 count, contradicting the doc's scalar-int32/unknown typing.
+- **TlvStarBranch_StarList_Elem_Write_Varint** (TlvStarBranchData)
+  - TlvStarBranchData doc references field4 starList -> sub_10216470 but does not enumerate this element (uint8 + int16 + 4x int32). Recovered here.
+- **TlvStarBranch_StarList_Elem_Write_Fixed** (TlvStarBranchData)
+  - Same element as FUN_10216000; doc leaves its fields unspecified.
+- **TlvStarBranch_Quality_Elem_Write_Varint** (TlvStarBranchData)
+  - TlvStarBranchData doc references field5 quality -> sub_10216C90; element fields (uint8 + int32) recovered here.
+- **TlvStarBranch_Quality_Elem_Write_Fixed** (TlvStarBranchData)
+  - Same element as FUN_102169d0; doc leaves fields unspecified.
+- **TlvStarBranch_Quality_Elem_Read_Fixed** (TlvStarBranchData)
+  - Matches TlvStarBranchData doc's sub_10216C90 reference; element fields (uint8 + int32) confirmed.
+- **TlvStarBranchData_Write_Varint** (TlvStarBranchData)
+  - Doc TlvStarBranchData flags a field-count mismatch (schema 4 vs DebugFormat 6) and types field4 starList / field5 quality as scalar int32. Actual: field4 and field5 are ARRAYS of sub-structs (starList = u8+i16+4xi32 elements sized by branchNum; quality = u8+i32 elements sized by starNum), field3 branchNum is a uint8 count. Wire5 arrays, not scalar int32.
+- **TlvStarBranchData_Write_Fixed** (TlvStarBranchData)
+  - Same as FUN_10217140: field4/field5 are sub-struct arrays not scalar int32; field3 is a uint8 count. Doc's 4-vs-6 field-count mismatch reflects that DebugFormat sees the array/count fields the 0x99 schema collapses.
+- **TlvStarBranchData_DebugFormat** (TlvStarBranchData)
+  - Doc TlvStarBranchData (@0x10217820) lists 4 wire fields: starNum(1), branchNum(3,unknown), starList(4,int32), quality(5,int32). The real DebugFormat shows branchNum is a uint8 count driving a separate branchList array (doc omits branchList entirely), and starList is an ARRAY whose element = {quality:uint8, finishTime:uint32}, not two scalar int32 fields. Doc's 0x99-subset flag is correct that it truncated, but the field semantics (branchList missing, starList element shape) are wrong.
+- **TlvStatContainer_DebugFormat** (TlvStarStatData)
+  - Candidate match to TlvStarStatData/similar stat container; verify element structs FUN_1021b2a0/FUN_1021ac30 against doc.
+- **TlvQuestSystemData_DebugFormat** (TlvQuestSystemData, TlvQuestScheduleData, TlvCompleteBit)
+  - Cross-ref TlvQuestSystemData / TlvQuestScheduleData / TlvCompleteBit: verify the auto-doc includes all 12 members (task, content, completeBit byte-array, daily, schedule, xDaily, reset, trace, complete). If the 0x99 doc truncated after early fields, flag it as incomplete.
+- **TlvNpcOrgPrefsContainer_DebugFormat** (TlvNpcOrgPrefsContainer)
+  - Doc TlvNpcOrgPrefsContainer (@0x1022B030) models this as 6 SCALAR fields (count/orgNum/npcOrgPkg/preferNum/npcPrefersPkg/npcAtdPkg). In reality it is THREE count+array pairs: (count → npcAtdPkg[]), (orgNum → npcOrgPkg[]), (preferNum → npcPrefersPkg[]). The doc mis-pairs the names (e.g. npcAtdPkg is the array driven by 'count', not a standalone tail scalar) and treats the *Pkg members as scalars rather than array elements. NOTE: DebugFormat loops npcOrgPkg using *param_1 (the 'count' field) not param_1[0x79] (orgNum) — likely an in-game bug or count-shared design; verify server side.
+- **TlvDragonBoxLotteryData_Pack_v0** (TlvDragonBoxLotteryData, TlvDragonBoxShopItems, TlvPiecePrizes)
+  - Doc TlvDragonBoxLotteryData lists only 9 fields (truncates after freshNumBitCount) and mis-tracks offsets (e.g. field 5 blackFaceCount shown @offset 245 duplicating 'pieces'). Real struct has 15 fields; missing from doc: freshNumBit[] (f10), freshNumTenCount (f11), freshNumTen[] (f12), dragonBoxShopItems (f13), freshNumCnt (f14), fetchState (f15). Also fields f2/f3/f4 offsets in doc (245/249/253) are wrong — those are sub-array structs, not int32 @ those offsets.
+- **TlvDragonBoxLotteryData_Pack_v1** (TlvDragonBoxLotteryData)
+  - See FUN_1022f160 (doc truncated to 9 fields).
+- **TlvDragonBoxLotteryData_DebugFormat** (TlvDragonBoxLotteryData)
+  - Confirms the 15-field superset the doc truncated to 9. dragonShopEndTime uses time format (DAT_11d9f574), not plain int32 as doc labels it.
+- **TlvAuctionRecordContainer_DebugFormat** (TlvAuctionRecordContainer)
+  - Verify doc TlvAuctionRecordContainer captures all three arrays (sales max 100, recordSale max 400, recordBuy max 400) sharing the same element type sub_10238CE0.
+- **TlvUniformSubStructAggregate_Pack** 
+  - No embedded field names; cross-ref by address (0x1023cc50) and the shared element serializer FUN_101b01d0 to identify which generated TLV struct this is. Field IDs are non-contiguous (gaps between 0xa5→0x125 etc.), so the generated doc must preserve the exact field_id numbering, not a 1..N renumber.

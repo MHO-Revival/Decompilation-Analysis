@@ -1,0 +1,131 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "11a23370",
+      "currentName": "FUN_11a23370",
+      "proposedName": "MonsterSpawnCondition_KillCount::ParseFromXmlNode",
+      "purpose": "Deserializes one 'kill-count' spawn/objective condition record from an XML/property-tree node (param_2 is an attribute reader with vtable: +0x10 hasAttr(name)->bool, +0x20 getAttrInt(name)->int, +0x24 getAttrString(node,name)). Fields read in order: groupId, spawnGroupId, msgID, logic, targetMonsterID, targetCount, TargMsgID, targetMonsterID2, targetCount2, TargMsgID2, MonsterBuffID1..3, Time1..3, AlertMsgID. groupId is written to parent object at (param_1+0x10); the remaining 16 dwords are packed into a 0x40-byte record and appended to the vector [param_1+0x18 .. param_1+0x1c). If capacity remains the 16 dwords are copied inline and end ptr advanced by 0x40, else growth/emplace helper FUN_11a241d0 is called. This is a condition that, when N monsters of one/two target species are killed, fires spawnGroupId (spawns a wave), sends msgID/TargMsgID, applies MonsterBuffID1..3 and Time1..3, and shows AlertMsgID. 'logic' selects AND/OR combination of the two target-monster sub-conditions.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective condition parsing",
+      "serverRelevance": "authoritative-config: parses level/mission spawn-trigger data; the server evaluates these kill-count conditions and drives the spawnGroupId spawn wave, buffs and timers authoritatively. (Loader itself is shared config plumbing.)",
+      "formulas": [
+        "record size = 0x40 bytes (16 dwords) appended per condition",
+        "groupId -> stored at parent+0x10 (getAttrInt on 'groupId')",
+        "record dword layout (from stack copy): [0]=spawnGroupId [1]=msgID [2]=logic [3]=targetMonsterID [4]=targetCount [5]=TargMsgID [6]=targetMonsterID2 [7]=targetCount2 [8]=TargMsgID2 [9]=MonsterBuffID1 [10]=MonsterBuffID2 [11]=MonsterBuffID3 [12]=Time1 [13]=Time2 [14]=Time3 [15]=AlertMsgID",
+        "vector append: if (end==cap) FUN_11a241d0(end,&rec,&flag,1,1) else copy 16 dwords; end += 0x40",
+        "per-attribute one-time name registration guarded by bitmask DAT_123a8514 (bit per field, 32 bits) then DAT_123a8658 for AlertMsgID"
+      ],
+      "costs": ["targetCount, targetCount2 = number of monsters to kill (objective thresholds); Time1..3 = buff/timer durations (units unknown, likely ms or s)"],
+      "notes": "MHO-specific (not stock CryEngine). Missing attribute -> formatted error via FUN_100ea3b0(&buf,fmt DAT_11d389ec,name)+FUN_100ee330 (log/assert). FUN_100f67b0=intern attr name, FUN_100e1cb0/100e1c50=lookup interned record, FUN_11a89daa=stack-cookie check."
+    },
+    {
+      "address": "11a24910",
+      "currentName": "FUN_11a24910",
+      "proposedName": "MonsterSpawnCondition_ItemCollect::ParseFromXmlNode",
+      "purpose": "Deserializes one item-based spawn/objective condition record. Fields: groupId, itemId, itemNum, spawnGroupId, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. groupId -> parent+0x10; remaining 12 dwords -> 0x30-byte record appended to vector [param_1+0x18..0x1c). Emplace helper FUN_11a25470 on grow. Semantics: when the player group collects/turns in itemNum of itemId, fire spawnGroupId and apply buffs/timers/messages.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective condition parsing",
+      "serverRelevance": "authoritative-config: item-collection objective that triggers a spawn wave; server validates item count and drives the spawn.",
+      "formulas": [
+        "record size = 0x30 bytes (12 dwords)",
+        "groupId -> parent+0x10",
+        "record layout: [0]=itemId [1]=itemNum [2]=spawnGroupId [3]=msgID [4]=TargMsgID [5]=MonsterBuffID1 [6]=MonsterBuffID2 [7]=MonsterBuffID3 [8]=Time1 [9]=Time2 [10]=Time3 [11]=AlertMsgID",
+        "append: if(end==cap) FUN_11a25470(end,&rec,&flag,1,1) else copy 12 dwords; end += 0x30",
+        "name-registration bitmask = DAT_123a8670"
+      ],
+      "costs": ["itemNum = required item quantity (objective threshold); itemId = required material/item id; Time1..3 = buff/timer durations"],
+      "notes": "Structurally identical layout to FUN_11a2b5a0 (shares emplace helper FUN_11a25470); likely two distinct item-condition subtypes."
+    },
+    {
+      "address": "11a26090",
+      "currentName": "FUN_11a26090",
+      "proposedName": "MonsterSpawnCondition_BreakPart::ParseFromXmlNode",
+      "purpose": "Deserializes a 'break monster part' spawn/objective condition. Fields: groupId, spawnGroupId, logic, msgID, targetMonsterID, targetPartName (string), targetBreakLev, TargMsgID, targetPartName2 (string), targetBreakLev2, TargMsgID2, MonsterBuffID1..3, Time1..3, AlertMsgID. Two of the fields (targetPartName/targetPartName2) are std::string members read via vtable+0x24 into local SSO string buffers (local_464/local_444, 16-byte inline). groupId -> parent+0x10. Record is 0x6c (108) bytes (contains two embedded strings), appended to vector [param_1+0x18..0x1c); grow via FUN_11a27030, copy-construct via FUN_11a25d00, and local strings freed with FUN_10c3d5d0 if heap-allocated. Semantics: when the named body part(s) of targetMonsterID are broken to targetBreakLev, fire spawnGroupId.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective (part-break) condition parsing",
+      "serverRelevance": "authoritative-config: part-break objective; server tracks part damage/break level and triggers the spawn wave.",
+      "formulas": [
+        "record size = 0x6c (108) bytes; contains two std::string (SSO, 16-byte inline buffer at offsets for part names)",
+        "groupId -> parent+0x10",
+        "scalar fields: spawnGroupId(local_474), logic(local_470), msgID(local_46c), targetMonsterID(local_468), targetBreakLev(local_44c), TargMsgID(local_448), targetBreakLev2(local_42c), TargMsgID2(local_428), MonsterBuffID1(local_424), MonsterBuffID2(local_420), MonsterBuffID3(local_41c), Time1(local_418), Time2(local_414), Time3(local_410), AlertMsgID(local_40c)",
+        "append: if(end==cap) FUN_11a27030(end,&rec,&flag,1,1) else FUN_11a25d00(&rec) [copy-ctor into slot]; end += 0x6c",
+        "name-registration bitmasks: DAT_123a8778 (32 fields) then DAT_123a88bc (Time3, AlertMsgID)"
+      ],
+      "costs": ["targetBreakLev/targetBreakLev2 = required part break level; Time1..3 = durations"],
+      "notes": "Part names are strings (localized/enum part identifiers), hence the larger struct and string cleanup path (FUN_10c3d5d0 = string dtor/free). 'logic' = AND/OR over the two part sub-conditions."
+    },
+    {
+      "address": "11a27780",
+      "currentName": "FUN_11a27780",
+      "proposedName": "MonsterSpawnCondition_AbnormalState::ParseFromXmlNode",
+      "purpose": "Deserializes a 'monster abnormal-state' spawn/objective condition. Fields: groupId, spawnGroupId, targetMonsterID, targetStateAbnormal, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID. groupId -> parent+0x10; 12 dwords -> 0x30-byte record appended to vector; grow via FUN_11a282e0. Semantics: when targetMonsterID enters status/abnormal state 'targetStateAbnormal' (poison/para/sleep/etc), fire spawnGroupId and apply buffs/timers.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective (status-ailment) condition parsing",
+      "serverRelevance": "authoritative-config: status-effect objective; server tracks monster abnormal state and triggers the spawn.",
+      "formulas": [
+        "record size = 0x30 bytes (12 dwords)",
+        "groupId -> parent+0x10",
+        "record layout: [0]=spawnGroupId [1]=targetMonsterID [2]=targetStateAbnormal [3]=msgID [4]=TargMsgID [5]=MonsterBuffID1 [6]=MonsterBuffID2 [7]=MonsterBuffID3 [8]=Time1 [9]=Time2 [10]=Time3 [11]=AlertMsgID",
+        "append: if(end==cap) FUN_11a282e0(end,&rec,&flag,1,1) else copy 12 dwords; end += 0x30",
+        "name-registration bitmask = DAT_123a88e8"
+      ],
+      "costs": ["targetStateAbnormal = status-ailment id/enum; Time1..3 = durations"],
+      "notes": "MHO-specific status-ailment tracking condition."
+    },
+    {
+      "address": "11a28a80",
+      "currentName": "FUN_11a28a80",
+      "proposedName": "MonsterSpawnCondition_MonsterPresent::ParseFromXmlNode",
+      "purpose": "Deserializes the simplest monster-target spawn/objective condition. Fields: groupId, spawnGroupId, targetMonsterID, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID (no count/part/state). groupId -> parent+0x10; 11 dwords -> 0x2c (44)-byte record appended to vector; grow via FUN_11a29520. Semantics: on presence/kill of targetMonsterID, fire spawnGroupId with buffs/timers/messages.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective condition parsing",
+      "serverRelevance": "authoritative-config: single-monster objective/trigger; server-driven spawn.",
+      "formulas": [
+        "record size = 0x2c (44) bytes (11 dwords)",
+        "groupId -> parent+0x10",
+        "record layout: [0]=spawnGroupId [1]=targetMonsterID [2]=msgID [3]=TargMsgID [4]=MonsterBuffID1 [5]=MonsterBuffID2 [6]=MonsterBuffID3 [7..8]=Time1,Time2 (written as CONCAT44 8-byte store) [9]=Time3 [10]=AlertMsgID",
+        "append: if(end==cap) FUN_11a29520(end,&rec,&flag,1,1) else copy 11 dwords; end += 0x2c",
+        "name-registration bitmask = DAT_123a89f0"
+      ],
+      "costs": ["Time1..3 = buff/timer durations"],
+      "notes": "MHO-specific. Only condition here with a 0x2c stride and a 64-bit combined store of Time1/Time2."
+    },
+    {
+      "address": "11a2a160",
+      "currentName": "FUN_11a2a160",
+      "proposedName": "MonsterSpawnCondition_HitPart::ParseFromXmlNode",
+      "purpose": "Deserializes a 'hit monster part N times' spawn/objective condition. Fields: groupId, spawnGroupId, logic, msgID, wrongHitCheck, targetMonsterID, targetPartName (string), targetPartCount, TargMsgID, targetPartName2 (string), targetPartCount2, TargMsgID2, MonsterBuffID1..3, Time1..3, AlertMsgID. Two std::string part-name members (SSO buffers local_464/local_444). groupId -> parent+0x10. Record is 0x70 (112) bytes appended to vector; grow via FUN_11a2b1c0, copy-construct via FUN_11a29dd0, strings freed via FUN_10c3d5d0. Semantics: when the named part(s) of targetMonsterID are hit targetPartCount times, fire spawnGroupId. 'wrongHitCheck' flags whether hits on non-target parts count/invalidate.",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective (part-hit) condition parsing",
+      "serverRelevance": "authoritative-config: hit-count-on-part objective; server counts hits per part and triggers the spawn.",
+      "formulas": [
+        "record size = 0x70 (112) bytes; two embedded std::string part names",
+        "groupId -> parent+0x10",
+        "scalar fields: spawnGroupId(local_478), logic(local_474), msgID(local_470), wrongHitCheck(local_46c), targetMonsterID(local_468), targetPartCount(local_44c), TargMsgID(local_448), targetPartCount2(local_42c), TargMsgID2(local_428), MonsterBuffID1(local_424), MonsterBuffID2(local_420), MonsterBuffID3(local_41c), Time1(local_418), Time2(local_414), Time3(local_410), AlertMsgID(local_40c)",
+        "append: if(end==cap) FUN_11a2b1c0(end,&rec,&flag,1,1) else FUN_11a29dd0(&rec) [copy-ctor]; end += 0x70",
+        "name-registration bitmasks: DAT_123a8ae4 (32 fields) then DAT_123a8c28 (Time2,Time3,AlertMsgID)"
+      ],
+      "costs": ["targetPartCount/targetPartCount2 = required hit counts on named parts; wrongHitCheck = bool/flag; Time1..3 = durations"],
+      "notes": "MHO-specific. Largest record (0x70). Differs from BreakPart (11a26090) by tracking hit-count + wrongHitCheck instead of break-level."
+    },
+    {
+      "address": "11a2b5a0",
+      "currentName": "FUN_11a2b5a0",
+      "proposedName": "MonsterSpawnCondition_ItemCollect2::ParseFromXmlNode",
+      "purpose": "Deserializes an item-based spawn/objective condition, layout-identical to FUN_11a24910 (groupId, itemId, itemNum, spawnGroupId, msgID, TargMsgID, MonsterBuffID1..3, Time1..3, AlertMsgID). groupId -> parent+0x10; 12 dwords -> 0x30-byte record appended to a different vector/parent; shares the same emplace helper FUN_11a25470. Likely a second item-condition subtype (e.g. consume vs deliver) with its own static name-registration state (DAT_123a8c68).",
+      "confidence": "high",
+      "subsystem": "monster-spawn / quest-objective condition parsing",
+      "serverRelevance": "authoritative-config: item objective triggering a spawn wave; server-validated.",
+      "formulas": [
+        "record size = 0x30 bytes (12 dwords), identical layout to 11a24910",
+        "groupId -> parent+0x10",
+        "record layout: [0]=itemId [1]=itemNum [2]=spawnGroupId [3]=msgID [4]=TargMsgID [5]=MonsterBuffID1 [6]=MonsterBuffID2 [7]=MonsterBuffID3 [8]=Time1 [9]=Time2 [10]=Time3 [11]=AlertMsgID",
+        "append: if(end==cap) FUN_11a25470(end,&rec,&flag,1,1) else copy 12 dwords; end += 0x30",
+        "name-registration bitmask = DAT_123a8c68 (separate from 11a24910's DAT_123a8670)"
+      ],
+      "costs": ["itemNum = required item quantity; itemId = required item id; Time1..3 = durations"],
+      "notes": "Duplicate of FUN_11a24910 body but distinct static state; the two coexisting item conditions differ by call site/subtype only (exact distinction unknown)."
+    }
+  ]
+}

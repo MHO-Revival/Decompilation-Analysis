@@ -1,0 +1,435 @@
+{
+  "batchIndex": 7,
+  "classes": [
+    {
+      "className": "CMessageColorInfo",
+      "category": "ui",
+      "purpose": "Client message-color table entry. Maps a message color-id to an actual RGBA/color value, and is used together with CMessageParmDescInfo to colorize localized chat/system messages and substitute {name} placeholders.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "118dc0f0",
+          "currentName": "CMessageColorInfo::GetManagers",
+          "proposedName": "CMessageColorInfo::GetInfoMgr",
+          "purpose": "Info-manager accessor. When param_3==0 returns the cached CInfoManager singleton (StcMbrNameSvr registry); otherwise forwards to the generic registry lookup FUN_11679e10 and falls back to a default record (&DAT_1239dc0c)."
+        },
+        {
+          "address": "118e0720",
+          "currentName": "CMessageColorInfo::GetManagers_118e0720",
+          "proposedName": "CMessageColorInfo::GetInfoMgrRaw",
+          "purpose": "Returns the raw singleton pointer (*DAT_1239d9e0) if param==0, else 0. Lightweight variant of the manager accessor."
+        },
+        {
+          "address": "118e1560",
+          "currentName": "CMessageColorInfo::GetManagers_118e1560",
+          "proposedName": "CMessageColorInfo::ResolveColorsAndParams",
+          "purpose": "Given a message object (layout A: color-id list at this+0x3c..0x40, output color vector at this+0x4c..0x50, template string at this+0x20): for each color id looks up the CMessageColorInfo record and appends the resolved color value; then tokenizes the template on '{' (0x7b) / '}' (0x7d), and for each {name} placeholder matches it against CMessageParmDescInfo entries (compares desc name at entry+0x14)."
+        },
+        {
+          "address": "118e1b70",
+          "currentName": "CMessageColorInfo::GetManagers_118e1b70",
+          "proposedName": "CMessageColorInfo::ResolveColorsAndParams_LayoutB",
+          "purpose": "Identical logic to 118e1560 but for a second message layout (color-id list at this+0x28..0x2c, output vector at this+0x38..0x3c, template string at this+0x14)."
+        }
+      ],
+      "fields": [
+        {"name": "colorValue", "type": "uint32 (RGBA)", "offset": "unknown", "source": "inferred", "note": "value pulled from the manager's 2-level id table and appended to the message's resolved-color vector"}
+      ],
+      "constants": ["OpenBrace='{' (0x7b)", "CloseBrace='}' (0x7d)"],
+      "formulas": ["placeholder scan: FUN_118dfd80(buf, pos, '{', '}', outName) walks {name} tokens; each token name compared to CMessageParmDescInfo entry name at entry+0x14"],
+      "relatedTlv": [],
+      "notes": "All four methods share the auto-id 'GetManagers'; only the first two are true manager accessors. The two big methods are the message color/parameter resolver in two struct layouts. No matching TLV doc (this is a client-only display table).",
+      "nameNext": [
+        {"address": "118dfd80", "proposedName": "StringUtil::FindBracedToken", "why": "brace tokenizer used to scan {param} placeholders"},
+        {"address": "118e2da0", "proposedName": "Vector<uint>::PushBackGrow", "why": "grow+append helper for the resolved-color vector"}
+      ]
+    },
+    {
+      "className": "CEquipEnchantInfo",
+      "category": "item",
+      "purpose": "Equipment enchant / attribute-bonus table entry. Drives building of an equipment's full enchant detail block (per-slot enchant attributes, names, descriptions) for tooltip display / network report.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "1050ecd0",
+          "currentName": "CEquipEnchantInfo::GetManagers",
+          "proposedName": "CEquipEnchantInfo::GetInfoMgr",
+          "purpose": "Singleton accessor: registers the class name with the shared-memory CInfoManager registry (StcMbrNameSvr) on first call and returns DAT_123be4f8."
+        },
+        {
+          "address": "112a5b80",
+          "currentName": "CEquipEnchantInfo::GetManagers_112a5b80",
+          "proposedName": "CEquipEnchantInfo::BuildEquipEnchantDetail",
+          "purpose": "Large builder (~0x226d8-byte work buffer) that assembles a full equipment detail record from an equip item (param_3): calls dozens of item-attribute getters (FUN_1134xxxx), copies the item name (FUN_100ebf60, 0x100), parses a comma-separated numeric list (up to 20 ints via FUN_100e4b30 + atoi), then walks up to 24 enchant/attribute slots reading each attribute's type/value/name(0x20)/description(0x40) via its vtable, resolving enchant records through the CEquipEnchantInfo manager, and finally hands the assembled struct to a network/UI sink (vtable+0x568)."
+        }
+      ],
+      "fields": [
+        {"name": "maxAttrSlots", "type": "count", "offset": "unknown", "source": "inferred", "note": "loop bound 0x18 (24) attribute slots, each stride 0xe4 bytes in the work buffer"},
+        {"name": "csvValueList", "type": "int[20]", "offset": "unknown", "source": "inferred", "note": "comma-separated (0x2c) list parsed with atoi, capped at 20 entries"}
+      ],
+      "constants": ["MaxAttrSlots=24 (0x18)", "MaxCsvValues=20 (0x14)", "ListSeparator=',' (0x2c)"],
+      "formulas": ["per-slot buffer stride = slot * 0xe4 bytes; description strings copied at 0x40, names at 0x20"],
+      "relatedTlv": [],
+      "notes": "Only the first method is the true singleton accessor. The second is a tooltip/detail assembler, not a TLV parser. Heavy stack usage confirms it builds a large transient display struct. Field offsets inside the equip item are opaque here (item passed as param_3).",
+      "nameNext": [
+        {"address": "1134b310", "proposedName": "CEquipItem::GetAttr_*", "why": "family of FUN_1134xxxx item-attribute getters feeding the detail struct"},
+        {"address": "11669090", "proposedName": "EnchantAttr::LookupById", "why": "resolves an attribute record used per slot"}
+      ]
+    },
+    {
+      "className": "CCommodityLibInfo",
+      "category": "economy",
+      "purpose": "Shop commodity-library entry. Each record has a commodity type field (1/2/3) and is grouped into commodity groups (CCommodityGroupInfo) and linked to NPC sale lists (CNpcSaleInfo). Provides type-filtered lookups and init/cleanup passes over all commodities.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "104d9030",
+          "currentName": "CCommodityLibInfo::GetManagers",
+          "proposedName": "CCommodityLibInfo::GetInfoMgr",
+          "purpose": "Singleton accessor for the commodity-lib CInfoManager (returns DAT_123be128)."
+        },
+        {
+          "address": "114b83c0",
+          "currentName": "CCommodityLibInfo::GetManagers_114b83c0",
+          "proposedName": "CCommodityLibInfo::ResolveLibAndGroupRefs",
+          "purpose": "Resolves references held by an object: iterates up to 20 commodity-lib ids (param_2, stride 0x212, id at +1) through the CCommodityLibInfo manager, then up to 128 group ids (param_2+0x1568, stride 0xe, short id at -6) through the CCommodityGroupInfo manager; finalizes with FUN_114b87c0."
+        },
+        {
+          "address": "11720ad0",
+          "currentName": "CCommodityLibInfo::GetManagers_11720ad0",
+          "proposedName": "CCommodityLibInfo::CollectByType2",
+          "purpose": "Walks every CCommodityLibInfo record and appends those whose type field (record+0x20)==2 into the caller-supplied 3-pointer vector (param_1)."
+        },
+        {
+          "address": "11720c50",
+          "currentName": "CCommodityLibInfo::GetManagers_11720c50",
+          "proposedName": "CCommodityLibInfo::FindFirstType1",
+          "purpose": "Returns the first CCommodityLibInfo record with type field (record+0x20)==1, else 0."
+        },
+        {
+          "address": "11720d80",
+          "currentName": "CCommodityLibInfo::GetManagers_11720d80",
+          "proposedName": "CCommodityLibInfo::CollectByType3",
+          "purpose": "Like CollectByType2 but collects records whose type (record+0x20)==3 into the output vector."
+        },
+        {
+          "address": "11722190",
+          "currentName": "CCommodityLibInfo::GetManagers_11722190",
+          "proposedName": "CCommodityLibInfo::ClearNpcSaleRefs",
+          "purpose": "For each commodity-lib record, gets its id (vtable+0x18), resolves the matching CNpcSaleInfo record, then iterates the sale's entry list (piVar2[5]..[6]) calling FUN_117da950 twice per entry to release/unregister NPC-sale references."
+        },
+        {
+          "address": "11909d80",
+          "currentName": "CCommodityLibInfo::GetManagers_11909d80",
+          "proposedName": "CCommodityLibInfo::ForEachCommodity_Call11721190",
+          "purpose": "Iterates all commodity-lib records, invoking FUN_11721190 on each (per-record init/precache step)."
+        },
+        {
+          "address": "11909ed0",
+          "currentName": "CCommodityLibInfo::GetManagers_11909ed0",
+          "proposedName": "CCommodityLibInfo::InitAllCommoditiesAndSales",
+          "purpose": "Iterates all commodity-lib records calling CNpcSaleInfo::GetManagers_11720f30 per record, then runs ClearNpcSaleRefs (11722190). Top-level commodity/NPC-sale initialization pass."
+        }
+      ],
+      "fields": [
+        {"name": "commodityType", "type": "int32 (1|2|3)", "offset": "0x20", "source": "reader", "note": "used to bucket/filter records; 1,2,3 seen"},
+        {"name": "recordList", "type": "vector<CCommodityLibInfo*>", "offset": "0x14..0x18", "source": "reader", "note": "flat manager vector base/end used by GetById"}
+      ],
+      "constants": ["MaxLibRefs=20 (0x14)", "MaxGroupRefs=128 (0x80)", "LibRefStride=0x212", "GroupRefStride=0xe"],
+      "formulas": [],
+      "relatedTlv": ["TlvCommoditySales", "TlvCommodityRefresh"],
+      "notes": "TLV docs TlvCommoditySales/TlvCommodityRefresh are the network/persistence side of shop commodities; these client methods are runtime lookups over the CInfoManager, not TLV parsers. commodityType at +0x20 verified by the ==1/==2/==3 filters.",
+      "nameNext": [
+        {"address": "11720f30", "proposedName": "CNpcSaleInfo::Init", "why": "called per commodity during the init pass"},
+        {"address": "117da950", "proposedName": "CNpcSaleInfo::ReleaseSaleEntry", "why": "frees NPC-sale references during cleanup"}
+      ]
+    },
+    {
+      "className": "CSculptureInfo",
+      "category": "activity",
+      "purpose": "Sculpture (carving) activity definition entry. Records are keyed/grouped by a library id (record+0x28 / record+0x14) and used to build per-player sculpture maps and to collect sculptures belonging to a given library.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "10950be0",
+          "currentName": "CSculptureInfo::GetManagers",
+          "proposedName": "CSculptureInfo::GetInfoMgr",
+          "purpose": "Singleton accessor for the sculpture CInfoManager (returns DAT_123c8698)."
+        },
+        {
+          "address": "10be6ef0",
+          "currentName": "CSculptureInfo::GetManagers_10be6ef0",
+          "proposedName": "CSculptureInfo::FindByLibKeyAndAppend",
+          "purpose": "Computes a key (param_1 vtable+0xc4 -> +0x14), scans all sculpture records for the first whose record[10] (offset 0x28)==key, and appends the {param_1, record} pair to the global vector DAT_1202e12c; returns 1 on match."
+        },
+        {
+          "address": "1117fcf0",
+          "currentName": "CSculptureInfo::GetManagers_1117fcf0",
+          "proposedName": "CSculptureInfo::BuildSculptureMapFromIds",
+          "purpose": "Iterates up to 10 sculpture ids from param_2, resolves each record, does a red-black-tree lookup/insert keyed by id in this+0x38, and for matches inserts a computed entry (FUN_11181ba0(record) value + FUN_114b15a0()) via FUN_11181320; finalizes via vtable at this+0xc."
+        },
+        {
+          "address": "1117fee0",
+          "currentName": "CSculptureInfo::GetManagers_1117fee0",
+          "proposedName": "CSculptureInfo::RefreshSculptureData",
+          "purpose": "Parses/expands id lists (FUN_1013ec30) resolving sculpture records (FUN_114b2470) then runs a nested pass (outer count at param_2+0x105 max 4, inner max 10 stride 0x185) building map entries and driving the owner object's vtable at this+0xc (+0x18/+0x10)."
+        },
+        {
+          "address": "114b1c50",
+          "currentName": "CSculptureInfo::GetManagers_114b1c50",
+          "proposedName": "CSculptureInfo::GetIdByLibKey",
+          "purpose": "Scans all records for the first whose record[10] (0x28)==param_1 and returns that record's id (vtable+0x18 result), else 0."
+        },
+        {
+          "address": "11980c30",
+          "currentName": "CSculptureInfo::GetManagers_11980c30",
+          "proposedName": "CSculptureInfo::ForEachSculpture_Call11a54280",
+          "purpose": "Iterates all sculpture records calling FUN_11a54280 on each (per-record processing pass)."
+        },
+        {
+          "address": "11980f00",
+          "currentName": "CSculptureInfo::GetManagers_11980f00",
+          "proposedName": "CSculptureInfo::ForEachSculpture_InitLib",
+          "purpose": "Iterates all sculpture records calling CSculptureLibInfo::GetManagers_11a540b0 per record (library init/link pass)."
+        },
+        {
+          "address": "11a53910",
+          "currentName": "CSculptureInfo::GetManagers_11a53910",
+          "proposedName": "CSculptureInfo::CollectByLibId",
+          "purpose": "For each record, compares record[5] (offset 0x14) against (param_1 vtable+0x18 result); appends matching records to the vector at param_1[0xf]/param_1[0x10]."
+        }
+      ],
+      "fields": [
+        {"name": "libKey", "type": "int32", "offset": "0x28", "source": "inferred", "note": "record[10]; grouping/library key matched in Find/Get-by-key methods"},
+        {"name": "libId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "record[5]; matched in CollectByLibId (11a53910)"}
+      ],
+      "constants": ["MaxIds=10", "InnerStride=0x185", "OuterMax=4"],
+      "formulas": [],
+      "relatedTlv": ["TlvSculptureData", "TlvSculptureLibData", "TlvSculptureRound"],
+      "notes": "TlvSculpture* are the persistence/network structs; these are client runtime iterators over CSculptureInfo. Distinguish two key offsets: +0x28 (libKey) used by 10be6ef0/114b1c50, +0x14 (libId) used by 11a53910. record[10]==key checks confirmed against code.",
+      "nameNext": [
+        {"address": "11a540b0", "proposedName": "CSculptureLibInfo::Init", "why": "called per sculpture during lib init pass"},
+        {"address": "11181320", "proposedName": "SculptureMap::Insert", "why": "inserts computed map entries"}
+      ]
+    },
+    {
+      "className": "CEquipRandPassiveSkillSubGroupInfo",
+      "category": "skill",
+      "purpose": "Sub-group table for equipment random passive skills. Each sub-group holds a list of (skill, weight) entries; used to pick the best sub-group for a skill and to randomly roll passive-skill sets together with CEquipRandPassiveSkillActivateGroupInfo.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "11636480",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::GetInfoMgr",
+          "purpose": "Info-manager accessor / GetById wrapper (returns singleton at DAT_122e0474 or default record)."
+        },
+        {
+          "address": "11638930",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers_11638930",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::SelectSubGroupForSkill",
+          "purpose": "Given a skill id (param_1), a flag (param_2), and a list of sub-group ids (param_3): iterates sub-groups, scans each sub-group's entry list (record+0x18..0x1c); if an entry's skill (entry[0])==param_1, either returns the first match (param_2<0) or tracks the sub-group whose entry weight (entry[8]) is highest and returns it."
+        },
+        {
+          "address": "11639f80",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers_11639f80",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::GetInfoMgrRaw",
+          "purpose": "Returns raw singleton pointer when param==0."
+        },
+        {
+          "address": "1163d020",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers_1163d020",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::RollRandomPassiveSkills",
+          "purpose": "RNG-driven passive-skill roll: computes a random draw count using rand (FUN_100ee450) * _DAT_11de9a60 over a [min..max] range (min 3), rolls candidate entries (FUN_11867d00/f60/f50), resolves each sub-group and its activate-group (CEquipRandPassiveSkillActivateGroupInfo), and emits generated skill results via FUN_1163c850."
+        },
+        {
+          "address": "1163d430",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers_1163d430",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::RollRandomPassiveSkills_Variant",
+          "purpose": "Second roll variant (uses FUN_11868050 to fetch candidates and FUN_11638b60 to validate activate group; same random-count math and FUN_1163c850 emission), operating on sub-group id list at this+0x2c..0x30."
+        },
+        {
+          "address": "11868120",
+          "currentName": "CEquipRandPassiveSkillSubGroupInfo::GetManagers_11868120",
+          "proposedName": "CEquipRandPassiveSkillSubGroupInfo::TouchSubGroupRefs",
+          "purpose": "Dispatches on a mode field at this+0x3c: mode 1 walks the flat id list at this+0x2c..0x30; mode 2 walks nested per-node lists (node+0xc..0x10); each iteration forces the sub-group manager to load (preload/validate references)."
+        }
+      ],
+      "fields": [
+        {"name": "entryList", "type": "vector<Entry*>", "offset": "0x18..0x1c", "source": "reader", "note": "sub-group's (skill,weight) entries"},
+        {"name": "entrySkillId", "type": "int32", "offset": "0x00 (entry[0])", "source": "inferred", "note": "matched against requested skill id"},
+        {"name": "entryWeight", "type": "int32", "offset": "0x20 (entry[8])", "source": "inferred", "note": "weight/level; max selects the sub-group"},
+        {"name": "mode", "type": "int32 (1|2)", "offset": "0x3c", "source": "reader", "note": "list layout selector in TouchSubGroupRefs"}
+      ],
+      "constants": ["MinRollCount=3", "rngScale=_DAT_11de9a60"],
+      "formulas": ["rollCount = base - floor(rand01 * _DAT_11de9a60 * (range+1)), clamped to >=1 and >=3 candidates then processed"],
+      "relatedTlv": [],
+      "notes": "The two roll methods are the core random-passive-skill generator; SelectSubGroupForSkill is a weighted best-match. Exact rng constant _DAT_11de9a60 is a double (likely 1/RAND_MAX). Activate-group class CEquipRandPassiveSkillActivateGroupInfo is a sibling table.",
+      "nameNext": [
+        {"address": "1163c850", "proposedName": "CEquipRandPassiveSkill::EmitRolledResult", "why": "builds/appends a generated passive-skill result"},
+        {"address": "11638ca0", "proposedName": "CEquipRandPassiveSkill::ComputeValue", "why": "computes per-entry value used in the emitted result"}
+      ]
+    },
+    {
+      "className": "CSoulStoneAttrInfo",
+      "category": "item",
+      "purpose": "Soul-stone attribute table entry. Each record carries an attribute-id list and a value/type; methods sum attribute values (optionally by type), apply attribute totals to a character, and collect attributes for a given entity.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "10520a00",
+          "currentName": "CSoulStoneAttrInfo::GetManagers",
+          "proposedName": "CSoulStoneAttrInfo::GetInfoMgr",
+          "purpose": "Singleton accessor for the soul-stone-attr CInfoManager (returns DAT_123be57c)."
+        },
+        {
+          "address": "11410350",
+          "currentName": "CSoulStoneAttrInfo::GetManagers_11410350",
+          "proposedName": "CSoulStoneAttrInfo::CollectAttrModifiers",
+          "purpose": "Walks a red-black tree at this+0x34 (nodes keyed by id at node+0x10); for each resolves the CSoulStoneAttrInfo record, iterates its attr-id list (record+0x50..0x54), calls a game-attribute resolver (vtable of this+8 obj, +0x44, args 0,attrId,0,1,0x29) and appends positive results to the vector at this+0x68..0x6c."
+        },
+        {
+          "address": "11413660",
+          "currentName": "CSoulStoneAttrInfo::GetManagers_11413660",
+          "proposedName": "CSoulStoneAttrInfo::SumAttrValue",
+          "purpose": "Walks the rb-tree, resolves each soul-stone-attr record and sums record+0x18 (value) across all; returns the total."
+        },
+        {
+          "address": "114138e0",
+          "currentName": "CSoulStoneAttrInfo::GetManagers_114138e0",
+          "proposedName": "CSoulStoneAttrInfo::SumAttrValueByType",
+          "purpose": "Same as SumAttrValue but only sums record+0x18 for records whose type (record+0x30)==param_2."
+        },
+        {
+          "address": "11414190",
+          "currentName": "CSoulStoneAttrInfo::GetManagers_11414190",
+          "proposedName": "CSoulStoneAttrInfo::ApplyAttrTotalsToChar",
+          "purpose": "For each attr record (rb-tree walk) builds a '{0}:{1}' id:name debug string, iterates the record's sub-attributes (count record[6]=0x18, array record[5]=0x14 via FUN_115342b0) summing +0x38 and +0x48 into two accumulators, then applies the totals to the owning character: char[10] (+0x28) += sum1 (clamped to 0x7fffffff), and vtable+0x278(sum2,0x27,0) for the second stat; rebuilds/refreshes afterward."
+        },
+        {
+          "address": "11a7c100",
+          "currentName": "CSoulStoneAttrInfo::GetManagers_11a7c100",
+          "proposedName": "CSoulStoneAttrInfo::CollectAttrsForEntity",
+          "purpose": "Iterates all soul-stone-attr records; where record[0xc] (offset 0x30)==entity id (local_10 vtable+0x18 result) appends the record to two vectors (entity[0x11]/[0x12] and a keyed list from FUN_11a7b9c0 keyed by record[5])."
+        }
+      ],
+      "fields": [
+        {"name": "value", "type": "int32", "offset": "0x18", "source": "reader", "note": "attribute value summed by 11413660/114138e0"},
+        {"name": "attrType", "type": "int32", "offset": "0x30", "source": "reader", "note": "record+0x30; filter key in SumAttrValueByType and CollectAttrsForEntity (record[0xc])"},
+        {"name": "attrIdList", "type": "vector<int>", "offset": "0x50..0x54", "source": "reader", "note": "list of game attribute ids resolved in CollectAttrModifiers"},
+        {"name": "subAttrArray", "type": "ptr", "offset": "0x14 (record[5])", "source": "reader", "note": "sub-attribute array; count at 0x18 (record[6])"},
+        {"name": "subAttrCount", "type": "int32", "offset": "0x18 (record[6])", "source": "reader", "note": "used in ApplyAttrTotalsToChar loop bound"}
+      ],
+      "constants": ["ClampMax=0x7fffffff", "AttrResolveTag=0x29", "StatOpCode=0x27"],
+      "formulas": ["char.stat(+0x28) += sum(subAttr+0x38); clamp to 0x7fffffff", "second stat applied via vtable+0x278(sum(subAttr+0x48), 0x27, 0)"],
+      "relatedTlv": [],
+      "notes": "Note offset overload: record+0x18 is 'value' in the sum methods but sub-attr +0x38/+0x48 are the applied stats. The '{0}:{1}' string is a debug/label build. rb-tree is the owner object's std::map, not the info table.",
+      "nameNext": [
+        {"address": "115342b0", "proposedName": "CSoulStoneSubAttr::GetByIndex", "why": "fetches sub-attribute record used for stat totals"},
+        {"address": "11a7b9c0", "proposedName": "SoulStoneAttrIndex::GetBucket", "why": "keyed bucket used to collect attrs per entity"}
+      ]
+    },
+    {
+      "className": "CProjectileInfo",
+      "category": "combat",
+      "purpose": "Projectile / fly-object definition entry. Holds model, AI (behavior tree/skill), hit-part, and preload reference lists. The main method preloads all resources referenced by a projectile data node (models, effects, sub fly-objects, monsters).",
+      "confidence": "high",
+      "methods": [
+        {
+          "address": "10cef470",
+          "currentName": "CProjectileInfo::GetManagers",
+          "proposedName": "CProjectileInfo::GetInfoMgr",
+          "purpose": "Info-manager accessor / GetById wrapper (singleton at DAT_1202f608, default record fallback &DAT_1202f638)."
+        },
+        {
+          "address": "10cf03d0",
+          "currentName": "CProjectileInfo::GetManagers_10cf03d0",
+          "proposedName": "CProjectileInfo::GetInfoMgrRaw",
+          "purpose": "Returns the raw singleton pointer when param==0."
+        },
+        {
+          "address": "10dde4b0",
+          "currentName": "CProjectileInfo::GetManagers_10dde4b0",
+          "proposedName": "CProjectileInfo::PreloadResourcesFromDataNode",
+          "purpose": "Given a data-node name and a preload flag, reads projectile config keys and preloads their resources: 'sfileModel' (CGF model), 'AISetting' -> 'sSkill' + 'sBlackBoardFile' (behavior tree under 'Scripts/AI/BehaviorTree/') + 'sequip_EquipmentPack', 'HitPartSetting' -> 'sHitPartInfo', 'sPreloadFlyObjInfo' (list of projectile ids: preloads each record's models at +0x134/+0x168 and effect at +0x1c4), 'spreloadeffects', and 'sPreloadMonsterInfo' (list of monster names resolved through CMonsterInfo, preloaded). Records loaded model handles into this+0x4c and preloaded-name/monster lists into this+0x54/0x58."
+        },
+        {
+          "address": "10ddf3d0",
+          "currentName": "CProjectileInfo::GetManagers_10ddf3d0",
+          "proposedName": "CProjectileInfo::UnloadPreloadedResources",
+          "purpose": "Iterates the preloaded projectile-id list at this+0x58 and releases each referenced record's resources: model at +0x134 and +0x168 (release via manager vtable+0x9c) and effect at +0x1c4 (FUN_110038f0)."
+        }
+      ],
+      "fields": [
+        {"name": "modelFileA", "type": "cstr handle", "offset": "0x134 (with 0x130 marker)", "source": "reader", "note": "primary preload model path; compared 0x134!=0x130 before loading"},
+        {"name": "modelFileB", "type": "cstr handle", "offset": "0x168 (with 0x164)", "source": "reader", "note": "secondary preload model path"},
+        {"name": "effectRef", "type": "cstr handle", "offset": "0x1c4 (with 0x1c0)", "source": "reader", "note": "preload effect reference"},
+        {"name": "monsterNameHandle", "type": "cstr", "offset": "0x68", "source": "reader", "note": "monster record+0x68 name used when resolving sPreloadMonsterInfo entries"},
+        {"name": "loadedModelStack", "type": "array", "offset": "0x4c", "source": "reader", "note": "this+0x4c accumulates loaded model handles during preload"},
+        {"name": "preloadNameList", "type": "string list", "offset": "0x54", "source": "reader", "note": "this+0x54 preloaded monster/name list"},
+        {"name": "preloadIdList", "type": "int list", "offset": "0x58", "source": "reader", "note": "this+0x58 preloaded projectile ids (used by UnloadPreloadedResources)"}
+      ],
+      "constants": ["BehaviorTreePath=\"Scripts/AI/BehaviorTree/\""],
+      "formulas": [],
+      "relatedTlv": [],
+      "notes": "Data-node keys confirm this is the projectile resource-preloader (CryEngine CGF/effect loading). Also touches CMonsterInfo (calls CMonsterInfo::GetManagers_10ddf560 at end when preload flag set). Model paths at +0x134/+0x168 and effect at +0x1c4 are solid.",
+      "nameNext": [
+        {"address": "10de0560", "proposedName": "DataNode::ReadStringList", "why": "parses the s*Info list keys into a string-list buffer"},
+        {"address": "10ddf560", "proposedName": "CMonsterInfo::PreloadFromProjectile", "why": "monster preload counterpart invoked at end"}
+      ]
+    },
+    {
+      "className": "CDragonBoxPrizeInfo",
+      "category": "item",
+      "purpose": "Dragon Box lottery prize-pool entry. Each prize record has an item id + count and a pool/type key; methods grant pending prizes to a player and build the per-player prize/gift/shop pools (joining CDragonBoxBlackFaceGiftInfo and CDragonBoxShop).",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "1092cef0",
+          "currentName": "CDragonBoxPrizeInfo::GetManagers",
+          "proposedName": "CDragonBoxPrizeInfo::GetInfoMgr",
+          "purpose": "Singleton accessor for the dragon-box-prize CInfoManager (returns DAT_123c837c)."
+        },
+        {
+          "address": "1155bf80",
+          "currentName": "CDragonBoxPrizeInfo::GetManagers_1155bf80",
+          "proposedName": "CDragonBoxPrizeInfo::GrantPendingPrizes",
+          "purpose": "Iterates the player's pending-prize list (this[0x13]..[0x14]); for each entry in state 1 marks it state 2, resolves the prize record, and grants it: FUN_109cf680(0x50,4) then FUN_1149ad80(record+0x24 itemId, record+0x28 count, 2), pushing the reward through the player object (vtable at *param_1+0x2d1c, +0x50)."
+        },
+        {
+          "address": "118189e0",
+          "currentName": "CDragonBoxPrizeInfo::GetManagers_118189e0",
+          "proposedName": "CDragonBoxPrizeInfo::BuildPlayerPools",
+          "purpose": "Builds the full dragon-box pools for a context object: (1) all CDragonBoxPrizeInfo records with record+0x18==ctx+0x10 are bucketed by state/type record+0x14 into ctx vectors at +0x5c/+0x44/+0x50; (2) all CDragonBoxBlackFaceGiftInfo records bucketed by record[5] matching ctx+0x6c/0x70/0x74; (3) all CDragonBoxShop records bucketed by record+0x34 matching ctx+0x78/0x80; then commits each bucket (FUN_118166c0/FUN_11816750 + FUN_1155b7a0/FUN_1155b880) and frees the temporaries."
+        },
+        {
+          "address": "11911c70",
+          "currentName": "CDragonBoxPrizeInfo::GetManagers_11911c70",
+          "proposedName": "CDragonBoxPrizeInfo::ForEachPrize_Call11a06de0",
+          "purpose": "Iterates all dragon-box-prize records calling FUN_11a06de0 on each (per-record processing pass)."
+        },
+        {
+          "address": "11911dc0",
+          "currentName": "CDragonBoxPrizeInfo::GetManagers_11911dc0",
+          "proposedName": "CDragonBoxPrizeInfo::ForEachPrize_InitDragonBox",
+          "purpose": "Iterates all dragon-box-prize records calling CDragonBoxInfo::GetManagers_11a06c20 per record (dragon-box init/link pass)."
+        }
+      ],
+      "fields": [
+        {"name": "poolType", "type": "int32 (1|2|3)", "offset": "0x14 (record[5])", "source": "reader", "note": "bucketed into 3 pools in BuildPlayerPools"},
+        {"name": "poolOwnerKey", "type": "int32", "offset": "0x18 (record[6])", "source": "reader", "note": "matched against ctx+0x10 to select this player's prizes"},
+        {"name": "itemId", "type": "int32", "offset": "0x24", "source": "reader", "note": "granted item id in GrantPendingPrizes (FUN_1149ad80 arg1)"},
+        {"name": "itemCount", "type": "int32", "offset": "0x28", "source": "reader", "note": "granted count (FUN_1149ad80 arg2)"},
+        {"name": "prizeState", "type": "int32 (1->2)", "offset": "entry+0x04", "source": "reader", "note": "pending-list entry state; 1=pending, set to 2 when granted"}
+      ],
+      "constants": ["StatePending=1", "StateGranted=2", "GrantMode=2"],
+      "formulas": [],
+      "relatedTlv": ["TlvDragonBoxLotteryData", "TlvDragonBoxShopItems"],
+      "notes": "TlvDragonBoxLotteryData/TlvDragonBoxShopItems are the network/persistence counterparts. Sibling classes CDragonBoxBlackFaceGiftInfo, CDragonBoxShop and CDragonBoxInfo are joined here. itemId/count at 0x24/0x28 and pool key at 0x14/0x18 are consistent across the code.",
+      "nameNext": [
+        {"address": "1149ad80", "proposedName": "CItemReward::Grant", "why": "grants (itemId,count,mode) reward"},
+        {"address": "11a06c20", "proposedName": "CDragonBoxInfo::LinkPrize", "why": "per-prize dragon-box init counterpart"}
+      ]
+    }
+  ]
+}

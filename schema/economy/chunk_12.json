@@ -1,0 +1,541 @@
+{
+  "chunkIndex": 12,
+  "functions": [
+    {
+      "address": "0x109f1210",
+      "currentName": "FUN_109f1210",
+      "proposedName": "GuideBookView::BuildChapterListVO",
+      "purpose": "Builds the AS3 UI VO array 'chapterArr' of mh.view.GuideBook.ChapterItemVo for the GuideBook (progression/tutorial reward book). Iterates chapter records at (guideMgr+0x2b28) and emits per-chapter {chapterID, chapterName, isOpen, isNew, isCanGetReward}.",
+      "subsystem": "guidebook/progression-ui",
+      "confidence": "high",
+      "formulas": [
+        "Guide manager reached via DAT_1202e818->[0xd0]->[0x90]->vfunc[0xb4]() then +0x2b28 = chapter container.",
+        "Chapter array walk: base=*(cont+0x10), end=*(cont+0x14), stride = 0xf ints (0x3c bytes).",
+        "chapterID = *puVar5 (record[0]); isOpen = *(record+0xd) (byte); isNew = (*(record+0xf) == 0) (byte, inverted); isCanGetReward = FUN_1153a0a0() (per-record can-claim check).",
+        "chapterName resolved via FUN_100e5aa0 (localized string lookup)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (renders server-provided guidebook state; no mutation or cost validation here)",
+      "notes": "isCanGetReward is computed client-side for display; the server must still authorize the actual chapter-reward claim."
+    },
+    {
+      "address": "0x109f14a0",
+      "currentName": "FUN_109f14a0",
+      "proposedName": "GuideBookView::BuildChapterDetailVO",
+      "purpose": "Builds GuideBook chapter-detail UI VOs (case type==2): introductionArr (TextDescriptionVo), taskArr (TaskItemVo), rewardArr (RewardItemVo). Shows chapter progress, tasks, and claimable rewards.",
+      "subsystem": "guidebook/progression-ui",
+      "confidence": "medium",
+      "formulas": [
+        "curProgress compared as (iStack_c0 == *(FUN_1170a680()+0x3c)).",
+        "isWeaponChapter and isHasChooseWeapon (local_a0[2]!=0) emitted as bools.",
+        "finishActionCount = ppppppiVar7[1]; actionCount = (ppppppiVar7[7]-ppppppiVar7[6])>>2 (element count of an int vector).",
+        "TaskItemVo: detailDes (string), curCompleteNum = (*taskRec)[8], needCompleteNum = (*taskRec)[6][10].",
+        "RewardItemVo per index i in [0, rewardCount): getCondition = (float)FUN_11539f30(i+1); rewardID = *(FUN_1180a860()+4); rewardCount = 1 (hardcoded); isHasGetReward = FUN_11539960(i); finishCount = *FUN_1180a860().",
+        "reward loop count = (*(rewardMgr+0x20) - *(rewardMgr+0x1c)) >> 3."
+      ],
+      "costs": [
+        "rewardCount is always displayed as 1 per reward entry (single-item rewards)."
+      ],
+      "serverRelevance": "client-only (display of server-authoritative task progress and reward-claim state)",
+      "notes": "Decompiler heavily mangled the frame (nested pointer types); offsets for TaskItemVo fields verified from string ordering only."
+    },
+    {
+      "address": "0x109f3df0",
+      "currentName": "FUN_109f3df0",
+      "proposedName": "EquipUpgradeView::BuildEnforceDataVO",
+      "purpose": "Builds the equipment enhance/upgrade (enforce) UI data block (param_5==3): source-item stats plus a 'destEquipArray' of candidate upgrade targets, each with full cost/requirement fields. This is the client mirror of the server's upgrade cost table.",
+      "subsystem": "equipment-upgrade/enforce",
+      "confidence": "high",
+      "formulas": [
+        "Top-level fields: roleLevel = CPlayer::GetHuntRankOrCount(); roleHunterStarLv = playerObj->vfunc[0x18]() + (FUN_1025b060()+FUN_1025b060()); sourceRare = item->vfunc[0x2c](); itemLevel = item->vfunc[0x18](); ItemRank = FUN_11669840(); bPointType = 1.",
+        "Per destEquip record walked at (iStack_20c+0x1c)..(+0x20), stride 0xb0 bytes.",
+        "Result array entries laid out at cursor iVar4 (base+0x5c), advancing +0x88 per entry then +0x2c inner. Field offsets relative to iVar4 (the +0x5c anchor of each entry):",
+        "equipID = *(e-0x50); enforceRequirement = *(e-0x58); hunterstarRequirement = *(e-0x54); equipRare = *(e-0x38); itemLevel = *(e-0x34); equipCounts = *(e-0x30); upgradeMoney = *(e-0x2c); currentMoney = *(e-0x28); rankDownLevel = *(e-0x24); enforceDownLevel = *(e-0x20); newRankLevel = *(e-0x1c); bBindState = *(e-0x10) (byte); enforceLevel = *(e-0x44); breakLevel = *(e-0x40); canBreak = *(e-0x3c) (byte); enforceRuleID = *(e-0xc).",
+        "&DAT_11dbb0b4 field (index) = *(e-0x4c).",
+        "Craft-credit cost fields: nCraftCreditID = *(e+4); nOwnCraftCredit = FUN_113fa380(*(e+4)) [owned amount of that craft-credit currency]; nCraftCreditMax = *(e+8); nCraftMoney = *(e+0xc).",
+        "equipHasEnoughMaterial hardcoded to 0 here (material sufficiency computed elsewhere)."
+      ],
+      "costs": [
+        "upgradeMoney (e-0x2c) = gold cost to upgrade; currentMoney (e-0x28) = money threshold/current.",
+        "enforceRequirement (e-0x58), hunterstarRequirement (e-0x54) = level/hunter-star gates.",
+        "nCraftMoney (e+0xc) craft-credit cost; nCraftCreditMax (e+8) cap; nOwnCraftCredit = FUN_113fa380(creditID) currently-owned."
+      ],
+      "serverRelevance": "validation/display (client shows server-provided upgrade costs & requirements; server must recompute and enforce upgradeMoney/craft cost & requirement gates on the actual upgrade action)",
+      "notes": "FUN_113fa380(id) is the recurring 'get owned count of currency/material id' accessor used throughout this chunk. The negative-offset cursor layout means each candidate-target record is ~0x88-0xb4 bytes."
+    },
+    {
+      "address": "0x109f85a0",
+      "currentName": "FUN_109f85a0",
+      "proposedName": "AirshipOccupyView::BuildLevelInfoVO",
+      "purpose": "Builds UI VO for a guild-airship / occupied-level entry (param_5==3): guild vs captain comparison, ship status, occupancy players, and the level's reward payload (normal + delicate rewards, material drops).",
+      "subsystem": "airship/guild-occupy rewards",
+      "confidence": "medium",
+      "formulas": [
+        "isSameGuild = (strcmp(playerGuildName, ship+0x20) != 0) ? ... emitted as 1 when strings differ (uVar8!=0 branch sets 1).",
+        "isAttack = (strcmp(playerGuildName, ship+0x64) != 0).",
+        "shipStatus = ((uVar9 << 0x1d) >> 0x1d) = sign-extended low 3 bits of *(ship+0x60).",
+        "textFinishTimes = (uVar9 >> 3) & 0x1fff (bits 3..15 of *(ship+0x60)).",
+        "textTimeReamain = (*(ship+0xc) - iStack_88) + 0x4b0  [remaining time; +1200 constant offset].",
+        "levelID = *(ship+0x10); occupyTime = *(ship+0x14).",
+        "guildName=ship+0x40-region string; captainName=ship+0x40; captainGuild=ship+0x20; occupyHunterText=ship+0x64; occupyPlayer1..4 = ship+0x84/0xa4/0xc4/0xe4.",
+        "Reward block from ship-config (iStack_c4): shipId=*(cfg+0x10); delicateRewardId=*(cfg+0x78); delicateRewardNum=*(cfg+0x7c); normalRewardID=*(cfg+0x70); normalRewardNum=*(cfg+0x74); materialNum=*(cfg+0x64); materialTagType=*(cfg+0x60)."
+      ],
+      "costs": [
+        "normalRewardID/normalRewardNum and delicateRewardId/delicateRewardNum define the occupy reward items and counts; materialNum/materialTagType define material payout."
+      ],
+      "serverRelevance": "client-only (display of server-owned occupy state and reward definitions)",
+      "notes": "0x4b0 = 1200 (seconds) added to displayed remaining time. Reward numbers are read from static level/ship config, not computed."
+    },
+    {
+      "address": "0x109fbd40",
+      "currentName": "FUN_109fbd40",
+      "proposedName": "MonsterCardResearchView::RegisterMessageHandlers",
+      "purpose": "Registers AS3<->C++ message handlers for the MonsterCard research/lottery tab view: requests ReqCurTabData/ReqResearch/ReqRefresh and responses AS2C_GetCurTabData/AS2C_GetResearchData/AS2C_GetLotteryItemListByMonsterType, binding handlers FUN_109fbf30, FUN_109fc040, LAB_109fc550, FUN_109fc6a0, FUN_109fc7b0, FUN_109fc880.",
+      "subsystem": "monster-card/lottery-ui",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (UI message-routing table registration)",
+      "notes": "Stock UI-framework registration pattern (FUN_100b62c0 create-name, FUN_109fd5c0 bind, FUN_10c3d5d0 free-temp-string)."
+    },
+    {
+      "address": "0x109fde80",
+      "currentName": "FUN_109fde80",
+      "proposedName": "MonsterCardExchangeView::RegisterMessageHandlers",
+      "purpose": "Registers message handlers for the MonsterCard exchange view: ReqCurTabData/ReqReward/ReqExchangePhyCard/ReqExchangeData -> FUN_109fdfe0, FUN_109fec60, FUN_109feb30, FUN_109fe5d0.",
+      "subsystem": "monster-card/exchange-ui",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (UI message-routing table registration)",
+      "notes": "ReqExchangeData is the client request that ultimately triggers a server-side card->reward exchange (cost validated server-side)."
+    },
+    {
+      "address": "0x109fdfe0",
+      "currentName": "FUN_109fdfe0",
+      "proposedName": "MonsterCardExchangeView::BuildCurTabDataVO",
+      "purpose": "Builds the current MonsterCard tab data VO (type==1): curSeriesNum, curCardType, cardGroupImageUrl, arrSeries, arrCardEntry (MonsterCardEntryVo per monster), and arrRewards (BaseItemVo list). Uses CIllustrateBookInfo::CollectByCategory to gather cards.",
+      "subsystem": "monster-card/exchange-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Card book manager at (uiMgr+0x2b1c). Series count = FUN_109d4570(); per-series record = FUN_109fdd40(i), included only if *(rec+0x44)!=0.",
+        "MonsterCardEntryVo: imageUrl = entry+0x18; monsterId = entry[4]; monsterName = entry+5; (&DAT_11dbdc0c field) = FUN_11537410(entry[4]) [collected/owned flag].",
+        "arrRewards BaseItemVo: itemID = rewardVec[5][i*2]; count = rewardVec[5][i*2+1]; name via FUN_10540d00(itemID)->+0x14. Count of rewards = ((rewardVec[6]-rewardVec[5])>>3)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (illustration/card-collection display; rewards shown are definition data)",
+      "notes": "FUN_10540d00(itemID) = item-base-info lookup by id; used repeatedly for item names."
+    },
+    {
+      "address": "0x109fe5d0",
+      "currentName": "FUN_109fe5d0",
+      "proposedName": "MonsterCardExchangeView::BuildExchangeDataVO",
+      "purpose": "Builds the MonsterCard exchange-preview VO (type==1): cost items, owned counts, gain items, owned credit, and cost amount for the selected series/card-type exchange.",
+      "subsystem": "monster-card/exchange-ui",
+      "confidence": "high",
+      "formulas": [
+        "arrExchangeCostItem: BaseItemVo list from costCfg (iVar5) at *(cfg+0x14)..*(cfg+0x18), stride 8: itemID=*(base+i*8), count=*(base+i*8+1). Owned count per cost item = FUN_113fa380(itemID) -> emitted into arrExchangeCostItemOwnNum.",
+        "arrExchangeGainItem: BaseItemVo list from gainCfg (FUN_11809ca0-derived) same 8-byte stride layout.",
+        "ownCreditNum = player->vfunc[0x244]() (current owned exchange credit).",
+        "costNum = *(seriesCfg+0x48) (credit cost of the exchange).",
+        "seriesName = seriesCfg+0x18; cardTypeName = player+5; imageUrl = seriesCfg+0x1c."
+      ],
+      "costs": [
+        "costNum = *(seriesCfg+0x48) exchange credit price; arrExchangeCostItem lists required item ids+counts; ownCreditNum is player's current credit balance (for affordability display)."
+      ],
+      "serverRelevance": "validation/display (client previews the exchange cost; server must verify credit/items and perform the exchange authoritatively)",
+      "notes": "vfunc[0x244] on the player object is the exchange-credit balance getter for this feature."
+    },
+    {
+      "address": "0x10a03930",
+      "currentName": "FUN_10a03930",
+      "proposedName": "CPlayerVIPLevelUpInfo::LookupByLevel",
+      "purpose": "2D config-table lookup into CPlayerVIPLevelUpInfo (VIP level-up thresholds). Returns the config value for a given level index, or 0 if out of range.",
+      "subsystem": "vip/progression-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr obtained via CPlayerVIPLevelUpInfo::GetManager()/CInfoManager::FindByName.",
+        "Guard: level!=-1 && (level!=0 || mgr[0xc]==0) && mgr[10]!=0; then idx = level - mgr[0xc]; require 0<=idx<mgr[9].",
+        "row = *(mgr[8] + (idx / mgr[10]) * 4); if row!=0 return *(row + (idx % mgr[10]) * 4).",
+        "mgr[0xc]=base level offset, mgr[9]=total count, mgr[10]=columns-per-row (chunked 2D table)."
+      ],
+      "costs": [],
+      "serverRelevance": "config-lookup (shared VIP level-up threshold table; both client and server read the same config to gate VIP levels)",
+      "notes": "Standard MHO chunked-2D config accessor pattern (row stride mgr[10], base offset mgr[0xc]); reused verbatim by FUN_10b629d0, FUN_111ff230, etc."
+    },
+    {
+      "address": "0x10b5f4f0",
+      "currentName": "FUN_10b5f4f0",
+      "proposedName": "ForgeView::ctor_RegisterModelHandlers",
+      "purpose": "Constructor for the Forge (crafting) UI controller; registers model-string callbacks: RequireCraftMaterialId, EquipTypeSelcted, EquipSubTypeSelcted, ForgePagePre, ForgePageNext, OnStartForge, OnForgeClose, ForgeChk, RefreshForgeView.",
+      "subsystem": "forge/crafting-ui",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (UI controller construction & callback registration)",
+      "notes": "Sets vtable PTR_FUN_11cc7b84; binds each named model field to a handler via CInfoRecord::GetModelString + vfunc[0xf0]."
+    },
+    {
+      "address": "0x10b5f680",
+      "currentName": "FUN_10b5f680",
+      "proposedName": "ForgeView::OnRequireCraftMaterialId",
+      "purpose": "Forge handler that, given a selected craftID, looks up CCraftInfo, checks whether the player owns enough of the required craft materials, and pushes the result (event 0x3d) to the UI.",
+      "subsystem": "forge/crafting",
+      "confidence": "medium",
+      "formulas": [
+        "craftID = *(param_2+8); early-out if <1.",
+        "CCraftInfo entry via chunked-2D lookup (mgr+0x20 base, +0x24 count, +0x28 cols, +0x30 base-offset), same pattern as FUN_10a03930.",
+        "Requirement check uses FUN_1025b060() hunter/stat counts vs *(craft+0x80) (required material threshold): compares single count and sum of two counts against *(craft+0x80).",
+        "local_10 (owned-material total) = FUN_113f9300(3,matListId,0) + FUN_113f9300(0,...) + FUN_113f9300(2,...) + FUN_113f9300(10,...), where matListId = *(craft+0x5c). Sums owned materials across bag categories {3,0,2,10}.",
+        "Emits struct {local_14=canFlag, local_10=ownedTotal, ...} via UI event 0x3d."
+      ],
+      "costs": [
+        "*(craft+0x80) = required material count for the craft; *(craft+0x5c) = material-list/group id."
+      ],
+      "serverRelevance": "validation/display (client-side affordability preview; server is authoritative on actual craft material consumption)",
+      "notes": "FUN_113f9300(category, listId, 0) counts owned items of a bag category matching a material list; categories 0/2/3/10 appear to be bag partitions."
+    },
+    {
+      "address": "0x10b611b0",
+      "currentName": "FUN_10b611b0",
+      "proposedName": "LevelUpView::BuildExpCurveInfo_Variant1",
+      "purpose": "Builds player level-up UI data (two blocks, UI events 0x87 and 0x252) from CPlayerLevelUpInfo (level/EXP curve) and CExplimitInfo (EXP cap). Shows current level, EXP, star level, and reward preview for current and next level.",
+      "subsystem": "leveling/exp-ui",
+      "confidence": "medium",
+      "formulas": [
+        "current level = CPlayer::GetHuntRankOrCount(); level-up config row via CPlayerLevelUpInfo chunked-2D lookup (mgr+0x20/0x24/0x28/0x30).",
+        "*(levelRec+0x14) used as an EXP/threshold field emitted into local_40[0].",
+        "CExplimitInfo lookup (FUN_108dea50) by hunt rank -> emits *(rec+0x1c) and *(rec+0x18) as exp-limit fields (local_2c/local_28, local_64/local_60).",
+        "Several stat getters FUN_1025b060() populate current/next-level stat comparison; FUN_113974a0 returns paired values; FUN_116bd200()+0x30 supplies another field."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (display of level/EXP curve; server owns actual EXP & level)",
+      "notes": "FUN_1139a7e0/FUN_1139a680 are max-level/boundary predicates; FUN_11399090 fetches next-level exp pair when not at cap."
+    },
+    {
+      "address": "0x10b61860",
+      "currentName": "FUN_10b61860",
+      "proposedName": "LevelUpView::BuildExpCurveInfo_Variant2",
+      "purpose": "Variant of the level-up UI data builder (UI events 0x87 and 0x252) using CPlayerLevelUpInfo, with a constant 1000 denominator field; shows current/next level EXP and reward preview.",
+      "subsystem": "leveling/exp-ui",
+      "confidence": "medium",
+      "formulas": [
+        "local_3c = 1000 and local_74 = 1000 (fixed constant, likely EXP-percentage denominator / display scale).",
+        "current level = CPlayer::GetHuntRankOrCount(); CPlayerLevelUpInfo chunked-2D lookup; *(levelRec+0x14) emitted.",
+        "Reward preview via FUN_108d1810(level) -> *(rec+0x18)/*(rec+0x1c) when *(rec+0x14)!=0."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (level/EXP display)",
+      "notes": "Near-duplicate of FUN_10b611b0 but uses FUN_108d1810 (level-reward lookup) instead of CExplimitInfo; constant 1000 differs."
+    },
+    {
+      "address": "0x10b629d0",
+      "currentName": "FUN_10b629d0",
+      "proposedName": "CPlayerLevelUpInfo::LookupByLevel",
+      "purpose": "Chunked-2D config lookup into CPlayerLevelUpInfo returning the level-curve entry (EXP threshold / reward record) for a given level, or 0 if out of range.",
+      "subsystem": "leveling/exp-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CPlayerLevelUpInfo::GetInfoManager(0,\"CPlayerLevelUpInfo\",0).",
+        "Guard: level!=-1 && (level!=0 || mgr[0x30]==0) && mgr[0x28]!=0; idx = level - mgr[0x30]; require 0<=idx<mgr[0x24].",
+        "row = *(mgr[0x20] + (idx / mgr[0x28]) * 4); return *(row + (idx % mgr[0x28]) * 4).",
+        "Field byte-offsets: base ptr @0x20, count @0x24, cols @0x28, base-level @0x30."
+      ],
+      "costs": [],
+      "serverRelevance": "config-lookup (authoritative level/EXP curve table; server should use identical thresholds for level-up validation)",
+      "notes": "Same accessor shape as FUN_10a03930 but with byte offsets 0x20/0x24/0x28/0x30 instead of word indices 8/9/10/0xc."
+    },
+    {
+      "address": "0x10b74240",
+      "currentName": "FUN_10b74240",
+      "proposedName": "TGBang::ReportLevelUpTelemetry",
+      "purpose": "Formats a Tencent 'tgbang' analytics/beacon URL query string reporting role level (and qt=levelUp when flagged) and dispatches it via FUN_10b73f00.",
+      "subsystem": "telemetry/analytics",
+      "confidence": "high",
+      "formulas": [
+        "Format: \"&daid=45&game=mho&uin=%u&world=%u%02u&roleid=%llu&level=%d&role=%s&sex=%d&jobid=1&ext=\" (param_14==0) or the same with \"&qt=levelUp\" inserted before &ext= (param_14!=0).",
+        "Buffer size 0x823 bytes; snprintf-style via FUN_100ec3b0."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (external analytics beacon; not gameplay-authoritative)",
+      "notes": "Not economy logic; included because it fires on level-up. daid=45, jobid=1 are constants."
+    },
+    {
+      "address": "0x10d1d7f0",
+      "currentName": "FUN_10d1d7f0",
+      "proposedName": "ScriptBind::RegisterLootAndEventEnums",
+      "purpose": "Registers script/flowgraph enum constants into a script table: resource-quality, gather loot types (Mine/Herb/Insect/Fish/Mushroom/Honey/Stone/Body/Bone/Egg...), interest-point types, and the eMHGameEventID_* client event enumeration (~0x08..0x85).",
+      "subsystem": "gathering/loot enums + engine events",
+      "confidence": "high",
+      "formulas": [
+        "Float enum values: DAT_3f800000=1.0, DAT_40000000=2.0, DAT_40400000=3.0, DAT_40800000=4.0, DAT_40a00000=5.0, DAT_40c00000=6.0, DAT_40e00000=7.0, DAT_41000000=8.0, DAT_41100000=9.0, DAT_41200000=10.0, DAT_41300000=11.0, DAT_41400000=12.0, DAT_41800000=16.0, DAT_41880000=17.0, DAT_41900000=18.0.",
+        "eLootType_ order: Mine=1,Herb=2,Insect=3,Fish=4,Mushroom=5,Honey=6,Stone=7,Shit=8,Remain=9,Body=10,BrokenPart=11,Bone=12,Egg=16,Web=17,Other=18 (values as floats).",
+        "eMHGameEventID_* integer enum registered via FUN_10d1cc20(name,id) from 8..0x85; notable: AddCraft=9, BeginCraft=10, BeginLoot=0xb, VipLevelNotify=0x76, LevelUnlockNotify=0x6d."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (script/flowgraph constant registration; loot-type taxonomy is shared vocabulary)",
+      "notes": "Mostly engine plumbing; the loot-type and gather interest-point taxonomy is useful reference for reward/gathering systems."
+    },
+    {
+      "address": "0x10d25f60",
+      "currentName": "FUN_10d25f60",
+      "proposedName": "SmithModel::SendReqStartCraft",
+      "purpose": "Serializes a {CraftID} request and sends it to the server as message id 9 (matches eMHGameEventID_AddCraft/BeginCraft family). Client->server craft request.",
+      "subsystem": "forge/crafting-network",
+      "confidence": "high",
+      "formulas": [
+        "CraftID = (float)*param_2 written into an AS-value (type tag 4=number).",
+        "Dispatched via FUN_10d1d220(model+0x58, 9, ...). Guarded by empty-queue check on model+0xac lists at +0x100/+0x108."
+      ],
+      "costs": [],
+      "serverRelevance": "client request (server authoritative: must validate craft cost/materials before crafting)",
+      "notes": "Message id 9. CraftID is the only payload; all cost enforcement is server-side."
+    },
+    {
+      "address": "0x10d260c0",
+      "currentName": "FUN_10d260c0",
+      "proposedName": "SmithModel::SendReqCraftWithDiscount",
+      "purpose": "Serializes {CraftID, Discount} and sends it to the server as message id 10 (0xa). Client->server craft request carrying a discount value.",
+      "subsystem": "forge/crafting-network",
+      "confidence": "high",
+      "formulas": [
+        "CraftID = (float)*param_2; Discount = (float)param_2[1]; both AS number values (tag 4).",
+        "Dispatched via FUN_10d1d220(model+0x58, 10, ...). Queue guard on model+0xac at +0x11c/+0x124."
+      ],
+      "costs": [
+        "Discount field is client-supplied; server MUST NOT trust it — recompute discounted price authoritatively."
+      ],
+      "serverRelevance": "client request (SECURITY: discount is client-provided; server must validate/derive it, never accept the client value as the price)",
+      "notes": "Message id 0xa."
+    },
+    {
+      "address": "0x10d2d660",
+      "currentName": "FUN_10d2d660",
+      "proposedName": "SmithModel::SendReqEnforceEquip",
+      "purpose": "Serializes an equipment-enforce/enchant request {m_nItemID, m_nItemColumn, m_nItemGrid, m_nEnforceRule, m_nEnforceLevel, m_nBufferID} and sends it to the server as message id 0x52. Client->server upgrade request.",
+      "subsystem": "equipment-upgrade/enforce-network",
+      "confidence": "high",
+      "formulas": [
+        "Payload fields (all AS number tag 4): m_nItemID=(float)param_2[0], m_nItemColumn=param_2[1], m_nItemGrid=param_2[2], m_nEnforceRule=param_2[3], m_nEnforceLevel=param_2[4], m_nBufferID=param_2[5].",
+        "Dispatched via FUN_10d1d220(model+0x58, 0x52, ...). Queue guard on model+0xac at +0x8fc/+0x904."
+      ],
+      "costs": [],
+      "serverRelevance": "client request (server authoritative on enforce success/cost; must validate item ownership at column/grid, rule, and consume the money/material/craft-credit costs from FUN_109f3df0's table)",
+      "notes": "Message id 0x52. Pairs with the enforce-cost view builder FUN_109f3df0."
+    },
+    {
+      "address": "0x10e357c0",
+      "currentName": "FUN_10e357c0",
+      "proposedName": "NetMsgSchema::InitOrdinaryDropReward",
+      "purpose": "Lazily initializes the reflection/TDR field schema for an 'ordinary drop reward' network message: enable, playerNetId, addExp, addBindGold, addUnBindGold, OrdinaryDropItem, OrdinaryDropItemCount, plus a Result sub-struct.",
+      "subsystem": "rewards/drop-message-schema",
+      "confidence": "high",
+      "formulas": [
+        "One-time init guarded by DAT_120341a8 bits 1 and 2.",
+        "Field descriptors built at globals DAT_120340e8.. via PTR_FUN_11df7674/11df7734 constructors; param_1 populated with {&fields, &Result, &empty, flags|0x10}."
+      ],
+      "costs": [
+        "Message conveys server-computed reward amounts: addExp, addBindGold, addUnBindGold, OrdinaryDropItem(+Count)."
+      ],
+      "serverRelevance": "authoritative (this is the wire schema for a reward the SERVER computes and pushes: EXP + bound/unbound gold + drop item/count). Bind vs unbind gold distinction is significant.",
+      "notes": "'addBindGold' = bound (non-tradeable) currency; 'addUnBindGold' = unbound (tradeable) currency. Schema only; the actual grant is server-side."
+    },
+    {
+      "address": "0x10e35bc0",
+      "currentName": "FUN_10e35bc0",
+      "proposedName": "NetMsgSchema::InitRewardStateMsg",
+      "purpose": "Lazily initializes the reflection field schema for a reward-state network message: enable, rewardSstate (sic), plus a Result sub-struct.",
+      "subsystem": "rewards/message-schema",
+      "confidence": "high",
+      "formulas": [
+        "Init guarded by DAT_120340c0 bits 1/2; descriptors at DAT_12034078.."
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server-pushed reward-claim state message schema)",
+      "notes": "'rewardSstate' is the shipped (typo) field name — preserve exact spelling on the wire."
+    },
+    {
+      "address": "0x10ea2960",
+      "currentName": "FUN_10ea2960",
+      "proposedName": "NetMsgSchema::InitWaveRewardConfigMsg",
+      "purpose": "Lazily initializes the reflection field schema for a wave/layer reward-config message: layer, modelGroupID, delayStartTime, rewardTime, rewardExp, rewardBindGold, rewardUnbindGold, rewardItemGroupID, addPlayerBuffID, addBossBuffID, isHaveReward, resouceID, monsterID, monsterNum.",
+      "subsystem": "rewards/wave-config-schema",
+      "confidence": "high",
+      "formulas": [
+        "Init guarded by DAT_1203a778 bits 1/2; 'layer' is field group 1, the rest group 2, at globals DAT_1203a748.."
+      ],
+      "costs": [
+        "Per-wave reward payload: rewardExp, rewardBindGold, rewardUnbindGold, rewardItemGroupID (item-group id for loot table)."
+      ],
+      "serverRelevance": "authoritative (defines server-driven per-wave reward config: EXP + bound/unbound gold + item group; server grants on wave clear)",
+      "notes": "Looks like a tower-defense / monster-wave (modelGroupID, monsterID, monsterNum, boss buff) reward definition. resouceID spelled as shipped."
+    },
+    {
+      "address": "0x10ea2fc0",
+      "currentName": "FUN_10ea2fc0",
+      "proposedName": "NetMsgSchema::InitOrdinaryItemGroupRewardMsg",
+      "purpose": "Lazily initializes the reflection field schema for a reward message carrying: enable, playerNetId, addExp, addBindGold, addUnBindGold, OrdinaryItemGroupID, plus Result.",
+      "subsystem": "rewards/drop-message-schema",
+      "confidence": "high",
+      "formulas": [
+        "Init guarded by DAT_1203aaf0 bits 1/2; descriptors at DAT_1203aa48.."
+      ],
+      "costs": [
+        "Server-computed grant: addExp, addBindGold, addUnBindGold, and OrdinaryItemGroupID (item-group id resolved to concrete drops server-side)."
+      ],
+      "serverRelevance": "authoritative (sibling of FUN_10e357c0 but references an item GROUP id rather than a single item; server rolls the group into concrete items)",
+      "notes": "Distinguishes bound vs unbound gold like the other reward messages."
+    },
+    {
+      "address": "0x10f99040",
+      "currentName": "FUN_10f99040",
+      "proposedName": "AircraftEntity::AttachAndRelease",
+      "purpose": "Locates the 'aircraft' sub-entity/proxy on an entity, invokes an attach vfunc, then releases a ref-counted temp (decrementing DAT_123be268 allocator counter).",
+      "subsystem": "vehicle/entity (non-economy)",
+      "confidence": "low",
+      "formulas": [
+        "DAT_123be268 -= (0xd + *(param_2-4)) on final free (allocator bookkeeping)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (entity/vehicle plumbing; not economy)",
+      "notes": "Included for completeness; unrelated to progression/economy."
+    },
+    {
+      "address": "0x110f82c0",
+      "currentName": "FUN_110f82c0",
+      "proposedName": "HovercraftComponent::InitFromXml",
+      "purpose": "Parses the 'Hovercraft' entity XML node into component fields (maxThrustersDamaged, collapsedFeetAngle, collapsedLegAngle, recoverTime) and resolves attachment helpers (turret1, cannon, generator, platform_pos).",
+      "subsystem": "vehicle/entity (non-economy)",
+      "confidence": "medium",
+      "formulas": [
+        "Writes floats at param_1+0x500/0x504/0x508 and int at +0x4f8; attachment ids at +0x520/0x524/0x528/0x52c."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (entity component init; not economy)",
+      "notes": "Stock CryEngine entity-XML parsing."
+    },
+    {
+      "address": "0x11164820",
+      "currentName": "FUN_11164820",
+      "proposedName": "Player::OnLevelUp_PlayVfxAndNotify",
+      "purpose": "Level-up reaction: plays the 'Energy_Ability_PC.BUF.LevelUp' particle effect, runs level-up logic (FUN_1139ab90), and if a predicate holds fires client event 0x4ce with the player's hunt rank.",
+      "subsystem": "leveling/vfx",
+      "confidence": "medium",
+      "formulas": [
+        "Particle spawn params: local_10=0x42b40000 (=90.0f), local_14=0x3f000000 (=0.5f), scale 0x3f800000 (=1.0f).",
+        "Event 0x4ce dispatched with FUN_1024e8a0(CPlayer::GetHuntRankOrCount(2))."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (level-up presentation; server owns the level change that triggers it)",
+      "notes": "90.0f likely an effect duration/height; 0.5f an offset."
+    },
+    {
+      "address": "0x111ff230",
+      "currentName": "FUN_111ff230",
+      "proposedName": "CActivityLotteryInfo::LookupByIndex",
+      "purpose": "Chunked-2D config lookup into CActivityLotteryInfo (lottery/gacha activity table); returns the entry for a given index or 0.",
+      "subsystem": "lottery/activity-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CActivityLotteryInfo::GetInfoManager(0,\"CActivityLotteryInfo\",0).",
+        "Guard: idx!=-1 && (idx!=0 || mgr[0x30]==0) && mgr[0x28]!=0; k = idx - mgr[0x30]; require 0<=k<mgr[0x24].",
+        "row = *(mgr[0x20] + (k / mgr[0x28]) * 4); return *(row + (k % mgr[0x28]) * 4)."
+      ],
+      "costs": [],
+      "serverRelevance": "config-lookup (lottery activity table; server must own draw odds/rewards, client uses same table for display)",
+      "notes": "Same chunked-2D accessor pattern as FUN_10b629d0."
+    },
+    {
+      "address": "0x111ffc70",
+      "currentName": "FUN_111ffc70",
+      "proposedName": "LotteryView::TriggerActivityByStringList",
+      "purpose": "For a lottery activity entry (looked up in CActivityLotteryInfo), joins a client-provided list of fixed-width (0x20) strings and fires the entry's UI/flow event (*(entry+0x1c)) with the concatenated argument.",
+      "subsystem": "lottery/activity-ui",
+      "confidence": "medium",
+      "formulas": [
+        "Activity index = *param_1; string count = (byte)param_1[1]; strings start at (param_1+5), each 0x20 bytes.",
+        "Join with separator (&DAT_11d9dc4c/11d9dc4d) between entries; event id = *(entry+0x1c); dispatch via FUN_1112f070(eventId, joinedStr) with mode 0x2a.",
+        "Only runs if *(entry+0x1c) > 0."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI/flow trigger; the lottery draw itself is a separate server-authoritative action)",
+      "notes": "FUN_1112f070 is the generic UI-event/flash dispatch used across this chunk."
+    },
+    {
+      "address": "0x1124ed40",
+      "currentName": "FUN_1124ed40",
+      "proposedName": "SmithController::OnCraftResult",
+      "purpose": "Handles the server craft-result: processes the result (FUN_1124f8f0); on success (param_1[1]==0) reads owned craft-credit and pushes event 0x60, advances the 'Smith_crafting' tutorial step at guide id 0x75a2, and fires UI event 0x11a with code 0x3d; on failure fires 0x11a with code 0x56.",
+      "subsystem": "forge/crafting",
+      "confidence": "medium",
+      "formulas": [
+        "Success gate: param_1[1] == 0.",
+        "On success owned craft-credit = FUN_113fa380(*(item+0x84)) where item = FUN_107ec240(*param_1); pushed via message id 0x60.",
+        "Tutorial: if current guide == 0x75a2 advance 'Smith_crafting' step.",
+        "UI event 0x11a payload = 0x3d (success) or 0x56 (failure)."
+      ],
+      "costs": [],
+      "serverRelevance": "client reaction (server already decided craft success/cost; this only updates local UI + owned-credit display)",
+      "notes": "0x75a2 = a specific guide/step id; 0x3d and 0x56 are UI sub-codes."
+    },
+    {
+      "address": "0x1124fee0",
+      "currentName": "FUN_1124fee0",
+      "proposedName": "SmithController::BuildCraftMaterialList",
+      "purpose": "For a given craftID, looks up CCraftInfo, iterates its required-material list and, per material, resolves name/icon from CItemBaseInfo (fallback 'test item'/'2.png'), reads owned count, and pushes each entry to the UI via message id 0x3c.",
+      "subsystem": "forge/crafting-ui",
+      "confidence": "high",
+      "formulas": [
+        "CCraftInfo entry via chunked-2D lookup (mgr+0x20/0x24/0x28/0x30).",
+        "Material list walked at *(craft+0x120)..*(craft+0x124), stride 8 bytes (int pairs): materialItemID=*piVar8, requiredCount=piVar8[1].",
+        "Owned count = FUN_113fa380(materialItemID). Item name via CItemBaseInfo chunked-2D lookup -> local_5c; icon = *(itemInfo+0xb4).",
+        "Per-material struct {name[0x20], icon[0x20], requiredCount=local_18, ownedCount=uStack_14, itemID=iStack_10, index=iStack_c} pushed via message id 0x3c."
+      ],
+      "costs": [
+        "requiredCount (piVar8[1]) = quantity of each material the craft consumes; *(craft+0x120) is the material-list head."
+      ],
+      "serverRelevance": "validation/display (client renders craft material requirements + owned counts; server enforces consumption)",
+      "notes": "Fallback strings 'test item'/'2.png' indicate placeholder for missing item defs (debug data)."
+    },
+    {
+      "address": "0x112b79a0",
+      "currentName": "FUN_112b79a0",
+      "proposedName": "Player::PlayLevelUpBuffVfx",
+      "purpose": "Plays the 'Energy_Ability_PC.BUF.LevelUp' level-up particle effect and invokes vfunc[0x1ac](2,0,0) on the target (level-up presentation).",
+      "subsystem": "leveling/vfx",
+      "confidence": "medium",
+      "formulas": [
+        "Same particle params as FUN_11164820: 0x42b40000 (90.0f), 0x3f000000 (0.5f), scale 0x3f800000 (1.0f)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (VFX)",
+      "notes": "Second, simpler level-up VFX entry point."
+    },
+    {
+      "address": "0x11356730",
+      "currentName": "FUN_11356730",
+      "proposedName": "CharAttrTable::SetFieldByName",
+      "purpose": "Player persistent-attribute deserializer: given a DB/config field name, a value, and the character struct base, matches the name and writes the value to the correct struct offset. This is effectively the full authoritative player-attribute schema (currency, EXP, level, VIP, clan, weapon proficiency, farm, PVP, face customization).",
+      "subsystem": "player-data-schema/currency+exp",
+      "confidence": "high",
+      "formulas": [
+        "Dispatch: for each name, iVar1=FUN_100ec310(name,\"<Field>\"); if match, *(base+OFFSET)=value; return 1. (int32 unless noted undefined2=int16.)",
+        "PROGRESSION: CharLevel@0x8, CharExp@0xc, StarLevel@0x10, CharHP@0x14, CharMaxHP@0x18, CharStr@0x1c, CharBst@0x20, CharLck@0x24, CharVgr@0x28, CharDefence@0x2c.",
+        "CURRENCY: CharMoney@0x30, CharBoundMoney@0x34, CharCredit@0x38, CharBoundCredit@0x3c, CharCatCredit@0xc0, CharReviveCredit@0xc4, PVPMoney@0x196, CharCatMoney@0x19a, CharCatMoneyWeek@0x19e, CharCatMoneyWeekMax@0x1a2, HuntSoul@0x1a6, ClanMoney@0x152, ClanMoneyPVP@0x15e, TotalCredit@0x1ba (stored as FLOAT), HuntingCreditExchange@0x1da, WeekMoneyGain@0x20e.",
+        "FATIGUE: CharFatigue@0x40, CharMaxFatigue@0x44.",
+        "WEAPON EXP: ClaymoreExp@0x48, HammerExp@0x4c, KatanaExp@0x50, DuelSwordExp@0x54, SwordExp@0x58, SpearExp@0x5c, GunExp@0x60, BowExp@0x64, CrossbowExp@0x68, FluteExp@0x6c.",
+        "MISC PROGRESSION: CharContribution@0x84, CharRemainsExp@0x88, CharRemainsDoubleExp@0x114, ExtDailyExp@0xcc, ExtDailyDoubleExp@0x118, FarmExp@0x8e, FarmEvaluation@0x92, IllustratePoint@0x22c, TotalHRPoint@0x1ca, CharHRLevel@0x156, CharHRPoint@0x15a.",
+        "VIP: VIPLevel@0x11c, VIPExp@0x120, VIPBaseEndTime@0x124, VIPGrowthEndTime@0x128, VIPProfitEndTime@0x12c, VIPVASFrozen@0x134(i16), VIPBaseCanUse@0x136(i16), VIPGrowthCanUse@0x138(i16), VIPProfitCanUse@0x13a(i16).",
+        "CLAN: ClanScore@0x14a, ClanScoreMax@0x14e, ClanLeaveTime@0x162.",
+        "WildHuntGuild@0x1b2 also writes sign-extension into +0x1b6 (64-bit value: *(+0x1b6)=value>>0x1f).",
+        "SoulStone/PVP scoring: SoulStoneLevel@0x206, SoulStoneAtkLevel@0x212, PersonalELO@0x192, XHunterScore@0x1fa, XHunterHighScore@0x202, MVPPoint@0x1f6, ShouHunPoint@0x1ee, LieHunPoint@0x1f2.",
+        "MonopolyRoundCount@0x1e2, MonolopyActivity@0x1e6, MonolopyCurGrid@0x1ea, MonolopyAccStep@0x1fe (spellings as shipped)."
+      ],
+      "costs": [
+        "Defines the exact persistent fields the server owns and must be authoritative over: CharMoney/CharBoundMoney (gold, unbound/bound), CharCredit/CharBoundCredit (credits), CharCatCredit, CharReviveCredit, PVPMoney, CharCatMoney(+week/weekMax cap), HuntSoul, ClanMoney/ClanMoneyPVP, TotalCredit(float), WeekMoneyGain, plus all *Exp fields."
+      ],
+      "serverRelevance": "authoritative (schema map): although this function is client-side deserialization of server-sent character data, every offset here is a server-owned persistent field. Currency mutations (CharMoney/BoundMoney/Credit/etc.) and all EXP/level fields MUST be computed and validated server-side. CharCatMoneyWeek + CharCatMoneyWeekMax indicate a weekly earn cap the server must enforce.",
+      "notes": "~5.9KB linear name->offset dispatch (FUN_100ec310 = string compare). Cross-ref TLV CharacterAttributes.md uses a base 0x14 higher (CharLevel@0x1c vs @0x8 here) — this is a distinct client mirror struct, but field identities match. Bound vs unbound money is a core distinction: BoundMoney/BoundCredit are non-tradeable. TotalCredit is unusually stored as a float."
+    }
+  ]
+}

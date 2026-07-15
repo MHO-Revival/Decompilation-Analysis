@@ -1,0 +1,513 @@
+{
+  "batchIndex": 13,
+  "classes": [
+    {
+      "className": "CLevelNARegionInfo",
+      "category": "activity",
+      "purpose": "Static game-data record describing a 'NA region' of a hunting level/map. Each record links to a CMHLevelInfo cell (by level index) and carries a key/id used to build a per-level region lookup table.",
+      "methods": [
+        {"address": "11646340", "currentName": "CLevelNARegionInfo::GetManagers", "proposedName": "CLevelNARegionInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor: if name==0 returns the cached CInfoManager<CLevelNARegionInfo> singleton, otherwise looks it up by class name via FUN_11679e10; returns a dummy static manager on failure."},
+        {"address": "116480a0", "currentName": "CLevelNARegionInfo::GetManagers_116480a0", "proposedName": "CLevelNARegionInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter: returns *DAT_122e0674 (the CInfoManager) when arg==0, else 0."},
+        {"address": "118c9c00", "currentName": "CLevelNARegionInfo::GetManagers_118c9c00", "proposedName": "CLevelNARegionInfo::BuildLevelRegionLookup", "purpose": "Iterates every CLevelNARegionInfo record; reads region+0x14 (level/cell index) and region+0x18 (key); looks the cell up in the CMHLevelInfo manager (paged id map) and inserts the region pointer into a red-black tree keyed by region+0x18 at cell+0xC0, i.e. builds a per-level region lookup."}
+      ],
+      "fields": [
+        {"name": "levelCellIndex", "type": "int32", "offset": "0x14", "source": "inferred", "note": "index used to fetch the owning CMHLevelInfo cell"},
+        {"name": "regionKey", "type": "int32", "offset": "0x18", "source": "inferred", "note": "key inserted into the per-level region tree"}
+      ],
+      "constants": [],
+      "formulas": ["CMHLevelInfo GetById: id-=base(+0x30); bucket=arr[+0x20][id/bucketSize(+0x28)]; entry=bucket[id%bucketSize]"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "No DebugFormat/Reader recovered; offsets 0x14/0x18 inferred from the lookup-builder consumer. 118c9c00 also touches CMHLevelInfo internals (cell+0x14/+0x18, tree at cell+0xC0).",
+      "nameNext": [{"address": "118ca2f0", "proposedName": "RBTree::InsertRegionNode", "why": "tree-insert helper used by the lookup builder"}]
+    },
+    {
+      "className": "CStarLevelPageUnlockInfo",
+      "category": "misc",
+      "purpose": "Static data controlling unlocking of 'star level' pages (progression pages). Records carry a type tag (==99) and a range whose entries drive per-page unlock processing.",
+      "methods": [
+        {"address": "10976c20", "currentName": "CStarLevelPageUnlockInfo::GetManagers", "proposedName": "CStarLevelPageUnlockInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CStarLevelPageUnlockInfo> singleton registration/accessor (StcMbrNameSvr::GetSingletonName), returns the manager pointer."},
+        {"address": "11620300", "currentName": "CStarLevelPageUnlockInfo::GetManagers_11620300", "proposedName": "CStarLevelPageUnlockInfo::CollectUnlockPages", "purpose": "Walks the info list backward; for records whose type(+0x1c)==99 and whose range (+0x10..+0x14) is non-empty, builds a temporary sorted/paged vector (cap 6 at param+0x10) of unlock-page entries via FUN_1161xxxx helpers."},
+        {"address": "118ee510", "currentName": "CStarLevelPageUnlockInfo::GetManagers_118ee510", "proposedName": "CStarLevelPageUnlockInfo::ForEachPage_Apply", "purpose": "Iterates the whole info table (count via mgr vtbl+0x28) and calls FUN_116bb3f0 for each non-null record (per-page apply/register)."}
+      ],
+      "fields": [
+        {"name": "typeTag", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "gate value compared to constant 99"},
+        {"name": "rangeBegin", "type": "ptr", "offset": "0x10", "source": "inferred"},
+        {"name": "rangeEnd", "type": "ptr", "offset": "0x14", "source": "inferred", "note": "(end-begin)/0x1c = element count; element stride 0x1c"}
+      ],
+      "constants": ["PageUnlockType=99", "MaxPages=6"],
+      "formulas": ["element count = (rangeEnd - rangeBegin) / 0x1c"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "No DebugFormat/Reader; element stride 0x1c and cap 6 read from CollectUnlockPages control flow."
+    },
+    {
+      "className": "CHunterAbilityCardInfo",
+      "category": "skill",
+      "purpose": "Static data for hunter 'ability cards' — each card grants a list of passive skills. Consumer walks a player's card tree and applies each card's skill list.",
+      "methods": [
+        {"address": "108ba530", "currentName": "CHunterAbilityCardInfo::GetManagers", "proposedName": "CHunterAbilityCardInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CHunterAbilityCardInfo> singleton accessor."},
+        {"address": "114df740", "currentName": "CHunterAbilityCardInfo::GetManagers_114df740", "proposedName": "CHunterAbilityCardInfo::ApplyCardSkills", "purpose": "Walks a red-black tree (this+0x184/+0x18c) of owned card ids; for nodes where FUN_117f6a10(id)==2, resolves the card in the paged id-map, reads its skill-id vector (card+0x8c..+0x90) and grants each skill via obj(param+0x1b4)->vtbl+0x44 with (0,skillId,0,1,0x13)."},
+        {"address": "117f2ee0", "currentName": "CHunterAbilityCardInfo::GetManagers_117f2ee0", "proposedName": "CHunterAbilityCardInfo::ForEachCard_Apply", "purpose": "Iterates the whole card table and calls FUN_118ad510 for each non-null card."}
+      ],
+      "fields": [
+        {"name": "skillIdsBegin", "type": "ptr", "offset": "0x8c", "source": "inferred", "note": "vector<int32> of granted skill ids"},
+        {"name": "skillIdsEnd", "type": "ptr", "offset": "0x90", "source": "inferred", "note": "count = (0x90-0x8c)>>2"}
+      ],
+      "constants": ["SkillApplyType=0x13", "CardStateGate=2"],
+      "formulas": ["skill count = (card+0x90 - card+0x8c) >> 2"],
+      "confidence": "medium",
+      "relatedTlv": [],
+      "notes": "ApplyCardSkills clearly grants a per-card skill list; type-arg 0x13 to the skill-add call. Offsets 0x8c/0x90 confirmed by the memcpy of the skill-id vector."
+    },
+    {
+      "className": "CMonolopyBlockInfo",
+      "category": "activity",
+      "purpose": "Static data for a single board tile in the 'Monolopy' (Monopoly-style) minigame board. A field at +0x20 groups tiles; consumers collect tiles matching a requested group.",
+      "methods": [
+        {"address": "109bb270", "currentName": "CMonolopyBlockInfo::GetManagers", "proposedName": "CMonolopyBlockInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CMonolopyBlockInfo> singleton accessor."},
+        {"address": "119bbd00", "currentName": "CMonolopyBlockInfo::GetManagers_119bbd00", "proposedName": "CMonolopyBlockInfo::ForEachBlock_11a79110", "purpose": "Iterates all block records and calls FUN_11a79110 per record (per-tile processing)."},
+        {"address": "119bbe50", "currentName": "CMonolopyBlockInfo::GetManagers_119bbe50", "proposedName": "CMonolopyBlockInfo::ForEachBlock_11a79100", "purpose": "Iterates all block records and calls FUN_11a79100 per record, then FUN_11a79470 (finalize)."},
+        {"address": "11a78e00", "currentName": "CMonolopyBlockInfo::GetManagers_11a78e00", "proposedName": "CMonolopyBlockInfo::CollectBlocksByGroup", "purpose": "Iterates all blocks and appends (to vector at param+0x18) each block whose field block+0x20 equals the requested group id at param+0x10."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x20", "source": "inferred", "note": "index 8 of the record; matched against a requested group"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Offset 0x20 (local_c[8]) is the only clearly-read field. Class name is game's own misspelling 'Monolopy' (Monopoly board minigame)."
+    },
+    {
+      "className": "CMartRankInfo",
+      "category": "economy",
+      "purpose": "Static data mapping a mart/shop rank (1..4) to its unlocked goods. Consumer resolves each rank's item id and collects the corresponding shop-item objects.",
+      "methods": [
+        {"address": "112d43e0", "currentName": "CMartRankInfo::GetManagers", "proposedName": "CMartRankInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor for CMartRankInfo (cached singleton or by-name lookup)."},
+        {"address": "112d6980", "currentName": "CMartRankInfo::GetManagers_112d6980", "proposedName": "CMartRankInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter (returns *DAT_12040a2c when arg==0)."},
+        {"address": "112d73f0", "currentName": "CMartRankInfo::GetManagers_112d73f0", "proposedName": "CMartRankInfo::CollectRankGoods", "purpose": "For ranks 1..3 (loop bound 4) resolves rank record by id (paged id-map), reads id field (+0x14), calls goods-resolver (this+0x18 vtbl+0x1b4) then FUN_11550f40/FUN_11550d40, and appends non-zero results to the output vector; also has a fast path iterating a pre-filled vector at this+0x28..+0x2c."},
+        {"address": "11974270", "currentName": "CMartRankInfo::GetManagers_11974270", "proposedName": "CMartRankInfo::ForEachRank_Apply", "purpose": "Iterates all rank records and calls FUN_11a4cba0 per record."}
+      ],
+      "fields": [
+        {"name": "goodsId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "id passed to the goods resolver"}
+      ],
+      "constants": ["MaxRank=4"],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Rank loop iterates ids 1..3 with bound <4; offset 0x14 is the resolved id field."
+    },
+    {
+      "className": "CGuildResourceInstituteInfo",
+      "category": "social",
+      "purpose": "Static data for guild 'resource institute' upgrade tiers. A field at +0x10 is a level/threshold; consumers filter tiers whose threshold <= a requested value and iterate associated guild-quest prizes.",
+      "methods": [
+        {"address": "1190eb30", "currentName": "CGuildResourceInstituteInfo::GetManagers", "proposedName": "CGuildResourceInstituteInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "11910470", "currentName": "CGuildResourceInstituteInfo::GetManagers_11910470", "proposedName": "CGuildResourceInstituteInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "119108d0", "currentName": "CGuildResourceInstituteInfo::GetManagers_119108d0", "proposedName": "CGuildResourceInstituteInfo::ForEachTier_QuestPrize", "purpose": "Iterates all institute tiers and invokes CGuildQuestPrizeInfo::GetManagers_11a05d90 for each non-null tier."},
+        {"address": "11a05a60", "currentName": "CGuildResourceInstituteInfo::GetManagers_11a05a60", "proposedName": "CGuildResourceInstituteInfo::CollectTiersByThreshold", "purpose": "Iterates all tiers and appends (to vector at param_2+4) every tier whose field +0x10 (threshold/level) is <= param_1."}
+      ],
+      "fields": [
+        {"name": "levelThreshold", "type": "int32", "offset": "0x10", "source": "inferred", "note": "compared <= requested value in CollectTiersByThreshold"}
+      ],
+      "constants": [],
+      "formulas": ["tier included iff tier+0x10 <= requestedValue"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Offset 0x10 threshold is clear; related to CGuildQuestPrizeInfo."
+    },
+    {
+      "className": "CDragonBoxInfo",
+      "category": "item",
+      "purpose": "Static data for a 'Dragon Box' lottery/gacha container. Each box references its prize entries (CDragonBoxPrizeInfo) and item rewards (CItemBaseInfo).",
+      "methods": [
+        {"address": "108a2960", "currentName": "CDragonBoxInfo::GetManagers", "proposedName": "CDragonBoxInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CDragonBoxInfo> singleton accessor."},
+        {"address": "11912440", "currentName": "CDragonBoxInfo::GetManagers_11912440", "proposedName": "CDragonBoxInfo::ForEachBox_118191f0", "purpose": "Iterates all box records and calls FUN_118191f0 per record."},
+        {"address": "11912590", "currentName": "CDragonBoxInfo::GetManagers_11912590", "proposedName": "CDragonBoxInfo::ForEachBox_PrizeInfo", "purpose": "Iterates all box records and calls CDragonBoxPrizeInfo::GetManagers_118189e0 for each (link boxes to their prize table)."},
+        {"address": "11a06c20", "currentName": "CDragonBoxInfo::GetManagers_11a06c20", "proposedName": "CDragonBoxInfo::GetItemBaseInfoMgr", "purpose": "Ensures both the CDragonBoxInfo and CItemBaseInfo managers are initialized and returns the CItemBaseInfo manager pointer (used to resolve box item rewards)."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "medium",
+      "relatedTlv": ["TlvDragonBoxLotteryData", "TlvDragonBoxShopItems"],
+      "notes": "Clear cross-references to CDragonBoxPrizeInfo and CItemBaseInfo confirm this is a lottery-box definition. No field offsets exposed in these methods."
+    },
+    {
+      "className": "CFluteTuneInfo",
+      "category": "skill",
+      "purpose": "Static data for hunting-horn (flute) tunes/melodies. Each tune references buff ids (a paired value at +0x18/+0x1c) that get applied when the melody plays.",
+      "methods": [
+        {"address": "10972b50", "currentName": "CFluteTuneInfo::GetManagers", "proposedName": "CFluteTuneInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CFluteTuneInfo> singleton accessor."},
+        {"address": "117eada0", "currentName": "CFluteTuneInfo::GetManagers_117eada0", "proposedName": "CFluteTuneInfo::CollectTuneBuffs", "purpose": "For each tune id in the input list (this+0x24..+0x28) resolves the tune via paged id-map, appends the tune ptr to vector at this+0x34 and its buff pair (tune+0x18,+0x1c) to vector at this+0x40; recurses over sub-lists (this+0x48..+0x4c)."},
+        {"address": "118bfc00", "currentName": "CFluteTuneInfo::GetManagers_118bfc00", "proposedName": "CFluteTuneInfo::ForEachTune_BuffInfo", "purpose": "Iterates all tunes and calls CBuffInfo::GetManagers_117eb8e0 for each (link tunes to buff definitions)."}
+      ],
+      "fields": [
+        {"name": "buffValueA", "type": "int32", "offset": "0x18", "source": "inferred", "note": "ppuVar7[6]; first of a buff id/param pair"},
+        {"name": "buffValueB", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "ppuVar7[7]; second of the pair"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "confidence": "medium",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CBuffInfo plus the +0x18/+0x1c pair strongly indicate tune->buff mapping."
+    },
+    {
+      "className": "CSoulBeastInfo",
+      "category": "pet",
+      "purpose": "Static/loaded data for the Soul Beast pet system: stage/level progression, stage-unlock arrays and attribute arrays. Loader parses a TDR (0x99) record into the runtime object and dereferences referenced soul-beast ids.",
+      "methods": [
+        {"address": "10520350", "currentName": "CSoulBeastInfo::GetManagers", "proposedName": "CSoulBeastInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CSoulBeastInfo> singleton accessor."},
+        {"address": "11413e40", "currentName": "CSoulBeastInfo::GetManagers_11413e40", "proposedName": "CSoulBeastInfo::LoadFromData", "purpose": "Parses a soul-beast record: copies header ptrs (src[0..3]->this+0x20..0x2c, src+0x3d2->this+0x30); reads stage array (count byte at src+4, dwords from src+0x11) and attr array (count byte at src+0xb1, dwords from src+0xb2); stores src+0xbf5a to this+0x8c; then for each of src+0x3d6 referenced ids (stride 0xc from src+0x3da) resolves the beast in the paged id-map and allocates a 0x1C0-byte runtime object."},
+        {"address": "119bf530", "currentName": "CSoulBeastInfo::GetManagers_119bf530", "proposedName": "CSoulBeastInfo::ForEachBeast_116ebb60", "purpose": "Iterates all soul-beast records and calls FUN_116ebb60 per record."}
+      ],
+      "fields": [
+        {"name": "stageCount", "type": "uint8", "offset": "src+0x4", "source": "reader", "note": "TLV stageCount; array of int32 stages at src+0x11"},
+        {"name": "attrCount", "type": "uint8", "offset": "src+0xb1", "source": "reader", "note": "TLV attrCount; array of int32 attrs at src+0xb2"},
+        {"name": "refBeastCount", "type": "int32", "offset": "src+0x3d6", "source": "reader", "note": "count of referenced soul-beast ids; entries stride 0xc from src+0x3da"},
+        {"name": "runtimeField", "type": "int32", "offset": "0x8c", "source": "inferred", "note": "loaded from src+0xbf5a"}
+      ],
+      "constants": ["RuntimeObjSize=0x1C0"],
+      "formulas": ["referenced beast entries stride = 0xC (12 bytes)"],
+      "confidence": "medium",
+      "relatedTlv": ["TlvSoulBeastSystemData", "TlvSoulBeastStats", "TlvSoulBeastIdAttrs"],
+      "notes": "LoadFromData matches TlvSoulBeastSystemData (stage/level/attrPoint/stages[]/attrs[]). Exact src offsets are large (0x3d2/0x3da/0xbf5a) suggesting a big fixed record; FUN_10467580 = string/ref helper."
+    },
+    {
+      "className": "CSpoorGroupInfo",
+      "category": "monster",
+      "purpose": "Static data grouping monster 'spoor' (tracks/footprint) entries. Each group aggregates CSpoorInfo records; consumers look up a group by a runtime spoor id.",
+      "methods": [
+        {"address": "109473e0", "currentName": "CSpoorGroupInfo::GetManagers", "proposedName": "CSpoorGroupInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CSpoorGroupInfo> singleton accessor."},
+        {"address": "111fbd60", "currentName": "CSpoorGroupInfo::GetManagers_111fbd60", "proposedName": "CSpoorGroupInfo::FindGroupByKeyAndBind", "purpose": "Scans all groups; finds the group whose field +0x14 (index 5) equals FUN_1134b7d0() (a runtime key), then calls target(*this+8)->vtbl+0x18 with group->vtbl+0x18 (bind resolved group id)."},
+        {"address": "1197a8b0", "currentName": "CSpoorGroupInfo::GetManagers_1197a8b0", "proposedName": "CSpoorGroupInfo::ForEachGroup_11a512b0", "purpose": "Iterates all groups and calls FUN_11a512b0 per group."},
+        {"address": "1197ace0", "currentName": "CSpoorGroupInfo::GetManagers_1197ace0", "proposedName": "CSpoorGroupInfo::ForEachGroup_SpoorInfo", "purpose": "Iterates all groups and calls CSpoorInfo::GetManagers_11a51150 per group (link groups to member spoor records)."}
+      ],
+      "fields": [
+        {"name": "groupKey", "type": "int32", "offset": "0x14", "source": "inferred", "note": "piVar2[5]; matched against a runtime key from FUN_1134b7d0"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CSpoorInfo; offset 0x14 is the group key."
+    },
+    {
+      "className": "CPetMonsterSkillInfo",
+      "category": "pet",
+      "purpose": "Static data mapping pet (captured-monster) records to their skill sets. Consumer rebuilds per-pet skill lists and re-evaluates skill entries, skipping a special skill (id 0x8f) unless a flag is set.",
+      "methods": [
+        {"address": "10970bd0", "currentName": "CPetMonsterSkillInfo::GetManagers", "proposedName": "CPetMonsterSkillInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CPetMonsterSkillInfo> singleton accessor."},
+        {"address": "1154e340", "currentName": "CPetMonsterSkillInfo::GetManagers_1154e340", "proposedName": "CPetMonsterSkillInfo::RebuildPetSkillTables", "purpose": "Iterates all pet-monster-skill records; resolves each id via FUN_1169e9d0 + paged id-map, then rebuilds several skill collections (FUN_116cd2d0/116cd8b0/116cd900/116cd4a0). For each skill entry with type(+0x1c)!=0 (and type!=0x8f unless flag param+8), computes a value via FUN_11430a30(entry+0x18) stored at entry+0x12c."}
+      ],
+      "fields": [
+        {"name": "skillType", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "per-skill-entry field; special value 0x8f is filtered"},
+        {"name": "skillParam", "type": "int32", "offset": "0x18", "source": "inferred", "note": "arg to FUN_11430a30"},
+        {"name": "computedValue", "type": "int32", "offset": "0x12c", "source": "inferred", "note": "0x12c==300; result stored back per skill entry"}
+      ],
+      "constants": ["SpecialSkillId=0x8f"],
+      "formulas": ["entry+0x12c = FUN_11430a30(entry+0x18) for each active skill entry"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "The multiple 116cdXXX calls fetch fixed-count skill buckets (9 and 10 entries). Stack-canary present (FUN_11679c30/FUN_11a89daa)."
+    },
+    {
+      "className": "CAchieveLibInfo",
+      "category": "misc",
+      "purpose": "Static achievement 'library' records (achievement definitions/groups). Consumers iterate all achievements, feed achievement groups, and resolve a matching achievement for a runtime object.",
+      "methods": [
+        {"address": "109e3cb0", "currentName": "CAchieveLibInfo::GetManagers", "proposedName": "CAchieveLibInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CAchieveLibInfo> singleton accessor."},
+        {"address": "119c7e50", "currentName": "CAchieveLibInfo::GetManagers_119c7e50", "proposedName": "CAchieveLibInfo::ForEachAchieve_11a81640", "purpose": "Iterates all achievement records and calls FUN_11a81640 per record."},
+        {"address": "119c7fa0", "currentName": "CAchieveLibInfo::GetManagers_119c7fa0", "proposedName": "CAchieveLibInfo::ForEachAchieve_Group", "purpose": "Iterates all achievements calling CAchieveGroupInfo::GetManagers_11a814e0 per record, then FUN_11a81870 (finalize)."},
+        {"address": "11a82540", "currentName": "CAchieveLibInfo::GetManagers_11a82540", "proposedName": "CAchieveLibInfo::FindMatchingAchieve", "purpose": "Iterates achievements; for each, tests FUN_11a81340(param,param+0x34) and on first match stores that achievement id at param+0x30 and stops."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Related to CAchieveGroupInfo. No field offsets exposed."
+    },
+    {
+      "className": "CPetSkillSlotUnlockInfo",
+      "category": "pet",
+      "purpose": "Static data defining unlock requirements for pet skill slots. A pet references 3 primary slot-unlock ids (this+0xe8) and 2 secondary ids (this+0xf4); the consumer resolves each id and stores the pointers into two output vectors.",
+      "methods": [
+        {"address": "1174b760", "currentName": "CPetSkillSlotUnlockInfo::GetManagers", "proposedName": "CPetSkillSlotUnlockInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "1174c670", "currentName": "CPetSkillSlotUnlockInfo::GetManagers_1174c670", "proposedName": "CPetSkillSlotUnlockInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "1174ca80", "currentName": "CPetSkillSlotUnlockInfo::GetManagers_1174ca80", "proposedName": "CPetSkillSlotUnlockInfo::ResolveSlotUnlocks", "purpose": "Resolves 3 slot-unlock ids at this+0xe8 (via paged id-map) into pointer vector at this+0x100, then 2 slot-unlock ids at this+0xf4 into id vector at this+0x10c."}
+      ],
+      "fields": [
+        {"name": "primarySlotIds", "type": "int32[3]", "offset": "0xe8", "source": "inferred", "note": "3 slot-unlock ids"},
+        {"name": "secondarySlotIds", "type": "int32[2]", "offset": "0xf4", "source": "inferred", "note": "2 slot-unlock ids"},
+        {"name": "resolvedPtrVec", "type": "vector<ptr>", "offset": "0x100", "source": "inferred"},
+        {"name": "resolvedIdVec", "type": "vector<int32>", "offset": "0x10c", "source": "inferred"}
+      ],
+      "constants": ["PrimarySlots=3", "SecondarySlots=2"],
+      "formulas": [],
+      "confidence": "medium",
+      "relatedTlv": [],
+      "notes": "The 3-then-2 fixed-count structure is clear from the two loops (local_14=3 then local_14=2)."
+    },
+    {
+      "className": "CSupplyPlanInfo",
+      "category": "activity",
+      "purpose": "Static/loaded data for hunter supply plans (loadout presets of item type/count/grid positions). Loader parses a TlvSupplyPlanList blob and merges any manager-defined active plans by name into a tree keyed by plan id.",
+      "methods": [
+        {"address": "108a2e30", "currentName": "CSupplyPlanInfo::GetManagers", "proposedName": "CSupplyPlanInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CSupplyPlanInfo> singleton accessor."},
+        {"address": "11546430", "currentName": "CSupplyPlanInfo::GetManagers_11546430", "proposedName": "CSupplyPlanInfo::LoadPlanList", "purpose": "Parses a supply-plan-list blob: src[0]=curPlan -> this+0x154; src[1]=planCnt -> loop count; each 0x188-byte plan record copied via FUN_112428f0 into map at this+0x13c. Then iterates the CSupplyPlanInfo manager and for each active record (byte at rec+0x18)!=0 inserts into the plan tree (keyed by id from vtbl+0x18), copying a <=20-char name (strncpy 0x14) and the 0x188-byte record."}
+      ],
+      "fields": [
+        {"name": "curPlan", "type": "uint8", "offset": "0x154", "source": "reader", "note": "TlvSupplyPlanList.curPlan; defaulted to 1 if 0"},
+        {"name": "planMap", "type": "tree", "offset": "0x13c", "source": "inferred", "note": "map<id, SupplyPlan(0x188 bytes)>"},
+        {"name": "planName", "type": "char[0x14]", "offset": "n/a", "source": "reader", "note": "TlvSupplyPlan.name, strncpy length 0x14"}
+      ],
+      "constants": ["PlanRecordSize=0x188", "NameLen=0x14", "DefaultCurPlan=1"],
+      "formulas": ["plan record size = 0x188 bytes (0x62 dwords)"],
+      "confidence": "high",
+      "relatedTlv": ["TlvSupplyPlanList", "TlvSupplyPlan"],
+      "notes": "Strong match: FUN_112428f0 == TlvSupplyPlan reader (sub_10113D40 family), 0x62-dword (0x188) copy loop, curPlan/planCnt bytes match TlvSupplyPlanList fields 1/2."
+    },
+    {
+      "className": "CStarLightStoneInfo",
+      "category": "item",
+      "purpose": "Static data for 'starlight stone' gems socketed into star-stone slots. Records are keyed by an id and a level; consumers pick the correct stone tier for a value and remove/refund socketed stone items.",
+      "methods": [
+        {"address": "1098bad0", "currentName": "CStarLightStoneInfo::GetManagers", "proposedName": "CStarLightStoneInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CStarLightStoneInfo> singleton accessor."},
+        {"address": "115a4e80", "currentName": "CStarLightStoneInfo::GetManagers_115a4e80", "proposedName": "CStarLightStoneInfo::RefundSlotStones", "purpose": "Iterates star-stone slots (this+0x4c, stride 0xc, count via CStarStoneSlotInfo); for occupied slots resolves the stone (paged id-map, index shifted by +1), and if its param matches, removes/refunds one stone item via obj+0x44 with (0,itemId,0,1,0x21) and decrements the slot count."},
+        {"address": "115a63c0", "currentName": "CStarLightStoneInfo::GetManagers_115a63c0", "proposedName": "CStarLightStoneInfo::FindStoneTierByValue", "purpose": "For stone ids 1..4, resolves the record and binary-searches its per-level tree (entry+0x14/+0x18) for key param_1; on match sets *param_2 to the tier index and returns FUN_115a3230(&param_1)."}
+      ],
+      "fields": [
+        {"name": "slotArray", "type": "struct[3-dword stride]", "offset": "0x4c", "source": "inferred", "note": "each slot: stoneId (slot[-1]) + count (slot[0]); stride 0xc"},
+        {"name": "levelTree", "type": "tree", "offset": "0x14", "source": "inferred", "note": "per-record tree keyed by level (entry+0x10)"}
+      ],
+      "constants": ["MaxStoneTiers=4", "ItemRemoveType=0x21"],
+      "formulas": ["slot index -> stone id uses (index+1) in FindStoneTierByValue / RefundSlotStones"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Related to CStarStoneSlotInfo. Tier count 4 and item-op type 0x21 are load-bearing constants."
+    },
+    {
+      "className": "CLevelEnSubGroupInfo",
+      "category": "activity",
+      "purpose": "Static data for level 'entrust' (commission) sub-groups. Each sub-group aggregates CLevelEntrustNpcInfo entries and references item rewards (CItemBaseInfo).",
+      "methods": [
+        {"address": "104d8330", "currentName": "CLevelEnSubGroupInfo::GetManagers", "proposedName": "CLevelEnSubGroupInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CLevelEnSubGroupInfo> singleton accessor."},
+        {"address": "118f0190", "currentName": "CLevelEnSubGroupInfo::GetManagers_118f0190", "proposedName": "CLevelEnSubGroupInfo::ForEachSubGroup_EntrustNpc", "purpose": "Calls FUN_11744050 (reset) then iterates all sub-groups invoking CLevelEntrustNpcInfo::GetManagers_1173f7c0 per record (link sub-groups to entrust NPCs)."},
+        {"address": "119f4720", "currentName": "CLevelEnSubGroupInfo::GetManagers_119f4720", "proposedName": "CLevelEnSubGroupInfo::EnsureItemInfoForRewards", "purpose": "Iterates the sub-group's reward list (param+0x1c..+0x20, stride 0x10) and ensures the CItemBaseInfo manager is initialized for each reward item."}
+      ],
+      "fields": [
+        {"name": "rewardListBegin", "type": "ptr", "offset": "0x1c", "source": "inferred", "note": "vector of 0x10-byte reward entries"},
+        {"name": "rewardListEnd", "type": "ptr", "offset": "0x20", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["reward count = (param+0x20 - param+0x1c) >> 4 (stride 0x10)"],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-references CLevelEntrustNpcInfo and CItemBaseInfo."
+    },
+    {
+      "className": "CTalentInfo",
+      "category": "skill",
+      "purpose": "Static data for player talents. Consumer builds and sends a talent-list network packet (opcode 0xb12) enumerating talent ids the player qualifies for.",
+      "methods": [
+        {"address": "10876500", "currentName": "CTalentInfo::GetManagers", "proposedName": "CTalentInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CTalentInfo> singleton accessor."},
+        {"address": "1141cb40", "currentName": "CTalentInfo::GetManagers_1141cb40", "proposedName": "CTalentInfo::SendTalentListPacket", "purpose": "Builds a packet (msg id 0xb12); iterates all talents, for each gets talent id (vtbl+0x18), filters via FUN_1141d640(id)==0, fills packet fields (id at local_18+8), and dispatches through the player's network object chain (*param_1+4 -> vtbl+0xa8/+0x24)."},
+        {"address": "118d8260", "currentName": "CTalentInfo::GetManagers_118d8260", "proposedName": "CTalentInfo::ForEachTalent_ItemBase", "purpose": "Iterates all talents and calls CItemBaseInfo::GetManagers_117436f0 per record (resolve talent item costs)."}
+      ],
+      "fields": [],
+      "constants": ["TalentListMsgId=0xb12"],
+      "formulas": [],
+      "confidence": "medium",
+      "relatedTlv": [],
+      "notes": "0xb12 packet id set at start of SendTalentListPacket; per-talent id via vtbl GetId (+0x18)."
+    },
+    {
+      "className": "CProjectileVehicleWeaponInfo",
+      "category": "weapon",
+      "purpose": "Static data for vehicle-mounted projectile weapons (e.g. the 'Abrams_Cannon' ballista/cannon). Setup routine binds a weapon instance to its owner, copies ballistic params from a record, and iterates the vehicle-weapon table.",
+      "methods": [
+        {"address": "11289f10", "currentName": "CProjectileVehicleWeaponInfo::GetManagers", "proposedName": "CProjectileVehicleWeaponInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "1128a940", "currentName": "CProjectileVehicleWeaponInfo::GetManagers_1128a940", "proposedName": "CProjectileVehicleWeaponInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "1128ae70", "currentName": "CProjectileVehicleWeaponInfo::GetManagers_1128ae70", "proposedName": "CProjectileVehicleWeaponInfo::InitWeaponInstance", "purpose": "Initializes a vehicle-weapon instance from a record: copies ballistic fields (rec+0xe2->this+0xd8, rec+0xe6->this+0xdc, short rec+0x12a->this+0xe0), reads a weapon name at rec+0xea, resolves the owner entity (rec+0x82 via +0x90/+0x7c), binds/attaches the weapon (vtbl+0x1d0/+0x1f0 or FUN_1156f2d0), and enumerates the 'Abrams_Cannon' entity's two sub-lists together with the vehicle-weapon manager."}
+      ],
+      "fields": [
+        {"name": "ballisticA", "type": "int32", "offset": "0xd8", "source": "inferred", "note": "this[0x36]; copied from rec+0xe2"},
+        {"name": "ballisticB", "type": "int32", "offset": "0xdc", "source": "inferred", "note": "this[0x37]; copied from rec+0xe6"},
+        {"name": "ballisticC", "type": "int16->int32", "offset": "0xe0", "source": "inferred", "note": "this[0x38]; copied from short rec+0x12a"}
+      ],
+      "constants": ["ReferencedEntity=\"Abrams_Cannon\""],
+      "formulas": [],
+      "confidence": "low",
+      "notes": "Record offsets rec+0xe2/+0xe6/+0x12a/+0xea/+0x7e/+0x82 read directly; 'Abrams_Cannon' is a referenced vehicle entity class.",
+      "relatedTlv": []
+    },
+    {
+      "className": "CEquipRandPassiveSkillActivateGroupInfo",
+      "category": "skill",
+      "purpose": "Static data grouping equipment random-passive-skill activation rules; each group ties into CEquipPassiveSkillGroupInfo definitions.",
+      "methods": [
+        {"address": "11636340", "currentName": "CEquipRandPassiveSkillActivateGroupInfo::GetManagers", "proposedName": "CEquipRandPassiveSkillActivateGroupInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "11639ee0", "currentName": "CEquipRandPassiveSkillActivateGroupInfo::GetManagers_11639ee0", "proposedName": "CEquipRandPassiveSkillActivateGroupInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "11865260", "currentName": "CEquipRandPassiveSkillActivateGroupInfo::GetManagers_11865260", "proposedName": "CEquipRandPassiveSkillActivateGroupInfo::EnsureRelatedMgrs_ForList", "purpose": "Iterates the id list at param+0x18..+0x1c (stride 4) and, per element, ensures both the CEquipRandPassiveSkillActivateGroupInfo and CEquipPassiveSkillGroupInfo managers are initialized (links the two tables)."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CEquipPassiveSkillGroupInfo. Method 11865260 mainly forces manager init for each list element."
+    },
+    {
+      "className": "CDragonBoxBlackFaceGiftInfo",
+      "category": "item",
+      "purpose": "Static data for the 'black face' (pity/guaranteed) gift entries of a Dragon Box lottery, referencing item rewards (CItemBaseInfo).",
+      "methods": [
+        {"address": "11816a40", "currentName": "CDragonBoxBlackFaceGiftInfo::GetManagers", "proposedName": "CDragonBoxBlackFaceGiftInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "11818300", "currentName": "CDragonBoxBlackFaceGiftInfo::GetManagers_11818300", "proposedName": "CDragonBoxBlackFaceGiftInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "119d5710", "currentName": "CDragonBoxBlackFaceGiftInfo::GetManagers_119d5710", "proposedName": "CDragonBoxBlackFaceGiftInfo::ForEachGift_11a87c10", "purpose": "Iterates all gift records and calls FUN_11a87c10 per record."},
+        {"address": "119d5860", "currentName": "CDragonBoxBlackFaceGiftInfo::GetManagers_119d5860", "proposedName": "CDragonBoxBlackFaceGiftInfo::ForEachGift_ItemBase", "purpose": "Iterates all gift records and calls CItemBaseInfo::GetManagers_11a87b20 per record (resolve gift item rewards)."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "medium",
+      "relatedTlv": ["TlvDragonBoxLotteryData"],
+      "notes": "Cross-reference to CItemBaseInfo; part of the Dragon Box lottery family."
+    },
+    {
+      "className": "CMonolopyMonsterLibInfo",
+      "category": "activity",
+      "purpose": "Static 'monster library' data for the Monolopy (Monopoly-style) minigame, tying board blocks to monsters.",
+      "methods": [
+        {"address": "119ba010", "currentName": "CMonolopyMonsterLibInfo::GetManagers", "proposedName": "CMonolopyMonsterLibInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "119bac50", "currentName": "CMonolopyMonsterLibInfo::GetManagers_119bac50", "proposedName": "CMonolopyMonsterLibInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "119bae80", "currentName": "CMonolopyMonsterLibInfo::GetManagers_119bae80", "proposedName": "CMonolopyMonsterLibInfo::ForEachLib_11a78f60", "purpose": "Iterates all monster-lib records and calls FUN_11a78f60 per record."},
+        {"address": "119bb000", "currentName": "CMonolopyMonsterLibInfo::GetManagers_119bb000", "proposedName": "CMonolopyMonsterLibInfo::ForEachLib_BlockCollect", "purpose": "Iterates all records calling CMonolopyBlockInfo::GetManagers_11a78e00 (collect blocks by group) per record, then FUN_11a79070 (finalize)."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CMonolopyBlockInfo confirms the board minigame linkage."
+    },
+    {
+      "className": "CLevelAppraisalInfo",
+      "category": "activity",
+      "purpose": "Static data for level (quest) appraisal / rating rules used to score a hunt's performance.",
+      "methods": [
+        {"address": "116ab810", "currentName": "CLevelAppraisalInfo::GetManagers", "proposedName": "CLevelAppraisalInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "116ae890", "currentName": "CLevelAppraisalInfo::GetManagers_116ae890", "proposedName": "CLevelAppraisalInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "118ce090", "currentName": "CLevelAppraisalInfo::GetManagers_118ce090", "proposedName": "CLevelAppraisalInfo::ForEachAppraisal_Apply", "purpose": "Iterates the whole appraisal table (count via mgr vtbl+0x28) and calls FUN_1175c4c0 for each non-null record."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "No field offsets exposed; iterator applies FUN_1175c4c0 per appraisal record."
+    },
+    {
+      "className": "CHuntingBoxInfo",
+      "category": "item",
+      "purpose": "Static data for hunting reward boxes/chests that grant equipment. Consumers iterate boxes resolving equipment (CEquipInfo) rewards.",
+      "methods": [
+        {"address": "108f2c00", "currentName": "CHuntingBoxInfo::GetManagers", "proposedName": "CHuntingBoxInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CHuntingBoxInfo> singleton accessor."},
+        {"address": "118f1e90", "currentName": "CHuntingBoxInfo::GetManagers_118f1e90", "proposedName": "CHuntingBoxInfo::ForEachBox_EquipInfo", "purpose": "Iterates the whole box table and calls CEquipInfo::GetManagers_119f5dc0 for each non-null box (resolve equipment rewards)."},
+        {"address": "119f6d40", "currentName": "CHuntingBoxInfo::GetManagers_119f6d40", "proposedName": "CHuntingBoxInfo::EnsureMgrForList", "purpose": "Iterates a list at param+0x1c..+0x20 (stride 4) forcing the CHuntingBoxInfo manager to be initialized for each element."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CEquipInfo confirms equipment-reward boxes."
+    },
+    {
+      "className": "CMHLevelModeInfo",
+      "category": "activity",
+      "purpose": "Static data enumerating MH level (quest) modes. Provides an id-validity check and per-mode iteration into CMHLevelInfo.",
+      "methods": [
+        {"address": "109dcba0", "currentName": "CMHLevelModeInfo::GetManagers", "proposedName": "CMHLevelModeInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CMHLevelModeInfo> singleton accessor."},
+        {"address": "116b3350", "currentName": "CMHLevelModeInfo::GetManagers_116b3350", "proposedName": "CMHLevelModeInfo::IsValidModeId", "purpose": "Returns bool: reads mode id from param (vtbl+0x18), requires id>=0, then does a paged id-map lookup in the manager and returns true iff a record exists for that id."},
+        {"address": "118e61d0", "currentName": "CMHLevelModeInfo::GetManagers_118e61d0", "proposedName": "CMHLevelModeInfo::ForEachMode_LevelInfo", "purpose": "Iterates all mode records and calls CMHLevelInfo::GetManagers_119ec430 per record (link modes to level definitions)."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": ["IsValidModeId: id=obj->GetId(); valid iff id>=0 and pagedMap[id] exists"],
+      "confidence": "medium",
+      "relatedTlv": [],
+      "notes": "116b3350 is a clear boolean id-existence check (returns CONCAT31(...,1) on found). Cross-references CMHLevelInfo."
+    },
+    {
+      "className": "CNpcAtdInfo",
+      "category": "misc",
+      "purpose": "Static NPC 'ATD' (attitude/attendant) data. A record field at +0x34 groups NPCs; consumers collect NPC ids for a requested group and link to preferences data.",
+      "methods": [
+        {"address": "104d8810", "currentName": "CNpcAtdInfo::GetManagers", "proposedName": "CNpcAtdInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CNpcAtdInfo> singleton accessor."},
+        {"address": "1172ecd0", "currentName": "CNpcAtdInfo::GetManagers_1172ecd0", "proposedName": "CNpcAtdInfo::CollectNpcIdsByGroup", "purpose": "Iterates all NPC-ATD records; for records whose field +0x34 (index 0xd) equals param+0x14 (requested group), appends the record's id (vtbl+0x18) to the vector at param+0x28."},
+        {"address": "119319a0", "currentName": "CNpcAtdInfo::GetManagers_119319a0", "proposedName": "CNpcAtdInfo::ForEachNpc_Prefers", "purpose": "Iterates all records and calls CNpcAtdPrefersInfo::GetManagers_11a1d050 per record (link to preference data)."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x34", "source": "inferred", "note": "record index 0xd; matched against requested group at param+0x14"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Cross-reference to CNpcAtdPrefersInfo. Offset 0x34 group id is clear."
+    },
+    {
+      "className": "CGuildQuestLevelInfo",
+      "category": "quest",
+      "purpose": "Static data for guild-quest level tiers.",
+      "methods": [
+        {"address": "1190c9a0", "currentName": "CGuildQuestLevelInfo::GetManagers", "proposedName": "CGuildQuestLevelInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "1190db90", "currentName": "CGuildQuestLevelInfo::GetManagers_1190db90", "proposedName": "CGuildQuestLevelInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "1190dda0", "currentName": "CGuildQuestLevelInfo::GetManagers_1190dda0", "proposedName": "CGuildQuestLevelInfo::ForEachLevel_11a05270", "purpose": "Iterates all guild-quest-level records and calls FUN_11a05270 per record."},
+        {"address": "1190e070", "currentName": "CGuildQuestLevelInfo::GetManagers_1190e070", "proposedName": "CGuildQuestLevelInfo::ForEachLevel_11a05260", "purpose": "Iterates all records and calls FUN_11a05260 per record."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Only manager accessors and simple per-record iterators recovered; no field offsets."
+    },
+    {
+      "className": "CEquipRandPassiveSkillActivateSetInfo",
+      "category": "skill",
+      "purpose": "Static data for a 'set' of equipment random-passive-skill activation rules (grouping of activate-groups).",
+      "methods": [
+        {"address": "10856650", "currentName": "CEquipRandPassiveSkillActivateSetInfo::GetManagers", "proposedName": "CEquipRandPassiveSkillActivateSetInfo::GetInfoMgrSingleton", "purpose": "Lazy-init CInfoManager<CEquipRandPassiveSkillActivateSetInfo> singleton accessor."},
+        {"address": "118669d0", "currentName": "CEquipRandPassiveSkillActivateSetInfo::GetManagers_118669d0", "proposedName": "CEquipRandPassiveSkillActivateSetInfo::EnsureMgrForList", "purpose": "Iterates the id list at param+0x18..+0x1c (stride 4) forcing the set-info manager to initialize per element."},
+        {"address": "1197d070", "currentName": "CEquipRandPassiveSkillActivateSetInfo::GetManagers_1197d070", "proposedName": "CEquipRandPassiveSkillActivateSetInfo::ForEachSet_11a520a0", "purpose": "Iterates all set records and calls FUN_11a520a0 per record."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Sibling of CEquipRandPassiveSkillActivateGroupInfo; no field offsets exposed."
+    },
+    {
+      "className": "CItemDecomposeInfo",
+      "category": "item",
+      "purpose": "Static data for item decomposition/salvage recipes (breaking an item down into component materials).",
+      "methods": [
+        {"address": "115946c0", "currentName": "CItemDecomposeInfo::GetManagers", "proposedName": "CItemDecomposeInfo::GetInfoMgrByName", "purpose": "3-arg CInfoManager accessor (cached singleton or by-name)."},
+        {"address": "11599f90", "currentName": "CItemDecomposeInfo::GetManagers_11599f90", "proposedName": "CItemDecomposeInfo::GetInfoMgrCached", "purpose": "1-arg cached-singleton getter."},
+        {"address": "1197e100", "currentName": "CItemDecomposeInfo::GetManagers_1197e100", "proposedName": "CItemDecomposeInfo::ForEachRecipe_11a529e0", "purpose": "Iterates all decompose records and calls FUN_11a529e0 per record."},
+        {"address": "1197e250", "currentName": "CItemDecomposeInfo::GetManagers_1197e250", "proposedName": "CItemDecomposeInfo::ForEachRecipe_11a52950", "purpose": "Iterates all decompose records and calls FUN_11a52950 per record."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "confidence": "low",
+      "relatedTlv": [],
+      "notes": "Only manager accessors and per-record iterators recovered; no field offsets."
+    }
+  ]
+}

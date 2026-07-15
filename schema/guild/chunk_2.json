@@ -1,0 +1,236 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x107f0840",
+      "currentName": "FUN_107f0840",
+      "proposedName": "NpcFriendModel::BuildNpcFriendDetailVO",
+      "subsystem": "social/npc-friend (companion/ATD)",
+      "purpose": "Builds the UI value-objects for the NPC-friend ('ATD' companion) detail panel: for the currently selected NPC group it emits a _detail VO plus per-degree gift/lock lists. Reads the NPC-friend group record from the local player context (ctx+0x2ac0), fills GroupId/GroupName, current & max impression (friendship points), friendship degree tiers (unlock/selected flags, degree name strings) and the gift item list. Pure client-side VO population fed to a UI list widget (vtbl+0xf 'push VO').",
+      "confidence": "medium",
+      "formulas": [
+        "player ctx obtained via (*(*(*(DAT_1202e818+0xd0)+0x90))+0xb4)() ; NPC-friend group record base = *(ctx+0x2ac0), skipped if null",
+        "MaxImpression = FUN_11730460(groupRec[2])  (max impression for the group's current stage)",
+        "CurImpression = min( groupRec_impression[1] , MaxImpression )  -> clamped so displayed current never exceeds max",
+        "GroupId = groupRec[0xb]; degree = groupRec[2] (current friendship tier/stage)",
+        "per-degree loop stride = 9 dwords (pppppuVar9 += 9); bUnLock = (degreeValue <= *(entry+8)); bSelected = (degreeValue == *(iVar3+8))",
+        "GroupName string resolved via FUN_100e5b40 record (+0x14); degreeName via FUN_117302b0(degree)->record+0x14",
+        "class names: NPC_ATD_VO_CLASS_NAME, NPC_FRIENDLOCK_VO_CLASS_NAME, NPC_DETAIL_VO_CLASS_NAME, TASK_AWARD_CLASS_NAME"
+      ],
+      "costs": [
+        "CurImpression / MaxImpression are the NPC-friend intimacy points shown to the player; server owns the accrual, client only clamps display"
+      ],
+      "serverRelevance": "client-only (UI VO builder). Impression values, degree/tier unlock state and gift eligibility are server-authoritative; this only renders them. The min(cur,max) clamp is a display safeguard.",
+      "notes": "Emits fields: GroupId, GroupName, CurImpression, MaxImpression, degree, degreeName, bUnLock, degreeString, bSelected, degreddUnLockString, itemIconPathName, ItemID, IsUnLock, bloodType, bodyHeight, weight, profession, homeTown, description. bloodType/bodyHeight/weight/profession/homeTown/description gated by FUN_11509f90(*,idx) presence checks (idx 1..7). Gift item list read from group[5]..group[6] stride 4."
+    },
+    {
+      "address": "0x107f2330",
+      "currentName": "FUN_107f2330",
+      "proposedName": "TaskModel::BuildTaskDetailVO",
+      "subsystem": "quest/task detail + reward preview",
+      "purpose": "Command handler (dispatch mode param_6==2) that builds the full quest/task detail VO for the selected task: award item list (task_awardList), selectable-award list (task_selectawardList), quest meta (taskName/taskLevel/taskid/tasktype/cantGiveup/queststatus/bTeam/bRepeat/bTrace), currency & progression reward previews, and the target-tracking sub-VO (TASK_TARGET_VO_NAME with up to 5 targets). Reward amounts are computed client-side by scaling quest-config base values by the player's hunt-rank/count factor.",
+      "confidence": "medium",
+      "formulas": [
+        "selected award index resolved from param_5: if (*(param_5+4)&0x8f) in {3,4} -> awardId=*(param_5+8) else 0xdeadbeaf (sentinel = no selection)",
+        "reward scaling pattern (repeated): value = (int)( (float)*(cfgRec + off) * (float)factor ) where factor = result of CPlayer::GetHuntRankOrCount(...) passed through FUN_1185f2e0()",
+        "field DAT_11dbfbc8 (exp/points-type reward) = (float)*(rec+8) * (float)huntFactor ; only when unaff_EBX[0x13] != 0",
+        "field DAT_11dc0944 (gold reward) = (float)*(rec+8) * (float)factor ; gold_bind = (float)*(rec+0xc) * (float)factor2  (two separate hunt-rank counts feed bound vs unbound gold)",
+        "farm_actuarialpoint = (float)*(rec+8) * (float)factor",
+        "hunter_contribution = cfg16c[1]; hunter_fund = cfg16c[3]; hunter_exp = cfg16c[2]  (guild-task rewards, read directly from config record FUN_108049c0)",
+        "huntingCredit = *(FUN_10804d10(rec+0x13)+4); npcfriendvalue = *(FUN_10804a00()+8)",
+        "queststatus/limit: FUN_10804c90() row, status flag = (rowCount >= 2) ? 1 : 0",
+        "task target VO stride = 0x3b dwords per target; fields: nTargetID1..5 = t[0..4], nOpType=t[5], nCurCount=t[6], nMaxCount=t[7], strTarget1..5 = t[0xd],t[0x13],t[0x19],t[0x1f],t[0x25], nQuestType=t[0x38], DAT_11dca838=t[0x39]; special-case when t[0x3a]==3 && t[0x34]!=4",
+        "taskid = task[1]; tasktype = task[4]; cantGiveup = *(byte)(task+7); bShare = *(byte)((task)+0x81); autotrak = *(byte)(cfg+0x11); shoqwCurQuestLevel = *(byte)(cfg+0x45)"
+      ],
+      "costs": [
+        "gold reward (DAT_11dc0944) and gold_bind (bound gold) = base * huntRankFactor",
+        "hunter_contribution / hunter_fund / hunter_exp = guild-task contribution, guild fund and guild exp rewards, read from task config offsets [1],[3],[2]",
+        "huntingCredit, npcfriendvalue, farm_actuarialpoint = additional currency/point rewards scaled by hunt-rank factor"
+      ],
+      "serverRelevance": "validation/client-preview. These formulas are the client's reward PREVIEW; the server must own actual grant of gold/bound-gold/exp/contribution/fund and enforce the same base*huntRankFactor scaling. cantGiveup/bTeam/bRepeat are server-enforced quest rules the client mirrors.",
+      "notes": "calls CPlayer::GetHuntRankOrCount (confirmed). Reward multiplier factor comes from GetHuntRankOrCount output normalized by FUN_1185f2e0. hunter_contribution/hunter_fund/hunter_exp confirm this task type feeds the guild (hunter-group) economy. Config accessors: FUN_10804cd0(0x19), FUN_10804940(0x18), FUN_10804980, FUN_108049c0(0x21), FUN_10804d10(0x24), FUN_10804a00 index the quest reward config table."
+    },
+    {
+      "address": "0x107f4680",
+      "currentName": "FUN_107f4680",
+      "proposedName": "NpcOrgModel::BuildNpcOrgListVO",
+      "subsystem": "faction / NPC organization reputation",
+      "purpose": "Builds the NPC-organization (faction) list VO. Iterates the player's NPC-org records (from ctx+0x2ac0 group container) and for each emits OrgID, OrgName, current org friend/reputation value, the max for the current stage, the stage index, and the next-level unlock description string. Also caches the first org's id into a global (current-selected org).",
+      "confidence": "medium",
+      "formulas": [
+        "org record iterated; OrgID = orgRec[3][5]; on first record (iStack_98==0) global DAT_123bb9a4 = orgRec[3][5] (current org id)",
+        "NpcAtdInGroupsStage = orgRec[2]  (current reputation stage/level)",
+        "OrgFriendValue = orgRec[1]  (current reputation points)",
+        "OrgFriendValueMax = FUN_1172eac0(orgRec[2])  (max reputation for current stage)",
+        "NextLevelUnLockContent = FUN_1172eb20(stage+1) string  (unlock description for next stage)"
+      ],
+      "costs": [
+        "OrgFriendValue / OrgFriendValueMax = faction reputation points and the per-stage cap (FUN_1172eac0 maps stage -> cap)"
+      ],
+      "serverRelevance": "client-only (VO builder). Faction reputation accrual and stage progression are server-authoritative; FUN_1172eac0 (stage->max) and FUN_1172eb20 (stage->unlock text) read shared config, so the server must enforce the same per-stage caps.",
+      "notes": "class name NPCORG_VO_CLASS_NAME. Global DAT_123bb9a4 is written here and read in FUN_107f0840 (line 261) as the selected-org filter."
+    },
+    {
+      "address": "0x1081f440",
+      "currentName": "FUN_1081f440",
+      "proposedName": "MailModel::RegisterModelCallbacks",
+      "subsystem": "mail (registration/plumbing)",
+      "purpose": "Registers the mail model's script/UI callbacks: InitModel, ReadMail (FUN_10820250), ReadGift (FUN_108202b0). CryEngine/GFx model-binding plumbing.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (callback registration). No game logic.",
+      "notes": "Stock model-binding boilerplate (FUN_100b62c0 = build interned string, FUN_104d0ee0 = register)."
+    },
+    {
+      "address": "0x1081f560",
+      "currentName": "FUN_1081f560",
+      "proposedName": "MailController::RegisterCommands",
+      "subsystem": "mail (command dispatch table)",
+      "purpose": "Registers the mail controller's command->handler table (dispatch mode param==1). Defines the full client-side mail RPC/command surface.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration, but enumerates the authoritative mail command surface the server must service.",
+      "notes": "Commands -> handlers: _getMailInBoxData=FUN_10820820, SendMail=FUN_1081f930, DeleteMail=FUN_10820310, ForceDeleteMail=FUN_108204b0, ExtractItem=FUN_10820520, GroupExtractItem=FUN_108205d0, ReturnBackMail=FUN_108207b0, ReqMailList=FUN_10821b40, _refreshMailDetail=FUN_10821390, GetFriendNameData=FUN_10820e60, ReqUnReadMailNum=LAB_10821ba0, AfterCloseWidget=LAB_10821bd0, GetExtractData=FUN_10821c00, SendHunterGroupMail=FUN_1081ff90, IsHaveHunterGroupRight=FUN_108201a0. 'SendHunterGroupMail' + 'IsHaveHunterGroupRight' = guild/hunter-group mass-mail feature gated by a guild permission check."
+    },
+    {
+      "address": "0x10820820",
+      "currentName": "FUN_10820820",
+      "proposedName": "MailModel::BuildInboxDataVO",
+      "subsystem": "mail inbox list",
+      "purpose": "'_getMailInBoxData' handler. Reads the player's mailbox object (ctx+0x2ac4) and builds a MailDataArr of MAIL_DATA_VO_CLASSNAME rows plus allMailNum, for the inbox list UI.",
+      "confidence": "high",
+      "formulas": [
+        "mailbox object = *(playerCtx + 0x2ac4); skipped if null",
+        "allMailNum = mailboxObj[0x20]  (total mail count)",
+        "per-mail struct m: _strID = _i64toa(*(int64*)m, base10) (64-bit mail id as string); _nType = *(byte)(m+9); _nSource = *(byte)(m+8); _nRemainTime = m[4] (64-bit via FUN_104d1440); _bHasAccessories = (m[5] != 0xffffffff); _nItemID = m[0x21] (64-bit); _nItemCnt = *(byte)(m+0x88 i.e. m+0x22 dword)",
+        "_strItemIconPathName = *(FUN_10254130(m[0x21]) + 0xb4)  (item icon from item-def by id) if item exists"
+      ],
+      "costs": [
+        "_nItemID / _nItemCnt = single attachment item id + count summarised per mail row",
+        "_nRemainTime = mail expiry countdown (server-set)"
+      ],
+      "serverRelevance": "client-only VO builder; the mailbox contents, counts and expiry timers are server-authoritative (delivered via network into ctx+0x2ac4).",
+      "notes": "class names MAIL_INBOX_DATA_CLASSNAME / MAIL_DATA_VO_CLASSNAME. Fields: _strID,_bRead,_nType,_nSource,_strTitle,_strSender,_nRemainTime,_bHasAccessories,_nItemID,_nItemCnt,_strItemIconPathName. CPet::SetName reused as a generic string setter."
+    },
+    {
+      "address": "0x10820e60",
+      "currentName": "FUN_10820e60",
+      "proposedName": "MailModel::BuildFriendNameListVO",
+      "subsystem": "social/friends (mail recipient picker)",
+      "purpose": "'GetFriendNameData' handler. Reads the friend-list manager (ctx+0x2d5c), builds a FriendNameList VO of friend display names (with an optional name filter), used to populate the mail recipient / friend selector. Emits an 'addtime' boolean per friend derived from how long ago the friendship was formed.",
+      "confidence": "medium",
+      "formulas": [
+        "friend manager = *(playerCtx + 0x2d5c); skipped if null",
+        "name filter built from param_4[8] string; friends whose name doesn't match (FUN_10254970 != -1) are skipped",
+        "addtime flag: nowSecs = FUN_111f8d20() (current time, 64-bit); friendAddTime = *(friend + 0xc0); addtime = ( (nowSecs - friendAddTime) < 0x3f481 ) ? 0 : 1",
+        "0x3f481 = 259201 (= 3*86400 + 1). So addtime=1 means the friendship is OLDER than 3 days; addtime=0 within the first 3 days"
+      ],
+      "costs": [
+        "3-day (259200s) threshold gates the 'addtime' friend-maturity flag — likely used to restrict gifting/intimacy actions to friendships older than 3 days"
+      ],
+      "serverRelevance": "validation/client-preview. Friend add-time and the social graph are server-authoritative; the 3-day maturity rule should be re-checked server-side for any action it gates. Name matching is client-side filtering only.",
+      "notes": "class name FRIEND_NAME_CLASS_NAME. friend struct offset +0xc0 = friendship-established timestamp (unix seconds)."
+    },
+    {
+      "address": "0x10821390",
+      "currentName": "FUN_10821390",
+      "proposedName": "MailModel::BuildMailReaderVO",
+      "subsystem": "mail read/detail + attachments",
+      "purpose": "'_refreshMailDetail' handler. For an opened mail it builds the mailReaderData VO: attachment item list (itemList of MAIL_EXTRACT_ITEM_DATA_CLASSNAME), attached currencies (gold/bound-gold/credit with their extract indices), and sender/title/content strings.",
+      "confidence": "high",
+      "formulas": [
+        "reader source object = *(playerCtx + 0x2ac4) (mailbox); matched mail m selected by 64-bit id (iRam00000078/iRam0000007c)",
+        "attachment items iterated over m[0x29]..m[0x2a], stride 0x20 bytes; count = (m[0x2a]-m[0x29]) >> 5",
+        "per item at (base+i*0x20): _ullItemId/_itemID = *(base+0x14) (64-bit), _count = *(u16)(base+0x10), _index = *(u16)(base+2); _itemIconPathName/_strItemName from item-def FUN_10254130(itemId)+0xb4",
+        "gold = m[0x23]; goldIndex = m[0x24]; credit = m[0x25]; creditIndex = m[0x26]; boundGold = m[0x27]; boundGoldIndex = m[0x28] (all 64-bit via FUN_104d1440)",
+        "source = (char)m[2]; strSender = m[0xb]; strTitle = m[0x17]; strContent = m[0x1d]; nMailID via FUN_104d14d0"
+      ],
+      "costs": [
+        "Mail attachment currencies: gold (m[0x23]), bound gold (m[0x27]), credit (m[0x25]) each with a paired extract-slot index (goldIndex/boundGoldIndex/creditIndex)",
+        "Attachment item: _ullItemId (64-bit item id) + _count (u16)"
+      ],
+      "serverRelevance": "client-only VO builder; attachment contents (item ids/counts, gold/bound-gold/credit amounts, expiry, indices) are server-authoritative. ExtractItem/GroupExtractItem (separate handlers) perform the authoritative claim keyed by these indices.",
+      "notes": "class names MAIL_READER_DATA_CLASSNAME / MAIL_EXTRACT_ITEM_DATA_CLASSNAME. The separate goldIndex/boundGoldIndex/creditIndex fields are extract slot ids the server uses to prevent double-claim."
+    },
+    {
+      "address": "0x108259e0",
+      "currentName": "FUN_108259e0",
+      "proposedName": "FriendController::RegisterCommands",
+      "subsystem": "social/friends (command dispatch table)",
+      "purpose": "Registers the friend controller's command->handler table. Defines the full client-side friend/social RPC surface (friend groups, add/delete, blacklist, mood, apply accept/reject).",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration; enumerates the authoritative friend/social command surface the server must service.",
+      "notes": "Commands: InitModel, GetFriendDetailInfoByID, CreateNewGroup, ChangeGroupName, ChangeFriendGroup, ChangeFriendToBackList(blacklist), AddNewFriend, DelFriendByID, DelFriendGroupByID, QueryAllInfo, DelPlayerFromBlacklist, DelPasserbyPlayer, SetMood, OnAcceptFriendApply, OnRejectFriendApply. Handlers: LAB_10827730, FUN_10827750, FUN_10827880, FUN_10827970, FUN_108279d0, FUN_10827ac0, FUN_10827bc0, FUN_10827840, LAB_10827c20, FUN_10827c50, FUN_10827cb0, FUN_10827d10, FUN_10827dc0, FUN_10827eb0."
+    },
+    {
+      "address": "0x10825e70",
+      "currentName": "FUN_10825e70",
+      "proposedName": "FriendController::NotifyFriendOnlineStateChange",
+      "subsystem": "social/friends (online notification)",
+      "purpose": "Fires a friend online/offline reminder toast if the 'g_FriendRemind' cvar is enabled. Sends UI event 0xc30 when the friend is online (*(friend+0x20)==0) or 0xc31 otherwise.",
+      "confidence": "medium",
+      "formulas": [
+        "gate: cvar 'g_FriendRemind' (via console mgr +0x54, then +0x8 get-value) must be non-zero",
+        "if *(friend+0x20)==0 -> FUN_1112f070(0xc30, name)  else -> FUN_1112f070(0xc31, name)",
+        "friend display arg = FUN_1024e9b0(friend, 6)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only UI toast. Online-state changes are pushed by the server; this only renders the notification.",
+      "notes": "0xc30/0xc31 are UI/localized-message ids for friend-online / friend-offline. friend struct +0x20 = online-state field."
+    },
+    {
+      "address": "0x10825ed0",
+      "currentName": "FUN_10825ed0",
+      "proposedName": "FriendListModel::RegisterCommands",
+      "subsystem": "social/friends (registration/plumbing)",
+      "purpose": "Registers '_getFriendListData' -> FUN_10825f60 (dispatch mode param==1). Plumbing.",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration.",
+      "notes": "Single-command registration."
+    },
+    {
+      "address": "0x10825f60",
+      "currentName": "FUN_10825f60",
+      "proposedName": "FriendListModel::BuildFriendListVO",
+      "subsystem": "social/friends (full friend list)",
+      "purpose": "'_getFriendListData' handler. Reads the friend manager (ctx+0x2d5c) and builds the complete friend-list UI model: group headers (GROUP_CLASS_NAME), the default friend list, and per-group friend rows (FRIEND_CLASS_NAME) with identity, server, level, intimacy, online/team/guild info. Cross-server flag derived by comparing each friend's world-server id against the local player's.",
+      "confidence": "medium",
+      "formulas": [
+        "friend manager = *(playerCtx + 0x2d5c); skipped if null",
+        "isInTown top field = default true, overridden by (*(*(ctx+0xd0))+0x164)() query",
+        "per-friend struct f offsets (dword indexed): netId = f[10]; worldServerId = f[0x11]; HRLevel = f[0x10] and f[0xb] (level fields); intimate = f[0x12] (64-bit via FUN_104d1440 -> intimacy points); isOnline = *(byte)(f+0xe*4); lineID = f[0xf]; strMood = f[0x1a]; nTeamID = f[0x22]; strHunterStar = f[0x29]; StrServer via FUN_1025b060(f[0xd]) when f[0xd]!=0",
+        "bCrossServer = ( *(curPlayerCtx + 0x2d78) != friend.worldServerId )  -> local world-server id at ctx+0x2d78",
+        "groupType/groupId from f[0x21] sub-record: groupId = *(byte)(f[0x21]+1) when f[0x21]!=0 else 0/0xff",
+        "guildName / clanName resolved via FUN_10829c60 (string lookups)",
+        "friends grouped: records with f[0x21]==0 go to defaultFriendList; others matched into groupDataList by group id byte *(f[0x21]+1)"
+      ],
+      "costs": [
+        "intimate = f[0x12] friendship intimacy points (64-bit); HRLevel = hunter rank/level; both server-owned"
+      ],
+      "serverRelevance": "client-only VO builder. Entire social graph (membership, intimacy, online state, team/guild association, cross-server ids) is server-authoritative and pushed into ctx+0x2d5c. bCrossServer is a local comparison against ctx+0x2d78 (local world-server id).",
+      "notes": "class names GROUP_CLASS_NAME, FRIEND_CLASS_NAME. Fields: netId, worldServerId, bCrossServer, StrServer, HRLevel, intimate, groupType, groupId, isOnline, strMood, lineID, guildName, nTeamID, strHunterStar, clanName, groupDataList, defaultFriendList, isInTown. Three friend-emit passes (group friends / default list / per-group cross-ref) share the same field layout."
+    },
+    {
+      "address": "0x10834d00",
+      "currentName": "FUN_10834d00",
+      "proposedName": "GameSettings::ApplyDisplayPreset",
+      "subsystem": "client settings (not guild logic)",
+      "purpose": "Applies a batch of gameplay/display cvar values based on a preset selector (param_3+8 == 1 vs otherwise), then rebuilds an npc-language config string. Only tangentially guild-related via the 'g_selfGuildName' cvar (show own guild name overhead).",
+      "confidence": "medium",
+      "formulas": [
+        "preset A (selector==1): sys_show_damage_number=1, g_selfGuildName=1, cl_ShowLocalPlayerNamePad=1, cl_MHFCCameraPitchControlByMouseZ=1, g_firstAtkRotEnable=1, g_otherAtkRotEnable=0, g_iCommonResetCameraType=1, cl_ShowBossDeadGlow=1, cl_TaskTraceMode=1, pl_autoHolster=1, g_npc_language=2",
+        "preset B (else): sys_show_damage_number=0, g_selfGuildName=0, cl_ShowLocalPlayerNamePad=0, cl_MHFCCameraPitchControlByMouseZ=1, g_firstAtkRotEnable=0, g_otherAtkRotEnable=1, g_iCommonResetCameraType=1, cl_ShowBossDeadGlow=0, cl_TaskTraceMode=1, pl_autoHolster=0, g_npc_language=1",
+        "cvars fetched via (*(DAT_1202e818[0xb]))+0x54)(name) then set via vtbl+0x14; tail memcpy/memset builds a 0x191-byte language string buffer"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (local cvar / display preset). No authoritative state. g_selfGuildName just toggles guild-name nameplate display.",
+      "notes": "calls CInfoRecord::GetModelString, memset. Included in this chunk only because it touches g_selfGuildName; the rest is graphics/camera/HUD presets."
+    }
+  ]
+}

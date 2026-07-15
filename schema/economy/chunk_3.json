@@ -1,0 +1,233 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "107d7f80",
+      "currentName": "FUN_107d7f80",
+      "proposedName": "CInstanceClearingView::RegisterScriptHandlers",
+      "purpose": "Registers the Lua/UI script mediator handlers for the end-of-instance clearing/reward/score view. Builds a table of named callbacks (FUN_100b62c0 = intern name key, FUN_104d0ee0/FUN_107dddb0 = bind delegate into a hash map, FUN_10c3d5d0 = release previous delegate). Wires client-side actions: CloseInstanceScoreView, CloseInstanceRewardView, ReqInstanceClearingStart, ReqQuitInstanceDirectly, RefreshScoreInfo, SetLevelResultInfo (->FUN_107d9870), PayModeCheck, OnGiveup/OK/Cancel, CanGiveupLevel, GetViewSystemData, GetActivityRewardData, GetGiveupStatus, InitGiveupView, GetCreditLevelNeed, addLikeIt, GetLikeItWaitTime, IsTeamMateReportedGuaJi, C2AS_IsLevelCatAvailable, C2AS_LevelCatReset. Tail conditionals (FUN_10d17440/FUN_10d17870 guards) register the four data providers FUN_107e0a20/70/c0/b10.",
+      "confidence": "high",
+      "subsystem": "instance-clearing-ui",
+      "serverRelevance": "client-only. Pure UI/script-mediator plumbing; names like ReqInstanceClearingStart, ReqQuitInstanceDirectly, C2AS_LevelCatReset, GetCreditLevelNeed, C2AS_IsLevelCatAvailable are the client request stubs whose server counterparts (AS2C / C2AS RPCs) must be authoritative. No economy logic here.",
+      "formulas": [],
+      "costs": [],
+      "notes": "C2AS_LevelCatReset and C2AS_IsLevelCatAvailable are the client->server RPCs for the 'level cat' (instance level restart/reset) feature whose cost is displayed by FUN_107dbab0. GetCreditLevelNeed = credit requirement query. Server must own reset-cost debit and availability check."
+    },
+    {
+      "address": "107d9870",
+      "currentName": "FUN_107d9870",
+      "proposedName": "CInstanceClearingView::BuildLevelResultInfo",
+      "purpose": "SetLevelResultInfo handler: reads the server-delivered instance-clearing result struct (via DAT_1202e818->+0xd0->+0x90 vtable+0xb4 -> result object at iVar6) and builds the score/reward VO passed to the UI script. Populates IsWin, IsIndPVE, PveBattleScore, SelfBattleScore, PveBattleMoney, HuntSoul/FinalHuntSoul/WildHuntCamp/IsHuntSoulReachLimit, RandomMatchPoint, IsDoubleReward. Then assembles multiple parallel item/exp/gold reward lists by calling FUN_107dbf70 (ExtraBonus aggregation) five times with different field-id key sets, plus RewardEventItemInfoList and per-player PlayerDatas/PlayerStateData sub-objects. Iterates monster-change records (MonsterId/OldSize/NewSize/ChangeType/OldType/MonsterName via FUN_107d7df0+FUN_100e5b60).",
+      "confidence": "medium",
+      "subsystem": "instance-clearing-ui",
+      "serverRelevance": "client-only display. Reads a server-authoritative clearing-result struct and reformats it for the UI. All money/exp/hunt-soul values originate server-side; this only presents them. Server must compute PveBattleMoney, BaseExp/ExtraExps, HuntSoul caps (IsHuntSoulReachLimit), IsDoubleReward, RandomMatchPoint.",
+      "formulas": [
+        "IsDoubleReward = (FUN_114549f0(0x18) >> 4) & 1  (bit 4 of reward-flags word at selector 0x18)",
+        "IsHuntSoulReachLimit displayed from FUN_11454780()&0xff",
+        "IsIndPVE = (FUN_114549f0(0x19) == 1)"
+      ],
+      "costs": [
+        "PveBattleMoney: money earned from the cleared instance (server-computed)",
+        "HuntSoul / FinalHuntSoul: wild-hunt soul currency earned, subject to IsHuntSoulReachLimit cap",
+        "RandomMatchPoint: matchmaking reward points"
+      ],
+      "notes": "Selector indices into the result object: FUN_114548c0(1)/(2)/(8) read flag bits; FUN_114549f0(0x18)/(0x19) read enum/int fields. The five FUN_107dbf70 calls correspond to reward-category key sets {2,10,6,11,0xd}, {4,3}, {7}, {0xf}, {8} (the raw int arrays pushed via FUN_107dffc0). Exact meaning of each id is display-grouping only."
+    },
+    {
+      "address": "107db970",
+      "currentName": "FUN_107db970",
+      "proposedName": "CInstanceClearingView::BuildInstanceCurrencyData",
+      "purpose": "Builds the 'mh.model.Instance.InstanceCurrencyData' VO. Reads four currency totals from the server clearing-result object (DAT_1202e818->+0xd0->+0x90 vtable+0xb4) via four FUN_1025b060 accessor calls and emits fields BindMoney, UnbindMoney, BindCredit, UnbindCredit (all via FUN_104d1550 = write-int).",
+      "confidence": "high",
+      "subsystem": "currency-display",
+      "serverRelevance": "client-only display of server-authoritative currency balances/rewards. Confirms the four-currency model: bound money, unbound money, bound credit, unbound credit. Server must own all four ledgers.",
+      "formulas": [],
+      "costs": [
+        "Four currency channels displayed: BindMoney, UnbindMoney, BindCredit, UnbindCredit (bound vs tradeable money and credit)"
+      ],
+      "notes": "The bound/unbound distinction is the canonical MHO currency split (bound = soulbound/non-tradeable). Server ledger must track each independently."
+    },
+    {
+      "address": "107dbab0",
+      "currentName": "FUN_107dbab0",
+      "proposedName": "CInstanceClearingView::BuildLevelCatRewardListData",
+      "purpose": "Builds 'mh.model.Instance.InstanceLevelCatRewardListData' VO for the instance 'level cat' (level restart/reset) reward preview. Reads reset-state struct via FUN_112ad370 and config record via FUN_119d7d10, emits CurrentResetTimes (state+4), MaxResetTimes (config+0x38), ResetCost (config+0x34, written via FUN_104d1440 = int/id field). Then iterates a reward array (base state+0xac, count state+8, element stride 4 bytes across three parallel columns) emitting per-entry InstanceLevelCatRewardData {ItemId=elem[-0x28], ItemCount=elem[0], BindType=elem[0x28]}.",
+      "confidence": "high",
+      "subsystem": "instance-level-reset",
+      "serverRelevance": "validation/authoritative. ResetCost and MaxResetTimes are config-driven cost/limit values the client displays; the server (C2AS_LevelCatReset) must charge ResetCost and enforce CurrentResetTimes < MaxResetTimes before granting RewardDatas. Client only previews.",
+      "formulas": [
+        "CurrentResetTimes = *(resetState + 4)",
+        "MaxResetTimes = *(config + 0x38)",
+        "ResetCost = *(config + 0x34)  (currency amount charged per reset)",
+        "reward entry count = *(resetState + 8); reward columns based at resetState+0xac with word stride: ItemId at elem-0xa0, ItemCount at elem+0, BindType at elem+0xa0"
+      ],
+      "costs": [
+        "ResetCost: currency charged to reset/re-run an instance level (paid via the 'level cat' feature)",
+        "MaxResetTimes: hard cap on number of paid resets"
+      ],
+      "notes": "FUN_112ad370 = level-cat runtime state; FUN_119d7d10 = level-cat config record. Reward struct is three parallel int columns 0xa0 bytes apart."
+    },
+    {
+      "address": "107dbce0",
+      "currentName": "FUN_107dbce0",
+      "proposedName": "CInstanceClearingView::BuildRewardItemVO_FromDrop",
+      "purpose": "Builds a 'mh.model.Instance.vo.RewardItem' VO from a raw drop tuple param_3 (an {itemId, count, bindType} triple). Looks up the item base-info record (FUN_10254130) and emits itemIconPathName (info+0xb4), ItemID (=*param_3), a count field (DAT_11dbdc0c key = param_3[1]), itemType (info+0x10), bindType (param_3[2]).",
+      "confidence": "high",
+      "subsystem": "reward-display",
+      "serverRelevance": "client-only display. Formats a server-granted item drop for the reward UI. Item icon/type come from static item base-info config; id/count/bind come from the server drop record.",
+      "formulas": [
+        "itemIconPathName = *(itemBaseInfo + 0xb4)",
+        "itemType = *(itemBaseInfo + 0x10)",
+        "ItemID = param_3[0]; count(DAT_11dbdc0c) = param_3[1]; bindType = param_3[2]"
+      ],
+      "costs": [],
+      "notes": "FUN_10254130 = CItemBaseInfo lookup by id. DAT_11dbdc0c is the interned key string for the item-count field (likely \"ItemCount\")."
+    },
+    {
+      "address": "107dbd80",
+      "currentName": "FUN_107dbd80",
+      "proposedName": "CInstanceClearingView::BuildRewardItemVO_FromItemObject",
+      "purpose": "Builds a 'mh.model.Instance.vo.RewardItem' VO from a live item object (param_3+4 = item ptr). Emits itemIconPathName (vtable+0x24), ItemID (FUN_11669730), count (vtable+0xc, DAT_11dbdc0c key), itemType (FUN_11669730 again), bindType (FUN_116693d0); if FUN_116698a0() true also emits rareType (vtable+0x2c). Always writes instanceChannel=1 and instanceChannelNumber (int field, default).",
+      "confidence": "high",
+      "subsystem": "reward-display",
+      "serverRelevance": "client-only display of a granted item object. rareType only emitted for items whose class flags it (FUN_116698a0).",
+      "formulas": [
+        "instanceChannel = 1 (constant); rareType emitted only if FUN_116698a0(item) != 0"
+      ],
+      "costs": [],
+      "notes": "Same RewardItem VO schema as FUN_107dbce0 but sourced from a heap item object via its accessor vtable rather than a raw config tuple."
+    },
+    {
+      "address": "107dbf70",
+      "currentName": "FUN_107dbf70",
+      "proposedName": "CInstanceClearingView::AggregateExtraBonusData",
+      "purpose": "Aggregates instance-reward 'extra bonus' contributions into InstanceReward_ExtraBonusData VOs. Iterates the reward-source list (param_3 range [+4,+8)), and for each source reads per-entry percentage and flat components and accumulates them into several red-black-tree maps keyed by bonus id (categories split by FUN_1144f490()==6 vs other). Categories are distinguished into two output passes: id-keyed ExtraBonus values, and named-activity bonuses (ActivityName from FUN_107d7c80 name lookup + FUN_100ecfd0 unicode conversion). Emits DAT_11dbabc0 (bonus-type id), 'ExtraBonus' (value), DAT_11dc97c8, and 'ActivityName'. Uses CSkillLevelMap::Insert / FUN_107e0b70 as the map-insert helpers.",
+      "confidence": "medium",
+      "subsystem": "reward-bonus-calc",
+      "serverRelevance": "client-only preview/aggregation. Recomputes displayed bonus exp/gold from server-delivered per-source pct+flat data. The authoritative reward total must be computed server-side; this mirrors the math for the UI. Constants below are the percentage model the server should match.",
+      "formulas": [
+        "DAT_11de9a30 = 100.0f (percent divisor); DAT_11de9918 = 1.0f",
+        "multiplied result = ((float)pctSum / 100.0 + 1.0) * (float)baseValue + (float)flatSum   [line 2425: piStack_7c]",
+        "per-source contribution = ((float)pct / 100.0) * (float)base + (float)flat   [line 2434]",
+        "adjustment accum = ((float)pct / 100.0 - 1.0) * (float)result + prevAccum   [line 2436]",
+        "category selector: FUN_1144f490()==6 routes to the second (credit/gold?) map, else to the first (exp?) map"
+      ],
+      "costs": [
+        "Bonus multipliers expressed as integer percentages divided by 100 then applied as (1 + pct/100) to a base reward, plus flat additive components"
+      ],
+      "notes": "FUN_1144f060=pct field, FUN_1144f220=secondary pct, FUN_1144f0f0/FUN_1144f100=flat/int, FUN_1144f490=category tag. The exact base/pct/flat field semantics per category id are display-grouping; treat the (1+pct/100)*base+flat shape as the reward-bonus formula the server should enforce."
+    },
+    {
+      "address": "107e4ef0",
+      "currentName": "FUN_107e4ef0",
+      "proposedName": "CInstanceClearingView::IsQCoinRewardActivityActive",
+      "purpose": "Returns 1 if the 'QCoinReward' activity is currently active. Gates on the clearing-result object having a non-zero flag at +0x260fc, then walks the activity map (FUN_1122ba70 = activity tree root/iter), matching each activity's name (at *(activity+0x14)+0x2d) against DAT_11dc9f44 and 'QCoinReward'; for matches, calls CActivityMgr::GetActivityState and returns 1 if state byte (+4) == 3.",
+      "confidence": "high",
+      "subsystem": "activity-reward",
+      "serverRelevance": "client-only check that mirrors server activity state; used to show/hide a QCoin (real-money proxy) reward affordance. Server must be authoritative over activity state (==3 = active/claimable) and any QCoin grant.",
+      "formulas": [
+        "active := activityState != 0 && *(activityState + 4) == 3",
+        "gate := *(clearingResult + 0x260fc) != 0"
+      ],
+      "costs": [
+        "QCoinReward: activity granting QCoin (Tencent Q-coin, real-currency-linked) reward"
+      ],
+      "notes": "Activity name compared via inline strcmp against DAT_11dc9f44 (unknown fallback name) and literal 'QCoinReward'. State enum value 3 = active/rewardable."
+    },
+    {
+      "address": "107ec240",
+      "currentName": "FUN_107ec240",
+      "proposedName": "CCraftInfo::GetRecordById",
+      "purpose": "CInfoManager 2D-table accessor for CCraftInfo (weapon/armor crafting recipes). Gets the singleton manager (CCraftInfo::GetInfoManagerSingleton, else CInfoManager::FindByName(\"CCraftInfo\"), else default &DAT_123bf070), then given a flat record id returns the config row pointer via 2D indexing.",
+      "confidence": "high",
+      "subsystem": "crafting-config",
+      "serverRelevance": "validation/authoritative config source. This is the crafting-recipe cost/material table; the server must use the equivalent table to validate craft material and currency costs. Client uses it to display recipes.",
+      "formulas": [
+        "id valid iff id != -1 && (id != 0 || base[0xc]==0) && base[10]!=0 && (id-=base[0xc]) in [0, base[9]); record = *(*(base[8] + (id/base[10])*4) + (id%base[10])*4)",
+        "base[8]=row-pointer array, base[9]=total count, base[10]=row stride, base[0xc]=id base offset"
+      ],
+      "costs": [
+        "CCraftInfo record = per-recipe material list + currency cost (fields consumed downstream, not read here)"
+      ],
+      "notes": "Standard CryEngine/MHO CInfoManager paged 2D-array lookup; identical shape to the three below. DAT_123bf070 = empty default manager to avoid null."
+    },
+    {
+      "address": "107ec3e0",
+      "currentName": "FUN_107ec3e0",
+      "proposedName": "CEquipLevelUpConsumeInfo::GetRecordById",
+      "purpose": "CInfoManager 2D-table accessor for CEquipLevelUpConsumeInfo (equipment level-up material/cost table). Same singleton-or-FindByName-or-default(&DAT_123bf030) pattern and same 2D index formula as CCraftInfo, but reads the array/count/stride/base fields at manager offsets +0x20/+0x24/+0x28/+0x30.",
+      "confidence": "high",
+      "subsystem": "upgrade-config",
+      "serverRelevance": "validation/authoritative config. Defines the consumables/currency required to level up equipment; server must enforce these costs on the level-up transaction.",
+      "formulas": [
+        "id valid iff id!=-1 && (id!=0 || *(base+0x30)==0) && *(base+0x28)!=0 && (id-=*(base+0x30)) in [0,*(base+0x24)); record = *(*(*(base+0x20) + (id / *(base+0x28))*4) + (id % *(base+0x28))*4)"
+      ],
+      "costs": [
+        "CEquipLevelUpConsumeInfo record = materials + currency consumed per equip level-up step"
+      ],
+      "notes": "Manager field layout: +0x20 row-array, +0x24 count, +0x28 stride, +0x30 id base."
+    },
+    {
+      "address": "107ec550",
+      "currentName": "FUN_107ec550",
+      "proposedName": "CEquipUpgradeInfo::GetRecordById",
+      "purpose": "CInfoManager 2D-table accessor for CEquipUpgradeInfo (equipment upgrade/enchant table). Singleton-or-FindByName(\"CEquipUpgradeInfo\")-or-default(&DAT_123beff4); same 2D index formula with manager fields at +0x20/+0x24/+0x28/+0x30.",
+      "confidence": "high",
+      "subsystem": "upgrade-config",
+      "serverRelevance": "validation/authoritative config. Equipment-upgrade cost/success table; server must consult it to validate upgrade material/currency spend and (likely) success rates.",
+      "formulas": [
+        "same 2D lookup as CEquipLevelUpConsumeInfo::GetRecordById (fields +0x20/+0x24/+0x28/+0x30)"
+      ],
+      "costs": [
+        "CEquipUpgradeInfo record = upgrade cost + (probably) success-chance parameters per upgrade level"
+      ],
+      "notes": "Success-chance / cost fields are inside the returned record, not dereferenced here."
+    },
+    {
+      "address": "107ec870",
+      "currentName": "FUN_107ec870",
+      "proposedName": "CSuperCraftConsumeInfo::GetRecordById",
+      "purpose": "CInfoManager 2D-table accessor for CSuperCraftConsumeInfo (advanced/'super' craft material+cost table). Singleton-or-FindByName(\"CSuperCraftConsumeInfo\")-or-default(&DAT_123bef7c); identical 2D index formula (manager fields +0x20/+0x24/+0x28/+0x30).",
+      "confidence": "high",
+      "subsystem": "crafting-config",
+      "serverRelevance": "validation/authoritative config. Defines materials/currency for high-tier crafting; server must enforce.",
+      "formulas": [
+        "same 2D lookup formula as the other three accessors"
+      ],
+      "costs": [
+        "CSuperCraftConsumeInfo record = materials + currency for super-craft"
+      ],
+      "notes": "Fourth of four identical config-table accessors in this chunk (CCraftInfo, CEquipLevelUpConsumeInfo, CEquipUpgradeInfo, CSuperCraftConsumeInfo) — the client-side crafting/upgrade cost catalog."
+    },
+    {
+      "address": "107f3b70",
+      "currentName": "FUN_107f3b70",
+      "proposedName": "CForgeView::BuildCraftUpgradeConfigVO",
+      "purpose": "When param_5==1, builds the forge/crafting config VO delivered to the UI script. Pulls the config subsystem (FUN_113f3640 -> FUN_1115abd0) and, over several vtable[0xdc]+FUN_1159a350 enumerations, emits keyed maps: weaponCraftData (id->{u64,int} tuples), weaponUpgradeData + weaponUpgradeKeys, weaponLevelData, itemLevelUpData, itemLevelData, itemRecastData. Each is a table of config rows copied into script-side dictionaries.",
+      "confidence": "medium",
+      "subsystem": "forge-config-display",
+      "serverRelevance": "client-only. Reformats static forge/craft/upgrade/recast config tables for the UI. Underlying tables are the authoritative cost sources (see the four accessors above); this only serializes them to the client.",
+      "formulas": [],
+      "costs": [
+        "Aggregates the weapon craft / upgrade / level / item level-up / item level / item recast config tables (each row carries cost/material/level data)"
+      ],
+      "notes": "vtable[0xdc] selects a config category (called with 5,6,8,...) and FUN_1159a350 returns the row array (count-prefixed, 3-word stride). itemRecastData = weapon/equip re-roll (recast) config."
+    },
+    {
+      "address": "107f5670",
+      "currentName": "FUN_107f5670",
+      "proposedName": "CQuestTrackView::BuildTracedQuestVOList",
+      "purpose": "Builds the tracked-quest ('traceDatas') VO list for the quest-tracker HUD. Guarded by DAT_123bb99c and a state check (DAT_123bcebc&0x8f in {8,9,10}). For each traced quest it emits a TASK_QUEST_VO_NAME record: nQuestID, nQuestStatus, nQuestLevel, strQuestName, nQuestType, bTraced, lefttime, timeout, and a subTaskArr of sub-objectives each with nOpType, nTargetID1..5 / strTarget1.., nCurCount, nMaxCount, isPointMaterial. Handles quest-type branches (type 4 = gather/kill variants) and looks up target names via item/monster info tables.",
+      "confidence": "medium",
+      "subsystem": "quest-tracking",
+      "serverRelevance": "client-only display of server-authoritative quest progress. nCurCount/nMaxCount/nQuestStatus reflect server-tracked progress; server must own quest completion and any reward grant. Not a currency/item mutation.",
+      "formulas": [
+        "sub-task loop bounded to 6 objectives (do..while ((int)idx < 6))",
+        "point-material remaining count: cnt = FUN_116c04a0(materialId) * (curValue - baseValue)  [line 5335-5337]",
+        "nMaxCount clamp: if (opType != 4 || nCurCount < nMaxCount) status forced to 0 (incomplete) [line 5366]"
+      ],
+      "costs": [],
+      "notes": "Progression/quest UI, included because quest completion drives rewards. isPointMaterial flags objectives measured by accumulated material points rather than item count. Target-id resolution uses the same CInfoManager 2D lookup pattern (line 5347-5353) as the config accessors."
+    }
+  ]
+}

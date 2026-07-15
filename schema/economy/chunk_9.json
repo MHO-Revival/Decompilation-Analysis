@@ -1,0 +1,288 @@
+{
+  "chunkIndex": 9,
+  "functions": [
+    {
+      "address": "1095c0d0",
+      "currentName": "FUN_1095c0d0",
+      "proposedName": "CLevelEnSubGroupRewardInfo::GetRewardByLevelIndex",
+      "subsystem": "rewards/config",
+      "purpose": "2D-grid config accessor for CLevelEnSubGroupRewardInfo (entrust sub-group reward table). Resolves the singleton InfoManager (lazy FindByName fallback DAT_123c003c) then indexes the shared CInfoManager grid by a level/reward id, returning the entry pointer.",
+      "formulas": [
+        "shared CInfoManager 2D-grid lookup: valid iff param!=-1 && (param!=0 || base[+0x30]==0) && cols[+0x28]!=0; idx = param - base[+0x30]; valid iff 0<=idx<count[+0x24]; row = grid[+0x20][idx / cols]; result = row[idx % cols] (row==0 -> return 0)",
+        "container offsets: +0x20 row-array, +0x24 element count, +0x28 columns/stride, +0x30 base/first-id (same layout confirmed in schema item.md GetLevelByExp)"
+      ],
+      "serverRelevance": "authoritative: read-only accessor over server-loaded static reward config; server owns the CLevelEnSubGroupRewardInfo table and the reward ids it yields.",
+      "confidence": "high"
+    },
+    {
+      "address": "1095c240",
+      "currentName": "FUN_1095c240",
+      "proposedName": "CLevelAppraiseRewardBoxInfo::GetRewardByLevelIndex",
+      "subsystem": "rewards/config",
+      "purpose": "Identical 2D-grid config accessor for CLevelAppraiseRewardBoxInfo (level appraisal/评价 reward-box table). Lazy singleton (fallback DAT_123c0074).",
+      "formulas": [
+        "same CInfoManager grid formula as 1095c0d0: idx=param-base[+0x30]; row=grid[+0x20][idx/cols[+0x28]]; result=row[idx%cols]; guards param!=-1, cols!=0, 0<=idx<count[+0x24]"
+      ],
+      "serverRelevance": "authoritative: read-only accessor over server-loaded appraisal reward-box config.",
+      "confidence": "high"
+    },
+    {
+      "address": "10972de0",
+      "currentName": "FUN_10972de0",
+      "proposedName": "WeaponMelodyController::RegisterScriptHandlers",
+      "subsystem": "weapon/melody",
+      "purpose": "Registers weapon 'melody/tune' (hunting-horn) script RPC handlers via FUN_104d13b0 and pushes current weaponID into the script model. Binds _GetCurrentWeaponMelodyList, _ChooseMelody, _GetEnforceMelodyList, _GetTuneNameByID.",
+      "formulas": [
+        "weaponID = player->pet-container(DAT_1202e818+0xd0 ->+0x90)->vtbl[+0xb4]()->vtbl[+0x444](); written via FUN_104d1550(\"weaponID\",...)"
+      ],
+      "serverRelevance": "client-only: UI/script handler registration and weaponID display. Enforcement of melody effects is server-side elsewhere.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10974d90",
+      "currentName": "FUN_10974d90",
+      "proposedName": "LevelEntrustDetailVO::Build",
+      "subsystem": "quest/entrust (level commission) UI",
+      "purpose": "Builds the LEVELENTRUST_DETAILVO client view-object for a level/commission detail screen (param_5==3 command). Reads server-provided level-config + player state and writes ~40 TLV fields (requirements, limits, player currency snapshot, appraisal/boss/reward arrays, material-ticket, fastest-pass).",
+      "formulas": [
+        "nLimitEnterCount = FUN_1130cb50(argIdx=9) + FUN_1130cb50(argIdx=5) (two TLV int args summed at 0x10975727-0x10975764)",
+        "appraiseArr max value iVar4 = max over up-to-3 appraisal slots of FUN_1141bcc0(piVar3[4]->vtbl[+0x1c]()) where result>=0; stored per slot keyed by CLevelInfo grid offsets +0x30/+0x34/+0x38 (FUN_1184c850)",
+        "requirement fields read by TLV arg-index (FUN_1130bb80(idx)): idx0xe->needLev, idx8->mLimitMember/mLimitMemberMax(+4/+8), idx0xd->needItemId/needItemCount, idx5->needGuildLev + nCurrentGuildLev(guild+0x44), idx4->needGoldenHunterLev + nCurrentGoldernLev, idx0xc->nTicketCount",
+        "bIsFastestPass path: only when levelInfo+0x2e34 != 0; nFastestPassTime = *(short*)psVar10; strFastestPassName from psVar10+4",
+        "IsShowMaterialTicket set true only when reward count uVar6 < 2 (piVar5[0x97] gate, FUN_...+0x3a4/+0xa4)",
+        "bIsAccept/progress via CMHLevelInfo::CheckLevelProgressThreshold; cleared to 0 if pcVar8+0x14 == 0x4b2 (level id 1202)"
+      ],
+      "costs": [
+        "playerMoney = FUN_1025b060() (unbound currency getter), playerBoundMoney = second FUN_1025b060 read; both snapshotted into VO for display",
+        "needItemId/needItemCount = entrust material requirement (arg idx 0xd)"
+      ],
+      "serverRelevance": "validation/client-only: populates UI from server-authoritative level config and player currency/level; the requirement thresholds (needLev, needGuildLev, needItem, enter-count caps) shown here must be enforced server-side on entrust accept.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10976e80",
+      "currentName": "FUN_10976e80",
+      "proposedName": "CLevelRewardInfo::GetRewardByLevelIndex",
+      "subsystem": "rewards/config",
+      "purpose": "2D-grid config accessor for CLevelRewardInfo (per-level reward table). Lazy singleton (fallback DAT_123c03bc).",
+      "formulas": [
+        "same CInfoManager grid formula as 1095c0d0: idx=param-base[+0x30]; row=grid[+0x20][idx/cols[+0x28]]; result=row[idx%cols]"
+      ],
+      "serverRelevance": "authoritative: read-only accessor over server-loaded per-level reward config.",
+      "confidence": "high"
+    },
+    {
+      "address": "109772d0",
+      "currentName": "FUN_109772d0",
+      "proposedName": "InstanceSelectController::RegisterScriptHandlers",
+      "subsystem": "instance/level-select UI",
+      "purpose": "Registers InstanceSelect script RPC handlers (param_5==6). Binds _openDetailInfoView, getHubPageInfo, QuickStartInstance, QuickMatchInstance, PreSelectInstance, RequireInstanceRewardShow(1097a150), GetInstanceReward, getSpecHubInfo(10977e30), UnlockEliteLevel, GetEliteUnlockInfo, getLevelGroupLimit. (Several duplicate registrations present in decompile.)",
+      "serverRelevance": "client-only: handler-table registration. GetInstanceReward/QuickStart etc. issue requests the server must validate.",
+      "confidence": "high"
+    },
+    {
+      "address": "10977e30",
+      "currentName": "FUN_10977e30",
+      "proposedName": "InstanceSelectController::GetSpecHubInfo",
+      "subsystem": "instance/level-select UI",
+      "purpose": "Builds the hub-page level list VO (param_5==7). Depending on selector local_19c (1=entry,4=raid,2=king,3=letter,5=star-level,7=other) calls CMHLevelInfo::CollectHub*Configs, then per level writes many display fields (levelID, levelMod, levelShowType, levelLockType, isReward, isStarHunt, appraisal, bDoubleReward, maxLimited, isElite, unlock conditions, next-level indices, BossName/LevelName).",
+      "formulas": [
+        "selector dispatch on local_19c: 1->CollectHubEntryConfigs, 4->CollectHubRaidConfigs, 2->CollectHubKingQuests, 3->CollectHubLetterQuests, 5->CollectHubPageStarLevelQuests, 7->FUN_1130bcd0",
+        "per-level element stride = 0x20 dwords (0x80 bytes): fields at [0]=levelID, [1]=levelMod, [2]=levelPointIndex, [4]=isValidLevel/levelShowType, [5]=levelDifficultType, [6]=levelIconName-related, [0xc]=levelLockType, [0xd]=maxLimited, +0x1d(byte)=isElite-flag, [0x14/0x15]=unlock-condition range, [0x17/0x18]=arrayNextLevelIndex range, [0x1a]=SubPageID, [0x1b]=strSubPageTitle key, [0x1e/0x1f]=star/priority sort keys",
+        "isReward = *(byte*)(elem+7); isReward reward id resolved via FUN_10976e80 (CLevelRewardInfo grid) then FUN_10976ff0",
+        "'best/highlight' level pick: keeps elem with higher [0x1f] (or equal [0x1f] and higher pppppiStack_174 vs [0x1e]) when [0xc]==0 (unlocked)"
+      ],
+      "serverRelevance": "client-only: UI list builder reading server-authoritative CMHLevelInfo config and unlock/reward state.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1097a150",
+      "currentName": "FUN_1097a150",
+      "proposedName": "InstanceSelectController::RequireInstanceRewardShow",
+      "subsystem": "rewards/claim UI",
+      "purpose": "Scans all hubs (outer) and up to 32 chapters (inner) to find the first unclaimed hub-completion reward and reports it to UI (hubId, chapterInfo, numReward, rewardId, stateReward). If none pending, reports terminal state 2.",
+      "formulas": [
+        "outer loop bound = FUN_10976b80() (hub count); hub obj = FUN_10976af0(hubIdx); inner loop 0..0x20 (32) chapters; chapter = FUN_116b8a70(i)",
+        "rewardId = hubObj->vtbl[+0x18](chapter+4, &iStack_54); reward state iStack_50 = FUN_1130c880(playerLevelObj local_2c, rewardId)",
+        "emit when rewardId>0 (iStack_54>0) && state!=1: stateReward = (rewardId==-1)?0:1; else if all hubs exhausted (hubCount<=hubIdx): report chapterInfo=-1, rewardId=-1, stateReward=2",
+        "iStack_50 init -5 sentinel; state==1 means already claimed"
+      ],
+      "serverRelevance": "validation: client computes which reward to show/request; server must authoritatively decide claim eligibility (state) and grant. Client display of stateReward is advisory.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1097c720",
+      "currentName": "FUN_1097c720",
+      "proposedName": "CLevelRegularRewardInfo::GetInfoManager",
+      "subsystem": "rewards/config",
+      "purpose": "Lazy singleton accessor for the CLevelRegularRewardInfo InfoManager (regular/repeatable level reward table); FindByName fallback with default DAT_123c03f8. No indexing (returns the manager base).",
+      "serverRelevance": "authoritative: config-table manager accessor.",
+      "confidence": "high"
+    },
+    {
+      "address": "1097fd80",
+      "currentName": "FUN_1097fd80",
+      "proposedName": "ItemListVO::BuildFromBagByMaterial",
+      "subsystem": "item/inventory UI",
+      "purpose": "Builds an ITEM_VO itemList view-object (param_5==2) by scanning the player's bag across bag types {0,2,10} and matching items whose base-item id equals a target material id (from FUN_11669250 -> +0x10). Writes per-item VO fields: id, count, asset, collumn(slot), isBind, m_nBindType, m_nFactItemLevel, and if transmogrify-capable m_nTransmogrifyItemId + quench fields.",
+      "formulas": [
+        "bag-type set auStack_18 = {0, 2, 10}; per type slotCount = FUN_113f92a0(type); item = FUN_113f9bb0(type, slotIdx)",
+        "match: candidate base id (from op-struct +0x10 via FUN_11669250) == target; count via item->vtbl[+0xc]()",
+        "isBind = (piVar3[8] != 0); m_nBindType = FUN_116693d0(); m_nFactItemLevel = item->vtbl[+0x18]()",
+        "quench block only if FUN_116698a0()!=0 (transmog-capable): m_nTransmogrifyItemId = piVar3[0x7d]; item def via FUN_1052bdd0; m_bCanQuench = (def+0x28c != 0); m_nMaxQuenchLevel = def+0x290; m_nQuenchLevel = (short)piVar3[0x7e]"
+      ],
+      "serverRelevance": "client-only: read-only bag view builder; bag contents are server-authoritative.",
+      "confidence": "medium"
+    },
+    {
+      "address": "109803b0",
+      "currentName": "FUN_109803b0",
+      "proposedName": "ItemListVO::BuildFromBagByTypeFilter",
+      "subsystem": "item/inventory UI",
+      "purpose": "Builds an ITEM_VO itemList (param_5==5) scanning bag types {0,2,10} filtered by item category fields (rareType iStack_78 at def+0x34, typeNormal piStack_74 at def+0x38, typeSub iStack_a0/iStack_7c at def+0x3c). Emits richer VO incl. m_typeNormal, m_typeSub, m_nRareType.",
+      "formulas": [
+        "bag types {0,2,10}; slotCount=FUN_113f92a0(type); item=FUN_113f9bb0(type,slot)",
+        "filter: (iStack_78<0 || iStack_78==def+0x34) && (piStack_74<0 || piStack_74==def+0x38); typeSub match: if iStack_7c==-1 use iStack_a0==def+0x3c; else if iStack_a0>=0 && iStack_a0!=def+0x3c && iStack_7c>=0 use iStack_7c==def+0x3c",
+        "sentinel -0x21524151 (0xDEADBEAF-like) marks 'no filter'; def field offsets +0x10(id) +0x34(rareType) +0x38(typeNormal) +0x3c(typeSub) +0xb4(asset) +0x4c(rareType alt)",
+        "quench fields identical to 1097fd80 (m_bCanQuench def+0x28c, m_nMaxQuenchLevel def+0x290, m_nQuenchLevel (short)piVar3[0x7e]); m_nRareType from item->vtbl[+0x2c]() when transmog-capable else def+0x4c"
+      ],
+      "serverRelevance": "client-only: bag view builder with category filter; contents server-authoritative.",
+      "confidence": "medium"
+    },
+    {
+      "address": "109814c0",
+      "currentName": "FUN_109814c0",
+      "proposedName": "IpvpSettlementDataVO::Build",
+      "subsystem": "pvp/league settlement UI",
+      "purpose": "Builds the mh.model.Ipvp.IpvpSettlementData VO after an interactive-PvP match: per-player rows (level, name, score, catcar), reward Items list, and league (排位) result: score/power deltas, coin change, faction, rank-band transition and pictures.",
+      "formulas": [
+        "player-row array stride = 0x430 bytes; row count = (list_end[+0x64] - list_begin[+0x60]) / 0x430; self row matched by row+4 == myId(iStack_f4+4)",
+        "RedTeamScore=battle+0x54, BlueTeamScore=battle+0x58, PlayerLevel=self+0x408, Score=self+0x40c, CatCar=self+0x414",
+        "league fields read from player+0x9880.. : LeagueType=[0x9880], LeagueScoreChange=[0x9881], LeaguePowerChange=[0x9882], LeagueSelfScoreChange/CoinChange=[0x9883]; [0x9884..0x988a] rank/pic state",
+        "LeagueCoinCurrent = FUN_1025b060(); LeagueCoinChange = iStack_c8 ([0x9883])",
+        "rank-band (LeagueType==4 only): tier = score/100 + 1; iStack_d0 = maxScore/100+1, iVar7 = curScore/100+1; LeagueCurSelRankScore = (maxScore/100+1)*100 - maxScore (points to next band); band-transition code: ==->1, cur<prev->3, prev<cur->2, else 0",
+        "Items list built from in_stack_00000018 pairs {id, count} stride 4 dwords as BaseItemVo(id,count)"
+      ],
+      "costs": [
+        "LeagueCoinCurrent snapshot = FUN_1025b060(); LeagueCoinChange = league coin delta awarded this match (server-computed)"
+      ],
+      "serverRelevance": "client-only: settlement UI. All scores, coin deltas, reward Items and rank transitions are server-authoritative; this function only renders them.",
+      "confidence": "medium"
+    },
+    {
+      "address": "109863d0",
+      "currentName": "FUN_109863d0",
+      "proposedName": "LevelEntrustDetailVO::BuildByGroup",
+      "subsystem": "quest/entrust (commission) UI",
+      "purpose": "Builds LEVELENTRUST_DETAILVO by (nGroupID,nSubGroupID,nLevelID) (param_5==4). If all three are 0, resolves the current active entrust (mgr+0x2b9c) else uses args. Writes accept state, current/max entrust counts, medal descriptions, title, target area, limit time, need-item, reward placeholders, and other-target array.",
+      "formulas": [
+        "arg parse: group=in+8(if type 3/4), subGroup=in+0x20, levelID=in+0x38; else default group=0xdeadbeaf sentinel",
+        "bIsAccept = (activeEntrust(+0xae7 obj)->[10](0) exists && its +8 == nLevelID)",
+        "curEntrustCount = (+0xae6 obj)->vtbl[10]()",
+        "maxEntrustCount = base->[0xb] + titleBonus, where titleBonus = mgr(local_10c+0x2b98)->vtbl[+0x20](titleObj, entrustCfg[0xc]) (0x10986502 area)",
+        "nLimitTime = *(entrustCfg+0x24)+0x40; needItemId=*(FUN_116ae260(3)+4), needItemCount=+8",
+        "nRewardUnBindGold / nRewardBindGold / nRewardExp all written 0 (client placeholders; real reward server-side)",
+        "strOtherTargetArr: iterates entrust other-target list, element stride = 0x54 bytes, count = (list+0x20 - list+0x1c)/0x54; medal desc block gated by FUN_116ae4c0 && FUN_1175b200(1)"
+      ],
+      "costs": [
+        "needItemId/needItemCount = commission material requirement (FUN_116ae260(3)); reward gold/exp displayed as 0 here (populated server-side elsewhere)"
+      ],
+      "serverRelevance": "validation/client-only: entrust detail UI; accept eligibility, counts and rewards are server-authoritative. maxEntrustCount = base + title bonus is a useful server rule to mirror.",
+      "confidence": "medium"
+    },
+    {
+      "address": "109899f0",
+      "currentName": "FUN_109899f0",
+      "proposedName": "LotteryActivityController::RegisterScriptHandlers",
+      "subsystem": "rewards/lottery activity",
+      "purpose": "Registers a gacha/lottery activity controller's script handlers: InitModel, FetchActivityData, FetchStaticData, FetchPlayerData, DeliverItem, DrawReward, DrawFinalReward, IsPrizeDrawn (via FUN_100b62c0 config bind + FUN_1098ad10 register).",
+      "serverRelevance": "client-only: handler registration. DrawReward/DrawFinalReward/DeliverItem are lottery draw requests the server must authoritatively resolve (RNG, item grant, cost).",
+      "confidence": "high"
+    },
+    {
+      "address": "1098bd60",
+      "currentName": "FUN_1098bd60",
+      "proposedName": "StarStoneController::RegisterScriptHandlers",
+      "subsystem": "starstone (upgrade/enchase)",
+      "purpose": "Registers star-stone (星石) script handlers: C2AS_GetStarStoneData, FeedFragments(1098c900), FeedCheck, GetAttributeByLevel, GetRepairMoney, RepairStone, GetStarStoneMaxLevelExp, GetStarFragmentAttribute, EnchaseLights, EnchaseCheck, GetCurrentWeaponAttribute, GetStarLightData, GetStarLightSlotUnlockCondition, GetStarLightAvailableList.",
+      "serverRelevance": "client-only: handler registration. RepairStone/FeedFragments/EnchaseLights mutate items+consume currency and must be server-authoritative (cost + success validated server-side).",
+      "confidence": "high"
+    },
+    {
+      "address": "1098c900",
+      "currentName": "FUN_1098c900",
+      "proposedName": "StarStoneController::OnFeedFragmentsResult",
+      "subsystem": "starstone (feed/level EXP)",
+      "purpose": "Builds FeedResultData VO from a C2AS_FeedFragments response (param_5/in_stack_00000014==1): consumed-fragment count list, per-element feed EXP gained, and money cost. Feeds fragments into the star-stone to raise its level.",
+      "formulas": [
+        "per-element FeedExp via FUN_1163d760(elem): elem 0=Fire, 1=Water, 2=Thunder, 3=Dragon, 4=Ice (written FeedExp_Fire/Water/Thunder/Dragon/Ice)",
+        "CostMoney = uStack_58 (money consumed by feed, from server result struct via FUN_1098bc10 / vtbl[+0xc](auStack_38,auStack_6c))",
+        "consumed items iterated: count per entry via FUN_104d4800 id/count into (id=uStack_b8, count=piStack_bc) accumulated by FUN_1163d700; loop bound = fragment list count vtbl[+0x28]",
+        "gated on levelInfo+0x26118 != 0"
+      ],
+      "costs": [
+        "CostMoney = currency consumed feeding fragments (server-computed, displayed here)",
+        "consumed fragment items (id,count) enumerated for UI"
+      ],
+      "serverRelevance": "client-only display of a server-authoritative feed result; server computes feed EXP per element, item consumption and money cost.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10992310",
+      "currentName": "FUN_10992310",
+      "proposedName": "FireworksActivityController::RegisterScriptHandlers",
+      "subsystem": "rewards/exchange activity",
+      "purpose": "Registers fireworks + exchange activity handlers (param_5==1): GetFireworksData, ReqFireworks, GetExchangeData, ReqExchangeReward, C2AS_IsActivityOpen.",
+      "serverRelevance": "client-only: handler registration. ReqFireworks/ReqExchangeReward consume/grant items and must be server-validated (exchange rate, stock, cost).",
+      "confidence": "high"
+    },
+    {
+      "address": "10999ab0",
+      "currentName": "data__QuenchEffectPropertyMo",
+      "proposedName": "data::QuenchEffectPropertyMo::ctor",
+      "subsystem": "quench (equip temper) data",
+      "purpose": "Constructor/initializer for the mh.data::QuenchEffectPropertyMo TLV model object (a single quench effect property row). Zeroes fields [0],[1], stores owner at [6], and if owner!=0 initializes the TLV wrapper.",
+      "serverRelevance": "client-only: TLV VO scaffold. Quench effect property values are server-authoritative config.",
+      "confidence": "high"
+    },
+    {
+      "address": "10999b80",
+      "currentName": "data__QuenchEffectMo",
+      "proposedName": "data::QuenchEffectMo::ctor",
+      "subsystem": "quench (equip temper) data",
+      "purpose": "Constructor for mh.data::QuenchEffectMo TLV model (a quench effect entry, groups QuenchEffectPropertyMo). Same zero+owner+TLV-init pattern.",
+      "serverRelevance": "client-only: TLV VO scaffold.",
+      "confidence": "high"
+    },
+    {
+      "address": "10999c40",
+      "currentName": "data__QuenchBillMo",
+      "proposedName": "data::QuenchBillMo::ctor",
+      "subsystem": "quench (equip temper) data",
+      "purpose": "Constructor for mh.data::QuenchBillMo TLV model (a quench 'bill'/cost record). Same zero+owner+TLV-init pattern.",
+      "serverRelevance": "client-only: TLV VO scaffold for quench cost data (real cost is server-computed).",
+      "confidence": "high"
+    },
+    {
+      "address": "10999cb0",
+      "currentName": "FUN_10999cb0",
+      "proposedName": "QuenchBillVO::WriteCostMoney",
+      "subsystem": "quench (equip temper)",
+      "purpose": "Trivial helper writing the 'iCostMoney' field into the current quench view/bill object via FUN_104d1550.",
+      "costs": [
+        "iCostMoney = quench operation currency cost (value passed in, server-computed)"
+      ],
+      "serverRelevance": "client-only: writes a single cost field for display; server owns the actual quench cost.",
+      "confidence": "high"
+    },
+    {
+      "address": "10999e20",
+      "currentName": "FUN_10999e20",
+      "proposedName": "EquipQuenchController::RegisterScriptHandlers",
+      "subsystem": "quench (equip temper)",
+      "purpose": "Registers equipment-quench (装备淬炼) script handlers: InitModel, CanQuenchEquip, GetQuenchEquipCost, GetQuenchEquipEffect, GetQuenchEquipCompareEffect, ReqEquipQuench, RollBackEquipQuench, GetTipsData (last bound to a data::QuenchEffectMo factory at 1099afa0).",
+      "serverRelevance": "client-only: handler registration. ReqEquipQuench/RollBackEquipQuench mutate equipment and consume currency; cost (GetQuenchEquipCost) and success/effect must be server-authoritative.",
+      "confidence": "high"
+    }
+  ]
+}

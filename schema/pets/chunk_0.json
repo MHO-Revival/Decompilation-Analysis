@@ -1,0 +1,781 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x101717d0",
+      "currentName": "FUN_101717d0",
+      "proposedName": "TlvCatCuisineState::UnpackText",
+      "purpose": "TDR text-format deserializer for the cat-cuisine state record. Reads [catCuisineID] into *param_1 and [state] into param_1[1] via TdrText_FieldScalar. Sets up SEH frame and optional cleanup (FUN_10c3da30). Returns -0x13 (-19) if the source buffer (param_2) is null.",
+      "confidence": "high",
+      "subsystem": "cuisine/serialization",
+      "serverRelevance": "serialization plumbing (TDR text codec); struct is server-owned cat-cuisine state (see TlvCatCuisineState)",
+      "formulas": [
+        "struct: +0x0 catCuisineID (int32, fmt DAT_11d9e0b4=\"%d\"-style), +0x4 state (uint32, fmt DAT_11d9f574)",
+        "null-source guard: if param_2==0 return -0x13 (-19)"
+      ],
+      "costs": [],
+      "notes": "Text (debug/log) variant of the TDR codec, distinct from the binary TLV reader at 0x10171710 (TlvCatCuisineState). Matches TlvCatCuisineState fields field_1/field_2."
+    },
+    {
+      "address": "0x101718b0",
+      "currentName": "FUN_101718b0",
+      "proposedName": "TlvCatCuisineState::PackText",
+      "purpose": "TDR text-format serializer (writer) for the cat-cuisine state record: writes [catCuisineID]=*param_1 then [state]=param_1[1].",
+      "confidence": "high",
+      "subsystem": "cuisine/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": [
+        "struct: +0x0 catCuisineID (int32), +0x4 state (uint32)"
+      ],
+      "costs": [],
+      "notes": "Pack counterpart of 0x101717d0."
+    },
+    {
+      "address": "0x101ff650",
+      "currentName": "FUN_101ff650",
+      "proposedName": "PetGatherRecord::PackText",
+      "purpose": "TDR text serializer for a pet gathering/farm record. Emits curExp, level, gatherCount, lastRefreshTime, petID, gatherLevel in order (short-circuits on first non-zero return).",
+      "confidence": "high",
+      "subsystem": "pets/gather-farm",
+      "serverRelevance": "authoritative (server owns gather EXP/level and refresh timing); this is the client-side text codec mirror",
+      "formulas": [
+        "struct layout: +0x0 curExp (int32), +0x4 level (int16), +0x6 gatherCount (int16), +0x8 lastRefreshTime (uint32), +0xc petID (int32), +0x10 gatherLevel (int16)",
+        "field width note: level/gatherCount/gatherLevel are 16-bit; curExp/lastRefreshTime/petID are 32-bit"
+      ],
+      "costs": [],
+      "notes": "Reveals per-pet gathering progression fields (gather EXP, gather level, gather count, last-refresh timestamp) that the server must track."
+    },
+    {
+      "address": "0x10200df0",
+      "currentName": "FUN_10200df0",
+      "proposedName": "PetAvatarInfo::PackText",
+      "purpose": "TDR text serializer for a pet avatar record: petID, skinID, a fixed 6-element avatarInfo array (byte-encoded via FUN_1010c010 with fmt 0x%02x-style), then sex (int8, fmt \"0x%02x\") and slot.",
+      "confidence": "high",
+      "subsystem": "pets/appearance",
+      "serverRelevance": "authoritative (server stores pet appearance/skin/slot)",
+      "formulas": [
+        "struct layout: +0x0 petID (int32), +0x4 skinID (int32), +0x8 avatarInfo[6] (each element 4 bytes, iterated 6x), +0x20 sex (int8, fmt \"0x%02x\"), +0x21 slot (uint32 read unaligned)",
+        "avatarInfo array header written via TdrText_ArrayHeader(...,6,0) then 6 elements"
+      ],
+      "costs": [],
+      "notes": "avatarInfo is a 6-entry array of appearance sub-values (customization). Uses TdrBuf_PutU8Z after array."
+    },
+    {
+      "address": "0x102074e0",
+      "currentName": "FUN_102074e0",
+      "proposedName": "SoulBeastState::PackText",
+      "purpose": "TDR text serializer for the persistent Soul Beast state record. Emits soulBeastGID (int64), oCharLevel, oCharExp, oCharGlut (glutton/hunger), oEvloveStage, oImage, oFollow, oFeedTime.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast",
+      "serverRelevance": "authoritative (server owns soul-beast level/exp/hunger/evolve-stage/feed-time)",
+      "formulas": [
+        "struct layout: +0x0 soulBeastGID (int64, fmt \"%I64u\", uses *param_1 + param_1[1]), +0x8 oCharLevel (int32), +0xc oCharExp (int32), +0x10 oCharGlut/hunger (int32), +0x14 oEvloveStage (int32), +0x18 oImage/faceID (int32), +0x1c oFollow (int32), +0x20 oFeedTime (int32)"
+      ],
+      "costs": [],
+      "notes": "Core soul-beast growth/state fields: level, exp, glut (satiety/hunger), evolve stage, image (face), follow flag, feed timestamp. 'Evlove' is the game's spelling. Maps to TlvSoulBeastSystemData."
+    },
+    {
+      "address": "0x102c00d0",
+      "currentName": "FUN_102c00d0",
+      "proposedName": "CatCuisineReq::UnpackText",
+      "purpose": "TDR text reader for a cat-cuisine request: iCatCuisineID into *param_1, dwState into param_1[1]. Returns -0x13 if source null.",
+      "confidence": "high",
+      "subsystem": "cuisine/serialization",
+      "serverRelevance": "validation (server reads/validates cuisine selection request)",
+      "formulas": [
+        "struct: +0x0 iCatCuisineID (int32), +0x4 dwState (uint32)",
+        "null guard returns -0x13"
+      ],
+      "costs": [],
+      "notes": "Same field pair as 0x101717d0 but different message (iCatCuisineID/dwState naming)."
+    },
+    {
+      "address": "0x102c0170",
+      "currentName": "FUN_102c0170",
+      "proposedName": "CatCuisineReq::PackText",
+      "purpose": "TDR text writer for iCatCuisineID/dwState pair.",
+      "confidence": "high",
+      "subsystem": "cuisine/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["struct: +0x0 iCatCuisineID (int32), +0x4 dwState (uint32)"],
+      "costs": [],
+      "notes": "Pack counterpart of 0x102c00d0."
+    },
+    {
+      "address": "0x10393970",
+      "currentName": "FUN_10393970",
+      "proposedName": "PetBlobMsg::PackText",
+      "purpose": "TDR text serializer for a variable-length pet blob: dwEntityId, iSize (bounds-checked), then szPet1[iSize] as a byte array. Validates size range before emitting.",
+      "confidence": "high",
+      "subsystem": "pets/serialization",
+      "serverRelevance": "validation (server enforces size bounds on the pet payload)",
+      "formulas": [
+        "struct: +0x0 dwEntityId (uint32), +0x4 iSize (int32), +0x8 szPet1[iSize] (byte array)",
+        "bounds check: if iSize<0 return -6; if iSize>0x400 (1024) return -7",
+        "array iterated byte-by-byte via FUN_1010c010"
+      ],
+      "costs": ["max blob size = 0x400 = 1024 bytes"],
+      "notes": "szPet1 is a raw byte buffer capped at 1024. Server-side must clamp identically."
+    },
+    {
+      "address": "0x103bf800",
+      "currentName": "FUN_103bf800",
+      "proposedName": "PetFacilityWorkReq::PackText",
+      "purpose": "TDR text serializer for a pet farm/facility work request: iFacilityType, iFacilityIndex, iPlowLandIndex, a 4-element pet array, a 4-element tools array, and bSkipCutScene flag.",
+      "confidence": "high",
+      "subsystem": "pets/farm-facility",
+      "serverRelevance": "validation (server validates facility/pet/tool assignment request)",
+      "formulas": [
+        "struct: +0x0 iFacilityType (int32), +0x4 iFacilityIndex (int32), +0x8 iPlowLandIndex (int32), +0xc pet[4] (4x int32), +0x1c tools[4] (4x int32), +0x2c bSkipCutScene (int8, fmt \"0x%02x\")",
+        "pet and tools arrays are fixed length 4 each (TdrText_ArrayHeader(...,4,0))"
+      ],
+      "costs": ["up to 4 pets and 4 tools per facility work order"],
+      "notes": "Farm system: assign up to 4 pets + 4 tools to a facility/plow-land slot."
+    },
+    {
+      "address": "0x103c1430",
+      "currentName": "FUN_103c1430",
+      "proposedName": "PetFacilityRef::PackText_A",
+      "purpose": "TDR text serializer for {iPetID, iFacilityType, iFacilityIndex}.",
+      "confidence": "high",
+      "subsystem": "pets/farm-facility",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["struct: +0x0 iPetID, +0x4 iFacilityType, +0x8 iFacilityIndex (all int32)"],
+      "costs": [],
+      "notes": "Identical layout to 0x103c1ab0 (two distinct messages share the struct)."
+    },
+    {
+      "address": "0x103c1ab0",
+      "currentName": "FUN_103c1ab0",
+      "proposedName": "PetFacilityRef::PackText_B",
+      "purpose": "TDR text serializer for {iPetID, iFacilityType, iFacilityIndex}; byte-identical to 0x103c1430.",
+      "confidence": "high",
+      "subsystem": "pets/farm-facility",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["struct: +0x0 iPetID, +0x4 iFacilityType, +0x8 iFacilityIndex (all int32)"],
+      "costs": [],
+      "notes": "Duplicate of 0x103c1430 for a sibling message type."
+    },
+    {
+      "address": "0x103c1d80",
+      "currentName": "FUN_103c1d80",
+      "proposedName": "PetErrResp::UnpackText",
+      "purpose": "TDR text reader for {iPetID, iErrCode}. Returns -0x13 if source null.",
+      "confidence": "high",
+      "subsystem": "pets/serialization",
+      "serverRelevance": "serialization plumbing (server-authored error response)",
+      "formulas": ["struct: +0x0 iPetID (int32), +0x4 iErrCode (int32); null guard -> -0x13"],
+      "costs": [],
+      "notes": "Generic pet-operation error response."
+    },
+    {
+      "address": "0x103c1e20",
+      "currentName": "FUN_103c1e20",
+      "proposedName": "PetErrResp::PackText",
+      "purpose": "TDR text writer for {iPetID, iErrCode}.",
+      "confidence": "high",
+      "subsystem": "pets/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["struct: +0x0 iPetID, +0x4 iErrCode (int32)"],
+      "costs": [],
+      "notes": "Pack counterpart of 0x103c1d80."
+    },
+    {
+      "address": "0x103c2150",
+      "currentName": "FUN_103c2150",
+      "proposedName": "PetFacilitySlotReq::PackText",
+      "purpose": "TDR text serializer for {iPetID, iFacilityType, iFacilityIndex, nFacilitySlot}.",
+      "confidence": "high",
+      "subsystem": "pets/farm-facility",
+      "serverRelevance": "validation (server validates facility slot assignment)",
+      "formulas": ["struct: +0x0 iPetID (int32), +0x4 iFacilityType (int32), +0x8 iFacilityIndex (int32), +0xc nFacilitySlot (int16)"],
+      "costs": [],
+      "notes": "nFacilitySlot is 16-bit."
+    },
+    {
+      "address": "0x103c2530",
+      "currentName": "FUN_103c2530",
+      "proposedName": "PetFacilityUseResp::PackText",
+      "purpose": "TDR text serializer for a facility-use response: iPetID, iErrCode, iFacilityType, iFacilityIndex, nFacilitySlot, nIsFirstUse, dwLeftTime.",
+      "confidence": "high",
+      "subsystem": "pets/farm-facility",
+      "serverRelevance": "authoritative (server computes remaining time, first-use flag, error code)",
+      "formulas": [
+        "struct: +0x0 iPetID (int32), +0x4 iErrCode (int32), +0x8 iFacilityType (int32), +0xc iFacilityIndex (int32), +0x10 nFacilitySlot (int16), +0x12 nIsFirstUse (int16), +0x14 dwLeftTime (uint32)"
+      ],
+      "costs": [],
+      "notes": "dwLeftTime = server-computed remaining cooldown/work time; nIsFirstUse gates first-use bonus/cutscene."
+    },
+    {
+      "address": "0x103c3420",
+      "currentName": "FUN_103c3420",
+      "proposedName": "PetTrainResultResp::PackText",
+      "purpose": "TDR text serializer for a pet TRAINING result: iErrCode, iPetID, iTrainID, then the resulting pet stats iMelee, iDefence, iMaxHP, iLoyalPoint, iSpirit, iPotential.",
+      "confidence": "high",
+      "subsystem": "pets/training",
+      "serverRelevance": "authoritative (server computes post-training stat block; client only displays)",
+      "formulas": [
+        "struct: +0x0 iErrCode (int32), +0x4 iPetID (int32), +0x8 iTrainID (int32), +0xc iMelee (int32), +0x10 iDefence (int32), +0x14 iMaxHP (int32), +0x18 iLoyalPoint (int32), +0x1c iSpirit (int32), +0x20 iPotential (int32)"
+      ],
+      "costs": [],
+      "notes": "Reveals the full pet stat vector affected by training: Melee (attack), Defence, MaxHP, LoyalPoint (loyalty), Spirit, Potential. iTrainID selects which training program was applied."
+    },
+    {
+      "address": "0x104123c0",
+      "currentName": "FUN_104123c0",
+      "proposedName": "SoulBeastType::UnpackTextField",
+      "purpose": "TDR text reader for a single [szSoulBeastType] formatted value field; returns -0x13 (0xffffffed) if source null, else the TdrText_FieldValueFmt result.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["single field [szSoulBeastType] via TdrText_FieldValueFmt; null guard -> 0xffffffed (-19)"],
+      "costs": [],
+      "notes": "One of a family of string-field codecs (0x104123c0/0x10412430/0x10412450/0x104124d0) for szSoulBeastType."
+    },
+    {
+      "address": "0x10412430",
+      "currentName": "FUN_10412430",
+      "proposedName": "SoulBeastType::PackTextField",
+      "purpose": "Minimal TDR text writer for [szSoulBeastType] field.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["writes [szSoulBeastType] via TdrText_FieldValueFmt"],
+      "costs": [],
+      "notes": "Pack counterpart."
+    },
+    {
+      "address": "0x10412450",
+      "currentName": "FUN_10412450",
+      "proposedName": "SoulBeastType::UnpackTextField_Buf",
+      "purpose": "TDR text reader for [szSoulBeastType] into a caller buffer with NUL termination; returns &DAT_11d9d32b (empty string) if buffer/len null.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["NUL-terminates output buffer at index 0 (or -1 if len==0)"],
+      "costs": [],
+      "notes": "Buffer-writing variant."
+    },
+    {
+      "address": "0x104124d0",
+      "currentName": "FUN_104124d0",
+      "proposedName": "SoulBeastType::UnpackTextField_Bounded",
+      "purpose": "TDR text reader for [szSoulBeastType] into a bounded buffer; clamps NUL position to cap-1 via TdrBuf_PutNulAt.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/serialization",
+      "serverRelevance": "serialization plumbing",
+      "formulas": ["clamp: if cap<=len then nulPos = cap-1; TdrBuf_PutNulAt(cap,nulPos)"],
+      "costs": [],
+      "notes": "Bounded string variant."
+    },
+    {
+      "address": "0x104190e0",
+      "currentName": "FUN_104190e0",
+      "proposedName": "PetDailyRecord::PackText",
+      "purpose": "TDR text serializer for {iPetIdx, iDateDay, iCurHigher} - a per-pet daily record tracking a date-day and a current-highest value.",
+      "confidence": "medium",
+      "subsystem": "pets/daily",
+      "serverRelevance": "authoritative (server tracks daily counter/highest with date-day reset)",
+      "formulas": ["struct: +0x0 iPetIdx (int32), +0x4 iDateDay (int32), +0x8 iCurHigher (int32)"],
+      "costs": [],
+      "notes": "iCurHigher likely a daily best-value (e.g. gather/training peak) with iDateDay used for daily reset."
+    },
+    {
+      "address": "0x104fd510",
+      "currentName": "FUN_104fd510",
+      "proposedName": "CCatCuisineInfo::GetRecordByIndex",
+      "purpose": "Config-manager accessor: obtains the CCatCuisineInfo singleton (falling back to CInfoManager::FindByName), then returns the record pointer at linear index param_1 from array [mgr+0x14 .. mgr+0x18].",
+      "confidence": "high",
+      "subsystem": "cuisine/config",
+      "serverRelevance": "client-only (static config table lookup; server would have its own copy)",
+      "formulas": [
+        "index bounds: 0 <= param_1 < (mgr[6]-mgr[5])>>2  (element size 4)",
+        "return *(mgr[5] + param_1*4)  where mgr[5]=array begin, mgr[6]=array end"
+      ],
+      "costs": [],
+      "notes": "Standard CInfoManager singleton pattern (lazy-init guard DAT_123be344 bit0). Array of record pointers, 4-byte elements."
+    },
+    {
+      "address": "0x104fd5a0",
+      "currentName": "FUN_104fd5a0",
+      "proposedName": "CCatCuisineInfo::ReleaseManager",
+      "purpose": "Resolves the CCatCuisineInfo singleton and calls its vtable+0x28 method (release/cleanup).",
+      "confidence": "medium",
+      "subsystem": "cuisine/config",
+      "serverRelevance": "client-only",
+      "formulas": ["calls (*(mgr+0x28))() after singleton resolution"],
+      "costs": [],
+      "notes": "Cleanup helper for the config singleton."
+    },
+    {
+      "address": "0x10510ff0",
+      "currentName": "FUN_10510ff0",
+      "proposedName": "CPetInfoPanel::RefreshPetList",
+      "purpose": "Scaleform UI: rebuilds the _petList VO array (PetPropertyALLVO_CLASS_NAME) by iterating the panel's pet list (records stride 0x30 between +0x134 and +0x138), calling CPetInfoPanel::BuildPetDetailVO_ByLookup per pet, then invokes Flash ResetPos / RefreshPetInfoByPos.",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only (UI rendering of pet list)",
+      "formulas": [
+        "pet record iteration: from *(this+0x134) to *(this+0x138), stride 0x30",
+        "per-record fields used: +0x1c, +0x24, +0x28 (petid), +0x2c (petindex)"
+      ],
+      "costs": [],
+      "notes": "Flash/Scaleform plumbing. Pet list node is 0x30 bytes."
+    },
+    {
+      "address": "0x10512150",
+      "currentName": "FUN_10512150",
+      "proposedName": "CPetPanelUI::RefreshAll",
+      "purpose": "Scaleform UI dispatcher: depending on a mode check (FUN_1050a550), rebuilds the pet property view via CPetPanelUI::BuildSubSkillListVO + BuildEquippedSkillLists, sets _PetPos, fires RefreshPetPropertyUI and _root.Global_PetAvatarRefresh; sets dirty flags at +0x18c/+0x18d.",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["pet list non-empty test: *(this+0x134) != *(this+0x138)"],
+      "costs": [],
+      "notes": "Builds sub-skill (support-cat skills) and equipped-skill lists in the UI. Actual skill data comes from server; this only renders."
+    },
+    {
+      "address": "0x10512310",
+      "currentName": "FUN_10512310",
+      "proposedName": "CPetPanelUI::RefreshByMode",
+      "purpose": "Scaleform UI: mode-gated refresh that sets _PetPos, calls RefreshPetInfoByPos and ShowAsEnviroment(*(this+0x180)); otherwise delegates to RefreshPetList (0x10510ff0).",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "ShowAsEnviroment toggle uses field +0x180."
+    },
+    {
+      "address": "0x10512810",
+      "currentName": "FUN_10512810",
+      "proposedName": "CPetPanelUI::OnFirePetClicked",
+      "purpose": "Handles the 'fire/dismiss pet' (FirePet) confirm flow: sets a flag at +0x1a0, resolves CMessageParmDescInfo config, and pops a MsgBox with OK/Cancel (MsgBoxFirePetOk / MsgBoxFirePetCancel), message id 0x1fb5.",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only (confirmation dialog; the actual fire request goes elsewhere)",
+      "formulas": [
+        "message-param 2D lookup index: iVar5 = 0x2f - mgr[0xc]; valid if 0<=iVar5<mgr[9]; row=mgr[8][iVar5/mgr[10]], col index iVar5%mgr[10]",
+        "msgbox id = 0x1fb5"
+      ],
+      "costs": [],
+      "notes": "0x2f is a fixed message-descriptor id offset; 0x70 error path calls FUN_10c3d580(0x70)."
+    },
+    {
+      "address": "0x10512a20",
+      "currentName": "FUN_10512a20",
+      "proposedName": "CPetPanelUI::RenderPetAvatarImage",
+      "purpose": "Scaleform: fetches the FlashUI render target and blits the pet avatar into the 'petavatarimg' element, scaling by a DPI factor from the render device.",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["render size = deviceScale * _DAT_11de99c8 (H) and _DAT_11de99d8 (V)"],
+      "costs": [],
+      "notes": "Pure rendering; refcount management on the Flash object."
+    },
+    {
+      "address": "0x10512b70",
+      "currentName": "FUN_10512b70",
+      "proposedName": "CPetInfoPanel::BuildPetsListVO",
+      "purpose": "Scaleform: builds _PetsList VO array with per-pet strName, level, petindex, petid, status; iterates pet nodes (stride 0x30) and calls BuildPetDetailVO_ByLookup + BuildPetInfoVO for the selected pet.",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "per-node fields: +0x04 level, +0x1c (icon/asset key), +0x20 status, +0x28 petid, +0x2c petindex; stride 0x30",
+        "selected pet match: *(this+0x34)==node+0x2c && *(this+0x38)==node+0x28"
+      ],
+      "costs": [],
+      "notes": "Confirms pet-list node layout (level@+4, status@+0x20, petid@+0x28, petindex@+0x2c)."
+    },
+    {
+      "address": "0x10512e20",
+      "currentName": "FUN_10512e20",
+      "proposedName": "CPetInfoPanel::BuildPetsListVO_Select",
+      "purpose": "Scaleform: variant of BuildPetsListVO that also drives default-selection and calls BuildPetInfoVO under several fallback conditions (empty list, param_3 flag).",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "node stride 0x30; count = (*(this+0x138)-*(this+0x134))/0x30",
+        "on first node when !param_3: set selection *(this+0x34)=node+0x2c, *(this+0x38)=node+0x28"
+      ],
+      "costs": [],
+      "notes": "Selection/default-pet logic for the pet panel."
+    },
+    {
+      "address": "0x10515860",
+      "currentName": "FUN_10515860",
+      "proposedName": "CPetPanelUI::BuildPetEquipsVO",
+      "purpose": "Scaleform: builds the _PetEquips VO array (PETEQUIPITEMVO_CLASS_NAME) from the pet's equipment list (nodes stride 0x40 between +0x158 and +0x15c), emitting asset, name, collumn, m_bUseItem, isBind, m_nBindType; then fires RefreshPetEquipsUI.",
+      "confidence": "medium",
+      "subsystem": "pets/equipment/UI",
+      "serverRelevance": "client-only (renders server-owned pet equipment inventory)",
+      "formulas": [
+        "equip node stride 0x40 (0x10 int words); fields: +0x0 itemId, +0x4 (id2), +0x8 collumn, +0x2c asset, +0x34 m_bUseItem(=0<node[0xd]), +0x38 isBind(node[0xe]), +0x3c m_nBindType(node[0xf])",
+        "empty slot when node[0]==0"
+      ],
+      "costs": [],
+      "notes": "Pet equipment slot record is 0x40 bytes; m_bUseItem = (durability/use count node[0xd] > 0)."
+    },
+    {
+      "address": "0x10516d50",
+      "currentName": "FUN_10516d50",
+      "proposedName": "CPetPanelUI::RenderPetAvatar3D",
+      "purpose": "Scaleform: positions/scales the 3D pet avatar render (color-transform + translate) reading 4 double values from the incoming VO (offsets +0x8, +0x20, +0x38, +0x50) and blits into petavatarimg when dirty.",
+      "confidence": "low",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "reads doubles at VO+0x8, +0x20, +0x38, +0x50 (guarded by type-tag byte &0x8f==5 meaning double)",
+        "final translate/scale multiplied by device scale factor and _DAT_11de99c8/_DAT_11de99d8"
+      ],
+      "costs": [],
+      "notes": "Rendering-only; VO type tag 5 = double in the Scaleform value union."
+    },
+    {
+      "address": "0x10517820",
+      "currentName": "FUN_10517820",
+      "proposedName": "CPetPanelUI::SetPetName",
+      "purpose": "Scaleform: writes the pet's display name into the _PetName field (name fetched via FUN_112f64e0 from pet id at +0x34/+0x38).",
+      "confidence": "medium",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Pet name resolved from selected pet id (this+0x34 petindex, this+0x38 petid)."
+    },
+    {
+      "address": "0x105193a0",
+      "currentName": "FUN_105193a0",
+      "proposedName": "PetShowChxTime::CheckDailyReset",
+      "purpose": "Loads the persisted 'PetShowChxTime' timestamp, converts both it and now via _localtime64_s, and sets an output flag when the stored year/month/day differ from today (daily-reset detection for a pet UI 'show' hint).",
+      "confidence": "medium",
+      "subsystem": "pets/UI-preference",
+      "serverRelevance": "client-only (local persisted preference / daily flag, not server state)",
+      "formulas": [
+        "reset trigger if (storedYear != todayYear) || (storedMon != todayMon) || (storedDay != todayMday); day compared via tm_isdst field reuse (decompiler artifact)"
+      ],
+      "costs": [],
+      "notes": "Uses local config store (FUN_1126e800 key 'PetShowChxTime'). Client daily-hint bookkeeping only."
+    },
+    {
+      "address": "0x10519500",
+      "currentName": "FUN_10519500",
+      "proposedName": "PetShowChxTime::Persist",
+      "purpose": "Writes/clears the persisted 'PetShowChxTime' value (stores current time via FUN_111f8d20 when flag set, else clears) in the local config store.",
+      "confidence": "medium",
+      "subsystem": "pets/UI-preference",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Setter counterpart to 0x105193a0."
+    },
+    {
+      "address": "0x10519640",
+      "currentName": "FUN_10519640",
+      "proposedName": "CPetPanelUI::OnRequireItemUpdated",
+      "purpose": "Scaleform: when the panel's tracked item id (+0x48) matches the local player's current item context (entity +0xf8), sets _PetPos and fires SetRequireItemId / RefreshPetPropertyUI.",
+      "confidence": "low",
+      "subsystem": "pets/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["gate: *(this+0x48) > 0 && *(this+0x48) == *(playerEntity+0xf8)"],
+      "costs": [],
+      "notes": "Refreshes required-item display for pet actions."
+    },
+    {
+      "address": "0x10520400",
+      "currentName": "FUN_10520400",
+      "proposedName": "CSoulBeastInfo::GetRecordById",
+      "purpose": "CSoulBeastInfo config accessor with base-offset + 2D (row/col) indexing: resolves singleton, adjusts id by base offset mgr[0xc], then indexes the row/col table (cols = mgr[10]).",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/config",
+      "serverRelevance": "client-only (static config table)",
+      "formulas": [
+        "guard: param!=-1 && (param!=0 || mgr[0xc]==0) && mgr[10]!=0",
+        "idx = param - mgr[0xc]; valid if 0<=idx<mgr[9]",
+        "row = mgr[8][idx / mgr[10]]; return row[idx % mgr[10]]"
+      ],
+      "costs": [],
+      "notes": "Sparse 2D bucket table (mgr[8]=row-ptr array, mgr[9]=capacity, mgr[10]=bucket width, mgr[0xc]=min id). Lazy-init guard DAT_123c7298."
+    },
+    {
+      "address": "0x105204a0",
+      "currentName": "FUN_105204a0",
+      "proposedName": "CSoulBeastInfo::GetRecordByIndex",
+      "purpose": "CSoulBeastInfo linear-index accessor: returns record ptr at index param_1 from [mgr+0x14..mgr+0x18].",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/config",
+      "serverRelevance": "client-only",
+      "formulas": ["bounds: 0<=param<(mgr[6]-mgr[5])>>2; return *(mgr[5]+param*4)"],
+      "costs": [],
+      "notes": "Linear counterpart of the 2D accessor at 0x10520400."
+    },
+    {
+      "address": "0x10520530",
+      "currentName": "FUN_10520530",
+      "proposedName": "CSoulBeastInfo::ReleaseManager",
+      "purpose": "Resolves CSoulBeastInfo singleton and calls its vtable+0x28 cleanup method.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/config",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Cleanup helper."
+    },
+    {
+      "address": "0x10520c80",
+      "currentName": "data__SoulBeastMo",
+      "proposedName": "data::SoulBeastMo::ctor",
+      "purpose": "Constructor for the 'mh.data::SoulBeastMo' Scaleform value-object; zero-inits and tags with the class name when a movie context is provided.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/UI-VO",
+      "serverRelevance": "client-only",
+      "formulas": ["obj[0]=0; obj[1]=0; obj[6]=ctx; if ctx: FUN_11a98de0(obj,\"mh.data::SoulBeastMo\",0,0)"],
+      "costs": [],
+      "notes": "One of five VO constructors (SoulBeastMo/FaceMo/DetailMo/UnlockMo/FoodMo)."
+    },
+    {
+      "address": "0x10520d90",
+      "currentName": "data__SoulBeastFaceMo",
+      "proposedName": "data::SoulBeastFaceMo::ctor",
+      "purpose": "Constructor for the 'mh.data::SoulBeastFaceMo' Scaleform value-object.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/UI-VO",
+      "serverRelevance": "client-only",
+      "formulas": ["tags obj with \"mh.data::SoulBeastFaceMo\" when ctx set"],
+      "costs": [],
+      "notes": "Soul-beast face/appearance VO."
+    },
+    {
+      "address": "0x10520ea0",
+      "currentName": "data__SoulBeastDetailMo",
+      "proposedName": "data::SoulBeastDetailMo::ctor",
+      "purpose": "Constructor for the 'mh.data::SoulBeastDetailMo' Scaleform value-object.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/UI-VO",
+      "serverRelevance": "client-only",
+      "formulas": ["tags obj with \"mh.data::SoulBeastDetailMo\" when ctx set"],
+      "costs": [],
+      "notes": "Detail VO."
+    },
+    {
+      "address": "0x10521120",
+      "currentName": "data__SoulBeastUnlockMo",
+      "proposedName": "data::SoulBeastUnlockMo::ctor",
+      "purpose": "Constructor for the 'mh.data::SoulBeastUnlockMo' Scaleform value-object.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/UI-VO",
+      "serverRelevance": "client-only",
+      "formulas": ["tags obj with \"mh.data::SoulBeastUnlockMo\" when ctx set"],
+      "costs": [],
+      "notes": "Unlock-condition VO."
+    },
+    {
+      "address": "0x10521210",
+      "currentName": "data__SoulBeastFoodMo",
+      "proposedName": "data::SoulBeastFoodMo::ctor",
+      "purpose": "Constructor for the 'mh.data::SoulBeastFoodMo' Scaleform value-object.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/UI-VO",
+      "serverRelevance": "client-only",
+      "formulas": ["tags obj with \"mh.data::SoulBeastFoodMo\" when ctx set"],
+      "costs": [],
+      "notes": "Feed/food VO."
+    },
+    {
+      "address": "0x10521420",
+      "currentName": "FUN_10521420",
+      "proposedName": "CSoulBeastPanelUI::InitModel",
+      "purpose": "Initializes the Soul Beast panel's Flash<->native callback registry, binding external interface names to handlers: InitModel, GetSoulStoneData, GetAttrUpData, Reset, StageUp, UnlockStage, LearnAttr, GetItemName, CloseUI, SetAvatarFrameData, SendSoulBeastSocialAction, GetSoulBeastSocialActionData, UnLockBeast, GetSoulBeastConditionArr, GetSoulBeastData, GetSoulBeastDetailData, GetSoulBeastFace, GetSoulBeastFood, OnlyOneFeedTips, FeedSoulBeast, IsAchieveMaxLevel, etc. Also caches gfx_draw/gfx_draw_only material handles.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/UI",
+      "serverRelevance": "client-only (UI dispatch table; the named actions map to server requests handled elsewhere)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Enumerates the full soul-beast client action surface: StageUp/UnlockStage (evolution), LearnAttr (attribute/skill learning), FeedSoulBeast (feeding), UnLockBeast. Handler bodies (FUN_10525xxx/FUN_10526xxx) are outside this chunk. gfx_draw material handles stored at this+0x2c/+0x30."
+    },
+    {
+      "address": "0x10521f00",
+      "currentName": "FUN_10521f00",
+      "proposedName": "CSoulBeastPanelUI::SetupAvatarModel",
+      "purpose": "Registers avatar-refresh callbacks (event ids 0x1121/0x1122) and fires _root.Global_SoulBeastAvatarRefresh; stores the avatar object at this+0x44.",
+      "confidence": "low",
+      "subsystem": "pets/soul-beast/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["event ids 0x1121, 0x1122"],
+      "costs": [],
+      "notes": "Avatar preview wiring."
+    },
+    {
+      "address": "0x10523e90",
+      "currentName": "data__SoulBeastUnlockMo_10523e90",
+      "proposedName": "CSoulBeastPanelUI::BuildUnlockConditionVO",
+      "purpose": "Builds the soul-beast stage/unlock condition VO array (lockConditionArr): for each condition evaluates an unlock checker and emits iUnlockType, bIsUnlock, iUnlockParam, and (for level-type conditions) a param label; sets aggregate bIsUnlock/lockType and lockConditionTips.",
+      "confidence": "medium",
+      "subsystem": "pets/soul-beast/evolution",
+      "serverRelevance": "validation (mirrors server-side unlock rules for display; server is authoritative on whether a stage is unlocked)",
+      "formulas": [
+        "condition checker: (*(vtbl+8))(playerCtx, condition, ...) -> bIsUnlock (bool)",
+        "aggregate bIsUnlock stays true only while every condition returns true",
+        "switch(unlockType): case 1/2/4/5/6 -> iUnlockParam = *(cond+4); case 3 (level/quest) -> iUnlockParam = *(cond+8), and label lookup key = *(cond+4)*100 + *(cond+8) via FUN_10520b90, label from result+0x14",
+        "non-checker branch (FUN_11412fc0 true): reads current level (FUN_11439380 -> iLevel) and a second value (FUN_11439200), lockType=2"
+      ],
+      "costs": [],
+      "notes": "Unlock condition types: type 3 uses composite key type*100+param (e.g. chapter/quest gating). Reveals unlock-condition struct: +0x4 and +0x8 are the two params. Server must enforce these before allowing StageUp/UnlockStage."
+    },
+    {
+      "address": "0x105245e0",
+      "currentName": "data__SoulBeastFoodMo_105245e0",
+      "proposedName": "CSoulBeastPanelUI::BuildFeedAndEvolveVO",
+      "purpose": "KEY FORMULA FUNCTION. Builds the soul-beast feed/evolve detail VO: current level/growth/hunger and their caps, max-level/evolve state, evolution gold+silver+item costs and affordability flags, and food-box capacity. Reads evolve-info and level-up-info config records.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/evolution+feeding",
+      "serverRelevance": "authoritative (server owns level/growth/hunger and computes evolution eligibility & cost consumption; this is the client mirror for the confirm UI, so exact numbers match server rules)",
+      "formulas": [
+        "iLevel = FUN_11439380() (current soul-beast level)",
+        "iGrow = FUN_11439200() (current growth/exp)",
+        "iHungry = FUN_115aad40() (current satiety/hunger)",
+        "iMaxGrow = levelUpInfo(FindInfoByTypeLevel(type)).field(+0x1c)",
+        "iMaxHungry = FUN_1171a1d0().field(+0x48)",
+        "iMaxLevel selection: if curLevel >= CSoulBeastLevelUpInfo::GetMaxLevel(type) -> 0xffffffff(-1); else if evolveStage < CSoulBeastEvolveInfo::GetMaxEvolveStage(type) -> nextEvolve.reqLevel(evolveInfo+0x1c); else -> 0xfffffffe(-2)",
+        "bCanEvolveBeast = (evolveInfo.reqLevel(+0x1c) <= curLevel)",
+        "iNeedGold = evolveInfo(+0x24); bEnoughGold = iNeedGold <= FUN_11396e10(iNeedGold, 0)  [currency-0 balance check]",
+        "iNeedSilver = evolveInfo(+0x20); bEnoughSilver = (gold+silver) <= FUN_11396e10(gold+silver, 1)  [currency-1 balance check]",
+        "arrNeedItems: iterate evolve item-req list from *(evolveInfo+0x30) down to (evolveInfo+0x28), stride 0x10; per item iItemId(+0x10), iItemCount(+0x14), bEnough = required(+0x14) <= inventoryCount(FUN_113fa380(itemId))",
+        "iBoxCapacity = FUN_114c7530(); iMaxBoxCapacity = FUN_114c7510() (food-box capacity)"
+      ],
+      "costs": [
+        "evolution gold cost = evolveInfo+0x24",
+        "evolution silver cost = evolveInfo+0x20 (checked as gold+silver combined)",
+        "evolution material items = list at evolveInfo+0x28..+0x30 (stride 0x10: itemId@+0x10, count@+0x14)",
+        "level cap sentinels: -1 = at max level, -2 = at max evolve stage"
+      ],
+      "notes": "evolveInfo struct offsets: +0x1c reqLevel for next stage, +0x20 silver cost, +0x24 gold cost, +0x28/+0x30 item-requirement vector (begin/end). CSoulBeastEvolveInfo (config) confirmed in schema (soulBeastId@0x14, evolveStage@0x18). Currency checker FUN_11396e10(amount, currencyType) returns available balance; type 0=gold, 1=silver."
+    },
+    {
+      "address": "0x10524c10",
+      "currentName": "data__SoulBeastFaceMo_10524c10",
+      "proposedName": "CSoulBeastPanelUI::BuildFaceListVO",
+      "purpose": "Builds the beastFaceArray VO and CurrentFaceID: iterates all face/appearance config entries emitting iItemId, strIcon, iLevel(req level), isLock (locked if current level below req), bIsUse (equipped == current face id).",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/appearance",
+      "serverRelevance": "authoritative (server owns current face id and unlock-by-level); client mirror for UI",
+      "formulas": [
+        "per-face fields: +0x4 iItemId, +0x1c strIcon, +0x50 iLevel (required level)",
+        "isLock = (currentLevel(FUN_11439380) < face.reqLevel(+0x50))",
+        "bIsUse = (face.itemId(+0x4) == currentFaceId(FUN_11439740))",
+        "CurrentFaceID = FUN_11439740()"
+      ],
+      "costs": [],
+      "notes": "Face unlock gate is purely by soul-beast level (face.reqLevel at +0x50)."
+    },
+    {
+      "address": "0x10524f20",
+      "currentName": "data__SoulBeastFoodMo_10524f20",
+      "proposedName": "CSoulBeastPanelUI::BuildFoodListVO",
+      "purpose": "Builds the beastFoodArray VO: iterates the soul-beast's valid food item list emitting iItemId, iItemCount (player inventory count), and iItemLevel.",
+      "confidence": "high",
+      "subsystem": "pets/soul-beast/feeding",
+      "serverRelevance": "authoritative (server validates feed-item eligibility & consumes items); client mirror",
+      "formulas": [
+        "per-food fields: +0x4 iItemId; iItemCount = FUN_113fa380(itemId) (owned count); iItemLevel = foodItem.vtbl+0x18()"
+      ],
+      "costs": [],
+      "notes": "Food list sourced from soul-beast config record (FUN_115aad30 -> list at +0x1c..+0x20). Feeding item level affects growth gain (growth/hunger applied server-side)."
+    },
+    {
+      "address": "0x10525e00",
+      "currentName": "FUN_10525e00",
+      "proposedName": "CSoulBeastPanelUI::RenderAvatar3D",
+      "purpose": "Scaleform: color-transforms and positions the soul-beast 3D avatar into avatarSoulBeastShow, reading 4 doubles from the VO and firing _root.Global_SoulBeastAvatarRefresh; near-identical to the pet variant at 0x10516d50.",
+      "confidence": "low",
+      "subsystem": "pets/soul-beast/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["reads doubles at VO +0x8/+0x20/+0x38/+0x50; scale by device factor * _DAT_11de99c0"],
+      "costs": [],
+      "notes": "Rendering only."
+    },
+    {
+      "address": "0x10526080",
+      "currentName": "FUN_10526080",
+      "proposedName": "CSoulBeastPanelUI::RenderAvatarImage",
+      "purpose": "Scaleform: blits the soul-beast avatar into the avatarSoulBeastShow element scaled by device DPI factor.",
+      "confidence": "low",
+      "subsystem": "pets/soul-beast/UI",
+      "serverRelevance": "client-only",
+      "formulas": ["render size = deviceScale * _DAT_11de99c0"],
+      "costs": [],
+      "notes": "Rendering only; sibling of 0x10512a20."
+    },
+    {
+      "address": "0x1052bf70",
+      "currentName": "FUN_1052bf70",
+      "proposedName": "CPetInfo::GetRecordById",
+      "purpose": "CPetInfo config accessor with base-offset + 2D (row/col) indexing (identical pattern to CSoulBeastInfo::GetRecordById), returning the pet config record for a pet id.",
+      "confidence": "high",
+      "subsystem": "pets/config",
+      "serverRelevance": "client-only (static pet config table; server keeps its own)",
+      "formulas": [
+        "guard: id!=-1 && (id!=0 || mgr[0x30]==0) && mgr[0x28]!=0",
+        "idx = id - mgr[0x30]; valid if 0<=idx<mgr[0x24]",
+        "row = mgr[0x20][idx / mgr[0x28]]; return row[idx % mgr[0x28]]"
+      ],
+      "costs": [],
+      "notes": "CPetInfo manager: +0x20 row-ptr array, +0x24 capacity, +0x28 bucket width, +0x30 min id. Lazy-init guard DAT_123be7b4."
+    },
+    {
+      "address": "0x10530e20",
+      "currentName": "FUN_10530e20",
+      "proposedName": "WeaponUIConfig::LoadFromXml",
+      "purpose": "Loads Libs/WeaponUIConfig.xml (WeaponUICOnfigs): parses GlobalConfig (maxscale/minscale/scalespeed), per-weapon WeaponConfigs (indexed by weaponid-0x1f into a 12-slot table stride 0x48), EquipConfigs with PlayerConfig and PetConfig, and WeaponConfigOverride entries.",
+      "confidence": "medium",
+      "subsystem": "pets/UI-config",
+      "serverRelevance": "client-only (visual placement/scale config)",
+      "formulas": [
+        "weapon slot index = weaponid - 0x1f, valid range [0,0xc); slot base = base + index*0x48",
+        "GlobalConfig writes: maxscale->DAT_11e22934, minscale->DAT_11e22938, scalespeed->this+0x2c"
+      ],
+      "costs": [],
+      "notes": "Only PetConfig block (this+0x40c) is pet-relevant here: display transform for the pet weapon/model in UI. Not gameplay data."
+    },
+    {
+      "address": "0x107cb110",
+      "currentName": "FUN_107cb110",
+      "proposedName": "CPetEquipInfo::GetRecordById",
+      "purpose": "CPetEquipInfo config accessor with base-offset + 2D indexing (same pattern as CPetInfo), returning the pet-equipment config record for an id.",
+      "confidence": "high",
+      "subsystem": "pets/equipment/config",
+      "serverRelevance": "client-only (static config table)",
+      "formulas": [
+        "idx = id - mgr[0x30]; valid if 0<=idx<mgr[0x24]; row=mgr[0x20][idx/mgr[0x28]]; return row[idx%mgr[0x28]]"
+      ],
+      "costs": [],
+      "notes": "Lazy-init guard DAT_123bea3c. Manager offsets 0x20/0x24/0x28/0x30 as in CPetInfo."
+    },
+    {
+      "address": "0x10835cb0",
+      "currentName": "FUN_10835cb0",
+      "proposedName": "GameSettings::SaveCVars",
+      "purpose": "Serializes a large block of client game-settings CVars (camera, input, display, gameplay toggles) via sprintf into a settings buffer. Stock settings-persistence code; among the many CVars are pet-related display toggles handled in the loader sibling.",
+      "confidence": "low",
+      "subsystem": "settings (client)",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Not pet gameplay logic - included in this chunk only because it neighbors pet CVars. CryEngine CVar plumbing."
+    },
+    {
+      "address": "0x10836b50",
+      "currentName": "FUN_10836b50",
+      "proposedName": "GameSettings::LoadCVars",
+      "purpose": "Loads/applies client game-settings CVars including the pet-name display toggles cl_ShowPlayerPetName and cl_ShowHeroPetName (plus refuse-request, name-pad, effect-hide toggles).",
+      "confidence": "low",
+      "subsystem": "settings (client)",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "cl_ShowPlayerPetName / cl_ShowHeroPetName are the only pet-touching entries; purely local display preferences. CryEngine CVar plumbing."
+    }
+  ]
+}

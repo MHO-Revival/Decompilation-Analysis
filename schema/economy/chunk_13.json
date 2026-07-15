@@ -1,0 +1,382 @@
+{
+  "chunkIndex": 13,
+  "functions": [
+    {
+      "address": "1139dcb0",
+      "currentName": "FUN_1139dcb0",
+      "proposedName": "CPlayerLevelUpInfo::AddExpComputeLevel",
+      "subsystem": "leveling",
+      "purpose": "Given a current (level=param_1, exp=param_2) and an exp delta (param_3), computes the resulting (level->*param_4, exp->*param_5) by rolling exp over per-level EXP caps. Looks up the CPlayerLevelUpInfo record for the level; the per-level EXP-to-next cap is at entry+0x14. Carries overflow into subsequent levels via FUN_10b629d0(level) (per-level info lookup), stopping at the level cap.",
+      "formulas": [
+        "InfoManager lookup: idx=level-mgr[0x30]; require 0<=idx<mgr[0x24]; block=mgr[0x20][idx/mgr[0x28]]; entry=block[idx%mgr[0x28]] (standard CInfoManager paged pattern)",
+        "entry+0x14 = EXP required to advance from this level (per-level cap)",
+        "levelCap = *(FUN_1046c7c0(1) + 0xd0); if levelCap <= level return 0xffffffff",
+        "if exp+delta < entry[0x14]: outLevel=level, outExp=exp+delta (no level change)",
+        "else level-up: carry = (exp - entry[0x14]) + delta; outExp=0; outLevel=level+1; then while true: nextEntry=FUN_10b629d0(outLevel); cap=nextEntry[0x14]; if carry<cap break (outExp=carry); else outLevel++, carry-=cap; stop when outLevel>=levelCap",
+        "returns 0 on success, 0xffffffff on error (invalid level / level>=cap / missing entry / exp>=cap)"
+      ],
+      "costs": ["EXP curve: per-level EXP-to-next stored at CPlayerLevelUpInfo entry+0x14", "hard level cap at FUN_1046c7c0(1)+0xd0"],
+      "serverRelevance": "authoritative - this is the exact EXP->level accumulation the server must run to award levels; do not trust client level. Validate against same CPlayerLevelUpInfo curve.",
+      "confidence": "high"
+    },
+    {
+      "address": "11404e20",
+      "currentName": "CEquipEnforceBreak::GetManagers",
+      "proposedName": "CEquipEnforceBreak::GetManagers",
+      "subsystem": "upgrade",
+      "purpose": "Singleton accessor / CInfoManager registration for the CEquipEnforceBreak config table (equipment enforce/enhance failure-break data). Stock CryEngine StcMbrNameSvr singleton plumbing (RegisterAndGetSingleton + CInfoManager::FindByName, one-shot init flags DAT_1218f860/DAT_1218f8a8).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing; the table it returns is config the server also needs, but this accessor is boilerplate.",
+      "confidence": "high"
+    },
+    {
+      "address": "114072a0",
+      "currentName": "FUN_114072a0",
+      "proposedName": "CEquipEnforceBreak::FindInfoById",
+      "subsystem": "upgrade",
+      "purpose": "Returns the CEquipEnforceBreak config entry pointer for a given id (enhance/enforce level). Standard paged CInfoManager lookup; returns 0 if not found.",
+      "formulas": ["idx=id-mgr[0x30]; require 0<=idx<mgr[0x24]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": ["provides the enforce-break record; break/downgrade parameters are inside the returned struct (not read here)"],
+      "serverRelevance": "validation - server uses this table to determine equipment break/downgrade on failed enhance.",
+      "confidence": "high"
+    },
+    {
+      "address": "114075c0",
+      "currentName": "CEquipEnforceBreak::GetManagers_114075c0",
+      "proposedName": "CEquipEnforceBreak::GetSingletonManager",
+      "subsystem": "upgrade",
+      "purpose": "Minimal singleton getter returning *DAT_1218f844 (the CEquipEnforceBreak manager) after one-time RegisterAndGetSingleton init. Stock plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "high"
+    },
+    {
+      "address": "11413d50",
+      "currentName": "FUN_11413d50",
+      "proposedName": "CSoulStone::LevelUpAddValue",
+      "subsystem": "leveling",
+      "purpose": "Levels up a soul-stone object by one: increments its level counter at this+0x24 (param_1[9]), looks up the CSoulStoneLevelUpInfo record for the new level, and adds that record's per-level value (entry+0x18) into the accumulator at this+0x28 (param_1[10]), saturating at INT_MAX. Then tail-calls a virtual (vtable+0xa8), likely a change/notify hook.",
+      "formulas": [
+        "this[9] (level, offset 0x24) += 1",
+        "InfoManager lookup for new level: idx=level-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]",
+        "this[10] (accumulator, offset 0x28) += entry[0x18]; if result < 0 (overflow) clamp this[10]=0x7fffffff"
+      ],
+      "costs": ["CSoulStoneLevelUpInfo entry+0x18 = per-level value added on each level-up (stat/points)"],
+      "serverRelevance": "authoritative - soul-stone level and accumulated value are progression state the server must own; entry+0x18 is the per-level gain.",
+      "confidence": "high"
+    },
+    {
+      "address": "11416be0",
+      "currentName": "FUN_11416be0",
+      "proposedName": "CLevelReward::BuildRewardEntry",
+      "subsystem": "rewards",
+      "purpose": "Initializes a level-reward descriptor object (this=param_1) from a reward-config record (param_3), dispatching on the reward mode at this[0x56] (=param_3[0], values 0-0x12). Reads CLevelRewardInfo entry offsets 0x40/0x44 (local defaults). Sets item/count/probability fields on the descriptor. Handles direct rewards (case 0), grouped rewards (cases 1-9,0xc,0xd,0x10-0x12 via param_3[0xb]), level-encounter group/subgroup rewards (cases 10/0xb/0xe), and a fixed count-1 reward (case 0xf). Returns 1 on success, 0 on failure/unknown mode.",
+      "formulas": [
+        "mode = this[0x56] = param_3[0] (offset 0x158)",
+        "CLevelRewardInfo lookup by mode gives local_c=entry[0x40], local_8=entry[0x44] (default group/pool ids)",
+        "this[0x57]=param_3[6] (or FUN_1140dd10() default if -1); this[0x58]=param_3[7] (or FUN_1140dce0() default if <1); this[0x59]=param_3[8] (or *(param_2[0x1e]+0x38))",
+        "reward output fields: this[0x64]/this[0x65]=item/minCount, this[0x66]/this[0x67]=?/maxCount, this[0x5b]=count, this[0x5c]=rate/probability, this[0x62]=item-list ptr, this[0x5d]=extra",
+        "case 0 (direct): this[0x6c..0x70]=param_3[0x20..0x24]; this[0x5c]=param_3[0x26]; this[0x62]=param_3[0x28]; this[0x64]=param_3[0x29]; this[0x65]=param_3[0x2a]; this[0x66]=param_3[0x2b]; this[0x67]=param_3[0x2c]",
+        "case 0xf (fixed): this[0x64]=this[0x65]=1, this[0x66]=this[0x67]=0; if (float)param_3[0x26]>0 this[0x5c]=param_3[0x26]; if param_3[0x25]>0 this[0x5b]=param_3[0x25]",
+        "override tail: if param_3[0x25]!=0 this[0x5b]=param_3[0x25]; if (float)param_3[0x26]>0 this[0x5c]=param_3[0x26]; if param_3[0x2a]>0 {this[0x64]=param_3[0x29]; this[0x65]=param_3[0x2a]}; if param_3[0x2c]>0 {this[0x66]=param_3[0x2b]; this[0x67]=param_3[0x2c]}"
+      ],
+      "costs": ["reward item ids, min/max counts, and drop rate/probability (this[0x5c], a float) are populated from CLevelRewardInfo config and param_3 record; exact currency amounts live in the config records"],
+      "serverRelevance": "authoritative - defines what a level reward grants (item ids, counts, probabilities). Server must build/grant from this config, not from client claims.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114242e0",
+      "currentName": "FUN_114242e0",
+      "proposedName": "CEquipEnchant::ApplyTimedEffect",
+      "subsystem": "enchant",
+      "purpose": "Applies an equipment-enchant timed effect. Reads an enchant id/level via vtable+0x3c, looks up CEquipEnchantInfo entry; requires entry+0x34 (effect/buff id) nonzero. If entry+0x30 (duration/threshold) nonzero, reads current value via vtable+0x40 and compares against a counter/time from FUN_10a136c0(); early-returns if already satisfied, else computes a residual. Creates the effect via FUN_115d5b10(effectId, 1, seconds*1000) and stores the handle at param_2+0xc.",
+      "formulas": [
+        "enchantKey = vtable[0x3c](); CEquipEnchantInfo lookup: idx=key-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]",
+        "require entry[0x34] != 0 (effect id)",
+        "if entry[0x30] != 0: cur=vtable[0x40](); limit=FUN_10a136c0(); if (uint)(entry[0x30]+cur) <= limit return (no-op); residual = (entry[0x30]-limit)+cur",
+        "effectHandle = FUN_115d5b10(entry[0x34], 1, residual*1000)  // *1000 = seconds->milliseconds duration",
+        "store handle at param_2+0xc"
+      ],
+      "costs": ["entry+0x34 = enchant effect/buff id; entry+0x30 = base duration/threshold (seconds); effect duration passed as residual*1000 ms"],
+      "serverRelevance": "authoritative - enchant effect id and duration come from CEquipEnchantInfo config; server should compute/grant the timed effect.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1144d4c0",
+      "currentName": "CLevelBoxRewardInfo::GetManagers",
+      "proposedName": "CLevelBoxRewardInfo::GetManagers",
+      "subsystem": "rewards",
+      "purpose": "Singleton accessor / registration for the CLevelBoxRewardInfo config table (level-box / chest reward table). Stock CInfoManager singleton plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing; underlying table drives box rewards.",
+      "confidence": "high"
+    },
+    {
+      "address": "1144f290",
+      "currentName": "FUN_1144f290",
+      "proposedName": "CLevelBoxRewardInfo::FindInfoById",
+      "subsystem": "rewards",
+      "purpose": "Returns the CLevelBoxRewardInfo config entry for a given box/reward id. Standard paged CInfoManager lookup.",
+      "formulas": ["idx=id-mgr[0x30]; require 0<=idx<mgr[0x24]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": ["provides level-box reward record (contents in returned struct)"],
+      "serverRelevance": "validation - server uses this to determine box/chest reward contents.",
+      "confidence": "high"
+    },
+    {
+      "address": "1145f060",
+      "currentName": "FUN_1145f060",
+      "proposedName": "CGuildBuildingLevelUpInfo::FindInfoByTypeLevel",
+      "subsystem": "leveling",
+      "purpose": "Returns the CGuildBuildingLevelUpInfo config entry for a guild building, keyed by buildingType*100 + level. Composite-key CInfoManager lookup.",
+      "formulas": [
+        "key = buildingType(param_1)*100 + level(param_2)",
+        "idx=key-mgr[0x30]; require 0<=idx<mgr[0x24]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"
+      ],
+      "costs": ["guild-building level-up cost/requirement record keyed by type*100+level (costs in returned struct)"],
+      "serverRelevance": "validation - server validates guild building upgrade cost/requirements from this table; key composition buildingType*100+level is load-bearing.",
+      "confidence": "high"
+    },
+    {
+      "address": "1145f0c0",
+      "currentName": "FUN_1145f0c0",
+      "proposedName": "CGuildBuildingLevelUpInfo::FindInfoById",
+      "subsystem": "leveling",
+      "purpose": "Returns the CGuildBuildingLevelUpInfo entry for a single composite id (already-combined key). Standard paged CInfoManager lookup.",
+      "formulas": ["idx=id-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "confidence": "high"
+    },
+    {
+      "address": "1145f110",
+      "currentName": "FUN_1145f110",
+      "proposedName": "CGuildBuildingLevelUpInfo::GetByIndex",
+      "subsystem": "leveling",
+      "purpose": "Flat-vector accessor: returns element param_1 from the CGuildBuildingLevelUpInfo id list (begin at mgr+0x14, end at mgr+0x18). Used to enumerate all building/level ids.",
+      "formulas": ["count = (mgr[0x18]-mgr[0x14])>>2; require 0<=index<count; return *(mgr[0x14] + index*4)"],
+      "costs": [],
+      "serverRelevance": "client-only enumeration helper.",
+      "confidence": "high"
+    },
+    {
+      "address": "114aa550",
+      "currentName": "FUN_114aa550",
+      "proposedName": "CGuild::ClampTargetLevel",
+      "subsystem": "leveling",
+      "purpose": "Validates/clamps a requested guild level. this+0x44 holds current guild level. Looks up CGuildLevelUpInfo for that level; if valid, fetches the level record via FUN_108ada90 and reads the level cap at entry+0x14. Clamps the requested param_2 to min(param_2, cap) and stores it at this+0x48. Rejects negative targets. Returns 1.",
+      "formulas": [
+        "if targetLevel(param_2) < 0 return 0",
+        "curLevel = this[0x44]; CGuildLevelUpInfo lookup: idx=curLevel-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]",
+        "levelRec = FUN_108ada90(this[0x44]); cap = levelRec[0x14]",
+        "this[0x48] = (targetLevel <= cap) ? targetLevel : cap"
+      ],
+      "costs": ["CGuildLevelUpInfo entry+0x14 = guild level cap"],
+      "serverRelevance": "validation/authoritative - server must clamp guild level to the config cap (entry+0x14). this+0x44=current level, this+0x48=clamped target.",
+      "confidence": "high"
+    },
+    {
+      "address": "114cf6b0",
+      "currentName": "FUN_114cf6b0",
+      "proposedName": "CLevelEnGroup::GrantGroupReward",
+      "subsystem": "rewards",
+      "purpose": "Grants a level-encounter group reward. Looks up both CLevelEnGroupInfo and CLevelEnGroupRewardInfo for group id param_2; requires both present and a valid reward object from FUN_117e9080(param_3). Builds an item bundle (FUN_115223e0 -> FUN_1141c6c0 -> FUN_1149a960), validates via FUN_113f7ed0, then grants by calling vtable+0x228 on this->0x14 with (bundle[1]=count, bundle[0]=itemId). Returns 0=success, 2=no config/no object, 6=build/validate failed, 7=grant rejected.",
+      "formulas": [
+        "CLevelEnGroupInfo lookup and CLevelEnGroupRewardInfo lookup, both by group id param_2 (standard paged pattern)",
+        "reward record puVar5 = FUN_117e9080(param_3); grant call: (*this[0x14] vtable[0x228])(puVar5[1], puVar5[0])",
+        "return codes: 0 ok, 2 missing config/reward, 6 build fail (FUN_113f7ed0 != 0 or FUN_115223e0 false), 7 grant rejected"
+      ],
+      "costs": ["reward item id = puVar5[0], count = puVar5[1] (from CLevelEnGroupRewardInfo config)"],
+      "serverRelevance": "authoritative - grants items to the player; server must own this grant and validate against CLevelEnGroupRewardInfo. vtable+0x228 = add-item/grant call.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114cf840",
+      "currentName": "FUN_114cf840",
+      "proposedName": "CLevelEnSubGroup::GrantSubGroupRewards",
+      "subsystem": "rewards",
+      "purpose": "Grants level-encounter SUB-group rewards. Looks up CLevelEnSubGroupInfo and CLevelEnSubGroupRewardInfo for id param_1. Iterates the reward-entry array of the reward record (base mgr-entry+0x1c, end+0x20, stride 0x10, count=(end-begin)>>4), building and granting each bundle via FUN_115223e0/FUN_1141c640/memcpy/FUN_1149a960. Finalizes with FUN_113f7ed0. Returns 0=success, 2=missing config, 6=failure.",
+      "formulas": [
+        "two paged lookups (CLevelEnSubGroupInfo, CLevelEnSubGroupRewardInfo) by id param_1",
+        "reward-entry array: base=rewardEntry+0x1c, end=rewardEntry+0x20, entryStride=0x10, count=(end-base)>>4",
+        "per entry puVar8 (at base+i*0x10): build bundle then FUN_1149a960(puVar8[0], puVar8[1])",
+        "return 0 ok, 2 missing config, 6 fail"
+      ],
+      "costs": ["each sub-group reward entry: id=puVar8[0], count/param=puVar8[1] (CLevelEnSubGroupRewardInfo config, 0x10-byte records)"],
+      "serverRelevance": "authoritative - grants a batch of items; server must iterate the same config records and grant server-side.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114cfa30",
+      "currentName": "FUN_114cfa30",
+      "proposedName": "CLevelEnGroup::PreviewOrCheckGroupReward",
+      "subsystem": "rewards",
+      "purpose": "Variant of the group-reward path (114cf6b0) that first calls a check/preview virtual (**(this[0x14]+0x2d1c)+0x44)(buf,0x3d); only if that returns 0 does it grant via vtable+0x22c(bundle[1],bundle[0]). Returns void. Likely the capacity-check-then-grant or preview flow. Same CLevelEnGroupInfo/RewardInfo lookups by param_2.",
+      "formulas": [
+        "same dual lookup as 114cf6b0 by group id param_2",
+        "check: (*(*(this[0x14]+0x2d1c)) vtable[0x44])(local_78, 0x3d); if result==0 then grant (*this[0x14] vtable[0x22c])(puVar5[1], puVar5[0])",
+        "0x3d = check-context/count constant"
+      ],
+      "costs": ["reward item id=puVar5[0], count=puVar5[1]"],
+      "serverRelevance": "authoritative/validation - the 0x3d-preflight is a bag/capacity check before granting; server must enforce the same check before the vtable+0x22c grant.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114cfb90",
+      "currentName": "FUN_114cfb90",
+      "proposedName": "CLevelEnSubGroup::PreviewOrCheckSubGroupRewards",
+      "subsystem": "rewards",
+      "purpose": "Sub-group variant with the same preflight-check pattern as 114cfa30: builds the sub-group reward bundle by iterating the 0x10-stride reward array, then calls the check virtual (*(*(0x2d1c))+0x44)(buf,0x3d) once at the end. Returns void.",
+      "formulas": [
+        "same sub-group array iteration as 114cf840 (base+0x1c, end+0x20, stride 0x10)",
+        "final check: (*(*(role+0x2d1c)) vtable[0x44])(local_84, 0x3d)"
+      ],
+      "costs": ["sub-group reward entries id=puVar8[0], count=puVar8[1]"],
+      "serverRelevance": "authoritative/validation - capacity/preview check plus batch grant; server enforces server-side.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114d1460",
+      "currentName": "CSuperSeriesReward::GetManagers",
+      "proposedName": "CSuperSeriesReward::GetManagers",
+      "subsystem": "rewards",
+      "purpose": "Singleton accessor / registration for the CSuperSeriesReward config table (super-series / streak reward table). Stock CInfoManager plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "high"
+    },
+    {
+      "address": "114d23b0",
+      "currentName": "FUN_114d23b0",
+      "proposedName": "CSuperSeriesReward::ComputeTier3Progress",
+      "subsystem": "rewards",
+      "purpose": "Computes a super-series reward's progress/claimable amount (tier using counter arg 3). Looks up CSuperSeriesReward[param_2], fills out-struct param_3 with reward params (id/count/max), reads current count from this[3] (if param_2==0) or this[5]. Gates on CLevelSuperSequence[current-sequence] and CMHLevelModeInfo[0x36] (mode 54) validity, a vtable+0x388 condition, and FUN_1156c6b0(entry+0x2c). Computes remaining claimable = clamp(FUN_1156c660(3) - count, 0) then min with (max - count). Returns bool (1 with progress, 0 otherwise).",
+      "formulas": [
+        "CSuperSeriesReward lookup by param_2 (paged pattern)",
+        "out param_3[4]=entry[0x1c] (max/cap), param_3[0]=entry[0x14] (reward id), param_3[1]=entry[0x18], param_3[3]=0",
+        "param_3[2] = (param_2==0) ? this[3] : this[5]   // current accumulated count",
+        "seqId = this vtable[0x30](0); CLevelSuperSequence lookup by seqId; CMHLevelModeInfo fixed index 0x36 (=54) must be valid",
+        "gate: this[1] vtable[0x388]() != 0 AND FUN_1156c6b0(seqEntry[0x2c]) != 0",
+        "counter = FUN_1156c660(3); remaining = counter - count; if remaining<0 remaining=0; param_3[3]=remaining; if (param_3[4]-count) < remaining param_3[3]=param_3[4]-count",
+        "returns 1 (byte) when computed, 0 otherwise"
+      ],
+      "costs": ["entry+0x14=reward id, entry+0x18=?, entry+0x1c=max claimable cap; progress counter from FUN_1156c660(3)"],
+      "serverRelevance": "authoritative - claimable amount = min(counter3 - claimedCount, cap - claimedCount). Server must compute this and cap claims; do not trust client-reported progress.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114d2780",
+      "currentName": "CSuperSeriesReward::GetManagers_114d2780",
+      "proposedName": "CSuperSeriesReward::GetSingletonManager",
+      "subsystem": "rewards",
+      "purpose": "Minimal singleton getter returning *DAT_122de584 (CSuperSeriesReward manager) after one-time init. Stock plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing.",
+      "confidence": "high"
+    },
+    {
+      "address": "114d2ba0",
+      "currentName": "FUN_114d2ba0",
+      "proposedName": "CSuperSeriesReward::ComputeTier2Progress",
+      "subsystem": "rewards",
+      "purpose": "Tier-2 twin of 114d23b0: identical structure but reads the second reward column set (entry+0x20/0x24/0x28), uses this[4]/this[6] for current count, and computes remaining against counter FUN_1156c660(2) instead of (3).",
+      "formulas": [
+        "out param_3[4]=entry[0x28], param_3[0]=entry[0x20], param_3[1]=entry[0x24], param_3[3]=0",
+        "param_3[2] = (param_2==0) ? this[4] : this[6]",
+        "counter = FUN_1156c660(2); remaining = clamp(counter - count, 0); param_3[3]=min(remaining, entry[0x28]-count)",
+        "same CLevelSuperSequence + CMHLevelModeInfo[0x36] + vtable[0x388] + FUN_1156c6b0(seqEntry[0x2c]) gates"
+      ],
+      "costs": ["second reward tier: entry+0x20=id, entry+0x24=?, entry+0x28=cap; progress counter FUN_1156c660(2)"],
+      "serverRelevance": "authoritative - tier-2 claimable = min(counter2 - claimed, cap - claimed); server-enforced.",
+      "confidence": "medium"
+    },
+    {
+      "address": "114d2d40",
+      "currentName": "FUN_114d2d40",
+      "proposedName": "CSuperSeriesReward::FindInfoById",
+      "subsystem": "rewards",
+      "purpose": "Returns the CSuperSeriesReward config entry for a given id. Standard paged CInfoManager lookup.",
+      "formulas": ["idx=id-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "confidence": "high"
+    },
+    {
+      "address": "11534200",
+      "currentName": "FUN_11534200",
+      "proposedName": "CSoulBeastLevelUpInfo::FindInfoByTypeLevel",
+      "subsystem": "leveling",
+      "purpose": "Returns the CSoulBeastLevelUpInfo config entry for a soul-beast, keyed by beastType*100 + level. Composite-key CInfoManager lookup.",
+      "formulas": [
+        "key = beastType(param_1)*100 + level(param_2)",
+        "idx=key-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"
+      ],
+      "costs": ["soul-beast level-up cost/stat record keyed type*100+level"],
+      "serverRelevance": "validation - server validates soul-beast leveling from this table; key = type*100+level.",
+      "confidence": "high"
+    },
+    {
+      "address": "11534260",
+      "currentName": "FUN_11534260",
+      "proposedName": "CSoulBeastLevelUpInfo::FindInfoById",
+      "subsystem": "leveling",
+      "purpose": "Returns the CSoulBeastLevelUpInfo entry for a single composite id. Standard paged lookup.",
+      "formulas": ["idx=id-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": [],
+      "serverRelevance": "validation.",
+      "confidence": "high"
+    },
+    {
+      "address": "1153b3e0",
+      "currentName": "CSRLMaterialLotteryInfo::GetManagers",
+      "proposedName": "CSRLMaterialLotteryInfo::GetManagers",
+      "subsystem": "lottery",
+      "purpose": "Singleton accessor / registration for the CSRLMaterialLotteryInfo config table (SRL material lottery/gacha pool). Stock CInfoManager plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only plumbing; underlying table defines lottery material pool.",
+      "confidence": "high"
+    },
+    {
+      "address": "1153ec20",
+      "currentName": "FUN_1153ec20",
+      "proposedName": "CSRLItemLotteryInfo::FindInfoById",
+      "subsystem": "lottery",
+      "purpose": "Returns the CSRLItemLotteryInfo config entry for a given id (SRL item lottery/gacha table). Standard paged CInfoManager lookup (accessor label in header is CSRLItemLotteryInfo::FindInfoByKey/GetManagers).",
+      "formulas": ["idx=id-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": ["item-lottery pool record: item ids, weights/probabilities inside the returned struct"],
+      "serverRelevance": "authoritative - lottery/gacha draw outcomes and probabilities come from this table; server must roll and grant, never the client.",
+      "confidence": "high"
+    },
+    {
+      "address": "1153ecc0",
+      "currentName": "FUN_1153ecc0",
+      "proposedName": "CSRLMaterialLotteryInfo::FindInfoById",
+      "subsystem": "lottery",
+      "purpose": "Returns the CSRLMaterialLotteryInfo config entry for a given id (material lottery pool). Standard paged CInfoManager lookup.",
+      "formulas": ["idx=id-mgr[0x30]; entry=mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]]"],
+      "costs": ["material-lottery pool record: material ids, weights inside struct"],
+      "serverRelevance": "authoritative - material lottery draws must be server-rolled from this table.",
+      "confidence": "high"
+    },
+    {
+      "address": "1158dc80",
+      "currentName": "FUN_1158dc80",
+      "proposedName": "OperationActivity::RegisterEnumReflection",
+      "subsystem": "activity",
+      "purpose": "Reflection/serialization registrar: registers name<->value pairs for several activity enums into a descriptor object (via param_2 vtable+8). Covers kOperationActivityBoardType_* (board/panel kinds), kScriptActivityDataType_* (script data payload kinds), and kScriptActivityDataItemCondType_* (exchange/gift item unlock conditions). Pure enum-name reflection plumbing (each block sets a value + string then calls the register vtable, then FUN_10a2eb80 twice to free temporaries). Returns bool (all-registered).",
+      "formulas": [
+        "OperationActivityBoardType values: NoBoard=0, Marqueen=1, Buttons=2, Items=3, LevelEnter=0x65, LevelFinish=0x66, LoginGift=0x67, FirstBuyVip=0x68, Exchange=0x69, Note=0x6a, Achievement=0x6b, OnlineTime=0x6c, LevelUp=0x6d, Compensate=0x6e, NewRealmWelfare=0x6f, NewAchievement=0x70, SingleButton=0x71, IntoChaos=0x72, MultiLevelEnter=0x73, QiXi=0x74, Divination=0x75, Exchanges=0x76, TaskChain=0x77, Investment=0x78, EquipUpgrade=0x79, ThunderDragon=0x7a, OpenView=0x7b, ... plus a second numbering block 0xa..0x2d (TunDragon..DailyConsumption)",
+        "ScriptActivityDataType values: Marqueen=0x10, ButtonScript=0x20, ButtonCharge=0x21, ButtonInternalWeb=0x22, ButtonExternalWeb=0x23, ButtonAcceptTask=0x24, ButtonEnterLevel=0x25, Item=0x30, Param=0x40, LevelHidden=0x41, HubHidden=0x42, LevelControl=0x43, Script=0x44, ScriptAttachParam=0x45, Hunt=0x46",
+        "ScriptActivityDataItemCondType values: None=0, ExchangeItem=1, Time=2, OnlineTime=3, CharLevel=4, LevelFinish=5, GetItem=6, EntryFinish=7, Login=8, Achievement=9"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only - reflection/serialization enum registration. Useful only as an enum-value reference (e.g. ScriptActivityDataItemCondType_ExchangeItem=1 for exchange/gift gating).",
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,414 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "116ebac0",
+      "currentName": "FUN_116ebac0",
+      "proposedName": "SoulBeastDef::RegisterReflection",
+      "purpose": "Reflection/type-descriptor registration stub for the 'SoulBeastDef' data-table row type. Sets self-pointers at obj+0x10 and obj+0x14, then calls FUN_100b62c0(\"SoulBeastDef\",\"\") to register the schema name. Stock data-def plumbing.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["*(obj+0x10)=obj; *(obj+0x14)=obj; RegisterDef(\"SoulBeastDef\",\"\")"],
+      "serverRelevance": "client-only (reflection registration; schema name shared with server data tables)",
+      "notes": "Duplicate of FUN_116ebb20 (identical body)."
+    },
+    {
+      "address": "116ebb20",
+      "currentName": "FUN_116ebb20",
+      "proposedName": "SoulBeastDef::RegisterReflection_dup",
+      "purpose": "Byte-identical duplicate of FUN_116ebac0; registers 'SoulBeastDef' reflection descriptor.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["*(obj+0x10)=obj; *(obj+0x14)=obj; RegisterDef(\"SoulBeastDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "1174cd70",
+      "currentName": "FUN_1174cd70",
+      "proposedName": "CPetInfo::Deserialize",
+      "purpose": "Config/data-table deserializer for a pet definition row (the 'Pet*Info' record). Reads ~40 typed fields from a key/value data source (param_2 is a reader interface: vtbl+0x10=HasKey, +0x20=GetInt/GetUInt, +0x28=GetStruct/GetString, +0x30=GetFloat) and writes them into the pet-def struct at param_1. Each field guarded by a once-per-key init bitset (DAT_123912b4 / DAT_123913f8 / DAT_1239153c) that lazily interns the field-name string (FUN_100f67b0) and warms a lookup cache (FUN_100e1cb0). Missing keys emit a formatted 'field not found' warning (FUN_100ea3b0 with template DAT_11d389ec) instead of writing. The last four fields are the combat damage-ratio floats.",
+      "subsystem": "pets/stats-combat",
+      "confidence": "medium",
+      "formulas": [
+        "int field -> obj+0x10 (from DAT_123912b8 key)",
+        "int field -> obj+0x14 (DAT_123912cc)",
+        "obj+0x18 = FUN_1181d900(parsedStruct)  (DAT_123912e0)",
+        "obj+0x1c = FUN_1181dbe0(FUN_1181d700(parsedStruct))  (DAT_123912f4)",
+        "obj+0x20 = count of id-list (<=5) parsed by FUN_100ec4b0(list, &obj+0x24, 5); id array stored at obj+0x24.. ; ids also pushed onto a per-thread ring buffer at ctx+0x3b758/0x3b75c (DAT_12391308)",
+        "int fields -> obj+0xa0,0xa4,0xa8,0xac (DAT_1239131c/1330/1344/1358)",
+        "int fields -> obj+0x38,0x3c,0x40,0x44,0x48,0x4c,0x50 (DAT_..136c/1380/1394/13a8/13bc/13d0/13e4)",
+        "int fields -> obj+0x54,0x58,0x5c,0x60,0x64,0x68,0x6c,0x70,0x74,0x78,0x7c,0x80,0x84,0x88,0x8c (DAT_..13fc/1410/1424/1438/144c/1460/1474/1488/149c/14b0/14c4/14d8/14ec/1500/1514)",
+        "int field -> obj+0xe0 (DAT_12391528)",
+        "int fields -> obj+0xe4,0xe8,0xec,0xf0,0xf4,0xf8 (DAT_..1540/1554/1568/157c/1590/15a4)",
+        "derived: tmp = *(obj+0x80) + *(obj+0x7c); if (DAT_1239128c < tmp) DAT_1239128c = tmp   // tracks global max of (field@0x80 + field@0x7c) across all rows",
+        "float 'Defence'      -> obj+0x90",
+        "float 'PhyPDRatio'   -> obj+0x94",
+        "float 'MonsterAtkPet'-> obj+0x98",
+        "float 'PlayerAtkPet' -> obj+0x9c"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative data (pet-definition table shared client/server). Combat ratios PhyPDRatio (physical-defence ratio), MonsterAtkPet (monster->pet damage scale), PlayerAtkPet (player->pet damage scale), Defence, plus the ~30 int stat fields feed server-authoritative pet combat math. Only 4 of ~40 field-name keys were recovered symbolically (Defence/PhyPDRatio/MonsterAtkPet/PlayerAtkPet); the remaining keys live in unrecovered DAT_ globals.",
+      "notes": "id-list cap = 5 (FUN_100ec4b0 last arg). Field-name interning bitsets are pure lazy-init guards (stock), not gameplay. Offsets 0x38-0x8c hold the bulk of the pet base stats; exact per-offset semantics require the source data table (Cross-ref TLV_DOCS)."
+    },
+    {
+      "address": "11753290",
+      "currentName": "FUN_11753290",
+      "proposedName": "CPetInfo::GetSkinModelAssetOrDefault",
+      "purpose": "Given a pet-def struct, if field@0x98 > 0 uses skin id at field@0xb0 to look up a row in the CPetSkinInfo 2D bucket table; returns (skinRow + 0x30) on hit, else falls back to (petdef + 0x44). Client asset/model resolution.",
+      "subsystem": "pets/skin",
+      "confidence": "medium",
+      "formulas": [
+        "if (*(pet+0x98) <= 0) return pet+0x44",
+        "idx = *(pet+0xb0); mgr=CPetSkinInfo::GetInfoManager()",
+        "valid if idx!=-1 && (idx!=0 || mgr+0x30==0) && mgr+0x28!=0 && (idx-=mgr+0x30) in [0, mgr+0x24)",
+        "row = table[mgr+0x20][idx / (mgr+0x28)][idx % (mgr+0x28)]; if row!=0 return row+0x30 else return pet+0x44"
+      ],
+      "serverRelevance": "client-only (visual skin/model lookup)",
+      "notes": "mgr+0x28=bucket size, mgr+0x30=id base offset, mgr+0x24=count, mgr+0x20=bucket array."
+    },
+    {
+      "address": "11753420",
+      "currentName": "FUN_11753420",
+      "proposedName": "CPetInfo::GetSkinAltAssetOrDefault",
+      "purpose": "Identical to FUN_11753290 except returns (skinRow + 0x18) on hit and falls back to (petdef + 0x2c). Second skin-related asset field lookup.",
+      "subsystem": "pets/skin",
+      "confidence": "medium",
+      "formulas": [
+        "same bucket-table lookup as 11753290 but hit -> row+0x18, miss/disabled -> pet+0x2c"
+      ],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "11753a50",
+      "currentName": "FUN_11753a50",
+      "proposedName": "CPetAtkModeInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetAtkModeInfo data table (pet attack-mode definitions). Returns table[index] pointer or 0.",
+      "subsystem": "pets/combat-ai",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetAtkModeInfo\"); if 0<=i<((mgr+0x18 - mgr+0x14)>>2) return *(mgr+0x14 + i*4) else 0"],
+      "serverRelevance": "authoritative data (pet attack-mode table; combat AI mode definitions used by server)"
+    },
+    {
+      "address": "11753ab0",
+      "currentName": "FUN_11753ab0",
+      "proposedName": "CPetAtkTargetInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetAtkTargetInfo table (pet attack-target selection definitions).",
+      "subsystem": "pets/combat-ai",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetAtkTargetInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data (target-selection rules for pet combat AI)"
+    },
+    {
+      "address": "11753b10",
+      "currentName": "FUN_11753b10",
+      "proposedName": "CPetCharacterInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetCharacterInfo table (pet character/personality definitions).",
+      "subsystem": "pets",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetCharacterInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data"
+    },
+    {
+      "address": "11753b70",
+      "currentName": "FUN_11753b70",
+      "proposedName": "CPetNameInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetNameInfo table (pet name definitions).",
+      "subsystem": "pets",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetNameInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "validation (name id table; server may validate chosen name id)"
+    },
+    {
+      "address": "11753bd0",
+      "currentName": "FUN_11753bd0",
+      "proposedName": "CPetQualityInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetQualityInfo table (pet star/quality-grade definitions).",
+      "subsystem": "pets/quality",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetQualityInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data (quality/star grade table; server owns quality growth)"
+    },
+    {
+      "address": "11753c30",
+      "currentName": "FUN_11753c30",
+      "proposedName": "CPetSkinInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetSkinInfo table (pet skin definitions).",
+      "subsystem": "pets/skin",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CPetSkinInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "client-only (skin visuals)"
+    },
+    {
+      "address": "1177f340",
+      "currentName": "FUN_1177f340",
+      "proposedName": "SoulBeastActionDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastActionDef' (soul-beast action/animation table row).",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["*(obj+0x10)=obj; *(obj+0x14)=obj; RegisterDef(\"SoulBeastActionDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "1177f370",
+      "currentName": "FUN_1177f370",
+      "proposedName": "SoulBeastFoodDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastFoodDef' (soul-beast feeding/food table row).",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastFoodDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "1177f3a0",
+      "currentName": "FUN_1177f3a0",
+      "proposedName": "SoulBeastImageDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastImageDef'.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastImageDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "1177f3d0",
+      "currentName": "FUN_1177f3d0",
+      "proposedName": "SoulBeastLieHunCheckDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastLieHunCheckDef' (soul-beast 'LieHun'/soul-hunt check requirement table).",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastLieHunCheckDef\",\"\")"],
+      "serverRelevance": "validation (requirement-check definitions server enforces)"
+    },
+    {
+      "address": "1177f400",
+      "currentName": "FUN_1177f400",
+      "proposedName": "SoulBeastShouHunCheckDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastShouHunCheckDef' ('ShouHun'/beast-hunt check requirement table).",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastShouHunCheckDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "1177f430",
+      "currentName": "FUN_1177f430",
+      "proposedName": "SoulBeastSocialActionDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastSocialActionDef' (soul-beast social/interaction action table).",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSocialActionDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "1177f460",
+      "currentName": "FUN_1177f460",
+      "proposedName": "SoulBeastSoulStoneLevelCheckDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastSoulStoneLevelCheckDef' (soul-stone level requirement check table for evolution).",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSoulStoneLevelCheckDef\",\"\")"],
+      "serverRelevance": "validation (evolution soul-stone-level requirements)"
+    },
+    {
+      "address": "1177f4f0",
+      "currentName": "FUN_1177f4f0",
+      "proposedName": "SoulBeastSoulStoneStageCheckDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'SoulBeastSoulStoneStageCheckDef' (soul-stone stage requirement check table for evolution).",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSoulStoneStageCheckDef\",\"\")"],
+      "serverRelevance": "validation (evolution soul-stone-stage requirements)"
+    },
+    {
+      "address": "117802d0",
+      "currentName": "FUN_117802d0",
+      "proposedName": "TaskPetEmploymentContentDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'TaskPetEmploymentContentDef' (task/employment pet dispatch content table).",
+      "subsystem": "pets/tasks",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetEmploymentContentDef\",\"\")"],
+      "serverRelevance": "authoritative data (pet dispatch/employment task content)"
+    },
+    {
+      "address": "11780300",
+      "currentName": "FUN_11780300",
+      "proposedName": "TaskPetFilterDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'TaskPetFilterDef' (pet task eligibility/filter table).",
+      "subsystem": "pets/tasks",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetFilterDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "11780360",
+      "currentName": "FUN_11780360",
+      "proposedName": "TaskPetTrainingContentDef::RegisterReflection",
+      "purpose": "Reflection registration stub for 'TaskPetTrainingContentDef' (pet training task content table).",
+      "subsystem": "pets/training",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetTrainingContentDef\",\"\")"],
+      "serverRelevance": "authoritative data (training task content)"
+    },
+    {
+      "address": "11781020",
+      "currentName": "FUN_11781020",
+      "proposedName": "SoulBeastActionDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastActionDef'.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastActionDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "11781050",
+      "currentName": "FUN_11781050",
+      "proposedName": "SoulBeastFoodDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastFoodDef'.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastFoodDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "11781080",
+      "currentName": "FUN_11781080",
+      "proposedName": "SoulBeastImageDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastImageDef'.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastImageDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "117810b0",
+      "currentName": "FUN_117810b0",
+      "proposedName": "SoulBeastLieHunCheckDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastLieHunCheckDef'.",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastLieHunCheckDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "117810e0",
+      "currentName": "FUN_117810e0",
+      "proposedName": "SoulBeastShouHunCheckDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastShouHunCheckDef'.",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastShouHunCheckDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "11781110",
+      "currentName": "FUN_11781110",
+      "proposedName": "SoulBeastSocialActionDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastSocialActionDef'.",
+      "subsystem": "pets/soul-beast",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSocialActionDef\",\"\")"],
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "11781140",
+      "currentName": "FUN_11781140",
+      "proposedName": "SoulBeastSoulStoneLevelCheckDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastSoulStoneLevelCheckDef'.",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSoulStoneLevelCheckDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "117811d0",
+      "currentName": "FUN_117811d0",
+      "proposedName": "SoulBeastSoulStoneStageCheckDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'SoulBeastSoulStoneStageCheckDef'.",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"SoulBeastSoulStoneStageCheckDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "11781fb0",
+      "currentName": "FUN_11781fb0",
+      "proposedName": "TaskPetEmploymentContentDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'TaskPetEmploymentContentDef'.",
+      "subsystem": "pets/tasks",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetEmploymentContentDef\",\"\")"],
+      "serverRelevance": "authoritative data"
+    },
+    {
+      "address": "11781fe0",
+      "currentName": "FUN_11781fe0",
+      "proposedName": "TaskPetFilterDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'TaskPetFilterDef'.",
+      "subsystem": "pets/tasks",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetFilterDef\",\"\")"],
+      "serverRelevance": "validation"
+    },
+    {
+      "address": "11782040",
+      "currentName": "FUN_11782040",
+      "proposedName": "TaskPetTrainingContentDef::RegisterReflection_dup",
+      "purpose": "Duplicate registration stub for 'TaskPetTrainingContentDef'.",
+      "subsystem": "pets/training",
+      "confidence": "high",
+      "formulas": ["RegisterDef(\"TaskPetTrainingContentDef\",\"\")"],
+      "serverRelevance": "authoritative data"
+    },
+    {
+      "address": "117b8800",
+      "currentName": "FUN_117b8800",
+      "proposedName": "CSoulBeastEvolveInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CSoulBeastEvolveInfo table (soul-beast evolution definitions: evolution requirements/results).",
+      "subsystem": "pets/soul-beast/evolution",
+      "confidence": "high",
+      "formulas": ["mgr=GetInfoManager(\"CSoulBeastEvolveInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data (evolution requirement/result table; server owns evolution)"
+    },
+    {
+      "address": "1181ddc0",
+      "currentName": "FUN_1181ddc0",
+      "proposedName": "CPetLevelInfo::Manager_VCall28",
+      "purpose": "Fetches the CPetLevelInfo singleton manager and tail-calls its vtbl+0x28 method (jumptable not recovered; likely a reload/rebuild-table entry). Thin dispatcher.",
+      "subsystem": "pets/leveling",
+      "confidence": "low",
+      "formulas": ["mgr=CPetLevelInfo::GetManager(); (*(mgr+0x28))()"],
+      "serverRelevance": "unknown",
+      "notes": "Indirect jump; exact method behind vtbl+0x28 not determinable from this chunk."
+    },
+    {
+      "address": "11926df0",
+      "currentName": "FUN_11926df0",
+      "proposedName": "CPetLevelInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetLevelInfo table (pet level/EXP curve definitions).",
+      "subsystem": "pets/leveling",
+      "confidence": "high",
+      "formulas": ["mgr=CPetLevelInfo::GetManager(); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data (level/EXP curve table; server owns leveling)"
+    },
+    {
+      "address": "11928c30",
+      "currentName": "FUN_11928c30",
+      "proposedName": "CPetFireInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CPetFireInfo table (pet 'fire'/dispatch or pet-firing/release definitions).",
+      "subsystem": "pets",
+      "confidence": "medium",
+      "formulas": ["mgr=GetInfoManager(\"CPetFireInfo\"); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data",
+      "notes": "'Fire' semantics ambiguous (dismiss/release vs projectile); needs cross-ref."
+    },
+    {
+      "address": "11933c40",
+      "currentName": "FUN_11933c40",
+      "proposedName": "CCatCuisineRateInfo::GetRowByIndex",
+      "purpose": "Bounds-checked flat-array accessor into the CCatCuisineRateInfo table (support-cat cuisine buff success-rate / effect-rate definitions). Uses generic manager-lookup FUN_10a05550 rather than a symbolized GetInfoManager.",
+      "subsystem": "pets/cuisine",
+      "confidence": "high",
+      "formulas": ["mgr=FUN_10a05550(0,\"CCatCuisineRateInfo\",0); if 0<=i<((mgr+0x18-mgr+0x14)>>2) return *(mgr+0x14+i*4) else 0"],
+      "serverRelevance": "authoritative data (cuisine buff rate table; server applies cuisine buffs). Actual rate values are in the row payload, not this accessor."
+    }
+  ]
+}

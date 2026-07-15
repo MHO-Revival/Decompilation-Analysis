@@ -1,0 +1,646 @@
+{
+  "chunkIndex": 5,
+  "functions": [
+    {
+      "address": "112a9d80",
+      "currentName": "FUN_112a9d80",
+      "proposedName": "CCliGameContext::SpawnLocalTempPlayer",
+      "purpose": "Client-side spawn of the local (temporary) player actor. Grabs a global source struct (FUN_1128e460), logs \"[SpawnLocalPlayer] SpawnLocalTempPlayer!\", resolves or creates the local player entity via an entity-system vtable (create call passes (entityId@+0xc, srcId@+4, 1, 0)), clears a byte flag at player+9, calls vtable+0x29c(src) to init, and if vtable+0x280() returns true refreshes the WildHunt/entity mgr. Copies a large source blob (0x8498e bytes) into param_1+0x14 when a mgr flag (vtable+0x6c) is set.",
+      "confidence": "medium",
+      "subsystem": "player-spawn",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "memcpy(param_1+0x14, src, 0x8498e) only when (*mgr)+0x6c vcall != 0",
+        "player entity created via entitySys->vtbl+0x10(id@param_1+0xc, srcId@src+4, 1, 0) if lookup vtbl+0x14 returns null",
+        "byte at (player+9)=0 before vtbl+0x29c(src) init"
+      ],
+      "notes": "Stock-ish CryEngine entity plumbing wrapped for MHO local player; not authoritative monster logic."
+    },
+    {
+      "address": "112df200",
+      "currentName": "FUN_112df200",
+      "proposedName": "SingletonNameSvr_CCliWildHuntMgr::ctor",
+      "purpose": "Constructs the singleton-name holder for class CCliWildHuntMgr (client WildHunt manager). Sets vtable PTR_FUN_11d1f1f4 and registers name string.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "client-only",
+      "notes": "CInfoManager/singleton boilerplate."
+    },
+    {
+      "address": "112df2f0",
+      "currentName": "FUN_112df2f0",
+      "proposedName": "SingletonNameSvr_CCliWildHuntMgr::destroy",
+      "purpose": "Tears down the CCliWildHuntMgr singleton (DAT_12040ac0): calls vtable+0 destructor, frees, unregisters singleton name.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "client-only",
+      "notes": "Singleton teardown boilerplate."
+    },
+    {
+      "address": "112df490",
+      "currentName": "FUN_112df490",
+      "proposedName": "CCliWildHuntMgr::LoadWildHuntConfig",
+      "purpose": "Loads the \"WildHunt\" config: builds a config key string (\"WildHunt\",\"\") and passes it to FUN_1145b320 with a stack out-struct (config lookup). Guarded by FUN_1145b350() != 0 (config system available).",
+      "confidence": "low",
+      "subsystem": "wildhunt",
+      "serverRelevance": "client-only",
+      "notes": "FUN_100b62c0 builds std::string(key,default); FUN_1145b320 is the config accessor."
+    },
+    {
+      "address": "112df5d0",
+      "currentName": "FUN_112df5d0",
+      "proposedName": "SingletonNameSvr_CCliWildHuntMgr::setInstance",
+      "purpose": "Stores CCliWildHuntMgr instance pointer into DAT_12040ac0 and registers it under its singleton name.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "112df5f0",
+      "currentName": "FUN_112df5f0",
+      "proposedName": "SingletonNameSvr_CCliWildHuntMgr::registerName",
+      "purpose": "Registers CCliWildHuntMgr singleton name mapping (no static store).",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "client-only"
+    },
+    {
+      "address": "11511390",
+      "currentName": "FUN_11511390",
+      "proposedName": "CGiftBagGroupInfo::GetFieldByKey_0x2c",
+      "purpose": "CInfoManager keyed accessor for CGiftBagGroupInfo. Maps key param_1 into the 2D bucket table (base+0x20, bucket size base+0x28, key offset base+0x30, count base+0x24) and returns record+0x2c. Returns 0 if not found.",
+      "confidence": "high",
+      "subsystem": "giftbag",
+      "serverRelevance": "validation",
+      "formulas": [
+        "idx = key - *(mgr+0x30); require 0<=idx<*(mgr+0x24)",
+        "bucket = *(*(mgr+0x20) + (idx / *(mgr+0x28))*4); record = *(bucket + (idx % *(mgr+0x28))*4); return record+0x2c"
+      ],
+      "notes": "Standard CInfoManager 2D chunked table lookup; not spawn/AI. +0x2c is a payload field of the record."
+    },
+    {
+      "address": "115113f0",
+      "currentName": "FUN_115113f0",
+      "proposedName": "CGiftBagGroupInfo::GetFieldByIndex_0x2c",
+      "purpose": "CGiftBagGroupInfo linear-array accessor: index into flat array (base+0x14 .. base+0x18, stride 4), returns record+0x2c. Bounds: 0<=idx<(size>>2).",
+      "confidence": "high",
+      "subsystem": "giftbag",
+      "serverRelevance": "validation",
+      "formulas": [
+        "count = (*(mgr+0x18) - *(mgr+0x14)) >> 2; require 0<=idx<count",
+        "record = *(*(mgr+0x14) + idx*4); return record+0x2c"
+      ]
+    },
+    {
+      "address": "11511430",
+      "currentName": "FUN_11511430",
+      "proposedName": "CGiftBagGroupInfo::GetRecordByKey",
+      "purpose": "Same keyed 2D lookup as 11511390 but returns the record pointer itself (record+(idx%bucket)*4) rather than +0x2c.",
+      "confidence": "high",
+      "subsystem": "giftbag",
+      "serverRelevance": "validation",
+      "formulas": [
+        "idx = key - *(mgr+0x30); bucket=*(*(mgr+0x20)+(idx/ *(mgr+0x28))*4); return *(bucket + (idx% *(mgr+0x28))*4)"
+      ]
+    },
+    {
+      "address": "11511480",
+      "currentName": "FUN_11511480",
+      "proposedName": "CGiftBagGroupInfo::GetRecordByIndex",
+      "purpose": "CGiftBagGroupInfo linear accessor returning record pointer at flat index (base+0x14, stride 4).",
+      "confidence": "high",
+      "subsystem": "giftbag",
+      "serverRelevance": "validation",
+      "formulas": ["count=(*(mgr+0x18)-*(mgr+0x14))>>2; return *(*(mgr+0x14)+idx*4)"]
+    },
+    {
+      "address": "115114e0",
+      "currentName": "FUN_115114e0",
+      "proposedName": "CGiftBagGroupInfo::ForEach_or_GetCount",
+      "purpose": "Fetches the CGiftBagGroupInfo manager and tail-calls its vtable+0x28 (indirect jump; jumptable not recovered). Likely a count/iterate accessor.",
+      "confidence": "low",
+      "subsystem": "giftbag",
+      "serverRelevance": "validation",
+      "notes": "Decompiler could not recover jumptable at 115114f5."
+    },
+    {
+      "address": "115312e0",
+      "currentName": "FUN_115312e0",
+      "proposedName": "CMHLevelInfo::CheckWildHuntPhaseRewardWindow",
+      "purpose": "Given a level key (param_2), walks an internal red-black tree (root at param_1+0x60, node at +100) to locate an entry, then looks up CMHLevelInfo by key. From the level record it reads a sub-info (FUN_11531c90 on level+0x38) and a reward record (CLevelRewardInfo::GetRewardByLevelIndex on level+0x10). Validates a percentage reward-availability, then compares the current \"WildHuntPhase\" config value against the player's phase and checks the current game time falls in [record+0x113, record+0x117). Client gate for WildHunt-phase reward display/eligibility.",
+      "confidence": "low",
+      "subsystem": "wildhunt",
+      "serverRelevance": "validation",
+      "formulas": [
+        "reward gate: 0 < (*(reward+0x34) * *(subInfo+0x30)) / 100   (integer percentage)",
+        "require *(subInfo+0x30) > 0",
+        "phase gate: FUN_1025b060() == local_28 where local_28 = config value 'WildHuntPhase'",
+        "time window: *(rec+0x113) <= gameTime(vtbl+0x38) < *(rec+0x117)"
+      ],
+      "notes": "player state via FUN_1145b350 (local player), FUN_115a2c80 (WildHunt mgr). Offsets 0x113/0x117 are unaligned byte reads in decompiler; likely misaligned struct fields. Function returns void (both branches just cleanup)."
+    },
+    {
+      "address": "115608b0",
+      "currentName": "FUN_115608b0",
+      "proposedName": "CGMCommandRegistry::RegisterCommands",
+      "purpose": "Registers the GM/admin command table via repeated FUN_1025e3f0(desc, name) calls. Each entry sets local_c to an argument-count/permission code before registering. Commands include: set_max_queue(2), setmaxonline(2), notice(2), alert(3), exchangesyssale(5), exchangesysbid(3), exchangesyscancel(2), exchangerate(3), feature(3), <DAT>(4), <DAT>(3), exitts(3), hunterstar(5), <DAT>(5), wildhunt(3), scriptactivity(5), reloaddata(2), <DAT>(2), <DAT>(2), levelunlock(3), hubunlock(3).",
+      "confidence": "medium",
+      "subsystem": "gm-commands",
+      "serverRelevance": "authoritative",
+      "costs": [
+        "exchangerate command registered (economy exchange rate GM command; arg count 3)",
+        "each local_c value = number of arguments/param-slots for the command"
+      ],
+      "formulas": [
+        "local_c per command = arg-count: set_max_queue=2, setmaxonline=2, notice=2, alert=3, exchangesyssale=5, exchangesysbid=3, exchangesyscancel=2, exchangerate=3, feature=3, exitts=3, hunterstar=5, wildhunt=3, scriptactivity=5, reloaddata=2, levelunlock=3, hubunlock=3"
+      ],
+      "notes": "wildhunt is a GM command here (arg count 3). Server-authoritative admin surface; relevant for reproducing admin/console behavior."
+    },
+    {
+      "address": "115a28f0",
+      "currentName": "FUN_115a28f0",
+      "proposedName": "SingletonNameSvr_CWildHuntMgr::ctor",
+      "purpose": "Constructs singleton-name holder for server-side class CWildHuntMgr (vtable PTR_FUN_11d2f984).",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative",
+      "notes": "Singleton boilerplate; CWildHuntMgr is the (non-Cli) authoritative WildHunt manager."
+    },
+    {
+      "address": "115a2d30",
+      "currentName": "FUN_115a2d30",
+      "proposedName": "SingletonNameSvr_CWildHuntMgr::setInstance",
+      "purpose": "Stores CWildHuntMgr instance into DAT_122df384 and registers singleton name.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "115a2d80",
+      "currentName": "FUN_115a2d80",
+      "proposedName": "SingletonNameSvr_CWildHuntMgr::registerName",
+      "purpose": "Registers CWildHuntMgr singleton name mapping.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "115c8990",
+      "currentName": "IBattleGroundSpawnConfig__SpawnLog",
+      "proposedName": "IBattleGroundSpawnConfig::SpawnLog",
+      "purpose": "Logging helper for battleground spawn config. Emits a formatted log line (level 7) tagged 'IBattleGroundSpawnConfig::SpawnLog' from BattleGroundSpawnConfig.cpp:0x1d with varargs from stack.",
+      "confidence": "high",
+      "subsystem": "battleground-spawn",
+      "serverRelevance": "authoritative",
+      "notes": "Source path D:\\MHFC\\OpRelease\\Code\\Common\\CommonLib\\BattleGround\\BattleGroundSpawnConfig.cpp confirms server/common battleground spawn subsystem. Only the log wrapper here."
+    },
+    {
+      "address": "115f6260",
+      "currentName": "FUN_115f6260",
+      "proposedName": "CBTNode_EffectSpawnedCollectPoint::Execute",
+      "purpose": "Behavior-tree / effect node that spawns a 'CollectPoint' effect. Checks vtable+0xc(target,0) predicate and param_1[1] (effect id) > 0; resolves an effect record (FUN_10d3f100(effectId), reads +0x28), then via the target's effect manager (**(target+3)+0x90 then +0x48) invokes \"EffectSpawnedCollectPoint\" with a computed handle. Client visual effect on a collect/gather point.",
+      "confidence": "low",
+      "subsystem": "effects",
+      "serverRelevance": "client-only",
+      "notes": "param_1[1] is an effect/collect-point id; string \"EffectSpawnedCollectPoint\" is the effect event name."
+    },
+    {
+      "address": "11643b90",
+      "currentName": "CMonsterSpawnGroup__EnableSpawner",
+      "proposedName": "CMonsterSpawnGroup::EnableSpawner",
+      "purpose": "AUTHORITATIVE spawn scheduler. Rolls a randomized FirstSpawnDelay in [min,max] and, if positive, schedules a one-shot timer 'CMonsterSpawnGroup::EnableSpawner' (delay*1000 ms) with callback FUN_116440b0(this) and stores the timer handle at this[0x31]. If the first delay <= 0, immediately rolls a second randomized value from a second min/max pair and calls vtable+0xb4(value) (spawn now / set count).",
+      "confidence": "high",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "delay = (int)((double)FUN_100ee450() * _DAT_11de98f0 * (double)((max-min)+1)) + min   // uniform int in [min,max]",
+        "_DAT_11de98f0 = 1/RAND_MAX scale (rand01 normalizer; shared across codebase)",
+        "primary pair: min=this[0x23] (off 0x8c), max=this[0x24] (off 0x90) -> FirstSpawnDelay(sec)",
+        "timer: FUN_100ea610(name, delay*1000 ms, oneShot=1, this, cb=FUN_116440b0, 0); handle-> this[0x31] (off 0xc4)",
+        "fallback pair when delay<=0: min=this[0x25] (0x94), max=this[0x26] (0x98) -> value passed to vtbl+0xb4"
+      ],
+      "notes": "this[0x23..0x26] hold the FirstSpawnDelay min/max and a secondary min/max (likely SpawnAmount min/max). Timer resolution is seconds*1000=ms."
+    },
+    {
+      "address": "11644370",
+      "currentName": "FUN_11644370",
+      "proposedName": "CMonsterSpawnGroup::ResolveSpawnGroupInfo",
+      "purpose": "Looks up a CSpawnMonsterGroupInfo record by key (param_2) using the standard CInfoManager 2D table and caches the record pointer into this+0x7c (0 if not found).",
+      "confidence": "high",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "idx = key - *(mgr+0x30); bucket=*(*(mgr+0x20)+(idx/ *(mgr+0x28))*4); this+0x7c = *(bucket + (idx% *(mgr+0x28))*4)"
+      ],
+      "notes": "this+0x7c = cached spawn-group definition pointer used at spawn time."
+    },
+    {
+      "address": "116448e0",
+      "currentName": "CMonsterSpawnGroup___CheckRespawn",
+      "proposedName": "CMonsterSpawnGroup::_CheckRespawn",
+      "purpose": "AUTHORITATIVE respawn scheduler. If respawn count so far (this[0x32]) < respawn amount (this[0x27]), and a virtual precondition (vtable+0x2c, e.g. group still active/alive slots) passes, and no respawn timer is pending (this[0x33]==-1): rolls a randomized RespawnDelay in [min,max]; if >0 schedules one-shot timer 'CMonsterSpawnGroup::_CheckRespawn' with callback FUN_11644120 and stores handle at this[0x33]; else respawns immediately via FUN_11644120(-1,1).",
+      "confidence": "high",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "gate: this[0x32] (respawnedCount, off 0xc8) < this[0x27] (respawnAmount, off 0x9c)",
+        "gate: vtbl+0x2c() true AND this[0x33] (timer handle, off 0xcc) == -1",
+        "delay = (int)((double)FUN_100ee450() * _DAT_11de98f0 * (double)((max-min)+1)) + min",
+        "RespawnDelay pair: min=this[0x28] (0xa0), max=this[0x29] (0xa4)",
+        "timer: FUN_100ea610(name, delay*1000 ms, 1, this, FUN_11644120, 0) -> this[0x33]; else FUN_11644120(0xffffffff,1)"
+      ]
+    },
+    {
+      "address": "116ae000",
+      "currentName": "FUN_116ae000",
+      "proposedName": "CMonsterSpawnGroup::DoSpawnBatch",
+      "purpose": "AUTHORITATIVE spawn execution. Reads the cached spawn-group id at this+0x278 (must be >0), validates it exists in CSpawnMonsterGroupInfo, builds a spawn context from this+0x20 (position?) and this+0x30 (region/level ctx) via FUN_116f86a0, then configures a spawner: count param (defaulting to this+0x38 when caller count<1 or flag this+0xe4==0), FUN_1184a310(count), FUN_1184a540(ctx), FUN_1184a650(param_3)->number actually spawned (clamped >=0). Returns spawned count.",
+      "confidence": "medium",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "groupId = *(this+0x278); require >0 and valid in CSpawnMonsterGroupInfo",
+        "if (param_2 < 1) || (*(byte)(this+0xe4)==0): count = *(this+0x38)   // default spawn amount",
+        "spawnedCount = FUN_1184a650(param_3); if (<1) spawnedCount=0"
+      ],
+      "notes": "this+0x278 = active spawn-group id; this+0x38 = default spawn amount; this+0xe4 = override-count flag; FUN_1184a3xx set up spawner params, FUN_1184a650 performs spawn and returns count. FUN_116433b0 finalizes."
+    },
+    {
+      "address": "116f1b30",
+      "currentName": "FUN_116f1b30",
+      "proposedName": "CEffectSpawnInfo::ReadConfig",
+      "purpose": "XML/attr reader for a spawnable effect/geometry decoration config. Parses fields into the target struct: Effect(str@+0x120), HideEffectOnDestroy(bool@+0x188), GeomName(str@+0x1b0), TrailSound(str@+0x138), Geom offset X/Y/Z(@+0x1c8/0x1cc/0x1d0), Geom rotate X/Y/Z(@+0x1d4/0x1d8/0x1dc), VFX offset X/Y/Z(@+0x1e0/0x1e4/0x1e8), VFX rotate X/Y/Z(@+0x1ec/0x1f0/0x1f4), RotationSpeed X/Y/Z(@+0x1f8/0x1fc/0x200), GeomScale(@+0x204), DestroyEffect(list), DestroyEffectScale(float list@+0x1a8), MeshHitEffect id(@+0x184 flag via string compare), SpawnScale, plus a bool@+0x208. Also computes a name hash for the Effect string.",
+      "confidence": "medium",
+      "subsystem": "effects",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "geom name hash: h=0x4e67c6a7; for each char c: h ^= h*0x20 + (h>>2) + c; stored at this+0x150 (only if +0x14c != +0x148)",
+        "float attrs read via reader vtbl+0x30 (returns float10), stored as float32 at listed offsets",
+        "DestroyEffectScale parsed with atof into float vector at this+0x1a8"
+      ],
+      "notes": "Static-init DAT_1238e390/DAT_1238e4d4 bitmask gates cache the interned attribute-name ids (one bit per field). Pure client visual/decoration; not monster AI. u\"SpawnScale\", u\"MeshHitEffect\", u\"DestroyEffect\" also referenced."
+    },
+    {
+      "address": "116f8790",
+      "currentName": "FUN_116f8790",
+      "proposedName": "CSpawnMonsterGroupInfo::ReadConfig",
+      "purpose": "Reader for a CSpawnMonsterGroupInfo record (weighted monster spawn group). Parses id (attr@+0x10), Name(str@+0x14), then a MonsterID list where each entry may carry SpawnWeight and a LevelMin/LevelMax range; entries are appended into the group's monster list (via FUN_11645210). Handles both a single MonsterID value and an array form.",
+      "confidence": "medium",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "record id -> this+0x10 (attr reader vtbl+0x20)",
+        "Name -> this+0x14 (string)",
+        "per entry: MonsterID (int) + SpawnWeight (int, default via presence check) + LevelMin + LevelMax; SpawnWeight>0 required to append",
+        "entry struct assembled at local_418: [monsterId(local_42c), weight(local_414), levelMin(local_410), levelMax(local_40c)] -> FUN_11645210"
+      ],
+      "notes": "This is the static spawn-table: which monster ids can roll in a group, their SpawnWeight, and the level band (LevelMin/LevelMax) gating each. Matches CSpawnMonsterGroupInfo in recovered schema (weighted pick uses entry+4 weight)."
+    },
+    {
+      "address": "116fc320",
+      "currentName": "FUN_116fc320",
+      "proposedName": "CLevelSpawnBatchInfo::GetManager",
+      "purpose": "Lazy accessor returning the CInfoManager singleton for 'LevelSpawnBatchInfo' (registers name once via DAT_1238eb5c flag, returns DAT_1238eb58).",
+      "confidence": "high",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "notes": "LevelSpawnBatchInfo = batched level-spawn table manager (see CLevelSpawnBatchInfo in schema)."
+    },
+    {
+      "address": "116fcc00",
+      "currentName": "FUN_116fcc00",
+      "proposedName": "CLevelSpawnBatchInfo::ReadConfig",
+      "purpose": "Reader for a LevelSpawnBatchInfo record: parses id (first attr@*param_1) and SpawnGroupID (@param_1[1]). Links a level/batch to a spawn group id.",
+      "confidence": "high",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "*param_1 = id (attr reader vtbl+0x20)",
+        "param_1[1] = SpawnGroupID"
+      ],
+      "notes": "Two-field record: {recordId, SpawnGroupID}. Missing SpawnGroupID logs error and aborts."
+    },
+    {
+      "address": "117045a0",
+      "currentName": "FUN_117045a0",
+      "proposedName": "CFGModuleOnMonsterStateAbnormalInfo::GetRecordByKey",
+      "purpose": "CInfoManager keyed 2D-table accessor for CFGModuleOnMonsterStateAbnormalInfo (config for reacting to abnormal monster states / status effects). Returns record pointer or 0.",
+      "confidence": "medium",
+      "subsystem": "monster-state",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "idx = key - *(mgr+0x30); bucket=*(*(mgr+0x20)+(idx/ *(mgr+0x28))*4); return *(bucket+(idx% *(mgr+0x28))*4)"
+      ],
+      "notes": "Standard lookup; 'OnMonsterStateAbnormal' = trigger table for status/abnormal-state events (see FUN_11936910 manager init)."
+    },
+    {
+      "address": "11711230",
+      "currentName": "FUN_11711230",
+      "proposedName": "CMHLevel::ParseLevelEntities",
+      "purpose": "Iterates all 'Entity' nodes of a level XML and dispatches by EntityClass to build level runtime objects. Handles: MHMonsterSpawnPoint (FUN_118a3500 -> spawn-point list at this+0xc0), ProximityTrigger (FUN_118a2e90 -> this+0x48), EnterInstance (FUN_118a33d0 -> this+0x78), SwitchRegionTrigger (FUN_118a3270 -> this+0x60), MHPlayerSpawnPoint (FUN_118a3020, branches on type/mode fields local_68==3 / local_70==0), LogicPoint (FUN_118a3710), MHPathPoint (FUN_118a3b90 -> waypoints), WayPointList (FUN_118a3820).",
+      "confidence": "medium",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "spawn-point dedup: if new point's key FUN_1170ba20 == this+0xc0 (list head) then insert",
+        "MHPlayerSpawnPoint: local_68==3 -> FUN_117118e0 path; else local_70==0 -> FUN_11711850; else FUN_11711820"
+      ],
+      "notes": "Core level-load: places monster spawn points, player spawn points, region/proximity/enter-instance triggers, paths and waypoint lists. this+0xc0 = MHMonsterSpawnPoint container; +0x48/0x60/0x78 = trigger containers."
+    },
+    {
+      "address": "11741100",
+      "currentName": "FUN_11741100",
+      "proposedName": "CWildHunt::GetManager",
+      "purpose": "Lazy accessor for 'WildHunt' CInfoManager (DAT_12390984).",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11741130",
+      "currentName": "FUN_11741130",
+      "proposedName": "CWildHuntConst::GetManager",
+      "purpose": "Lazy accessor for 'WildHuntConst' CInfoManager (DAT_1239098c).",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "1177ed70",
+      "currentName": "FUN_1177ed70",
+      "proposedName": "GiftBagGroupAllRFTCheckDef::ctor",
+      "purpose": "Constructs an empty intrusive list node for a GiftBagGroupAllRFTCheckDef record (self-linking +0x10/+0x14) and registers class name.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative",
+      "notes": "List-head init boilerplate; RFT = likely 'Ratio/Rate' check def."
+    },
+    {
+      "address": "1177eda0",
+      "currentName": "FUN_1177eda0",
+      "proposedName": "GiftBagGroupCharLevelCheckRngDef::ctor",
+      "purpose": "Empty-list-node ctor for GiftBagGroupCharLevelCheckRngDef (character-level range check def).",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "1177edd0",
+      "currentName": "FUN_1177edd0",
+      "proposedName": "GiftBagGroupDRFTCheckDef::ctor",
+      "purpose": "Empty-list-node ctor for GiftBagGroupDRFTCheckDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "1177ee00",
+      "currentName": "FUN_1177ee00",
+      "proposedName": "GiftBagGroupDef::ctor",
+      "purpose": "Empty-list-node ctor for GiftBagGroupDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "1177ee30",
+      "currentName": "FUN_1177ee30",
+      "proposedName": "GiftBagGroupHRLevelCheckRngDef::ctor",
+      "purpose": "Empty-list-node ctor for GiftBagGroupHRLevelCheckRngDef (hunter-rank level range check def).",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11780a50",
+      "currentName": "FUN_11780a50",
+      "proposedName": "GiftBagGroupAllRFTCheckDef::ctor_dup",
+      "purpose": "Duplicate empty-list-node ctor for GiftBagGroupAllRFTCheckDef (second copy, likely different TU/vtable).",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11780a80",
+      "currentName": "FUN_11780a80",
+      "proposedName": "GiftBagGroupCharLevelCheckRngDef::ctor_dup",
+      "purpose": "Duplicate empty-list-node ctor for GiftBagGroupCharLevelCheckRngDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11780ab0",
+      "currentName": "FUN_11780ab0",
+      "proposedName": "GiftBagGroupDRFTCheckDef::ctor_dup",
+      "purpose": "Duplicate empty-list-node ctor for GiftBagGroupDRFTCheckDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11780ae0",
+      "currentName": "FUN_11780ae0",
+      "proposedName": "GiftBagGroupDef::ctor_dup",
+      "purpose": "Duplicate empty-list-node ctor for GiftBagGroupDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "11780b10",
+      "currentName": "FUN_11780b10",
+      "proposedName": "GiftBagGroupHRLevelCheckRngDef::ctor_dup",
+      "purpose": "Duplicate empty-list-node ctor for GiftBagGroupHRLevelCheckRngDef.",
+      "confidence": "medium",
+      "subsystem": "giftbag",
+      "serverRelevance": "authoritative"
+    },
+    {
+      "address": "117bf4e0",
+      "currentName": "FUN_117bf4e0",
+      "proposedName": "CMonsterInfo::ReadConfig",
+      "purpose": "Reader for a monster/pet definition record. Parses id(@+0x10), Name(via CPet::SetName), Title(via CPet::SetName), LevelEnabled(@+0x1c), stat multipliers HPMul(float@+0x20), AttackMul(@+0x24), DefenseMul(@+0x28), CRIMul(@+0x2c), AvatarId1..8(@+0x30..+0x4c), SkeletonFile(str@+0x50), BlackBoardName(str@+0x68), BTFolder(str@+0x80), BTFiles(str@+0x98), EventBT(str@+0xb0), Gender(@+0xc8), MonsterEnabled(@+0xcc). The BT/BlackBoard fields wire this monster to its behavior-tree.",
+      "confidence": "high",
+      "subsystem": "monster-ai",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "HPMul->float@+0x20, AttackMul->+0x24, DefenseMul->+0x28, CRIMul->+0x2c (crit multiplier), all read as float10->float32",
+        "AvatarId1..8 -> int @+0x30,+0x34,+0x38,+0x3c,+0x40,+0x44,+0x48,+0x4c",
+        "LevelEnabled@+0x1c, Gender@+0xc8, MonsterEnabled@+0xcc"
+      ],
+      "notes": "MHO-specific monster def: BlackBoardName(+0x68), BTFolder(+0x80), BTFiles(+0x98), EventBT(+0xb0) are the behavior-tree bindings (CBTActor/blackboard). Stat multipliers scale base stats by level. Uses CPet::SetName so this table is shared with pet/companion definitions."
+    },
+    {
+      "address": "11807a20",
+      "currentName": "FUN_11807a20",
+      "proposedName": "CWildHuntTaskRatioInfo::GetRecordByIndex",
+      "purpose": "Linear-array accessor for CWildHuntTaskRatioInfo (WildHunt task probability/ratio table). Returns record pointer at flat index.",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative",
+      "formulas": ["count=(*(mgr+0x18)-*(mgr+0x14))>>2; return *(*(mgr+0x14)+idx*4)"],
+      "notes": "See CWildHuntTaskRatioInfo in activity schema."
+    },
+    {
+      "address": "1189c230",
+      "currentName": "FUN_1189c230",
+      "proposedName": "CMHLevelSpawnConfig::ParseLevelXml",
+      "purpose": "Top-level parser for a level's spawn/config XML. Validates LevelID matches *(this)+0x10, then iterates: MonsterSpawnGroups (each -> FUN_1189ca40 builds a spawn-group entry, appended via FUN_1189dab0), Entities (each -> FlowgraphEnable + FUN_1189d780 into this+6 list, filtered by FUN_1189c080), ConfigSets (each -> FUN_1189c520 building a config-set list keyed by id), and resolves DefaultConfigSet id to a pointer stored at this[3].",
+      "confidence": "medium",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "gate: LevelID (FUN_100f6ef0 'LevelID') must equal *(*this + 0x10)",
+        "DefaultConfigSet: walk config-set list (this[1]..) find node where node[2]==id; this[3]=node(+2) or 0"
+      ],
+      "notes": "Drives which monster spawn groups and entities belong to a level, plus named config sets (variant spawn layouts) and the default set. this+6 = entities list; this[1] = config-sets list head."
+    },
+    {
+      "address": "1189ca40",
+      "currentName": "FUN_1189ca40",
+      "proposedName": "CMonsterSpawnGroupEntry::ParseXml",
+      "purpose": "Parses one <MonsterSpawnGroups> entry. Resolves/auto-assigns the group key (attr DAT_11de661c; if <=0 auto-generates count+1 | 0x10000000), then reads RegionID(@+0x4), SpawnAmountMin(@+0x8)/SpawnAmountMax(@+0xc), FirstSpawnDelayMin/Max(@+0x10/+0x14 via FUN_1189a8a0), RespawnAmont(@+0x18), RespawnDelayMin/Max(@+0x1c/+0x20 via FUN_1189a8a0), SpawnMonsterGroupID(@+0x24), and a RandomMonsters list (each MonsterID + SpawnWeight, appended via FUN_1189db00 when MonsterID>0 and SpawnWeight>0). Returns success only if SpawnMonsterGroupID>0 or the RandomMonsters list is non-empty.",
+      "confidence": "high",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "group key from attr; if key<=0: key = (existingEntryCount + 1) | 0x10000000  (auto id, high bit tag)",
+        "RegionID->param_1+1 (0x4)",
+        "SpawnAmountMin->param_1[2] (0x8), SpawnAmountMax->param_1[3] (0xc); both required",
+        "FirstSpawnDelay pair (min,max)->param_1+4,+5 (0x10,0x14)",
+        "RespawnAmont (sic, typo in data)->param_1[6] (0x18)",
+        "RespawnDelay pair (min,max)->param_1+7,+8 (0x1c,0x20)",
+        "SpawnMonsterGroupID->param_1[9] (0x24)",
+        "RandomMonsters entry: MonsterID default 0, SpawnWeight default 100; appended if MonsterID>0 && SpawnWeight>0",
+        "success gate: param_1[9]>0 OR RandomMonsters list (param_1+10, 0x28) non-empty"
+      ],
+      "costs": ["SpawnWeight default = 100 when attribute absent"],
+      "notes": "Runtime source of spawn amounts, first-spawn/respawn delay ranges, region, and inline weighted monster list. Delay values here feed CMonsterSpawnGroup::EnableSpawner/_CheckRespawn (min/max pairs). Note game data field spelled 'RespawnAmont'. Struct layout matches CMonsterSpawnGroup runtime offsets (0x23..0x29 in the *4-index form)."
+    },
+    {
+      "address": "118a3500",
+      "currentName": "FUN_118a3500",
+      "proposedName": "MHMonsterSpawnPoint::ParseEntity",
+      "purpose": "Reads an MHMonsterSpawnPoint level entity. Parses name(@+0x1c), EntityClass(@+0x34), Pos %f,%f,%f (@+0x10/+0x14/+0x18), Rotate %f,%f,%f,%f quaternion (@+0xc,+0x0,+0x4,+0x8), LevelWeather(@+0x4c), LevelTime(@+0x50), FixedMonsterID(@+0x60, default 0), RegionID(@+100=0x64, default -1), SpawnerEnable(@+0x54, default 0), EntityGuid (%PRIX64 hex64 @+0x58), and a LevelInfo id list (parsed from a comma/token string into the list at +0x68).",
+      "confidence": "high",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "Pos: sscanf '%f,%f,%f' -> +0x10,+0x14,+0x18 (default '0,0,0')",
+        "Rotate: sscanf '%f,%f,%f,%f' -> +0xc,+0x0,+0x4,+0x8 (default '0,0,0,0')",
+        "FixedMonsterID default 0; RegionID default 0xffffffff(-1); SpawnerEnable default 0",
+        "EntityGuid: sscanf '%PRIX64' -> 64-bit at +0x58",
+        "LevelInfo list: tokenize -> ints >0 appended to list at +0x68"
+      ],
+      "notes": "FixedMonsterID forces a specific monster at this point; RegionID ties it to a spawn region; SpawnerEnable toggles the spawner; LevelWeather/LevelTime gate conditional spawning. Authoritative placement + spawn conditions per point."
+    },
+    {
+      "address": "118a40b0",
+      "currentName": "FUN_118a40b0",
+      "proposedName": "SpawnMonsterGroupInfo::registerName",
+      "purpose": "Registers the 'SpawnMonsterGroupInfo' string name; returns arg.",
+      "confidence": "medium",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "notes": "Name-registration stub."
+    },
+    {
+      "address": "118a4120",
+      "currentName": "FUN_118a4120",
+      "proposedName": "SpawnMonsterGroupInfo::GetTypeDescriptor",
+      "purpose": "One-time init of the SpawnMonsterGroupInfo type descriptor (DAT_1239bd94 block): type id 0x27, count 1, various zeroed fields, instance pointer stashed. Returns descriptor pointer, sets *param_2=1.",
+      "confidence": "medium",
+      "subsystem": "monster-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": ["_DAT_1239bd94 = 0x27 (type id/field count); _DAT_1239bd9c = 1"],
+      "notes": "CInfoManager type-descriptor init boilerplate."
+    },
+    {
+      "address": "11936910",
+      "currentName": "FUN_11936910",
+      "proposedName": "OnMonsterStateAbnormalInfo::GetTypeDescriptor",
+      "purpose": "One-time init of the 'OnMonsterStateAbnormal' type descriptor (DAT_1239fb48 block): type id 0xe3, count 1. Returns descriptor pointer.",
+      "confidence": "medium",
+      "subsystem": "monster-state",
+      "serverRelevance": "authoritative",
+      "formulas": ["_DAT_1239fb48 = 0xe3 (type id); _DAT_1239fb50 = 1"],
+      "notes": "Config table for reactions to abnormal monster states (status effects). Descriptor init boilerplate."
+    },
+    {
+      "address": "11957970",
+      "currentName": "FUN_11957970",
+      "proposedName": "SpawnInfo::GetTypeDescriptor",
+      "purpose": "One-time init of the 'SpawnInfo' type descriptor (DAT_123a05b8 block): type id 0x10f, count 1. Returns descriptor pointer.",
+      "confidence": "medium",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": ["_DAT_123a05b8 = 0x10f (type id); _DAT_123a05c0 = 1"],
+      "notes": "Descriptor init for the SpawnInfo table (see readers 11958350/11958c30)."
+    },
+    {
+      "address": "11958350",
+      "currentName": "FUN_11958350",
+      "proposedName": "CSpawnObjectiveInfo::ReadConfig",
+      "purpose": "Reader for a SpawnInfo/spawn-objective record. Parses id(@+0x10), Logic (enum clamped to 0/1/2 @+0x14), TimeLimit(@+0x18), MessageID(@+0x1c), SpawnIDs (id list @+0x20 via FUN_1162bea0), then two target-monster conditions: TargetMonsterID1(@+0x2c)/TargetCount1(@+0x30)/TargetMsgID1(@+0x34) and TargetMonsterID2(@+0x38)/TargetCount2(@+0x3c)/TargMsgID2(@+0x40).",
+      "confidence": "high",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "Logic enum: value must be 0,1,2 -> stored @+0x14 (else left unset)",
+        "TimeLimit@+0x18, MessageID@+0x1c",
+        "SpawnIDs: string parsed into int list @+0x20",
+        "Target1: monsterId@+0x2c, count@+0x30, msgId@+0x34",
+        "Target2: monsterId@+0x38, count@+0x3c, msgId@+0x40"
+      ],
+      "notes": "Spawn objective/wave: spawn a set of SpawnIDs, with success conditions of killing TargetCount of TargetMonsterID and firing message ids. Logic selects objective mode. Server-authoritative objective evaluation."
+    },
+    {
+      "address": "11958c30",
+      "currentName": "FUN_11958c30",
+      "proposedName": "CSpawnInfoEntry::ReadConfig",
+      "purpose": "Reader for a single SpawnInfo spawn entry. Parses id(@+0x10), MonsterID(@+0x14), MonsterGroupID(@+0x18), SpawnAmount(@+0x1c), RegionId(@+0x20), Delay(@+0x24), RespawnAmount(@+0x28), RespawnDelay(@+0x2c), Scale(float@+0x30), BuffID(@+0x34).",
+      "confidence": "high",
+      "subsystem": "level-spawn",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "MonsterID@+0x14, MonsterGroupID@+0x18, SpawnAmount@+0x1c, RegionId@+0x20",
+        "Delay@+0x24, RespawnAmount@+0x28, RespawnDelay@+0x2c",
+        "Scale->float@+0x30, BuffID@+0x34"
+      ],
+      "notes": "A concrete monster-spawn command: what to spawn, how many, where (region), spawn/respawn timing, size scale, and a buff applied to spawned monsters. Authoritative."
+    },
+    {
+      "address": "119ddbd0",
+      "currentName": "FUN_119ddbd0",
+      "proposedName": "CSpawnEntityEffectInfo::ReadConfig",
+      "purpose": "Reader for a spawn-on-event entity/effect definition. Parses Name(str@+0x14), id(@+0x10), EntityType (matched against a wide-string enum table at DAT_11d6abb8 -> index), DelayTime(float), OffsetX/Y/Z(floats), RotationX/Y/Z(floats), SpawnMode (matched against enum table DAT_11d6ac08 -> index), UseHitDir(bool), and Param0..2 (three string params, key format u\"Param%1d\"). Assembles the parsed values via FUN_119dd840 and appends a 0x70-byte record to a list at this+0x40.",
+      "confidence": "medium",
+      "subsystem": "spawn-effects",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "EntityType: linear string-compare against enum table [DAT_11d6abb8, stride 0x14 wchars] -> matched index (local_4e8)",
+        "SpawnMode: linear string-compare against table [DAT_11d6ac08] -> index (local_4e4)",
+        "DelayTime,OffsetY,OffsetZ,RotationX,RotationY,RotationZ read via vtbl+0x34 (double) -> float",
+        "Param%1d loop: i=0..2, reads Param0/Param1/Param2 strings into a temp [+0x18 stride] then packs 0x70-byte record appended at this+0x40 (stride 0x70)"
+      ],
+      "notes": "Defines what entity/effect to spawn when an event (e.g. a hit) fires: type, spawn mode, positional offset/rotation relative to hit, delay, whether to align to hit direction, and up to 3 string params. UseHitDir ties spawn orientation to attack direction. this+0x40 = list of spawn-effect records (0x70 bytes each)."
+    },
+    {
+      "address": "11a21e50",
+      "currentName": "FUN_11a21e50",
+      "proposedName": "CWildHuntSpawnGroupInfo::ReadConfig",
+      "purpose": "Reader for a WildHunt spawn-group record holding up to three monster spawn slots. Parses groupId(@+0x10), then three identical blocks: slot1 monsterId(@+0x14)/monsterCount(@+0x18)/regionId(@+0x1c)/delay(@+0x20)/respawnAmount(@+0x24)/respawnDelay(@+0x28)/scale(float@+0x2c); slot2 (@+0x30..+0x48, scale float@+0x48); slot3 (@+0x4c..+0x64, scale float@+0x64=100).",
+      "confidence": "high",
+      "subsystem": "wildhunt",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "groupId@+0x10",
+        "slot1: monsterId@+0x14, count@+0x18, regionId@+0x1c, delay@+0x20, respawnAmount@+0x24, respawnDelay@+0x28, scale(float)@+0x2c",
+        "slot2: monsterId@+0x30, count@+0x34, regionId@+0x38, delay@+0x3c, respawnAmount@+0x40, respawnDelay@+0x44, scale(float)@+0x48",
+        "slot3: monsterId@+0x4c, count@+0x50, regionId@+0x54, delay@+0x58, respawnAmount@+0x5c, respawnDelay@+0x60, scale(float)@+0x64"
+      ],
+      "notes": "WildHunt event-specific spawn composition (three fixed monster slots each with count/region/delay/respawn/scale). lowerCamel attribute names distinguish this from the generic SpawnInfo table. Authoritative WildHunt spawning."
+    }
+  ]
+}

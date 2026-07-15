@@ -1,0 +1,626 @@
+{
+  "chunkIndex": 8,
+  "functions": [
+    {
+      "address": "0x10206300",
+      "currentName": "FUN_10206300",
+      "proposedName": "Tlv_WriteField2_SoulBeastSub_A",
+      "purpose": "Length-prefixed sub-struct writer: emits TDR tag 0x25 (field_id=2, wire5 LEN_DELIM), reserves a 4-byte length slot, calls body writer FUN_10203930, then backpatches the byte length via FUN_1010c3c0. A thin wrapper that serializes an embedded soul-beast/farm sub-object as field 2.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStats"],
+      "protocolFields": ["field2: sub-struct(len-delimited) @ tag 0x25 — embedded soul-beast object written by FUN_10203930"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Server must emit the same field2 len-delimited framing (tag 0x25 + 4-byte size prefix) when sending this soul-beast sub-object.",
+      "confidence": "low",
+      "notes": "TdrBuf.h write path. Body writer FUN_10203930 lives in another chunk; exact struct unconfirmed but address neighborhood is the soul-beast/farm serializers."
+    },
+    {
+      "address": "0x10206380",
+      "currentName": "FUN_10206380",
+      "proposedName": "Tlv_WriteField2_SoulBeastSub_B",
+      "purpose": "Identical to FUN_10206300 (tag 0x25 field2, reserve 4-byte length, body, backpatch) but calls a different body writer FUN_10204070. Second flavor of the field-2 len-delimited sub-struct writer.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStats"],
+      "protocolFields": ["field2: sub-struct(len-delimited) @ tag 0x25 — embedded object written by FUN_10204070"],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Same as FUN_10206300; server replicates len-delimited field-2 framing.",
+      "confidence": "low",
+      "notes": "Sibling of FUN_10206300 with alternate element encoding (FUN_10204070 vs FUN_10203930)."
+    },
+    {
+      "address": "0x10206700",
+      "currentName": "FUN_10206700",
+      "proposedName": "TlvDbg_PrintFarmField",
+      "purpose": "DebugFormat helper (TdrBufUtil.cpp): validates a non-NULL variable via FUN_1024a140, prints a '[farm]' labeled sub-object header via FUN_1010c010, then recurses into FUN_10205ad0 to dump the farm/soul-beast sub-structure. Human-readable dump, not wire I/O.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvFarmData", "TlvSoulBeastStats"],
+      "protocolFields": [],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "None — client-side debug pretty-printer for the farm/pet blob; server does not need it.",
+      "confidence": "medium",
+      "notes": "String '[farm]'. TdrBufUtil DebugFormat path; pure diagnostics."
+    },
+    {
+      "address": "0x10207890",
+      "currentName": "FUN_10207890",
+      "proposedName": "TlvSoulBeastStatsArray_Write_Varint",
+      "purpose": "Write/marshal of the soul-beast (farm pet) attribute array. Emits 7 length-delimited (wire5) fields; each field is an int32[7] scalar array written element-by-element via FUN_1010c560, with a backpatched 4-byte length. Field tags 0x25,0x45,0x55,0x65,0x75,0x85,0x95.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArray"],
+      "protocolFields": [
+        "field2: int32[7] array @ tag 0x25, struct off 0x00 — oCharLevel per soul-beast",
+        "field4: int32[7] array @ tag 0x45, struct off 0x1c — oCharExp",
+        "field5: int32[7] array @ tag 0x55, struct off 0x38 — oCharGlut",
+        "field6: int32[7] array @ tag 0x65, struct off 0x54 — oEvloveStage",
+        "field7: int32[7] array @ tag 0x75, struct off 0x70 — oImage",
+        "field8: int32[7] array @ tag 0x85, struct off 0x8c — oFollow",
+        "field9: int32[7] array @ tag 0x95, struct off 0xa8 — oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Generated doc TlvSoulBeastStatsArray lists each of fields 2/4/5/6/7/8/9 as a SCALAR int32 with wire3 tags (0x23,0x43,...). The actual write code emits them as wire5 LEN_DELIM fields (tags 0x25,0x45,...) each carrying an int32[7] array (7 elements, struct stride 0x1c). Fields are arrays, not scalars, and wire type is 5 not 3. Field 3 is absent (doc also omits it).",
+      "serverRelevance": "High — server building character/pet packets must emit these 7 fields as wire5 length-delimited int32[7] arrays, not scalar wire3 ints, or the client parse fails.",
+      "confidence": "medium",
+      "notes": "Field names taken from FUN_102090a0 debug labels and TlvSoulBeastStats doc. FUN_1010c560 = 4-byte big-endian element writer. Read counterpart at sub_10208B40 (other chunk)."
+    },
+    {
+      "address": "0x10207e90",
+      "currentName": "FUN_10207e90",
+      "proposedName": "TlvSoulBeastStatsArray_Write_Fixed",
+      "purpose": "Second write flavor of the soul-beast attribute array. Same 7 fields / same offsets as FUN_10207890, but first blocks use FUN_1010c190 and later blocks are written with inline big-endian 4-byte stores plus per-element buffer bounds checks (TdrBuf.h 0x108). Produces the same wire5 int32[7] arrays.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArray"],
+      "protocolFields": [
+        "field2: int32[7] array @ tag 0x25, off 0x00 — oCharLevel",
+        "field4: int32[7] array @ tag 0x45, off 0x1c — oCharExp",
+        "field5: int32[7] array @ tag 0x55, off 0x38 — oCharGlut",
+        "field6: int32[7] array @ tag 0x65, off 0x54 — oEvloveStage",
+        "field7: int32[7] array @ tag 0x75, off 0x70 — oImage",
+        "field8: int32[7] array @ tag 0x85, off 0x8c — oFollow",
+        "field9: int32[7] array @ tag 0x95, off 0xa8 — oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Same discrepancy as FUN_10207890: doc labels these fields scalar int32/wire3, code emits wire5 len-delimited int32[7] arrays.",
+      "serverRelevance": "High — alternate encoder for the same structure; server must produce identical wire5 array framing.",
+      "confidence": "medium",
+      "notes": "Byte-for-byte the same field layout as FUN_10207890; differs only in element-writer primitive (FUN_1010c190 + inline stores)."
+    },
+    {
+      "address": "0x102090a0",
+      "currentName": "FUN_102090a0",
+      "proposedName": "TlvSoulBeastStatsArray_DebugFormat",
+      "purpose": "DebugFormat pretty-printer for the soul-beast attribute array. Dumps each of the 7 attribute arrays under labels [oCharLevel],[oCharExp],[oCharGlut],[oEvloveStage],[oImage],[oFollow],[oFeedTime] using '%s[0 : %I64i]:' + '%I64i' per element (7 elements each). Confirms field names/offsets used by the writers.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArray"],
+      "protocolFields": [
+        "[oCharLevel]: int32[7] @ off 0x00",
+        "[oCharExp]: int32[7] @ off 0x1c",
+        "[oCharGlut]: int32[7] @ off 0x38",
+        "[oEvloveStage]: int32[7] @ off 0x54",
+        "[oImage]: int32[7] @ off 0x70",
+        "[oFollow]: int32[7] @ off 0x8c",
+        "[oFeedTime]: int32[7] @ off 0xa8"
+      ],
+      "tlvDocDiscrepancy": "Confirms the array nature: each labeled field is dumped as 7 int64-formatted elements, not a single scalar as the generated doc implies.",
+      "serverRelevance": "None directly (debug), but authoritative source of the field names/order the server must honor.",
+      "confidence": "high",
+      "notes": "Label 'oEvloveStage' is the original (mis)spelling in the game. Ground-truth for FUN_10207890/e90 field names."
+    },
+    {
+      "address": "0x102098b0",
+      "currentName": "FUN_102098b0",
+      "proposedName": "TlvSoulBeastStatsArrayB_Write_Varint",
+      "purpose": "Duplicate of FUN_10207890 (soul-beast attribute-array writer, FUN_1010c560 elements, tags 0x25..0x95) instantiated for the ArrayB parent. Same 7 int32[7] fields / offsets.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayB"],
+      "protocolFields": [
+        "field2: int32[7] @0x00 oCharLevel","field4: int32[7] @0x1c oCharExp","field5: int32[7] @0x38 oCharGlut","field6: int32[7] @0x54 oEvloveStage","field7: int32[7] @0x70 oImage","field8: int32[7] @0x8c oFollow","field9: int32[7] @0xa8 oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_10207890: doc TlvSoulBeastStatsArrayB lists scalar int32/wire3; code emits wire5 len-delimited int32[7] arrays.",
+      "serverRelevance": "High — server must emit identical wire5 array framing for ArrayB.",
+      "confidence": "medium",
+      "notes": "Read counterpart sub_1020AB60 (other chunk)."
+    },
+    {
+      "address": "0x10209eb0",
+      "currentName": "FUN_10209eb0",
+      "proposedName": "TlvSoulBeastStatsArrayB_Write_Fixed",
+      "purpose": "Duplicate of FUN_10207e90 (fixed/inline element flavor) for the ArrayB parent. Same 7 int32[7] fields.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayB"],
+      "protocolFields": [
+        "field2: int32[7] @0x00 oCharLevel","field4: int32[7] @0x1c oCharExp","field5: int32[7] @0x38 oCharGlut","field6: int32[7] @0x54 oEvloveStage","field7: int32[7] @0x70 oImage","field8: int32[7] @0x8c oFollow","field9: int32[7] @0xa8 oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Same discrepancy: wire5 int32[7] arrays vs doc scalar int32/wire3.",
+      "serverRelevance": "High — alternate ArrayB encoder.",
+      "confidence": "medium",
+      "notes": "Inline element stores with TdrBuf.h 0x108 bounds checks."
+    },
+    {
+      "address": "0x1020b0c0",
+      "currentName": "FUN_1020b0c0",
+      "proposedName": "TlvSoulBeastStatsArrayB_DebugFormat",
+      "purpose": "Duplicate of FUN_102090a0 debug printer for the ArrayB parent (same [oCharLevel]..[oFeedTime] labels, 7 elements each).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayB"],
+      "protocolFields": [
+        "[oCharLevel]:int32[7]@0x00","[oCharExp]:int32[7]@0x1c","[oCharGlut]:int32[7]@0x38","[oEvloveStage]:int32[7]@0x54","[oImage]:int32[7]@0x70","[oFollow]:int32[7]@0x8c","[oFeedTime]:int32[7]@0xa8"
+      ],
+      "tlvDocDiscrepancy": "Confirms array (7-element) nature vs doc scalar.",
+      "serverRelevance": "None (debug).",
+      "confidence": "high",
+      "notes": "Field-name ground truth for ArrayB."
+    },
+    {
+      "address": "0x1020b8c0",
+      "currentName": "FUN_1020b8c0",
+      "proposedName": "TlvSoulBeastStatsArrayC_Write_Varint",
+      "purpose": "Duplicate of FUN_10207890 for the ArrayC parent (FUN_1010c560 element writer, tags 0x25..0x95, 7 int32[7] fields).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayC"],
+      "protocolFields": [
+        "field2: int32[7] @0x00 oCharLevel","field4: int32[7] @0x1c oCharExp","field5: int32[7] @0x38 oCharGlut","field6: int32[7] @0x54 oEvloveStage","field7: int32[7] @0x70 oImage","field8: int32[7] @0x8c oFollow","field9: int32[7] @0xa8 oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_10207890 vs TlvSoulBeastStatsArrayC doc: wire5 int32[7] arrays not scalar int32/wire3.",
+      "serverRelevance": "High — server emits identical wire5 array framing for ArrayC.",
+      "confidence": "medium",
+      "notes": "Read counterpart sub_1020CB70."
+    },
+    {
+      "address": "0x1020bec0",
+      "currentName": "FUN_1020bec0",
+      "proposedName": "TlvSoulBeastStatsArrayC_Write_Fixed",
+      "purpose": "Duplicate of FUN_10207e90 (fixed/inline flavor) for the ArrayC parent.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayC"],
+      "protocolFields": [
+        "field2: int32[7] @0x00 oCharLevel","field4: int32[7] @0x1c oCharExp","field5: int32[7] @0x38 oCharGlut","field6: int32[7] @0x54 oEvloveStage","field7: int32[7] @0x70 oImage","field8: int32[7] @0x8c oFollow","field9: int32[7] @0xa8 oFeedTime"
+      ],
+      "tlvDocDiscrepancy": "Same discrepancy: wire5 int32[7] arrays vs scalar int32/wire3.",
+      "serverRelevance": "High — alternate ArrayC encoder.",
+      "confidence": "medium",
+      "notes": "Inline element stores; TdrBuf.h 0x108 checks."
+    },
+    {
+      "address": "0x1020d0d0",
+      "currentName": "FUN_1020d0d0",
+      "proposedName": "TlvSoulBeastStatsArrayC_DebugFormat",
+      "purpose": "Duplicate of FUN_102090a0 debug printer for the ArrayC parent.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvSoulBeastStatsArrayC"],
+      "protocolFields": [
+        "[oCharLevel]:int32[7]@0x00","[oCharExp]:int32[7]@0x1c","[oCharGlut]:int32[7]@0x38","[oEvloveStage]:int32[7]@0x54","[oImage]:int32[7]@0x70","[oFollow]:int32[7]@0x8c","[oFeedTime]:int32[7]@0xa8"
+      ],
+      "tlvDocDiscrepancy": "Confirms array nature vs doc scalar.",
+      "serverRelevance": "None (debug).",
+      "confidence": "high",
+      "notes": "Field-name ground truth for ArrayC."
+    },
+    {
+      "address": "0x1020ddd0",
+      "currentName": "FUN_1020ddd0",
+      "proposedName": "Tlv_Write4Field_U8_3xI32_Varint",
+      "purpose": "Write/marshal of a small 4-field record. Emits field1 as uint8 (tag 0x11) from off 0, then fields 2/3/4 as varint int32 (tags 0x20/0x30/0x40, wire0) from offs 1/5/9 via FUN_1010c5f0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": [],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int32(varint) @ off 0x01, tag 0x20",
+        "field3: int32(varint) @ off 0x05, tag 0x30",
+        "field4: int32(varint) @ off 0x09, tag 0x40"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Server must emit the 4 fields with these tags/wire types when producing this sub-record.",
+      "confidence": "low",
+      "notes": "13-byte record (u8 + 3 int32). Varint-encoded sibling of FUN_1020de90. Struct name not resolved; likely a shop/refresh time sub-element given address neighborhood."
+    },
+    {
+      "address": "0x1020de90",
+      "currentName": "FUN_1020de90",
+      "proposedName": "Tlv_Write4Field_U8_3xI32_Fixed",
+      "purpose": "Fixed-encoding sibling of FUN_1020ddd0. field1 uint8 (tag 0x11), fields 2/3/4 as fixed 4-byte int32 (tags 0x23/0x33/0x43, wire3) via FUN_1010c190 from offs 1/5/9.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": [],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int32(fixed) @ off 0x01, tag 0x23",
+        "field3: int32(fixed) @ off 0x05, tag 0x33",
+        "field4: int32(fixed) @ off 0x09, tag 0x43"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Alternate (wire3) encoding of the same record; server must match whichever the parent selects.",
+      "confidence": "low",
+      "notes": "Same layout as FUN_1020ddd0, fixed32 elements instead of varint."
+    },
+    {
+      "address": "0x1020f2f0",
+      "currentName": "FUN_1020f2f0",
+      "proposedName": "TlvShopBuyLimitData_DebugFormat",
+      "purpose": "DebugFormat printer for TlvShopBuyLimitData. Dumps lastResetTm (%I64u int64), limitDataCnt (uint8 count at off 8), then four parallel arrays of length limitDataCnt: shopType (uint8, off 9), shopID (int32, off 0x109), saleID (int32, off 0x509), buyCount (int16, off 0x909).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvShopBuyLimitData"],
+      "protocolFields": [
+        "field1 lastResetTm: int64 @ off 0x00",
+        "field2 limitDataCnt: uint8 @ off 0x08 (array length)",
+        "shopType: uint8[limitDataCnt] @ off 0x09",
+        "shopID: int32[limitDataCnt] @ off 0x109",
+        "saleID: int32[limitDataCnt] @ off 0x509",
+        "buyCount: int16[limitDataCnt] @ off 0x909"
+      ],
+      "tlvDocDiscrepancy": "Generated doc TlvShopBuyLimitData lists shopType/shopID/saleID as scalar int32 (fields 5/6/7) and buyCount as scalar int32 (field 8). Actual structure: they are PARALLEL ARRAYS sized by limitDataCnt, and buyCount elements are int16 (2 bytes), not int32. shopType elements are uint8. Doc field-id/type mapping for 5..8 is wrong.",
+      "serverRelevance": "High — server must send shopType/shopID/saleID/buyCount as arrays of length limitDataCnt with correct element widths (u8/i32/i32/i16), not four scalar int32s.",
+      "confidence": "high",
+      "notes": "DebugFormat, but element widths derived from stride (bVar2*4 for shopID/saleID, bVar2*2 for buyCount, bVar2 for shopType). Read counterpart sub_1020EED0."
+    },
+    {
+      "address": "0x1020f9c0",
+      "currentName": "FUN_1020f9c0",
+      "proposedName": "Tlv_Read2xI16_ShopSubElem",
+      "purpose": "Read/deserialize of a 2-field record. Clears presence flags at off 4, loops reading TDR tags (FUN_1010ccb0); tag>>4==1 -> field1 int16 (big-endian, off 0), ==2 -> field2 int16 (off 2); unknown tags skipped via FUN_1010d4f0.",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": [],
+      "protocolFields": [
+        "field1: int16 @ off 0x00 (presence bit 0x1)",
+        "field2: int16 @ off 0x02 (presence bit 0x2)",
+        "presence_flags: uint32 @ off 0x04"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Server must parse/accept this 2x int16 sub-element (e.g. shop line id/quantity pair) with 2-byte wire fields.",
+      "confidence": "medium",
+      "notes": "Element reader; presence-flag tracked. Two int16 fields, each 2 bytes read big-endian. Sibling of FUN_102128e0 (different parent)."
+    },
+    {
+      "address": "0x10210c80",
+      "currentName": "FUN_10210c80",
+      "proposedName": "TlvShopEntry_Read",
+      "purpose": "Read/deserialize of a shop entry (sub_10210C80, the 'shops' element of TlvShopDataContainer). Presence flags at off 0xa. field1 int16 (off 0), field2 int32 via FUN_1010c870 (off 2), field3 int32 via FUN_1010c870 (off 6).",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvShopDataContainer"],
+      "protocolFields": [
+        "field1: int16 @ off 0x00 (presence 0x1)",
+        "field2: int32 @ off 0x02 (presence 0x2)",
+        "field3: int32 @ off 0x06 (presence 0x4)",
+        "presence_flags: uint32 @ off 0x0a"
+      ],
+      "tlvDocDiscrepancy": "Doc TlvShopDataContainer references 'shops sub-struct -> sub_10210C80' but does not enumerate this element's own fields (int16 + 2x int32). Recovered here.",
+      "serverRelevance": "High — the shop entry element the server serializes inside TlvShopDataContainer.shops[].",
+      "confidence": "high",
+      "notes": "FUN_1010c870 = fixed 4-byte int reader. Referenced by TlvShopDataContainer doc as sub_10210C80."
+    },
+    {
+      "address": "0x102121e0",
+      "currentName": "FUN_102121e0",
+      "proposedName": "TlvShopDataContainer_DebugFormat",
+      "purpose": "DebugFormat printer for TlvShopDataContainer. Prints shopCount (int32, max 0x14/20) then shops[] array (each via FUN_102106f0); then four TlvShopBuyLimitData sub-objects dayBuyItemLimitData/weekBuyItemLimitData/monthBuyItemLimitData/foreverBuyLimitData (each via FUN_1020f2f0); then groupCount (int32 @ index 0x1568, max 0x80/128) and groups[] array (each via FUN_10210e70).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvShopDataContainer", "TlvShopBuyLimitData"],
+      "protocolFields": [
+        "shopCount: int32 @ off 0x00 (max 20)",
+        "shops: TlvShopEntry[shopCount] (elem FUN_102106f0)",
+        "dayBuyItemLimitData: TlvShopBuyLimitData (FUN_1020f2f0)",
+        "weekBuyItemLimitData: TlvShopBuyLimitData",
+        "monthBuyItemLimitData: TlvShopBuyLimitData",
+        "foreverBuyLimitData: TlvShopBuyLimitData",
+        "groupCount: int32 @ word-index 0x1568 (max 128)",
+        "groups: sub-struct[groupCount] (elem FUN_10210e70)"
+      ],
+      "tlvDocDiscrepancy": "Doc TlvShopDataContainer assigns field ids as f1 shopCount, f2 dayBuyItemLimitData, f3 week, f4 month, f5 forever, f6 groupCount, f7 groups, f8 shops, and types all as scalar int32. Actual layout: shops/groups are arrays, the four *BuyItemLimitData are TlvShopBuyLimitData sub-structs, shopCount/groupCount are counts with bounds 20/128. The doc's flat scalar-int32 typing for f2..f8 is wrong (these are sub-structs/arrays).",
+      "serverRelevance": "High — top-level shop data blob; server must build shops[] and groups[] arrays plus the four buy-limit sub-structs with correct counts (<=20 / <=128).",
+      "confidence": "high",
+      "notes": "DebugFormat (tag order not directly observable), but nesting and counts are explicit. Read at sub_10211D10."
+    },
+    {
+      "address": "0x102128e0",
+      "currentName": "FUN_102128e0",
+      "proposedName": "Tlv_Read2xI16_ShopSubElem_Dup",
+      "purpose": "Read/deserialize identical to FUN_1020f9c0: presence flags at off 4, field1 int16 (off 0), field2 int16 (off 2). Separate instantiation for a different parent.",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": [],
+      "protocolFields": [
+        "field1: int16 @ off 0x00 (presence 0x1)",
+        "field2: int16 @ off 0x02 (presence 0x2)",
+        "presence_flags: uint32 @ off 0x04"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Same as FUN_1020f9c0 — 2x int16 sub-element reader.",
+      "confidence": "medium",
+      "notes": "Byte-identical to FUN_1020f9c0."
+    },
+    {
+      "address": "0x10214140",
+      "currentName": "FUN_10214140",
+      "proposedName": "TlvMultiShopRefresh_DebugFormat",
+      "purpose": "DebugFormat printer for TlvMultiShopRefresh. Prints count (int32, max 0x14/20), shops[] array (each via FUN_10213570), then refreshTimeD/refreshTimeW/refreshTimeM (int32, word-indices 0xa47/0xa48/0xa49).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvMultiShopRefresh"],
+      "protocolFields": [
+        "count: int32 @ off 0x00 (max 20)",
+        "shops: sub-struct[count] (elem FUN_10213570)",
+        "refreshTimeD: int32 @ word-index 0xa47",
+        "refreshTimeW: int32 @ word-index 0xa48",
+        "refreshTimeM: int32 @ word-index 0xa49"
+      ],
+      "tlvDocDiscrepancy": "Doc TlvMultiShopRefresh lists refreshTimeD as 'sub-struct -> sub_102132D0' and shops as scalar int32. Actual: shops is an array of count sub-structs; refreshTimeD/W/M are plain int32 scalars at the tail. Doc's sub-struct/scalar assignment is off.",
+      "serverRelevance": "High — server sends shop refresh-time blob; must emit shops[] array (<=20) plus 3 int32 refresh timestamps.",
+      "confidence": "high",
+      "notes": "DebugFormat. Read at sub_10213E60. &DAT_11d9f574 = int32 format."
+    },
+    {
+      "address": "0x10214e60",
+      "currentName": "FUN_10214e60",
+      "proposedName": "TlvStarStatList_Elem_Read",
+      "purpose": "Read/deserialize of a stat-list element (sub_10214E60, the statList element of TlvStarStatData). Presence flags at off 6. field1 int16 (off 0), field2 int32 via FUN_1010c870 (off 2).",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarStatData"],
+      "protocolFields": [
+        "field1: int16 @ off 0x00 (presence 0x1)",
+        "field2: int32 @ off 0x02 (presence 0x2)",
+        "presence_flags: uint32 @ off 0x06"
+      ],
+      "tlvDocDiscrepancy": "TlvStarStatData doc references field4 statList -> sub_10214E60 but leaves this element's fields unspecified. Recovered: int16 + int32.",
+      "serverRelevance": "High — element of TlvStarStatData.statList[]; server must serialize int16 + int32 per entry.",
+      "confidence": "high",
+      "notes": "Write counterparts FUN_10214c50/FUN_10214ca0 (referenced from FUN_102152f0/4b0). Read here."
+    },
+    {
+      "address": "0x102152f0",
+      "currentName": "FUN_102152f0",
+      "proposedName": "TlvStarStatData_Write_Varint",
+      "purpose": "Write/marshal of TlvStarStatData. field1 starNum uint8 (tag 0x11, off 0, max 0x14/20); field2 starList as wire5 array (tag 0x25) of starNum uint8 elements (FUN_101150a0); field3 statNum uint8 (tag 0x31, off 0x15, max 10); field4 statList as wire5 array (tag 0x45) of statNum sub-structs via FUN_10214c50 (each len-delimited); field5 starPoints int32 varint (tag 0x50) at off 0x7a.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarStatData"],
+      "protocolFields": [
+        "field1 starNum: uint8 @ off 0x00, tag 0x11 (max 20)",
+        "field2 starList: uint8[starNum] array @ tag 0x25 (off 0x01)",
+        "field3 statNum: uint8 @ off 0x15, tag 0x31 (max 10)",
+        "field4 statList: sub-struct[statNum] @ tag 0x45 (elem FUN_10214c50 = sub_10214E60)",
+        "field5 starPoints: int32(varint) @ off 0x7a, tag 0x50"
+      ],
+      "tlvDocDiscrepancy": "Doc TlvStarStatData lists field2 starList as scalar int32 (@off21) and field3 statNum type 'unknown'. Actual: field2 starList is a uint8[] array (wire5, sized by starNum), field3 statNum is a uint8 count, field4 statList is an array of sub_10214E60 structs. starPoints @off122(0x7a) matches doc.",
+      "serverRelevance": "High — weapon/card star-stat blob; server must emit starList as a byte array and statList as an array of {int16,int32} sub-structs, counts bounded 20/10.",
+      "confidence": "high",
+      "notes": "Field names confirmed by DebugFormat FUN_10215c50. FUN_101150a0 = write uint8. Read at sub_10215960."
+    },
+    {
+      "address": "0x102154b0",
+      "currentName": "FUN_102154b0",
+      "proposedName": "TlvStarStatData_Write_Fixed",
+      "purpose": "Fixed-encoding flavor of TlvStarStatData write. Same fields as FUN_102152f0 but statList elements via FUN_10214ca0 and field5 starPoints written as fixed int32 (tag 0x53) via FUN_1010c190.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarStatData"],
+      "protocolFields": [
+        "field1 starNum: uint8 @ off 0x00, tag 0x11",
+        "field2 starList: uint8[starNum] @ tag 0x25",
+        "field3 statNum: uint8 @ off 0x15, tag 0x31",
+        "field4 statList: sub-struct[statNum] @ tag 0x45 (elem FUN_10214ca0)",
+        "field5 starPoints: int32(fixed) @ off 0x7a, tag 0x53"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_102152f0: doc mistypes field2 (byte array not scalar int32) and field3 (uint8 count not 'unknown').",
+      "serverRelevance": "High — alternate TlvStarStatData encoder (wire3 starPoints).",
+      "confidence": "high",
+      "notes": "Sibling of FUN_102152f0; differs in element writer and field5 wire type (0x53 vs 0x50)."
+    },
+    {
+      "address": "0x10215c50",
+      "currentName": "FUN_10215c50",
+      "proposedName": "TlvStarStatData_DebugFormat",
+      "purpose": "DebugFormat printer for TlvStarStatData. Prints starNum (0x%02x, max 20), starList[] (bytes, ' 0x%02x'), statNum (0x%02x, max 10), statList[] (each via FUN_10215060), starPoints (int32 @ off 0x7a).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarStatData"],
+      "protocolFields": [
+        "starNum: uint8 @ off 0x00 (max 20)",
+        "starList: uint8[starNum] @ off 0x01",
+        "statNum: uint8 @ off 0x15 (max 10)",
+        "statList: sub-struct[statNum]",
+        "starPoints: int32 @ off 0x7a"
+      ],
+      "tlvDocDiscrepancy": "Confirms starList is a uint8 array and statNum a uint8 count, contradicting the doc's scalar-int32/unknown typing.",
+      "serverRelevance": "None (debug); authoritative field names for the star-stat writers.",
+      "confidence": "high",
+      "notes": "Ground truth for FUN_102152f0/4b0."
+    },
+    {
+      "address": "0x10216000",
+      "currentName": "FUN_10216000",
+      "proposedName": "TlvStarBranch_StarList_Elem_Write_Varint",
+      "purpose": "Write/marshal of a 6-field star-branch starList element (write counterpart of read sub_10216470). field1 uint8 (tag 0x11, off 0), field2 int16 (tag 0x20, FUN_1010c4d0, off 1), field3 int32 (tag 0x30, off 3), field4 int32 (tag 0x40, off 7), field5 int32 (tag 0x50, FUN_1010c560, off 0xb), field6 int32 (tag 0x60, off 0xf). Varint/wire0 encoding.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int16 @ off 0x01, tag 0x20",
+        "field3: int32 @ off 0x03, tag 0x30",
+        "field4: int32 @ off 0x07, tag 0x40",
+        "field5: int32 @ off 0x0b, tag 0x50",
+        "field6: int32 @ off 0x0f, tag 0x60"
+      ],
+      "tlvDocDiscrepancy": "TlvStarBranchData doc references field4 starList -> sub_10216470 but does not enumerate this element (uint8 + int16 + 4x int32). Recovered here.",
+      "serverRelevance": "High — element of TlvStarBranchData.starList[]; server must emit u8+i16+4xi32 per entry.",
+      "confidence": "medium",
+      "notes": "Called from FUN_10217140. FUN_1010c4d0 = write int16 (varint), FUN_1010c5f0/c560 = write int32."
+    },
+    {
+      "address": "0x10216100",
+      "currentName": "FUN_10216100",
+      "proposedName": "TlvStarBranch_StarList_Elem_Write_Fixed",
+      "purpose": "Fixed-encoding flavor of the star-branch starList element write. field1 uint8 (0x11), field2 int16 fixed (tag 0x22, FUN_1010c120), field3-6 int32 fixed (tags 0x33/0x43/0x53/0x63, FUN_1010c190).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int16(fixed) @ off 0x01, tag 0x22",
+        "field3: int32(fixed) @ off 0x03, tag 0x33",
+        "field4: int32(fixed) @ off 0x07, tag 0x43",
+        "field5: int32(fixed) @ off 0x0b, tag 0x53",
+        "field6: int32(fixed) @ off 0x0f, tag 0x63"
+      ],
+      "tlvDocDiscrepancy": "Same element as FUN_10216000; doc leaves its fields unspecified.",
+      "serverRelevance": "High — alternate encoder for the same starList element.",
+      "confidence": "medium",
+      "notes": "Called from FUN_10217320. Wire2/wire3 fixed encoding."
+    },
+    {
+      "address": "0x102169d0",
+      "currentName": "FUN_102169d0",
+      "proposedName": "TlvStarBranch_Quality_Elem_Write_Varint",
+      "purpose": "Write of a 2-field quality element (write counterpart of read sub_10216C90). field1 uint8 (tag 0x11, off 0), field2 int32 varint (tag 0x20, off 1).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int32(varint) @ off 0x01, tag 0x20"
+      ],
+      "tlvDocDiscrepancy": "TlvStarBranchData doc references field5 quality -> sub_10216C90; element fields (uint8 + int32) recovered here.",
+      "serverRelevance": "High — element of TlvStarBranchData.quality[] (field5).",
+      "confidence": "medium",
+      "notes": "Called from FUN_10217140. Read counterpart FUN_10216ba0."
+    },
+    {
+      "address": "0x10216a50",
+      "currentName": "FUN_10216a50",
+      "proposedName": "TlvStarBranch_Quality_Elem_Write_Fixed",
+      "purpose": "Fixed-encoding flavor of the quality element write. field1 uint8 (0x11), field2 int32 fixed (tag 0x23, FUN_1010c190, off 1).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00, tag 0x11",
+        "field2: int32(fixed) @ off 0x01, tag 0x23"
+      ],
+      "tlvDocDiscrepancy": "Same element as FUN_102169d0; doc leaves fields unspecified.",
+      "serverRelevance": "High — alternate encoder for the quality element.",
+      "confidence": "medium",
+      "notes": "Called from FUN_10217320. Read counterpart FUN_10216c90."
+    },
+    {
+      "address": "0x10216ba0",
+      "currentName": "FUN_10216ba0",
+      "proposedName": "TlvStarBranch_Quality_Elem_Read_Varint",
+      "purpose": "Read/deserialize of the quality element (varint flavor). Presence flags at off 5. field1 uint8 (off 0), field2 int32 varint via FUN_1010ccb0 (off 1).",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00 (presence 0x1)",
+        "field2: int32(varint) @ off 0x01 (presence 0x2)",
+        "presence_flags: uint32 @ off 0x05"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Server must parse quality element (uint8 + int32).",
+      "confidence": "medium",
+      "notes": "Read counterpart of FUN_102169d0. FUN_1010ccb0 = read varint."
+    },
+    {
+      "address": "0x10216c90",
+      "currentName": "FUN_10216c90",
+      "proposedName": "TlvStarBranch_Quality_Elem_Read_Fixed",
+      "purpose": "Read/deserialize of the quality element (fixed flavor, sub_10216C90). Presence flags at off 5. field1 uint8 (off 0), field2 int32 fixed via FUN_1010c870 (off 1).",
+      "subsystem": "tlv-serializer",
+      "direction": "C2S",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1: uint8 @ off 0x00 (presence 0x1)",
+        "field2: int32(fixed) @ off 0x01 (presence 0x2)",
+        "presence_flags: uint32 @ off 0x05"
+      ],
+      "tlvDocDiscrepancy": "Matches TlvStarBranchData doc's sub_10216C90 reference; element fields (uint8 + int32) confirmed.",
+      "serverRelevance": "High — the quality element reader named in the doc (sub_10216C90).",
+      "confidence": "high",
+      "notes": "Read counterpart of FUN_10216a50. FUN_1010c870 = read fixed int32."
+    },
+    {
+      "address": "0x10217140",
+      "currentName": "FUN_10217140",
+      "proposedName": "TlvStarBranchData_Write_Varint",
+      "purpose": "Write/marshal of TlvStarBranchData. field1 uint8 (tag 0x11, off 0); field3 branchNum uint8 count (tag 0x31, off 1, max 10) via FUN_101150a0; field4 starList as wire5 array (tag 0x45) of branchNum sub-structs via FUN_10216000; field5 quality as wire5 array (tag 0x55) of field1-count sub-structs via FUN_102169d0 (count max 20).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1 starNum: uint8 @ off 0x00, tag 0x11 (also array count for field5, max 20)",
+        "field3 branchNum: uint8 @ off 0x01, tag 0x31 (array count for field4, max 10)",
+        "field4 starList: sub-struct[branchNum] @ tag 0x45 (elem FUN_10216000 = sub_10216470)",
+        "field5 quality: sub-struct[starNum] @ tag 0x55 (elem FUN_102169d0 / read sub_10216C90)"
+      ],
+      "tlvDocDiscrepancy": "Doc TlvStarBranchData flags a field-count mismatch (schema 4 vs DebugFormat 6) and types field4 starList / field5 quality as scalar int32. Actual: field4 and field5 are ARRAYS of sub-structs (starList = u8+i16+4xi32 elements sized by branchNum; quality = u8+i32 elements sized by starNum), field3 branchNum is a uint8 count. Wire5 arrays, not scalar int32.",
+      "serverRelevance": "High — weapon/card star-branch blob; server must emit starList[] and quality[] as sub-struct arrays with counts bounded 10/20.",
+      "confidence": "medium",
+      "notes": "Read at sub_10217820. Field names starNum/branchNum/starList/quality from TlvStarBranchData doc."
+    },
+    {
+      "address": "0x10217320",
+      "currentName": "FUN_10217320",
+      "proposedName": "TlvStarBranchData_Write_Fixed",
+      "purpose": "Fixed-encoding flavor of TlvStarBranchData write. Same structure as FUN_10217140 but starList elements via FUN_10216100 and quality elements via FUN_10216a50 (fixed wire3 encodings).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "relatedTlv": ["TlvStarBranchData"],
+      "protocolFields": [
+        "field1 starNum: uint8 @ off 0x00, tag 0x11 (max 20)",
+        "field3 branchNum: uint8 @ off 0x01, tag 0x31 (max 10)",
+        "field4 starList: sub-struct[branchNum] @ tag 0x45 (elem FUN_10216100)",
+        "field5 quality: sub-struct[starNum] @ tag 0x55 (elem FUN_10216a50)"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_10217140: field4/field5 are sub-struct arrays not scalar int32; field3 is a uint8 count. Doc's 4-vs-6 field-count mismatch reflects that DebugFormat sees the array/count fields the 0x99 schema collapses.",
+      "serverRelevance": "High — alternate TlvStarBranchData encoder (fixed element encoding).",
+      "confidence": "medium",
+      "notes": "Sibling of FUN_10217140; uses fixed-wire element writers."
+    }
+  ]
+}

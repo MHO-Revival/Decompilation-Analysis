@@ -1,0 +1,259 @@
+{
+  "batchIndex": 5,
+  "classes": [
+    {
+      "className": "CEquipInfo",
+      "category": "item",
+      "purpose": "Static configuration record for a piece of equipment (armor/weapon gear). One instance per equip definition, owned by a CInfoManager<CEquipInfo> singleton and looked up by numeric id. Holds the item-id string, gender-specific model/appearance sub-structs, the owning suit/set id, and links to passive-skill and suit-skill group definitions.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "1052bd00",
+          "currentName": "CEquipInfo::GetManagers",
+          "proposedName": "CEquipInfo::GetInfoManager",
+          "purpose": "Real singleton accessor. Lazily registers the class name via StcMbrNameSvr<CInfoManager>::GetSingletonName and returns the CInfoManager<CEquipInfo> pointer (DAT_123be924). This is the only method that genuinely matches the auto 'GetManagers' label."
+        },
+        {
+          "address": "1112ea10",
+          "currentName": "CEquipInfo::GetManagers_1112ea10",
+          "proposedName": "CEquipInfo::ResolveDerivedEquipList",
+          "purpose": "Clears the instance's result vector at this+0x258..0x260, obtains an id from a subsystem (this[3] vtable), looks the equip up in the manager, applies a variant/gender flag (EDX&0x800000 -> FUN_1025b060) and a level byte (this+0x28d), computes a resolved equip id via FUN_116c4820 and pushes it into the vector. Builds the concrete/derived equip id for the current variant."
+        },
+        {
+          "address": "111e0f20",
+          "currentName": "CEquipInfo::GetManagers_111e0f20",
+          "proposedName": "CEquipInfo::HasValidEquipInSlots",
+          "purpose": "Scans 24 slot records (stride 6 dwords = 0x18 bytes) in param_1; for each non-empty slot looks up the referenced CEquipInfo and tests its field at +0x120 (state, must be !=0 and !=2). Returns true (FUN_11672970(1)) on first match, else false after all 24 slots. A predicate over an equipment loadout."
+        },
+        {
+          "address": "1120fbf0",
+          "currentName": "CEquipInfo::GetManagers_1120fbf0",
+          "proposedName": "CEquipInfo::CollectSuitEffectsForEquipIds",
+          "purpose": "Takes a vector of equip ids (param_1 begin/end). Resolves each to its CEquipInfo, collects the resolved pointers and each item's suit id (this+0x27c), then delegates to CEquipSuitEffectInfo::CollectActiveSuitSkills(11212bc0) to compute active set effects. Cleans up temporaries. Returns 0."
+        },
+        {
+          "address": "113023d0",
+          "currentName": "CEquipInfo::GetManagers_113023d0",
+          "proposedName": "CEquipInfo::BuildSuitSetBonusDisplay",
+          "purpose": "Given an equip instance (param_1) reads its suit id (this+0x27c), looks it up in CSuitCfgInfo, enumerates the suit's member equips (CEquipInfo), counts how many are currently equipped vs each set-tier's required piece count, and assembles the active/inactive suit skill (CEquipSuitSkillGroupInfo) and passive skill (CEquipPassiveSkillGroupInfo) display rows, formatting enhancement level as '+%d'. Produces the set-bonus tooltip/state data."
+        },
+        {
+          "address": "116c4890",
+          "currentName": "CEquipInfo::GetManagers_116c4890",
+          "proposedName": "CEquipInfo::FindByItemIdString",
+          "purpose": "Linear scan of all CEquipInfo entries (manager's flat vector at mgr+0x14). Returns the first entry whose id string at this+0x80, parsed with atoi, equals param_1. Confirms this+0x80 is the numeric item-id stored as a string."
+        },
+        {
+          "address": "118b8880",
+          "currentName": "CEquipInfo::GetManagers_118b8880",
+          "proposedName": "CEquipInfo::PreloadRandPassiveSkillGroups",
+          "purpose": "Iterates every CEquipInfo entry and for each valid one invokes CEquipRandPassiveSkillGroupInfo::GetManagers_116c52a0(param_1). Pre-touches/loads the random passive-skill-group data for all equipment."
+        },
+        {
+          "address": "119f5dc0",
+          "currentName": "CEquipInfo::GetManagers_119f5dc0",
+          "proposedName": "CEquipInfo::EnsureReferencedManagers",
+          "purpose": "Walks two vectors on param_1 (dword vector at +0x20..0x24, and 8-byte-stride vector at +0x2c..0x30). Per entry it only forces lazy initialization of the CEquipInfo and CItemBaseInfo CInfoManager singletons. A dependency/precache warm-up loop; performs no per-entry mutation."
+        }
+      ],
+      "fields": [
+        {"name": "itemIdStr", "type": "char*", "offset": "0x80", "source": "reader", "note": "numeric item id stored as string; atoi'd in FindByItemIdString (116c4890)"},
+        {"name": "modelDataMale", "type": "struct", "offset": "0x6c", "source": "reader", "note": "gender-variant model/appearance sub-struct (used when gender flag set); +0x10/+0x14 hold resource path + name strings (see CUnderclothesInfo)"},
+        {"name": "modelDataFemale", "type": "struct", "offset": "0x84", "source": "reader", "note": "other-gender model sub-struct (used when gender flag 0)"},
+        {"name": "stateFlag", "type": "int", "offset": "0x120", "source": "inferred", "note": "state/kind checked in HasValidEquipInSlots (!=0 && !=2)"},
+        {"name": "flag138", "type": "int", "offset": "0x138", "source": "inferred", "note": "boolean-ish; CUnderclothesInfo sets its +0x8d = (equip[0x138]==1)"},
+        {"name": "levelOrStar", "type": "byte", "offset": "0x28d", "source": "inferred", "note": "level/star byte read in ResolveDerivedEquipList (1112ea10)"},
+        {"name": "suitCfgId", "type": "int", "offset": "0x27c", "source": "reader", "note": "owning suit/set id; used as key into CSuitCfgInfo and matched against CEquipSuitEffectInfo node ids"},
+        {"name": "derivedEquipVec", "type": "vector<int>", "offset": "0x258", "source": "inferred", "note": "begin/end/cap at 0x258/0x25c/0x260; result list filled by ResolveDerivedEquipList"},
+        {"name": "ownerSystem", "type": "ptr", "offset": "0x0c", "source": "inferred", "note": "this[3]; subsystem/context used for id resolution via vtable"}
+      ],
+      "constants": ["EquipSlotCount=24 (0x18 loop in 111e0f20)", "VariantFlagMask=0x800000"],
+      "formulas": [
+        "CInfoManager id lookup (shared): idx = id - mgr[0x30(minId)]; if 0<=idx<mgr[0x24(count)] then entry = pageTable[mgr+0x20][idx / mgr[0x28(pageSize)]][idx % pageSize]",
+        "Suit set bonus active test (113023d0): activeTier requires equippedPieceCount >= tier.requiredPieces (local_a8 = equippedCount - matched; local_ac = required - present); bonus disabled when local_a8 < local_ac"
+      ],
+      "relatedTlv": ["TlvEquipData", "TlvEquipItem"],
+      "notes": "All 8 methods were auto-labeled 'CEquipInfo::GetManagers'; only 1052bd00 is actually the manager/singleton accessor. TlvEquipData/TlvEquipItem describe the runtime networked item instance, NOT this static config class, so treat the mapping as directional only (field offsets here do not correspond to the TLV layout)."
+    },
+    {
+      "className": "CMonsterInfo",
+      "category": "monster",
+      "purpose": "Static configuration record for a monster/NPC definition, owned by a CInfoManager<CMonsterInfo> singleton and keyed by monster id. Drives entity precache from Libs/EntityCustomTypes XML, spawning, level/reward association, and NPC-shop linkage.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "107d7d50",
+          "currentName": "CMonsterInfo::GetManagers",
+          "proposedName": "CMonsterInfo::GetInfoManager",
+          "purpose": "Real singleton accessor: registers the class name via StcMbrNameSvr<CInfoManager> and returns the CInfoManager<CMonsterInfo> pointer (DAT_123bee60)."
+        },
+        {
+          "address": "10ddf560",
+          "currentName": "CMonsterInfo::GetManagers_10ddf560",
+          "proposedName": "CMonsterInfo::PreCacheEntityResources",
+          "purpose": "Loads 'Libs/EntityCustomTypes/<entityName>_PreCache.xml' (param_1 = entity type name). Walks the XML: Entity>Effect nodes (SpawnEffect -> EffectName string, AddBuff -> EffectID resolved via a name table), FlyObj, Projectile nodes (ProjectileID -> CProjectileInfo lookup, precaching its resource strings at +0x134/+0x168/+0x1c4), and SpawnMonster>Monster nodes (id -> CMonsterInfo). Accumulates all referenced resource names into precache string tables. Returns bool success."
+        },
+        {
+          "address": "112a2e10",
+          "currentName": "CMonsterInfo::GetManagers_112a2e10",
+          "proposedName": "CMonsterInfo::SpawnMonstersFromList",
+          "purpose": "Iterates *param_4 spawn records (large stride 0x42eb bytes each). For each: allocates/creates an entity (FUN_111e09f0 entity system), tags it (states 0x13/0x14), resolves the monster id (record+6) in CMonsterInfo, applies config via FUN_113a3da0/FUN_113a6f80/FUN_113a3720, binds AI/behaviors (record+0x1a39 list), and registers with the level/battle system (FUN_11442f40 offsets 0x92,0xab5). Instantiates monsters described by a spawn table."
+        },
+        {
+          "address": "114d28a0",
+          "currentName": "CMonsterInfo::GetManagers_114d28a0",
+          "proposedName": "CMonsterInfo::CollectSuperSequenceMonsters",
+          "purpose": "Guarded by a CLevelSuperSequence lookup on this. Iterates sequence steps 1..99 (FUN_116f5470), resolving each step's monster id in CMonsterInfo and appending valid monster pointers to the caller's vector (param_2). Returns 1. Gathers the monster set of a level's super-sequence."
+        },
+        {
+          "address": "11575040",
+          "currentName": "CMonsterInfo::GetManagers_11575040",
+          "proposedName": "CMonsterInfo::GrantLevelRewardsForKilledMonsters",
+          "purpose": "Guarded by a CLevelRewardInfo lookup (param_2[4] = reward id). Walks two intrusive red-black-tree maps hanging off session data (this[3]+0xb4) collecting (monsterId,count) pairs that are members of the killed-monster set (param_2[0x36..0x37]) and validated in CMonsterInfo, dedups them, then for each grants rewards / applies effects via FUN_11680b20/FUN_11680b00 and per-difficulty buff loops (FUN_117cdd40/FUN_117bbf90). Reward-settlement pass keyed on monsters."
+        },
+        {
+          "address": "11644630",
+          "currentName": "CMonsterInfo::GetManagers_11644630",
+          "proposedName": "CMonsterInfo::CreateMonstersFromSpawnQueue",
+          "purpose": "Walks an intrusive list (param_2+4) up to param_3 items. For each, obtains a monster id (FUN_1184a650), resolves CMonsterInfo, and creates a monster instance via FUN_11643c60 (using cfg fields +0x20,+0x6c and an optional size/variant from FUN_11643f00 gated by this+0x78). On success copies template fields (this[0x2a],[0x34],[0x35]) and registers spawn points (this+0x1b intrusive list). Instantiates queued monsters."
+        },
+        {
+          "address": "118d3cb0",
+          "currentName": "CMonsterInfo::GetManagers_118d3cb0",
+          "proposedName": "CMonsterInfo::PreloadNpcSaleInfo",
+          "purpose": "Iterates every CMonsterInfo entry (manager flat vector mgr[5]..mgr[6]) and, for entries flagged as NPC/shop (entry+0x10 != 0), invokes CNpcSaleInfo::GetManagers_1168f070 to preload their sale/shop data. Confirms entry+0x10 is an isNpc/hasShop flag."
+        },
+        {
+          "address": "119e6e10",
+          "currentName": "CMonsterInfo::GetManagers_119e6e10",
+          "proposedName": "CMonsterInfo::GetInfoManagerOrDefault",
+          "purpose": "Lazily initializes and returns the CInfoManager<CMonsterInfo> pointer, falling back to a static default instance (&DAT_123bedd8) if the registry lookup yields null. A defensive accessor variant."
+        },
+        {
+          "address": "11a389b0",
+          "currentName": "CMonsterInfo::GetManagers_11a389b0",
+          "proposedName": "CMonsterInfo::PrecacheActionDependencies",
+          "purpose": "Given an action/effect descriptor (param_1), forces lazy init of the manager singletons it depends on: CMonsterInfo when type(+0x14)==4 and monsterId(+0x1c)!=-1; CBuffInfo when buff fields +0x20 or +0x24 are >0; CMHLevelInfo when level id +0x10 !=0. Dependency warm-up for a spawn/buff/level action."
+        }
+      ],
+      "fields": [
+        {"name": "isNpcOrHasShop", "type": "bool", "offset": "0x10", "source": "inferred", "note": "per-monster flag; when set, CNpcSaleInfo is preloaded (118d3cb0)"},
+        {"name": "sizeVariantKey", "type": "int", "offset": "0x14", "source": "inferred", "note": "passed to FUN_11643f00 to derive a size/variant in CreateMonstersFromSpawnQueue"},
+        {"name": "spawnParamA", "type": "int", "offset": "0x20", "source": "inferred", "note": "used as arg to monster-instance creation FUN_11643c60"},
+        {"name": "spawnParamB", "type": "int", "offset": "0x6c", "source": "inferred", "note": "second creation arg in FUN_11643c60"},
+        {"name": "aiOrNameList", "type": "ptr", "offset": "0x68", "source": "inferred", "note": "name/behavior string used in PreCacheEntityResources SpawnMonster branch"},
+        {"name": "useSizeTable", "type": "int", "offset": "0x78", "source": "inferred", "note": "gate for size lookup in CreateMonstersFromSpawnQueue (obtained from config via vtable+0xc, this+0x78)"}
+      ],
+      "constants": ["MaxLevelSequenceSteps=99 (114d28a0)", "SpawnRecordStride=0x42eb bytes (112a2e10)", "PrecacheMonsterSlots=24 (0x17 loops)", "ActionType_SpawnMonster=4 (11a389b0 +0x14)"],
+      "formulas": [
+        "CInfoManager id lookup uses word-indexed form here: minId=mgr[0xc], count=mgr[9], pageSize=mgr[0xa], pageTable=mgr[8]; entry = pageTable[(id-minId)/pageSize][(id-minId)%pageSize]",
+        "Action-descriptor precache selects manager by type field +0x14 (==4 monster), buff ids +0x20/+0x24, level id +0x10"
+      ],
+      "relatedTlv": ["TlvMonsterSizeData"],
+      "notes": "All 9 methods auto-labeled 'CMonsterInfo::GetManagers'; only 107d7d50 (and defensively 119e6e10) is an actual manager accessor. Strongest evidence is 10ddf560 (the _PreCache.xml entity dependency loader). TlvMonsterSizeData is a runtime/network struct and only loosely related (the size-variant concept), not a field-level map."
+    },
+    {
+      "className": "CEquipSuitEffectInfo",
+      "category": "item",
+      "purpose": "Static definition of an equipment SUIT (armor-set) effect: which suit id it belongs to, its set-skill groups and per-tier skill entries (stride 0x20), and the piece-count thresholds that activate them. Owned by a CInfoManager<CEquipSuitEffectInfo> singleton. Works together with CSuitCfgInfo and CEquipSuitSkillGroupInfo to compute active set bonuses from equipped gear.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "10856be0",
+          "currentName": "CEquipSuitEffectInfo::GetManagers",
+          "proposedName": "CEquipSuitEffectInfo::GetInfoManager",
+          "purpose": "Real singleton accessor via StcMbrNameSvr<CInfoManager>; returns the CInfoManager<CEquipSuitEffectInfo> pointer (DAT_123bf788)."
+        },
+        {
+          "address": "11212bc0",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_11212bc0",
+          "proposedName": "CEquipSuitEffectInfo::CollectActiveSuitSkills",
+          "purpose": "Core set-bonus resolver. param_1 = vector of equipped CEquipInfo ids; param_3 = tree of suit-effect nodes keyed by suit id (node+0x10). For each suit node it validates the CEquipSuitEffectInfo, counts equipped items whose CEquipInfo.suitCfgId(+0x27c) matches the node's suit id, resolves the resulting skill groups (FUN_1172a630), and appends the active skill ids into the output vector (param_5), filtering skill-type tag 0xc when param_4 set. param_2/param_4 select group vs. flat-list mode."
+        },
+        {
+          "address": "11300ec0",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_11300ec0",
+          "proposedName": "CEquipSuitEffectInfo::BuildSuitSkillMap",
+          "purpose": "Iterates suit ids in this+0x54..0x58 (after CSuitCfgInfo::GetManagers_11300ae0 populates them). For each suit resolves CEquipSuitEffectInfo, gets its skill-group index via CEquipSuitSkillGroupInfo::GetManagers_1172a750, and inserts each 0x20-stride skill entry into an ordered map at this+0x78 keyed by group id, applying entries whose activation condition (entry+0x10 type 0, or type 1 with a 2-element id list whose threshold <= group value) holds via FUN_113008c0."
+        },
+        {
+          "address": "114646c0",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_114646c0",
+          "proposedName": "CEquipSuitEffectInfo::FindFirstType2EffectValue",
+          "purpose": "Enumerates all suit ids (CSuitCfgInfo::GetManagers_11464a00), resolves each CEquipSuitEffectInfo, scans its 8-dword-stride effect entries at +0x24..+0x28, and returns the first value of the first entry with type==2 and a non-empty id list; returns 0 if none."
+        },
+        {
+          "address": "11464860",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_11464860",
+          "proposedName": "CEquipSuitEffectInfo::ApplySuitEffects",
+          "purpose": "param_1 = vector of suit ids, param_2 = target/context. For each suit resolves CEquipSuitEffectInfo and iterates its 0x20-stride effect entries; for entries with type(+0x10)==0, or type==1 whose 2-element id list threshold is met (FUN_11572960 rank >= entry[0x14][1]), applies the effect via FUN_11463910(entry, ctx, suitId)."
+        },
+        {
+          "address": "11466200",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_11466200",
+          "proposedName": "CEquipSuitEffectInfo::ComputeEquippedSuitEffects",
+          "purpose": "Full recompute for a character (param_1). Gated by state flag (EDX&0x20000). Scans the 24 equipped slots (FUN_114645a0/FUN_1166c4b0 -> equip suit id +0x27c) to build the set of active suits, groups them (FUN_1172a630), writes 0x14-byte result records into this+0x104 and the resolved skill/buff ids into this+0x8c, then re-runs ApplySuitEffects(11464860) over CSuitCfgInfo and finalizes this+0x7c effect entries."
+        },
+        {
+          "address": "118b89e0",
+          "currentName": "CEquipSuitEffectInfo::GetManagers_118b89e0",
+          "proposedName": "CEquipSuitEffectInfo::PreloadSuitSkillGroups",
+          "purpose": "Iterates every CEquipSuitEffectInfo entry and for each valid one invokes CEquipSuitSkillGroupInfo::GetManagers_1172a8f0, warming up all suit skill-group data."
+        }
+      ],
+      "fields": [
+        {"name": "suitId", "type": "int", "offset": "0x10", "source": "inferred", "note": "suit-effect node key; matched against CEquipInfo.suitCfgId(+0x27c) (node in the map processed by 11212bc0)"},
+        {"name": "effectEntries", "type": "vector<Effect[0x20]>", "offset": "0x24", "source": "reader", "note": "begin/end at +0x24/+0x28; entries are 0x20 bytes each"},
+        {"name": "effectType", "type": "int", "offset": "0x10", "source": "reader", "note": "within an effect entry: 0=unconditional, 1=piece/rank threshold (2-element id list at entry+0x14), 2=value list"},
+        {"name": "suitIdList", "type": "vector<int>", "offset": "0x54", "source": "reader", "note": "this+0x54..0x58 list of suit ids consumed by BuildSuitSkillMap"},
+        {"name": "skillMap", "type": "rbtree", "offset": "0x78", "source": "inferred", "note": "ordered map keyed by group id built by BuildSuitSkillMap"},
+        {"name": "resultRecords", "type": "vector<Rec[0x14]>", "offset": "0x104", "source": "inferred", "note": "0x14-byte result records written by ComputeEquippedSuitEffects (on the character struct passed as param_1)"},
+        {"name": "resolvedSkillIds", "type": "vector<int>", "offset": "0x8c", "source": "inferred", "note": "output skill/buff id vector filled by ComputeEquippedSuitEffects"}
+      ],
+      "constants": ["EquippedSlotScan=24 (0x17)", "EffectEntryStride=0x20", "SkillTypeTagFiltered=0xc", "ComputeStateFlag=0x20000"],
+      "formulas": [
+        "Set-bonus activation (11212bc0/11464860/11300ec0): count equipped pieces with CEquipInfo.suitCfgId == node.suitId; a tier entry activates when type==0, or type==1 and player rank/piece-count (FUN_11572960 / FUN_1172a750) >= entry.threshold (entry+0x14 list[1])"
+      ],
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "notes": "All 7 methods auto-labeled 'CEquipSuitEffectInfo::GetManagers'; only 10856be0 is the accessor. 11212bc0 is the reusable resolver called from CEquipInfo (1120fbf0) and CUnderclothesInfo (11211080). TlvSuitSkillGroups is conceptually related (suit skill groups) but is a serialization struct, not a field-for-field map of this config class."
+    },
+    {
+      "className": "CUnderclothesInfo",
+      "category": "item",
+      "purpose": "Static definition/assembler for a character's base 'underclothes' avatar appearance. Its main method composes the full avatar model set from face (CFaceInfo), hair (CHairInfo), and the CEquipInfo pieces occupying the visible gear slots (with gender variants and CSuitInfo defaults / player overrides), then computes the resulting suit set-skill effects. Owned by a CInfoManager<CUnderclothesInfo> singleton.",
+      "confidence": "medium",
+      "methods": [
+        {
+          "address": "1052c770",
+          "currentName": "CUnderclothesInfo::GetManagers",
+          "proposedName": "CUnderclothesInfo::GetInfoManager",
+          "purpose": "Real singleton accessor via StcMbrNameSvr<CInfoManager>; returns the CInfoManager<CUnderclothesInfo> pointer (DAT_123be8a8)."
+        },
+        {
+          "address": "11211080",
+          "currentName": "CUnderclothesInfo::GetManagers_11211080",
+          "proposedName": "CUnderclothesInfo::BuildAvatarAppearance",
+          "purpose": "Builds a character's visible appearance into the output struct param_1. Reads gender (FUN_1139a8d0 -> local_120; selects the +0x14/+0x2c face-hair and +0x6c/+0x84 equip model sub-structs). Assigns face (CFaceInfo) and hair (CHairInfo) model strings, then for each visible gear slot (indices 1..5, with alternates 0xc..0x10) resolves the shown equip: priority is explicit override (param_3 slot fields +0x4..+0x14) > CSuitInfo default (when no custom suit) > slot's own CEquipInfo id, looked up in CEquipInfo, copying its model path+name and enhancement (FUN_11672840). Collects the equipped CEquipInfo ids and finally calls CEquipSuitEffectInfo::CollectActiveSuitSkills(11212bc0) to attach the set effects. Sets result flags at param_1+0x88/0x8a/0x8b/0x8c/0x8d/0x8e."
+        }
+      ],
+      "fields": [
+        {"name": "hasCustomData", "type": "bool", "offset": "0x8e", "source": "reader", "note": "set to 1 when a param_3 override struct is supplied (output struct)"},
+        {"name": "appearanceValid", "type": "bool", "offset": "0x88", "source": "reader", "note": "cleared to 0 when a required slot equip cannot be resolved; starts 1 (output struct)"},
+        {"name": "forceBaseModel", "type": "bool", "offset": "0x89", "source": "inferred", "note": "when set, slot fallbacks to custom-suit/default are skipped (output struct read repeatedly)"},
+        {"name": "hasOverrideSlots", "type": "bool", "offset": "0x8b", "source": "reader", "note": "set to 1 if any param_3 override slot (+4..+0x14) is non-zero (output struct)"},
+        {"name": "usesSuitInfo", "type": "bool", "offset": "0x8c", "source": "reader", "note": "set when a CSuitInfo default (local_124) is applied (output struct)"},
+        {"name": "specialFlag8d", "type": "bool", "offset": "0x8d", "source": "reader", "note": "= (resolved CEquipInfo.flag138(+0x138) == 1) for slot 5 (output struct)"},
+        {"name": "equipModelSlots", "type": "array", "offset": "0x30", "source": "inferred", "note": "per-slot resolved equip model blocks written via FUN_10ae6f90; param_1+0x30 is the first slot's model target"},
+        {"name": "suitEffectVec", "type": "vector", "offset": "0x7c", "source": "inferred", "note": "param_1+0x7c collects computed suit effects (fed to CollectActiveSuitSkills)"}
+      ],
+      "constants": ["VisibleGearSlots=5 (slot ids 1..5)", "AlternateSlotBase=0xb (slot n alt = n+0xb -> 0xc..0x10)", "GenderMaleOffsets: face/hair +0x14, equip +0x6c", "GenderFemaleOffsets: face/hair +0x2c, equip +0x84"],
+      "formulas": [
+        "Per-slot shown-equip resolution priority: param_3 override[slot] > (no custom suit) CSuitInfo default[slot] > slot's stored CEquipInfo id; local_120 gender selects model sub-struct offset (male +0x6c / female +0x84)",
+        "Slot model string pulled from CEquipInfo model sub-struct fields +0x10 (path) and +0x14 (name)"
+      ],
+      "relatedTlv": [],
+      "notes": "Only 2 methods; both auto-labeled 'GetManagers'. 1052c770 is the true accessor. 11211080 is a large avatar-composition routine (references CFaceInfo, CHairInfo, CEquipInfo, CSuitInfo) and is the interesting logic. Offsets on param_1 are on the OUTPUT appearance struct being filled, not on a CUnderclothesInfo instance. No clean TLV counterpart found."
+    }
+  ],
+  "notes": "Shared pattern across all 4 classes: every method was auto-named '<Class>::GetManagers' by the RE-AUTO pass, but only the StcMbrNameSvr<CInfoManager> stub (1052bd00 / 107d7d50 / 10856be0 / 1052c770) is a real manager/singleton accessor; the rest are ordinary methods that merely *call* the accessor to look items up. The recurring id->entry lookup is the CInfoManager paged-array indexer (byte-offset form: pageTable=mgr+0x20, count=mgr+0x24, pageSize=mgr+0x28, minId=mgr+0x30; word-index form: mgr[8]/[9]/[0xa]/[0xc]). These are static config/'Info' classes loaded from XML into CInfoManager, distinct from the Tlv* runtime/network structures, so TLV cross-references are directional only and were not used for field offsets."
+}

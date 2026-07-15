@@ -1,0 +1,372 @@
+{
+  "batchIndex": 10,
+  "classes": [
+    {
+      "className": "CMHMapInfo",
+      "category": "misc",
+      "purpose": "Static definition of a Monster-Hunter world map/zone. Each entry references a set of monsters (CMonsterInfo) and levels (CMHLevelInfo) placed on the map.",
+      "methods": [
+        {"address": "107caee0", "currentName": "CMHMapInfo::GetManagers", "proposedName": "CMHMapInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CMHMapInfo>; registers name via StcMbrNameSvr and returns the manager pointer (DAT_123bed10)."},
+        {"address": "1189f630", "currentName": "CMHMapInfo::GetManagers_1189f630", "proposedName": "CMHMapInfo::CollectMapMonsterLevels", "purpose": "Iterates every CMHMapInfo entry; for each map reads the monster container at map+0xB4, resolves each CMonsterInfo (id-indexed) and cross-references CMHLevelInfo where level+0x14 == map+0x10. Cross-reference/validation walk (aborts via non-returning FUN_10c3d580)."}
+      ],
+      "fields": [
+        {"name": "id", "type": "int", "offset": "0x10", "source": "reader", "note": "map/zone id, compared against CMHLevelInfo+0x14"},
+        {"name": "monsterContainer", "type": "ptr", "offset": "0xb4", "source": "reader", "note": "pointer to intrusive tree/list of placed-monster entries (each entry+0x22 = monster id)"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Manager idiom: vtable+0x28 = GetCount; entry array at mgr+0x14/+0x18 (>>2 = count); id-indexed lookup uses mgr+0x30(minId)/+0x28(divisor)/+0x20(bucketArray)/+0x24(size). Same idiom across the whole batch.",
+      "relatedTlv": [],
+      "nameNext": [
+        {"address": "107e0630", "proposedName": "CMonsterInfo::InitInfoManager", "why": "manager ctor thunk referenced during CMonsterInfo access"},
+        {"address": "107d6cc0", "proposedName": "CMHLevelInfo::InitInfoManager", "why": "manager ctor thunk for CMHLevelInfo"}
+      ]
+    },
+    {
+      "className": "CIllustrateBookInfo",
+      "category": "misc",
+      "purpose": "Static definition of a hunting-notes / illustration-book (bestiary) page. Groups monster/collection entries by category and links to illustration tasks.",
+      "methods": [
+        {"address": "109c56b0", "currentName": "CIllustrateBookInfo::GetManagers", "proposedName": "CIllustrateBookInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CIllustrateBookInfo> (DAT_123c0788)."},
+        {"address": "115371f0", "currentName": "CIllustrateBookInfo::GetManagers_115371f0", "proposedName": "CIllustrateBookInfo::CollectByCategory", "purpose": "Scans all book entries, collects those whose field+0x64 equals the requested category id into the caller vector; optionally sorts (comparator FUN_11808420) when the flag arg is set."},
+        {"address": "1168f680", "currentName": "CIllustrateBookInfo::GetManagers_1168f680", "proposedName": "CIllustrateBookInfo::FindByEntityIdAttach", "purpose": "Finds the book entry whose entry+0x18 equals target->GetId() (target vtable+0x18) and stores the pointer at target+0xA70 (param_1[0x29c])."},
+        {"address": "1172d2b0", "currentName": "CIllustrateBookInfo::GetManagers_1172d2b0", "proposedName": "CIllustrateBookInfo::FindByIdAttach28", "purpose": "Finds the book whose GetId() equals *(target+0x18) and stores it at target+0x28."},
+        {"address": "119c1390", "currentName": "CIllustrateBookInfo::GetManagers_119c1390", "proposedName": "CIllustrateBookInfo::ForEachRunIllustrateTask", "purpose": "Iterates every book and invokes CIllustrateTaskInfo::GetManagers_118097d0 with the caller context (task progress refresh)."}
+      ],
+      "fields": [
+        {"name": "id", "type": "int", "offset": "0x18", "source": "reader", "note": "book/entity id"},
+        {"name": "category", "type": "int", "offset": "0x64", "source": "reader", "note": "grouping/category key used by CollectByCategory"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Related sibling class CIllustrateTaskInfo (illustration progress tasks).",
+      "relatedTlv": []
+    },
+    {
+      "className": "CNewSkillInfo",
+      "category": "skill",
+      "purpose": "Static definition of a weapon 'new skill' (active/passive combat skill). Holds skill id, level, icon/name/description strings and effect ids used to build the skill display list and to apply weapon skills in combat.",
+      "methods": [
+        {"address": "107cd450", "currentName": "CNewSkillInfo::GetManagers", "proposedName": "CNewSkillInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CNewSkillInfo> (DAT_123bec30)."},
+        {"address": "112b3700", "currentName": "CNewSkillInfo::GetManagers_112b3700", "proposedName": "CNewSkillInfo::BuildSkillDisplayList", "purpose": "For skill slots 0..2 resolves the skill id (FUN_1169ebe0), id-indexed lookup, reads fields +0x10/+0x14/+0x54/+0x44/+0x48/+0x88/+0xA0/+0xA4, and appends a 0x4C-byte display record to the output vector (param_3). Returns 0xD5 when a skill id is missing."},
+        {"address": "1141e110", "currentName": "CNewSkillInfo::GetManagers_1141e110", "proposedName": "CNewSkillInfo::ApplyWeaponSkills", "purpose": "Walks weapon-skill slot levels (outer loop to 0xD), resolves each skill, tests applicability (FUN_1141dbb0), then applies the effect (skill+0x40 effect id, skill+0x14) through the owner's skill component."},
+        {"address": "118d8b60", "currentName": "CNewSkillInfo::GetManagers_118d8b60", "proposedName": "CNewSkillInfo::ForEachApply", "purpose": "Iterates all CNewSkillInfo entries and invokes FUN_1182dcd0 per non-null entry (bulk registration/callback)."}
+      ],
+      "fields": [
+        {"name": "skillId", "type": "int", "offset": "0x10", "source": "reader", "note": "skill id"},
+        {"name": "level", "type": "int", "offset": "0x14", "source": "reader"},
+        {"name": "field54", "type": "int", "offset": "0x54", "source": "reader"},
+        {"name": "rank", "type": "int", "offset": "0x44", "source": "reader", "note": "record stores rank+1"},
+        {"name": "field48", "type": "int", "offset": "0x48", "source": "reader"},
+        {"name": "iconOrName", "type": "char*", "offset": "0x88", "source": "reader", "note": "string; empty-string fallback DAT_11d9d32b"},
+        {"name": "descA0", "type": "char*", "offset": "0xa0", "source": "reader"},
+        {"name": "descA4", "type": "char*", "offset": "0xa4", "source": "reader"},
+        {"name": "effectId", "type": "int", "offset": "0x40", "source": "reader", "note": "passed to skill component when applying"}
+      ],
+      "formulas": ["display record stride = 0x4C bytes; record rank field = info+0x44 + 1"],
+      "constants": ["skillSlots=3", "weaponSlotMax=0x0D", "missingSkillCode=0xD5"],
+      "confidence": "medium",
+      "notes": "",
+      "relatedTlv": []
+    },
+    {
+      "className": "CNpcAtdPrefersInfo",
+      "category": "social",
+      "purpose": "Static definition of NPC attitude/affinity gift preferences (which items an NPC prefers and the resulting attitude change).",
+      "methods": [
+        {"address": "104d8980", "currentName": "CNpcAtdPrefersInfo::GetManagers", "proposedName": "CNpcAtdPrefersInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CNpcAtdPrefersInfo> (DAT_123be1c8)."},
+        {"address": "1150a770", "currentName": "CNpcAtdPrefersInfo::GetManagers_1150a770", "proposedName": "CNpcAtdPrefersInfo::ApplyPreferenceReaction", "purpose": "Iterates all prefer entries; builds an NPC list (FUN_117323e0), and for entries matching param_2 applies an attitude reaction on entry+0x10 (special path FUN_11509050 when action code in {3,4})."},
+        {"address": "11732650", "currentName": "CNpcAtdPrefersInfo::GetManagers_11732650", "proposedName": "CNpcAtdPrefersInfo::LinkNpcAtd", "purpose": "Iterates prefer entries and touches the CNpcAtdInfo manager to link preference rows to their base NPC-attitude rows."},
+        {"address": "11931e70", "currentName": "CNpcAtdPrefersInfo::GetManagers_11931e70", "proposedName": "CNpcAtdPrefersInfo::ForEachRefresh", "purpose": "Iterates prefer entries invoking FUN_11732640 per non-null entry."},
+        {"address": "11a1d050", "currentName": "CNpcAtdPrefersInfo::GetManagers_11a1d050", "proposedName": "CNpcAtdPrefersInfo::FindByAtdId", "purpose": "Finds the prefer entry whose entry+0x10 equals target->[0xB] and stores it at target->[0x15]."}
+      ],
+      "fields": [
+        {"name": "atdId", "type": "int", "offset": "0x10", "source": "reader", "note": "NPC attitude/npc key used in lookups"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Sibling base class CNpcAtdInfo.",
+      "relatedTlv": []
+    },
+    {
+      "className": "CSpeakInfo",
+      "category": "social",
+      "purpose": "Static definition of an NPC dialogue/speak line entry. Speak sets reference many speak-line ids plus embedded short strings.",
+      "methods": [
+        {"address": "10895810", "currentName": "CSpeakInfo::GetManagers", "proposedName": "CSpeakInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CSpeakInfo> (DAT_123bf970)."},
+        {"address": "115b9090", "currentName": "CSpeakInfo::GetManagers_115b9090", "proposedName": "CSpeakInfo::ParseSpeakSet", "purpose": "Parses a speak-set record: primary array of up to 0x28 speak ids (id-indexed, valid ones collected into out vector at +0x14), secondary array of up to 0x14 ids at rec+0x2F, and up to 10 embedded 24-byte string slots at rec+0x12E."},
+        {"address": "119084e0", "currentName": "CSpeakInfo::GetManagers_119084e0", "proposedName": "CSpeakInfo::ForEachRefresh", "purpose": "Iterates all speak entries invoking FUN_1175a4a0."},
+        {"address": "11908630", "currentName": "CSpeakInfo::GetManagers_11908630", "proposedName": "CSpeakInfo::ForEachApply", "purpose": "Iterates all speak entries invoking FUN_1175a490 with caller context."}
+      ],
+      "fields": [
+        {"name": "primarySpeakIds", "type": "int[<=40]", "offset": "0x04", "source": "reader", "note": "array starting at record+4; count in record[0]"},
+        {"name": "secondaryCount", "type": "int", "offset": "0xA4", "source": "reader", "note": "record[0x29]; array at record+0x2F (record[0x2f])"},
+        {"name": "stringCount", "type": "int", "offset": "0x120", "source": "reader", "note": "record[0x48]; up to 10 string slots at record+0x12E, stride 24 bytes"}
+      ],
+      "formulas": [],
+      "constants": ["maxPrimaryIds=0x28", "maxSecondaryIds=0x14", "maxStringSlots=10", "stringSlotStride=24"],
+      "confidence": "medium",
+      "notes": "Likely the client-side static form of chat/speak data (cf. TlvChatSpeakData) but this is the static Info table, not the TLV wire struct.",
+      "relatedTlv": ["TlvChatSpeakData"]
+    },
+    {
+      "className": "CSpawnMonsterGroupInfo",
+      "category": "monster",
+      "purpose": "Static definition of a monster spawn group for a level: weighted collection of monster spawn entries used to roll which monsters appear.",
+      "methods": [
+        {"address": "10e95ba0", "currentName": "CSpawnMonsterGroupInfo::GetManagers", "proposedName": "CSpawnMonsterGroupInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor (name,flag); returns cached singleton (DAT_12039bd8) when flag==0."},
+        {"address": "10e9ae20", "currentName": "CSpawnMonsterGroupInfo::GetManagers_10e9ae20", "proposedName": "CSpawnMonsterGroupInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager pointer when arg==0, else 0."},
+        {"address": "116fd440", "currentName": "CSpawnMonsterGroupInfo::GetManagers_116fd440", "proposedName": "CSpawnMonsterGroupInfo::RollSpawnForLevel", "purpose": "Resolves the level (CMHLevelInfo id-indexed by this+0x10), walks the group list at this+0x18, performs a weighted random pick over each group's entries, resolves the chosen CSpawnMonsterGroupInfo and spawns the monsters (FUN_1184a310/FUN_1184a540)."}
+      ],
+      "fields": [
+        {"name": "levelId", "type": "int", "offset": "0x10", "source": "reader", "note": "this+0x10 = CMHLevelInfo id"},
+        {"name": "groupList", "type": "list", "offset": "0x18", "source": "reader", "note": "intrusive list of spawn groups; each group entry+4 = weight, entry[6] = weight scale"}
+      ],
+      "formulas": ["weighted pick: threshold = (int)(rand01 * _DAT_11de98f0 * groupWeight); walk entry list subtracting entry+4 weights until threshold < weight"],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "This class holds the runtime spawn-roll logic, not just data. rand01 from FUN_100ee450.",
+      "relatedTlv": []
+    },
+    {
+      "className": "CGuildQuestPrizeInfo",
+      "category": "quest",
+      "purpose": "Static definition of guild-quest reward rows (prize item ids granted for a guild quest).",
+      "methods": [
+        {"address": "111ef510", "currentName": "CGuildQuestPrizeInfo::GetManagers", "proposedName": "CGuildQuestPrizeInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_1203f464) when flag==0."},
+        {"address": "111f1e00", "currentName": "CGuildQuestPrizeInfo::GetManagers_111f1e00", "proposedName": "CGuildQuestPrizeInfo::GrantPrizes", "purpose": "After validating the owner (vtable +4/+8), iterates the caller's prize-id list (up to 4), resolves each prize via id-indexed lookup and grants the item (FUN_111743b0/FUN_114a6890)."},
+        {"address": "111f3060", "currentName": "CGuildQuestPrizeInfo::GetManagers_111f3060", "proposedName": "CGuildQuestPrizeInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "1190ded0", "currentName": "CGuildQuestPrizeInfo::GetManagers_1190ded0", "proposedName": "CGuildQuestPrizeInfo::ForEachRefresh", "purpose": "Iterates all prize rows invoking FUN_11a055a0."},
+        {"address": "1190e1a0", "currentName": "CGuildQuestPrizeInfo::GetManagers_1190e1a0", "proposedName": "CGuildQuestPrizeInfo::ForEachRegisterItemBase", "purpose": "Iterates all prize rows invoking CItemBaseInfo::GetManagers_11a054b0 (register prize as item-base)."},
+        {"address": "11a05d90", "currentName": "CGuildQuestPrizeInfo::GetManagers_11a05d90", "proposedName": "CGuildQuestPrizeInfo::CollectByQuestId", "purpose": "Collects prize rows whose entry+0x14 equals *(target+0x10) into the target vector at +0x18."}
+      ],
+      "fields": [
+        {"name": "questId", "type": "int", "offset": "0x14", "source": "reader", "note": "entry[5]; guild-quest id key"}
+      ],
+      "formulas": [],
+      "constants": ["prizeListMax=4"],
+      "confidence": "medium",
+      "notes": "",
+      "relatedTlv": []
+    },
+    {
+      "className": "CPetStarInfo",
+      "category": "pet",
+      "purpose": "Static definition of pet star/rank rows keyed by a 2- or 3-part composite key (e.g. petType/star/subrank); drives pet star upgrade and skill-slot unlocks.",
+      "methods": [
+        {"address": "112f0ba0", "currentName": "CPetStarInfo::GetManagers", "proposedName": "CPetStarInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_12040b4c) when flag==0."},
+        {"address": "112f60d0", "currentName": "CPetStarInfo::GetManagers_112f60d0", "proposedName": "CPetStarInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "1174c1f0", "currentName": "CPetStarInfo::GetManagers_1174c1f0", "proposedName": "CPetStarInfo::FindByKey2", "purpose": "Finds the row where entry+0x14==param1 && entry+0x18==param2; falls back to the first row if none match."},
+        {"address": "1174c410", "currentName": "CPetStarInfo::GetManagers_1174c410", "proposedName": "CPetStarInfo::FindByKey3", "purpose": "Finds the row where entry+0x14==p1 && entry+0x18==p2 && entry+0x1c==p3; falls back to the first row."},
+        {"address": "119266d0", "currentName": "CPetStarInfo::GetManagers_119266d0", "proposedName": "CPetStarInfo::ForEachUnlockSkillSlot", "purpose": "Iterates all star rows invoking CPetSkillSlotUnlockInfo::GetManagers_1174ca80."}
+      ],
+      "fields": [
+        {"name": "keyA", "type": "int", "offset": "0x14", "source": "reader", "note": "composite key part 1 (pet type?)"},
+        {"name": "keyB", "type": "int", "offset": "0x18", "source": "reader", "note": "composite key part 2 (star?)"},
+        {"name": "keyC", "type": "int", "offset": "0x1c", "source": "reader", "note": "composite key part 3 (subrank?)"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "",
+      "relatedTlv": []
+    },
+    {
+      "className": "CMonsterPartInfo",
+      "category": "monster",
+      "purpose": "Static definition of a monster body part (breakable/severable part), keyed and looked up by name strings.",
+      "methods": [
+        {"address": "11735180", "currentName": "CMonsterPartInfo::GetManagers", "proposedName": "CMonsterPartInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_12390204) when flag==0."},
+        {"address": "11738340", "currentName": "CMonsterPartInfo::GetManagers_11738340", "proposedName": "CMonsterPartInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "1188ea40", "currentName": "CMonsterPartInfo::GetManagers_1188ea40", "proposedName": "CMonsterPartInfo::FindByName", "purpose": "Returns the part whose name string at entry+0x28 equals the string at target+0x14 (strcmp FUN_100ec310)."},
+        {"address": "1188eb90", "currentName": "CMonsterPartInfo::GetManagers_1188eb90", "proposedName": "CMonsterPartInfo::FindByName2", "purpose": "Returns the part whose name string at entry+0x2C equals *param_1 (strcmp), with empty-string fallbacks."},
+        {"address": "118d4660", "currentName": "CMonsterPartInfo::GetManagers_118d4660", "proposedName": "CMonsterPartInfo::ForEachRefreshA", "purpose": "Iterates all parts invoking FUN_1188ed20."},
+        {"address": "118d47b0", "currentName": "CMonsterPartInfo::GetManagers_118d47b0", "proposedName": "CMonsterPartInfo::ForEachRefreshB", "purpose": "Iterates all parts invoking FUN_1188ed10."}
+      ],
+      "fields": [
+        {"name": "nameA", "type": "char*", "offset": "0x28", "source": "reader", "note": "part name used by FindByName"},
+        {"name": "nameB", "type": "char*", "offset": "0x2c", "source": "reader", "note": "alternate name used by FindByName2"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "",
+      "relatedTlv": []
+    },
+    {
+      "className": "CCommodityInfo",
+      "category": "economy",
+      "purpose": "Static definition of a shop commodity (item sold in an NPC/shop), grouped by a shop/category id; each commodity also registers as an item-base row.",
+      "methods": [
+        {"address": "117df020", "currentName": "CCommodityInfo::GetManagers", "proposedName": "CCommodityInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_123941cc) when flag==0."},
+        {"address": "117dfbe0", "currentName": "CCommodityInfo::GetManagers_117dfbe0", "proposedName": "CCommodityInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "117dff00", "currentName": "CCommodityInfo::GetManagers_117dff10 (c0 @117dff00)", "proposedName": "CCommodityInfo::CollectByShopId", "purpose": "Collects commodities whose entry[9] (offset 0x24) equals *(target+0x10) into the vector at target+0x1C (duplicate overlapping decompilation of the fn below)."},
+        {"address": "117dff10", "currentName": "CCommodityInfo::GetManagers_117dff10", "proposedName": "CCommodityInfo::CollectByShopId", "purpose": "Collects commodities whose entry[9] (offset 0x24) equals *(target+0x10) into the caller vector at target+0x1C."},
+        {"address": "11908e20", "currentName": "CCommodityInfo::GetManagers_11908e20", "proposedName": "CCommodityInfo::ForEachRefresh", "purpose": "Iterates all commodities invoking FUN_11a01380."},
+        {"address": "11908f70", "currentName": "CCommodityInfo::GetManagers_11908f70", "proposedName": "CCommodityInfo::ForEachRegisterItemBase", "purpose": "Iterates all commodities invoking CItemBaseInfo::GetManagers_11a011c0 (register commodity as item-base)."}
+      ],
+      "fields": [
+        {"name": "shopId", "type": "int", "offset": "0x24", "source": "reader", "note": "entry[9]; shop/category grouping key"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Two decompiled bodies for @117dff10 (label c0 at 117dff00 and c3 at 117dff10) are the same CollectByShopId function. Possibly related to the TlvCommoditySales / TlvCommodityRefresh wire structs but this is the static shop table.",
+      "relatedTlv": ["TlvCommoditySales", "TlvCommodityRefresh"]
+    },
+    {
+      "className": "CPetInfo",
+      "category": "pet",
+      "purpose": "Static definition table of pet species/base data (attributes, skills, avatar). Also hosts the routine that deserializes a player's owned-pet blob and populates pet instances from this table.",
+      "methods": [
+        {"address": "1052bec0", "currentName": "CPetInfo::GetManagers", "proposedName": "CPetInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CPetInfo> (DAT_123be948)."},
+        {"address": "11583920", "currentName": "CPetInfo::GetManagers_11583920", "proposedName": "CPetInfo::LoadPetsFromData", "purpose": "Parses a serialized pet blob (FUN_101a6df0) of up to 12 records (stride 0x4FC), clears the owner's pet slots (this[8..0x1F]), and for each record resolves the CPetInfo species (id-indexed) and populates a pet instance: level (+0x40), active flag (+0x44), flags (+0x38), attr bytes/ids (+0x68,+0x6C..+0x7C,+0x80,+0x84), skills (CPetSkillInfo::GetManagers_11588cc0) and avatar."},
+        {"address": "11925f60", "currentName": "CPetInfo::GetManagers_11925f60", "proposedName": "CPetInfo::ForEachApply", "purpose": "Iterates all CPetInfo species invoking FUN_11755610 with caller context."}
+      ],
+      "fields": [
+        {"name": "petCount", "type": "int", "offset": "0x1c", "source": "inferred", "note": "owner instance this[7] set to record count"},
+        {"name": "level", "type": "int", "offset": "0x40", "source": "reader", "note": "on populated pet instance (iVar4+0x40)"},
+        {"name": "isActive", "type": "bool", "offset": "0x44", "source": "reader", "note": "instance+0x44 = (activeSlotChar == recordChar)"},
+        {"name": "flag38", "type": "bool", "offset": "0x38", "source": "reader"},
+        {"name": "attrByte68", "type": "byte", "offset": "0x68", "source": "reader"},
+        {"name": "attrId6c", "type": "int", "offset": "0x6c", "source": "reader"},
+        {"name": "attrId70", "type": "int", "offset": "0x70", "source": "reader"},
+        {"name": "attrId74", "type": "int", "offset": "0x74", "source": "reader"},
+        {"name": "attrId78", "type": "int", "offset": "0x78", "source": "reader"},
+        {"name": "attrId7c", "type": "int", "offset": "0x7c", "source": "reader"},
+        {"name": "field80", "type": "int", "offset": "0x80", "source": "reader"},
+        {"name": "field84", "type": "int", "offset": "0x84", "source": "reader"}
+      ],
+      "formulas": ["serialized pet record stride = 0x4FC bytes; max 12 records (< local_3c73, capped at 13)"],
+      "constants": ["petRecordStride=0x4FC"],
+      "confidence": "medium",
+      "notes": "Offsets +0x40..+0x84 are on the populated pet-instance object, not on the CPetInfo species row. Related wire struct TlvPetInfo/TlvPetFullAttrData.",
+      "relatedTlv": ["TlvPetInfo", "TlvPetFullAttrData", "TlvPetBattleData"]
+    },
+    {
+      "className": "CGuildTradeInstituteInfo",
+      "category": "economy",
+      "purpose": "Static definition of guild trade/commerce institute unlock rows (keyed by guild level threshold); drives which random commodities a guild can trade.",
+      "methods": [
+        {"address": "1190ebd0", "currentName": "CGuildTradeInstituteInfo::GetManagers", "proposedName": "CGuildTradeInstituteInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_1239ec20) when flag==0."},
+        {"address": "119104c0", "currentName": "CGuildTradeInstituteInfo::GetManagers_119104c0", "proposedName": "CGuildTradeInstituteInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "11910a00", "currentName": "CGuildTradeInstituteInfo::GetManagers_11910a00", "proposedName": "CGuildTradeInstituteInfo::ForEachBuildRandCommodity", "purpose": "Iterates all institute rows invoking CGuildRandCommodityInfo::GetManagers_11a06580, then calls EnsureManagerLoaded (11a068b0)."},
+        {"address": "11a06250", "currentName": "CGuildTradeInstituteInfo::GetManagers_11a06250", "proposedName": "CGuildTradeInstituteInfo::CollectByLevel", "purpose": "Collects institute rows whose entry+0x10 (required level) <= param_1 into the vector at param_2+4."},
+        {"address": "11a068b0", "currentName": "CGuildTradeInstituteInfo::GetManagers_11a068b0", "proposedName": "CGuildTradeInstituteInfo::EnsureManagerLoaded", "purpose": "Forces the manager to load (GetCount pass), constructing/registering the singleton via StcMbrNameSvr if absent."}
+      ],
+      "fields": [
+        {"name": "requiredLevel", "type": "int", "offset": "0x10", "source": "reader", "note": "guild level threshold for CollectByLevel"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Sibling class CGuildRandCommodityInfo. Possibly related to TlvGuildCommerceData wire struct.",
+      "relatedTlv": ["TlvGuildCommerceData", "TlvCommerceGuild"]
+    },
+    {
+      "className": "CRankingListOfPlayerInfo",
+      "category": "social",
+      "purpose": "Static definition of player ranking-list rows; each row has a ranking-type enum (+0x34) and an id (+0x10). Lookups fetch the ranking id for a given type/subtype.",
+      "methods": [
+        {"address": "1090b5e0", "currentName": "CRankingListOfPlayerInfo::GetManagers", "proposedName": "CRankingListOfPlayerInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CRankingListOfPlayerInfo> (DAT_123bfe28)."},
+        {"address": "112fd4e0", "currentName": "CRankingListOfPlayerInfo::GetManagers_112fd4e0", "proposedName": "CRankingListOfPlayerInfo::GetRankingIdOfType0xF", "purpose": "Returns entry+0x10 for the first row whose type (+0x34) == 0xF."},
+        {"address": "112fd620", "currentName": "CRankingListOfPlayerInfo::GetManagers_112fd620", "proposedName": "CRankingListOfPlayerInfo::GetRankingIdOfType0xD", "purpose": "Returns entry+0x10 for the first row whose type (+0x34) == 0xD."},
+        {"address": "112fd760", "currentName": "CRankingListOfPlayerInfo::GetManagers_112fd760", "proposedName": "CRankingListOfPlayerInfo::GetRankingIdOfType0xE", "purpose": "Returns entry+0x10 for the row whose type (+0x34) == 0xE and subkey (+0x38) == param."},
+        {"address": "1151c360", "currentName": "CRankingListOfPlayerInfo::GetManagers_1151c360", "proposedName": "CRankingListOfPlayerInfo::FindByKeys", "purpose": "Finds the row where entry[0xD] (+0x34) == p1 && entry[0xE] (+0x38) == p2 and returns its GetId() (vtable+0x18)."}
+      ],
+      "fields": [
+        {"name": "id", "type": "int", "offset": "0x10", "source": "reader", "note": "ranking id returned by lookups"},
+        {"name": "rankingType", "type": "int", "offset": "0x34", "source": "reader", "note": "type enum; observed values 0xD,0xE,0xF"},
+        {"name": "subKey", "type": "int", "offset": "0x38", "source": "reader", "note": "secondary key for type 0xE"}
+      ],
+      "formulas": [],
+      "constants": ["type_D=0x0D", "type_E=0x0E", "type_F=0x0F"],
+      "confidence": "medium",
+      "notes": "",
+      "relatedTlv": []
+    },
+    {
+      "className": "CTaskBountyLevelInfo",
+      "category": "quest",
+      "purpose": "Static definition of task/quest bounty-level rows (keyed by a bounty/task id at +0x14); used to collect available bounties and to link a task to its bounty level.",
+      "methods": [
+        {"address": "1161e430", "currentName": "CTaskBountyLevelInfo::GetManagers", "proposedName": "CTaskBountyLevelInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_122e00e4) when flag==0."},
+        {"address": "11620da0", "currentName": "CTaskBountyLevelInfo::GetManagers_11620da0", "proposedName": "CTaskBountyLevelInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "11621220", "currentName": "CTaskBountyLevelInfo::GetManagers_11621220", "proposedName": "CTaskBountyLevelInfo::CollectAvailableBounties", "purpose": "Initializes an output red-black-tree/set, iterates bounty rows, and for each entry+0x14 passes a filter (param_2+0x2B80 vtable+0x28); inserts passing ids into the set."},
+        {"address": "11722bc0", "currentName": "CTaskBountyLevelInfo::GetManagers_11722bc0", "proposedName": "CTaskBountyLevelInfo::FindByTaskId", "purpose": "Calls CTaskInfo helper then, when owner->[0xB]+0x20 > 0, finds the bounty row whose entry+0x14 equals *(owner->[0xB]+0x20)."},
+        {"address": "11907b50", "currentName": "CTaskBountyLevelInfo::GetManagers_11907b50", "proposedName": "CTaskBountyLevelInfo::ForEachRefreshA", "purpose": "Iterates all bounty rows invoking FUN_11a00f50."},
+        {"address": "11907ca0", "currentName": "CTaskBountyLevelInfo::GetManagers_11907ca0", "proposedName": "CTaskBountyLevelInfo::ForEachRefreshB", "purpose": "Iterates all bounty rows invoking FUN_11a00f40."}
+      ],
+      "fields": [
+        {"name": "bountyId", "type": "int", "offset": "0x14", "source": "reader", "note": "bounty/task key"}
+      ],
+      "formulas": [],
+      "constants": [],
+      "confidence": "medium",
+      "notes": "Sibling class CTaskInfo.",
+      "relatedTlv": []
+    },
+    {
+      "className": "CPetSkillConditionInfo",
+      "category": "pet",
+      "purpose": "Static definition of pet-skill unlock/trigger conditions. Each row holds two condition arrays (+0x118 and +0x124); provides selection logic that picks a pet skill whose conditions are satisfied (with probability gating).",
+      "methods": [
+        {"address": "1154d480", "currentName": "CPetSkillConditionInfo::GetManagers", "proposedName": "CPetSkillConditionInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_122defc4) when flag==0."},
+        {"address": "1154dd70", "currentName": "CPetSkillConditionInfo::GetManagers_1154dd70", "proposedName": "CPetSkillConditionInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "1154e6b0", "currentName": "CPetSkillConditionInfo::GetManagers_1154e6b0", "proposedName": "CPetSkillConditionInfo::ResolveConditionRefs", "purpose": "For every condition row, walks both condition vectors (+0x118/+0x11C and +0x124/+0x128) and resolves each element via FUN_11630610, caching the result at element+0x18."},
+        {"address": "1157f5f0", "currentName": "CPetSkillConditionInfo::GetManagers_1157f5f0", "proposedName": "CPetSkillConditionInfo::SelectPetSkillByConditions", "purpose": "Gathers candidate skill ids (CPetSkillInfo::GetManagers_113ef7e0 or FUN_11587830), sorts them, and for each resolves the condition row and tests availability/probability/both condition arrays; returns the chosen skill id via an ordered-tree walk."}
+      ],
+      "fields": [
+        {"name": "condVec1Begin", "type": "ptr", "offset": "0x118", "source": "reader", "note": "condition array 1 begin; end at +0x11C"},
+        {"name": "condVec2Begin", "type": "ptr", "offset": "0x124", "source": "reader", "note": "condition array 2 begin; end at +0x128"},
+        {"name": "resolvedRef", "type": "int", "offset": "0x18", "source": "reader", "note": "per condition element: cached resolved reference"}
+      ],
+      "formulas": ["probability gate: FUN_1154bc80(skill+0x10) / 1000 compared against 1 (i.e. skill probability expressed per-mille)"],
+      "constants": ["defaultCondId=0x2B3A"],
+      "confidence": "medium",
+      "notes": "Sibling class CPetSkillInfo.",
+      "relatedTlv": []
+    },
+    {
+      "className": "CSRLItemPoolInfo",
+      "category": "item",
+      "purpose": "Static definition of an SRL (item-box/lottery) reward pool. Drives the box-opening roll: weighted random selection of item id/count pairs plus a shuffled fixed-reward block.",
+      "methods": [
+        {"address": "1153b340", "currentName": "CSRLItemPoolInfo::GetManagers", "proposedName": "CSRLItemPoolInfo::GetInfoManager", "purpose": "Generic CInfoManager accessor; returns cached singleton (DAT_122dec44) when flag==0."},
+        {"address": "1153e790", "currentName": "CSRLItemPoolInfo::GetManagers_1153e790", "proposedName": "CSRLItemPoolInfo::GetInfoManagerIfLoaded", "purpose": "Returns cached manager when arg==0 else 0."},
+        {"address": "115411b0", "currentName": "CSRLItemPoolInfo::GetManagers_115411b0", "proposedName": "CSRLItemPoolInfo::RollItemBox", "purpose": "Validates the box via CSRLItemBoxDescriptionInfo and CSRLItemLotteryInfo (id-indexed by param_2), reads the per-slot weight list (FUN_1180e530), requires the weight sum to equal 8, then rolls each slot with rand() % poolSize picking item id/count pairs (dedup against prior picks) into the output array, and finally Fisher-Yates shuffles an 8-entry fixed reward block."}
+      ],
+      "fields": [
+        {"name": "outItemId", "type": "int", "offset": "n/a", "source": "reader", "note": "output record stride 4 dwords: itemId at [-1], count at [0], extra id at [+1]"}
+      ],
+      "formulas": ["weight sum must equal 8 to roll", "slot pick: idx = rand() % (poolEntryCount); poolEntryCount = (end-begin)>>3 (8-byte id/count pairs)", "fixed block shuffle: 8-element Fisher-Yates over reward set _DAT_11de9b30.."],
+      "constants": ["rewardSlots=8", "requiredWeightSum=8", "poolPairStride=8"],
+      "confidence": "medium",
+      "notes": "Sibling classes CSRLItemBoxDescriptionInfo, CSRLItemLotteryInfo. Likely related to TlvLotteryBoxItemPool / TlvSearchItemPool wire structs.",
+      "relatedTlv": ["TlvLotteryBoxItemPool", "TlvSearchItemPool"]
+    },
+    {
+      "className": "CMessageInfo",
+      "category": "ui",
+      "purpose": "Static definition of localized system/UI message templates. Provides message formatting from a parameter blob (typed argument list) and applying per-message colors.",
+      "methods": [
+        {"address": "1024f650", "currentName": "CMessageInfo::GetManagers", "proposedName": "CMessageInfo::GetInfoManager", "purpose": "Lazy singleton accessor for CInfoManager<CMessageInfo> (DAT_123bdb60)."},
+        {"address": "11263af0", "currentName": "CMessageInfo::GetManagers_11263af0", "proposedName": "CMessageInfo::FormatMessage", "purpose": "Parses a message-arg blob: iterates param->[4] typed records (stride 0x45), converting each by type byte (1=int FUN_1024e8a0, 2=int64/wide FUN_1024ed30, 3=bool FUN_1024e830, 4=string FUN_1024e9b0) into an argument vector, then id-indexed lookup of the CMessageInfo template and formats the output string (custom template at param+0x16A or default via FUN_1112f320/thunk_FUN_1112f700). Aborts with 'out of memory' on overflow."},
+        {"address": "118e12a0", "currentName": "CMessageInfo::GetManagers_118e12a0", "proposedName": "CMessageInfo::ForEachApplyColor", "purpose": "Iterates all message rows invoking CMessageColorInfo::GetManagers_118e1b70(entry, ctx) to attach color info."}
+      ],
+      "fields": [
+        {"name": "messageId", "type": "int", "offset": "0x00", "source": "reader", "note": "param->[0]; template id used for id-indexed lookup"},
+        {"name": "argCount", "type": "byte", "offset": "0x10", "source": "reader", "note": "param->[4] low byte; number of 0x45-byte arg records at param+0x11"},
+        {"name": "customTemplate", "type": "char*", "offset": "0x16a", "source": "reader", "note": "optional override format string; wide-string arg at +0x16E"}
+      ],
+      "formulas": ["arg record stride = 0x45 bytes; type byte at record+4 selects converter (1..4)"],
+      "constants": ["argRecordStride=0x45", "maxVectorElems=0x3FFFFFFF"],
+      "confidence": "medium",
+      "notes": "Sibling class CMessageColorInfo.",
+      "relatedTlv": []
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "batchIndex": 6,
+  "classes": [
+    {
+      "className": "CTaskLibInfo",
+      "category": "quest",
+      "purpose": "Static-data library of task/quest groups. Each managed record exposes a descriptor at +0x2c whose +0x10 holds a task-category enum (values 1..7). The helpers query the CInfoManager-backed pool to fetch task-lib entries filtered by that category, or iterate all of them.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"111ecce0","currentName":"CTaskLibInfo::GetManagers","proposedName":"CTaskLibInfo::GetInfoManager","purpose":"Singleton accessor for the CTaskLibInfo CInfoManager (StcMbrNameSvr<CInfoManager> lookup via FUN_11679e10). Returns the manager, or a static empty stub if not registered. This is the real 'GetManagers'/GetInstance used by every other helper."},
+        {"address":"111edf80","currentName":"CTaskLibInfo::GetManagers_111edf80","proposedName":"CTaskLibInfo::GetInfoManagerRawOrNull","purpose":"Lightweight variant returning the raw manager map pointer (*DAT_1203f3b8) when arg==0, else 0."},
+        {"address":"114ed1d0","currentName":"CTaskLibInfo::GetManagers_114ed1d0","proposedName":"CTaskLibInfo::ReleaseHeldTaskRefs","purpose":"Iterates an in-object array of up to 0x20 task-ref slots (count at this+0x1626, entries at this+0x1636 stride 0x14, id read at slot-8), resolves each id in the task-lib pool and disposes it (FUN_10c3d580). Instance cleanup/teardown of held task references. Low confidence on exact intent."},
+        {"address":"117462e0","currentName":"CTaskLibInfo::GetManagers_117462e0","proposedName":"CTaskLibInfo::FindTaskLibByCategory_7","purpose":"Scans all task-lib entries and returns the first whose descriptor(+0x2c)->type(+0x10) == 7."},
+        {"address":"117464a0","currentName":"CTaskLibInfo::GetManagers_117464a0","proposedName":"CTaskLibInfo::FindTaskLibByCategory_2","purpose":"Returns first task-lib entry whose descriptor type == 2."},
+        {"address":"117465e0","currentName":"CTaskLibInfo::GetManagers_117465e0","proposedName":"CTaskLibInfo::CollectTaskLibsByCategory_3","purpose":"Collects into an output vector all task-lib entries whose descriptor type == 3."},
+        {"address":"11746760","currentName":"CTaskLibInfo::GetManagers_11746760","proposedName":"CTaskLibInfo::CollectTaskLibsByCategory_4","purpose":"Collects into an output vector all task-lib entries whose descriptor type == 4."},
+        {"address":"117468e0","currentName":"CTaskLibInfo::GetManagers_117468e0","proposedName":"CTaskLibInfo::FindTaskLibForCurrentContext","purpose":"Scans all entries and returns the one whose virtual id (vtable+0x18) matches a context value fetched via FUN_117f86d0()->+0x40 (likely current map/level). Low confidence."},
+        {"address":"11746c60","currentName":"CTaskLibInfo::GetManagers_11746c60","proposedName":"CTaskLibInfo::FindTaskLibByCategory_1","purpose":"Returns first task-lib entry whose descriptor type == 1."},
+        {"address":"11746da0","currentName":"CTaskLibInfo::GetManagers_11746da0","proposedName":"CTaskLibInfo::FindTaskLibByCategory_5","purpose":"Returns first task-lib entry whose descriptor type == 5."},
+        {"address":"11747020","currentName":"CTaskLibInfo::GetManagers_11747020","proposedName":"CTaskLibInfo::FindTaskLibByCategory_6","purpose":"Returns first task-lib entry whose descriptor type == 6."},
+        {"address":"117c1e20","currentName":"CTaskLibInfo::GetManagers_117c1e20","proposedName":"CTaskLibInfo::FindTaskGroupForTask","purpose":"Iterates task-lib entries and, for a given task object (param), calls CTaskGroupInfo helper 117460f0(task, task+0x3c); on the first match stores the matched task-lib id at task+0x38. Low confidence."},
+        {"address":"119069f0","currentName":"CTaskLibInfo::GetManagers_119069f0","proposedName":"CTaskLibInfo::ForEachTaskLib_11747410","purpose":"Iterates GetCount() task-lib entries, invoking FUN_11747410 per entry (per-entry update/tick). Low confidence."},
+        {"address":"11906b40","currentName":"CTaskLibInfo::GetManagers_11906b40","proposedName":"CTaskLibInfo::RefreshAllTaskLibs","purpose":"Iterates all task-lib entries calling CTaskGroupInfo helper 117472a0 per entry, then finalizes with FUN_11747b10. Bulk refresh/reset of task groups. Low confidence."}
+      ],
+      "fields": [
+        {"name":"descriptor","type":"ptr","offset":"0x2c","source":"reader","note":"points to a sub-struct; +0x10 = task category enum (1..7)"}
+      ],
+      "constants": ["TaskCategoryCount~7"],
+      "formulas": ["CInfoManager paged getter (shared infra): index = id - baseId(mgr+0x30); page = arr[mgr+0x20][index / pageSize(mgr+0x28)]; record = page[index % pageSize]; bounds-checked against count(mgr+0x24). GetCount via vtable+0x28; flat vector at mgr+0x14..0x18."],
+      "relatedTlv": ["TlvRefreshLibTasks","TlvTaskContent"],
+      "nameNext": [
+        {"address":"117460f0","proposedName":"CTaskGroupInfo::MatchTaskInGroup","why":"called by 117c1e20 to test task membership in a group"},
+        {"address":"117472a0","proposedName":"CTaskGroupInfo::ResetGroup","why":"per-entry refresh callee of RefreshAllTaskLibs"},
+        {"address":"11747410","proposedName":"CTaskGroupInfo::UpdateGroup","why":"per-entry callee of ForEachTaskLib"}
+      ],
+      "notes": "TLV names (TlvRefreshLibTasks, TlvTaskState, etc.) are runtime/network player-state structs, not this static config class; only directionally related. The category enum meaning (main/branch/daily/guild/...) is not proven from code."
+    },
+    {
+      "className": "CSuitCfgInfo",
+      "category": "item",
+      "purpose": "Static-data config for equipment SUITS (armor sets). Records are indexed by suit id; the helpers compute which suits are active from a player's equipped pieces, evaluate suit-effect piece thresholds, and apply suit/passive skill effects. There appear to be 0x17 (23) suit config slots.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"1082e170","currentName":"CSuitCfgInfo::GetManagers","proposedName":"CSuitCfgInfo::GetInfoManager","purpose":"Singleton accessor for the CSuitCfgInfo CInfoManager (registers StcMbrNameSvr<CInfoManager> name). The real GetInstance."},
+        {"address":"11300ae0","currentName":"CSuitCfgInfo::GetManagers_11300ae0","proposedName":"CSuitCfgInfo::CollectActiveSuitsFromEquip","purpose":"Scans an equipped-parts array on param_2 (23 slots at +0x16c8), tallies suit ids into a temporary map/tree keyed by suit id, then walks the 23 suit slots and, for suits meeting piece counts (FUN_1172a550), pushes active suit ids into the output vector at this+0x58. Medium confidence."},
+        {"address":"11301170","currentName":"CSuitCfgInfo::GetManagers_11301170","proposedName":"CSuitCfgInfo::IsSuitEffectActive","purpose":"For a suit (param_2), counts equipped pieces belonging to the suit via CEquipInfo lookups, then reads the required piece count from CEquipSuitEffectInfo (effect list stride 0x6c; entry whose +0x18==2 supplies the requirement at +0). Returns 1 when equipped count >= required piece threshold, else 0."},
+        {"address":"11301ed0","currentName":"CSuitCfgInfo::GetManagers_11301ed0","proposedName":"CSuitCfgInfo::ApplyEquippedSuitEffects","purpose":"Loops the 10 equipment slots (param_2 stride 0x48), validates each equipped item (FUN_113f9bb0/FUN_116698a0), copies suit params into the equipment slot (FUN_115b8300), and at slot 9 applies passive-skill group effects (FUN_115b7ca0). Then finalizes CEquipSuitEffectInfo (11464860) and CEquipPassiveSkillGroupInfo (115b7e90). Recomputes/applies a character's full set-bonus state on equip change."},
+        {"address":"11464a00","currentName":"CSuitCfgInfo::GetManagers_11464a00","proposedName":"CSuitCfgInfo::CollectAllActiveSuitIds","purpose":"Iterates the 23 suit slots via FUN_114645a0(i), builds the suit-id tally map, and collects all satisfied suit ids into the output vector. Low/medium confidence."}
+      ],
+      "fields": [
+        {"name":"equippedPartsArray","type":"array","offset":"0x16c8","source":"reader","note":"on the player/equip container param, 23 (0x17) suit-part slots scanned by 11300ae0"}
+      ],
+      "constants": ["SuitSlotCount=0x17(23)","EquipmentSlotCount=10","SuitEffectEntryStride=0x6c","SuitEffectCondType_PieceCount=2"],
+      "formulas": ["Suit effect active when equippedPieceCount >= requiredPieces, where requiredPieces is the CEquipSuitEffectInfo entry with condType(+0x18)==2."],
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "nameNext": [
+        {"address":"1172a550","proposedName":"CSuitCfgInfo::SuitMeetsPieceCount","why":"predicate deciding a suit is active; called from 11300ae0/11464a00/11301ed0"},
+        {"address":"114645a0","proposedName":"CSuitCfgInfo::GetSuitBySlot","why":"maps slot index 0..22 to a suit record"}
+      ],
+      "notes": "0x17 recurring loop bound strongly implies 23 suit config entries. Piece-threshold logic verified in 11301170."
+    },
+    {
+      "className": "CManufactureSkillLearnInfo",
+      "category": "activity",
+      "purpose": "Static-data table describing which manufacturing (crafting) recipes/ingredients a player unlocks as a given crafting skill levels up. Records key on skillId(+0x14) and a level/group value(+0x18). Helpers cross-reference CManufactureIngredientLearnInfo, CManufactureInfo, CManufactureProficiencyInfo and CItemBaseInfo to build and send client packets listing learnable recipes.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"11207640","currentName":"CManufactureSkillLearnInfo::GetManagers","proposedName":"CManufactureSkillLearnInfo::GetInfoManager","purpose":"Singleton accessor for the CManufactureSkillLearnInfo CInfoManager. Real GetInstance."},
+        {"address":"1120a000","currentName":"CManufactureSkillLearnInfo::GetManagers_1120a000","proposedName":"CManufactureSkillLearnInfo::GetInfoManagerRawOrNull","purpose":"Returns raw manager pointer (*DAT_1203f710) when arg==0, else 0."},
+        {"address":"1120b400","currentName":"CManufactureSkillLearnInfo::GetManagers_1120b400","proposedName":"CManufactureSkillLearnInfo::SendLearnableRecipes","purpose":"Given a player crafting-skill object, finds the skill-learn record matching skillId(param[0x14]) to obtain a learn-group(+0x18), then iterates CManufactureIngredientLearnInfo matching (skillId, group), resolves each recipe via CManufactureInfo and its item via CItemBaseInfo (name copied), packs a 0x76-opcode message and sends it (FUN_111e0a50 messaging). Emits the set of newly learnable recipes/ingredients."},
+        {"address":"1120baa0","currentName":"CManufactureSkillLearnInfo::GetManagers_1120baa0","proposedName":"CManufactureSkillLearnInfo::SendProficiencyUnlocks","purpose":"Finds the skill-learn record for the current skill, walks its proficiency map, and via CManufactureProficiencyInfo builds and sends messages (opcodes 0x75 and 0xa6) describing proficiency-based unlocks for the skill level. Medium confidence."}
+      ],
+      "fields": [
+        {"name":"id","type":"int","offset":"0x10","source":"reader","note":"record id"},
+        {"name":"skillId","type":"int","offset":"0x14","source":"reader","note":"crafting skill id matched against player skill[0x14]"},
+        {"name":"learnGroup","type":"int","offset":"0x18","source":"reader","note":"level/group tier used to match ingredient-learn entries"}
+      ],
+      "constants": ["MsgOp_LearnableRecipe=0x76","MsgOp_Proficiency_0x75=0x75","MsgOp_Proficiency_0xa6=0xa6"],
+      "formulas": [],
+      "relatedTlv": [],
+      "nameNext": [
+        {"address":"111e0a50","proposedName":"GetClientMessageChannel","why":"messaging accessor used to send the 0x75/0x76/0xa6 packets"}
+      ],
+      "notes": "Ingredient-learn entry offsets observed: +0x14 skillId, +0x18 group, +0x10 id, +0x1c recipe/manufacture ref, +0x24/+0x28 params. CManufactureInfo/CItemBaseInfo use the shared paged getter with word-offset fields [8]=pagePtr [9]=count [10]=pageSize [0xc]=baseId."
+    },
+    {
+      "className": "CHunterChallengeCardInfo",
+      "category": "activity",
+      "purpose": "Static-data for Hunter 'challenge cards' (part of a hunter card/collection minigame with Challenge, Ability and Record card families). Records carry a card id(+0x10) and an enabled flag(+0x18). Helpers collect available cards, build star-challenge card instances, and match cards to targets. One method is a memory-pool performance benchmark left in the build.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"108b9fc0","currentName":"CHunterChallengeCardInfo::GetManagers","proposedName":"CHunterChallengeCardInfo::GetInfoManager","purpose":"Singleton accessor for the CHunterChallengeCardInfo CInfoManager. Real GetInstance."},
+        {"address":"114dfc90","currentName":"CHunterChallengeCardInfo::GetManagers_114dfc90","proposedName":"CHunterChallengeCardInfo::CollectAvailableCardIds","purpose":"Collects into the output vector all enabled(+0x18!=0) card ids(+0x10) from CHunterChallengeCardInfo, then also from CHunterAbilityCardInfo, skipping ids already present (FUN_114dfad0 dedup). Returns the resulting count."},
+        {"address":"114e1330","currentName":"CHunterChallengeCardInfo::GetManagers_114e1330","proposedName":"CHunterChallengeCardInfo::BenchmarkCardPool","purpose":"DEV/DEBUG benchmark: prints sizeof CHunterStarChallengeCard(0x3c) and CHunterStarCardTargetCard(0x28), then times (clock()) 10000-iteration alloc/free loops comparing the object pool vs pool-with-static-info vs pool-without-destroy vs plain new/delete. Not gameplay; a profiling harness. High confidence."},
+        {"address":"117f3080","currentName":"CHunterChallengeCardInfo::GetManagers_117f3080","proposedName":"CHunterChallengeCardInfo::BuildStarChallengeCards","purpose":"Iterates challenge cards; for each valid card calls CHunterStarLevelInfo(118ac740) and, by card type(+0x1c)==1 or ==4, constructs the corresponding star-card struct via FUN_117f5b70. Builds the star-challenge card set. Medium confidence."},
+        {"address":"11a88ba0","currentName":"CHunterChallengeCardInfo::GetManagers_11a88ba0","proposedName":"CHunterChallengeCardInfo::CollectMatchingCards","purpose":"Selects the card family (1=Challenge / 2=Ability / 3=Record) from a target object via FUN_117f69f0, iterates that family's manager, and collects cards whose id(+0x40 match) and secondary key(+0x1c) match the target (optional predicate FUN_108496a0) into param_2 vector. Returns whether any were added."}
+      ],
+      "fields": [
+        {"name":"cardId","type":"int","offset":"0x10","source":"reader","note":"card id (indexed; benchmark used id 0x2711=10001)"},
+        {"name":"secondaryKey","type":"int","offset":"0x1c","source":"reader","note":"read as [7] word; card type/target key (values 1,4 in BuildStarChallengeCards)"},
+        {"name":"enabledFlag","type":"byte","offset":"0x18","source":"reader","note":"non-zero => card available"}
+      ],
+      "constants": ["CardFamily_Challenge=1","CardFamily_Ability=2","CardFamily_Record=3","sizeof_CHunterStarChallengeCard=0x3c","sizeof_CHunterStarCardTargetCard=0x28"],
+      "formulas": [],
+      "relatedTlv": ["TlvChallengeRewardStats"],
+      "nameNext": [
+        {"address":"117f69f0","proposedName":"CHunterCard::GetCardFamily","why":"returns 1/2/3 selecting Challenge/Ability/Record manager"},
+        {"address":"114dfad0","proposedName":"IsCardIdCollected","why":"dedup predicate in CollectAvailableCardIds"},
+        {"address":"117f5b70","proposedName":"CHunterStarChallengeCard::Construct","why":"builds a star-card instance from a challenge card"}
+      ],
+      "notes": "Sibling managers CHunterAbilityCardInfo (108c64c0) and CHunterRecordCardInfo (108c6620) share the same layout. 108c60b0 is CHunterChallengeCardInfo's own paged getter."
+    },
+    {
+      "className": "CEquipSuitSkillInfo",
+      "category": "skill",
+      "purpose": "Static-data for equipment SUIT SKILLS (set-bonus skills). Records key on a skillId(+0x1c) with a per-piece value(+0x24) and threshold(+0x20), grouped under CEquipSuitSkillGroupInfo. Helpers validate whether a suit skill can be activated, accumulate a player's total skill level from equipped pieces, collect active passive skills, and register all suit skills into their groups.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"109a48b0","currentName":"CEquipSuitSkillInfo::GetManagers","proposedName":"CEquipSuitSkillInfo::GetInfoManager","purpose":"Singleton accessor for the CEquipSuitSkillInfo CInfoManager. Real GetInstance."},
+        {"address":"11571a40","currentName":"CEquipSuitSkillInfo::GetManagers_11571a40","proposedName":"CEquipSuitSkillInfo::CheckSuitSkillActivatable","purpose":"Validates whether the suit skills in a group can be activated given equipped pieces and their per-skill counts. Looks up the CEquipSuitSkillGroupInfo entry, aggregates per-skill values into temp maps, compares each required threshold(+0x20) against accumulated count (via GetSuitSkillLevel 11572670). Returns 0 on success or an error code (0x8..0xe, 0xb) identifying the failing condition."},
+        {"address":"115723b0","currentName":"CEquipSuitSkillInfo::GetManagers_115723b0","proposedName":"CEquipSuitSkillInfo::CollectActivePassiveSkills","purpose":"Walks the group's suit-skill list; for each enabled entry (byte flag at list+8+i*8+4) resolves the skill, cross-checks CEquipPassiveSkillGroupInfo, and appends a 0x14-byte record {skillId(+0x28), level=FUN_118005a0(+0x30), type=2} to the output vector. Builds the list of active passive set-skills."},
+        {"address":"11572670","currentName":"CEquipSuitSkillInfo::GetManagers_11572670","proposedName":"CEquipSuitSkillInfo::GetSuitSkillTotal","purpose":"For a given group and skillId(param_3), sums per-piece values(+0x24) across the equipped-piece skill list where skillId(+0x1c)==param_3, plus a second contribution from the group table, and returns the larger of the two totals (the effective suit-skill level)."},
+        {"address":"119adc70","currentName":"CEquipSuitSkillInfo::GetManagers_119adc70","proposedName":"CEquipSuitSkillInfo::RegisterAllSuitSkills","purpose":"Iterates every CEquipSuitSkillInfo record, reads its group id(+0x18), resolves the CEquipSuitSkillGroupInfo entry, and registers the skill (FUN_118227e0 with skillId+0x1c) into its group. Startup wiring of skills->groups."}
+      ],
+      "fields": [
+        {"name":"groupId","type":"int","offset":"0x18","source":"reader","note":"CEquipSuitSkillGroupInfo id"},
+        {"name":"skillId","type":"int","offset":"0x1c","source":"reader"},
+        {"name":"threshold","type":"int","offset":"0x20","source":"reader","note":"required accumulated count to activate"},
+        {"name":"pieceValue","type":"int","offset":"0x24","source":"reader","note":"per-piece contribution summed across equipped pieces"},
+        {"name":"passiveSkillId","type":"int","offset":"0x28","source":"reader","note":"used when emitting passive-skill records"},
+        {"name":"passiveArg","type":"int","offset":"0x30","source":"reader","note":"passed through FUN_118005a0 to compute level"}
+      ],
+      "constants": ["ActivePassiveRecordStride=0x14","ActivePassiveRecordType=2"],
+      "formulas": ["Effective suit-skill total = max(sumOf pieceValue(+0x24) where skillId matches, group-table contribution). Skill activates when total >= threshold(+0x20)."],
+      "relatedTlv": ["TlvSuitSkillGroups"],
+      "nameNext": [
+        {"address":"109a7c60","proposedName":"CEquipSuitSkillGroupInfo::GetInfoManager","why":"group manager repeatedly resolved here"},
+        {"address":"118005a0","proposedName":"ComputeSuitSkillLevel","why":"converts passiveArg(+0x30) into a level value in CollectActivePassiveSkills"},
+        {"address":"118227e0","proposedName":"CEquipSuitSkillGroupInfo::AddSkill","why":"registers a skill into its group"}
+      ],
+      "notes": "Error codes 0x8..0xe in CheckSuitSkillActivatable enumerate distinct failure reasons (missing group, wrong param, insufficient count) — worth mapping to named enum later."
+    },
+    {
+      "className": "CActivityInfo",
+      "category": "activity",
+      "purpose": "Static-data for in-game activities/events. Records carry a runtime state field(+0x10: e.g. 2=open, 3=closed), open/close reward ids(+0x3c/+0x40), and a level-entrust reference(+0x14). Helpers drive activity state transitions from server packets, query whether any activity is open, precache entrust data, and compute exp-limit bonuses tied to level-entrust progress.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"107d7b80","currentName":"CActivityInfo::GetManagers","proposedName":"CActivityInfo::GetInfoManager","purpose":"Singleton accessor for the CActivityInfo CInfoManager. Real GetInstance."},
+        {"address":"111ff920","currentName":"CActivityInfo::GetManagers_111ff920","proposedName":"CActivityInfo::PrecacheActivityEntrusts","purpose":"Reads a count-prefixed list (param_1[0]=count, then entries stride 5: id(4)+byte), and for each valid activity ensures the CActivityLevelEntrustInfo manager is loaded/registered. Precache pass. Low/medium confidence."},
+        {"address":"112def00","currentName":"CActivityInfo::GetManagers_112def00","proposedName":"CActivityInfo::UpdateActivityStates","purpose":"Consumes a count-prefixed id+state list (stride 5) and applies each new state to activity(+0x10). On transition to state 2 (open) with an open-reward(+0x3c>0) it grants/schedules the reward (FUN_1112ef90 / mail path FUN_1112f070); on state 3 (closed) with +0x40>0 it triggers the close reward. Server-driven activity state sync."},
+        {"address":"1130b930","currentName":"CActivityInfo::GetManagers_1130b930","proposedName":"CActivityInfo::HasOpenActivityInList","purpose":"Given a list of activity ids at param[0x90..0x91], returns true if any referenced activity currently has state(+0x10)==2 (open)."},
+        {"address":"113b23a0","currentName":"CActivityInfo::GetManagers_113b23a0","proposedName":"CActivityInfo::CalcExpLimitBonusFromEntrust_field18","purpose":"For a CExplimitInfo record (param_1), scans open activities (state==2), follows each to its CActivityLevelEntrustInfo entry, reads its progress value(+0x24), and accumulates bonus += (value-1) * explimit(+0x18). Returns total bonus."},
+        {"address":"113b2660","currentName":"CActivityInfo::GetManagers_113b2660","proposedName":"CActivityInfo::CalcExpLimitBonusFromEntrust_field14","purpose":"Same as 113b23a0 but multiplies by explimit(+0x14) instead of +0x18 (a second bonus dimension)."},
+        {"address":"11513600","currentName":"CActivityInfo::GetManagers_11513600","proposedName":"CActivityInfo::PreloadAllActivities","purpose":"Iterates GetCount() activities, forcing the manager/records to be resolved (warm-up). Low confidence."},
+        {"address":"117286e0","currentName":"CActivityInfo::GetManagers_117286e0","proposedName":"CActivityInfo::GetMHLevelInfoManager","purpose":"Ensures the CActivityInfo manager is registered, then resolves and returns the CMHLevelInfo CInfoManager. Effectively a CMHLevelInfo manager accessor invoked from activity code. Low confidence on why it lives here."},
+        {"address":"1194a100","currentName":"CActivityInfo::GetManagers_1194a100","proposedName":"CActivityInfo::ForEachActivity_11862240","purpose":"Iterates all activities and invokes FUN_11862240(param) for each valid record (bulk apply, e.g. UI refresh). Low confidence."}
+      ],
+      "fields": [
+        {"name":"state","type":"int","offset":"0x10","source":"reader","note":"runtime state; 2=open, 3=closed observed"},
+        {"name":"levelEntrustId","type":"int","offset":"0x14","source":"reader","note":"CActivityLevelEntrustInfo reference used for bonus calc"},
+        {"name":"openRewardId","type":"int","offset":"0x3c","source":"reader","note":"granted on open (state 2)"},
+        {"name":"closeRewardId","type":"int","offset":"0x40","source":"reader","note":"granted on close (state 3)"}
+      ],
+      "constants": ["ActivityState_Open=2","ActivityState_Closed=3","StateListEntryStride=5"],
+      "formulas": ["expLimitBonus += (entrustProgress(entrust+0x24) - 1) * explimit(+0x18)  [variant _field14 uses explimit(+0x14)]"],
+      "relatedTlv": ["TlvActivityData","TlvActivityDataList","TlvActivityFetched"],
+      "nameNext": [
+        {"address":"1112ef90","proposedName":"GrantActivityReward","why":"reward grant invoked on open/close transitions"},
+        {"address":"113b2xxx CActivityLevelEntrustInfo::GetInfoManager","proposedName":"CActivityLevelEntrustInfo::GetInfoManager","why":"entrust manager resolved for bonus calc"}
+      ],
+      "notes": "State-list entry stride is 5 bytes: 4-byte activity id + 1-byte new state. Bonus formulas verified from the (value-1)*multiplier expression."
+    },
+    {
+      "className": "CItemBoxGroupInfo",
+      "category": "item",
+      "purpose": "Static-data for loot/reward box GROUPS (a group aggregates several CItemBoxInfo tables). The core helper performs the weighted random roll that opens a box group and produces the reward item list; another warms up all groups at load.",
+      "confidence": "medium",
+      "methods": [
+        {"address":"1052c5f0","currentName":"CItemBoxGroupInfo::GetManagers","proposedName":"CItemBoxGroupInfo::GetInfoManager","purpose":"Singleton accessor for the CItemBoxGroupInfo CInfoManager. Real GetInstance."},
+        {"address":"11516390","currentName":"CItemBoxGroupInfo::GetManagers_11516390","proposedName":"CItemBoxGroupInfo::RollBoxRewards","purpose":"Given a box-group id (param_1), resolves the CItemBoxInfo table(s), performs weighted random selection over item-box entries (per-entry weight at +0x10, entry stride 0x24) using the RNG (FUN_11a89331), honours per-item counts/limits, resolves each winning item via CItemBaseInfo (name copied), and appends result rows {count, itemId, amount, name...} (stride 0x40) to the caller's output vector (param_2). This is the open-box / loot-roll routine. Medium confidence on exact row layout."},
+        {"address":"11923df0","currentName":"CItemBoxGroupInfo::GetManagers_11923df0","proposedName":"CItemBoxGroupInfo::PreloadAllBoxGroups","purpose":"Iterates all box-group records and calls FUN_11a14510 per record (per-group init/validation at load). Low confidence."}
+      ],
+      "fields": [
+        {"name":"itemBoxEntryWeight","type":"int","offset":"0x10","source":"reader","note":"on CItemBoxInfo item entries; cumulative weight used for the random roll"}
+      ],
+      "constants": ["ItemBoxEntryStride=0x24","RewardRowStride=0x40"],
+      "formulas": ["Weighted roll: draw r in [0, sumWeights); walk entries accumulating weight(+0x10) until cumulative > r to pick the winning item. RNG via FUN_11a89331 (rand+1 style)."],
+      "relatedTlv": [],
+      "nameNext": [
+        {"address":"1053b0a0","proposedName":"CItemBoxInfo::GetInfoManager","why":"box table manager resolved at start of RollBoxRewards"},
+        {"address":"11a89331","proposedName":"RandRange","why":"RNG used for the weighted draw"},
+        {"address":"11521920","proposedName":"CItemBaseInfo::ResolveRewardAmount","why":"computes the granted amount for a rolled item"}
+      ],
+      "notes": "CItemBaseInfo (11679e10 name lookup) is used with the shared word-offset manager layout ([8]page [9]count [10]pageSize [0xc]baseId) to resolve item names into the reward rows."
+    }
+  ],
+  "notes": "All seven files were auto-labeled 'CXxxInfo::GetManagers' from a single embedded string, but only the first method in each file is the true singleton/manager accessor (StcMbrNameSvr<CInfoManager> registration + FUN_11679e10 name lookup). The remaining methods are unrelated game-logic helpers that merely query the manager, hence the shared label. Shared infrastructure recognized across all files: FUN_11679e10 = CInfoManager-by-name lookup; the paged record getter uses manager fields +0x14/+0x18 (flat vector begin/end), +0x20 (page-table), +0x24 (count), +0x28 (pageSize), +0x30 (baseId), with record = pageTable[(id-baseId)/pageSize][(id-baseId)%pageSize]; GetCount is vtable+0x28. FUN_10c3d580 is a no-return allocator/throw helper; FUN_11a8911f registers a static-init guard. TLV cross-references are runtime network structs and only directionally related to these static-config classes."
+}

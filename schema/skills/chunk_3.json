@@ -1,0 +1,421 @@
+{
+  "chunkIndex": 3,
+  "functions": [
+    {
+      "address": "0x10511bb0",
+      "currentName": "FUN_10511bb0",
+      "proposedName": "CPetWaitSkillPanel::RegisterASCallbacks",
+      "purpose": "UI init hook (in_stack_00000014==1 = panel-open phase): calls FUN_104f42b0(ctx) then registers three ActionScript->C callbacks via FUN_104d13b0: 'GetPetWaitSkillData'->FUN_10518600, 'ReqWaitSkillNewNtf'->FUN_10518b00, 'IsLastBattlePetStateNormal'->FUN_10518bf0.",
+      "confidence": "high",
+      "subsystem": "pet-skill-ui",
+      "formulas": ["dispatch guard: if in_stack_00000014 == 1"],
+      "costs": [],
+      "serverRelevance": "client-only: Scaleform/AS callback registration for the pet 'wait skill' (skill-learning-queue) panel.",
+      "notes": "FUN_104d13b0 = register named AS callback. FUN_10518600 is the data-provider analysed below."
+    },
+    {
+      "address": "0x10511fc0",
+      "currentName": "FUN_10511fc0",
+      "proposedName": "CBattlePet::TryOpenSkillPanel_OnState5",
+      "purpose": "If gate FUN_1050a550(0x2d) (feature/quest flag id 0x2d) is true AND *(param_1+0x180)==5 (pet state == 5), fires AS event 'OpenBattlePetSkillPanel' via the UI dispatcher.",
+      "confidence": "medium",
+      "subsystem": "pet-skill-ui",
+      "formulas": ["condition: FUN_1050a550(0x2d)!=0 && *(this+0x180)==5", "AS-mode arg: ((byte)DAT_123bcdb4 & 0x8f)==10"],
+      "costs": [],
+      "serverRelevance": "client-only: opens battle-pet skill UI. *(this+0x180)=pet/entity state enum (5 = specific state, cf. FUN_105164f0 which accepts 8/9/10).",
+      "notes": "DAT_123bcdb0/DAT_123bcdb8/DAT_123bcdb4 = global Flash UI dispatcher, movie handle, and mode byte. vtbl+0x18 = dispatch/callFunction."
+    },
+    {
+      "address": "0x10512480",
+      "currentName": "FUN_10512480",
+      "proposedName": "CPetPanel::OnRefreshLearnedSkills",
+      "purpose": "State-gated pet-panel refresh. If flag 0x2d is set: calls FUN_10514a90 (rebuild _PetInfo VO) and fires AS 'RefreshPetLearnedSkills'; also dispatches with *(param_1+0x180) (pet state) as arg. Else if flag 0x7b is set: calls FUN_10510ff0 with *(param_1+0x24) (env/'ShowAsEnviroment' path).",
+      "confidence": "medium",
+      "subsystem": "pet-skill-ui",
+      "formulas": ["branch: FUN_1050a550(0x2d) then RefreshPetLearnedSkills path; else FUN_1050a550(0x7b) then FUN_10510ff0", "*(this+0x24)=UI/movie context ptr; *(this+0x180)=pet state"],
+      "costs": [],
+      "serverRelevance": "client-only: rebuilds pet skill display; 'ShowAsEnviroment' is a render mode."
+    },
+    {
+      "address": "0x10512580",
+      "currentName": "FUN_10512580",
+      "proposedName": "CPetPanel::PlayOrHideNewSkillEffect",
+      "purpose": "Flag-0x2d gated. Calls CPetPanelUI::BuildEquippedSkillLists then FUN_10514a90. If *(param_2+0xc)==0 fires AS 'HideAllSkillEffects'; otherwise builds an arg array {*(this+0x34), *(this+0x38), *(param_2+8)} and fires both 'HideAllSkillEffects' and 'PlayNewSkillEffect'.",
+      "confidence": "medium",
+      "subsystem": "pet-skill-ui",
+      "formulas": ["gate: FUN_1050a550(0x2d)", "toggle: *(param_2+0xc)==0 -> hide only; else play new-skill effect with args (*(this+0x34),*(this+0x38),*(param_2+8))"],
+      "costs": [],
+      "serverRelevance": "client-only: VFX for newly-learned pet skill. param_2 = notify struct (bAddNew flag @+0xc, skill id @+8)."
+    },
+    {
+      "address": "0x105130a0",
+      "currentName": "FUN_105130a0",
+      "proposedName": "CPetPanelUI::BuildSubSkillListVO",
+      "purpose": "Builds the 'subskills' array of PetSkillItemVO objects for the pet skill panel. Iterates skill-list nodes (CPetSkillInfo::BuildSkillListByCategory fills list at *(this+0x14c)..*(this+0x150)); for each node walks its entries (base *(node+2)[2], end [3], stride 0x2c) and writes per-skill fields into a PetSkillItemVO_CLASS_NAME object.",
+      "confidence": "medium",
+      "subsystem": "pet-skill-ui",
+      "formulas": [
+        "outer list: node ptr from *(this+0x14c), sentinel *(this+0x150); next node = node+5 (20 bytes)",
+        "inner entry loop: for(iVar7=node[2]; iVar7!=node[3]; iVar7+=0x2c)",
+        "PetSkillItem entry offsets: bAssemble=byte@+0x14, skillPoint=int@+0x10, skilllevel=int@+8, SkillID=int@+0xc, SkillIcon=str@+4, quality=int@+0x20, aptitude=int@+0x24, intimate@+0x1c, skillsubtype@+0x28",
+        "param_2 flag gates whether bAssemble/skillPoint/skilllevel/SkillID/quality/aptitude are written (AS setInt vs skip)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: VO marshalling for pet-skill panel. Entry offset map (stride 0x2c) is useful for the pet-skill sub-record struct; server owns these skill values.",
+      "notes": "FUN_104d1550=set-int, FUN_104d1670=set-string, FUN_104d1550(\"intimate\"/\"skillsubtype\") unconditional. Heavy Scaleform ref-count plumbing."
+    },
+    {
+      "address": "0x105145c0",
+      "currentName": "FUN_105145c0",
+      "proposedName": "CPetInfoPanel::BuildPetDetailVO_ByLookup",
+      "purpose": "Builds a full pet detail VO. FUN_112f64e0(param_3,param_2,&local_12c) looks up a pet record by key; if found (local_12c!=0) writes ~50 fields (name, type, status, level, indices, stats). If petType local_ec==0 (combat pet) also writes the full combat stat block (attack/defense/elemental attacks & resistances, fightwill, lucklevel).",
+      "confidence": "medium",
+      "subsystem": "pet-info-ui",
+      "formulas": [
+        "guard: param_5!=0; record found if local_12c(petid)!=0",
+        "combat-stat block emitted only when petType (local_ec)==0",
+        "fields: strName,petType,status,otherStatus,level,petindex,petid,intelligence,proficientcy,character,quality,exp_max,intimacy,intimacyvalue,fluteskillEquipped,fluteskilltotal,normalskillEquipped,normalskilltotal,skillpointleft,petcolordescription,traintime,maxLevel; combat: fightwill(_max),attacktype,attacktrend,attack(_max),hp_max,defense(_max),fire/water/thunder/ice/dragon/poison/sleepy/paralysisattack,fire/water/thunder/ice/dragonendure,lucklevel"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: display marshalling of server-authoritative pet stats. Field inventory documents the pet stat model (elemental attack + endure/resistance per element).",
+      "notes": "Mirrors FUN_10514a90 but sources fields from a looked-up record struct rather than this-object offsets. &DAT_11dbfba0/&DAT_11dbfbc8/&DAT_11dbfc90 are interned field-name strings (petid alt key / exp / hp)."
+    },
+    {
+      "address": "0x10514a90",
+      "currentName": "FUN_10514a90",
+      "proposedName": "CPetInfoPanel::BuildPetInfoVO",
+      "purpose": "Builds the '_PetInfo' VO from the this-object's pet struct and pushes it to Flash; then sets max item counts and refreshes the panel. Reads pet fields from fixed offsets on param_1, and looks up CPetStarInfo::FindByKey3(intelligence,quality,character) to derive item caps.",
+      "confidence": "high",
+      "subsystem": "pet-info-ui",
+      "formulas": [
+        "pet struct offsets on param_1: petType@0x84, status@0x54, otherStatus@0x58, level@0x60, petindex@0x48, petid@0x44(*ppiVar3), altId@0x4c, intelligence@0x74, proficientcy@0x80, character@0x7c, quality@0x78, exp@0x64, exp_max@0x68, intimacy@0x6c, intimacyvalue@0x70, fluteskillEquipped@0x114, fluteskilltotal@0x118, normalskillEquipped@0x11c, normalskilltotal@0x120, skillpointleft@0x110, renamenum@0x124, traintime@0x128, maxLevel@0x130",
+        "combat block only if *(param_1+0x84)==0 (petType==0): fightwill@0xb0/max@0xb4, attacktype@0xac, attacktrend@0xa8, attack@0x9c/max@0xa0, hp@0x8c/hp_max@0x90, defense@0x94/max@0x98, fireattack@0xd8,waterattack@0xdc,thunderattack@0xe4,iceattack@0xe0,dragonattack@0xe8,poisonattack@0xec,sleepyattack@0xf0,paralysisattack@0xf4, fireendure@0xfc,waterendure@0x100,thunderendure@0x10c,iceendure@0x104,dragonendure@0x108, lucklevel@0xa4",
+        "item caps from CPetStarInfo record iVar2: setMaxNumInitialtiveItem=*(iVar2+0xa0), setMaxNumPassiveItem=*(iVar2+0xa4), setMaxNumAssistItem=*(iVar2+0xac)+*(iVar2+0xa8)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display, but the offset map is the authoritative pet-struct layout (server owns these values). CPetStarInfo::FindByKey3(intelligence,quality,character) is the star/grade table that gates active/passive/assist skill-slot counts.",
+      "notes": "Also fires AS 'RefreshPetDetailInfo' and 'ResetSrollListIndex', then FUN_10515860. FindByKey3 keyed by (intelligence@0x74, quality@0x78, character@0x7c)."
+    },
+    {
+      "address": "0x105164f0",
+      "currentName": "FUN_105164f0",
+      "proposedName": "CBattlePet::OpenSkillPanel_IfInGame",
+      "purpose": "If UI mode ((DAT_123bcdb4 & 0x8f) in {8,9,10}) fires AS 'OpenBattlePetSkillPanel'. Mode 8/9/10 = in-game contexts.",
+      "confidence": "high",
+      "subsystem": "pet-skill-ui",
+      "formulas": ["gate: (DAT_123bcdb4 & 0x8f) == 8 || 9 || 10; AS-mode flag = (mode==10)"],
+      "costs": [],
+      "serverRelevance": "client-only."
+    },
+    {
+      "address": "0x10518600",
+      "currentName": "FUN_10518600",
+      "proposedName": "CPetWaitSkillPanel::GetWaitSkillData_ASProvider",
+      "purpose": "AS data-provider ('GetPetWaitSkillData'). Gets the local pet manager (DAT_1202e818->0xd0->0x90 vtbl+0xb4), fetches its pending-skill list, and for each learnable skill builds a Pet_Skill_Vo_Class_NAME object with skill fields; also emits skillNoticeList and nLastPetIndex.",
+      "confidence": "medium",
+      "subsystem": "pet-skill-ui",
+      "formulas": [
+        "pet obj = vtbl[0xb4] of (DAT_1202e818+0xd0)->0x90; skill container = *(pet+0x2cd8); vtbl[0x15] count check",
+        "iterate pairs: count = (aiStack_a0[0]-pppiStack_a4)>>3 (8-byte entries)",
+        "skill record iVar2 offsets: SkillIcon@0x40, strSkillName(str reader), skilllevel@0x14, SkillID@0x10, skilltype@0x58, learntime@0x94, aptitude@0x6c, quality@0x70, skillPoint@0x64, intimate@0x68, skilleffect(str), bAdvanced=byte@0x54",
+        "nCurSkillLv=*(iVar2+0x14); nMaxSkillLv = vtbl[0x2e](*(iVar2+0x10)) (max level for skill id); bFixed=0; bAddNew from per-entry flag",
+        "nLastPetIndex = FUN_112fb100()"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder; skill-record offset map matches CNewSkillInfo/pet-skill record (SkillID@0x10, skilllevel@0x14, skilltype@0x58, quality@0x70, aptitude@0x6c, skillPoint@0x64, intimate@0x68, learntime@0x94, SkillIcon@0x40). vtbl[0x2e] = per-skill max-level lookup (server should validate learn against this).",
+      "notes": "param_1 is a Scaleform out-value (int*****)."
+    },
+    {
+      "address": "0x10531e90",
+      "currentName": "FUN_10531e90",
+      "proposedName": "CPetBufferPanel::BuildEquipAndBufferVO",
+      "purpose": "Builds a pet equip/buffer-food VO. Resolves player (FUN_107cb630) and validates has-pet (FUN_116698a0). Reads two AS input variants (arg struct in_stack_00000010) for slot indices; for each valid slot resolves item id (FUN_11669730/FUN_1166dc70 depending on FUN_1166e250) and buffer id, then writes itemID/bufferID/equipName/bufferName. Buffer name resolved via string-table id 0x159d when no direct name.",
+      "confidence": "low",
+      "subsystem": "pet-equip-ui",
+      "formulas": [
+        "sentinel/no-value marker = -0x21524151 (0xDEADBEAF) for offsets 0x38/0x50 when tag (&0x8f) not in {3,4}",
+        "itemID = FUN_1166e250()? FUN_1166dc70() : FUN_11669730()",
+        "bufferID = FUN_1166e040(); string id 0x159d (5533) used to format buffer name when FUN_116c4f30()==0",
+        "second slot guarded by iStack_90+1 < 4 (max 3 buffer slots)"
+      ],
+      "costs": ["string-table entry 0x159d for default buffer name"],
+      "serverRelevance": "client-only: pet equipment/buffer-food display. Slot count cap (<4) and item/buffer id resolution are server-authoritative; client only reads.",
+      "notes": "CPet::SetName used here as a generic string-field setter, not a real rename. Decompilation is noisy (many artifact locals)."
+    },
+    {
+      "address": "0x107cc1d0",
+      "currentName": "FUN_107cc1d0",
+      "proposedName": "CEquipTooltip::AggregateEquipStatsVO",
+      "purpose": "Aggregates all displayed stats for an equipment item (weapon/armor) and pushes them to the tooltip/detail VO. param_8 selects source type (0x5e pet-weapon, 0x32 weapon-with-sharpness, 0xe, 0x3f, else). Sums a stride-0x48 (18-int) stat block from up to 4 contributors (base + two upgrade/enchant sources + optional gem local_5c) and caps slot count.",
+      "confidence": "high",
+      "subsystem": "equip-stats",
+      "formulas": [
+        "stat block stride check: ((local_70-local_74) & 0xfffffffc) == 0x48 (18 ints)",
+        "18-int stat layout (local_74[i]): [0]attackValue, [1]defendValue, [2]healthValue, [3]knowingLevel, [4]attackWater, [5]attackFire, [6]attackThunder, [7]attackDragon, [8]attackIce, [9]poison, [10]sleep, [0xb]hocus(=DynamiteValue group), [0xc]resWater, [0xd]resFire, [0xe]resThunder, [0xf]resDragon, [0x10]resIce, [0x11]DynamiteValue",
+        "contributors summed: FUN_11405420/11406f90 (base) + FUN_114074a0(iVar6,1,param_6) + FUN_114073f0(param_7) [normal path]; or FUN_11405c10/114074f0/11407430 [param_10 preview path]; plus FUN_107cb1d0 when local_5c(gem)!=0",
+        "maxSlotCounts local_60 = *(iVar6+300 / 0x12c); initSlotCounts local_54 = min(computed, maxSlotCounts)",
+        "param_8==0xe: local_54 += *(FUN_117b5220(*(iVar6+0x114),param_6)+0xd4) when param_9==0",
+        "param_8==0x3f: local_54 += *(CEquipLevelUpInfo::LookupMap0x108ByKey(*(iVar6+0x11c),param_7)+0xe8) when param_9==0",
+        "param_8==0x32 (weapon): slotCount=*(iVar6+0x124), weaponCurrentSlash=*(iVar6+0x160); weaponSlash_Red..Gold = FUN_116c4ea0(0..9) (10 sharpness bands)",
+        "weaponCurrentSlashDIF = FUN_113509f0(2) - prevSlash when equipped weapon (vtbl+0xb4) && param_9!=0 && (param_3==3||8); weaponCurrentSlashBuffer=FUN_113509f0(4)",
+        "param_8==0x5e path: iVar6 = FUN_1052bdd0(*(FUN_11669250()+0x10)) when pet equipped"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/data-display: reproduces server-authoritative equipment stat totals (base + level-up + enchant + gem) for the tooltip. Server must own the same 18-field stat aggregation and slot-count cap (min with maxSlotCounts @0x12c). Sharpness bands (weaponSlash_*) are the 10-color sharpness gauge.",
+      "notes": "Emitted fields: attackValue, attackWater/Fire/Thunder/Dragon/IceValue, defendValue, healthValue, knowingLevel, initSlotCounts, maxSlotCounts, resWater/Fire/Thunder/Dragon/IceValue, poison/sleep/hocusValue, DynamiteValue, slotCount, weaponCurrentSlash(+DIF/Buffer). FUN_116c4ea0(n)=sharpness band value."
+    },
+    {
+      "address": "0x107cd340",
+      "currentName": "CSkillVideo__GetManagers",
+      "proposedName": "CSkillVideo::GetInfoManagerSingleton",
+      "purpose": "Lazy-init singleton accessor for the CSkillVideo CInfoManager (stock double-checked-init idiom: sets flag bit, initialises intrusive list head DAT_123bec50, registers singleton name, returns manager ptr DAT_123bec4c).",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": ["init-once guard: (DAT_123bec68 & 1)==0"],
+      "costs": [],
+      "serverRelevance": "client-only plumbing (CryEngine/game static-info manager registration). CSkillVideo = skill-showcase/replay data table."
+    },
+    {
+      "address": "0x107cd4f0",
+      "currentName": "FUN_107cd4f0",
+      "proposedName": "CNewSkillInfo::GetRecordById",
+      "purpose": "Sparse-id record lookup into the CNewSkillInfo static table. Gets the manager (falls back to CInfoManager::FindByName 'CNewSkillInfo'), then indexes a two-level block table by skill id.",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": [
+        "sparse-table lookup: idx = id - mgr[0xc] (base id); valid if id!=-1 && (id!=0||mgr[0xc]==0) && mgr[10]!=0 && 0<=idx<mgr[9](count)",
+        "row = mgr[8][idx / mgr[10]]; return row[idx % mgr[10]]; mgr[10]=block stride, mgr[8]=block ptr array"
+      ],
+      "costs": [],
+      "serverRelevance": "data: CNewSkillInfo (weapon active/passive skill definitions) lookup by skill id. Server holds the same table (skill id, level, effect ids). Confirms the standard sparse-id indexing (base@[0xc], count@[9], stride@[10], blocks@[8])."
+    },
+    {
+      "address": "0x107cd660",
+      "currentName": "FUN_107cd660",
+      "proposedName": "CRageInfo::GetRecordById",
+      "purpose": "Same sparse-id lookup idiom as CNewSkillInfo, for the CRageInfo static table (rage/bushido meter definitions).",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": ["idx = id - mgr[0xc]; valid if id!=-1 && (id!=0||mgr[0xc]==0) && mgr[10]!=0 && 0<=idx<mgr[9]; return mgr[8][idx/mgr[10]][idx%mgr[10]]"],
+      "costs": [],
+      "serverRelevance": "data: CRageInfo = rage/bushido system definitions (rage_1/2/3 keys appear in keymap builder). Server must own rage thresholds/effects; this is the client's read-side lookup."
+    },
+    {
+      "address": "0x107d45b0",
+      "currentName": "FUN_107d45b0",
+      "proposedName": "CSkillVideo::GetManagerPtr",
+      "purpose": "Accessor returning the CSkillVideo manager pointer (via CSkillVideo::GetManagers, fallback CInfoManager::FindByName 'CSkillVideo', fallback registration + default DAT_123be98c).",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registry accessor."
+    },
+    {
+      "address": "0x10813de0",
+      "currentName": "FUN_10813de0",
+      "proposedName": "CManufactureSkillPanel::RegisterASCallbacks",
+      "purpose": "Registers the full set of ActionScript<->C event handlers for the Manufacture/Study (weapon-skill crafting/talent study) panel and wires them onto the panel object param_1. Then does one-time init of the manufacture controller (FUN_10d17440/FUN_10d17870/FUN_108163a0).",
+      "confidence": "medium",
+      "subsystem": "manufacture-skill-ui",
+      "formulas": [
+        "handler map (event -> C fn via FUN_100b62c0 make-delegate + FUN_104d0ee0/10815080 add-listener): RequestManufactureStudyViewData->FUN_10814230, ManufactureStudy->FUN_10814270, ManufactureStudyNextLevelSkill->FUN_108142b0, ManufactureTreeListClick->FUN_10814b20, ManufactureMake->FUN_10814b70, ManufactureCancel->LAB_10814c70, RequestManufactureMake->LAB_10814c20, StopIntoneBar->FUN_10814cb0, RequestManufactureViewData->FUN_108142f0, OnClose->FUN_108141f0, CheckUnBind->(anon), C2AS_IsMaking->FUN_10814e60"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: UI event wiring. Event names ('RequestManufactureMake','StopIntoneBar','C2AS_IsMaking') indicate the manufacture flow: request->make (with intone/cast bar)->completion. Server validates the actual crafting/skill-study request.",
+      "notes": "FUN_100b62c0 = build string/delegate; FUN_104d0ee0 = addEventListener; FUN_10c3d5d0 = release temp string."
+    },
+    {
+      "address": "0x1081adf0",
+      "currentName": "FUN_1081adf0",
+      "proposedName": "CEquipTalentPanel::BuildAttackAndPassiveSkillVO",
+      "purpose": "Builds the attack/defense/element + passive-skill data object for an equip talent/detail view. param_5 selects sub-struct offset (param_2+0x30 vs +0x48). Resolves equip record via FUN_1052bdd0; emits base attack/element/defend/health values and iterates the record's passive-skill list writing group id / value / name.",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "sub-struct offset: param_5=='\\0' -> param_2+0x48 else param_2+0x30",
+        "value_i = floor((float)(*(rec+Foff) * SCALE) + DAT_11de9968) + *(rec+Boff)  [SCALE rendered as 0.0 by decompiler => term collapses to floor(DAT_11de9968); DAT_11de9968 is a shared double bias/multiplier constant]",
+        "offsets: attackWater float@0x1a4 base@0x190; attackFire f@0x1a8 b@0x194; attackThunder f@0x1ac b@0x198; attackDragon f@0x1b0 b@0x19c; attackIce f@0x1b4 b@0x1a0; attackDefend f@0x154 b@0x150; attack f@0x14c b@0x148; currentSlashValue=*(rec+0x160)",
+        "passive-skill list: iterate ptr *(rec+0x21c)..*(rec+0x220) stride 8: entry[0]=passiveSkillGroupID, entry[1]=passiveSkillValue; count capped by AS-provided passiveSkillLength (uStack_d8); passiveSkillName via FUN_1050ebc0(groupID) lookup",
+        "arrayPassiveSkillData filled via AS array accessor vtbl[0x30](index)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; passive-skill list layout (stride-8 (groupID,value) pairs at rec+0x21c..0x220) and the base-int stat offsets are useful for the equip record struct. Server owns the actual stat/passive values.",
+      "notes": "The float*0.0 is almost certainly a lost multiplier register (decompiler artifact); treat the scaling term as unknown, base int at Boff is the load-bearing part. DAT_11de9968 documented elsewhere as a double constant (VIP multiplier context) — reused constant, value unknown here."
+    },
+    {
+      "address": "0x1082e040",
+      "currentName": "FUN_1082e040",
+      "proposedName": "CEquipPassiveSkillGroupInfo::GetRecordByIndex",
+      "purpose": "Contiguous-vector accessor into the CEquipPassiveSkillGroupInfo static table (not sparse): returns element param_1 from a pointer array.",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": ["valid if 0<=param_1 < (mgr[6]-mgr[5])>>2; return ((int*)mgr[5])[param_1]  (mgr[5]=vector begin, mgr[6]=end)"],
+      "costs": [],
+      "serverRelevance": "data: equipment passive-skill group definitions; index-addressed list."
+    },
+    {
+      "address": "0x1082e0d0",
+      "currentName": "FUN_1082e0d0",
+      "proposedName": "CEquipPassiveSkillGroupInfo::ForceInitAllRecords",
+      "purpose": "Gets the CEquipPassiveSkillGroupInfo manager then calls vtbl+0x28 with a PTR arg (bulk force-init / iterate-and-load of all group records).",
+      "confidence": "medium",
+      "subsystem": "skill-info-registry",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registry init.",
+      "notes": "Matches schema note that the activate-group manager 'forces manager init for each list element'."
+    },
+    {
+      "address": "0x1082e430",
+      "currentName": "FUN_1082e430",
+      "proposedName": "CEquipSkillPanel::RegisterASCallbacks",
+      "purpose": "On panel-open (in_stack_00000014==1) registers equip-skill AS data providers: _getEquipSkillListData->FUN_1082e540, _getEquipSkillDetailInfo->FUN_1082fa70, _getAllEquipSkillDetailInfo->FUN_1082f3d0, _getOtherEquipSkillListData->FUN_1082f040, _getEquipSkillCellDescData->FUN_1082ffc0.",
+      "confidence": "high",
+      "subsystem": "equip-skill-ui",
+      "formulas": ["gate: in_stack_00000014 == 1"],
+      "costs": [],
+      "serverRelevance": "client-only AS callback registration for the equipment-skill (armor skill) panel."
+    },
+    {
+      "address": "0x1082e540",
+      "currentName": "FUN_1082e540",
+      "proposedName": "CEquipSkillPanel::BuildEquipSkillListVO",
+      "purpose": "AS provider '_getEquipSkillListData'. Iterates the player's active equipment-skill map (player obj +0x2d20, red-black-tree walk of node set +0x34..+0x3c) and for each active skill builds an EQUIPSKILL_CELLVO with typeName and param1..param9 (+Extra) value/threshold pairs, plus a suit-bonus (param9) contribution from CSuitCfgInfo::GetSuitBySlot(9), a skillExplain string chosen by threshold comparison, and a bCanBeLighten flag.",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "skill nodes: RB-tree over *(playerObj+0x2d20)+0x34..+0x3c; per-node skill id = node[4]",
+        "params emitted via FUN_108304f0(bandIndex,...) for indices {0,1,3,2,4,5} -> param1..param6 (+Extra), FUN_10830580 -> param7, FUN_108304f0(9) -> param8; param8 may be overridden by suit-bonus loop (CSuitCfgInfo::GetSuitBySlot(9); suit table stride 0x1c, match FUN_11465310)",
+        "param9 via FUN_108306b0; 'total'/'toralExtra' = accumulated point/threshold",
+        "skillExplain selection: compares accumulated (puStack_16c+pppuStack_170) against per-band threshold iStack_7c to pick the active description tier; bCanBeLighten = FUN_11463b10() when playerObj+0xb48 != 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder. The param1..param9 model = equipment-skill levels with (value, extra/threshold) per band; server owns which skills are active and their point totals. Suit slot 9 = set-bonus source.",
+      "notes": "Very heavy decompiler noise; param index remap {0,1,3,2,4,5,7,9} -> UI slots is genuine. FUN_1082eed0/1082efd0 = per-tier description helpers; FUN_10831f50 = list cleanup."
+    },
+    {
+      "address": "0x1082f040",
+      "currentName": "FUN_1082f040",
+      "proposedName": "CEquipSkillPanel::BuildOtherEquipSkillListVO",
+      "purpose": "AS provider '_getOtherEquipSkillListData'. Iterates the equipment-skill definition list (player skill-mgr vtbl+0x56c, count at +0x17b4, entries at base+0x5ee stride 1 with paired index +0x80) and builds EQUIPSKILL_CELL_DESC objects: needPoint, skillName, skillEffect, bCanBeLighten (=piVar1[0x100]>0), skillType=0.",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "count = *(mgr+0x17b4); entry loop over piVar1=base+0x5ee, piVar1++ per iteration; skill record via FUN_11522920(*piVar1, piVar1[0x80])",
+        "bCanBeLighten = (piVar1[0x100] > 0); skillType constant 0",
+        "output array 'otherEquipSkillArr'"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: lists equip skills the player does NOT currently have active ('other'). Server owns eligibility."
+    },
+    {
+      "address": "0x1082f3d0",
+      "currentName": "FUN_1082f3d0",
+      "proposedName": "CEquipSkillPanel::BuildAllEquipSkillDetailVO",
+      "purpose": "AS provider '_getAllEquipSkillDetailInfo'. For a requested skill group it builds EQUIPSKILL_DETAILCELL entries (totalPoint, needPoint, skillName, skillEffect, groupID, bCanBeLighten) across all tiers, aggregated into 'allSkillDetailList'.",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "reads AS args param_4 (group) and param_4+6 (second arg); iterates skill collection (vtbl+0x28 count, vtbl+0x30 element)",
+        "per element resolves record via FUN_1050ebc0; walks tier list (piStack_cc..piStack_c8 stride 0x14) emitting DETAILCELL with totalPoint/needPoint/skillName/skillEffect/groupID; bCanBeLighten=FUN_11463b10() when skillMgr+0xb48!=0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only detail-view VO. Tier list stride 0x14 per skill-effect description entry.",
+      "notes": "0xdeadbeaf sentinel used for uninitialised AS-value reads (tag &0x8f not in {3,4})."
+    },
+    {
+      "address": "0x1082fa70",
+      "currentName": "FUN_1082fa70",
+      "proposedName": "CEquipSkillPanel::BuildEquipSkillDetailInfoVO",
+      "purpose": "AS provider '_getEquipSkillDetailInfo'. Builds EQUIPSKILL_DETAIL for one skill group (looked up by AS-provided groupID param_4+0x1c/0x20): iterates CEquipPassiveSkillGroupInfo records (FUN_1082e0d0 count, FUN_1082e040 element) whose group matches, emits a 'dataArr' of DETAILCELL {needPoint, skillName, skillEffect, explain} plus 'equipSkillDetailInfo'.",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "target groupId from AS arg *(param_4+0x20) when tag ok else 0xdeadbeaf",
+        "match: FUN_1082e040(iVar8) record, keep if *(rec+0x10)==requested group ptr; skillName from *(rec+0x24/0x28); tier list rec+0x30 walked stride 0x14",
+        "outputs: dataArr[] (per-tier needPoint/skillName/skillEffect) and equipSkillDetailInfo object"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only detail VO for a single equip-skill group. Group record: group-key@0x10, name strings@0x18/0x24/0x28, tier block@0x30."
+    },
+    {
+      "address": "0x1082ffc0",
+      "currentName": "FUN_1082ffc0",
+      "proposedName": "CEquipSkillPanel::BuildEquipSkillCellDescVO",
+      "purpose": "AS provider '_getEquipSkillCellDescData'. Walks two node lists on the player equip-skill mgr (playerObj+0x2d20: list A at [0x19]..[0x1a] stride 5, list B at [0x1f]..[0x20] stride 5) and builds EQUIPSKILL_CELL_DESC entries into 'allSkillDetailList' with totalPoint(0), needPoint, skillName, skillEffect, skillType, bCanBeLighten, and for list B also skillGroupName (FUN_1050ebc0) and suitName (FUN_1082e210).",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "list A: piVar5 = mgr[0x19]; while(piVar5 != mgr[0x1a]) { rec=piVar5[1]; needPoint=*(rec+0x24), skillName=*(rec+0x18), skillType=piVar5[4]; piVar5+=5 }",
+        "list B: piVar5 = mgr[0x1f]..mgr[0x20] stride 5; adds skillGroupName=FUN_1050ebc0(*piVar5)+0x2c, suitName=FUN_1082e210(piVar5[3])+0x14",
+        "bCanBeLighten = FUN_11463b10(rec) when *(mgr+0x2d20)!=0 else 0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: full descriptive list of equip skills (armor + set/suit skills). List B = suit/set skills (has suitName)."
+    },
+    {
+      "address": "0x10838870",
+      "currentName": "FUN_10838870",
+      "proposedName": "CKeymapPanel::BuildKeymapSettingVO",
+      "purpose": "Builds the KEYMAPSETTING VO: maps every bindable action to its current key. Combat/movement bindings (melee1/2, move*, dodge, holster, defense, reload, creep, focus, interact, crouch), rage_1/rage_2/rage_3 (via FUN_10839e50), ammo (bulletf1-5), item shortcuts (MhItem_0-9), and ~40 UI-panel toggles (ui_*). Then reads 25 nData fields (mouse/extended bindings) from FUN_108342e0() and emits keyMapVo.",
+      "confidence": "high",
+      "subsystem": "input-bindings",
+      "formulas": [
+        "each key value = FUN_10839d50() (keyboard binding) except rage_1/2/3 = FUN_10839e50() (separate binding source)",
+        "nData0..nData57 default 0xffffffff; populated by (FUN_108342e0()) vtbl+0x14 (25 out-params) — extended/mouse bindings",
+        "ui_* actions include ui_equipSkill, ui_manufacture, ui_WeaponTalent, ui_petlist, ui_Skillvideo, ui_ActionPanel"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: local input configuration. Notable that rage_1/2/3 are first-class bindings (rage/bushido activation keys) and there is a dedicated ui_WeaponTalent and ui_equipSkill panel toggle.",
+      "notes": "&DAT_11dce988='reserve/lock' key, &DAT_11dce978 interned strings. Pure client config; server never sees keymap."
+    },
+    {
+      "address": "0x10856700",
+      "currentName": "FUN_10856700",
+      "proposedName": "CEquipRandPassiveSkillActivateSetInfo::GetRecordById",
+      "purpose": "Sparse-id lookup into CEquipRandPassiveSkillActivateSetInfo static table (byte-offset variant of the standard idiom).",
+      "confidence": "high",
+      "subsystem": "skill-info-registry",
+      "formulas": [
+        "idx = id - *(mgr+0x30) (base); valid if id!=-1 && (id!=0||*(mgr+0x30)==0) && *(mgr+0x28)!=0 (stride) && 0<=idx<*(mgr+0x24) (count)",
+        "row = *(*(mgr+0x20) + (idx / *(mgr+0x28))*4); return *(row + (idx % *(mgr+0x28))*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "data: equipment random-passive-skill activation-set definitions. Used by FUN_1085ab40 to expand a rolled passive's activate list. Server owns the roll & activation; this is client read-side (base@0x30,count@0x24,stride@0x28,blocks@0x20)."
+    },
+    {
+      "address": "0x10858e30",
+      "currentName": "FUN_10858e30",
+      "proposedName": "CPetSkill::BuildSkillMetaVO_ByHandle",
+      "purpose": "AS provider: given a pet-skill handle (AS arg @+8), resolves the skill object (FUN_10540d00 -> FUN_116c05c0 -> FUN_1050ef40 record) and writes skillPoint, intimate, quality, skilltype from the record.",
+      "confidence": "high",
+      "subsystem": "pet-skill-ui",
+      "formulas": [
+        "record iVar2 offsets: skillPoint=*(rec+0x64), intimate=*(rec+0x68), quality=*(rec+0x70), skilltype=*(rec+0x58)",
+        "AS input value @ in_stack_00000010+8 when tag (&0x8f) in {3,4} else 0xdeadbeaf"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO; confirms pet-skill record offsets (skillPoint@0x64, intimate@0x68, quality@0x70, skilltype@0x58) consistent with FUN_10518600."
+    },
+    {
+      "address": "0x1085ab40",
+      "currentName": "FUN_1085ab40",
+      "proposedName": "CCharmPanel::BuildRandPassiveSkillVO",
+      "purpose": "Builds the charm / random-passive-skill VO (param_5==9 required). Resolves the equip/charm object (branches: hidden-skill path FUN_113f9bb0, normal FUN_10858a70, or FUN_10858670), validates via FUN_116698a0/FUN_1166e120, then emits title, charmFoundTimes, and an 'arrayRandPassiveSkillDesc' array. Each rolled passive can be hidden (bIsHidden, with nVisibleMoney unlock cost) and carries an 'activateInfoList' of ACTIVATE_VO entries (nType per activation, expanded via CEquipRandPassiveSkillActivateSetInfo).",
+      "confidence": "medium",
+      "subsystem": "equip-skill-ui",
+      "formulas": [
+        "gate: param_5==9; requires equip obj (DAT_1202e818->0xd0->0x90 vtbl+0xb4) with *(obj+0x2d1c)!=0",
+        "charmFoundTimes = piVar5[0x7b]",
+        "passive-desc loop count = (uStack_f4 - piStack_f8)/0x1c (stride 0x1c per input desc); entry fields: iStack_9c(=bIsHidden flag, ==1), skill group @+8/+0xc",
+        "bIsHidden = (entry[0]==1); if hidden: nVisibleMoney = CEquipHiddenSkillCondOpenInfo::GetInfoManagerInstance(skill via vtbl[0x2c]/vtbl[0x18])",
+        "hidden-name string id: 0x13a5 + (skillIdx<0) ; charm title string id 0x13a4",
+        "activateInfoList: iterate FUN_10856700(uStack_a4)->+0x2c list [4]..[5] stride 4; per activate nType = vtbl[0x10](); value via FUN_1085a0c0"
+      ],
+      "costs": ["nVisibleMoney = money required to reveal a hidden random-passive skill (server-authoritative unlock cost)", "string ids 0x13a4 (title) / 0x13a5 (hidden name)"],
+      "serverRelevance": "validation/data: displays server-rolled random passive skills on a charm/equip. Server owns the roll (see CEquipRandPassiveSkillSubGroupInfo in schema) and the hidden-skill unlock cost (nVisibleMoney). Client only renders; the reveal action is server-validated.",
+      "notes": "CPet::SetName reused as generic string setter. FUN_1024ebe0/FUN_1024e720 = string-table format helpers. High decompiler noise."
+    }
+  ]
+}

@@ -1,0 +1,484 @@
+{
+  "batchIndex": 14,
+  "classes": [
+    {
+      "className": "CTaskCalculateInfo",
+      "category": "quest",
+      "purpose": "Config table describing how task/quest progress or rewards are calculated. Only the CInfoManager factory-registration boilerplate was recovered; no field-bearing methods survived.",
+      "methods": [
+        {"address": "1185ea20", "currentName": "CTaskCalculateInfo::GetManagers", "proposedName": "CTaskCalculateInfo::GetInfoManager", "purpose": "Static singleton accessor: returns the CInfoManager registered for this class via the StcMbrNameSvr named-factory (FUN_11679e10); lazily registers the class name and a default empty instance."},
+        {"address": "1185f220", "currentName": "CTaskCalculateInfo::GetManagers_1185f220", "proposedName": "CTaskCalculateInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton CInfoManager instance pointer (returns 0 when arg != 0)."},
+        {"address": "11903fe0", "currentName": "CTaskCalculateInfo::GetManagers_11903fe0", "proposedName": "CTaskCalculateInfo::RegisterAllInstances", "purpose": "Static-init loop over all managers that constructs/precaches each element (calls FUN_1185f5f0); part of data-table load."},
+        {"address": "11904130", "currentName": "CTaskCalculateInfo::GetManagers_11904130", "proposedName": "CTaskCalculateInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop, calls per-element ctor FUN_1185f5e0."}
+      ],
+      "confidence": "low",
+      "notes": "All four recovered methods are the shared CInfoManager singleton/factory pattern; no DebugFormat, reader, XML or field offsets present. Field layout unknown."
+    },
+    {
+      "className": "CWeaponRecycleInfo",
+      "category": "economy",
+      "purpose": "Config table for weapon recycling/salvage (converting weapons back into materials/currency). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "113f3d60", "currentName": "CWeaponRecycleInfo::GetManagers", "proposedName": "CWeaponRecycleInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager (StcMbrNameSvr factory)."},
+        {"address": "113fa540", "currentName": "CWeaponRecycleInfo::GetManagers_113fa540", "proposedName": "CWeaponRecycleInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "119b4a80", "currentName": "CWeaponRecycleInfo::GetManagers_119b4a80", "proposedName": "CWeaponRecycleInfo::RegisterAllInstances", "purpose": "Static-init loop constructing/precaching each element (FUN_11a76ff0)."},
+        {"address": "119b4bd0", "currentName": "CWeaponRecycleInfo::GetManagers_119b4bd0", "proposedName": "CWeaponRecycleInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_11a76fe0)."}
+      ],
+      "confidence": "low",
+      "notes": "Pure factory boilerplate; no field data recovered."
+    },
+    {
+      "className": "CGiftBagGroupInfo",
+      "category": "item",
+      "purpose": "Groups multiple gift-bag (item bundle) definitions; iterates child CGiftBagInfo elements. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11510bc0", "currentName": "CGiftBagGroupInfo::GetManagers", "proposedName": "CGiftBagGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11511580", "currentName": "CGiftBagGroupInfo::GetManagers_11511580", "proposedName": "CGiftBagGroupInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11945b60", "currentName": "CGiftBagGroupInfo::GetManagers_11945b60", "proposedName": "CGiftBagGroupInfo::RegisterAllInstances", "purpose": "Static-init loop; per element calls FUN_11a33e30."},
+        {"address": "11945e00", "currentName": "CGiftBagGroupInfo::GetManagers_11945e00", "proposedName": "CGiftBagGroupInfo::RegisterAllChildGiftBags", "purpose": "Static-init loop that constructs the child CGiftBagInfo elements (calls CGiftBagInfo::GetManagers_11a33cd0), confirming Group->CGiftBagInfo containment."}
+      ],
+      "confidence": "medium",
+      "notes": "Cross-reference: this group class owns/iterates CGiftBagInfo children. No field offsets recovered."
+    },
+    {
+      "className": "CMonsterGroupInfo",
+      "category": "monster",
+      "purpose": "Groups multiple monster definitions (e.g. a spawn set or encounter group); iterates child CMonsterInfo elements. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "118d52c0", "currentName": "CMonsterGroupInfo::GetManagers", "proposedName": "CMonsterGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "118d5f00", "currentName": "CMonsterGroupInfo::GetManagers_118d5f00", "proposedName": "CMonsterGroupInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "118d6130", "currentName": "CMonsterGroupInfo::GetManagers_118d6130", "proposedName": "CMonsterGroupInfo::RegisterAllInstances", "purpose": "Static-init loop; per element calls FUN_119e6fe0."},
+        {"address": "118d62b0", "currentName": "CMonsterGroupInfo::GetManagers_118d62b0", "proposedName": "CMonsterGroupInfo::RegisterAllChildMonsters", "purpose": "Static-init loop constructing child CMonsterInfo elements (calls CMonsterInfo::GetManagers_119e6e10), confirming Group->CMonsterInfo containment."}
+      ],
+      "confidence": "medium",
+      "notes": "Cross-reference: owns/iterates CMonsterInfo children. No field offsets recovered."
+    },
+    {
+      "className": "CMonolopyCostInfo",
+      "category": "activity",
+      "purpose": "Cost table for the 'Monolopy' (Monopoly-style) board-game minigame/event, e.g. dice/roll or step costs. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "117fed50", "currentName": "CMonolopyCostInfo::GetManagers", "proposedName": "CMonolopyCostInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "117ff670", "currentName": "CMonolopyCostInfo::GetManagers_117ff670", "proposedName": "CMonolopyCostInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "119b9b90", "currentName": "CMonolopyCostInfo::GetManagers_119b9b90", "proposedName": "CMonolopyCostInfo::RegisterAllInstances", "purpose": "Static-init loop; per element calls FUN_117ff890."},
+        {"address": "119b9ce0", "currentName": "CMonolopyCostInfo::GetManagers_119b9ce0", "proposedName": "CMonolopyCostInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_117ff880)."}
+      ],
+      "confidence": "low",
+      "notes": "'Monolopy' is the game's spelling of Monopoly (see also CMonolopyRoundPrizeInfo). No field data recovered."
+    },
+    {
+      "className": "CGuildTaskLibInfo",
+      "category": "social",
+      "purpose": "Library/pool of guild task definitions (guild quests). Registered under CInfoManager via StcMbrNameSvr. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "111ef6f0", "currentName": "CGuildTaskLibInfo::GetManagers", "proposedName": "CGuildTaskLibInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "111f3150", "currentName": "CGuildTaskLibInfo::GetManagers_111f3150", "proposedName": "CGuildTaskLibInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "117d6ce0", "currentName": "CGuildTaskLibInfo::GetManagers_117d6ce0", "proposedName": "CGuildTaskLibInfo::GetInfoManagerInstance2", "purpose": "Secondary singleton-instance accessor (called by the register loop)."},
+        {"address": "1190c3f0", "currentName": "CGuildTaskLibInfo::GetManagers_1190c3f0", "proposedName": "CGuildTaskLibInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_111f0020) that precaches each library element."}
+      ],
+      "confidence": "low",
+      "notes": "Contains 'StcMbrNameSvr<class CInfoManager>::GetSingletonName' reference confirming the shared singleton factory. No field offsets recovered."
+    },
+    {
+      "className": "CGuildTitleInfo",
+      "category": "social",
+      "purpose": "Definition table for guild titles/ranks (name, permissions, etc.). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "114f5da0", "currentName": "CGuildTitleInfo::GetManagers", "proposedName": "CGuildTitleInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "114f75b0", "currentName": "CGuildTitleInfo::GetManagers_114f75b0", "proposedName": "CGuildTitleInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "1190a5b0", "currentName": "CGuildTitleInfo::GetManagers_1190a5b0", "proposedName": "CGuildTitleInfo::RegisterAllInstances", "purpose": "Static-init loop; per element calls FUN_11a018f0."},
+        {"address": "1190a700", "currentName": "CGuildTitleInfo::GetManagers_1190a700", "proposedName": "CGuildTitleInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_114f6270)."}
+      ],
+      "confidence": "low",
+      "notes": "Pure factory boilerplate; no field data recovered."
+    },
+    {
+      "className": "CPhysicalCardGroupInfo",
+      "category": "activity",
+      "purpose": "Group table for 'physical' (stamina/energy 体力) cards, likely a daily stamina/recharge card group. One real query method over the group grid was recovered.",
+      "methods": [
+        {"address": "109c5ab0", "currentName": "CPhysicalCardGroupInfo::GetManagers", "proposedName": "CPhysicalCardGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115374a0", "currentName": "CPhysicalCardGroupInfo::GetManagers_115374a0", "proposedName": "CPhysicalCardGroupInfo::QueryCardGroup", "purpose": "Query method (thiscall, param_2 = out): looks up the singleton manager and indexes into its element grid; returns card-group data through the output pointer. Exact fields not labelled."}
+      ],
+      "confidence": "low",
+      "notes": "Only 2 methods recovered. Second is a real lookup but without field labels; offsets not confidently identified."
+    },
+    {
+      "className": "CActivityLevelEntrustInfo",
+      "category": "activity",
+      "purpose": "Per-activity-level entrust (commission) reward/config, indexed via the CLevelEnGroupInfo level grid. Provides a level-based lookup used to enumerate entrust entries for an activity level.",
+      "methods": [
+        {"address": "111fd440", "currentName": "CActivityLevelEntrustInfo::GetManagers", "proposedName": "CActivityLevelEntrustInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "111ff480", "currentName": "CActivityLevelEntrustInfo::GetManagers_111ff480", "proposedName": "CActivityLevelEntrustInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "114d5610", "currentName": "CActivityLevelEntrustInfo::GetManagers_114d5610", "proposedName": "CActivityLevelEntrustInfo::GetEntrustByActivityLevel", "purpose": "Lookup: resolves an activity level (param_1) against the CLevelEnGroupInfo 2D grid (base at +0x30, columns at +0x28, count at +0x24, row-array at +0x20), validates the target entry has a non-zero list at +0x2c, then iterates this class's own managers to collect matching entrust entries. Calls FUN_11548ea0(level)."}
+      ],
+      "confidence": "medium",
+      "formulas": [
+        "CLevelEnGroupInfo grid index: idx = level - base(+0x30); row = idx / cols(+0x28); col = idx % cols; entry = grid[+0x20][row][col]; valid iff 0 <= idx < count(+0x24) and entry->+0x2c != 0"
+      ],
+      "relatedTlv": ["TlvEntrustGroupStatList", "TlvGroupEntrustStatData"],
+      "notes": "The 2D-grid layout (+0x20 row-array, +0x24 count, +0x28 columns, +0x30 base) is the shared CInfoManager/CLevelEnGroupInfo container layout, not fields of the entrust element itself. Entrust TLV docs exist but describe group stats; treat mapping as directional."
+    },
+    {
+      "className": "CTraceInfo",
+      "category": "misc",
+      "purpose": "Config for a 'trace' system (likely footprint/tracking marks or a guided-trace feature). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "115052e0", "currentName": "CTraceInfo::GetManagers", "proposedName": "CTraceInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11506240", "currentName": "CTraceInfo::GetManagers_11506240", "proposedName": "CTraceInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11914270", "currentName": "CTraceInfo::GetManagers_11914270", "proposedName": "CTraceInfo::RegisterAllInstances", "purpose": "Static-init loop; per element calls FUN_11a080e0."},
+        {"address": "119143c0", "currentName": "CTraceInfo::GetManagers_119143c0", "proposedName": "CTraceInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_11505730)."}
+      ],
+      "confidence": "low",
+      "notes": "Meaning of 'Trace' inferred from name only; no field data recovered."
+    },
+    {
+      "className": "CFinalGuildMatchRewardInfo",
+      "category": "social",
+      "purpose": "Reward table for the final round of guild matches/tournaments. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1196f640", "currentName": "CFinalGuildMatchRewardInfo::GetManagers", "proposedName": "CFinalGuildMatchRewardInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11970da0", "currentName": "CFinalGuildMatchRewardInfo::GetManagers_11970da0", "proposedName": "CFinalGuildMatchRewardInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "119713c0", "currentName": "CFinalGuildMatchRewardInfo::GetManagers_119713c0", "proposedName": "CFinalGuildMatchRewardInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1196fc60) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Part of the guild-match family (see CGuildMatchAgainstInfo/CGuildMatchRewardInfo). No field data recovered."
+    },
+    {
+      "className": "CCorFuliConfigInfo",
+      "category": "economy",
+      "purpose": "Configuration for a 'CorFuli' (福利, welfare/benefit) reward feature, tied to VIP services (references CVIPServiceInfo). Only factory boilerplate + one iterator recovered.",
+      "methods": [
+        {"address": "11546c40", "currentName": "CCorFuliConfigInfo::GetManagers", "proposedName": "CCorFuliConfigInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115489a0", "currentName": "CCorFuliConfigInfo::GetManagers_115489a0", "proposedName": "CCorFuliConfigInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "115490a0", "currentName": "CCorFuliConfigInfo::GetManagers_115490a0", "proposedName": "CCorFuliConfigInfo::QueryWithVipService", "purpose": "Iterates the managers and cross-references CVIPServiceInfo (calls CVIPServiceInfo::GetManagers), i.e. resolves welfare config against VIP-service data. Also calls FUN_115473c0."}
+      ],
+      "confidence": "low",
+      "notes": "Cross-reference to CVIPServiceInfo suggests VIP-gated welfare rewards. No field offsets recovered."
+    },
+    {
+      "className": "CAllTagItemLimitInfo",
+      "category": "item",
+      "purpose": "Per-tag item hold/ownership limit table (max quantity of items sharing a given tag/category). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11520090", "currentName": "CAllTagItemLimitInfo::GetManagers", "proposedName": "CAllTagItemLimitInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11521b00", "currentName": "CAllTagItemLimitInfo::GetManagers_11521b00", "proposedName": "CAllTagItemLimitInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11522ca0", "currentName": "CAllTagItemLimitInfo::GetManagers_11522ca0", "proposedName": "CAllTagItemLimitInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11520a40) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CAdditionLevelRewardInfo",
+      "category": "activity",
+      "purpose": "Extra/bonus ('addition') reward table keyed by level, e.g. supplementary level-up rewards. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "118e6500", "currentName": "CAdditionLevelRewardInfo::GetManagers", "proposedName": "CAdditionLevelRewardInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "118e70b0", "currentName": "CAdditionLevelRewardInfo::GetManagers_118e70b0", "proposedName": "CAdditionLevelRewardInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "118e72d0", "currentName": "CAdditionLevelRewardInfo::GetManagers_118e72d0", "proposedName": "CAdditionLevelRewardInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_118e6810) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CGuildMatchAgainstInfo",
+      "category": "social",
+      "purpose": "Guild-match matchup/bracket ('against') pairing table. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1196dff0", "currentName": "CGuildMatchAgainstInfo::GetManagers", "proposedName": "CGuildMatchAgainstInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "1196eba0", "currentName": "CGuildMatchAgainstInfo::GetManagers_1196eba0", "proposedName": "CGuildMatchAgainstInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "1196edc0", "currentName": "CGuildMatchAgainstInfo::GetManagers_1196edc0", "proposedName": "CGuildMatchAgainstInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1196e300) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Guild-match family. No field data recovered."
+    },
+    {
+      "className": "CGuildMatchRewardInfo",
+      "category": "social",
+      "purpose": "Reward table for regular (non-final) guild matches. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1196f6e0", "currentName": "CGuildMatchRewardInfo::GetManagers", "proposedName": "CGuildMatchRewardInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11970df0", "currentName": "CGuildMatchRewardInfo::GetManagers_11970df0", "proposedName": "CGuildMatchRewardInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "119711e0", "currentName": "CGuildMatchRewardInfo::GetManagers_119711e0", "proposedName": "CGuildMatchRewardInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1196fd30) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Guild-match family (cf. CFinalGuildMatchRewardInfo). No field data recovered."
+    },
+    {
+      "className": "CBattlePunishLevelModeFilterInfo",
+      "category": "combat",
+      "purpose": "Filter table controlling battle-punish (leave/desertion penalty) levels per game mode. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11a72f90", "currentName": "CBattlePunishLevelModeFilterInfo::GetManagers", "proposedName": "CBattlePunishLevelModeFilterInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11a73390", "currentName": "CBattlePunishLevelModeFilterInfo::GetManagers_11a73390", "proposedName": "CBattlePunishLevelModeFilterInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11a73580", "currentName": "CBattlePunishLevelModeFilterInfo::GetManagers_11a73580", "proposedName": "CBattlePunishLevelModeFilterInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a73090) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Pairs with CBattlePunishLevelFilterInfo (per-mode variant). No field data recovered."
+    },
+    {
+      "className": "CHuntingBoxGroupInfo",
+      "category": "item",
+      "purpose": "Group table for hunting boxes (loot/reward containers). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "116ab770", "currentName": "CHuntingBoxGroupInfo::GetManagers", "proposedName": "CHuntingBoxGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "116ae840", "currentName": "CHuntingBoxGroupInfo::GetManagers_116ae840", "proposedName": "CHuntingBoxGroupInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "118f2710", "currentName": "CHuntingBoxGroupInfo::GetManagers_118f2710", "proposedName": "CHuntingBoxGroupInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_116ac5f0) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CPvpActionBoundsInfo",
+      "category": "combat",
+      "purpose": "PvP action bounds/limits (allowed actions or movement/attack ranges within a PvP arena). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1194ed50", "currentName": "CPvpActionBoundsInfo::GetManagers", "proposedName": "CPvpActionBoundsInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11950500", "currentName": "CPvpActionBoundsInfo::GetManagers_11950500", "proposedName": "CPvpActionBoundsInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "119508e0", "currentName": "CPvpActionBoundsInfo::GetManagers_119508e0", "proposedName": "CPvpActionBoundsInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1194f2b0) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CStarStoneLevelExpInfo",
+      "category": "item",
+      "purpose": "Star-stone (gem) level-up EXP curve. Each level row stores five threshold/attribute values; provides a GetLevelByExp that maps accumulated EXP to a star-stone level by walking the curve.",
+      "methods": [
+        {"address": "115a34d0", "currentName": "CStarStoneLevelExpInfo::GetManagers", "proposedName": "CStarStoneLevelExpInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115a5c60", "currentName": "CStarStoneLevelExpInfo::GetManagers_115a5c60", "proposedName": "CStarStoneLevelExpInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "115a6540", "currentName": "CStarStoneLevelExpInfo::GetManagers_115a6540", "proposedName": "CStarStoneLevelExpInfo::GetLevelByExp", "purpose": "Given (param_1 = attribute/column index 0-4, param_2 = current EXP), iterates levels from 1..maxLevel (max from FUN_1183eca0 struct +0x34), reads the level row's threshold at the selected column, and returns the last level whose threshold is <= the given EXP. Returns -1/curve edge cases handled."}
+      ],
+      "confidence": "medium",
+      "fields": [
+        {"name": "attrExpCol0", "type": "uint", "offset": "0x18", "source": "reader", "note": "level-row column selected by attr index 0 (the default/primary EXP threshold)"},
+        {"name": "attrExpCol1", "type": "uint", "offset": "0x14", "source": "reader", "note": "column selected by attr index 1"},
+        {"name": "attrExpCol2", "type": "uint", "offset": "0x1c", "source": "reader", "note": "column selected by attr index 2"},
+        {"name": "attrExpCol3", "type": "uint", "offset": "0x20", "source": "reader", "note": "column selected by attr index 3"},
+        {"name": "attrExpCol4", "type": "uint", "offset": "0x24", "source": "reader", "note": "column selected by attr index 4"}
+      ],
+      "formulas": [
+        "GetLevelByExp(attr, exp): for L in 1..maxLevel: threshold = row(L)->col[attr]; if exp < threshold return L-1 (previous level); returns maxLevel when exp exceeds all thresholds. Level->row resolved via the manager 2D grid (base +0x30, cols +0x28, count +0x24, row-array +0x20).",
+        "attr column map: 0->+0x18, 1->+0x14, 2->+0x1c, 3->+0x20, 4->+0x24"
+      ],
+      "notes": "Element field offsets (+0x14..+0x24) are confirmed from the switch in GetLevelByExp. The +0x20/+0x24/+0x28/+0x30 grid offsets belong to the shared CInfoManager container. No exact StarStone TLV doc found."
+    },
+    {
+      "className": "CEliminateMatchInfo",
+      "category": "activity",
+      "purpose": "Config for elimination (knockout) match rounds in a PvP tournament/ladder. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "114880a0", "currentName": "CEliminateMatchInfo::GetManagers", "proposedName": "CEliminateMatchInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11489010", "currentName": "CEliminateMatchInfo::GetManagers_11489010", "proposedName": "CEliminateMatchInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "1196dc10", "currentName": "CEliminateMatchInfo::GetManagers_1196dc10", "proposedName": "CEliminateMatchInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11488580) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Pairs with CQualifierMatchInfo. No field data recovered."
+    },
+    {
+      "className": "CQualifierMatchInfo",
+      "category": "activity",
+      "purpose": "Config for qualifier (qualifying round) matches in a PvP tournament/ladder. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11488140", "currentName": "CQualifierMatchInfo::GetManagers", "proposedName": "CQualifierMatchInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11489060", "currentName": "CQualifierMatchInfo::GetManagers_11489060", "proposedName": "CQualifierMatchInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "1196d390", "currentName": "CQualifierMatchInfo::GetManagers_1196d390", "proposedName": "CQualifierMatchInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_114885e0) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Pairs with CEliminateMatchInfo. No field data recovered."
+    },
+    {
+      "className": "CDailyFramAwardInfo",
+      "category": "activity",
+      "purpose": "Daily 'farm' (Fram, likely farming/harvest) award table; references item-box groups (CItemBoxGroupInfo) as the reward containers. Only factory boilerplate + one cross-ref recovered.",
+      "methods": [
+        {"address": "11515590", "currentName": "CDailyFramAwardInfo::GetManagers", "proposedName": "CDailyFramAwardInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11516e30", "currentName": "CDailyFramAwardInfo::GetManagers_11516e30", "proposedName": "CDailyFramAwardInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11517750", "currentName": "CDailyFramAwardInfo::GetManagers_11517750", "proposedName": "CDailyFramAwardInfo::RegisterAllWithItemBoxGroup", "purpose": "Static-init loop that also resolves reward item-boxes via CItemBoxGroupInfo::GetManagers_11516390, then calls FUN_11515e10 per element."}
+      ],
+      "confidence": "low",
+      "notes": "'Fram' is likely a typo of 'Farm'. Cross-reference to CItemBoxGroupInfo for reward containers. No field offsets recovered."
+    },
+    {
+      "className": "CStarStoneTinyInfo",
+      "category": "item",
+      "purpose": "Resolves 'tiny' star-stone (small gem) attribute values from an item/gem instance descriptor. Provides a query that matches a property descriptor and reads attribute values from the star-stone level grid.",
+      "methods": [
+        {"address": "115a3570", "currentName": "CStarStoneTinyInfo::GetManagers", "proposedName": "CStarStoneTinyInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115a5cb0", "currentName": "CStarStoneTinyInfo::GetManagers_115a5cb0", "proposedName": "CStarStoneTinyInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "115a6900", "currentName": "CStarStoneTinyInfo::GetManagers_115a6900", "proposedName": "CStarStoneTinyInfo::QueryAttrFromInstance", "purpose": "Given a property descriptor (param_1: type==1, subtype==8, id==0x16), scans its 0x114-byte record array (+0x164..+0x168) for the record tagged 0xbdb, reads the star-stone id (+0xf8) and level (+0xfc), indexes the manager grid, then via a switch on the requested attribute index (0-4) writes the attribute value (+0x14..+0x24) to *param_3 and the level cap/aux (+0x28) to *param_4; returns 1 on success."}
+      ],
+      "confidence": "medium",
+      "fields": [
+        {"name": "descRecordArrayBegin", "type": "ptr", "offset": "0x164", "source": "reader", "note": "on the input property descriptor: start of 0x114-byte record array"},
+        {"name": "descRecordArrayEnd", "type": "ptr", "offset": "0x168", "source": "reader", "note": "end pointer; count = (end-begin)/0x114"},
+        {"name": "recordTag", "type": "int", "offset": "0x04", "source": "reader", "note": "per-record; matched against 0xbdb (3035) to select the star-stone record"},
+        {"name": "recordStarStoneId", "type": "int", "offset": "0xf8", "source": "reader", "note": "per-record star-stone id"},
+        {"name": "recordStarStoneLevel", "type": "int", "offset": "0xfc", "source": "reader", "note": "per-record star-stone level used to index the grid"},
+        {"name": "elemAttr0", "type": "uint", "offset": "0x18", "source": "reader", "note": "grid element: attribute for switch index 0"},
+        {"name": "elemAttr1", "type": "uint", "offset": "0x14", "source": "reader", "note": "grid element: attribute for switch index 1"},
+        {"name": "elemAttr2", "type": "uint", "offset": "0x1c", "source": "reader", "note": "grid element: attribute for switch index 2"},
+        {"name": "elemAttr3", "type": "uint", "offset": "0x20", "source": "reader", "note": "grid element: attribute for switch index 3"},
+        {"name": "elemAttr4", "type": "uint", "offset": "0x24", "source": "reader", "note": "grid element: attribute for switch index 4"},
+        {"name": "elemAux", "type": "uint", "offset": "0x28", "source": "reader", "note": "grid element: aux value written to *param_4 (level cap or bonus)"}
+      ],
+      "constants": ["DescMatch type=1 subtype=8 id=0x16", "RecordSelectTag=0xbdb(3035)", "RecordStride=0x114"],
+      "notes": "Shares the star-stone level grid layout with CStarStoneLevelExpInfo (same +0x14..+0x28 element fields and +0x20/+0x24/+0x28/+0x30 container grid). Attribute switch order matches CStarStoneLevelExpInfo."
+    },
+    {
+      "className": "CSystemUnlockInfo",
+      "category": "ui",
+      "purpose": "Table of feature/system unlock conditions (which UI systems or gameplay features unlock and when). One query method over the manager list was recovered.",
+      "methods": [
+        {"address": "1083ea70", "currentName": "CSystemUnlockInfo::GetManagers", "proposedName": "CSystemUnlockInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115a99a0", "currentName": "CSystemUnlockInfo::GetManagers_115a99a0", "proposedName": "CSystemUnlockInfo::QuerySystemUnlock", "purpose": "Fastcall query (out param_1): resolves the manager singleton (FUN_10848210), invokes its count vtable (+0x28), and iterates to look up unlock data; exact fields not labelled."}
+      ],
+      "confidence": "low",
+      "notes": "Only 2 methods recovered. Second is a real lookup but without labelled fields."
+    },
+    {
+      "className": "CBattlePunishLevelFilterInfo",
+      "category": "combat",
+      "purpose": "Filter table for battle-punish (desertion/leave penalty) levels. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11a72ef0", "currentName": "CBattlePunishLevelFilterInfo::GetManagers", "proposedName": "CBattlePunishLevelFilterInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11a73340", "currentName": "CBattlePunishLevelFilterInfo::GetManagers_11a73340", "proposedName": "CBattlePunishLevelFilterInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11a73430", "currentName": "CBattlePunishLevelFilterInfo::GetManagers_11a73430", "proposedName": "CBattlePunishLevelFilterInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a73030) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Base variant of CBattlePunishLevelModeFilterInfo. No field data recovered."
+    },
+    {
+      "className": "CPlayerLvRewardMiniGroupInfo",
+      "category": "activity",
+      "purpose": "Grouping table for player-level 'mini' reward sets (small level-up reward groups). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11a5ab30", "currentName": "CPlayerLvRewardMiniGroupInfo::GetManagers", "proposedName": "CPlayerLvRewardMiniGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11a5b180", "currentName": "CPlayerLvRewardMiniGroupInfo::GetManagers_11a5b180", "proposedName": "CPlayerLvRewardMiniGroupInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11a5b2f0", "currentName": "CPlayerLvRewardMiniGroupInfo::GetManagers_11a5b2f0", "proposedName": "CPlayerLvRewardMiniGroupInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a5ac90) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CMonolopyRoundPrizeInfo",
+      "category": "activity",
+      "purpose": "Per-round prize table for the 'Monolopy' (Monopoly) minigame/event. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "109bb3f0", "currentName": "CMonolopyRoundPrizeInfo::GetManagers", "proposedName": "CMonolopyRoundPrizeInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "119bc690", "currentName": "CMonolopyRoundPrizeInfo::GetManagers_119bc690", "proposedName": "CMonolopyRoundPrizeInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_119bc7e0) precaching each element."},
+        {"address": "119bc7e0", "currentName": "CMonolopyRoundPrizeInfo::GetManagers_119bc7e0", "proposedName": "CMonolopyRoundPrizeInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_119bc7e0 chain)."}
+      ],
+      "confidence": "low",
+      "notes": "Family with CMonolopyCostInfo. No field data recovered."
+    },
+    {
+      "className": "CHunterRecordCardInfo",
+      "category": "social",
+      "purpose": "Hunter record card (player profile/hunter-log card) definition. One record-building query method recovered.",
+      "methods": [
+        {"address": "108ba7d0", "currentName": "CHunterRecordCardInfo::GetManagers", "proposedName": "CHunterRecordCardInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "114e0150", "currentName": "CHunterRecordCardInfo::GetManagers_114e0150", "proposedName": "CHunterRecordCardInfo::BuildRecordCard", "purpose": "Fastcall method that builds a local record-card structure (stack locals) from the manager data; calls FUN_1161c950. Exact fields not labelled."}
+      ],
+      "confidence": "low",
+      "notes": "Only 2 methods recovered. Second builds/queries a card record but fields are not labelled."
+    },
+    {
+      "className": "CSoulStoneStageUpInfo",
+      "category": "item",
+      "purpose": "Soul-stone stage-up (upgrade) config; references CSoulStoneAttrInfo for the resulting attributes. Only factory boilerplate + cross-ref recovered.",
+      "methods": [
+        {"address": "10520620", "currentName": "CSoulStoneStageUpInfo::GetManagers", "proposedName": "CSoulStoneStageUpInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "119be450", "currentName": "CSoulStoneStageUpInfo::GetManagers_119be450", "proposedName": "CSoulStoneStageUpInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a7c2b0) precaching each element."},
+        {"address": "119be5a0", "currentName": "CSoulStoneStageUpInfo::GetManagers_119be5a0", "proposedName": "CSoulStoneStageUpInfo::RegisterAllWithSoulStoneAttr", "purpose": "Static-init loop that also constructs CSoulStoneAttrInfo children (calls CSoulStoneAttrInfo::GetManagers_11a7c100)."}
+      ],
+      "confidence": "low",
+      "notes": "Cross-reference to CSoulStoneAttrInfo. No field offsets recovered."
+    },
+    {
+      "className": "CAstrolabeSubjectInfo",
+      "category": "skill",
+      "purpose": "Astrolabe (star-chart talent system) 'subject' definitions - the categories/themes of astrolabe nodes. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "109a85a0", "currentName": "CAstrolabeSubjectInfo::GetManagers", "proposedName": "CAstrolabeSubjectInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "119b0840", "currentName": "CAstrolabeSubjectInfo::GetManagers_119b0840", "proposedName": "CAstrolabeSubjectInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a76760) precaching each element."},
+        {"address": "119b0990", "currentName": "CAstrolabeSubjectInfo::GetManagers_119b0990", "proposedName": "CAstrolabeSubjectInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_11a76750)."}
+      ],
+      "confidence": "low",
+      "notes": "Part of the Astrolabe family (CAstrolabeStarInfo, CAstrolabeTaskPrizeInfo). No field data recovered."
+    },
+    {
+      "className": "CMonsterPartGroupInfo",
+      "category": "monster",
+      "purpose": "Grouping of monster body parts (breakable/severable part sets used for damage zones and carve rewards). Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "107ec630", "currentName": "CMonsterPartGroupInfo::GetManagers", "proposedName": "CMonsterPartGroupInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "118d5000", "currentName": "CMonsterPartGroupInfo::GetManagers_118d5000", "proposedName": "CMonsterPartGroupInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1185d990) precaching each element."},
+        {"address": "118d5150", "currentName": "CMonsterPartGroupInfo::GetManagers_118d5150", "proposedName": "CMonsterPartGroupInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_1185d930)."}
+      ],
+      "confidence": "low",
+      "notes": "Monster-part family. No field data recovered."
+    },
+    {
+      "className": "CNpcTalkInfo",
+      "category": "social",
+      "purpose": "NPC dialogue/talk line definitions. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "118da990", "currentName": "CNpcTalkInfo::GetManagers", "proposedName": "CNpcTalkInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "118db4e0", "currentName": "CNpcTalkInfo::GetManagers_118db4e0", "proposedName": "CNpcTalkInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_118daca0) precaching each element."},
+        {"address": "118db760", "currentName": "CNpcTalkInfo::GetManagers_118db760", "proposedName": "CNpcTalkInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_117257a0)."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CDragonBoxShowInfo",
+      "category": "item",
+      "purpose": "Display/showcase config for the Dragon Box (gacha/lottery box) - which items are shown as featured. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1092d200", "currentName": "CDragonBoxShowInfo::GetManagers", "proposedName": "CDragonBoxShowInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "11913880", "currentName": "CDragonBoxShowInfo::GetManagers_11913880", "proposedName": "CDragonBoxShowInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11a07fd0) precaching each element."},
+        {"address": "119139d0", "currentName": "CDragonBoxShowInfo::GetManagers_119139d0", "proposedName": "CDragonBoxShowInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_11a07fc0)."}
+      ],
+      "confidence": "low",
+      "notes": "DragonBox family (CDragonBoxInfo, CDragonBoxPrizeInfo, etc.). No field data recovered."
+    },
+    {
+      "className": "CCharmFoundCostInfo",
+      "category": "economy",
+      "purpose": "Cost table for charm 'found' (forging/foundation) operations. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11636160", "currentName": "CCharmFoundCostInfo::GetManagers", "proposedName": "CCharmFoundCostInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "116394a0", "currentName": "CCharmFoundCostInfo::GetManagers_116394a0", "proposedName": "CCharmFoundCostInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11639df0", "currentName": "CCharmFoundCostInfo::GetManagers_11639df0", "proposedName": "CCharmFoundCostInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11637250) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Charm-found cost family (cf. CCharmFoundLockCostInfo, CCharmFoundTimesCostInfo). No field data recovered."
+    },
+    {
+      "className": "CEquipHiddenSkillCondOpenInfo",
+      "category": "skill",
+      "purpose": "Conditions under which an equipment's hidden skill is unlocked/opened. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "11520130", "currentName": "CEquipHiddenSkillCondOpenInfo::GetManagers", "proposedName": "CEquipHiddenSkillCondOpenInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "115227d0", "currentName": "CEquipHiddenSkillCondOpenInfo::GetManagers_115227d0", "proposedName": "CEquipHiddenSkillCondOpenInfo::GetInfoManagerInstance", "purpose": "Thin accessor returning the singleton instance pointer."},
+        {"address": "11522cf0", "currentName": "CEquipHiddenSkillCondOpenInfo::GetManagers_11522cf0", "proposedName": "CEquipHiddenSkillCondOpenInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_11520aa0) precaching each element."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    },
+    {
+      "className": "CGuideBookActionInfo",
+      "category": "quest",
+      "purpose": "Guide-book (hunter's notes / monster field guide) action definitions - actions/entries triggered from the guide book UI. Only factory boilerplate recovered.",
+      "methods": [
+        {"address": "1146bc90", "currentName": "CGuideBookActionInfo::GetManagers", "proposedName": "CGuideBookActionInfo::GetInfoManager", "purpose": "Static singleton accessor for the class CInfoManager."},
+        {"address": "1146e910", "currentName": "CGuideBookActionInfo::GetManagers_1146e910", "proposedName": "CGuideBookActionInfo::RegisterAllInstances", "purpose": "Static-init loop over managers (FUN_1153a240) precaching each element."},
+        {"address": "1153a240", "currentName": "CGuideBookActionInfo::GetManagers_1153a240", "proposedName": "CGuideBookActionInfo::RegisterAllInstances2", "purpose": "Sibling static-init loop (FUN_1146ca60)."}
+      ],
+      "confidence": "low",
+      "notes": "Purpose inferred from name; no field data recovered."
+    }
+  ],
+  "notes": "Batch-wide finding: all 37 bundles were auto-labelled 'GetManagers' but are actually the shared CInfoManager singleton/factory-registration template (StcMbrNameSvr<CInfoManager> named factory via FUN_11679e10; static-init flag-guarded lazy construction; iterator loops that precache child elements). Method-1 of each class = GetInfoManager (factory accessor), and where present a single-int-param variant = GetInfoManagerInstance. No DebugFormat printer, no XML/_PreCache loader, and no TLV tag>>4 reader survived in any bundle, so per-class field layouts are almost entirely unrecoverable here. Exceptions with genuine field/logic content: CStarStoneLevelExpInfo (GetLevelByExp EXP->level curve, element fields +0x14..+0x24), CStarStoneTinyInfo (QueryAttrFromInstance, same grid + descriptor scan on 0x114-byte records tagged 0xbdb), and CActivityLevelEntrustInfo (GetEntrustByActivityLevel using the CLevelEnGroupInfo 2D level grid). Confirmed containment cross-references: CGiftBagGroupInfo->CGiftBagInfo, CMonsterGroupInfo->CMonsterInfo, CSoulStoneStageUpInfo->CSoulStoneAttrInfo, CDailyFramAwardInfo->CItemBoxGroupInfo, CCorFuliConfigInfo->CVIPServiceInfo, CActivityLevelEntrustInfo->CLevelEnGroupInfo. The shared CInfoManager container grid layout is +0x20 row-pointer-array, +0x24 total count, +0x28 columns/stride, +0x30 base index."
+}

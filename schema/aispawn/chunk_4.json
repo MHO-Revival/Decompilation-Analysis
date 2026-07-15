@@ -1,0 +1,775 @@
+{
+  "chunkIndex": 4,
+  "functions": [
+    {
+      "address": "10da0520",
+      "currentName": "CMonster__SpawnParticleEffect",
+      "proposedName": "CMonster::SpawnParticleEffect",
+      "purpose": "Client visual helper: profiles the scope 'CMonster::SpawnParticleEffect' then builds a particle-spawn descriptor (FUN_10b01ff0 with scale 1.0f, flags 0,0) and queues it (FUN_10a7b9f0). Pure rendering/FX.",
+      "subsystem": "monster-fx",
+      "confidence": "high",
+      "formulas": [
+        "particle descriptor built with scale=0x3f800000(1.0f), two trailing flags = 0",
+        "profiler gate via (*(DAT_1202e818+0xa0) vtbl +0xc)(this,'CMonster::SpawnParticleEffect',1,1)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (particle FX rendering)",
+      "notes": "Stock-style FX spawn; not authoritative."
+    },
+    {
+      "address": "10db7120",
+      "currentName": "FUN_10db7120",
+      "proposedName": "CMonster::ComputeAimReflectedTarget",
+      "purpose": "Monster aim / target-lead computation. Pops the front of a small ring/deque of recorded target positions (history samples at +0x21a4..+0x21a8, 0xc-byte stride: Vec3 + 1 float), then transforms the relative target vector (targetPos - param) by the entity's orientation quaternion (matrix col fetched via vtbl+0xd0) using the standard q*v reflection formula, and forwards the result to FUN_10dba840. When debug flag *(DAT_1202e818+0x7c)+0xabc is set it draws a debug sphere labelled 'MonsterAim'.",
+      "subsystem": "monster-ai-aim",
+      "confidence": "medium",
+      "formulas": [
+        "gate: *(param_1+0x21b0)!=0 AND *(param_1+0x21a4)!=*(param_1+0x21a8) (history non-empty)",
+        "sample pop: reads Vec3 local_20 = *(hist-0xc), scalar local_18 = *(hist-4); advances tail: *(param_1+0x21a8) -= 0xc",
+        "rel = (target.x-param2, target.y-param3, sample-param4)",
+        "quat-rotate-vector reflection: v' = rel + 2*( cross(q.xyz, cross(q.xyz,rel) + q.w*rel) ); components use q.xyz XORed with sign mask DAT_11de9c90 (float negate) matching Ghidra's q*v*q^-1 expansion",
+        "debug sphere color arg &DAT_40400000 = 3.0f, radius 0x3f800000=1.0f"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only as decompiled (draws MonsterAim debug geometry); the leading/aim math itself may mirror server target-prediction but here it is a client render/debug path",
+      "notes": "History buffer of past target positions used for aim smoothing/lead. DAT_11de9c90 is the 0x80000000 float sign-flip mask."
+    },
+    {
+      "address": "10dbb900",
+      "currentName": "FUN_10dbb900",
+      "proposedName": "CMonster::ApplyCustomAppearanceSettings",
+      "purpose": "Reads the 'PropertyCustom' InfoRecord block and applies cosmetic/appearance customization to a monster's character instance via CMonsterCustomSettingHelper: custom shader color (.colorCustom / .HasCustomColor), skin decals/scars (.SkinDecalSetting.DecalList: Texture/Normal/Dirscale/Upscale), hidden attachments (.HideAttachment.AttachmentList), morph weights (.Morph.MorphList: Weight), and attachment slots/objects/effects (.AttachmentSetting: AttachmentList AName/BName/Rotation/Position/Binding, ObjectAttachment, EffectAttachment, MonsterStateEffects). Iterates InfoRecord child arrays.",
+      "subsystem": "monster-appearance",
+      "confidence": "medium",
+      "formulas": [
+        "param_2 low-byte flags: bit tests param_2._3_1_ toggle color/decal application; param_2 masked with 0xffffff repeatedly (packs a 1-byte 'apply' flag in top byte)",
+        "InfoRecord node type check == 6 (object node) before descending; type 7 handled via refcount release",
+        "attachment effect uses model scale *(*(local_a0+0xc) vtbl+0xbc)() as the effect scale param"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (visual customization of character instance)",
+      "notes": "CMonsterCustomSettingHelper::{SetCustomShaderColor,CreateScar,SetMorphWeight,CreateAttachmentSlot,AttachmentObject,AttachmentEffect}. DAT_123be268 is a global string-heap byte counter (bookkeeping). Not authoritative."
+    },
+    {
+      "address": "10e5a420",
+      "currentName": "FUN_10e5a420",
+      "proposedName": "FlowNode_SpawnEventFilter::GetConfiguration",
+      "purpose": "CryEngine FlowGraph node config registrar (one-time init guarded by DAT_120376f8 bits 1/2). Declares inputs: enable, disable, triggerOnce, isSpawnerEntityID, isCollectPointNetID, isPet, isItemID, isBuffID; outputs: OnEvent, spawnerEntityID, collectPointNetID, playerNetID, petNetID, itemID, buffID. A generic spawn/collect/pet/item/buff event filter node routing entity/net IDs.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": [
+        "port descriptor type tags via PTR_FUN_11df76xx registrars (bool/int/entityId variants)",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10 (node category/flags word)",
+        "output port 'spawnerEntityID' data-type tag uRam...=3 (entityId), others =1 (int)"
+      ],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition); event routing metadata",
+      "notes": "&DAT_11d9d32b = empty-string sentinel; &DAT_11df7728/7669/76c9 = port default/type descriptors. Stock CryEngine FlowNode plumbing with MHO-specific spawner/pet/item ports."
+    },
+    {
+      "address": "10e741a0",
+      "currentName": "FUN_10e741a0",
+      "proposedName": "FlowNode_LogicEntitySpawnEventFilter::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_120383e0). Same as FlowNode_SpawnEventFilter but adds an extra input 'logicEntityNetID'. Inputs: enable, disable, triggerOnce, logicEntityNetID, isSpawnerEntityID, isCollectPointNetID, isPet, isItemID, isBuffID; outputs: OnEvent, spawnerEntityID, collectPointNetID, playerNetID, petNetID, itemID, buffID.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": [
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10",
+        "OnEvent output tag =1; spawnerEntityID tag =3"
+      ],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition)",
+      "notes": "Near-duplicate of 10e5a420 with logicEntityNetID input added."
+    },
+    {
+      "address": "10e97da0",
+      "currentName": "FUN_10e97da0",
+      "proposedName": "FlowNode_DoSpawn_A::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203a2f0): single input 'DoSpawn', single output 'Spawned'. Minimal spawn-trigger node.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": [
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10",
+        "Spawned output data-type tag = 1"
+      ],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition)",
+      "notes": "One of four near-identical DoSpawn->Spawned trigger nodes (10e97da0/10e989c0/10e98ed0/10e994c0), distinguished only by their static config storage addresses."
+    },
+    {
+      "address": "10e989c0",
+      "currentName": "FUN_10e989c0",
+      "proposedName": "FlowNode_DoSpawn_B::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203a088): input 'DoSpawn', output 'Spawned'.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": ["param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition)",
+      "notes": "Duplicate of 10e97da0."
+    },
+    {
+      "address": "10e98ed0",
+      "currentName": "FUN_10e98ed0",
+      "proposedName": "FlowNode_DoSpawn_C::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203a420): input 'DoSpawn', output 'Spawned'.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": ["param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition)",
+      "notes": "Duplicate of 10e97da0."
+    },
+    {
+      "address": "10e994c0",
+      "currentName": "FUN_10e994c0",
+      "proposedName": "FlowNode_DoSpawn_D::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_12039f88): input 'DoSpawn', output 'Spawned'.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": ["param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"],
+      "costs": [],
+      "serverRelevance": "client/editor (FlowGraph node definition)",
+      "notes": "Duplicate of 10e97da0."
+    },
+    {
+      "address": "10e99a40",
+      "currentName": "FUN_10e99a40",
+      "proposedName": "FlowNode_MonsterSpawnGroup::GetConfiguration",
+      "purpose": "FlowGraph node config for the main MHO monster-spawn-group node (guard DAT_12039e70). Full spawn-batch authoring surface. Inputs: Enable, Disable, DoSpawn, regionSpawnPoints, AddRegionSpawnPoints, AddSpawnPoint, ClearSpawnPoints, mhoMonsterInfoId_monsterID, defaultMonsterWeight, monsterGroup, monsterList, mhoMonsterInfoId_AddMonster, AddMonsterGroup, AddMonsterList, ClearMonsters, spawnAmountMin, spawnAmountMax, firstSpawnDelay, respawnAmount, respawnDelayMin, respawnDelayMax, scale, StrengthID, StrengthRatio. Output: Spawned. This is the richest spawn-table definition in the chunk.",
+      "subsystem": "spawn-config",
+      "confidence": "high",
+      "formulas": [
+        "DEFAULT defaultMonsterWeight = 100 (local_c8=100; per-monster spawn weight)",
+        "DEFAULT spawnAmountMin = 1 (local_38=1)",
+        "DEFAULT spawnAmountMax = 0xffffffff (-1 = unlimited/unset)",
+        "DEFAULT respawnAmount = 0xffffffff (-1)",
+        "DEFAULT StrengthRatio = 0x3f800000 = 1.0f (local_170)",
+        "DEFAULT firstSpawnDelay/respawnDelayMin/respawnDelayMax/StrengthID = 0",
+        "mhoMonsterInfoId_monsterID default = 0xffffffff; monsterGroup default = 0xffffffff",
+        "'scale' and 'StrengthRatio' registered as float ports (PTR_FUN_11df7694/7689); counts/ids as int/uint ports (PTR_FUN_11df7674/7669)",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"
+      ],
+      "costs": [
+        "defaultMonsterWeight default 100 (weighting for weighted random monster pick, cf. CSpawnMonsterGroupInfo weighted-pick rule)",
+        "StrengthRatio default 1.0 (monster stat scalar); StrengthID selects a strength/difficulty table row"
+      ],
+      "serverRelevance": "authoritative data surface (server drives spawn amounts, weights, respawn timing, strength scaling); node authored in level, executed server-side for spawn batches",
+      "notes": "Ports map directly to CLevelSpawnBatchInfo/CSpawnMonsterGroupInfo config (schema monster.md). 'monsterList'/'AddMonsterList' use a string-list port (DAT_1201fc98 empty-string list + type tag 0x11df76e9). regionSpawnPoints/AddSpawnPoint define spawn-point geometry. Key for reconstructing spawn tables: min/max count, first-spawn delay, respawn count + min/max respawn delay, per-monster weight, group vs list composition, scale, strength id/ratio."
+    },
+    {
+      "address": "10e9ad80",
+      "currentName": "FUN_10e9ad80",
+      "proposedName": "CLevelSpawnBatchInfo::GetRecordByIndex",
+      "purpose": "Paged-array accessor into the CLevelSpawnBatchInfo CInfoManager: given a linear index, returns the config record pointer. Byte-offset form of the standard CInfoManager id lookup.",
+      "subsystem": "spawn-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CLevelSpawnBatchInfo::FindInfoByKey(0,'CLevelSpawnBatchInfo',0)",
+        "gate: param_1!=-1 AND (param_1!=0 OR mgr[0x30]==0) AND mgr[0x28]!=0",
+        "idx = param_1 - mgr[0x30]  (mgr+0x30 = minId/base)",
+        "require 0 <= idx < mgr[0x24]  (mgr+0x24 = count)",
+        "page = *(mgr[0x20] + (idx / mgr[0x28]) * 4)  (mgr+0x20 = page table, mgr+0x28 = pageSize)",
+        "return *(page + (idx % mgr[0x28]) * 4)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server config lookup for spawn batches)",
+      "notes": "Matches schema monster.md CInfoManager lookup rule but in byte-offset (not word-indexed) form: minId=+0x30, count=+0x24, pageSize=+0x28, pageTable=+0x20."
+    },
+    {
+      "address": "10e9b010",
+      "currentName": "FUN_10e9b010",
+      "proposedName": "CSpawnMonsterGroupInfo::GetRecordByIndex",
+      "purpose": "Paged-array accessor into the CSpawnMonsterGroupInfo CInfoManager (identical structure to 10e9ad80). Returns a spawn-monster-group config record by linear index.",
+      "subsystem": "spawn-config",
+      "confidence": "high",
+      "formulas": [
+        "mgr = CSpawnMonsterGroupInfo::GetInfoManager(0,'CSpawnMonsterGroupInfo',0)",
+        "idx = param_1 - mgr[0x30]; require 0<=idx<mgr[0x24]",
+        "page = *(mgr[0x20] + (idx/mgr[0x28])*4); return *(page + (idx%mgr[0x28])*4)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (server config lookup for weighted monster spawn groups)",
+      "notes": "CSpawnMonsterGroupInfo holds weighted-pick roll logic per schema monster.md (levelId@0x10, groupList@0x18)."
+    },
+    {
+      "address": "10e9e840",
+      "currentName": "FUN_10e9e840",
+      "proposedName": "FlowNode_MonsterSupplier::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203a688) for a monster 'supply' spawner. Inputs: Enable, Disable, Faction, SpawnSupply; outputs: Supplier, 'Monster ID', OnEmpty. Spawns/supplies monsters of a faction and signals when the supply is exhausted.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": [
+        "OnEmpty output data-type tag = 6 (event/any); Supplier tag = 1; 'Monster ID' tag = 1",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff02f) | 0x20 (note 0x20 category, different from the 0x10 nodes)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative spawn behavior (server drives supply/faction spawning); node config is client/editor metadata",
+      "notes": "Faction-based reinforcement/supply spawner with OnEmpty completion signal."
+    },
+    {
+      "address": "10ea1ab0",
+      "currentName": "FUN_10ea1ab0",
+      "proposedName": "FlowNode_MonsterQuestModule::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203a8a0) for a monster-related quest/objective module. Input: modelGroupID. Outputs: moduleType, useItemID, useItemNum, targetMonsterID, killMonsterCount, monsterPartName, monsterBreakLev, monsterStateAbnormal, spawnGroupID, msgID, targMsgID, monsterBuff1/2/3, logic, targetMonsterID2, killTargetMonsterCount2, monsterPartName2, monsterBreakLev2, targMsgID2, wrongHitCheck, time1/2/3, alertMsgID. Defines hunt/break/kill objective parameters and their message IDs.",
+      "subsystem": "quest-monster",
+      "confidence": "high",
+      "formulas": [
+        "monsterPartName / monsterPartName2 output tag = 5 (string); most numeric ports tag = 1",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10",
+        "supports two objective targets (targetMonsterID + targetMonsterID2) with kill counts, part-break levels, state-abnormal, and up to 3 monster buffs"
+      ],
+      "costs": [
+        "useItemID/useItemNum define a required item consumption for the objective",
+        "killMonsterCount / killTargetMonsterCount2 = required kill counts",
+        "monsterBreakLev / monsterBreakLev2 = required part-break level thresholds"
+      ],
+      "serverRelevance": "authoritative/validation (server verifies kill counts, part breaks, item use, monster state for quest progress)",
+      "notes": "Links spawnGroupID to a quest module. wrongHitCheck likely penalizes hitting the wrong part/monster; time1-3 and alertMsgID are timed-objective params."
+    },
+    {
+      "address": "10ea1fc0",
+      "currentName": "FUN_10ea1fc0",
+      "proposedName": "FlowNode_SpawnGroup3Slot::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203ab60) for a 3-slot monster spawn group. Inputs: enable, spawnGroupID. Outputs (per slot x3): monsterID, monsterCount, spawnRegionID, delay, respawnAmount, respawnDelay, scale (i.e. monsterID/monsterID2/monsterID3 etc.). Defines up to three distinct monster spawns keyed by a spawnGroupID.",
+      "subsystem": "spawn-config",
+      "confidence": "high",
+      "formulas": [
+        "three identical field blocks suffixed '', '2', '3'",
+        "'scale'/'scale2'/'scale3' output tag = 2 (float); ids/counts/delays tag = 1 (int)",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x10"
+      ],
+      "costs": [
+        "monsterCount per slot = number to spawn",
+        "delay = first-spawn delay; respawnAmount + respawnDelay = respawn behavior per slot"
+      ],
+      "serverRelevance": "authoritative data surface (server executes per-slot spawn counts/delays/respawns for a spawnGroupID)",
+      "notes": "Simpler per-slot alternative to the weighted MonsterSpawnGroup node (10e99a40)."
+    },
+    {
+      "address": "10eb7360",
+      "currentName": "FUN_10eb7360",
+      "proposedName": "FlowNode_SpawnEntityByArchetype::GetConfiguration",
+      "purpose": "FlowGraph node config (guard DAT_1203c0a8): input 'archeType' (entity archetype string-list port); outputs Success, SpawnEntityID, Failed. Spawns a single entity from an archetype and reports its entity id or failure.",
+      "subsystem": "flowgraph-spawn",
+      "confidence": "high",
+      "formulas": [
+        "Success/Failed output tag = 6 (event); SpawnEntityID tag = 3 (entityId)",
+        "archeType input uses string-list port descriptor (DAT_1201fc98 + type 0x11df76e9)",
+        "config flags: param_1[2] = (param_1[2] & 0xfffff01f) | 0x11"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative spawn (server creates the entity and returns its net id); config is editor metadata",
+      "notes": "General-purpose archetype spawner distinct from monster-specific nodes."
+    },
+    {
+      "address": "10ec8f70",
+      "currentName": "CPlayer__SpawnParticleEffect",
+      "proposedName": "CPlayer::SpawnParticleEffect",
+      "purpose": "Client visual: profiles scope 'CPlayer::SpawnParticleEffect', builds a particle descriptor (scale 1.0f) and queues it. Player-side FX twin of 10da0520.",
+      "subsystem": "player-fx",
+      "confidence": "high",
+      "formulas": ["scale=0x3f800000(1.0f); FUN_10b01ff0(local_34,pos,dir,1.0f,0,0) -> FUN_10a7b9f0(1,desc)"],
+      "costs": [],
+      "serverRelevance": "client-only (FX)",
+      "notes": "Identical body to 10da0520 and 10f10670."
+    },
+    {
+      "address": "10efa380",
+      "currentName": "FUN_10efa380",
+      "proposedName": "CPlayer::SpawnPerfectDodgeEffect",
+      "purpose": "Reads InfoRecord 'perfectDodgeGeometry'->'effect' particle name and spawns it attached to the player's 'Bip01 Spine' bone (via character-instance vtbl+0x1e8) when the profiler gate passes. Client dodge feedback FX.",
+      "subsystem": "player-fx",
+      "confidence": "high",
+      "formulas": [
+        "attach transform: pos/rot zeroed, scale field local_18=0x3f800000(1.0f)",
+        "attach call args: (effect,'Bip01 Spine',&pos,&rot,1.0f,0,1,1,0,0)",
+        "gate via 'Particle.SpawnEffect' profiler scope"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (perfect-dodge visual)",
+      "notes": "Perfect-dodge is a combat mechanic but this function only renders its effect."
+    },
+    {
+      "address": "10f10670",
+      "currentName": "CPlayer__SpawnParticleEffect_10f10670",
+      "proposedName": "CPlayer::SpawnParticleEffect_dup",
+      "purpose": "Byte-identical duplicate of CPlayer::SpawnParticleEffect (10ec8f70). Client FX.",
+      "subsystem": "player-fx",
+      "confidence": "high",
+      "formulas": ["scale=1.0f particle descriptor"],
+      "costs": [],
+      "serverRelevance": "client-only (FX)",
+      "notes": "Duplicate symbol."
+    },
+    {
+      "address": "10f9ac10",
+      "currentName": "FUN_10f9ac10",
+      "proposedName": "CParticleEmitterList::SpawnEffectsForEntry",
+      "purpose": "Client FX: iterates an effect-entry array (0x30-dword/0xc0-byte stride) attached to a spawn record and, for each entry passing the 'Particle.SpawnEffect' gate, attaches the particle to a bone via character vtbl+0x1e8 with scale 1.0f.",
+      "subsystem": "player-fx",
+      "confidence": "medium",
+      "formulas": [
+        "iterate puVar2 from *(param_3+0x3c) to *(param_3+0x40), stride 0xc dwords (0x30 bytes? actually +0xc ints=48 bytes)",
+        "per entry: local pos = puVar3[-2..0]; attach (id, boneName puVar3[-6], &vec puVar3[-5], &pos, 1.0f,0,1,1,0,0)",
+        "guard: DAT_1202e818 and its +0xa0 subsystem non-null"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (FX)",
+      "notes": "Called by 10f9ace0 and 10f9b480."
+    },
+    {
+      "address": "10f9ace0",
+      "currentName": "FUN_10f9ace0",
+      "proposedName": "CParticleEmitterList::SpawnEffectAtIndex",
+      "purpose": "Client FX: bounds-checks an index into a particle-entry array (0x80-byte stride, count = (arr_end - arr_begin)>>7), and if entry[0] > threshold DAT_11de9890 spawns the entry's particle on its bone and recurses into child effects (FUN_10f9ac10). Otherwise cleans up (FUN_10f9ab90). Stores current index at param_1[0x84].",
+      "subsystem": "player-fx",
+      "confidence": "medium",
+      "formulas": [
+        "count = ((int)param_1[0x82] - (int)param_1[0x81]) >> 7  (0x80-byte entries)",
+        "entry = index*0x80 + param_1[0x81]",
+        "prev entry (if index>0) = entry - 0x20 dwords (0x80 bytes)",
+        "spawn condition: *entry (float) > DAT_11de9890 (small epsilon)",
+        "attach: (entry[3]=id, entry[4]=bone, entry+5=vec, &pos(entry[8..10]), 1.0f,0,1,1,0,0)",
+        "param_1[0x84] = index (last-processed marker)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (FX playback)",
+      "notes": "DAT_11de9890 is a threshold/epsilon float."
+    },
+    {
+      "address": "10f9b480",
+      "currentName": "FUN_10f9b480",
+      "proposedName": "CParticleEmitterList::SpawnEffectShared",
+      "purpose": "Client FX variant of 10f9ace0 using different struct offsets (array at +500/+0x1f8, 0x80 stride). Spawns the indexed particle entry on its bone, recurses children, and if the entry's tag string (at entry+0x7c) differs from empty-sentinel releases it. Mentions 'mh_sharemem_addrinfo' (shared-memory addr info). Stores index at +0x210.",
+      "subsystem": "player-fx",
+      "confidence": "low",
+      "formulas": [
+        "count = (*(param_1+0x1f8) - *(param_1+500)) >> 7",
+        "entry = index*0x80 + *(param_1+500)",
+        "attach: (*(entry+0xc)=id, *(entry+0x10)=bone, entry+0x14=vec, &pos(entry+0x20..0x28), 1.0f,0,1,1,0,0)",
+        "string compare entry+0x7c vs &DAT_11d9d32b (empty) to decide refcount release",
+        "*(param_1+0x210) = index"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (FX)",
+      "notes": "'mh_sharemem_addrinfo' string suggests this path may run in a shared-memory/render context; still visual."
+    },
+    {
+      "address": "11004740",
+      "currentName": "FUN_11004740",
+      "proposedName": "BehaviorTree::LoadWithParentInheritance",
+      "purpose": "Loads a behavior-tree XML by filename, then reads its 'Parent' node's 'FileName' attribute and loads the parent tree from '/Scripts/AI/BehaviorTree/'+parentFile, implementing BT inheritance. Uses the engine XML/system node (DAT_1202e818 root vtbl+0x1c4 -> +0x40 parse).",
+      "subsystem": "behaviortree",
+      "confidence": "medium",
+      "formulas": [
+        "parent path = '/Scripts/AI/BehaviorTree/' + xmlNode['Parent']['FileName']",
+        "local_220[512] stack buffer for constructed path",
+        "string-heap counter DAT_1202015c adjusted on buffer free"
+      ],
+      "costs": [],
+      "serverRelevance": "shared/authoritative (behavior-tree definitions drive monster AI; loaded wherever BT runs — server-authoritative for MHO monsters)",
+      "notes": "MHO stores BTs under /Scripts/AI/BehaviorTree/. Parent-chain loading = BT template inheritance."
+    },
+    {
+      "address": "1101b290",
+      "currentName": "FUN_1101b290",
+      "proposedName": "CMonster::OnDamageFireBTDamageEvent",
+      "purpose": "Damage-reception handler that aggregates a HitDescriptor's damage components, then fires a 'DamageEvent' into the monster's BehaviorTreeBase blackboard with AttackDir, HitDamage, HitPoint, AttackerID, AttackAttr. Also raises the 'MHOnDamage' script event and marks the entity dirty (network 0x70,5). Gates on attack-attribute mask matching (param_1+0x30 & attrFlags). This is the aggro/threat input path from combat into AI.",
+      "subsystem": "monster-ai-damage",
+      "confidence": "medium",
+      "formulas": [
+        "damage array param_3 (pfVar1): [0..5] are 6 damage components (element/status channels)",
+        "HitDamage = (int)ceil(pfVar1[0]) + (int)ceil(pfVar1[1] + DAT_11de9890 + pfVar1[2] + pfVar1[3] + pfVar1[4] + pfVar1[5])",
+        "attr-flag detection: fields param_3[0x1a],[0x1c],[0x1e],[0x20] compared == 1.4013e-45 (float bit-pattern 0x00000001) to find the active attack-attr slot; if none, sets pfVar1[0x1b]=1.4013e-45",
+        "if attacker entity type (vtbl+0xa8) == 2 : OR flag 8 into the attr word (pfVar7[1] |= 8) — flags a special hit class",
+        "gate: (*(param_1+0x30) & (uint)pfVar7[1]) != 0  (attack-attr mask must intersect monster's accepted mask)",
+        "AttackDir = attackerPos - hitEntityPos (per-axis subtraction of two Vec3 fetched via vtbl+0x94)",
+        "on gate-fail: zeroes all 6 damage components (damage nullified)"
+      ],
+      "costs": [
+        "HitDamage rounding: each channel ceil()'d; channels 1-5 summed then ceil'd together, channel 0 ceil'd separately, results added"
+      ],
+      "serverRelevance": "authoritative/validation (damage aggregation + attack-attribute gating decides whether a hit registers and how much; feeds BT/aggro). In MHO server drives monsters, so this math is the reference for HitDamage and attack-attr acceptance even though the code path is client-side BT.",
+      "notes": "CBuffInfo::SerializeHitDamageMessage64 packs the damage msg; HitDescriptor::ComputeAttackAttrMask supplies AttackAttr. DAT_11de9890 is the small epsilon also used in FX. The 6-component damage vector + attack-attr mask is the core hit model."
+    },
+    {
+      "address": "11035fb0",
+      "currentName": "FUN_11035fb0",
+      "proposedName": "ScriptBind_BehaviorTree::Register",
+      "purpose": "Registers the Lua/script binding table for the BehaviorTreeBase component (vtable PTR_FUN_11d0a268). Exposes: TestFunc, SetBTBlackBoardValue{Bool,EntityID,Float,String,Vec3,Uint}, GetBTBlackBoardValue{Bool,EntityID,Float,String,Vec3}, LoadEventBehaviorTree, LoadBehaviorTree, LoadBlackboard, ClearAllTrees, InitBehaviorTrees, SetBTBlackBoardValueStringString, ExecuteEventTree.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": [
+        "each entry registered via (component[0x11] vtbl +100)(&descriptor) with param-signature strings (e.g. 'KeyName,BoolValue')",
+        "handler fn ptrs: SetBool=FUN_110369a0, SetEntityID=FUN_110367e0, SetFloat=FUN_11036870, SetString=FUN_11036a30, SetVec3=FUN_11036900, SetUint=FUN_11036ad0, GetBool=FUN_11037020, GetEntityID=FUN_11036d60, GetFloat=FUN_11036e50, GetString=FUN_11037100, GetVec3=FUN_11036f30, LoadEventBT=FUN_110371f0, LoadBT=FUN_11037380, LoadBlackboard=FUN_11037510, ClearAllTrees=FUN_110376a0, InitBehaviorTrees=FUN_110376f0, SetStringString=FUN_11036b30, ExecuteEventTree=FUN_110377d0"
+      ],
+      "costs": [],
+      "serverRelevance": "shared scripting glue (lets Lua/entity scripts drive the BT blackboard); behavior it exposes is AI-authoritative",
+      "notes": "Companion larger bind table at 11037e80 adds monster combat toggles."
+    },
+    {
+      "address": "110367a0",
+      "currentName": "FUN_110367a0",
+      "proposedName": "ScriptBind_BT::GetComponentHelper",
+      "purpose": "Helper: resolves the calling entity, fetches its component 0x144 and its 'BehaviorTreeBase' sub-object. Used as the common prologue for BT scriptbind calls.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["entity = param_2 vtbl+8; comp = (*(param_1+0x58) vtbl+0x144)(entity); comp->GetImpl('BehaviorTreeBase') via +0x18"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": "Pattern repeated inline in the sibling functions."
+    },
+    {
+      "address": "110367e0",
+      "currentName": "FUN_110367e0",
+      "proposedName": "ScriptBind_BT::SetBlackboardEntityID",
+      "purpose": "Lua binding: SetBTBlackBoardValueEntityID(keyName, entityId). Resolves BehaviorTreeBase then calls its blackboard-set vtbl +0x70 with (keyStringId, entityId).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["arg1 via FUN_10c62470 (string/key), arg2 via FUN_10d32550 (entity id); comp vtbl+0x70(key,entityId)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue (sets AI blackboard)",
+      "notes": "Blackboard setters share vtbl slots +0x70..+0x80 by type."
+    },
+    {
+      "address": "11036870",
+      "currentName": "FUN_11036870",
+      "proposedName": "ScriptBind_BT::SetBlackboardFloat",
+      "purpose": "Lua binding: SetBTBlackBoardValueFloat(keyName, floatValue). Calls BehaviorTreeBase blackboard-set vtbl +0x74 with (key, float).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["key via FUN_10c62470, value via FUN_10c623f0 (float); comp vtbl+0x74(key,float)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11036900",
+      "currentName": "FUN_11036900",
+      "proposedName": "ScriptBind_BT::SetBlackboardVec3",
+      "purpose": "Lua binding: SetBTBlackBoardValueVec3(keyName, vec3). Calls blackboard-set vtbl +0x7c with (key, vec3 x/y/z).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["key via FUN_10c62470, vec via FUN_10b1f370; comp vtbl+0x7c(key, x, y (packed), z)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "110369a0",
+      "currentName": "FUN_110369a0",
+      "proposedName": "ScriptBind_BT::SetBlackboardBool",
+      "purpose": "Lua binding: SetBTBlackBoardValueBool(keyName, bool). Calls blackboard-set vtbl +0x80 with (key, bool).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["key via FUN_10c62470, bool via FUN_10b1f4b0; comp vtbl+0x80(key,bool)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11036a30",
+      "currentName": "FUN_11036a30",
+      "proposedName": "ScriptBind_BT::SetBlackboardString",
+      "purpose": "Lua binding: SetBTBlackBoardValueString(keyName, stringValue). Hashes the value string (FUN_113168d0) and calls blackboard-set vtbl +0x78 with (key, hashedString).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["value string hashed/interned via FUN_113168d0; comp vtbl+0x78(key,*hashed)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11036ad0",
+      "currentName": "FUN_11036ad0",
+      "proposedName": "ScriptBind_BT::SetBlackboardUint",
+      "purpose": "Lua binding: SetBTBlackBoardValueUint(keyName, uint). Calls blackboard-set vtbl +0x70 with (uintKey, value) when key non-zero.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x70(param_3,param_4) guarded by param_3!=0"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": "Shares slot +0x70 with EntityID setter (both integer-typed)."
+    },
+    {
+      "address": "11036b30",
+      "currentName": "FUN_11036b30",
+      "proposedName": "ScriptBind_BT::SetBlackboardStringString",
+      "purpose": "Lua binding: SetBTBlackBoardValueStringString(name, value). Builds two CryString keys and calls BehaviorTreeBase vtbl +0x98 twice. Note: contains a non-returning path (FUN_10c3d580) after the second call — likely a decompiler artifact of an inlined string ctor/exception frame.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "medium",
+      "formulas": ["local CryString from param_3; comp vtbl+0x98(...) (string-keyed string set)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11036d60",
+      "currentName": "FUN_11036d60",
+      "proposedName": "ScriptBind_BT::GetBlackboardEntityID",
+      "purpose": "Lua binding: GetBTBlackBoardValueEntityID(keyName) -> entityId. Reads via BehaviorTreeBase vtbl +0x84 and returns to script (FUN_110273e0).",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x84(key,&out); return script value FUN_110273e0(&out)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue (reads AI blackboard)",
+      "notes": "Getters use vtbl +0x84..+0x94 by type; node-type 6/7 handle refcount/release of returned object."
+    },
+    {
+      "address": "11036e50",
+      "currentName": "FUN_11036e50",
+      "proposedName": "ScriptBind_BT::GetBlackboardFloat",
+      "purpose": "Lua binding: GetBTBlackBoardValueFloat(keyName) -> float. Reads via BehaviorTreeBase vtbl +0x88, returns FUN_10d1c5b0.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x88(key,&out float)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11036f30",
+      "currentName": "FUN_11036f30",
+      "proposedName": "ScriptBind_BT::GetBlackboardVec3",
+      "purpose": "Lua binding: GetBTBlackBoardValueVec3(keyName) -> vec3. Reads via BehaviorTreeBase vtbl +0x90, returns FUN_110333d0.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x90(key,&out xyz)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11037020",
+      "currentName": "FUN_11037020",
+      "proposedName": "ScriptBind_BT::GetBlackboardBool",
+      "purpose": "Lua binding: GetBTBlackBoardValueBool(keyName) -> bool. Reads via BehaviorTreeBase vtbl +0x94 into a packed byte, returns FUN_10d1c620.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x94(key,&byteOut)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11037100",
+      "currentName": "FUN_11037100",
+      "proposedName": "ScriptBind_BT::GetBlackboardString",
+      "purpose": "Lua binding: GetBTBlackBoardValueString(keyName) -> string. Reads via BehaviorTreeBase vtbl +0x8c, resolves interned string (FUN_11317f30) and returns FUN_10a01710.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x8c(key,&hashOut); string = FUN_11317f30(hash)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "110371f0",
+      "currentName": "FUN_110371f0",
+      "proposedName": "ScriptBind_BT::LoadEventBehaviorTree",
+      "purpose": "Lua binding: LoadEventBehaviorTree(FileName). Strips the 'scripts/ai/behaviortree' path prefix (FUN_11037820) then calls BehaviorTreeBase vtbl +0xb4 to load an event-driven BT from the normalized name.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["filename normalized via FUN_11037820 (strip 0x17-char prefix); comp vtbl+0xb4(name)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue (loads AI tree)",
+      "notes": ""
+    },
+    {
+      "address": "11037380",
+      "currentName": "FUN_11037380",
+      "proposedName": "ScriptBind_BT::LoadBehaviorTree",
+      "purpose": "Lua binding: LoadBehaviorTree(FileName). Same normalization as LoadEventBehaviorTree, then calls vtbl +0x9c to load the main BT.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0x9c(normalizedName)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11037510",
+      "currentName": "FUN_11037510",
+      "proposedName": "ScriptBind_BT::LoadBlackboard",
+      "purpose": "Lua binding: LoadBlackboard(FileName). Normalizes path then calls vtbl +0xa0 to load the blackboard definition.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0xa0(normalizedName)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "110376a0",
+      "currentName": "FUN_110376a0",
+      "proposedName": "ScriptBind_BT::ClearAllTrees",
+      "purpose": "Lua binding: ClearAllTrees(). Resolves BehaviorTreeBase and calls FUN_10b04fd0 to tear down all loaded trees.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "110376f0",
+      "currentName": "FUN_110376f0",
+      "proposedName": "ScriptBind_BT::InitBehaviorTrees",
+      "purpose": "Lua binding: InitBehaviorTrees(paramsTable). Reads file_BlackBoardFile, file_BTEventFileName, file_BTFileName1/2/3 from the Lua table and initializes the BT set (FUN_10b04dd0). So a monster can load a blackboard + up to 3 BTs + an event tree in one call.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": [
+        "reads keys: file_BlackBoardFile, file_BTEventFileName, file_BTFileName1, file_BTFileName2, file_BTFileName3",
+        "FUN_10b04dd0(&fileSet) initializes trees"
+      ],
+      "costs": [],
+      "serverRelevance": "shared scripting glue (AI init from config table)",
+      "notes": "Defines the standard per-monster BT file layout: 1 blackboard + 3 behavior trees + 1 event tree."
+    },
+    {
+      "address": "110377d0",
+      "currentName": "FUN_110377d0",
+      "proposedName": "ScriptBind_BT::ExecuteEventTree",
+      "purpose": "Lua binding: ExecuteEventTree(). Resolves BehaviorTreeBase and calls vtbl +0xbc to run the event tree once.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["comp vtbl+0xbc()"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11037820",
+      "currentName": "FUN_11037820",
+      "proposedName": "BehaviorTree::StripScriptPathPrefix",
+      "purpose": "Helper: if the string is >0x17 chars and begins with 'scripts/ai/behaviortree', erases that 23-char prefix (FUN_10a821e0 substr from index 0x18) leaving a relative BT name. Used by all BT Load* binds.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["if len>0x17 && strncmp(s,'scripts/ai/behaviortree',0x17)==0: s = substr(s, 0x18)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": "Duplicate at 1103a300."
+    },
+    {
+      "address": "110378a0",
+      "currentName": "FUN_110378a0",
+      "proposedName": "ScriptBind_BT::GetComponentPtr",
+      "purpose": "Helper returning the BehaviorTreeBase sub-object pointer for the calling entity (component 0x144 -> 'BehaviorTreeBase' via +0x18), or 0.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": ""
+    },
+    {
+      "address": "11037e80",
+      "currentName": "FUN_11037e80",
+      "proposedName": "ScriptBind_MonsterBehaviorTree::Register",
+      "purpose": "Registers the extended scriptbind table (vtable PTR_FUN_11d0a518) for monster BT entities. Includes all blackboard get/set + BT load functions of 11035fb0 PLUS monster combat/physics toggles: ClearPhysicsFlag, EnableAttackable, SetReceiveAttackType, EnablePlayerWall, EnableMonsterWall, AddGeometry, EnableTerrain, EnableSpecialObject, IgnoreHitCount, SetPlayerCanAttack, SetMonsterCanAttack, SetUseMaterialEffect, SetCanHitCount, LogicHide. Also seeds blackboard 'attack force' constants used by monster attacks.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": [
+        "blackboard float constants written via component[0x12] vtbl+0x70: AF_Normal_Short = 0x3f800000 (1.0f), AF_Shake_Gournd = 0x40000000 (2.0f), AF_FlyObj = 0x41000000 (8.0f), AF_Rush = 0x40800000 (4.0f)",
+        "toggle handler fns bind bool ports via FUN_1103aa00; SetReceiveAttackType/SetCanHitCount via int handler FUN_1103a8e0",
+        "handlers: EnableAttackable=FUN_11039a80, SetReceiveAttackType=FUN_11039b60, EnablePlayerWall=FUN_11039bf0, EnableMonsterWall=FUN_11039cd0, AddGeometry=FUN_1103a0f0, EnableTerrain=FUN_11039db0, EnableSpecialObject=FUN_11039e90, IgnoreHitCount=FUN_11039f70, SetPlayerCanAttack=FUN_1103a050, SetMonsterCanAttack=FUN_1103a000, SetUseMaterialEffect=FUN_1103a2b0, SetCanHitCount=FUN_1103a0a0, LogicHide=FUN_1103a380"
+      ],
+      "costs": [
+        "attack-force categories: Normal_Short=1, Shake_Ground=2, Rush=4, FlyObj=8 (bitmask-style values used as hit-reaction classes; align with the '|=8' special-hit flag in 1101b290)"
+      ],
+      "serverRelevance": "shared scripting glue; the exposed toggles (attackable, wall collision, hit-count, can-attack) govern authoritative combat/collision state",
+      "notes": "The AF_* constants (1/2/4/8) are hit-reaction/attack-force classes; 'AF_Shake_Gournd' misspelling preserved from binary. Superset of 11035fb0."
+    },
+    {
+      "address": "1103a300",
+      "currentName": "FUN_1103a300",
+      "proposedName": "BehaviorTree::StripScriptPathPrefix_dup",
+      "purpose": "Byte-identical duplicate of 11037820: strips the 'scripts/ai/behaviortree' 23-char prefix from a BT filename.",
+      "subsystem": "behaviortree-scriptbind",
+      "confidence": "high",
+      "formulas": ["if len>0x17 && strncmp==0: substr(0x18)"],
+      "costs": [],
+      "serverRelevance": "shared scripting glue",
+      "notes": "Duplicate of 11037820."
+    },
+    {
+      "address": "11080ba0",
+      "currentName": "FUN_11080ba0",
+      "proposedName": "SharkAI::SerializeParams",
+      "purpose": "Serializes/loads the 'SSharkParams' movement-AI parameter block for a shark-type monster into struct fields, using an XML/serializer object (vtbl +0x70 float, +0x54 int, +0x74 bool). Maps circling/sprint/melee movement tuning to offsets 0x160..0x1c0.",
+      "subsystem": "monster-ai-movement",
+      "confidence": "high",
+      "formulas": [
+        "speedInertia@0x160, rollAmount@0x164, accel@0x178, decel@0x17c, sprintMultiplier@0x170, sprintDuration@0x174",
+        "rotSpeed_min@0x180, rotSpeed_max@0x184, speed_min@0x188",
+        "minDistanceCircle@0x18c, maxDistanceCircle@0x190 (shown as +400), numCircles@0x194 (int)",
+        "minDistForUpdatingMoveTarget@0x198, meleeAnimation@0x19c (string), meleeDistance@0x1a0",
+        "circlingTime@0x1a4, attackRollTime@0x1a8, attackRollAngle@0x1ac",
+        "escapeAnchorType@0x1b0 (int), bSpawned@0x1b4 (bool)",
+        "headBoneName@0x1b8, spineBoneName1@0x1bc, spineBoneName2@0x1c0"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (movement AI tuning drives server-side monster navigation/attacks); this is the config (de)serializer",
+      "notes": "'SSharkParams' is a CryEngine-style AI param struct; the circling/sprint/roll-attack pattern is the MHO-specific shark/leviathan movement model. Companion runtime handler at 11082790."
+    },
+    {
+      "address": "11082790",
+      "currentName": "FUN_11082790",
+      "proposedName": "SharkAI::OnEventAndReadParams",
+      "purpose": "Shark-AI goal/behavior event handler and runtime param reader. Handles blackboard/signal events: 'targetId' (set current target @0x161c), 'selectTarget' (set target, reset circling state, enter state 8), 'goAway' (enter state 6, reset), 'spawned'. Then reads live movement params (speedInertia, sprint, rotSpeed, turn radius, accel/decel, circle distances, circlingTime, numCircles, bones, melee sub-block) into the runtime struct. A finite state machine field lives at +0x1bd8.",
+      "subsystem": "monster-ai-movement",
+      "confidence": "medium",
+      "formulas": [
+        "targetId/selectTarget: *(param_1+0x161c) = targetEntity",
+        "selectTarget resets: 0x15fc,0x16e0,0x16dc,0x16d8,0x15ec,0x15e8,0x15e4 = 0; state @0x1bd8 = 8; reads 'spawned' flag @0x1b84",
+        "goAway: state @0x1bd8 = 6; resets 0x15fc,0x15ec,0x15e8,0x15e4 = 0",
+        "runtime param offsets: speedInertia@0x1b30, minTurnRadius@0x1b3c, sprintMultiplier@0x1b40, sprintDuration@0x1b44, accel@0x1b48, decel@0x1b4c, rotSpeed_min@0x1b50, rotSpeed_max@0x1b54, speed_min@0x1b58(+7000), minDistanceCircle@0x1b5c, maxDistanceCircle@0x1b60, numCircles@0x1b64(int), minDistForUpdatingMoveTarget@0x1b68, melee.radius@0x1b70, circlingTime@0x1b74, melee.rollTime@0x1b78, melee.rollAngle@0x1b7c, escapeAnchorType@0x1b80",
+        "rollAngle converted to radians: *pfVar1 *= DAT_11de98c0 (deg->rad, ~0.01745)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative (target selection + movement state drive server monster behavior). Note this is the CryEngine goalop/behavior instance; MHO monsters are server-authoritative so state machine (@0x1bd8: 6=goAway/flee, 8=selectTarget/engage) and target field (@0x161c) are reference for server AI.",
+      "notes": "DAT_11de98c0 = PI/180 degrees-to-radians constant. State enum values observed: 6 (goAway/escape), 8 (engage/select target). Reads a nested 'melee' sub-record with radius/animation/rollTime/rollAngle."
+    },
+    {
+      "address": "1129ddf0",
+      "currentName": "CCliBattleGroundMgr__OnGameEvent_SpawnLocalPlayer",
+      "proposedName": "CCliBattleGroundMgr::OnGameEvent_SpawnLocalPlayer",
+      "purpose": "CLIENT battleground manager: on the local-player spawn event, connects to the Battle Server (IP@+0x849a8, uin@+0x84da8), sends a verify/handshake message, then busy-waits (Sleep(10) loop) for the server to acknowledge player init; periodically re-requests init; on success initializes the local player entity and applies spawn transform. On failure returns to town.",
+      "subsystem": "battleground-client",
+      "confidence": "high",
+      "formulas": [
+        "connect: (BS vtbl+0x14)(ip@+0x849a8, uin@+0x84da8, key, 3, 100, emptyStr) -> result code",
+        "verify msg header id = 0x0d; payload copies 8 dwords of session key from *(param_1+0x84db4)",
+        "timeout g_ConnBattleSvrTimeOut default 60000 ms (CVar, +0x30 getter)",
+        "wait loop: Sleep(10); elapsed += 10; seconds = elapsed/1000; log each whole second; after >1000ms and second%0x1e(30)==0 -> resend 'Recv Client Request Player Init Msg!!' (retry #++)",
+        "keepalive/reconnect when timeout exceeded (elapsed-timeout); loop until *(param_1+0x84db8)!=0",
+        "on init: *(param_1+0x18)+=1000; *(param_1+0x24)+=1000 (spawn coordinate/id offsets); state 0x84db8: 1=ready, 2=CloseByTown"
+      ],
+      "costs": [
+        "g_ConnBattleSvrTimeOut = 60000 ms connect timeout",
+        "player-init retry cadence: every 30 s after first 1 s"
+      ],
+      "serverRelevance": "client-only (network client that connects to the authoritative Battle Server and requests player spawn/init)",
+      "notes": "'Cli' prefix = client. Uses shared-memory / networksink handshake. Companion 1129fae0 is the receive path."
+    },
+    {
+      "address": "1129fae0",
+      "currentName": "CCliBattleGroundMgr__OnGameEvent_SpawnLocalPlayer_1129fae0",
+      "proposedName": "CCliBattleGroundMgr::OnRecvPlayerInitMsg",
+      "purpose": "CLIENT handler for the 'Player Init Msg' received from the network sink (completes the spawn handshake started by 1129ddf0). Parses the message, creates/looks up the local player entity, copies the full player-state blob into the manager, and initializes rank/hunt-count UI and combat state. Sets ready flags (+0x109784=1, +0x84db8=1).",
+      "subsystem": "battleground-client",
+      "confidence": "medium",
+      "formulas": [
+        "guard: FUN_1128e050() (valid msg) && *(param_1+0x109784)=='\\0' (not already spawned)",
+        "memcpy player-state blob: memcpy(param_1+0x14, msg, 0x8498e) when host is the server-authority (+0x6c getter)",
+        "reads hunt rank/count via CPlayer::GetHuntRankOrCount for UI (FUN_11398580 rank frame)",
+        "special-hit / difficulty field at msg+0x5e483 (flag) and msg+0x5f697 (added to +0x48c counter)",
+        "sets flags: *(param_1+0x109784)=1 (spawned), *(param_1+0x84db8)=1 (init ready)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (deserializes authoritative player state pushed by server; 0x8498e-byte player blob)",
+      "notes": "Player-state blob size 0x8498e bytes copied verbatim from server message — useful for sizing the server->client player-init packet."
+    }
+  ]
+}

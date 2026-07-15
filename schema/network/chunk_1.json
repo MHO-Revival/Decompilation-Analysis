@@ -1,0 +1,1315 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x10128d30",
+      "currentName": "FUN_10128d30",
+      "proposedName": "TlvStoreData_Store_Unpack_v",
+      "purpose": "TDR unpack of a single 'store' element of TlvStoreData: reads field_id=1 (idx, uint8 @0) and field_id=2 (len-delimited string, max 7 bytes, memmove into +1 with NUL terminator -> char name[8]@1). Presence bitmask at +9.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this element identically inside TlvStoreData.Stores; nested sub-struct, not a top-level message.",
+      "protocolFields": [
+        "1 idx: uint8 @ 0 (wire1)",
+        "2 name: char[8] len-delim string, max 7 chars @ 1 (wire5)"
+      ],
+      "relatedTlv": ["TlvStoreData", "TlvIdxName"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "This is the 'stores' element reader referenced by TlvStoreData doc as sub_10128D30; C# TlvStoreData confirms List<TlvIdxName> (idx+name), consistent with reversed {uint8 idx, char[8] name}.",
+      "notes": "Reader (varint-length) variant. Loop reads tag via FUN_1010ccb0 then switch(tag>>4)."
+    },
+    {
+      "address": "0x101292e0",
+      "currentName": "FUN_101292e0",
+      "proposedName": "TlvStoreData_Pack_varint",
+      "purpose": "TDR pack of TlvStoreData (varint-encoding variant). Writes curNum(u8), count(u8), stores[] nested array (FUN_10128930 per elem, max 8), storeSize as VARINT (tag 0x40), storeData byte-array (tag 0x55, len=storeSize<=200000).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize player store state (curNum/store list/opaque blob) in this exact layout.",
+      "protocolFields": [
+        "1 curNum: uint8 @ 0 (tag 0x11)",
+        "2 count: uint8 @ 1 (tag 0x21) — element count of stores, max 8",
+        "3 stores: nested array of Store(FUN_10128930) (tag 0x35, len-delim)",
+        "4 storeSize: uint32 @ 0x6a as VARINT (tag 0x40) — max 200000",
+        "5 storeData: uint8[storeSize] @ 0x6e (tag 0x55, len-delim byte array)"
+      ],
+      "relatedTlv": ["TlvStoreData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvStoreData.md is WRONG: field2 'count' typed 'unknown' — it is uint8 (tag 0x21); field3 'stores' typed 'int32 @106' — it is a nested TlvIdxName array (offset 1 is count, 106/0x6a is storeSize); field5 'storeData' typed 'int32' — it is a variable-length uint8[] (len=storeSize) @0x6e. C# TlvStoreData matches this corrected view (List<TlvIdxName>, byte[] StoreData).",
+      "notes": "Varint variant (storeSize tag 0x40). Sibling FUN_101294b0 is the fixed-4-byte variant matching the doc's tag 0x43."
+    },
+    {
+      "address": "0x101294b0",
+      "currentName": "FUN_101294b0",
+      "proposedName": "TlvStoreData_Pack_fixed",
+      "purpose": "TDR pack of TlvStoreData (fixed-width variant). Identical to FUN_101292e0 except storeSize written as fixed int32 (tag 0x43 via FUN_1010c190) and stores elements packed by FUN_10128a00.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize TlvStoreData; this fixed-width encoding matches the generated doc's tags.",
+      "protocolFields": [
+        "1 curNum: uint8 @ 0 (tag 0x11)",
+        "2 count: uint8 @ 1 (tag 0x21)",
+        "3 stores: nested array (tag 0x35)",
+        "4 storeSize: int32 @ 0x6a FIXED 4-byte (tag 0x43)",
+        "5 storeData: uint8[storeSize] @ 0x6e (tag 0x55)"
+      ],
+      "relatedTlv": ["TlvStoreData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Same field-type corrections as FUN_101292e0. Doc tag 0x43 for storeSize matches THIS fixed variant (not the varint sibling).",
+      "notes": "Fixed variant. MHO emits both a varint and a fixed-4-byte encoder per struct; docs were generated from the fixed encoder."
+    },
+    {
+      "address": "0x10129d20",
+      "currentName": "FUN_10129d20",
+      "proposedName": "TlvStoreData_DebugPrint",
+      "purpose": "TdrBufUtil debug/dump printer for TlvStoreData. Emits named fields [curNum][count][stores][storeSize][storeData] via FUN_1024a290/FUN_1010c010.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Not needed on server (diagnostic pretty-printer); authoritative source of field NAMES for TlvStoreData.",
+      "protocolFields": [
+        "curNum: uint8 @ 0",
+        "count: uint8 @ 1 (max 8)",
+        "stores[]: nested (FUN_10128fc0 print)",
+        "storeSize: uint32 @ 0x6a (max 200000)",
+        "storeData: uint8[] @ 0x6e"
+      ],
+      "relatedTlv": ["TlvStoreData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Confirms field names/types over the doc's wrong 'unknown'/'int32' entries.",
+      "notes": "Debug printer; ignore for wire compat but use for naming."
+    },
+    {
+      "address": "0x101305c0",
+      "currentName": "FUN_101305c0",
+      "proposedName": "TlvGuildCommerceData_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvGuildCommerceData. Emits [commerceCount][commerceInfo(array,max10)][selectCommerceId][guildWarHistoryInfo][buffCount][commerceBuffInfo(array,max5)].",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic only; gives field names + array bounds for guild commerce state.",
+      "protocolFields": [
+        "commerceCount: int32 @ 0 (max 10)",
+        "commerceInfo[]: nested (FUN_1012f0f0), count=commerceCount",
+        "selectCommerceId: int32 @ 0xae",
+        "guildWarHistoryInfo: uint32 @ 0xb2",
+        "buffCount: int32 @ 0xb6 (max 5)",
+        "commerceBuffInfo[]: nested (FUN_1012f750), count=buffCount"
+      ],
+      "relatedTlv": ["TlvGuildCommerceData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvGuildCommerceData.md misorders/mistypes: it lists commerceInfo as field6 int32 and commerceBuffInfo as field5 int32; the printer shows commerceInfo is a nested ARRAY (count=commerceCount, max10) and commerceBuffInfo a nested ARRAY (count=buffCount, max5). commerceCount/buffCount are the loop counters, not simple int32 leaves.",
+      "notes": "Server-authored guild commerce/boat state."
+    },
+    {
+      "address": "0x10131c10",
+      "currentName": "FUN_10131c10",
+      "proposedName": "TlvGuildFuncRecords_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvGuildFuncRecords: [count][guildFuncRecordInfosPkg(array,max500)] each elem printed by FUN_10131250.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; field names/bounds for guild function-record log.",
+      "protocolFields": [
+        "count: int32 @ 0 (0..500)",
+        "guildFuncRecordInfosPkg[]: nested (FUN_10131250)"
+      ],
+      "relatedTlv": ["TlvGuildFuncRecords"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Element printer FUN_10131250 shared with TlvGuildBuyRecords."
+    },
+    {
+      "address": "0x101325f0",
+      "currentName": "FUN_101325f0",
+      "proposedName": "TlvGuildBuyRecords_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvGuildBuyRecords: [count][guildBuyRecordInfosPkg(array,max500)] each elem FUN_10131250.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; field names/bounds for guild buy-record log.",
+      "protocolFields": [
+        "count: int32 @ 0 (0..500)",
+        "guildBuyRecordInfosPkg[]: nested (FUN_10131250)"
+      ],
+      "relatedTlv": ["TlvGuildBuyRecords"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Same element type as TlvGuildFuncRecords."
+    },
+    {
+      "address": "0x10139bc0",
+      "currentName": "FUN_10139bc0",
+      "proposedName": "TlvSculptureHistory_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvSculptureHistory: [hisCount][sculptures(array,max3)] each elem FUN_10139290.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; field names/bounds.",
+      "protocolFields": [
+        "hisCount: int32 @ 0 (0..3)",
+        "sculptures[]: nested (FUN_10139290)"
+      ],
+      "relatedTlv": ["TlvSculptureHistory"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": ""
+    },
+    {
+      "address": "0x1013af60",
+      "currentName": "FUN_1013af60",
+      "proposedName": "TlvSculptureContainer_DebugPrint",
+      "purpose": "TdrBufUtil printer for a sculpture container: [curCount][sculptures(array,max5)] each elem FUN_1013a5d0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; field names/bounds.",
+      "protocolFields": [
+        "curCount: int32 @ 0 (0..5)",
+        "sculptures[]: nested (FUN_1013a5d0)"
+      ],
+      "relatedTlv": ["TlvSculptureContainer"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Distinct element type (FUN_1013a5d0) from TlvSculptureHistory."
+    },
+    {
+      "address": "0x1013be60",
+      "currentName": "FUN_1013be60",
+      "proposedName": "TlvEquips_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvEquips: [count][equips(array,max0x28=40)] each elem prints [itemType] (uint32 @ elem+0, stride 8 bytes).",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; equip list field names/bounds.",
+      "protocolFields": [
+        "count: uint32 @ 0 (0..40)",
+        "equips[]: struct{ itemType: uint32 @ +0 } stride 8 bytes, starting @ 4"
+      ],
+      "relatedTlv": ["TlvEquips"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Element inlined (not a sub-struct call) — prints only itemType via FUN_1024a290; each element occupies 2 dwords."
+    },
+    {
+      "address": "0x1013c390",
+      "currentName": "FUN_1013c390",
+      "proposedName": "Tdr_Unpack_CountBlob1286_varint",
+      "purpose": "TDR unpack of {count, opaque byte blob}: field1 count (varint via FUN_1010ccb0 into *param_1), field2 len-delim byte array copied byte-by-byte into +4, capped at 0x506 (1286) bytes; sets *param_1 to bytes read. Presence bitmask @ 0x50a.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must produce a matching count+blob field; struct identity unresolved.",
+      "protocolFields": [
+        "1 count/len: uint32 @ 0 (varint)",
+        "2 data: uint8[<=0x506] @ 4 (len-delim, 1286-byte cap)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader variant; sibling FUN_1013c510 is fixed-4-byte reader. Fixed 1286-byte inline buffer."
+    },
+    {
+      "address": "0x1013c510",
+      "currentName": "FUN_1013c510",
+      "proposedName": "Tdr_Unpack_CountBlob1286_fixed",
+      "purpose": "Fixed-4-byte-length variant of FUN_1013c390: field1 count read via FUN_1010c870 (fixed u32), byte blob into +4 capped 0x506.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must produce a matching count+blob field.",
+      "protocolFields": [
+        "1 count/len: uint32 @ 0 (fixed 4-byte)",
+        "2 data: uint8[<=0x506] @ 4 (len-delim)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant of FUN_1013c390."
+    },
+    {
+      "address": "0x101412a0",
+      "currentName": "FUN_101412a0",
+      "proposedName": "TlvSculptureLibData_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvSculptureLibData: [count][libs(array,max4, FUN_10140430)][cfgCount][cfgs(array,max10, FUN_1013f770)].",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; field names/bounds for sculpture-lib config.",
+      "protocolFields": [
+        "count: int32 @ 0 (0..4)",
+        "libs[]: nested (FUN_10140430)",
+        "cfgCount: int32 @ 0x54fd*4 (param_1[0x54fd]) (0..10)",
+        "cfgs[]: nested (FUN_1013f770)"
+      ],
+      "relatedTlv": ["TlvSculptureLibData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "cfgCount stored far into struct (dword index 0x54fd), indicating a large libs array precedes it."
+    },
+    {
+      "address": "0x101416d0",
+      "currentName": "FUN_101416d0",
+      "proposedName": "TlvSculptureLibData_Pack_varint_wrapper",
+      "purpose": "TDR pack wrapper: writes tag 0x15 (field1 len-delim), reserves 4-byte length (FUN_1010bf70), serializes nested struct via FUN_10140860, then patches length (FUN_1010c3c0).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must frame nested len-delim field with a 4-byte length prefix.",
+      "protocolFields": [
+        "1 body: len-delim nested struct (FUN_10140860) @ tag 0x15"
+      ],
+      "relatedTlv": ["TlvSculptureLibData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint wrapper; sibling FUN_10141750 uses FUN_10140a40 (fixed variant)."
+    },
+    {
+      "address": "0x10141750",
+      "currentName": "FUN_10141750",
+      "proposedName": "TlvSculptureLibData_Pack_fixed_wrapper",
+      "purpose": "Fixed-variant pack wrapper equivalent to FUN_101416d0, nested body via FUN_10140a40.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must frame nested len-delim field.",
+      "protocolFields": [
+        "1 body: len-delim nested struct (FUN_10140a40) @ tag 0x15"
+      ],
+      "relatedTlv": ["TlvSculptureLibData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant of FUN_101416d0."
+    },
+    {
+      "address": "0x10141ad0",
+      "currentName": "FUN_10141ad0",
+      "proposedName": "TlvSculptureLibData_libs_DebugPrintWrapper",
+      "purpose": "TdrBufUtil helper that prints label [libs] then dispatches to FUN_101412a0 with incremented indent.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic only.",
+      "protocolFields": [
+        "libs: nested-array label wrapper -> FUN_101412a0"
+      ],
+      "relatedTlv": ["TlvSculptureLibData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Pretty-print dispatch wrapper."
+    },
+    {
+      "address": "0x10143ac0",
+      "currentName": "FUN_10143ac0",
+      "proposedName": "Tdr_Pack_U8U32_varint",
+      "purpose": "TDR pack of {uint8@0, uint32@1}: tag 0x11 u8, tag 0x20 u32 as VARINT (FUN_1010c560).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this small pair struct; identity unresolved.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: uint32 @ 1 (tag 0x20 varint)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint variant; matching unpack FUN_10143c90; fixed sibling FUN_10143b40."
+    },
+    {
+      "address": "0x10143b40",
+      "currentName": "FUN_10143b40",
+      "proposedName": "Tdr_Pack_U8U32_fixed",
+      "purpose": "Fixed variant of FUN_10143ac0: tag 0x11 u8, tag 0x23 int32 fixed (FUN_1010c190).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this pair struct.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: int32 @ 1 (tag 0x23 fixed 4-byte)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant; matching unpack FUN_10143d80."
+    },
+    {
+      "address": "0x10143c90",
+      "currentName": "FUN_10143c90",
+      "proposedName": "Tdr_Unpack_U8U32_varint",
+      "purpose": "TDR unpack of {uint8@0, uint32@1}: field1 u8, field2 u32 via FUN_1010cbd0 (varint). Presence bitmask @ +5.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server-side counterpart of FUN_10143ac0.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "2 f2: uint32 @ 1 (varint)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; sibling FUN_10143d80 fixed."
+    },
+    {
+      "address": "0x10143d80",
+      "currentName": "FUN_10143d80",
+      "proposedName": "Tdr_Unpack_U8U32_fixed",
+      "purpose": "Fixed variant of FUN_10143c90: field2 u32 via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server-side counterpart of FUN_10143b40.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "2 f2: uint32 @ 1 (fixed 4-byte)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed reader."
+    },
+    {
+      "address": "0x101441e0",
+      "currentName": "FUN_101441e0",
+      "proposedName": "Tdr_Pack_U8U32U32_varint",
+      "purpose": "TDR pack of {uint8@0, uint32@1, uint32@5}: tag 0x11 u8, tag 0x20 u32 varint, tag 0x30 u32 varint (FUN_1010c560).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this triple; identity unresolved.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: uint32 @ 1 (tag 0x20 varint)",
+        "3 f3: uint32 @ 5 (tag 0x30 varint)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint variant; unpack FUN_101443f0; fixed sibling FUN_10144280."
+    },
+    {
+      "address": "0x10144280",
+      "currentName": "FUN_10144280",
+      "proposedName": "Tdr_Pack_U8U32U32_fixed",
+      "purpose": "Fixed variant of FUN_101441e0: tag 0x11 u8, tag 0x23 int32, tag 0x33 int32 (FUN_1010c190).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this triple.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: int32 @ 1 (tag 0x23 fixed)",
+        "3 f3: int32 @ 5 (tag 0x33 fixed)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x101443f0",
+      "currentName": "FUN_101443f0",
+      "proposedName": "Tdr_Unpack_U8U32U32_varint",
+      "purpose": "TDR unpack of {uint8@0, uint32@1, uint32@5}: field2/field3 via FUN_1010cbd0 (varint). Presence @ +9.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_101441e0.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "2 f2: uint32 @ 1 (varint)",
+        "3 f3: uint32 @ 5 (varint)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_10144500."
+    },
+    {
+      "address": "0x10144500",
+      "currentName": "FUN_10144500",
+      "proposedName": "Tdr_Unpack_U8U32U32_fixed",
+      "purpose": "Fixed variant of FUN_101443f0: field2/field3 via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_10144280.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "2 f2: uint32 @ 1 (fixed)",
+        "3 f3: uint32 @ 5 (fixed)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed reader."
+    },
+    {
+      "address": "0x10144bc0",
+      "currentName": "FUN_10144bc0",
+      "proposedName": "Tdr_Unpack_NestedU16U16",
+      "purpose": "TDR unpack: field1 nested u32/struct via FUN_1010c870 @0; field2 2-byte value @4 (bytes swapped: +4 hi,+5 lo); field3 2-byte value @6. Presence @ +8. Fields 2/3 read as raw 2-byte big-endian pairs (wire type 3 in switch).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit matching {u32, u16, u16}; note byte-swapped 2-byte reads.",
+      "protocolFields": [
+        "1 f1: uint32 @ 0 (nested/fixed)",
+        "2 f2: uint16 @ 4 (2-byte, stored [hi@4,lo@5])",
+        "3 f3: uint16 @ 6 (2-byte, stored [hi@6,lo@7])"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "low",
+      "tlvDocDiscrepancy": "",
+      "notes": "2-byte fields copied with explicit endianness swap (offset+1 then offset)."
+    },
+    {
+      "address": "0x10145430",
+      "currentName": "FUN_10145430",
+      "proposedName": "Tdr_Unpack_U16_ByteArr10_U16Arr10_varint",
+      "purpose": "TDR unpack: field1 u16 @0 (FUN_1010ca10); field2 byte array @2 (len-delim, count into *param_1, max 10); field3 u16 array @6 (element via FUN_1010ccb0 varint, wire3+len prefix, max 10). Presence @ 0x1a (as shorts).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit {u16 count, uint8[10], uint16[10]} array struct.",
+      "protocolFields": [
+        "1 count: uint16 @ 0 (varint)",
+        "2 bytes: uint8[<=10] @ 2 (len-delim scalar array)",
+        "3 words: uint16[<=10] @ 6 (len-delim scalar array, varint elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_10145630 (FUN_1010c800/FUN_1010c870)."
+    },
+    {
+      "address": "0x10145630",
+      "currentName": "FUN_10145630",
+      "proposedName": "Tdr_Unpack_U16_ByteArr10_U16Arr10_fixed",
+      "purpose": "Fixed variant of FUN_10145430: field1 u16 via FUN_1010c800, field3 elems via FUN_1010c870 (fixed).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart fixed reader.",
+      "protocolFields": [
+        "1 count: uint16 @ 0 (fixed)",
+        "2 bytes: uint8[<=10] @ 2",
+        "3 words: uint16[<=10] @ 6 (fixed elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant of FUN_10145430."
+    },
+    {
+      "address": "0x101484d0",
+      "currentName": "FUN_101484d0",
+      "proposedName": "TlvGlobalLevelStatContainer_Pack_varint",
+      "purpose": "TDR pack of the global level-stat container (varint): field1 globalStatCnt(u8@0,max10); field2 globalStatDataType u8 array (tag 0x25); field3 globalStatDataVal u32 array (tag 0x35, elems FUN_1010c5f0); field4 levelDataCnt u16@0x33 (tag 0x40 varint via FUN_1010c4d0, max5000); field5 levelStatDataInfo nested array (FUN_10146d20, tag 0x55); field6 levelModeDataCnt u8@0x4808d(tag 0x61,max10); field7 levelModeStatDataInfo nested array (FUN_101478b0, tag 0x75).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize global/level statistics container in this exact layout.",
+      "protocolFields": [
+        "1 globalStatCnt: uint8 @ 0 (tag 0x11, max 10)",
+        "2 globalStatDataType: uint8[] @ 1 (tag 0x25)",
+        "3 globalStatDataVal: uint32[] @ 0xb (tag 0x35)",
+        "4 levelDataCnt: uint16 @ 0x33 (tag 0x40 varint, max 5000)",
+        "5 levelStatDataInfo[]: nested (FUN_10146d20) (tag 0x55)",
+        "6 levelModeDataCnt: uint8 @ 0x4808d (tag 0x61, max 10)",
+        "7 levelModeStatDataInfo[]: nested (FUN_101478b0) (tag 0x75)"
+      ],
+      "relatedTlv": ["TlvGlobalLevelStatContainer"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Field names confirmed by printer FUN_10149410 ([globalStatCnt][globalStatDataType][globalStatDataVal][levelDataCnt][levelStatDataInfo][levelModeDataCnt][levelModeStatDataInfo]).",
+      "notes": "Varint variant; fixed sibling FUN_101487d0. Very large struct (levelDataCnt array offset 0x4808d)."
+    },
+    {
+      "address": "0x101487d0",
+      "currentName": "FUN_101487d0",
+      "proposedName": "TlvGlobalLevelStatContainer_Pack_fixed",
+      "purpose": "Fixed variant of FUN_101484d0: globalStatDataVal via FUN_1010c190, levelDataCnt via FUN_1010c120 (tag 0x42, fixed 2-byte), nested elems FUN_10146e70/FUN_10147a00.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize container (fixed encoding).",
+      "protocolFields": [
+        "1 globalStatCnt: uint8 @ 0",
+        "2 globalStatDataType: uint8[] @ 1",
+        "3 globalStatDataVal: int32[] @ 0xb (fixed)",
+        "4 levelDataCnt: uint16 @ 0x33 (tag 0x42 fixed 2-byte)",
+        "5 levelStatDataInfo[]: nested (FUN_10146e70)",
+        "6 levelModeDataCnt: uint8 @ 0x4808d",
+        "7 levelModeStatDataInfo[]: nested (FUN_10147a00)"
+      ],
+      "relatedTlv": ["TlvGlobalLevelStatContainer"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x10149410",
+      "currentName": "FUN_10149410",
+      "proposedName": "TlvGlobalLevelStatContainer_DebugPrint",
+      "purpose": "TdrBufUtil printer for the global level-stat container, source of authoritative field names and array bounds.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; naming source.",
+      "protocolFields": [
+        "globalStatCnt: uint8 @ 0 (max 10)",
+        "globalStatDataType: uint8[]",
+        "globalStatDataVal: uint32[]",
+        "levelDataCnt: uint16 @ 0x33 (max 5000)",
+        "levelStatDataInfo[]: nested (FUN_10147540)",
+        "levelModeDataCnt: uint8 @ 0x4808d (max 10)",
+        "levelModeStatDataInfo[]: nested (FUN_101480d0)"
+      ],
+      "relatedTlv": ["TlvGlobalLevelStatContainer"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Debug printer."
+    },
+    {
+      "address": "0x10149fe0",
+      "currentName": "FUN_10149fe0",
+      "proposedName": "TlvEntrustGroupStatList_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvEntrustGroupStatList: [entrustGroupStatCount][entrustGroupStatInfo(array,max0xf=15)] each elem FUN_101468d0.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; entrust (quest commission) group stats.",
+      "protocolFields": [
+        "entrustGroupStatCount: int32 @ 0 (0..15)",
+        "entrustGroupStatInfo[]: nested (FUN_101468d0)"
+      ],
+      "relatedTlv": ["TlvEntrustGroupStatList"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Invoked as [entrustAllStat] within TlvLevelHubSystemData."
+    },
+    {
+      "address": "0x1014b090",
+      "currentName": "FUN_1014b090",
+      "proposedName": "TlvLevelWarningData_DebugPrint",
+      "purpose": "TdrBufUtil printer: [lastRefreshTm][rewardCnt][levelCnt][warningData(array,max10, FUN_1014a6a0)].",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; level warning/reward refresh data (printed as [levelWarningData] in TlvLevelHubSystemData).",
+      "protocolFields": [
+        "lastRefreshTm: uint32 @ 0",
+        "rewardCnt: uint8 @ 4",
+        "levelCnt: uint8 @ 5 (0..10)",
+        "warningData[]: nested (FUN_1014a6a0), count=levelCnt"
+      ],
+      "relatedTlv": ["TlvLevelHubSystemData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Sub-component of the level-hub system data."
+    },
+    {
+      "address": "0x101508d0",
+      "currentName": "FUN_101508d0",
+      "proposedName": "TlvLevelHubSystemData_DebugPrint",
+      "purpose": "TdrBufUtil printer for the large TlvLevelHubSystemData struct (read at sub_1014FF80). Emits 20 named fields; authoritative field list for a struct whose 0x99 wire schema only serializes a subset.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize hub/level progression state; this printer documents the full field set and offsets.",
+      "protocolFields": [
+        "entrustMoneyLastTm: int32 @ 0",
+        "thousandLayerDataCount: int32 @ 4 (0..0x46=70)",
+        "thousandLayerData[]: nested (FUN_10144e00)",
+        "levelStatLen: int32 @ 0x350 (param_1[0xd4]) (0..0x2000)",
+        "levelStatDataPack: uint8[levelStatLen] @ 0x354",
+        "entrustAllStat: nested (FUN_10149fe0 = TlvEntrustGroupStatList)",
+        "levelWarningData: nested (FUN_1014b090)",
+        "monsterSizeHistroyInfo: nested (FUN_1014c2e0)",
+        "unlockHubPageCount: uint16 @ 0x11588 (param_1[0x4562])",
+        "unlockHubPageData[64]: nested (FUN_10143850) @ 0x1158a",
+        "levelUnLockCount: int32 @ 0x1188a (0..5000)",
+        "unLockLevelData: int32[levelUnLockCount] @ 0x1188e",
+        "levelIntegrateData: nested (FUN_1014d8b0)",
+        "hubRewardCount: uint8 @ 0x2649c (param_1[0x9927]) (0..0x40)",
+        "hubRewardData[]: nested (FUN_10143f70)",
+        "unlockLevelGroupCount: uint8 @ 0x266dd (0..0x40)",
+        "unlockLevelGroupData: int32[] @ 0x266de",
+        "hubPageStarUnLockCount: uint8 @ 0x267de (0..0x40)",
+        "hubPageStarUnLockData[]: nested (FUN_101446e0)",
+        "superHunterData: nested (FUN_1014e300)"
+      ],
+      "relatedTlv": ["TlvLevelHubSystemData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvLevelHubSystemData.md self-admits 'schema has 1, DebugFormat has 20'. This printer recovers all 20 fields with offsets; the doc only lists field2 entrustMoneyLastTm. Server implementers should use this full list, not the doc.",
+      "notes": "Huge struct (~0x267e0 bytes). Debug printer only; use for the schema, not wire framing."
+    },
+    {
+      "address": "0x101511a0",
+      "currentName": "FUN_101511a0",
+      "proposedName": "Tdr_Pack_ThreeName32_varint",
+      "purpose": "TDR pack of a struct with three 32-byte fixed strings: strnlen(<0x20) then FUN_1010c2b0 (write bytes) under tags 0x15/0x25/0x35 with length-prefix framing (FUN_1010bf70/FUN_1010c3c0). name0@0, name1@0x20, name2@0x40.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit three NUL-terminated strings each capped at 31 chars; identity unresolved (likely a names/titles struct).",
+      "protocolFields": [
+        "1 name0: char[32] @ 0 (tag 0x15, len-delim, max 31)",
+        "2 name1: char[32] @ 0x20 (tag 0x25, max 31)",
+        "3 name2: char[32] @ 0x40 (tag 0x35, max 31)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "strnlen(0x20) cap => returns -3 if >=31. Sibling FUN_10151330 identical (both are the same string-writer variant)."
+    },
+    {
+      "address": "0x10151330",
+      "currentName": "FUN_10151330",
+      "proposedName": "Tdr_Pack_ThreeName32_fixed",
+      "purpose": "Duplicate/fixed sibling of FUN_101511a0 (identical body: three 32-byte strings under tags 0x15/0x25/0x35).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit three capped strings.",
+      "protocolFields": [
+        "1 name0: char[32] @ 0 (tag 0x15)",
+        "2 name1: char[32] @ 0x20 (tag 0x25)",
+        "3 name2: char[32] @ 0x40 (tag 0x35)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Byte-identical to FUN_101511a0 (string fields have no varint/fixed distinction)."
+    },
+    {
+      "address": "0x10151ab0",
+      "currentName": "FUN_10151ab0",
+      "proposedName": "TdrBuf_WriteByte",
+      "purpose": "Low-level TdrBuf primitive: assert position<=length, bounds-check, write one byte at buf[pos] and advance position. Returns 0xffffffff on full buffer.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Primitive; server's TdrBuf equivalent must bounds-check and append a byte.",
+      "protocolFields": [
+        "buf: {base@0, pos@4, len@8} — writes 1 byte at base+pos, pos++"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "TdrBuf.h primitive (not a struct serializer). buf layout [base,pos,len]."
+    },
+    {
+      "address": "0x10151b00",
+      "currentName": "FUN_10151b00",
+      "proposedName": "TdrBuf_ReadByte",
+      "purpose": "Low-level TdrBuf primitive: assert position<=length, if pos==len return -2 (0xfffffffe), else read one byte into *param_2 and advance position.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Primitive; server's TdrBuf reader must match (return underflow error, advance pos).",
+      "protocolFields": [
+        "buf: {base@0, pos@4, len@8} — reads 1 byte into out, pos++"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "TdrBuf.h primitive. Underflow => -2."
+    },
+    {
+      "address": "0x10152ae0",
+      "currentName": "FUN_10152ae0",
+      "proposedName": "TlvProcs_Proc_Unpack_varint",
+      "purpose": "TDR unpack of a single Proc element (sub_10152C90 per TlvProcs doc): field1 u32/nested @0 (FUN_1010cbd0), field2 u32/nested @4 (FUN_1010cbd0), field3 byte array @8 (len-delim, count -> *(param_1+4), max 0x100). Presence @ 0x108.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit Proc elements matching TlvProcs.procs.",
+      "protocolFields": [
+        "1 f1: uint32 @ 0 (varint)",
+        "2 count: uint32 @ 4 (varint) — element count of field3",
+        "3 data: uint8[<=0x100] @ 8 (len-delim scalar array)"
+      ],
+      "relatedTlv": ["TlvProcs"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "TlvProcs.md lists procs element reader as sub_10152C90 (the fixed sibling of this varint reader).",
+      "notes": "Varint reader; fixed sibling FUN_10152c90 = doc's sub_10152C90."
+    },
+    {
+      "address": "0x10152c90",
+      "currentName": "FUN_10152c90",
+      "proposedName": "TlvProcs_Proc_Unpack_fixed",
+      "purpose": "Fixed variant of FUN_10152ae0 (doc sub_10152C90): fields via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit Proc elements.",
+      "protocolFields": [
+        "1 f1: uint32 @ 0 (fixed)",
+        "2 count: uint32 @ 4 (fixed)",
+        "3 data: uint8[<=0x100] @ 8 (len-delim)"
+      ],
+      "relatedTlv": ["TlvProcs"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Matches TlvProcs doc's element reader address sub_10152C90."
+    },
+    {
+      "address": "0x10153890",
+      "currentName": "FUN_10153890",
+      "proposedName": "TlvProcs_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvProcs: [procsCount][procs(array,max0x14=20)] each elem FUN_10152f10.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; script/proc list.",
+      "protocolFields": [
+        "procsCount: int32 @ 0 (0..20)",
+        "procs[]: nested (FUN_10152f10)"
+      ],
+      "relatedTlv": ["TlvProcs"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvProcs.md gives max via schema; printer confirms bound 0x14 (20) and names.",
+      "notes": "Printed as [fetchProcs] within TlvScriptProcData."
+    },
+    {
+      "address": "0x10153ba0",
+      "currentName": "FUN_10153ba0",
+      "proposedName": "Tdr_Pack_U8U8U32_varint",
+      "purpose": "TDR pack of {uint8@0, uint8@1, uint32@2}: tag 0x11 u8, tag 0x31 u8 (FUN_1010c0c0, field3 wire1), tag 0x40 u32 varint (FUN_1010c5f0, field4). Note field2 (id 2) is skipped.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this element; likely the counterData element (see FUN_10154af0).",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "3 f3: uint8 @ 1 (tag 0x31)",
+        "4 f4: uint32 @ 2 (tag 0x40 varint)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "field_id 2 absent (gap in schema). Varint variant; matching unpack FUN_10153db0; fixed sibling FUN_10153c40."
+    },
+    {
+      "address": "0x10153c40",
+      "currentName": "FUN_10153c40",
+      "proposedName": "Tdr_Pack_U8U8U32_fixed",
+      "purpose": "Fixed variant of FUN_10153ba0: field4 via tag 0x43 int32 (FUN_1010c190).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this element.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "3 f3: uint8 @ 1 (tag 0x31)",
+        "4 f4: int32 @ 2 (tag 0x43 fixed)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant (this is the counterData element reader referenced as sub_10153F00 in TlvCounterData doc)."
+    },
+    {
+      "address": "0x10153db0",
+      "currentName": "FUN_10153db0",
+      "proposedName": "Tdr_Unpack_U8U8U32_varint",
+      "purpose": "TDR unpack of {uint8@0, uint8@1, uint32@2}: field1 u8, field3 u8, field4 u32 via FUN_1010ccb0 (varint). Presence @ +6. field_id 2 absent.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_10153ba0.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "3 f3: uint8 @ 1",
+        "4 f4: uint32 @ 2 (varint)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_10153f00 = doc sub_10153F00."
+    },
+    {
+      "address": "0x10153f00",
+      "currentName": "FUN_10153f00",
+      "proposedName": "Tdr_Unpack_U8U8U32_fixed",
+      "purpose": "Fixed variant of FUN_10153db0 (doc sub_10153F00, counterData element): field4 via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_10153c40; TlvCounterData.counterData element.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0",
+        "3 f3: uint8 @ 1",
+        "4 f4: uint32 @ 2 (fixed)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvCounterData.md field2 'counterData -> sub_10153F00': this IS that element reader; element has fields at ids 1,3,4 (id2 gap), types uint8/uint8/uint32.",
+      "notes": "Matches doc element address."
+    },
+    {
+      "address": "0x101543d0",
+      "currentName": "FUN_101543d0",
+      "proposedName": "Tdr_Pack_CountArray64_varint",
+      "purpose": "TDR pack: field1 count u8@0 (max 0x40), field2 nested array (tag 0x25) of `count` elements packed by FUN_10153ba0 with per-element length framing.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit a count + nested-array container (max 64 elems).",
+      "protocolFields": [
+        "1 count: uint8 @ 0 (tag 0x11, max 0x40)",
+        "2 items[]: nested (FUN_10153ba0) (tag 0x25)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint variant; fixed sibling FUN_101544e0. Likely TlvCounterData pack."
+    },
+    {
+      "address": "0x101544e0",
+      "currentName": "FUN_101544e0",
+      "proposedName": "Tdr_Pack_CountArray64_fixed",
+      "purpose": "Fixed variant of FUN_101543d0: elements packed by FUN_10153c40.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit count + nested-array container.",
+      "protocolFields": [
+        "1 count: uint8 @ 0 (max 0x40)",
+        "2 items[]: nested (FUN_10153c40) (tag 0x25)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x101546c0",
+      "currentName": "FUN_101546c0",
+      "proposedName": "Tdr_Unpack_CountArray64_varint",
+      "purpose": "TDR unpack: field1 u8@0 (count), field2 nested array (each element len-delim, decoded by FUN_10153db0) up to 0x40; writes element count to *param_1. Presence @ 0x281.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_101543d0.",
+      "protocolFields": [
+        "1 count: uint8 @ 0",
+        "2 items[]: nested (FUN_10153db0), max 0x40"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_10154870."
+    },
+    {
+      "address": "0x10154870",
+      "currentName": "FUN_10154870",
+      "proposedName": "TlvCounterData_Unpack_fixed",
+      "purpose": "Fixed variant of FUN_101546c0 (matches TlvCounterData doc address 0x10154870): count + nested array via FUN_10153f00.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server-side deserializer for TlvCounterData.",
+      "protocolFields": [
+        "1 counterNum: uint8 @ 0 (max 0x40)",
+        "2 counterData[]: nested (FUN_10153f00)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "TlvCounterData.md 'Address 0x10154870' is THIS function. Doc calls field1 counterNum(uint8) and field2 counterData(nested sub_10153F00) — consistent; note field1 here doubles as the element count (max 64).",
+      "notes": "Confirms doc; fixed reader."
+    },
+    {
+      "address": "0x10154af0",
+      "currentName": "FUN_10154af0",
+      "proposedName": "TlvCounterData_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvCounterData: [counterNum][counterData(array,max0x40=64)] each elem FUN_10154120.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; naming source for counter data.",
+      "protocolFields": [
+        "counterNum: uint8 @ 0 (0..64)",
+        "counterData[]: nested (FUN_10154120)"
+      ],
+      "relatedTlv": ["TlvCounterData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Debug printer."
+    },
+    {
+      "address": "0x10154e00",
+      "currentName": "FUN_10154e00",
+      "proposedName": "Tdr_Pack_U8Count_U32Array16_varint",
+      "purpose": "TDR pack: field1 count u8@0 (max 0x10), field2 uint32 scalar array (tag 0x25) of `count` elems via FUN_1010c560 (varint) at +1 stride 4.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit count + u32[16] array; identity unresolved.",
+      "protocolFields": [
+        "1 count: uint8 @ 0 (tag 0x11, max 16)",
+        "2 values: uint32[<=16] @ 1 (tag 0x25 scalar array, varint elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint variant; matching unpack FUN_10155090; fixed sibling FUN_10154ee0."
+    },
+    {
+      "address": "0x10154ee0",
+      "currentName": "FUN_10154ee0",
+      "proposedName": "Tdr_Pack_U8Count_U32Array16_fixed",
+      "purpose": "Fixed variant of FUN_10154e00: array elems via FUN_1010c190 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit count + u32[16] array.",
+      "protocolFields": [
+        "1 count: uint8 @ 0 (max 16)",
+        "2 values: int32[<=16] @ 1 (tag 0x25, fixed elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x10155090",
+      "currentName": "FUN_10155090",
+      "proposedName": "Tdr_Unpack_U8Count_U32Array16_varint",
+      "purpose": "TDR unpack: field1 u8@0 count, field2 uint32 array @1 (elems via FUN_1010cbd0 varint, max 0x10). Presence @ 0x41.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_10154e00.",
+      "protocolFields": [
+        "1 count: uint8 @ 0",
+        "2 values: uint32[<=16] @ 1 (varint elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_10155200."
+    },
+    {
+      "address": "0x10155200",
+      "currentName": "FUN_10155200",
+      "proposedName": "Tdr_Unpack_U8Count_U32Array16_fixed",
+      "purpose": "Fixed variant of FUN_10155090: array elems via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart of FUN_10154ee0.",
+      "protocolFields": [
+        "1 count: uint8 @ 0",
+        "2 values: uint32[<=16] @ 1 (fixed elems)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed reader."
+    },
+    {
+      "address": "0x10156700",
+      "currentName": "FUN_10156700",
+      "proposedName": "TlvScriptVars_DebugPrint",
+      "purpose": "TdrBufUtil printer: [count][data(array,max0x38=56)] each elem FUN_10155d40. Printed as [scriptVars] within TlvScriptProcData.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; script variable list.",
+      "protocolFields": [
+        "count: int32 @ 0 (0..56)",
+        "data[]: nested (FUN_10155d40)"
+      ],
+      "relatedTlv": ["TlvScriptProcData"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Generic [count][data] names; identified via ScriptProcData print wrapper (FUN_10158990)."
+    },
+    {
+      "address": "0x10157480",
+      "currentName": "FUN_10157480",
+      "proposedName": "TlvOnlineTime_Pack_varint",
+      "purpose": "TDR pack of an online-time struct: three leading len-delim fields (no explicit ids at 0x15/0x25/0x35 each = FUN_10156a30 sub-writer), then field4 count u8@0x60 (tag 0x41, max10) and field5 nested array (tag 0x55) of FUN_10156a30 elems.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize online-time/self-def sub-record used inside TlvAlarmTimeData/TlvScriptProcData.",
+      "protocolFields": [
+        "1 daily: nested (FUN_10156a30) (tag 0x15)",
+        "2 weekly: nested (FUN_10156a30) (tag 0x25)",
+        "3 monthly: nested (FUN_10156a30) (tag 0x35)",
+        "4 count: uint8 @ 0x60 (tag 0x41, max 10)",
+        "5 selfDefs[]: nested (FUN_10156a30) (tag 0x55)"
+      ],
+      "relatedTlv": ["TlvAlarmTimeData", "TlvOnlineTime"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Field names from printer FUN_10157f00 ([daily][weekly][monthly][count][selfDefs]). This is TlvAlarmTimeData's body: TlvAlarmTimeData.md field4 'count' typed 'unknown@96' is actually uint8@0x60 (tag 0x41); field5 'selfDefs -> sub-struct' is actually a nested ARRAY (count elems, max10), and daily/weekly/monthly are single nested sub-structs.",
+      "notes": "Varint variant; fixed sibling FUN_10157670 (FUN_10156b10). Offset 0x60=96 matches doc's 'offset 96'."
+    },
+    {
+      "address": "0x10157670",
+      "currentName": "FUN_10157670",
+      "proposedName": "TlvOnlineTime_Pack_fixed",
+      "purpose": "Fixed variant of FUN_10157480: sub-records via FUN_10156b10.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize online-time/alarm sub-record.",
+      "protocolFields": [
+        "1 daily: nested (FUN_10156b10)",
+        "2 weekly: nested (FUN_10156b10)",
+        "3 monthly: nested (FUN_10156b10)",
+        "4 count: uint8 @ 0x60 (max 10)",
+        "5 selfDefs[]: nested (FUN_10156b10)"
+      ],
+      "relatedTlv": ["TlvAlarmTimeData", "TlvOnlineTime"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Same corrections as FUN_10157480.",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x10157f00",
+      "currentName": "FUN_10157f00",
+      "proposedName": "TlvAlarmTimeData_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvAlarmTimeData: [daily][weekly][monthly][count][selfDefs(array,max10)] each nested elem FUN_10157090.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; authoritative names/bounds for alarm/online-time data.",
+      "protocolFields": [
+        "daily: nested (FUN_10157090)",
+        "weekly: nested (FUN_10157090)",
+        "monthly: nested (FUN_10157090)",
+        "count: uint8 @ 0x60 (0..10)",
+        "selfDefs[]: nested (FUN_10157090), count=count"
+      ],
+      "relatedTlv": ["TlvAlarmTimeData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Confirms count is uint8@0x60 and selfDefs is an array, correcting TlvAlarmTimeData.md.",
+      "notes": "Debug printer."
+    },
+    {
+      "address": "0x101582f0",
+      "currentName": "FUN_101582f0",
+      "proposedName": "TlvScriptProcData_Pack_varint",
+      "purpose": "TDR pack of ScriptProcData: three nested sub-structs under tags 0x15/0x25/0x35 (FUN_10153230=fetchProcs, FUN_101560a0=scriptVars, FUN_10157480=onlineTime), each length-framed.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize per-character script/proc persistent data.",
+      "protocolFields": [
+        "1 fetchProcs: nested (FUN_10153230 = TlvProcs) (tag 0x15)",
+        "2 scriptVars: nested (FUN_101560a0) (tag 0x25)",
+        "3 onlineTime: nested (FUN_10157480 = TlvOnlineTime) (tag 0x35)"
+      ],
+      "relatedTlv": ["TlvScriptProcData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "Field names from printer FUN_10158990 ([fetchProcs][scriptVars][onlineTime]).",
+      "notes": "Varint variant; fixed sibling FUN_10158400."
+    },
+    {
+      "address": "0x10158400",
+      "currentName": "FUN_10158400",
+      "proposedName": "TlvScriptProcData_Pack_fixed",
+      "purpose": "Fixed variant of FUN_101582f0: sub-structs via FUN_10153320/FUN_10156190/FUN_10157670.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must serialize script/proc data.",
+      "protocolFields": [
+        "1 fetchProcs: nested (FUN_10153320) (tag 0x15)",
+        "2 scriptVars: nested (FUN_10156190) (tag 0x25)",
+        "3 onlineTime: nested (FUN_10157670) (tag 0x35)"
+      ],
+      "relatedTlv": ["TlvScriptProcData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed variant."
+    },
+    {
+      "address": "0x10158990",
+      "currentName": "FUN_10158990",
+      "proposedName": "TlvScriptProcData_DebugPrint",
+      "purpose": "TdrBufUtil printer for TlvScriptProcData: [fetchProcs][scriptVars][onlineTime] dispatching to FUN_10153890/FUN_10156700/FUN_10157f00.",
+      "subsystem": "tlv-serializer",
+      "direction": "unknown",
+      "msgId": "unknown",
+      "serverRelevance": "Diagnostic; naming source.",
+      "protocolFields": [
+        "fetchProcs: nested (FUN_10153890 = TlvProcs)",
+        "scriptVars: nested (FUN_10156700)",
+        "onlineTime: nested (FUN_10157f00 = TlvAlarmTimeData)"
+      ],
+      "relatedTlv": ["TlvScriptProcData"],
+      "confidence": "high",
+      "tlvDocDiscrepancy": "",
+      "notes": "Debug printer; ties together the ScriptProcData sub-structs."
+    },
+    {
+      "address": "0x10159fb0",
+      "currentName": "FUN_10159fb0",
+      "proposedName": "Tdr_Unpack_U16U32",
+      "purpose": "TDR unpack: field1 2-byte value @0 (bytes [hi@0,lo@1], wire1), field3 u32 @2 (FUN_1010c870, wire3). Presence @ +6. field_id 2 absent.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit {u16, u32}; identity unresolved.",
+      "protocolFields": [
+        "1 f1: uint16 @ 0 (2-byte, [hi,lo])",
+        "3 f3: uint32 @ 2 (fixed 4-byte)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "low",
+      "tlvDocDiscrepancy": "",
+      "notes": "2-byte field stored big-endian (offset+1 then offset)."
+    },
+    {
+      "address": "0x1015a5a0",
+      "currentName": "FUN_1015a5a0",
+      "proposedName": "Tdr_Unpack_U32U8_varint",
+      "purpose": "TDR unpack: field1 u32 @0 (FUN_1010cbd0 varint), field2 u8 @4. Presence @ +5.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit {u32, u8}; identity unresolved.",
+      "protocolFields": [
+        "1 f1: uint32 @ 0 (varint)",
+        "2 f2: uint8 @ 4"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Varint reader; fixed sibling FUN_1015a690."
+    },
+    {
+      "address": "0x1015a690",
+      "currentName": "FUN_1015a690",
+      "proposedName": "Tdr_Unpack_U32U8_fixed",
+      "purpose": "Fixed variant of FUN_1015a5a0: field1 via FUN_1010c870 (fixed 4-byte).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit {u32, u8}.",
+      "protocolFields": [
+        "1 f1: uint32 @ 0 (fixed)",
+        "2 f2: uint8 @ 4"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Fixed reader."
+    },
+    {
+      "address": "0x1015aad0",
+      "currentName": "FUN_1015aad0",
+      "proposedName": "Tdr_Pack_SingleU8_a",
+      "purpose": "TDR pack of a single-field struct: write tag 0x11 then one uint8 (*param_1) at buf[pos], advance. Returns -1 on full buffer.",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit a single tagged uint8; trivial one-field struct.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Duplicate body with FUN_1015ab40 (single u8, no encoding variance)."
+    },
+    {
+      "address": "0x1015ab40",
+      "currentName": "FUN_1015ab40",
+      "proposedName": "Tdr_Pack_SingleU8_b",
+      "purpose": "Byte-identical sibling of FUN_1015aad0 (single tagged uint8).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit a single tagged uint8.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Duplicate of FUN_1015aad0."
+    },
+    {
+      "address": "0x1015ac80",
+      "currentName": "FUN_1015ac80",
+      "proposedName": "Tdr_Unpack_SingleU8_a",
+      "purpose": "TDR unpack of a single-field struct: reads field1 u8 @0. Presence @ +1. Unknown fields skipped (FUN_1010d4f0).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart reader for single-u8 struct.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Duplicate body with FUN_1015ad40."
+    },
+    {
+      "address": "0x1015ad40",
+      "currentName": "FUN_1015ad40",
+      "proposedName": "Tdr_Unpack_SingleU8_b",
+      "purpose": "Byte-identical sibling of FUN_1015ac80 (reads single u8 @0).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Counterpart reader for single-u8 struct.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Duplicate of FUN_1015ac80."
+    },
+    {
+      "address": "0x1015f980",
+      "currentName": "FUN_1015f980",
+      "proposedName": "Tdr_Pack_U8U8_a",
+      "purpose": "TDR pack of {uint8@0, uint8@1}: tag 0x11 u8, tag 0x21 u8 (FUN_1010c0c0).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this small pair; identity unresolved.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: uint8 @ 1 (tag 0x21)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Both u8 => no varint/fixed distinction; FUN_1015fa00 is byte-identical."
+    },
+    {
+      "address": "0x1015fa00",
+      "currentName": "FUN_1015fa00",
+      "proposedName": "Tdr_Pack_U8U8_b",
+      "purpose": "Byte-identical sibling of FUN_1015f980 ({uint8, uint8} pack).",
+      "subsystem": "tlv-serializer",
+      "direction": "S2C",
+      "msgId": "unknown",
+      "serverRelevance": "Server must emit this pair.",
+      "protocolFields": [
+        "1 f1: uint8 @ 0 (tag 0x11)",
+        "2 f2: uint8 @ 1 (tag 0x21)"
+      ],
+      "relatedTlv": ["unknown"],
+      "confidence": "medium",
+      "tlvDocDiscrepancy": "",
+      "notes": "Duplicate of FUN_1015f980."
+    }
+  ]
+}

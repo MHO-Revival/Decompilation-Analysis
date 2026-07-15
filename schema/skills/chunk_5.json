@@ -1,0 +1,368 @@
+{
+  "chunkIndex": 5,
+  "functions": [
+    {
+      "address": "108d97c0",
+      "currentName": "FUN_108d97c0",
+      "proposedName": "CPropertyPanelModel::BuildPlayerPropertyVO",
+      "subsystem": "ui-character-property / equipment-skills",
+      "purpose": "Client UI marshaller that builds a PROPERTY_VO_CLASSNAME view-object describing the local player's combat stats plus the element/status flags of both weapon slots and the active armor/equipment skill list. Reads the player object (param_5, a CPlayer-like whose vtbl+0xb8 fills a scratch buffer) and pushes ~30 named fields into an AS3 data object. Guarded by param_6>1.",
+      "formulas": [
+        "Player-context resolve: piVar4 = FUN_107cb5c0() (local CPlayer); requires piVar4 && local_130[0][0xc] && local_130[0][0xd] non-null before building.",
+        "Weapon slot pointers: main weapon = *(int*)(playerRec+0x30), sub weapon = *(int*)(playerRec+0x34); pcVar2 is the player record from FUN_108df100 chain.",
+        "Weapon element/status bitmask lives at *(uint*)(weaponSlot+0x78). Per-bit booleans emitted (FUN_104d15e0): bit0,bit1,bit2 (fire/water/thunder tolerances group per string order), bit3 = weaponAttackContainsDragon, bit4 = weaponAttackContainsIce, bit6 = weaponAttackContainsPoison, bit7 = weaponAttackContainsSleep, bit8 = (11dd64fc string) e.g. paralysis. Same 9-bit decode done for both main(0x30) and sub(0x34) slots.",
+        "Attribute type detection: ((uint)param_5[7] & 0x8f) == 3 or == 4 selects weapon-attack container pointer param_5[8], else sentinel 0xdeadbeaf.",
+        "Armor/equipment skill iteration (two lists at playerRec+0x48 loop): base = *(int*)(rec+0x48), count = (*(rec+0x4c) - base)/0x14 (stride 0x14=20 bytes). Per non-null entry emits skillName=*(entry+0x18), needPoint=*(entry+0x24), skillEffect=(entry+0x1c), bIsActivation=1, bCanBeLighten=*(byte)(entry+8). Same pattern repeated for a second list (activated vs available skills).",
+        "A third skill list built under piStack_84[0x9838] non-zero: 10-iteration table (iVar5=10) stepping puVar6 += 0x12 words per row, emitting a 'collumn' grid; used when player has some feature flag at CPlayer+0x9838*4.",
+        "Emits floats via FUN_104d14d0 (setFloat, e.g. luckattack) and CPlayer::GetHuntRankOrCount() for hunt-rank/hrLevel fields.",
+        "curendure/endure flag: ((byte)uStack_d4 & 0x8f) == 10 (AS3 string-type discriminant)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder; but the field schema is authoritative-relevant: it enumerates the player property model (curhp, endure, curendure, level, netID, hrLevel, hrPoint, Attack, lucklevel, luckattack, water/thunder/dragon attack, defense, water/fire/thunder/dragon/ice tolerance) and the per-weapon element+status bitmask layout (weapon+0x78 bits: Dragon=3,Ice=4,Poison=6,Sleep=7). Equipment/armor skill entries (skillName@+0x18, needPoint@+0x24, skillEffect@+0x1c, canBeLighten@+8, stride 0x14) are the server-owned skill definitions the client displays.",
+      "confidence": "medium",
+      "notes": "Very large auto-decompiled; stack-pointer aliasing obscures exact field order. weaponAttackContains* string args (Dragon/Ice/Poison/Sleep) are literal in code; earlier bit labels come from DAT_ pointers (11dd6358/6374/6390 etc.) not resolved to text here."
+    },
+    {
+      "address": "108e2bb0",
+      "currentName": "FUN_108e2bb0",
+      "proposedName": "CFarmPetModel::BuildCollectPetAndPlantVO",
+      "subsystem": "pet-farm / garden (collect-pet + plant)",
+      "purpose": "Client UI builder for the farm/garden panel: builds a CP_VO_CLASSNAME list of 'collect pets' (0x98 entries) and a PLANT_VO_CLASSNAME list of 3 plant plots, computing collectability and remaining time from server timestamps. Uses _time64 for now.",
+      "formulas": [
+        "Collect-pet loop: iterates iVar3 = 0..0x97 (0x98=152 slots); per-slot record pointer piVar9 advances +5 ints (0x14 bytes). level = (short)*piVar9.",
+        "maxLevel = *(int*)(FUN_117c7e70() + petTypeOffset).",
+        "canCollect logic: _Var11 = _time64(0); now = (int)_Var11. If ( *(short*)((int)piVar9+2)==0 && piVar9[1]!=0 && ((uint)(now - piVar9[1]))/0x3c < *(uint*)(cfg+0x1c) ) then canCollect=0 else 1. (0x3c=60, converts seconds to minutes; cfg+0x1c = required minutes.)",
+        "totalTime = (piVar9[1] + *(int*)(cfg+0x1c) * 0x3c) - now   (start-timestamp + requiredMinutes*60 - now = seconds remaining).",
+        "If cfg (FUN_108e1450 result) is null: canCollect emitted with no value (default) and totalTime=0.",
+        "Plant loop: 3 plots (iVar3<3), record piVar7 advances +3 ints. seedID via FUN_10254130; state=*(piVar7+2). totalTime = FUN_114219c0(0,iVar3) (server remaining time). canCollect = (iVar6!=0 && iVar8<=0) ? 1 : 0 where iVar8 = totalTime.",
+        "petSkillList emitted as nested list per collect-pet (FUN_11a98a70 array + setter vtbl+0x14)."
+      ],
+      "costs": [
+        "cfg+0x1c = required grow/produce minutes per collect-pet type (time gate, not currency)."
+      ],
+      "serverRelevance": "client-only display; server is authoritative for the collect timestamps (piVar9[1] start time), required-minutes config (cfg+0x1c), and plant remaining time (FUN_114219c0). Server must validate canCollect (elapsed>=required) before granting the collect reward. Confirms fields: level, maxLevel, canCollect, totalTime(seconds), seedID, state, itemIconPathName.",
+      "confidence": "medium"
+    },
+    {
+      "address": "108e7830",
+      "currentName": "FUN_108e7830",
+      "proposedName": "CPetModel::BuildPetDetailVO",
+      "subsystem": "pet stats / pet skills",
+      "purpose": "Client UI builder for a single pet's detail sheet. Calls FUN_112f64e0(petIndex, ...) to fill a local struct, then pushes ~50 named fields to the AS3 pet VO. If petType(local_f4)==0 (combat pet) it additionally emits full combat stats.",
+      "formulas": [
+        "Guard: if the pet-battle system (DAT_1202e818+0xd0->+0x90 vtbl+0xb4, then +0x2cd8 vtbl+0x54) reports active/in-battle, skip the fill (goto LAB_108e78bd only when not in battle path).",
+        "FUN_112f64e0(param_2=petIndex-hi, param_1=lo, &local_134) fills local struct; only builds if local_134 (petid) != 0.",
+        "Base fields: petType=local_f4, status=local_124, level=local_118, petindex=local_130, petid=local_134, intelligence=local_104, proficientcy=local_f8, character=local_fc, quality=local_100, exp_max=local_110, intimacy=local_10c, intimacyvalue=local_108, fluteskillEquipped=local_64, fluteskilltotal=local_60, normalskillEquipped=local_5c, normalskilltotal=local_58, skillpointleft=local_68, traintime=local_50.",
+        "If local_f4(petType)==0: emit fightwill/fightwill_max, attacktype, attacktrend, attack/attack_max, hp/hp_max, defense/defense_max, fireattack/waterattack/thunderattack/iceattack/dragonattack/poisonattack/sleepyattack/paralysisattack, fireendure/waterendure/thunderendure/iceendure/dragonendure, lucklevel(local_d4)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; schema-authoritative: enumerates the full pet stat/skill model the server must replicate (elemental attack & endurance values, fluteskill vs normalskill equipped/total counts, skillpointleft for pet-skill allocation, intimacy). Server owns all values.",
+      "confidence": "high"
+    },
+    {
+      "address": "108fb670",
+      "currentName": "FUN_108fb670",
+      "proposedName": "CCatCuisineModel::GetCatCuisineResultInfo",
+      "subsystem": "cat-cuisine food buffs",
+      "purpose": "AS3 handler '_getCatCuisineResultInfo' (also binds '_hideWindow'). Reads the cat-cuisine result object (game ctx +0xd0->+0x90 vtbl+0xb4, then +0x2d60) to extract an arrayBuffer of active food-buffer IDs, then for each ID builds a mh.model.CatFood.CatFoodBufferData {bufferName, bufferDesc, bufferID} and also emits catCuisineName.",
+      "formulas": [
+        "Result object at *(iVar2+0x2d60); iVar3 = vtbl+0x10 -> count; vtbl+0x14, vtbl+0x18 (uVar4 & 0xff flag), vtbl+0x1c -> fill buffer via FUN_10a04620/FUN_10a04770(count).",
+        "Guarded by 0 < iVar3 (has buffers). Buffer copied via memcpy of (iStack_64 - ppiStack_68) bytes; element size 4 (>>2 word count).",
+        "Per buffer id: iVar3 = FUN_104fd710(id); if non-zero -> bufferName = *(id_rec+0x28); bufferDesc from FUN_100e5b60; bufferID = iVar2 (index).",
+        "catCuisineName resolved via FUN_108d15f0(uStack_e8) when non-zero."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of active cat-cuisine buffs the server granted. Schema-relevant for buff subsystem: each food buff has bufferID, bufferName, bufferDesc. Server owns which buffs are active and their IDs; the arrayBuffer is the replicated active-buff list.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10911230",
+      "currentName": "FUN_10911230",
+      "proposedName": "CWeaponTalentModel::RegisterInitHandlers",
+      "subsystem": "weapon-talent UI init",
+      "purpose": "Registers three AS3 model-init native callbacks: InitModel->FUN_10911340, InitWeaponTalentTips->FUN_10912240, InitWeaponTalentProfoundSkillTips->FUN_109122a0. Pure binding/plumbing.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (handler registration).",
+      "confidence": "high"
+    },
+    {
+      "address": "10911340",
+      "currentName": "FUN_10911340",
+      "proposedName": "CWeaponTalentModel::InitModel",
+      "subsystem": "weapon-talent tree",
+      "purpose": "InitModel handler: registers the weapon-talent RPC/callback surface and pushes currentWeaponType. Gated on DAT_1202e818+0x58 present.",
+      "formulas": [
+        "Registers (FUN_104d13b0): _SaveWeaponTalentData->FUN_10911480, _SaveProfoundSkillData->FUN_10911540, _GetWeaponTalentAndProfoundSkillData->FUN_10911660, _UnlockTalent->FUN_10911d00, _RequestServerTalentInfo->LAB_10912960, _isInBattleGroundAs3->FUN_10912a00.",
+        "currentWeaponType: piVar5 = CPlayer (ctx+0xd0->+0x90 vtbl+0xb4); uVar2 = CPlayer vtbl+0x444 (current weapon item id); iVar3 = FUN_10254130(uVar2) (item record); weaponType = *(iVar3+0x3c). Default uVar4=7 if no record."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only; the registered names define the server RPC surface the server must implement/validate (SaveWeaponTalentData, SaveProfoundSkillData, UnlockTalent, RequestServerTalentInfo). Weapon type derived from item record +0x3c.",
+      "confidence": "high"
+    },
+    {
+      "address": "10911660",
+      "currentName": "FUN_10911660",
+      "proposedName": "CWeaponTalentModel::GetWeaponTalentAndProfoundSkillData",
+      "subsystem": "weapon-talent tree / profound skills",
+      "purpose": "_GetWeaponTalentAndProfoundSkillData handler: builds the full weapon-talent tree VO (talentInfo) with style/common names, masterValue, an arrayProfound of profound-skill tips and arrayStyles containing per-style arrayWeaponTalentData. Reads static config via _DAT_00000000-based reflection lookups (STATIC_WEAPON_TALENT_PROFOUND / _DATA / _STYLE_DATA).",
+      "formulas": [
+        "Requires ctx+0x58 and CPlayer (ctx+0xd0->+0x90 vtbl+0xb4) and its +0x14 vtbl+4 subsystem non-null.",
+        "masterValue = FUN_112f0580() (player's accumulated talent 'master' points).",
+        "CNewSkillInfo::BuildSkillDisplayList() computes uStack_110 (talentInfo string/id).",
+        "arrayProfound: iterates STATIC_WEAPON_TALENT_PROFOUND records (iStack_7c..iStack_78, stride 0x4c) calling FUN_10911e00 per entry to build a profound-skill tip VO.",
+        "arrayStyles -> STATIC_WEAPON_TALENT_DATA (piStack_68..piStack_64) and STATIC_WEAPON_TALENT_STYLE_DATA; per style iterates arrayWeaponTalentData (piVar6[-1]..*piVar6, stride 0x3c) calling FUN_10912030 per talent-skill entry.",
+        "AS3 type discriminant (byte & 0x8f)==10 for string, ==6 for object throughout."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only VO builder reading server-supplied talent state + static config tables. Schema-authoritative for talent tree layout: talent has style1/common/style2 names, weaponName, masterValue; profound-skill and talent-skill records have stride 0x4c and 0x3c respectively. Server owns unlock/activation state.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10911e00",
+      "currentName": "FUN_10911e00",
+      "proposedName": "CWeaponTalentModel::BuildProfoundSkillTipVO",
+      "subsystem": "weapon-talent profound skill",
+      "purpose": "Builds one profound-skill tip VO from a talent record (param_2), reading fixed offsets, and resolves a TipsDesc string from a 2D tips table indexed by the skill index.",
+      "formulas": [
+        "SkillID=*(rec+4), WeaponType=*(rec+0x10), PlayerLevel=*(rec+0x14), HunterRank=*(rec+0x18), SkillIndex=*(rec+0x20), Card1ID=*(rec+0x24), Card2ID=*(rec+0x28), Card3ID=*(rec+0x2c), Status=*(rec+0x48).",
+        "TipsDesc lookup: idx = *(rec+0xc); tbl = FUN_107d45b0(); valid if idx!=-1 && (idx!=0 || *(tbl+0x30)==0) && *(tbl+0x28)!=0 && (idx -= *(tbl+0x30)) in [0, *(tbl+0x24)). Then row = *(*(tbl+0x20) + (idx / *(tbl+0x28))*4); cell = *(row + (idx % *(tbl+0x28))*4); if cell!=0 emit TipsDesc. (Standard MHO chunked-2D table: base+0x20 rows, +0x28 stride, +0x24 count, +0x30 offset.)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; confirms profound-skill record layout (offsets above) and card-slot association (Card1/2/3 ID). Server owns Status (activated/locked) and card requirements.",
+      "confidence": "high"
+    },
+    {
+      "address": "10912030",
+      "currentName": "FUN_10912030",
+      "proposedName": "CWeaponTalentModel::BuildTalentSkillVO",
+      "subsystem": "weapon-talent skill",
+      "purpose": "Builds one weapon-talent-skill VO from a talent-style record (param_2), reading fixed offsets and three name/tip strings.",
+      "formulas": [
+        "skillID=*(rec+4), weaponType=*(rec+8), playerLevel=*(rec+0x18), hunterStarLevel=*(rec+0x1c), SkillIndex=*(rec+0xc), cardID1=*(rec+0x20), cardID2=*(rec+0x24), cardID3=*(rec+0x28), skillStatus=*(rec+0x38), schoolsType=*(rec+0x10), masterValue=*(rec+0x14).",
+        "Strings: skillName, iconPath, skillTips (from FUN_100e5aa0 string accessors)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display; confirms talent-skill record layout including schoolsType (talent school/branch) and masterValue (points cost/requirement). Server owns skillStatus.",
+      "confidence": "high"
+    },
+    {
+      "address": "10912240",
+      "currentName": "FUN_10912240",
+      "proposedName": "CWeaponTalentTipsModel::RegisterHandlers",
+      "subsystem": "weapon-talent tips UI",
+      "purpose": "Registers AS3 handler _WeaponTalentTipsGetInfo->FUN_10912300. Gated on ctx+0x58.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (handler registration).",
+      "confidence": "high"
+    },
+    {
+      "address": "109122a0",
+      "currentName": "FUN_109122a0",
+      "proposedName": "CWeaponTalentProfoundTipsModel::RegisterHandlers",
+      "subsystem": "weapon-talent profound tips UI",
+      "purpose": "Registers AS3 handler _WeaponTalentProfoundTipsGetInfo->FUN_10912490. Gated on ctx+0x58.",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (handler registration).",
+      "confidence": "high"
+    },
+    {
+      "address": "109125d0",
+      "currentName": "FUN_109125d0",
+      "proposedName": "CWeaponTalentTipsModel::BuildTalentCardTipVO",
+      "subsystem": "weapon-talent tips / hunter cards",
+      "purpose": "Builds a talent-tip VO (m_str*) comparing the talent's required player level / hunter rank / card levels against the player's current values, and marks which of the 3 hunter-cards the player already owns.",
+      "formulas": [
+        "current values: m_nCurrentPlayerLevel = CPlayer::GetHuntRankOrCount(); m_nCurrentHunterRank = CPlayer subsystem (*(cp+0x2d10) vtbl+0x18); both only when *(cp+0x2d10)!=0.",
+        "card ownership: bVar5/6/7 = (IsCardIdCollected(*(param_1+0x14 / +0x1c / +0x24)) == 2). Result==2 means fully collected. Emitted as m_bHasCard1/2/3.",
+        "required fields: m_nPlayerLevel=*(param_1+0xc), m_nHunterRank=*(param_1+0x10), m_nCard1Lv=*(param_1+0x18), m_nCard2Lv=*(param_1+0x20), m_nCard3Lv=*(param_1+0x28).",
+        "m_strSkillTips: same chunked-2D tips lookup as FUN_10911e00 using idx=*(param_1+0x2c), tbl=FUN_107d45b0().",
+        "card names: FUN_11a88b20(cardId,0) -> non-null enables m_strCard1/2/3Name."
+      ],
+      "costs": [],
+      "serverRelevance": "validation/display; card ownership (IsCardIdCollected==2) and current player level/hunter rank are server-authoritative; server must gate talent-card unlocks on player having the required cards at required levels. Confirms card record offsets (id@+0x14/+0x1c/+0x24, level@+0x18/+0x20/+0x28).",
+      "confidence": "high"
+    },
+    {
+      "address": "1091a010",
+      "currentName": "FUN_1091a010",
+      "proposedName": "CGuildSkillInfo::GetSkillIdByIndex",
+      "subsystem": "guild-skill config accessor",
+      "purpose": "Returns the guild-skill entry at index param_1 from the CGuildSkillInfo manager's array. Lazily initializes the manager via CInfoManager::FindByName('CGuildSkillInfo') with a one-time init guard (DAT_123c8254 bit 0).",
+      "formulas": [
+        "array count = (puVar1[6]-puVar1[5])>>2; valid if 0<=param_1<count; returns *(puVar1[5] + param_1*4), else 0.",
+        "one-time init: if (DAT_123c8254 & 1)==0 -> set bit, FUN_1091e8a0(), FUN_11a8911f(default record &DAT_123c8258)."
+      ],
+      "costs": [],
+      "serverRelevance": "config accessor (client-side). Reveals CGuildSkillInfo is an indexed array of skill ids; server should share the same guild-skill config table.",
+      "confidence": "high"
+    },
+    {
+      "address": "1091a0a0",
+      "currentName": "FUN_1091a0a0",
+      "proposedName": "CGuildSkillInfo::GetSkillCount",
+      "subsystem": "guild-skill config accessor",
+      "purpose": "Returns the guild-skill count by calling the manager's vtbl+0x28 (size). Same lazy CInfoManager::FindByName('CGuildSkillInfo') init pattern as FUN_1091a010.",
+      "formulas": [
+        "returns (**(manager+0x28))() = number of guild skills."
+      ],
+      "costs": [],
+      "serverRelevance": "config accessor (client-side).",
+      "confidence": "high"
+    },
+    {
+      "address": "1091b5a0",
+      "currentName": "FUN_1091b5a0",
+      "proposedName": "CGuildSkillModel::BuildSkillViewData",
+      "subsystem": "guild-skill panel (owned/trained)",
+      "purpose": "Builds SkillViewDataArray of SKILL_VIEW_CLASS_NAME entries for the guild-skill view: per skill it resolves item name/icon via FUN_1145f260 and emits level/tuition/trainingLevel, plus the guild fund. Dispatches 'SkillViewUpdate' AS3 event.",
+      "formulas": [
+        "skill list read via FUN_114a9180 / FUN_114a90b0(&piStack_b0) (range piStack_b0..piStack_ac).",
+        "per entry: FUN_1145f260(id0, id1) -> item record; itemName from *(rec+0x1c), display string from *(rec+0x20).",
+        "level = *(int*)(local_104+0x18), tuition = *(int*)(rec+0x28), trainingLevel = *(int*)(rec+0x24).",
+        "guildfund = FUN_114a8610()."
+      ],
+      "costs": [
+        "tuition = *(rec+0x28) (guild-fund cost to train/upgrade the guild skill).",
+        "guildfund = current guild fund balance (FUN_114a8610)."
+      ],
+      "serverRelevance": "validation/authoritative source: server owns guildfund and must charge 'tuition' and enforce trainingLevel on guild-skill train requests. Client only previews.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1091bc50",
+      "currentName": "FUN_1091bc50",
+      "proposedName": "CGuildSkillModel::BuildSkillCandidateData",
+      "subsystem": "guild-skill panel (candidates)",
+      "purpose": "Builds SkillDataArray of SKILL_CLASS_NAME candidate guild-skill entries (skills available to learn), resolving item name/icon and emitting level/tuition/trainingLevel + guildfund. Dispatches 'SkillCandidateUpdate'.",
+      "formulas": [
+        "candidate list from FUN_11174390() (base..[1], word stride); copied via memcpy.",
+        "per entry ppiVar12 (skill record): level=ppiVar12[6], tuition=ppiVar12[10], trainingLevel=ppiVar12[9].",
+        "itemName/icon via FUN_1145f260(id0,id1) -> *(rec+0x1c)/*(rec+0x20).",
+        "guildfund = FUN_114a8610(); also emits trainingLevel = *(byte)(uVar7+0x224) (guild building level gate)."
+      ],
+      "costs": [
+        "tuition = skillRecord[10] (guild-fund cost).",
+        "guildfund = current guild fund."
+      ],
+      "serverRelevance": "validation/authoritative: server charges tuition and gates candidate availability by trainingLevel / guild building level (byte@+0x224). Client preview only.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1091cec0",
+      "currentName": "FUN_1091cec0",
+      "proposedName": "CGuildBuildingModel::BuildLevelUpData",
+      "subsystem": "guild building level-up (skill unlocks)",
+      "purpose": "Builds the guild-building level-up VO: current building level (by building type), current vs next level bonuses (team member cap, gold cap, storehouse), gold cost to level up, and for type 5 (skill building) the current/next unlocked guild-skill lists. Dispatches 'levelMessageUpdate'.",
+      "formulas": [
+        "building type = local_f0 (from param_4[8] if type-tagged, else 0xdeadbeaf/-0x21524151).",
+        "current building level by type (switch): case 2->*(byte)(guild+0x221), 3->+0x222, 4->+0x223, 5->+0x224 (i.e. the four building levels are packed bytes at guild+0x221..0x224).",
+        "nextLevel = currentLevel+1, capped at 5 (if piVar7 > 5 -> 5).",
+        "config records via CGuildBuildingLevelUpInfo::FindInfoByTypeLevel(type, level): addTeamMember=*(rec+0x24), addGoldMax=*(rec+0x28), addStorehouse=*(rec+0x2c); next-level rec: guildLevel=*(rec+0x1c), goldNeed=*(rec+0x20), nextTeamMember=+0x24, nextGoldMax=+0x28, nextStorehouse=+0x2c. If no next rec: nextLevel=9 (sentinel 'max').",
+        "CurrentGuildLevel=*(guildState+0x44); CurrentGuildFund=FUN_114a8610().",
+        "type-5 path: builds currentSkillUnlock / nextSkilUnlock arrays by iterating FUN_1091a0a0() guild skills, emitting each skill's item info when *(skillRec+0x24)==currentLevel (unlocked-at) or ==nextLevel.",
+        "can-level flag: FUN_114f7010() gates whether the level-up button is enabled."
+      ],
+      "costs": [
+        "goldNeed = *(nextLevelRec+0x20) (guild fund required to level the building).",
+        "CurrentGuildFund = current guild fund (FUN_114a8610)."
+      ],
+      "serverRelevance": "validation/authoritative: server owns guild fund, building levels (bytes@guild+0x221..0x224), and must charge goldNeed and enforce level caps (max 5, sentinel 9). Config CGuildBuildingLevelUpInfo (type,level -> teamMember/goldMax/storehouse/goldNeed) must match server. Guild-skill unlock-at-level = skillRec+0x24.",
+      "confidence": "medium"
+    },
+    {
+      "address": "10929bf0",
+      "currentName": "FUN_10929bf0",
+      "proposedName": "CArenaScoreDebugModel::BuildTransformStatsVO",
+      "subsystem": "arena/score animation timing (debug telemetry)",
+      "purpose": "Builds a debug/telemetry VO of score-transform animation timings (icon play times, base/bill/mvp/achieve score-transform counts & durations, delays). Not a skill/buff function.",
+      "formulas": [
+        "Each field read via FUN_117423e0() (select) + a specific accessor FUN_1174xxxx() (getter): totalIconPlayTime, totalIconCountsPlayTime, averageIconPlayTime, scoreToScoreTransformDelay/Counts, base/bill/mvp ScoreTransformTotalTime & Counts, zeroScoreDelayTime, achieveScoreTransformCounts/AverageTime, iconFirstPlayDelayTime; testDataFlag=DAT_123bbb3c."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only (UI animation timing debug; no server relevance).",
+      "confidence": "high"
+    },
+    {
+      "address": "1093de10",
+      "currentName": "FUN_1093de10",
+      "proposedName": "CBattleTeamModel::BuildMemberArrayVO",
+      "subsystem": "battle-team roster (not skills)",
+      "purpose": "Builds the battle-team (_teamInfo) roster: a _memberArray of BTMemberVo_CLASS_NAME entries (name, level, HR level, note, leader/online flags, index, dayleft, score, IsSelf) plus team totals (member num/online num, name, score, average level, PvP effectiveness, personal/PvE/PvP scores).",
+      "formulas": [
+        "member fields via vtbl calls on record pppiVar1: nLevel=vtbl[2], nHRLevel=vtbl[8], bIsLeader=FUN_115b6e70(), index=vtbl[5], bOnline=vtbl[4], dayleft=vtbl[6], nScore=vtbl[3].",
+        "IsSelf: compares member handle (ppiVar11 vtbl[0x30] returns 64-bit id) against local player id (ppppppiStack_f0/iStack_ec pair).",
+        "team totals: BTMemberNum=FUN_115022e0(), BTMemberOnlineNum=teamObj vtbl[5], BTScore=teamObj[0x22], averageMemberLevel=teamObj vtbl[7], BTPvpEffectiveness=teamObj[0x2b], BTPersonalScore=member-count value FUN_11348ac0()+0x134, BTPveScore=teamObj[0x26], BTPvpScore=teamObj[0x2a]."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of server-authoritative team/roster state; not part of the skills/buffs subsystem (included only because it shares the VO-builder pattern). Server owns member online/level/score.",
+      "confidence": "medium"
+    },
+    {
+      "address": "109568f0",
+      "currentName": "FUN_109568f0",
+      "proposedName": "CCommonGroupBuffModel::RegisterHandlers",
+      "subsystem": "group/party buff UI init",
+      "purpose": "Registers the common-group buff AS3 callback surface (gated on init flag param==1): _getLocalPlayerNetID, _getCommonGroupPlayerHealth, _getCommonGroupPlayerLevel, _getCommonGroupInfo, _getCommonGroupBufferInfo, _getCommonGroupPlayerInfo, _getCommonBatchExecBuffCmd (->FUN_109572a0).",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only (handler registration); names define the group-buff query/command RPC surface (buffer info, batch exec buff cmd) the server must support.",
+      "confidence": "high"
+    },
+    {
+      "address": "109572a0",
+      "currentName": "FUN_109572a0",
+      "proposedName": "CCommonGroupBuffModel::GetBatchExecBuffCmd",
+      "subsystem": "team/party buff & debuff data",
+      "purpose": "'_getCommonBatchExecBuffCmd' handler: iterates the local buff container (FUN_11183d00/de0/df0 = iterator begin/at-end/next) and builds a BatchBuffList of TEAM_MEMBER_BUFFER_DATA_CLASSNAME entries describing each active buff/debuff (name, type, remaining time, total time, tooltip, icon, stack count, owner netID, icon-update flag, team-buff act type, trigger count).",
+      "formulas": [
+        "For each buff in the iterated container: _strName (string), _tipString, _strIcon (strings). Numeric fields (_nType, _nTime, _nTotalTime, _nStackCount, _nNetID, _nIconUpdateTimeFlag, _nTeamBuffActType, _nbufTriggerCount) are pushed conditionally when param_2!=0 via the int64/typed setter vtbl+0x14 (each guarded and released with vtbl+8).",
+        "_nTime = remaining duration; _nTotalTime = full duration; _nStackCount = current stacks; _nTeamBuffActType = team-buff activation type; _nbufTriggerCount = number of times the buff has triggered.",
+        "AS3 type flag (byte & 0x8f)==10 (string discriminant)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display, but the SCHEMA is authoritative-critical for buffs: confirms the runtime buff record fields the server must compute and replicate — buff type, remaining time, total duration, stack count, owning player netID, team-buff act type, and trigger count. Buff duration/stacking/triggers are server-owned.",
+      "confidence": "high"
+    },
+    {
+      "address": "10958830",
+      "currentName": "FUN_10958830",
+      "proposedName": "CCharmModel::BuildPassiveSkillAndActivateVO",
+      "subsystem": "charm crafting / passive skills",
+      "purpose": "Builds the charm (護石) crafting panel VO: charm name, a passiveSkillList of PASSIVESKILL_VO entries (each with bIsHidden, nVisibleMoney unlock cost, name, and an activateInfoList of ACTIVATE_VO entries), plus the required material item (id, owned bound/unbound counts, needed count). Uses CEquipHiddenSkillCondOpenInfo and CCharmFoundCostInfo.",
+      "formulas": [
+        "Guard: param_5>2; charm object at *(CPlayer+0x2d1c) (iStack_120).",
+        "passive skill array iterated over (local_e8 - piStack_ec)/0x1c entries (stride 0x1c=28 bytes). Per entry reads iVar3=*rec, uStack_a4=rec[1], puStack_a0=rec[2], iStack_9c=rec[3], uStack_98=*(rec+4) (8 bytes), iStack_90=rec[6].",
+        "bIsHidden = (rec[0] == 1).",
+        "nVisibleMoney (unlock cost for hidden skill) = iVar6 - iVar3, where iVar3 = piStack_164[0x7b] (current) and iVar6 = CEquipHiddenSkillCondOpenInfo::GetInfoManagerInstance(...) computed from charm skill index (vtbl+0x2c then vtbl+0x18). Only for hidden (type==1) skills.",
+        "activateInfoList: for non-zero skill (FUN_1050ebc0), iterates activate records at *(rec2+0x2c)+0x10..+0x14 (stride 4), each emitting nType=(piVar10 vtbl+0x10) and a nested VO via FUN_10958500.",
+        "Material cost: iVar3 = CCharmFoundCostInfo::GetInfoManagerInstance() -> *(rec+0x28) = required item id; nItemID; nRakeType=*(itemRec+0x4c). Counts: nItemNowBindCount = FUN_113fa680(itemId,1,1) (owned bound), nItemNowUnbindCount = FUN_113fa680(itemId,0,1) (owned unbound), nItemNowCount = iVar4 (total owned), nItemNeedCount = puStack_158 (required).",
+        "strItemIconPathName = *(itemRec+0xb4)."
+      ],
+      "costs": [
+        "nVisibleMoney = hidden-skill unlock cost = CEquipHiddenSkillCondOpenInfo value - current charm value.",
+        "nItemNeedCount = required material count (CCharmFoundCostInfo rec+0x28 = item id); nItemNowBind/Unbind/NowCount = player's owned quantities."
+      ],
+      "serverRelevance": "validation/authoritative: server owns charm passive-skill state, must charge nVisibleMoney and consume nItemNeedCount of the required material (bound/unbound) when unlocking/activating a charm passive skill. Confirms passive-skill record stride 0x1c and CCharmFoundCostInfo material-cost config. Client previews only.",
+      "confidence": "medium"
+    },
+    {
+      "address": "1096b9a0",
+      "currentName": "FUN_1096b9a0",
+      "proposedName": "CQTEModel::BuildQTEData",
+      "subsystem": "skill QTE (quick-time-event)",
+      "purpose": "Builds the QTE_DATAVO for a skill's quick-time-event sequence: a list of ACTION_DATAVO entries (action string, status, delay, started flag), plus per-QTE skillName/description/status. Gated on mode param_5==1.",
+      "formulas": [
+        "QTE list from FUN_10ea7ad0() (head) / FUN_10ea7ae0() (count); iterates linked list nodes (piVar4[0x17] inner action list).",
+        "per action node piVar2: action = string *(node+3) (default &DAT_11d9d32b if null), status = *(node+4), delay = (double)(float)*(node+2) (seconds), started = ((char)*(node+6)=='\\0').",
+        "per QTE piVar1: field(11dca14c)=*(node+5), status=*(node+2), started=(char)*(node+0x1d), description string.",
+        "delay pushed via typed setter (float->double cast, uStack_54)."
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display of QTE action timing; server owns QTE status/started/success. Confirms QTE action record: action name@+3, status@+4, delay(float)@+2, started@+6. Relevant to skill-cast QTE flow (server validates QTE outcome).",
+      "confidence": "medium"
+    }
+  ]
+}

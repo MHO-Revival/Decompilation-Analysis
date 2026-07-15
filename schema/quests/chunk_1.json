@@ -1,0 +1,299 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x107f43c0",
+      "currentName": "FUN_107f43c0",
+      "proposedName": "CChapterUI::FillChapterVO",
+      "purpose": "Populates a Scaleform view-object (VO) with quest-chapter fields, then sets two Flash timeline params. Reads a chapter record and writes string/int/bool VO fields consumed by the ActionScript UI.",
+      "subsystem": "quests/chapters-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI VO population); reveals chapter record layout the server must supply",
+      "formulas": [
+        "chapter record offsets: +0x7c = nChapterID (int, written to VO 'nChapterID' via FUN_104d1670), +0x80 = strChapterName ptr (VO 'strChapterName' via FUN_104d1550), +0x64/100 = bOpen (byte, VO 'bOpen' via FUN_104d15e0)",
+        "Flash calls: SetVariable('FillBorderBlack_FadeInTime', 0x3f800000=1.0f) then ('FillBorderBlack_Active', 0x3f800000=1.0f) via vtbl+0x2b4 on DAT_1202e818+0x34 (Flash/GFx player)",
+        "the standard '(flags>>6 & 1)' pattern is a CVariant/smart-string refcount-owning check (bit 6 of type byte = heap-allocated string), used throughout this chunk for AddRef/Release"
+      ],
+      "costs": [],
+      "notes": "in_stack_00000010 is a CVariant descriptor (elems: [0]=strptr,[1]=type/flags,[2]=?,[3]=?,[4]=?). FillBorderBlack is a screen fade overlay. Stock CVariant plumbing (FUN_104d1550/1670/15e0 = SetVar string/wstring/bool)."
+    },
+    {
+      "address": "0x107f4b10",
+      "currentName": "FUN_107f4b10",
+      "proposedName": "CTaskTraceUI::BuildQuestVO",
+      "purpose": "Builds the tracked-quest / task-tracker view-object (TASK_QUEST_VO_NAME) and its subTaskArr of objective rows. Reads the active quest record from the client player's quest manager and emits per-objective target IDs, op-type, current/max counts and label strings. THE key function for objective/subtask struct layout in this chunk.",
+      "subsystem": "quests/objective-display",
+      "confidence": "high",
+      "serverRelevance": "client-only display, but the subtask struct offsets are the client mirror of server-authoritative objective state (nCurCount/nMaxCount/nOpType/targetIDs)",
+      "formulas": [
+        "quest manager chain: DAT_1202e818+0xd0 -> +0x90 (player) -> vtbl+0xb4 (get quest ctx) -> +0x2ab0 (quest object); vtbl+0x50 returns active quest record 'iVar2'",
+        "quest record offsets: *(*(iVar2+8)+4) = nQuestID; *(iVar2+0x14) = nQuestStatus (also compared ==4 to select single-target branch); *(*(iVar2+8)+0x5c) = timeout; nQuestType from FUN_114f4f20; lefttime from FUN_114f4860 (clamped: if <=0 emit 0)",
+        "SUBTASK struct stride = 0x3b dwords (236 bytes). Per-subtask (piVar7) dword indices: [0..4]=nTargetID1..5; [5]=nOpType; [6]=nCurCount; [7]=nMaxCount; [0xd]=strTarget1 ptr; [0x13]=strTarget2; [0x19]=strTarget3; [0x1f]=strTarget4; [0x25]=strTarget5; [0x38]=nQuestType; [0x39]=extra id (VO key DAT_11dca838); [0x3a]=objective-kind flag; [0x34]=secondary type flag",
+        "OBJECTIVE VISIBILITY GATE: if (subtask[0x3a]==3 && subtask[0x34]!=4) the row is emitted ONLY when nCurCount < nMaxCount (piVar7[6] < piVar7[7]) i.e. incomplete; otherwise (all other kinds) the row is always emitted. This is a display filter, not the completion test.",
+        "single-target branch when quest record +0x14 == 4: reads *(*(iVar2+8)+0x34)+0x14 as nTargetID4, forces nOpType=0xd (13); FUN_114f4f20()==0x400 && *(*(iVar2+8)+0x38)!=0 selects a formatted vs raw target label"
+      ],
+      "costs": [],
+      "notes": "nOpType constants observed here: 0xd (13) for the +0x14==4 quest branch, 0x1f (31) for the empty/no-target fallback branch. VO built via FUN_11a98de0 (new CVariant map) then per-field FUN_104d1550 (int)/FUN_104d1670 (wstring). Subtask list obtained via FUN_107fa640 (returns [piStack_54, piStack_50) range)."
+    },
+    {
+      "address": "0x107f90b0",
+      "currentName": "FUN_107f90b0",
+      "proposedName": "CWeaponRecastUI::BuildRecastMaterialVO",
+      "purpose": "Builds the weapon-recast/reforge (weaponRecastDatas) quest VO: for each recast data entry it emits a quest header plus a subTaskArr of required-material rows with rarity, owned-count vs required-count, and a point-material flag. Aggregates the player's owned material counts and computes point-material cost via CMaterialTagDescInfo lookup tables.",
+      "subsystem": "quests/weapon-recast-materials",
+      "confidence": "medium",
+      "serverRelevance": "client-only display of recast requirements; material owned-count aggregation and cost-table indexing mirror server-authoritative crafting/recast validation",
+      "formulas": [
+        "top gate: only runs when weaponRecastDatas CVariant type&0x8f in {8,9,10} (array-like); iterates *ppppiStack_14c entries (count at [0]), stride 3 dwords per entry (id64 at +1, level ptr at +3)",
+        "per-material row: FUN_10254130(id) resolves item record; VO 'nTargetID1'=material id, 'rareType'=*(itemRec+0x4c)",
+        "OWNED COUNT = FUN_113fa680(id,0,1) + FUN_113fa680(id,1,1)  (two storage sources summed, e.g. bag + box); REQUIRED COUNT (nMaxCount) = piVar22[6]",
+        "completion mark: subtask 'complete' pointer cleared unless (piStack_178 != &DAT_00000004) OR (owned < required); i.e. a material is satisfied when owned >= required",
+        "point-material cost: uses red-black-tree maps keyed by material id (CSkillLevelMap::Insert at vtbl); per-material accumulates local_19c += FUN_116c04a0(playerPtr) * (needQty - alreadyCounted) using FUN_113fa680 / FUN_10540d00 / FUN_116c0400/0x4a0 helpers; nItemLevel from entry level ptr",
+        "CMaterialTagDescInfo lookup: 2-D table at (descInfo+0x20)[ (level - *(desc+0x30)) / *(desc+0x28) ][ (level-...) % *(desc+0x28) ]; guarded by range check against *(desc+0x24)",
+        "emits per material: 'nItemLevel','nTargetID1','strTarget1','rareType','nCurCount'(=owned),'nMaxCount'(=required),'isPointMaterial'(bool, default 1); quest header 'nQuestID','nQuestStatus','nQuestLevel','strQuestName'"
+      ],
+      "costs": [
+        "nMaxCount (required material qty) = subtask dword[6]; nCurCount (owned) = sum of two FUN_113fa680 storage queries",
+        "point-material total cost = sum over materials of unitCost(FUN_116c04a0) * remainingQty"
+      ],
+      "confidence_note": "control flow is heavily obfuscated by inlined std::map; offsets for the material-count formula are solid, the point-cost tree math is approximate",
+      "notes": "calls CSuperCraftConsumeInfo::GetRecordById, CMaterialTagDescInfo::GetManager, CInfoManager::FindByName, CSkillLevelMap::Insert, memcpy. FUN_113fa680(id, source, 1) = owned quantity in a storage; second arg 0/1 selects storage."
+    },
+    {
+      "address": "0x108131b0",
+      "currentName": "FUN_108131b0",
+      "proposedName": "CTradeUI::OnTradeRequest",
+      "purpose": "Handles an incoming trade request: if the g_refuseTradeRequest cvar-backed flag is set it silently rejects (FUN_1130eb90), otherwise pops a Yes/No message box wired to TradeRespondOk/CancelHandler.",
+      "subsystem": "social/trade (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only UI prompt; server owns actual trade authorization",
+      "formulas": [
+        "msgbox id 0x1f4a passed to FUN_1112d7d0 with handlers 'TradeRespondOkHandler'/'TradeRespondCancelHandler'",
+        "player+0x260dc != 0 => busy/auto-reject path (FUN_1130eb90 sends refusal)"
+      ],
+      "costs": [],
+      "notes": "Not quest-related; included for completeness. g_refuseTradeRequest state cached in DAT_123c73f8."
+    },
+    {
+      "address": "0x1081c610",
+      "currentName": "FUN_1081c610",
+      "proposedName": "CEmbedJewelUI::RegisterHandlers",
+      "purpose": "Registers the EmbedJewel (gem socketing) UI command handlers with the Flash->C dispatch table (FUN_104d13b0 = register named callback).",
+      "subsystem": "equipment/gem-embed (not quests)",
+      "confidence": "high",
+      "serverRelevance": "client-only handler registration; gem embed operations themselves are server-validated elsewhere",
+      "formulas": [
+        "registers: EmbedJewel_IsPlayerOpenEmbedUIFirstTime->FUN_1081e0e0, _putEquipIntoSlot->FUN_1081ca10, _checkPutEquipIntoSlot->FUN_1081c950, _requestEquipEmbedJewel->FUN_1081dbe0, _requestEquipEmbedJewelByArray->FUN_1081d640, New...ByArray->FUN_1081d910, _checkEquipEmbedJewel->FUN_1081d2d0, _checkEquipEmbedJewelByArray->FUN_1081cf80, _RemoveGem->FUN_1081df60, New_RemoveGem->FUN_1081e020, _putJewelIntoSlot->FUN_1081bf20"
+      ],
+      "costs": [],
+      "notes": "putJewelIntoSlot registered 5x (duplicate rows, likely a decompiler artifact or defensive re-register). Not quest-related."
+    },
+    {
+      "address": "0x10835cb0",
+      "currentName": "FUN_10835cb0",
+      "proposedName": "CSettingsUI::BuildOptionsVO",
+      "purpose": "Reads dozens of client cvars (camera, HUD, gamepad, social-refuse flags, name-pad modes) via ICVar->GetIVal/GetFVal and packs them into a settings VO for the options panel. Also builds per-weapon-type gamepad key config (weapon_type_1..12).",
+      "subsystem": "settings/options-ui (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "cvar accessor: DAT_1202e818+0x2c -> vtbl+0x54 = ICVarManager::GetCVar(name); then cvar vtbl+8 = GetIVal, +0xc = GetFVal",
+        "gamepad loop: for i in 1..12 sprintf('g_Gamepad_WeaponType_%d',i) read -> VO 'weapon_type_%d'",
+        "mouse sensitivity VO = cvar('i_mouse_accel')*DAT_11de9a30 (and _v, cl_MHFpsRotSpeed) — DAT_11de9a30 is a float scale constant",
+        "'isWindowsMode' = (r_Fullscreen==0)"
+      ],
+      "costs": [],
+      "notes": "Not quest-related. Large stock settings-sync function; cvar names in strings list."
+    },
+    {
+      "address": "0x10836b50",
+      "currentName": "FUN_10836b50",
+      "proposedName": "CSettingsUI::ApplyOptionsFromVO",
+      "purpose": "Reverse of BuildOptionsVO: reads a packed options struct (param_3) and writes each value back into the corresponding cvar (SetIVal at vtbl+0x14), flushing via vtbl+0x21c. Also toggles chat-dialog rendering and refreshes task-trace mode if it changed.",
+      "subsystem": "settings/options-ui (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "options struct param_3 field offsets (stride 0x10): +8=g_FriendRemind... +0x28=g_refuseTradeRequest, +0x38=g_refuseTeamRequest, +0x48=g_GuilderRemind, +0x58=cl_ShowHeroNamePadMode, +0x68=cl_ShowPlayerNamePadMode, +0x78=e_ChatDialogRendering, +0x88=cl_ShowHeroPetName(inverted), +0xa8=g_refuseClanRequest, +0xb8=cl_ShowPlayerPetName(inv), +0xc8=cl_ShowBossDeadGlow(inv), +0xd8=g_NPCName_hide(inv), +0xe8=cl_TaskTraceMode, +0xf8=g_DInputKeyboard, +0x108=g_UseEmbeddedIME, +0x118=g_hideEmoji, +0x128=r_HideC2PlaeyerEffect, +0x138=r_HideSelfPlaeyerEffect, +0x148=cl_iHideBreakEffect",
+        "if cl_TaskTraceMode changed (bVar24), notifies task-trace subsystem via FUN_10d17440/10d17870 -> event 0x231"
+      ],
+      "costs": [],
+      "notes": "Only quest-adjacent bit is cl_TaskTraceMode (event 0x231) which affects quest-objective on-screen tracking; still client-only."
+    },
+    {
+      "address": "0x10899850",
+      "currentName": "FUN_10899850",
+      "proposedName": "CTeamUI::OnTeamRequestMsgBox",
+      "purpose": "Handles team invite/join-request notifications: auto-rejects when the matching refuse flag is set, else shows a Yes/No message box (MsgBoxRespondOk/CancelHandler).",
+      "subsystem": "social/team (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only prompt",
+      "formulas": [
+        "invite ids {0x1f49,0x204e,0x205c} gated by cvar g_refuseTeamInvite; request ids {0x1f44,0x204f} gated by g_refuseTeamRequest; if refused -> FUN_1130eb90 reject",
+        "player+0x260dc != 0 required (in a session/map)"
+      ],
+      "costs": [],
+      "notes": "Not quest-related."
+    },
+    {
+      "address": "0x1089a840",
+      "currentName": "FUN_1089a840",
+      "proposedName": "CDailyRewardUI::RegisterHandlers",
+      "purpose": "Registers the Daily-Schedule/Daily-Reward UI model handlers (InitModel, QuestInfoTipsData, CollectTipsData) and the ActionScript commands OnOpenDailyScheduleByQuestID / OnOpenDailySchedule.",
+      "subsystem": "quests/daily-schedule-ui",
+      "confidence": "high",
+      "serverRelevance": "client-only handler wiring",
+      "formulas": [
+        "registers via FUN_100b62c0/FUN_1089d120 pairs: InitModel, QuestInfoTipsData->CDailyRewardUI::RegisterHandlers(sub), CollectTipsData->CDailyRewardUI::BuildDailyScheduleRewardItemData, OnOpenDailyScheduleByQuestID->FUN_1089acd0, OnOpenDailySchedule->FUN_1089ac70"
+      ],
+      "costs": [],
+      "notes": "Daily schedule = the recurring daily quest board. Named symbols confirm CDailyRewardUI class."
+    },
+    {
+      "address": "0x1089b5f0",
+      "currentName": "FUN_1089b5f0",
+      "proposedName": "CDailyRewardUI::BuildDailyScheduleQuestListVO",
+      "purpose": "Builds the DAILY_SCHEDULE_QUEST_SIMPLE_DATA VO array (questDataArray): iterates the client quest list and emits a simple card per daily-schedule quest with name, priority, bg images, counts, type, comment level, id and role/HS-level requirements. Also computes exp/money award preview.",
+      "subsystem": "quests/daily-schedule-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; reward preview (currentValue) mirrors server-authoritative daily reward state",
+      "formulas": [
+        "quest object per entry: piVar2 = *piVar10; piVar2[0xb] = quest def record; skip if (char)questDef[0x4b] != 0; questDef[0x3a] used as id",
+        "reward preview branch: if no reward-state object -> FUN_1089e5e0() reward record, uStack_c8 = rec+0x24 (award value), currentValue(uStack_cc)= that value only if completed-flag(iVar4)!=0; else FUN_1161a1e0(0x20) provides claimed(+0x14) / total(+0x18) counts",
+        "VO fields: questName, priority=rec+0x18, bgPath=rec+0x34, bgPath2=rec+0x4c, questCounts, questFinishCounts, questType, commentLevel, questID, roleLevelRequire, roleHSLevelRequire"
+      ],
+      "costs": [
+        "reward award value read from FUN_1089e5e0 record +0x24"
+      ],
+      "notes": "FUN_1161a1e0(0x20) allocates/returns a 0x20-byte progress accessor with vtbl+0x14=claimedCount, +0x18=totalCount. FUN_1089a580 -> quest-appearance record (priority/bg)."
+    },
+    {
+      "address": "0x1089bb10",
+      "currentName": "FUN_1089bb10",
+      "proposedName": "CQuestInfoTipsUI::BuildQuestTipsVO",
+      "purpose": "Builds the quest-info tooltip VO for a single quest: name, comment level, today's completion times, accept-level, open time, contribution, npc name, description, and formatted exp/money/contribution award strings.",
+      "subsystem": "quests/quest-tips-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only tooltip; award numbers reflect server-defined quest reward config",
+      "formulas": [
+        "quest def resolved via FUN_104d8d20(questId); def+0x2c = detail; detail+0x38 -> +0x1c = npc name; detail+8 = name, +0x14 = description, +0xc = ?; detail+0xdc = commentLevel",
+        "reward text formatting via FUN_1024ebe0 with template ids: 0x17f4 (exp line), 0x13c8 (contribution/fund line), 0x13c9 (money line, 2 args); amount pre-scaled by FUN_1024e8a0(value,1)",
+        "reward value source uses same FUN_1089e5e0(+0x24) / FUN_1161a1e0(0x20 claimed+0x14/total+0x18) pattern as BuildDailyScheduleQuestListVO",
+        "trailing VO writes 'expAward'=1,'moneyAward'=2,'questClass'=2 appear to be placeholder/enum constants"
+      ],
+      "costs": [
+        "award template ids 0x17f4 exp, 0x13c8 contribution, 0x13c9 money"
+      ],
+      "notes": "CPet::SetName is being reused as a generic wstring assign helper across this chunk (misnamed by symbol map)."
+    },
+    {
+      "address": "0x1089ef80",
+      "currentName": "FUN_1089ef80",
+      "proposedName": "CQuitGameQuestUI::BuildQuitGameQuestVO",
+      "purpose": "Builds the QuitGameQuestDataClass VO array (arrayQuestData) shown on logout: per quest emits name, contribution, max/current progress value and id, plus a textNotify summary string.",
+      "subsystem": "quests/quit-game-summary-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only summary; current/max values mirror server-authoritative quest progress",
+      "formulas": [
+        "iterates quest ctx (FUN_107cb5c0 -> +0x2ab0 -> vtbl+0xa0 list) [piStack_60, piStack_5c)",
+        "per quest: quest def piVar2[0xb]; reward-state accessor: if no state obj use FUN_1089e5e0()+0x24 gated by completed flag; else FUN_1161a1e0(0x20) claimed(+0x14)/total(+0x18)",
+        "VO: questName, contribution, maxValue, currentValue, questID; textNotify built separately",
+        "reward format uses FUN_1024ebe0 template id 0x13af"
+      ],
+      "costs": [
+        "textNotify/reward template id 0x13af"
+      ],
+      "notes": "currentValue = claimed reward, maxValue = total — a progress bar for outstanding rewards at logout."
+    },
+    {
+      "address": "0x108ae290",
+      "currentName": "FUN_108ae290",
+      "proposedName": "CMHUI_HunterGroup::InitModel",
+      "purpose": "Initializes the Hunter Group (guild) UI model: binds the data source, registers a large set of AS command handlers (AddGuilderRight, ReqJoinGroup, QuitHunterGroup, NoteSetting, impeach commands, OnGetMembers, record-data server responses) and reads the impeach-leader money cost.",
+      "subsystem": "social/hunter-group (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only wiring; reads a server-defined ImpeachMoney constant",
+      "formulas": [
+        "ImpeachMoney = *(FUN_11720120() + 0xac)  (guild config record + 0xac)",
+        "registers AS handlers via FUN_100b62c0/FUN_108b6f80; server-message bindings AS2C_RequestRecordData->FUN_108b6a00, AS2C_GetRecordData->FUN_108b6aa0",
+        "list getters FUN_104d13b0: _getSearchGroupList/_getReqJoinGroupList/_getGroupMemberList/_getGuildTitleList"
+      ],
+      "costs": [
+        "ImpeachMoney (guild leader impeachment cost) = guildConfig+0xac"
+      ],
+      "notes": "Not quest-related (guild subsystem)."
+    },
+    {
+      "address": "0x108b0970",
+      "currentName": "FUN_108b0970",
+      "proposedName": "CMHUI_HunterGroupModel::RegisterHandlers",
+      "purpose": "Registers the full Hunter Group model command handler table (InitModel, CheckGroupName, RenameGroup, GetGuildName, RefreshGuildDetail, Updata*, SubmitCreateHunterGroup, member/rights management, TitleSetting, UpGuildLevel, EditIcon, TakeWage, DisBandGuild, BanGuilder, etc.).",
+      "subsystem": "social/hunter-group (not quests)",
+      "confidence": "high",
+      "serverRelevance": "client-only handler registration",
+      "formulas": [
+        "pure sequence of FUN_100b62c0(name,'')/FUN_108b6f80(&slot, handlerFn, 0) registrations; e.g. InitModel->FUN_108ae290, CheckGroupName->FUN_108b5bb0, SubmitCreateHunterGroup->FUN_108b6430, UpGuildLevel->LAB_108b05f0, DisBandGuild->LAB_108b4dc0"
+      ],
+      "costs": [],
+      "notes": "Not quest-related. Large stock guild-UI registration boilerplate."
+    },
+    {
+      "address": "0x108b41e0",
+      "currentName": "FUN_108b41e0",
+      "proposedName": "CMHUI_HunterGroup::BuildReqJoinListVO",
+      "purpose": "Builds the guild join-request list VO (reqJoinGroupArray / REQUESTJOINHG_CLASS_NAME): per pending applicant emits memberName, level, message, hunterStar and id, then fires UpdataREQUESTJOINHG.",
+      "subsystem": "social/hunter-group (not quests)",
+      "confidence": "medium",
+      "serverRelevance": "client-only display",
+      "formulas": [
+        "applicant record offsets: +0x40=level, +8=id(DAT_11dbb0b4 key), +0x1c/0x20=name pair, +0x54/0x58=hunterStar strings, +0x6c/0x70=message pair",
+        "iterates [piStack_8c, piStack_88)"
+      ],
+      "costs": [],
+      "notes": "Not quest-related."
+    },
+    {
+      "address": "0x108ca7e0",
+      "currentName": "FUN_108ca7e0",
+      "proposedName": "CTaskUI::BuildTaskDetailVO",
+      "purpose": "Builds the full task-detail VO for the currently selected quest: header (taskName, taskLevel, queststatus, bTeam, bRepeat), the reward preview block (gold, gold_bind, farm actuarial points, hunter exp/fund/contribution, npc friendship), the reward-item list (task_awardList) and the objective list (task_targets). This is the richest reward-formula function in the chunk.",
+      "subsystem": "quests/task-detail-ui",
+      "confidence": "high",
+      "serverRelevance": "validation/client-display: reward amounts are scaled client-side by hunt-rank for preview, but the authoritative grant is server-side; the reward-type IDs and scaling formulas mirror server reward config",
+      "formulas": [
+        "gate: only runs when DAT_123bbaac (selected quest cache) > 0",
+        "queststatus: rewardState=vtbl+0x50(questPtr); if state obj -> status=*(state+0x14); else status = (vtbl+0x60 bool)?10:0",
+        "bTeam: FUN_10804c90(); team if quest party record present and memberCount(**+4) >= 2",
+        "bRepeat = *(quest+0x80) != 0",
+        "REWARD entries fetched by type-id from reward table at (quest param_2 + 0x4c): FUN_10804cd0(tbl,0x19), FUN_10804940(tbl,0x18), FUN_108049c0(tbl,0x21), FUN_10804900(tbl,0x1f award items), plus FUN_10804980()/FUN_10804a00() for actuarial/npc-friend",
+        "REWARD SCALING: each reward amount is multiplied by a hunt-rank factor from CPlayer::GetHuntRankOrCount. e.g. DAT_11dbfbc8 (type 0x19) = rec+8 * rankMul(local_30); gold_bind(type 0x18) = rec+0xc * countMul(local_2c); DAT_11dc0944 = rec+8 * rankMul; farm_actuarialpoint = rec+8 * rankMul; only applied when DAT_123bbaa8 (rank data loaded) != 0",
+        "hunter_exp = rec(0x21)+8; hunter_fund = rec(0x21)+0xc; hunter_contribution = rec(0x21)+4; npcfriendvalue = rec(0x24?)+8",
+        "award item row (TASK_AWARD_CLASS_NAME): itemIconPathName=itemRec+0xb4, slotid=index, ItemID=vtbl+0x18(item), count(DAT_11dbdc0c)=entry+8, quality(DAT_11dca14c)=itemRec+0x10; empty slot -> slotid=10,ItemID=0",
+        "task_targets objective rows (stride 0x3b dwords, same layout as BuildQuestVO): [0..4]=nTargetID1..5,[3]=nOpType,[4]=nCurCount,[5]=nMaxCount(NB base pointer here is at +2 vs BuildQuestVO), strTarget at [0xb/0x11/0x17/0x1d/0x23], [0x36]=nQuestType; single-target fallback forces nOpType=0x1f (31) with strTarget4"
+      ],
+      "costs": [
+        "reward-type IDs: 0x18 (gold/gold_bind), 0x19 (money/DAT_11dbfbc8), 0x1f (award item list), 0x21 (hunter exp/fund/contribution)",
+        "reward = base_amount * huntRankMultiplier (CPlayer::GetHuntRankOrCount)"
+      ],
+      "notes": "calls CPlayer::GetHuntRankOrCount(recPtr, &countOut, &rankMulOut, &altOut, &altOut2) -> writes float multipliers by hunt rank. The two subtask layouts (0x3b stride here vs 0x3b in 107f4b10) differ in base-index by 2 dwords; verify against TlvTaskContent (arg1..3) when wiring server side."
+    },
+    {
+      "address": "0x108cb6f0",
+      "currentName": "FUN_108cb6f0",
+      "proposedName": "CTaskUI::RefreshTaskListVO",
+      "purpose": "Builds/refreshes the task-list VO (refresh_tasks_list / TASK_TASKDATA_CLASS_NAME): per quest emits quest_id, level, questStatus, taskName, groupName, curStage/totalStage, groupType, group_id, bTracked, starLevel, Image and AwardNum; also emits daily-completion summary (compledaily: completecount/totalcount). Selects a default-focused quest and calls BuildTaskDetailVO for it.",
+      "subsystem": "quests/task-list-ui",
+      "confidence": "high",
+      "serverRelevance": "client-only list display; per-quest fields (quest_id, status, groupType, starLevel) mirror server-authoritative quest state",
+      "formulas": [
+        "daily summary: completecount = huntCounter[5]; totalcount = FUN_114e4950() (daily cap)",
+        "quest list obtained via DAT_123bbab4 (task manager) vtbl+0xd8 (list ptr), +0xe4 (count), +0xdc (copy)",
+        "per quest record piVar1 = *(*questNode + 0x2c): quest_id = piVar1[1]; level via FUN_104d8d20(piVar1[1]); questStatus via FUN_108cc140; groupType = piVar1[4]; group_id = piVar1[1]; starLevel = piVar1[0x4a]; Image = piVar1[0x36]; AwardNum via FUN_108ca6f0; curStage/totalStage hardcoded 1",
+        "default focus: first quest sets DAT_123bbaac = piVar1[1] (selected quest id) unless DAT_123bba53 (sticky-selection) set",
+        "match test to detect already-listed quest: *(*(*questNode+0x2c)+4) == *(*(existing+8)+4)"
+      ],
+      "costs": [],
+      "notes": "DAT_123bbaac is the shared 'selected quest id' used by BuildTaskDetailVO's gate. FUN_114e4950 = daily task total/cap. bTracked emitted as 0 (tracking set elsewhere)."
+    }
+  ]
+}

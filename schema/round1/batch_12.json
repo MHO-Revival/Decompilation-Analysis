@@ -1,0 +1,501 @@
+{
+  "batchIndex": 12,
+  "classes": [
+    {
+      "className": "CLevelIDGroupInfo",
+      "category": "misc",
+      "purpose": "Static config table that groups map/level IDs under a shared group id; on load it stamps each member level's runtime object with the group id.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1173def0", "currentName": "CLevelIDGroupInfo::GetManagers", "proposedName": "CLevelIDGroupInfo::GetInfoManager", "purpose": "CInfoManager<CLevelIDGroupInfo> registry accessor: looks up the singleton manager by class-name string (FUN_11679e10) and returns it, falling back to a static default."},
+        {"address": "1173ebe0", "currentName": "CLevelIDGroupInfo::GetManagers_1173ebe0", "proposedName": "CLevelIDGroupInfo::GetCachedInfoManager", "purpose": "Returns the already-cached manager instance (*DAT_12390770) when arg==0, else 0."},
+        {"address": "118f1610", "currentName": "CLevelIDGroupInfo::GetManagers_118f1610", "proposedName": "CLevelIDGroupInfo::ApplyGroupsToLevels", "purpose": "Iterates all group records (manager vector at +0x14/+0x18) and calls the per-record assignment helper (119f5090) for each."},
+        {"address": "119f5090", "currentName": "CLevelIDGroupInfo::GetManagers_119f5090", "proposedName": "CLevelIDGroupInfo::StampGroupOnMemberLevels", "purpose": "For one group record: for each level id in the group's id vector (this+0x14..+0x18), looks the level up in CMHLevelInfo's sparse map and writes the group id (this+0x10) into that level object's field at +0x260."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "value written into each member level's +0x260; also returned by vtable+0x18"},
+        {"name": "levelIds_begin", "type": "int32* (vector begin)", "offset": "0x14", "source": "inferred", "note": "std::vector<int32> of member level ids"},
+        {"name": "levelIds_end", "type": "int32* (vector end)", "offset": "0x18", "source": "inferred", "note": "count = (end-begin)>>2"}
+      ],
+      "constants": [],
+      "formulas": ["For each levelId in group: CMHLevelInfo(levelId).field_0x260 = group.groupId (sparse lookup: bucket=(levelId-base)/bucketSize, slot=(levelId-base)%bucketSize)"],
+      "relatedTlv": ["TlvLevelId"],
+      "notes": "No DebugFormat/reader recovered; layout inferred from ApplyGroupsToLevels control flow. Manager container layout (shared by whole batch): +0x14/+0x18 = vector<T*>; +0x20 bucket array, +0x24 capacity, +0x28 bucketSize, +0x30 idBase for id->record sparse lookup; vtable+0x28 = GetCount. TlvLevelId is player-side serialized data, only loosely related.",
+      "nameNext": [{"address": "11a008c0", "proposedName": "CMHLevelInfo::GetByLevelId", "why": "CMHLevelInfo sparse-map lookup used to resolve member levels"}]
+    },
+    {
+      "className": "CTaskHuntStageInfo",
+      "category": "quest",
+      "purpose": "Config for hunt-task stage gating: defines a monster/target list plus a required kill count and a rank threshold that unlocks a hunt stage.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1161e4d0", "currentName": "CTaskHuntStageInfo::GetManagers", "proposedName": "CTaskHuntStageInfo::GetInfoManager", "purpose": "CInfoManager<CTaskHuntStageInfo> registry accessor by class name."},
+        {"address": "11620720", "currentName": "CTaskHuntStageInfo::GetManagers_11620720", "proposedName": "CTaskHuntStageInfo::FindUnlockedStage", "purpose": "Scans all stage records; for a record gated by field[9] (rank threshold vs FUN_1134b7d0), counts how many entries in its list (this[5]..this[6]) pass FUN_114cdd70, and if count >= field[8] (required kill count) returns the stage id (vtable+0x18)."},
+        {"address": "11620df0", "currentName": "CTaskHuntStageInfo::GetManagers_11620df0", "proposedName": "CTaskHuntStageInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "119071c0", "currentName": "CTaskHuntStageInfo::GetManagers_119071c0", "proposedName": "CTaskHuntStageInfo::ForEachStage_A", "purpose": "Iterates all stage records and calls per-record helper FUN_11a00a40 (post-load fixup)."},
+        {"address": "11907310", "currentName": "CTaskHuntStageInfo::GetManagers_11907310", "proposedName": "CTaskHuntStageInfo::ForEachStage_ResolveLevels", "purpose": "Iterates all stage records and calls CMHLevelInfo helper (11a008c0) per record."}
+      ],
+      "fields": [
+        {"name": "targetList_begin", "type": "int32* (vector begin)", "offset": "0x14", "source": "inferred", "note": "list of target/monster ids"},
+        {"name": "targetList_end", "type": "int32* (vector end)", "offset": "0x18", "source": "inferred"},
+        {"name": "requiredCount", "type": "int32", "offset": "0x20", "source": "inferred", "note": "field[8]; min entries that must pass filter"},
+        {"name": "rankThreshold", "type": "int32", "offset": "0x24", "source": "inferred", "note": "field[9]; gate vs FUN_1134b7d0 (player rank/progress)"}
+      ],
+      "constants": [],
+      "formulas": ["stage unlocked when count(entries in targetList where FUN_114cdd70(entry)) >= requiredCount, provided rankThreshold check passes"],
+      "relatedTlv": [],
+      "notes": "Layout inferred from FindUnlockedStage. FUN_114cdd70 = per-target 'is completed/killed?' predicate; FUN_1134b7d0 = player rank/count provider.",
+      "nameNext": [{"address": "1134b7d0", "proposedName": "CPlayer::GetHuntRankOrCount", "why": "supplies threshold value compared to field[9]"}]
+    },
+    {
+      "className": "CCommerceInfo",
+      "category": "economy",
+      "purpose": "Guild/trade commerce (trade-boat) config; provides per-item commerce records and builds availability/value tuples keyed by commerce/goods id.",
+      "confidence": "low",
+      "methods": [
+        {"address": "109f59e0", "currentName": "CCommerceInfo::GetManagers", "proposedName": "CCommerceInfo::GetInfoManager", "purpose": "CInfoManager<CCommerceInfo> singleton accessor (registers singleton name via StcMbrNameSvr, returns DAT_123c9240)."},
+        {"address": "11174830", "currentName": "CCommerceInfo::GetManagers_11174830", "proposedName": "CCommerceInfo::BuildAvailableGoodsList", "purpose": "Given a context object (from vtable+0xc), walks all commerce records and appends 0xC-byte tuples {goodsId, unlockedBitFlag, value} to an output vector; value is resolved from the context's per-goods table at +0x1f0..+0x1f4 and the unlocked flag from bitmask at +0x1dc."},
+        {"address": "114a7780", "currentName": "CCommerceInfo::GetManagers_114a7780", "proposedName": "CCommerceInfo::FindOrInsertGoodsRecord", "purpose": "Find-or-insert in an object's per-goods vector at +0x1e4 (stride 0x18, keyed by id@0); on miss and if allowed (param_3), validates the id against the CCommerceInfo sparse map before inserting a new 0x18-byte record."}
+      ],
+      "fields": [
+        {"name": "goodsVector_begin", "type": "record* (stride 0x18)", "offset": "0x1e4", "source": "inferred", "note": "on the owning object, not on CCommerceInfo record; id at record+0x0"},
+        {"name": "goodsVector_end", "type": "record*", "offset": "0x1e8", "source": "inferred"},
+        {"name": "goodsVector_cap", "type": "record*", "offset": "0x1ec", "source": "inferred"},
+        {"name": "unlockedBitmask", "type": "uint32", "offset": "0x1dc", "source": "inferred", "note": "on owning object; bit per goods index"},
+        {"name": "valueTable_begin", "type": "record* (stride 0xc)", "offset": "0x1f0", "source": "inferred", "note": "on owning object; {id@0, ..., value@4}"},
+        {"name": "valueTable_end", "type": "record*", "offset": "0x1f4", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["tuple.unlocked = (owner.bitmask_0x1dc >> goodsIndex) & 1", "goodsVector stride = 0x18 bytes; valueTable stride = 0xC bytes"],
+      "relatedTlv": ["TlvCommerceGuild", "TlvGuildCommerceData", "TlvCommerceBoat"],
+      "notes": "Confidence low: the two data-building methods operate on a separate owner object (player/guild commerce state), so most offsets are that object's, not CCommerceInfo's own record. TlvCommerce* are the serialized network counterparts.",
+      "nameNext": []
+    },
+    {
+      "className": "CEquipFoundOpenCostInfo",
+      "category": "economy",
+      "purpose": "Cost table for opening/appraising equipment 'found' (hidden attribute) slots, keyed by equip type and an inclusive value range; returns two distinct cost fields.",
+      "confidence": "high",
+      "methods": [
+        {"address": "11833700", "currentName": "CEquipFoundOpenCostInfo::GetManagers", "proposedName": "CEquipFoundOpenCostInfo::GetInfoManager", "purpose": "CInfoManager<CEquipFoundOpenCostInfo> registry accessor by class name."},
+        {"address": "118360f0", "currentName": "CEquipFoundOpenCostInfo::GetManagers_118360f0", "proposedName": "CEquipFoundOpenCostInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "11836410", "currentName": "CEquipFoundOpenCostInfo::GetManagers_11836410", "proposedName": "CEquipFoundOpenCostInfo::GetCostB", "purpose": "Scans records; where type(+0x14)==param_1 and param_2 in [low(+0x18), high(+0x1c)], returns cost field at +0x24; else 0xFFFFFFFF."},
+        {"address": "11836600", "currentName": "CEquipFoundOpenCostInfo::GetManagers_11836600", "proposedName": "CEquipFoundOpenCostInfo::GetCostA", "purpose": "Same match logic as 11836410 but returns cost field at +0x20; else 0xFFFFFFFF."}
+      ],
+      "fields": [
+        {"name": "equipType", "type": "int32", "offset": "0x14", "source": "inferred", "note": "matched against query param_1"},
+        {"name": "rangeLow", "type": "int32", "offset": "0x18", "source": "inferred", "note": "inclusive lower bound of value/level range"},
+        {"name": "rangeHigh", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "inclusive upper bound"},
+        {"name": "costA", "type": "int32", "offset": "0x20", "source": "inferred", "note": "returned by GetCostA"},
+        {"name": "costB", "type": "int32", "offset": "0x24", "source": "inferred", "note": "returned by GetCostB"}
+      ],
+      "constants": ["NotFound=0xFFFFFFFF"],
+      "formulas": ["match = (record.equipType == queryType) && (rangeLow <= queryValue <= rangeHigh)"],
+      "relatedTlv": [],
+      "notes": "Clean two-query structure gives high confidence on offsets 0x14-0x24. costA/costB likely the two currency components (e.g. gold vs item/coupon).",
+      "nameNext": []
+    },
+    {
+      "className": "CAstrolabeStarInfo",
+      "category": "activity",
+      "purpose": "Config for the Astrolabe (constellation) minigame stars; each record carries a star id plus an associated value used to populate global lookup tables.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "119b1650", "currentName": "CAstrolabeStarInfo::GetManagers", "proposedName": "CAstrolabeStarInfo::GetInfoManager", "purpose": "CInfoManager<CAstrolabeStarInfo> registry accessor by class name."},
+        {"address": "119b22f0", "currentName": "CAstrolabeStarInfo::GetManagers_119b22f0", "proposedName": "CAstrolabeStarInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "119b24c0", "currentName": "CAstrolabeStarInfo::GetManagers_119b24c0", "proposedName": "CAstrolabeStarInfo::ForEachStar_A", "purpose": "Iterates all star records and calls per-record helper FUN_11a76c20 (post-load fixup)."},
+        {"address": "119b2640", "currentName": "CAstrolabeStarInfo::GetManagers_119b2640", "proposedName": "CAstrolabeStarInfo::ForEachStar_B", "purpose": "Iterates all records calling FUN_11a76c10, then calls BuildStarIndexTables (11a76dc0)."},
+        {"address": "11a76dc0", "currentName": "CAstrolabeStarInfo::GetManagers_11a76dc0", "proposedName": "CAstrolabeStarInfo::BuildStarIndexTables", "purpose": "Iterates all records; appends the star id (vtable+0x18) to global vector DAT_123ad234 and record field +0x14 to global vector DAT_123ad240 (parallel id/value index tables)."}
+      ],
+      "fields": [
+        {"name": "starId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "returned by vtable+0x18"},
+        {"name": "starValue", "type": "int32", "offset": "0x14", "source": "inferred", "note": "field[5]; second parallel index value"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": [],
+      "notes": "Layout inferred from BuildStarIndexTables. DAT_123ad234/DAT_123ad240 are global vectors filled at load.",
+      "nameNext": []
+    },
+    {
+      "className": "CSculptureLibInfo",
+      "category": "activity",
+      "purpose": "Sculpture-library config (sculpture/carving collection feature); links library entries to CSculptureInfo and CItemBaseInfo item definitions.",
+      "confidence": "low",
+      "methods": [
+        {"address": "1197f890", "currentName": "CSculptureLibInfo::GetManagers", "proposedName": "CSculptureLibInfo::GetInfoManager", "purpose": "CInfoManager<CSculptureLibInfo> registry accessor by class name."},
+        {"address": "119809c0", "currentName": "CSculptureLibInfo::GetManagers_119809c0", "proposedName": "CSculptureLibInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "11980d60", "currentName": "CSculptureLibInfo::GetManagers_11980d60", "proposedName": "CSculptureLibInfo::ForEachEntry_A", "purpose": "Iterates all library records and calls per-record helper FUN_11a53a80."},
+        {"address": "11981030", "currentName": "CSculptureLibInfo::GetManagers_11981030", "proposedName": "CSculptureLibInfo::ForEachEntry_LinkSculpture", "purpose": "Iterates all records and calls CSculptureInfo helper (11a53910) per record."},
+        {"address": "11a540b0", "currentName": "CSculptureLibInfo::GetManagers_11a540b0", "proposedName": "CSculptureLibInfo::GetManagerForEntry", "purpose": "Returns the CSculptureLibInfo manager, or the CItemBaseInfo manager instead when the passed object's count field (+0x58) > 0 (selects which info table to resolve against)."}
+      ],
+      "fields": [
+        {"name": "itemCount", "type": "int32", "offset": "0x58", "source": "inferred", "note": "on the passed object; >0 switches resolution to CItemBaseInfo"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": ["TlvSculptureLibData", "TlvSculptureLibWrapper", "TlvSculptureData"],
+      "notes": "Own record layout not recovered (per-record work is in uninspected FUN_11a53a80/11a53910). Strongly associated with CSculptureInfo and CItemBaseInfo. TlvSculptureLibData is the serialized counterpart.",
+      "nameNext": [{"address": "11a53910", "proposedName": "CSculptureInfo::LinkFromLibEntry", "why": "per-record link into CSculptureInfo"}]
+    },
+    {
+      "className": "CEquipUpgradeInfo",
+      "category": "item",
+      "purpose": "Equipment upgrade path config: for each upgradable equip, defines a chain of upgrade steps, each with an item-cost list, validated against CEquipInfo and CItemBaseInfo.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "107ec4b0", "currentName": "CEquipUpgradeInfo::GetManagers", "proposedName": "CEquipUpgradeInfo::GetInfoManager", "purpose": "CInfoManager<CEquipUpgradeInfo> singleton accessor (StcMbrNameSvr registration, returns DAT_123beebc)."},
+        {"address": "11975630", "currentName": "CEquipUpgradeInfo::GetManagers_11975630", "proposedName": "CEquipUpgradeInfo::ValidateUpgradePaths", "purpose": "For each upgrade record: resolves its equip id (+0x14) in CEquipInfo's sparse map, then walks its upgrade-step vector (+0x1c..+0x20, stride 0xB0); for each step walks its item-cost list (step+0x4..+0x8, stride 8) validating each item id against CItemBaseInfo."}
+      ],
+      "fields": [
+        {"name": "equipId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "looked up in CEquipInfo"},
+        {"name": "steps_begin", "type": "record* (stride 0xB0)", "offset": "0x1c", "source": "inferred", "note": "vector of upgrade-step structs"},
+        {"name": "steps_end", "type": "record*", "offset": "0x20", "source": "inferred"}
+      ],
+      "constants": ["UpgradeStepStride=0xB0", "ItemCostPairStride=0x8"],
+      "formulas": ["step struct stride = 0xB0; each step has item-cost list at step+0x4..step+0x8 with stride 8 ({itemId, count})"],
+      "relatedTlv": [],
+      "notes": "Only the validation/load method recovered (single big method). Step and cost-pair offsets inferred from iteration strides.",
+      "nameNext": []
+    },
+    {
+      "className": "CAstrolabeTaskPrizeInfo",
+      "category": "activity",
+      "purpose": "Astrolabe task reward table: for a given task id, holds a weighted set of prize ids and performs a weighted-random draw.",
+      "confidence": "high",
+      "methods": [
+        {"address": "109a8720", "currentName": "CAstrolabeTaskPrizeInfo::GetManagers", "proposedName": "CAstrolabeTaskPrizeInfo::GetInfoManager", "purpose": "CInfoManager<CAstrolabeTaskPrizeInfo> singleton accessor (StcMbrNameSvr, returns DAT_123c8b38)."},
+        {"address": "118060e0", "currentName": "CAstrolabeTaskPrizeInfo::GetManagers_118060e0", "proposedName": "CAstrolabeTaskPrizeInfo::RollPrizeForTask", "purpose": "For records whose taskId (field[8], +0x20) == param_1, collects weight (field[5], +0x14) and prize id (vtable+0x18) into parallel vectors, then does a weighted-random pick (FUN_10a1cee0) and returns the chosen prize id (0 if none)."},
+        {"address": "119b11d0", "currentName": "CAstrolabeTaskPrizeInfo::GetManagers_119b11d0", "proposedName": "CAstrolabeTaskPrizeInfo::ForEachPrize_A", "purpose": "Iterates all records calling per-record helper FUN_11806380."},
+        {"address": "119b1320", "currentName": "CAstrolabeTaskPrizeInfo::GetManagers_119b1320", "proposedName": "CAstrolabeTaskPrizeInfo::ForEachPrize_B", "purpose": "Iterates all records calling per-record helper FUN_11806370."}
+      ],
+      "fields": [
+        {"name": "prizeId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "returned by vtable+0x18"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred", "note": "field[5]; draw weight"},
+        {"name": "taskId", "type": "int32", "offset": "0x20", "source": "inferred", "note": "field[8]; matched against query task id"}
+      ],
+      "constants": [],
+      "formulas": ["weighted-random draw over {records where taskId==query} using weight field (FUN_10a1cee0 = weighted index picker)"],
+      "relatedTlv": [],
+      "notes": "FUN_10a1cee0 is the shared weighted-random-index helper used across all the pet-attribute rollers in this batch.",
+      "nameNext": [{"address": "10a1cee0", "proposedName": "WeightedRandomPick", "why": "shared weighted-random index selector taking parallel weight vector"}]
+    },
+    {
+      "className": "CTaskAttackInfo",
+      "category": "quest",
+      "purpose": "Maps up to five attack-target ids (monsters/NPCs) to a task; used to find which task is triggered when a given target is attacked.",
+      "confidence": "high",
+      "methods": [
+        {"address": "11771590", "currentName": "CTaskAttackInfo::GetManagers", "proposedName": "CTaskAttackInfo::GetInfoManager", "purpose": "CInfoManager<CTaskAttackInfo> registry accessor by class name."},
+        {"address": "1177e8a0", "currentName": "CTaskAttackInfo::GetManagers_1177e8a0", "proposedName": "CTaskAttackInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1185e230", "currentName": "CTaskAttackInfo::GetManagers_1185e230", "proposedName": "CTaskAttackInfo::FindTaskByTarget", "purpose": "Scans records; if param_1 matches any of the 5 target-id fields (field[6..10], +0x18/+0x1c/+0x20/+0x24/+0x28) returns the task id (vtable+0x18); else 0."},
+        {"address": "11904920", "currentName": "CTaskAttackInfo::GetManagers_11904920", "proposedName": "CTaskAttackInfo::ForEachTask_A", "purpose": "Iterates all records calling per-record helper FUN_1185e410."},
+        {"address": "11904a70", "currentName": "CTaskAttackInfo::GetManagers_11904a70", "proposedName": "CTaskAttackInfo::ForEachTask_B", "purpose": "Iterates all records calling per-record helper FUN_1185e400."}
+      ],
+      "fields": [
+        {"name": "taskId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "returned by vtable+0x18"},
+        {"name": "targetId0", "type": "int32", "offset": "0x18", "source": "inferred", "note": "field[6]"},
+        {"name": "targetId1", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "field[7]"},
+        {"name": "targetId2", "type": "int32", "offset": "0x20", "source": "inferred", "note": "field[8]"},
+        {"name": "targetId3", "type": "int32", "offset": "0x24", "source": "inferred", "note": "field[9]"},
+        {"name": "targetId4", "type": "int32", "offset": "0x28", "source": "inferred", "note": "field[10]"}
+      ],
+      "constants": [],
+      "formulas": ["match if queryTarget in {targetId0..targetId4}"],
+      "relatedTlv": [],
+      "notes": "Clean 5-slot equality check gives high confidence on offsets 0x18-0x28.",
+      "nameNext": []
+    },
+    {
+      "className": "CGuildSkillInfo",
+      "category": "social",
+      "purpose": "Guild skill config: lists guild skills and the guild level at which each unlocks; builds the set of skills currently available to a guild.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10919f10", "currentName": "CGuildSkillInfo::GetManagers", "proposedName": "CGuildSkillInfo::GetInfoManager", "purpose": "CInfoManager<CGuildSkillInfo> singleton accessor (StcMbrNameSvr, returns DAT_123c8230)."},
+        {"address": "114a81e0", "currentName": "CGuildSkillInfo::GetManagers_114a81e0", "proposedName": "CGuildSkillInfo::CollectAvailableSkills", "purpose": "Computes level = min(owner.field_0x224 + 1, CGuildBuildingLevelUpInfo(5)); for each skill record with requiredLevel(+0x24) <= level, resolves the skill via its group ptr(+0x14) and id(+0x18) (FUN_114a6c00/FUN_1149d9f0) and appends 8-byte entries to the output vector."},
+        {"address": "11964fc0", "currentName": "CGuildSkillInfo::GetManagers_11964fc0", "proposedName": "CGuildSkillInfo::ForEachSkill_A", "purpose": "Iterates all skill records calling per-record helper FUN_11a44a80."},
+        {"address": "11965110", "currentName": "CGuildSkillInfo::GetManagers_11965110", "proposedName": "CGuildSkillInfo::ForEachSkill_B", "purpose": "Iterates all skill records calling per-record helper FUN_11a44a70."}
+      ],
+      "fields": [
+        {"name": "skillGroup", "type": "ptr", "offset": "0x14", "source": "inferred", "note": "passed to skill-data lookup FUN_1149d9f0"},
+        {"name": "skillId", "type": "int32", "offset": "0x18", "source": "inferred"},
+        {"name": "requiredGuildLevel", "type": "int32", "offset": "0x24", "source": "inferred", "note": "skill available when <= current guild level"}
+      ],
+      "constants": [],
+      "formulas": ["availLevel = min(owner.field_0x224 + 1, CGuildBuildingLevelUpInfo::GetMaxLevel(5))", "skill included when requiredGuildLevel <= availLevel"],
+      "relatedTlv": [],
+      "notes": "owner.field_0x224 is a byte (guild building level counter). CGuildBuildingLevelUpInfo(5) supplies a cap for building type 5.",
+      "nameNext": [{"address": "1145ec70", "proposedName": "CGuildBuildingLevelUpInfo::GetMaxLevel", "why": "supplies the level cap used to clamp available skills"}]
+    },
+    {
+      "className": "CWeaponTutorialInfo",
+      "category": "weapon",
+      "purpose": "Bidirectional map between weapon type/category and its tutorial id; also tests whether a tutorial exists.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10876670", "currentName": "CWeaponTutorialInfo::GetManagers", "proposedName": "CWeaponTutorialInfo::GetInfoManager", "purpose": "CInfoManager<CWeaponTutorialInfo> singleton accessor (StcMbrNameSvr, returns DAT_123bf90c)."},
+        {"address": "11a5a350", "currentName": "CWeaponTutorialInfo::GetManagers_11a5a350", "proposedName": "CWeaponTutorialInfo::GetTutorialByWeapon", "purpose": "Finds the record whose key A (vtable+0x30) == param_1 and returns key B (vtable+0x34); 0 if none."},
+        {"address": "11a5a4c0", "currentName": "CWeaponTutorialInfo::GetManagers_11a5a4c0", "proposedName": "CWeaponTutorialInfo::GetWeaponByTutorial", "purpose": "Finds the record whose key B (vtable+0x34) == param_1 and returns key A (vtable+0x30); 0 if none."},
+        {"address": "11a5a610", "currentName": "CWeaponTutorialInfo::GetManagers_11a5a610", "proposedName": "CWeaponTutorialInfo::HasTutorial", "purpose": "Returns 1 if any record's key B (vtable+0x34) == param_1, else 0."}
+      ],
+      "fields": [
+        {"name": "keyA_weaponType", "type": "int32 (via vtable+0x30)", "offset": "unknown", "source": "inferred", "note": "accessor at vtable+0x30"},
+        {"name": "keyB_tutorialId", "type": "int32 (via vtable+0x34)", "offset": "unknown", "source": "inferred", "note": "accessor at vtable+0x34"}
+      ],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": [],
+      "notes": "Fields accessed only through virtual getters (vtable+0x30/+0x34), so raw offsets not visible. keyA/keyB roles are symmetric (weaponType <-> tutorialId).",
+      "nameNext": []
+    },
+    {
+      "className": "CPetSupportSkillInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet support skills used during pet generation; assigns a rolled support-skill id to a pet.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f9d0", "currentName": "CPetSupportSkillInfo::GetManagers", "proposedName": "CPetSupportSkillInfo::GetInfoManager", "purpose": "CInfoManager<CPetSupportSkillInfo> registry accessor by class name."},
+        {"address": "11752a10", "currentName": "CPetSupportSkillInfo::GetManagers_11752a10", "proposedName": "CPetSupportSkillInfo::RollAndAssignSupportSkill", "purpose": "Collects each record's weight (+0x14) into a vector, weighted-random picks (FUN_10a1cee0), and writes the chosen record's skill id (+0x10) into the pet object at +0xB4."},
+        {"address": "11753750", "currentName": "CPetSupportSkillInfo::GetManagers_11753750", "proposedName": "CPetSupportSkillInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c960", "currentName": "CPetSupportSkillInfo::GetManagers_1192c960", "proposedName": "CPetSupportSkillInfo::ForEachSupportSkill", "purpose": "Iterates all records and calls CPetSupportBuff helper (11a1ba20) for each non-null record."}
+      ],
+      "fields": [
+        {"name": "skillId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xB4"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred", "note": "weighted-random draw weight"}
+      ],
+      "constants": [],
+      "formulas": ["pet.supportSkill(+0xB4) = weightedRandom(records, weight).skillId"],
+      "relatedTlv": ["TlvPetFullAttrData", "TlvPetExtAttrData"],
+      "notes": "Pet-generation struct offsets across this batch: +0xA0 quality, +0xA4 character, +0xA8 atkTarget, +0xAC atkMode, +0xB0 skin, +0xB4 supportSkill. Batch index 12 namesake.",
+      "nameNext": [{"address": "11a1ba20", "proposedName": "CPetSupportBuff::ApplyFromInfo", "why": "per-record pet support buff application"}]
+    },
+    {
+      "className": "CPlayerLevelUpInfo",
+      "category": "misc",
+      "purpose": "Player level-up curve: per-level increment values; used to compute cumulative totals (e.g. exp/attribute points) up to a target level, and to build a merged threshold table with CExplimitInfo.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10b62080", "currentName": "CPlayerLevelUpInfo::GetManagers", "proposedName": "CPlayerLevelUpInfo::GetInfoManager", "purpose": "CInfoManager<CPlayerLevelUpInfo> registry accessor by class name."},
+        {"address": "10b62910", "currentName": "CPlayerLevelUpInfo::GetManagers_10b62910", "proposedName": "CPlayerLevelUpInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "117b1e10", "currentName": "CPlayerLevelUpInfo::GetManagers_117b1e10", "proposedName": "CPlayerLevelUpInfo::GetCumulativeToLevel", "purpose": "Walks records in order accumulating field +0x14; returns the running sum once a record's level (+0x10) >= param_1 (target level)."},
+        {"address": "117b2600", "currentName": "CPlayerLevelUpInfo::GetManagers_117b2600", "proposedName": "CPlayerLevelUpInfo::BuildLevelThresholdTable", "purpose": "One-time build (cached in DAT_12392268): for levels up to 0x28, combines per-level values from the CPlayerLevelUpInfo sparse map and CExplimitInfo, accumulating into the global cumulative table DAT_12392218[]."}
+      ],
+      "fields": [
+        {"name": "level", "type": "int32", "offset": "0x10", "source": "inferred", "note": "record's level"},
+        {"name": "value", "type": "int32", "offset": "0x14", "source": "inferred", "note": "per-level increment (exp/points)"}
+      ],
+      "constants": ["MaxLevelInTable=0x28"],
+      "formulas": ["cumulative(targetLevel) = sum of record.value over records with record.level < targetLevel", "threshold table combines CPlayerLevelUpInfo.value and CExplimitInfo.value per level up to 40"],
+      "relatedTlv": [],
+      "notes": "BuildLevelThresholdTable references CExplimitInfo (sibling exp-limit config); result cached in DAT_12392268/DAT_12392218.",
+      "nameNext": [{"address": "108df7e0", "proposedName": "CExplimitInfo::InitInfoManager", "why": "sibling exp-limit config manager init"}]
+    },
+    {
+      "className": "CNewPlayerInfo",
+      "category": "misc",
+      "purpose": "New-player setup/guide config; on load applies each record's setup action (grants/tutorial steps) to a target.",
+      "confidence": "low",
+      "methods": [
+        {"address": "118f6de0", "currentName": "CNewPlayerInfo::GetManagers", "proposedName": "CNewPlayerInfo::GetInfoManager", "purpose": "CInfoManager<CNewPlayerInfo> registry accessor by class name."},
+        {"address": "118f8330", "currentName": "CNewPlayerInfo::GetManagers_118f8330", "proposedName": "CNewPlayerInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "118f8770", "currentName": "CNewPlayerInfo::GetManagers_118f8770", "proposedName": "CNewPlayerInfo::ApplyAll_A", "purpose": "Iterates all records and calls per-record apply helper FUN_119fad30(target) for each non-null record."},
+        {"address": "118f8950", "currentName": "CNewPlayerInfo::GetManagers_118f8950", "proposedName": "CNewPlayerInfo::ApplyAll_B", "purpose": "Duplicate of ApplyAll_A (same iterate-and-apply FUN_119fad30); likely a separate instantiation/pass."}
+      ],
+      "fields": [],
+      "constants": [],
+      "formulas": [],
+      "relatedTlv": [],
+      "notes": "Own record layout not recovered (per-record work is in uninspected FUN_119fad30). Two near-identical apply loops.",
+      "nameNext": [{"address": "119fad30", "proposedName": "CNewPlayerInfo::ApplyToTarget", "why": "per-record new-player setup action"}]
+    },
+    {
+      "className": "CMonolopyInfo",
+      "category": "activity",
+      "purpose": "Monopoly-style board minigame config (name is a typo of 'Monopoly'); records define board tiles/positions. Computes and caches the max tile index.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109bb050", "currentName": "CMonolopyInfo::GetManagers", "proposedName": "CMonolopyInfo::GetInfoManager", "purpose": "CInfoManager<CMonolopyInfo> singleton accessor (StcMbrNameSvr, returns DAT_123c0660)."},
+        {"address": "119b91c0", "currentName": "CMonolopyInfo::GetManagers_119b91c0", "proposedName": "CMonolopyInfo::ForEachTile_A", "purpose": "Iterates all records calling per-record helper FUN_11a78770."},
+        {"address": "119b9310", "currentName": "CMonolopyInfo::GetManagers_119b9310", "proposedName": "CMonolopyInfo::ForEachTile_LinkItem", "purpose": "Iterates all records calling CItemBaseInfo helper (11a78660) per record, then calls ComputeMaxTileIndex (11a78530)."},
+        {"address": "11a78530", "currentName": "CMonolopyInfo::GetManagers_11a78530", "proposedName": "CMonolopyInfo::ComputeMaxTileIndex", "purpose": "One-time (cached in DAT_123ad3bc): scans all records and stores the maximum of field +0x14 (highest board tile index/position)."},
+        {"address": "11a78c50", "currentName": "CMonolopyInfo::GetManagers_11a78530", "proposedName": "CMonolopyInfo::ComputeMaxTileIndex_dup", "purpose": "Byte-identical duplicate of 11a78530 (separate emitted copy)."}
+      ],
+      "fields": [
+        {"name": "tileIndex", "type": "int32", "offset": "0x14", "source": "inferred", "note": "board position/tile id; max cached in DAT_123ad3bc"}
+      ],
+      "constants": [],
+      "formulas": ["maxTileIndex = max over records of field_0x14"],
+      "relatedTlv": [],
+      "notes": "'Monolopy' is the game's own misspelling of Monopoly. Two methods at 11a78530 and 11a78c50 are identical; the bundle labeled both with the same address in the header.",
+      "nameNext": []
+    },
+    {
+      "className": "CPetAtkTargetInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet attack-target modes; assigns a rolled attack-target value to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f750", "currentName": "CPetAtkTargetInfo::GetManagers", "proposedName": "CPetAtkTargetInfo::GetInfoManager", "purpose": "CInfoManager<CPetAtkTargetInfo> registry accessor by class name."},
+        {"address": "11751e70", "currentName": "CPetAtkTargetInfo::GetManagers_11751e70", "proposedName": "CPetAtkTargetInfo::RollAndAssignAtkTarget", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and writes the chosen record's value (+0x10) into the pet object at +0xA8."},
+        {"address": "11753610", "currentName": "CPetAtkTargetInfo::GetManagers_11753610", "proposedName": "CPetAtkTargetInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c700", "currentName": "CPetAtkTargetInfo::GetManagers_1192c700", "proposedName": "CPetAtkTargetInfo::ForEachAtkTarget", "purpose": "Iterates all records and calls per-record helper FUN_11a1ac70."}
+      ],
+      "fields": [
+        {"name": "atkTargetValue", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xA8"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["pet.atkTarget(+0xA8) = weightedRandom(records, weight).value"],
+      "relatedTlv": ["TlvPetBattleData"],
+      "notes": "Same weighted-roll pattern as the other pet-attribute tables.",
+      "nameNext": []
+    },
+    {
+      "className": "CPetCharacterInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet character/personality values; assigns a rolled character value to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f7f0", "currentName": "CPetCharacterInfo::GetManagers", "proposedName": "CPetCharacterInfo::GetInfoManager", "purpose": "CInfoManager<CPetCharacterInfo> registry accessor by class name."},
+        {"address": "117520c0", "currentName": "CPetCharacterInfo::GetManagers_117520c0", "proposedName": "CPetCharacterInfo::RollAndAssignCharacter", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and writes the chosen record's value (+0x10) into the pet object at +0xA4."},
+        {"address": "11753660", "currentName": "CPetCharacterInfo::GetManagers_11753660", "proposedName": "CPetCharacterInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c5d0", "currentName": "CPetCharacterInfo::GetManagers_1192c5d0", "proposedName": "CPetCharacterInfo::ForEachCharacter", "purpose": "Iterates all records and calls per-record helper FUN_11a1aa20."}
+      ],
+      "fields": [
+        {"name": "characterValue", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xA4"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["pet.character(+0xA4) = weightedRandom(records, weight).value"],
+      "relatedTlv": ["TlvPetFullAttrData"],
+      "notes": "Same weighted-roll pattern as other pet-attribute tables.",
+      "nameNext": []
+    },
+    {
+      "className": "CPetAtkModeInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet attack-mode values; assigns a rolled attack-mode value to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f6b0", "currentName": "CPetAtkModeInfo::GetManagers", "proposedName": "CPetAtkModeInfo::GetInfoManager", "purpose": "CInfoManager<CPetAtkModeInfo> registry accessor by class name."},
+        {"address": "11751c20", "currentName": "CPetAtkModeInfo::GetManagers_11751c20", "proposedName": "CPetAtkModeInfo::RollAndAssignAtkMode", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and writes the chosen record's value (+0x10) into the pet object at +0xAC."},
+        {"address": "117535c0", "currentName": "CPetAtkModeInfo::GetManagers_117535c0", "proposedName": "CPetAtkModeInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c830", "currentName": "CPetAtkModeInfo::GetManagers_1192c830", "proposedName": "CPetAtkModeInfo::ForEachAtkMode", "purpose": "Iterates all records and calls per-record helper FUN_11a1aec0."}
+      ],
+      "fields": [
+        {"name": "atkModeValue", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xAC"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["pet.atkMode(+0xAC) = weightedRandom(records, weight).value"],
+      "relatedTlv": ["TlvPetBattleData"],
+      "notes": "Same weighted-roll pattern as other pet-attribute tables.",
+      "nameNext": []
+    },
+    {
+      "className": "CPetQualityInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet quality/grade values; assigns a rolled quality value to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f930", "currentName": "CPetQualityInfo::GetManagers", "proposedName": "CPetQualityInfo::GetInfoManager", "purpose": "CInfoManager<CPetQualityInfo> registry accessor by class name."},
+        {"address": "11752570", "currentName": "CPetQualityInfo::GetManagers_11752570", "proposedName": "CPetQualityInfo::RollAndAssignQuality", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and writes the chosen record's value (+0x10) into the pet object at +0xA0."},
+        {"address": "11753700", "currentName": "CPetQualityInfo::GetManagers_11753700", "proposedName": "CPetQualityInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c240", "currentName": "CPetQualityInfo::GetManagers_1192c240", "proposedName": "CPetQualityInfo::ForEachQuality", "purpose": "Iterates all records and calls per-record helper FUN_11a1a7d0."}
+      ],
+      "fields": [
+        {"name": "qualityValue", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xA0"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["pet.quality(+0xA0) = weightedRandom(records, weight).value"],
+      "relatedTlv": ["TlvPetFullAttrData"],
+      "notes": "Same weighted-roll pattern as other pet-attribute tables.",
+      "nameNext": []
+    },
+    {
+      "className": "CPetNameInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet default names; rolls a name string and applies it to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "1174f890", "currentName": "CPetNameInfo::GetManagers", "proposedName": "CPetNameInfo::GetInfoManager", "purpose": "CInfoManager<CPetNameInfo> registry accessor by class name."},
+        {"address": "11752310", "currentName": "CPetNameInfo::GetManagers_11752310", "proposedName": "CPetNameInfo::RollAndAssignName", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and passes the chosen record's name string (+0x18, or a default) to the pet name setter FUN_100e5d80."},
+        {"address": "117536b0", "currentName": "CPetNameInfo::GetManagers_117536b0", "proposedName": "CPetNameInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1192c370", "currentName": "CPetNameInfo::GetManagers_1192c370", "proposedName": "CPetNameInfo::ForEachName", "purpose": "Iterates all records and calls per-record helper FUN_11a1b130."}
+      ],
+      "fields": [
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred", "note": "weighted-random draw weight"},
+        {"name": "nameString", "type": "char*", "offset": "0x18", "source": "inferred", "note": "pet display name; passed to setter FUN_100e5d80"}
+      ],
+      "constants": [],
+      "formulas": ["pet name = weightedRandom(records, weight).nameString (falls back to default string DAT_11d9d32b if null)"],
+      "relatedTlv": [],
+      "notes": "Distinct from the numeric pet tables: the payload is a string at +0x18, not an int at +0x10.",
+      "nameNext": [{"address": "100e5d80", "proposedName": "CPet::SetName", "why": "consumes the rolled name string"}]
+    },
+    {
+      "className": "CPetSkinInfo",
+      "category": "pet",
+      "purpose": "Weighted random table of pet skins/avatars; assigns a rolled skin id to a pet during generation.",
+      "confidence": "high",
+      "methods": [
+        {"address": "115661f0", "currentName": "CPetSkinInfo::GetManagers", "proposedName": "CPetSkinInfo::GetInfoManager", "purpose": "CInfoManager<CPetSkinInfo> registry accessor by class name."},
+        {"address": "11567180", "currentName": "CPetSkinInfo::GetManagers_11567180", "proposedName": "CPetSkinInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "117527c0", "currentName": "CPetSkinInfo::GetManagers_117527c0", "proposedName": "CPetSkinInfo::RollAndAssignSkin", "purpose": "Collects each record's weight (+0x14), weighted-random picks (FUN_10a1cee0), and writes the chosen record's skin id (+0x10) into the pet object at +0xB0."},
+        {"address": "1192c4a0", "currentName": "CPetSkinInfo::GetManagers_1192c4a0", "proposedName": "CPetSkinInfo::ForEachSkin_LinkAvatar", "purpose": "Iterates all records and calls CPetAvatarInfo helper (11a1b510) per record."}
+      ],
+      "fields": [
+        {"name": "skinId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written to pet+0xB0"},
+        {"name": "weight", "type": "int32", "offset": "0x14", "source": "inferred"}
+      ],
+      "constants": [],
+      "formulas": ["pet.skin(+0xB0) = weightedRandom(records, weight).skinId"],
+      "relatedTlv": ["TlvPetAvatarData"],
+      "notes": "Links to CPetAvatarInfo; TlvPetAvatarData is the serialized counterpart.",
+      "nameNext": [{"address": "11a1b510", "proposedName": "CPetAvatarInfo::ApplyFromSkin", "why": "per-record avatar link"}]
+    },
+    {
+      "className": "CActivityHuntInfo",
+      "category": "activity",
+      "purpose": "Config for timed hunt activity events; checks activity open/running state and resolves the active hunt activity's data.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1090b9e0", "currentName": "CActivityHuntInfo::GetManagers", "proposedName": "CActivityHuntInfo::GetInfoManager", "purpose": "CInfoManager<CActivityHuntInfo> singleton accessor (StcMbrNameSvr, returns DAT_123bfe04)."},
+        {"address": "11201850", "currentName": "CActivityHuntInfo::GetManagers_11201850", "proposedName": "CActivityHuntInfo::GetActiveHuntActivity", "purpose": "Scans records; for each, gets its activity id (FUN_11728390), looks up activity state (FUN_1122bad0), and if state byte(+4)==3 (running) returns that activity's data (FUN_117284e0)."},
+        {"address": "11949c30", "currentName": "CActivityHuntInfo::GetManagers_11949c30", "proposedName": "CActivityHuntInfo::ForEachHunt", "purpose": "Iterates all records calling per-record helper FUN_117288b0."},
+        {"address": "11949fd0", "currentName": "CActivityHuntInfo::GetManagers_11949fd0", "proposedName": "CActivityHuntInfo::ForEachHunt_ResolveActivity", "purpose": "Iterates all records and calls CActivityInfo helper (117286e0) per record."}
+      ],
+      "fields": [
+        {"name": "activityState_flag", "type": "int8", "offset": "0x4", "source": "inferred", "note": "on the activity-state object returned by FUN_1122bad0; value 3 == running"}
+      ],
+      "constants": ["ActivityState_Running=3"],
+      "formulas": ["active hunt = first record whose activity state byte(+4) == 3"],
+      "relatedTlv": [],
+      "notes": "Own record layout not recovered; the state check is on a separate activity-state object. Closely tied to CActivityInfo.",
+      "nameNext": [{"address": "1122bad0", "proposedName": "CActivityMgr::GetActivityState", "why": "returns activity-state object whose +4 byte encodes running state"}]
+    },
+    {
+      "className": "CVehicleAmmoInfo",
+      "category": "weapon",
+      "purpose": "Vehicle (mount/ballista) ammo config keyed by ammo id; used to resolve ammo records and to fill ammo capacity into a loadout list.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11062e20", "currentName": "CVehicleAmmoInfo::GetManagers", "proposedName": "CVehicleAmmoInfo::GetInfoManager", "purpose": "CInfoManager<CVehicleAmmoInfo> registry accessor by class name."},
+        {"address": "11063cb0", "currentName": "CVehicleAmmoInfo::GetManagers_11063cb0", "proposedName": "CVehicleAmmoInfo::GetCachedInfoManager", "purpose": "Returns cached manager instance when arg==0."},
+        {"address": "1156ede0", "currentName": "CVehicleAmmoInfo::GetManagers_1156ede0", "proposedName": "CVehicleAmmoInfo::FindLoadoutEntryByCategory", "purpose": "Walks a loadout list (this+4..this+8 of entry ptrs); for each valid entry (entry[1]==-1 & !entry[3], or entry[1]>0), resolves its ammo id (entry[0]) in the ammo sparse map and returns the entry when the ammo record's field +0x88 == param_2 (category)."},
+        {"address": "1156f350", "currentName": "CVehicleAmmoInfo::GetManagers_1156f350", "proposedName": "CVehicleAmmoInfo::SetLoadoutAmmoCapacity", "purpose": "Finds the loadout entry with id==param_2, initializes it {id, cap=0, param_3, flag=param_4}, resolves the ammo record in the sparse map and stores the record's field +0x58 into entry[1] (ammo capacity/max)."}
+      ],
+      "fields": [
+        {"name": "ammoCapacity", "type": "int32", "offset": "0x58", "source": "inferred", "note": "copied into loadout entry[1]"},
+        {"name": "categoryId", "type": "int32", "offset": "0x88", "source": "inferred", "note": "matched against query param_2 in FindLoadoutEntryByCategory"}
+      ],
+      "constants": [],
+      "formulas": ["loadout entry ammo max = ammoRecord.field_0x58; entry matched by ammoRecord.field_0x88 == queryCategory"],
+      "relatedTlv": [],
+      "notes": "Query methods operate on a caller loadout vector; the two named record offsets (0x58 capacity, 0x88 category) are on the CVehicleAmmoInfo record resolved via the sparse map.",
+      "nameNext": []
+    }
+  ]
+}

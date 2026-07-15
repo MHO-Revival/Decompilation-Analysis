@@ -1,0 +1,540 @@
+{
+  "chunkIndex": 7,
+  "functions": [
+    {
+      "address": "10b589a0",
+      "currentName": "FUN_10b589a0",
+      "proposedName": "CClientSyncedStorage::RegisterSerializationHelper",
+      "purpose": "Registers/serializes a 'ClientSychedStorage' object. Calls vtable+0x28(name 'ClientSychedStorage'), vtable+0x18(this,0x80,1), FUN_110a4a70(this), vtable+0x2c(). Stock CryEngine synced-var serialization plumbing.",
+      "subsystem": "netsync",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "notes": "Boilerplate serialization scope; not skill/buff data."
+    },
+    {
+      "address": "10b6a6d0",
+      "currentName": "FUN_10b6a6d0",
+      "proposedName": "CCodeCheckpointDebugMgr::Constructor",
+      "purpose": "Constructor for the feature-tester code-coverage debug manager. Sets vtable PTR_FUN_11cc83fc, zeroes lists, initializes cvars/commands: 'ft_debug_checkpoint_search' (cmd->FUN_10b6b9a0), 'ft_debug_ccoverage', 'ft_debug_ccoverage_rate', 'ft_debug_ccoverage_maxlines', filter_maxcount/mincount; loads '../USER/CodeCheckpointList.txt'.",
+      "subsystem": "debug",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "param_1[5] (ft_debug_ccoverage_rate default) = 0x3d4ccccd = 0.05f",
+        "param_1[6] (ccoverage_maxlines default) = 10",
+        "param_1[4],[7],[8] (ccoverage / filter_maxcount / filter_mincount defaults) = 0"
+      ],
+      "notes": "Stock CryEngine FeatureTester code-coverage tooling."
+    },
+    {
+      "address": "10b717f0",
+      "currentName": "FUN_10b717f0",
+      "proposedName": "CWeaponChargeInfo::ParseChildStates",
+      "purpose": "Iterates XML child nodes of a weapon-charge definition. For each child by tag: 'WeaponChargeInfo' -> invoke child parser into list at this+4; 'StateQuitInfo' -> iterate its children reading 'stateName' attr (into a state-name collection); 'buffTrig' -> invoke child parser into list at this+0xc (buff-trigger list). Builds the mapping of weapon charge states to triggered buffs.",
+      "subsystem": "weapon-charge-buff",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: this+4 = WeaponChargeInfo entry list head; this+0xc = buffTrig entry list head",
+        "tag comparison via FUN_10f56fa0(intern)+FUN_10f57110 (interned-string equality)"
+      ],
+      "notes": "Server must know which buffs a weapon-charge state triggers to validate client charge->buff application."
+    },
+    {
+      "address": "10b72690",
+      "currentName": "FUN_10b72690",
+      "proposedName": "CWeaponChargeInfo::ReadFromXml",
+      "purpose": "Parses a 'weaponInfo' XML node for a weapon charge level entry. Reads string attrs via atoi into a struct: weaponID, chargeLevel, buffID, skillID. Then iterates children expecting startInfo/loopInfo/endInfo sub-nodes (each dispatched to a sub-parser).",
+      "subsystem": "weapon-charge-buff",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "this+4 = atoi(weaponID)",
+        "this+8 = atoi(chargeLevel)",
+        "this+0xc = atoi(buffID)",
+        "this+0x10 = atoi(skillID)",
+        "child tags: 'startInfo','loopInfo','endInfo' each allocate/parse a sub-struct (FUN_10c3d580 alloc size 0x10)"
+      ],
+      "costs": [],
+      "notes": "Defines weapon charge level -> {buffID, skillID}. Authoritative game data the server should mirror for charge attack validation."
+    },
+    {
+      "address": "10b92350",
+      "currentName": "FUN_10b92350",
+      "proposedName": "CMonsterCombat::UpdateDragonheatFlameTransform",
+      "purpose": "For a monster in combat state 'COMBAT_DragonheatFront' or 'COMBAT_Rage02_FlamerFire', computes distance to a target bone/effector and copies the monster's position+orientation (this+0x98..0xa4) into the flame-attack target object (obj+0x218..0x224), then re-attaches the effect via FUN_10eff090. Squared-distance gate then rsqrtss.",
+      "subsystem": "rage-combat-fx",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "dx=this+0x88 - tgt.x; dy=this+0x8c - tgt.y; dz=this+0x90 - tgt.z; d2=dx*dx+dy*dy+dz*dz",
+        "if (DAT_11cbf070 < d2) rsqrtss(d2) -> inverse length (threshold DAT_11cbf070)",
+        "FUN_10eff090(1, this+0x88, 0x3f19999a=0.6f, 1) — 0.6f blend/scale param",
+        "copies this+0x98/0x9c/0xa0/0xa4 -> flameObj+0x218/0x21c/0x220/0x224"
+      ],
+      "notes": "Client-side flame/rage effect placement; positions are visual, not damage-authoritative."
+    },
+    {
+      "address": "10bc8d60",
+      "currentName": "FUN_10bc8d60",
+      "proposedName": "CGameBuffArea::CreateEntity",
+      "purpose": "Spawns/binds the render+logic entity for a buff area (region that applies buffs). Branch on source-type param_2[0x38]: type 0 = wrap an existing world entity (from param_2[0x36],[0x37] id pair) and call CLogicBuffArea::ReadPropertiesFromXml; type 4 = spawn a new entity named 'CGameBuffArea_%08x' of class 'MHBuffArea', load '/Libs/EntityProperties/<model>' 'Properties', apply, ReadPropertiesFromXml; else = minimal proxy creation. Stores render node in this+0x11.",
+      "subsystem": "buff-area",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "this[0x10] = param_2 (owning buff-area logic object)",
+        "param_2[0x38] = creation mode selector (0 | 4 | other)",
+        "param_2[0x36],[0x37] = entity id pair; fallback this[0x10]+0xd8/0xdc",
+        "entity name = sprintf('CGameBuffArea_%08x', this[0x10]+4)",
+        "class name 'MHBuffArea'; property path '/Libs/EntityProperties/' + record model string; sub-node 'Properties'",
+        "default scale local_20 = 0x3f800000 = 1.0f",
+        "on failure: releases render node id (this+0x11 = -1), this+0x10=0, returns 0"
+      ],
+      "notes": "Client entity creation for buff areas; server authoritatively owns which buffs the area applies (props read from XML)."
+    },
+    {
+      "address": "10bda3f0",
+      "currentName": "FUN_10bda3f0",
+      "proposedName": "RegisterNetSyncedCVars",
+      "purpose": "Registers ~300 cvars with a subsystem (obj vtable+0x20(name, flag)) — flag 1 for most, 0 for autotest_* / designer_warning_enabled / g_MonsterInfo. Marks which cvars participate (likely net-serialized / config-persisted). Ends with FUN_10bdb500. Notable gameplay cvars: g_playerHealthValue, g_MHFC_DamageMode, mg_dmgCalOnSvr, g_RandomDmgRst, g_frostDecay, g_BT_BuffLoad.",
+      "subsystem": "cvars",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "flag==0 cvars: autotest_enabled, autotest_state_setup, autotest_quit_when_done, designer_warning_enabled, g_MonsterInfo; all others flag==1"
+      ],
+      "notes": "Stock cvar-registration plumbing; mostly client tuning. mg_dmgCalOnSvr / g_MHFC_DamageMode hint at server-side damage calc toggle."
+    },
+    {
+      "address": "10be99f0",
+      "currentName": "FUN_10be99f0",
+      "proposedName": "CMonsterEntity::CreateAndBindRenderProxy",
+      "purpose": "Large monster/NPC spawn+bind routine. Reads 'EmCommon' record fields nMonsterDifficulty, nMonsterSizeScale, NPCSkillFile, NpcAnimationName1..8, DeadPose, CanLemon; sets up BT control object ('BTCtrlObject'), sculpture/mesh, size scaling, and writes script table attrs LastState/State on 'OnConnect'. Emits 'Spawned' events to two logic-entity slots (this[0x10]+0x125c, +0x1260).",
+      "subsystem": "monster-spawn",
+      "confidence": "low",
+      "serverRelevance": "validation",
+      "formulas": [
+        "size scale: local_8 = (float)FUN_10bec810() / DAT_11de9a30",
+        "this[0x10]+0x49a/0x49b read into local_10c/local_108 (id pair)",
+        "this[0x10]+0x102d != 0 -> sets flag bit |4",
+        "iterates monster part/limb array with stride 0x18 (count = (end-begin)/0x18), up to 8 entries at +0x14,+0x2c,+0x44,+0x5c,+0x74,+0x8c,+0xa4,+0xbc",
+        "spawn events written to this[0x10]+0x125c and +0x1260"
+      ],
+      "notes": "NPCSkillFile links monster to its skill set; largely client render/BT setup. Server owns skill file assignment."
+    },
+    {
+      "address": "10beff70",
+      "currentName": "FUN_10beff70",
+      "proposedName": "CPetSupportCatSkill::LoadAndPlaySkillAnims",
+      "purpose": "For a pet/support-cat active skill instance: reads script attr 'PetActiveSkillID' into this+0xc, looks up CPetSupportCatSkillInfo via FUN_10bf1a20, copies its animation strings (entry/castStart/castLoop/skill/leave) and SkillCastTime, then reads override attrs NeedSummonAnim, SkillEntryAnim, SkillCastStartAnim, SkillCastLoopAnim, SkillAnim, SkillLeaveAnim, SkillCastTime; finally dispatches a 0x938 event with this+0x10.",
+      "subsystem": "pet-skill",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "this+0xc = PetActiveSkillID (default 0xffffffff)",
+        "skillInfo offsets copied: +0x24/+0x28 (entry anim str), +0x84/+0x88 (loop?), +0x3c/+0x40, +0x54/+0x58, +0x6c/+0x70 (anim strings); cast time = *(skillInfo+0x8c) -> local_20",
+        "override attr 'SkillCastTime' -> local_20 (float)",
+        "event id local_84 = 0x938, local_80=local_7c = -1"
+      ],
+      "notes": "Pet active-skill cast time and animation config. Server should validate cast time / cooldown; anim data is client."
+    },
+    {
+      "address": "10bf1a20",
+      "currentName": "FUN_10bf1a20",
+      "proposedName": "CPetSupportCatSkillInfo::FindSkillEntryByKey",
+      "purpose": "2D paged-array lookup of a pet-support-cat skill info record by skill key/id. Gets the info manager singleton (FindInfoByKey 'CPetSupportCatSkillInfo'), then indexes a paged table.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "mgr+0x30 = base id offset; mgr+0x28 = page size (cols); mgr+0x24 = total count; mgr+0x20 = page-pointer array",
+        "reject if key==-1, or (key==0 && mgr+0x30==0), or mgr+0x28==0",
+        "idx = key - mgr[0x30]; require 0<=idx<mgr[0x24]",
+        "page = mgr[0x20][idx / mgr[0x28]]; return page[idx % mgr[0x28]]"
+      ],
+      "notes": "Authoritative pet-skill data table indexing (row=idx/pageSize, col=idx%pageSize)."
+    },
+    {
+      "address": "10bf31b0",
+      "currentName": "FUN_10bf31b0",
+      "proposedName": "CRageSkill::LoadEditorRageData",
+      "purpose": "If this+0x50 set and rage manager (FUN_10f19240) present, loads '/Libs/MHUI/XML/editorRageData.xml', iterates entries, matches DAT_11dca14c attr == param_2, then reads DAT_11cd68d8 attr and 'skillid' attr and registers them via (rageMgr+0x14)->fn(matchKey, val, skillid).",
+      "subsystem": "rage",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "guard: this+0x50 != 0 && FUN_10f19240() != 0",
+        "per-entry: read attr[DAT_11dca14c] into local_8; if local_8==param_2 read attr[DAT_11cd68d8] and 'skillid'; register (key=local_8, val, skillid)"
+      ],
+      "notes": "Rage-bar/rage-skill editor data. DAT_11dca14c / DAT_11cd68d8 are likely 'id'/'value' attr name literals; rage->skill mapping is server-relevant."
+    },
+    {
+      "address": "10c30c30",
+      "currentName": "FUN_10c30c30",
+      "proposedName": "CMHHitInfo::SerializeToNet",
+      "purpose": "Serializes/deserializes the combat hit-info struct to/from a network stream (twin of documented CMHHitInfo::SerializeToKeyValue @0x102d9480). Serializes every hit field with typed tags. This is the authoritative shot/hit packet carrying skill id & sequence.",
+      "subsystem": "combat-hit",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "this+0x00 shooterId (eid 'eid'), +0x04 targetId (eid), +0x08 weaponId (eid), +0x0c projectileId (ui32 'ui32')",
+        "this+0x48 partId (part 'part')",
+        "this+0x50 world pos (wrld), +0x68 dir (dir31), +0x74 normal (dir31)",
+        "this+0xe8 aimed (bool/serialize), +0xfc armorHeating (float)",
+        "this+0xe0 projectileClass (ui16), +0xe2 weaponClass (ui16)",
+        "this+0x100 penetrationCount (ui8), +0x108 impulseScale (vec3 'iii')",
+        "this+0x4c attackType, +0x118 hitType, +0x11c defenseResult, +0x120 HitIndex",
+        "this+0x124 shooterSrvId, +0x128 targetSrvId, +0x12c weaponSrvId, +0x130 projectileSrvId",
+        "this+0x15c skillID (matches combat.md: clientSkillId compared to server current skill), +0x160 skillSeq"
+      ],
+      "costs": [],
+      "notes": "Server must parse/validate this exact layout. skillID@0x15c cross-checked against combat.md sanction-3 rule (client skill != server current skill). skillSeq@0x160 is the per-cast sequence."
+    },
+    {
+      "address": "10c33050",
+      "currentName": "FUN_10c33050",
+      "proposedName": "RegisterMonsterDebugCommands",
+      "purpose": "Registers debug console commands via cvar-mgr vtable+0x7c: 'setfaction'->FUN_10c33970, 'ChangeMonster'->FUN_10c362a0, 'g_playmonsterskill'->FUN_10c36430.",
+      "subsystem": "debug",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "notes": "Debug/cheat commands for monster/skill testing."
+    },
+    {
+      "address": "10c330b0",
+      "currentName": "FUN_10c330b0",
+      "proposedName": "UnregisterGameDebugCommands",
+      "purpose": "Removes (vtable+0x80) a large list of debug console commands on shutdown, including buff cheats addbuffP/delbuffP/getbuffP, g_playmonsterskill, ChangeMonster, PlayBuffFX, CtrlM, SpawnItem, buyammo, buynpcshopitem/sellnpcshopitem, manuprod, lmanuskl, lmanuingd, catcs, warninglevel.",
+      "subsystem": "debug",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "notes": "Command teardown. Names reveal debug buff-add/remove and crafting/shop test commands."
+    },
+    {
+      "address": "10d0a9d0",
+      "currentName": "FUN_10d0a9d0",
+      "proposedName": "GetLodBlendModeName",
+      "purpose": "Maps an int LOD/pose blend mode (this+0x90) to a string: 0='WeightedAverage', 1='Prioritized', 2='Dithered', else empty.",
+      "subsystem": "animation",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this+0x90: 0->WeightedAverage, 1->Prioritized, 2->Dithered, default->empty"
+      ],
+      "notes": "Stock CryEngine character LOD/pose blend enum stringification."
+    },
+    {
+      "address": "10d1a840",
+      "currentName": "FUN_10d1a840",
+      "proposedName": "CGameLuaBindings::RegisterEntityEnumsAndFuncs",
+      "purpose": "Lua binding setup: publishes entity-type enum constants MH_LETYPE_* and player-guide/loot enums into a Lua table, then registers Lua-callable functions (each with signature-hint string).",
+      "subsystem": "lua-scripting",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "MH_LETYPE_PLAYER=0, MONSTER=1(0x3f800000), PROJECTILE=2(0x40000000), COLLECTPOINT=4(0x40800000), BUFFAREA=5(0x40a00000), ANIMOBJECT=6(0x40c00000), BTOBJECT=7(0x40e00000), PET=8(0x41000000), VEHICLE=9(0x41100000)  [note: value 3 is skipped]",
+        "ePlayerGuideState_NotDone=0, _Executing=1(0x3f800000), _Done=255(0x437f0000)",
+        "eLootType_MonsterSpecial=14 (0x41600000)",
+        "registered funcs: __tostring, GetEntityType, GetPlayerGuideStepState(step), SetPlayerGuideStepState(step,state), GetPlayerAttr(attr), SetPlayerAttr(attr,value), RegisterPlayerEvent(EventID,entity,func,params), RegisterMonsterEvent(EventID,entity,func,params), DeltaCharExp(exp)"
+      ],
+      "notes": "Authoritative entity-type enum reference (BUFFAREA=5, PET=8). SetPlayerAttr/DeltaCharExp are gameplay-mutating and must be server-validated if exposed."
+    },
+    {
+      "address": "10d2bb80",
+      "currentName": "FUN_10d2bb80",
+      "proposedName": "CSkillClient::SendSkillEvent_0x44",
+      "purpose": "Builds a script-object payload {m_nWeaponType, m_nSkillID, m_nSlotIndex} from param_2[0..2] and dispatches network/script event id 0x44 via FUN_10d1d220. Guarded by two empty-list checks at ownerObj+0x774 / +0x77c.",
+      "subsystem": "skill-net",
+      "confidence": "medium",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "payload: m_nWeaponType=(float)param_2[0], m_nSkillID=(float)param_2[1], m_nSlotIndex=(float)param_2[2]",
+        "event id = 0x44; guard lists at *(this+0xac)+0x774 and +0x77c must be non-empty",
+        "sender obj at this+0x58"
+      ],
+      "notes": "Client->server skill request (event 0x44, includes slot). Server must validate weaponType/skillID/slot."
+    },
+    {
+      "address": "10d2bd90",
+      "currentName": "FUN_10d2bd90",
+      "proposedName": "CSkillClient::SendSkillEvent_0x45",
+      "purpose": "Identical shape to 0x44 sender: payload {m_nWeaponType, m_nSkillID, m_nSlotIndex}, event id 0x45, guard lists at ownerObj+0x790 / +0x798.",
+      "subsystem": "skill-net",
+      "confidence": "medium",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "payload: m_nWeaponType, m_nSkillID, m_nSlotIndex (from param_2[0..2] as floats)",
+        "event id = 0x45; guard lists at *(this+0xac)+0x790 and +0x798"
+      ],
+      "notes": "Second skill-slot network event (likely equip/swap). Server-validated."
+    },
+    {
+      "address": "10d2bfa0",
+      "currentName": "FUN_10d2bfa0",
+      "proposedName": "CSkillClient::SendSkillEvent_0x46",
+      "purpose": "Same shape but payload {m_nWeaponType, m_nSkillID, m_nCurrentLevel}, event id 0x46, guard lists at ownerObj+0x7ac / +0x7b4.",
+      "subsystem": "skill-net",
+      "confidence": "medium",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "payload: m_nWeaponType, m_nSkillID, m_nCurrentLevel (from param_2[0..2] as floats)",
+        "event id = 0x46; guard lists at *(this+0xac)+0x7ac and +0x7b4"
+      ],
+      "notes": "Third skill network event carrying skill level (likely level-up/upgrade). Server-validated."
+    },
+    {
+      "address": "10d52a09",
+      "currentName": "FUN_10d52a09",
+      "proposedName": "unknown_misaligned_CBuffInfo_thunk",
+      "purpose": "Decompiler produced garbage (offcut/mid-instruction entry, raw flag arithmetic, calls to offcut addresses). Only recoverable hint is the string 'CBuffInfo'. Likely a mis-disassembled thunk/tail of a CBuffInfo method.",
+      "subsystem": "buff",
+      "confidence": "low",
+      "serverRelevance": "unknown",
+      "notes": "Not analyzable as-is; needs re-disassembly at correct instruction boundary. References CBuffInfo."
+    },
+    {
+      "address": "10d5d700",
+      "currentName": "FUN_10d5d700",
+      "proposedName": "CAttackHitCondition::ReadFromXml_A",
+      "purpose": "Parses an attack hit-condition config block. Reads scalar limits then builds a hash-keyed map of per-attacker override entries (children named 'attacker'), with redundant-hash-collision detection/error.",
+      "subsystem": "combat-hit",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "this+0x00 condition_flag (int), +0x04 max_entity_hit (int), +0x08 max_part_hit (int), +0x0c min_time_interval (float), +0x10 ignore_skill (int), +0x14 partbase_attack (bool)",
+        "attacker-name hash: h = 0x4e67c6a7; for each char c: h = h ^ (h*0x20 + (h>>2) + (int)(char)c)",
+        "map root at this+0x18 (red-black tree, node key at node+0x10, name ptr at node+0x14); collision => sprintf redundant-hash error"
+      ],
+      "costs": [
+        "max_entity_hit / max_part_hit = per-swing hit caps",
+        "min_time_interval = minimum seconds between hits on same target/part"
+      ],
+      "notes": "Authoritative multi-hit limiting: caps how many entities/parts a single attack may hit and the re-hit cooldown. Server must enforce."
+    },
+    {
+      "address": "10d5d950",
+      "currentName": "FUN_10d5d950",
+      "proposedName": "CAttackHitCondition::ReadFromXml_B",
+      "purpose": "Variant of ReadFromXml_A using the property-node API (FUN_10ab25f0 'value') with a reset flag (param_3). Reads the same fields into a struct addressed as int array, then builds the same per-attacker hash map.",
+      "subsystem": "combat-hit",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "param_1[0] condition_flag, [1] max_entity_hit, [2] max_part_hit, [3] min_time_interval(float), [4] ignore_skill, [5] partbase_attack(bool)",
+        "if reset flag (param_3 nonzero): each field pre-zeroed before optional override",
+        "same attacker hash: h=0x4e67c6a7; h = h ^ (h*0x20 + (h>>2) + c)",
+        "attacker map root at param_1+6 (node key +0x10, name ptr node[5]/+0x14)"
+      ],
+      "costs": [
+        "max_entity_hit, max_part_hit hit caps; min_time_interval re-hit cooldown"
+      ],
+      "notes": "Same authoritative hit-limiting rules as _A, sourced from a property node. min_time_interval read via vtable+0x1c (float getter)."
+    },
+    {
+      "address": "10db5920",
+      "currentName": "FUN_10db5920",
+      "proposedName": "CMonsterAI::LoadSkillSetting",
+      "purpose": "Loads a monster/entity AI 'Skill' setting: tries direct 'Skill' property (FUN_10a68a90); if absent, resolves record 'PropertyCustom'+'.AISetting.Skill' path and reads it; on success calls FUN_110779b0(skillCfg,0) to apply. Manages temp-string refcounts.",
+      "subsystem": "monster-skill",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "property lookup key 'Skill' or resolved '<record>.AISetting.Skill' via CInfoRecord::GetModelString('PropertyCustom','.AISetting.Skill')",
+        "apply: FUN_110779b0(skillHandle, 0)"
+      ],
+      "notes": "Binds monster AI skill config from entity properties. Server owns monster skill assignment."
+    },
+    {
+      "address": "10dcdd30",
+      "currentName": "FUN_10dcdd30",
+      "proposedName": "CSkillChangeFGNode::Activate",
+      "purpose": "Flowgraph/script node that reads script-table attrs 'SkillId' and 'SkillChanged' (caching their attr ids in this+0x10/+0x11), then triggers a skill change. Routes by id threshold: id<1000000 -> local/player skill path (FUN_1025d5b0/FUN_1025d690); id>=1000000 -> monster skill path (FUN_1025b300/FUN_1025b520 with id-1000000). Emits event 0x93b.",
+      "subsystem": "skill",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "this+0x10 = attr id of 'SkillId', this+0x11 = attr id of 'SkillChanged' (lazily resolved when <0)",
+        "id space split: skillId < 1000000 => player/normal skill; skillId >= 1000000 => monster skill (real id = skillId - 1000000)",
+        "if param_2 > 5 early-returns validity flag (param_2 is a mode/level gate)",
+        "success path calls FUN_1025d5b0(id) then FUN_1025d690(id) [player] or FUN_1025b300(id-1e6,param_2) then FUN_1025b520(id-1e6,1) [monster]",
+        "event id local_54 = 0x93b"
+      ],
+      "notes": "Confirms 1,000,000 offset separating player skill ids from monster skill ids. Server should apply the same partition when validating skill ids."
+    },
+    {
+      "address": "10dcded0",
+      "currentName": "FUN_10dcded0",
+      "proposedName": "CPetMonster::LoadSkillConfigFromXml",
+      "purpose": "Loads '/Libs/PetMonsterSkillConfig.xml' ('PetMonsterSkillConfig' root). For the pet's captured MonsterID: in 'PetMonsters' section sets the 5 active skill slots (First..Fifth) via slotMgr+0x18(slotIndex, skillID); in 'SkillLearn' section iterates learnable skills reading SkillID+Level and registers them via mgr+0x20.",
+      "subsystem": "pet-skill",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "resolves MonsterID = FUN_113a23b0()+0x14 only when pet BT ctrl object type (mgr+0xa8)==1",
+        "PetMonsters/<entry MonsterID==id>: slots 1..5 = attrs First,Second,Third,Fourth,Fifth (slotMgr+0x18(N, skillId))",
+        "SkillLearn/<entry MonsterID==id>/<skill>: SkillID (default 0), Level (default 1) -> mgr+0x20(&{skillID,level})"
+      ],
+      "costs": [],
+      "notes": "Authoritative pet-monster skill loadout (5 active slots) and learnable skill+level list keyed by MonsterID."
+    },
+    {
+      "address": "10e178a0",
+      "currentName": "FUN_10e178a0",
+      "proposedName": "FGNode_ItemSubmit::GetConfiguration",
+      "purpose": "Flowgraph node definition (lazy static init pattern). Inputs: Enable, Disable. Outputs: OnSubmit, SubmittedItemID, SubmittedItemCount, SubmittedBuffID, Submitter. Describes an item-submission event that yields a buff.",
+      "subsystem": "flowgraph",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "input ports: Enable, Disable (void)",
+        "output ports: OnSubmit(void), SubmittedItemID(int), SubmittedItemCount(int), SubmittedBuffID(int), Submitter(int)"
+      ],
+      "notes": "Client flowgraph plumbing; semantics: submitting item(s) grants SubmittedBuffID. Server owns the actual item->buff transaction."
+    },
+    {
+      "address": "10e329a0",
+      "currentName": "FUN_10e329a0",
+      "proposedName": "FGNode_AddBuff::GetConfiguration",
+      "purpose": "Flowgraph node definition. Inputs: targetNetID, buffID (default -1), needPartName (bool), partName (string). Output: buffInstanceID. This is an 'apply buff to target' node.",
+      "subsystem": "buff",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "inputs: targetNetID(int), buffID(int, default -1), needPartName(bool), partName(string)",
+        "output: buffInstanceID(int)"
+      ],
+      "notes": "Reveals buff application supports per-part targeting (needPartName/partName) and returns a unique buffInstanceID. Server-authoritative buff apply."
+    },
+    {
+      "address": "10e33780",
+      "currentName": "FUN_10e33780",
+      "proposedName": "FGNode_RemoveOrQueryBuff::GetConfiguration",
+      "purpose": "Flowgraph node. Inputs: targetNetID, buffID (default -1). Outputs: Success, Failed. Likely a remove-buff / has-buff node.",
+      "subsystem": "buff",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "inputs: targetNetID(int), buffID(int, default -1)",
+        "outputs: Success(void), Failed(void)"
+      ],
+      "notes": "Client flowgraph; buff removal/check driven server-side."
+    },
+    {
+      "address": "10e345a0",
+      "currentName": "FUN_10e345a0",
+      "proposedName": "FGNode_GetBuffCount::GetConfiguration",
+      "purpose": "Flowgraph node. Inputs: targetNetID, buffID (default -1). Outputs: Success, Failed, buffCount, stackCount. Queries a buff's instance count and stack count.",
+      "subsystem": "buff",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "inputs: targetNetID(int), buffID(int, default -1)",
+        "outputs: Success, Failed, buffCount(int), stackCount(int)"
+      ],
+      "notes": "Confirms buff stacking model has TWO counters: buffCount (number of instances) and stackCount (stacks). Server-authoritative buff state."
+    },
+    {
+      "address": "10e47620",
+      "currentName": "FUN_10e47620",
+      "proposedName": "FGNode_BuffAreaDisplay::GetConfiguration",
+      "purpose": "Flowgraph node for buff-area/monster UI display. Inputs include Show/Hide plus Root1..Root4 and other root ports. Outputs: BuffCurrentValue, BuffMaxValue, ShowMonster(bool), ShowArea1(bool), ShowArea2(bool).",
+      "subsystem": "buff-area",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "output ports: BuffCurrentValue(int), BuffMaxValue(int), ShowMonster(bool), ShowArea1(bool), ShowArea2(bool)"
+      ],
+      "notes": "UI/HUD display of accumulation-style buffs (current/max value bar). BuffCurrentValue/BuffMaxValue confirm gauge-type buffs. Display only."
+    },
+    {
+      "address": "10e5a420",
+      "currentName": "FUN_10e5a420",
+      "proposedName": "FGNode_LogicEntityEvent::GetConfiguration",
+      "purpose": "Flowgraph node. Inputs: enable, disable, triggerOnce(bool), and filter selectors isSpawnerEntityID(int default -1), isCollectPointNetID, isPet, isItemID, isBuffID. Output: OnEvent with spawnerEntityID, collectPointNetID, playerNetID, petNetID, itemID, buffID.",
+      "subsystem": "flowgraph",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "inputs: enable, disable, triggerOnce(bool), isSpawnerEntityID(int,-1), isCollectPointNetID(int), isPet(int), isItemID(int), isBuffID(int)",
+        "output OnEvent params: spawnerEntityID(int,3-wide?), collectPointNetID, playerNetID, petNetID, itemID, buffID"
+      ],
+      "notes": "Generic logic-entity event listener node; buffID is one of the trigger/emit params. Client event routing."
+    },
+    {
+      "address": "10e5b2d0",
+      "currentName": "FUN_10e5b2d0",
+      "proposedName": "FGNode_MonsterBuffEvent::GetConfiguration",
+      "purpose": "Flowgraph node. Inputs: enable, disable, triggerOnce(bool), monsterInfoID(int), buffID(int). Output: OnEvent with monsterNetID.",
+      "subsystem": "flowgraph",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "inputs: enable, disable, triggerOnce(bool), monsterInfoID(int), buffID(int)",
+        "output OnEvent param: monsterNetID(int)"
+      ],
+      "notes": "Fires when a monster (matching monsterInfoID) gains a buff (buffID). Client-side quest/script trigger."
+    },
+    {
+      "address": "10e741a0",
+      "currentName": "FUN_10e741a0",
+      "proposedName": "FGNode_LogicEntityEventEx::GetConfiguration",
+      "purpose": "Flowgraph node, extended variant of FGNode_LogicEntityEvent adding logicEntityNetID input. Inputs: enable, disable, triggerOnce, logicEntityNetID, isSpawnerEntityID(-1), isCollectPointNetID, isPet, isItemID, isBuffID. Output: OnEvent (spawnerEntityID, collectPointNetID, playerNetID, petNetID, itemID, buffID).",
+      "subsystem": "flowgraph",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "adds logicEntityNetID(int) input over FUN_10e5a420; same isX filters and OnEvent output ports"
+      ],
+      "notes": "Client event listener bound to a specific logic entity; buffID among filters/outputs."
+    },
+    {
+      "address": "10ea1ab0",
+      "currentName": "FUN_10ea1ab0",
+      "proposedName": "FGNode_QuestObjectiveConfig::GetConfiguration",
+      "purpose": "Flowgraph node defining a quest/objective condition block. Input: modelGroupID. Large output/param set: moduleType, useItemID, useItemNum, targetMonsterID, killMonsterCount, monsterPartName(5-wide), monsterBreakLev, monsterStateAbnormal, spawnGroupID, msgID, targMsgID, monsterBuff1/2/3, logic, targetMonsterID2, killTargetMonsterCount2, monsterPartName2(5-wide), monsterBreakLev2, targMsgID2, wrongHitCheck, time1/2/3, alertMsgID.",
+      "subsystem": "quest",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "input: modelGroupID(int)",
+        "params include monsterStateAbnormal(int) = required abnormal-status condition, monsterBuff1..3(int) = required monster buffs, monsterBreakLev/2 = part break level, killMonsterCount/killTargetMonsterCount2 = kill quotas, monsterPartName/2 are 5-wide string arrays",
+        "monsterPartName port width = 5, monsterPartName2 width = 5"
+      ],
+      "notes": "Quest objective referencing abnormal states and monster buffs as completion conditions. Server validates objective progress (kills, part breaks, abnormal-status/buff presence)."
+    },
+    {
+      "address": "10ea6a20",
+      "currentName": "FUN_10ea6a20",
+      "proposedName": "CSkillRef::ReadFromXml",
+      "purpose": "Parses a skill reference node into {SkillResID, SkillID, Level} (each defaulting to -1). Returns true if SkillResID>=1 OR SkillID>=1 (i.e. at least one identifier is valid).",
+      "subsystem": "skill",
+      "confidence": "high",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "this+0x00 = SkillResID (default -1), this+0x04 = SkillID (default -1), this+0x08 = Level (default -1)",
+        "valid = (SkillResID >= 1) || (SkillID >= 1)"
+      ],
+      "notes": "Canonical skill-reference triple used across combat action configs. A skill is addressed by either a resource id or a (skillID, level) pair."
+    },
+    {
+      "address": "10ea6b30",
+      "currentName": "FUN_10ea6b30",
+      "proposedName": "CCombatActionDef::ReadFromXml",
+      "purpose": "Master parser for a combat action/state definition. Reads ActionName->type code, weapon holster state, state lists, QTE start states, hittable/non-hittable skill lists, start effects, monster BT event string, failed-except states, and sub-actions.",
+      "subsystem": "combat-action",
+      "confidence": "medium",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "ActionName attr -> this+0xc type: ''(default)->3, 'UnHolstered'->1, 'Special'->2, (str@0x11cf5810)->4, (str@0x11cf5814)->5",
+        "State lists: 'States'/child 'State' appended to list at this+0x14; 'QTEStartStates' -> list at this+0x64",
+        "'HitSkillID' (int>0) and 'HitSkills' (children of CSkillRef {SkillResID,SkillID,Level}) -> hittable-skill list at this+0x1c (node stride 0x14)",
+        "'CannotHitSkills' (CSkillRef children) -> list at this+0x24; valid if SkillResID>=1 || SkillID>=1",
+        "'StartEffects'/'EffectID'(int>0) -> effect list at this+0x5c (node stride 0xc)",
+        "'MonsterBTEvent' string stored at this+0x40 (buffer end this+0x3c)",
+        "'FailedExceptState'/'FailedExceptStates' -> state list; 'Actions' children parsed via FUN_10ea6920 (node stride 0x1c)"
+      ],
+      "notes": "Authoritative skill<->action interaction rules: which skills this action can/cannot hit, its start effects, and BT event. Server must enforce HitSkills/CannotHitSkills gating and skill-ref matching."
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "chunkIndex": 4,
+  "functions": [
+    {
+      "address": "0x107f7e50",
+      "currentName": "FUN_107f7e50",
+      "proposedName": "CItemUpgradeModel::BuildTaskQuestVO",
+      "purpose": "Client UI-model builder for the item-upgrade (equipment upgrade/refine) panel. Iterates the 'itemUpgradeDatas' variant array (records of 3 dwords: two-dword id/guid + nItemLevel), and for each entry builds a TASK_QUEST_VO_NAME view-object describing required upgrade materials and their current-vs-max owned counts, plus quest metadata. Uses CMaterialTagDescInfo lookups and two red-black-tree maps (CSkillLevelMap::Insert) to aggregate material requirements and skill/level contributions.",
+      "subsystem": "progression/item-upgrade UI model",
+      "confidence": "medium",
+      "formulas": [
+        "record stride in itemUpgradeDatas = 3 dwords: uStack_70 = *(u64)(base + idx*3 + 1) (item guid/id pair), nItemLevel = base[idx*3 + 3]",
+        "per material: nCurCount = FUN_113fa680(itemId,0,1) + FUN_113fa680(itemId,1,1)  (unbind count + bind count of owned item)",
+        "nMaxCount = required count = puVar14[1] (path A, CMaterialTagDescInfo entries stride 2 dwords) OR piVar5[6] (path B)",
+        "completion flag piStack_1b8/iVar22: stays 'complete' (==4) only if all materials satisfy curCount >= maxCount; set to 0 (incomplete) when iVar17+iVar6 < maxCount",
+        "material entry offsets (path A): puVar14[0]=materialItemId, puVar14[1]=requiredCount; rareType = ppiStack_168[0x13]",
+        "material entry offsets (path B, subTask): piVar5[0]=targetId, piVar5[6]=requiredMax; rareType = *(itemDef+0x4c)"
+      ],
+      "costs": [
+        "no currency mutation; reports material requirement counts (nCurCount/nMaxCount) and isPointMaterial flag for the upgrade recipe"
+      ],
+      "serverRelevance": "client-only (populates flash/UI VO from local inventory counts). Reveals that upgrade-material sufficiency is a per-material curCount>=maxCount check that the server must re-validate on upgrade commit.",
+      "notes": "Keys emitted: subTaskArr, nItemLevel, nTargetID1, strTarget1, rareType, nCurCount, nMaxCount, isPointMaterial, nQuestID, nQuestStatus, nQuestLevel, strQuestName. FUN_113fa680(id, 0/1, 1) = owned-item count where arg2 0=unbind,1=bind. FUN_10254130(id)=item template lookup. FUN_1052bdd0/FUN_1052bdd0=quest name/def."
+    },
+    {
+      "address": "0x10812910",
+      "currentName": "FUN_10812910",
+      "proposedName": "CTradeModel::RegisterCommands",
+      "purpose": "Registers the player-to-player trade UI command handlers and network message handlers. Binds UI callbacks (FUN_104d0ee0) for: ReqTrade, ConfirmTrade, CancelTrade, LockTrade, MoveItemToTrade, UpdataMoneyToTrade, RemoveItemFromTrade, DragItemInTrade, TradeRespondOkHandler, TradeRespondCancelHandler; and network C2AS message handlers (FUN_10813750) for C2AS_GetDealLimitLevel and C2AS_IsUnderDealLimit.",
+      "subsystem": "economy/trade",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration, but names the trade protocol surface. C2AS_GetDealLimitLevel / C2AS_IsUnderDealLimit prove the SERVER is authoritative over a 'deal limit level' gate (a per-account cap that bounds trade value/eligibility). MoveItemToTrade + UpdataMoneyToTrade are the item- and currency-mutation requests the server must validate.",
+      "notes": "Standard command-binder pattern (FUN_100b62c0 build std::string, FUN_104d0ee0 register UI cb, FUN_10813750 register net msg, FUN_10c3d5d0 free). Handler bodies: ReqTrade=FUN_10812d60, ConfirmTrade=LAB_10812ef0, CancelTrade=LAB_10812f30, LockTrade=FUN_10812f70, MoveItemToTrade=FUN_10812ff0, UpdataMoneyToTrade=FUN_10813150, RemoveItemFromTrade=FUN_108130f0, DragItemInTrade=FUN_10813090, TradeRespondOk=FUN_10812e60, TradeRespondCancel=FUN_10812ea0, GetDealLimitLevel=FUN_10813420, IsUnderDealLimit=FUN_10813460."
+    },
+    {
+      "address": "0x1081a400",
+      "currentName": "FUN_1081a400",
+      "proposedName": "CRankLevelUpModel::OnRequestPutItemIn",
+      "purpose": "Handler for '_requestPutItemIn' in the equipment rank-level-up (enforce) UI. Resolves the dropped item by its guid (param_4 variant fields 8 and 0xe = guid lo/hi), validates it against the local game-data object, computes a status/result code, and writes the current enforce level to the VO under 'enforceLevel'.",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "medium",
+      "formulas": [
+        "guidLo = param_4[8] if (param_4[7]&0x8f)==3||==4 else 0xdeadbeaf; guidHi = param_4[0xe] if (param_4[0xd]&0x8f)==3||==4 else 0xdeadbeaf",
+        "item = FUN_113f9bb0(guidLo,guidHi); if item==0 -> result 0x29812",
+        "else itemDef=FUN_11669250(); if *(itemDef+0x34)!=2 -> result 0x29813 (not equipment)",
+        "else if *(itemDef+0x34)==2 && *(itemDef+0xc0)==6 -> result 0x2981b",
+        "enforceLevel = FUN_1166c160() when item selected (FUN_107cb630 nonzero and FUN_116698a0 true)"
+      ],
+      "costs": [
+        "result-code enum (client status): 0x29812=item-not-found, 0x29813=not-enforceable-type, 0x2981b=disallowed-subtype(0xc0==6)"
+      ],
+      "serverRelevance": "client-only pre-check/UI feedback. The itemDef type test (+0x34==2 equipment, +0xc0 subtype) and enforce-level read mirror validation the server must enforce on the actual enforce request.",
+      "notes": "Result written to param_1[2]; param_1 is a variant slot (tag at [1]). DAT_1202e818 -> +0xd0 -> +0x90 -> vtbl+0xb4 = local player/game-data accessor (recurring pattern this chunk). FUN_1166c160()=current enforce level getter."
+    },
+    {
+      "address": "0x1081a9f0",
+      "currentName": "FUN_1081a9f0",
+      "proposedName": "CRankLevelUpModel::RegisterCommands",
+      "purpose": "Registers equipment rank-level-up (enforce) UI command handlers: _requestPutItemIn (FUN_1081a400), _requestRankLevelUp (FUN_1081a5e0), _msgBoxConfirm (FUN_1081a740), _requestRankLevelUpItemInfo (FUN_1081a820), _isRankLevelUpItemRequireLevelBigger (FUN_1081aad0).",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration. _requestRankLevelUp is the enforce-commit request; server must validate item, level cap, and material/currency cost.",
+      "notes": "FUN_104d13b0(name, funcPtr) = command-table bind."
+    },
+    {
+      "address": "0x1082a2b0",
+      "currentName": "FUN_1082a2b0",
+      "proposedName": "CEquipTransferModel::RegisterCommands",
+      "purpose": "Registers the equipment-transfer/enforce model methods and its network message handlers. Method binds (FUN_1082d6b0): InitModel, TrasferInitModel, PutEquipIntoSlot, RequireEquipEnforce, IsTransferReady, GetForceLevel, Dispose, StartTransfer, GetCanTransferLevel, IsEquipTransferRuleError, GetMaxForceLevel, IsTransferBindCost. Then registers 7 network message IDs.",
+      "subsystem": "progression/equipment-transfer",
+      "confidence": "high",
+      "formulas": [
+        "registered network message IDs (FUN_1081b5b0): 0x424, 0x3ee, 0x419, 0x418, 0x416, 0x3f2, 0x448"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only registration; enumerates the equip-transfer/enforce protocol opcodes (0x424,0x3ee,0x419,0x418,0x416,0x3f2,0x448). StartTransfer/RequireEquipEnforce are the server-validated mutation requests. IsTransferBindCost indicates transfer may bind the equipment (cost side-effect).",
+      "notes": "InitModel handler=FUN_1082a9e0, TrasferInitModel=FUN_1082aac0, StartTransfer=FUN_1082a790, GetForceLevel=FUN_1082cd40, GetMaxForceLevel=FUN_1082cc80, GetCanTransferLevel=FUN_1082cbd0, IsTransferBindCost=FUN_1082ca00, IsEquipTransferRuleError=FUN_1082c8c0. CPet::SetName call is a shared std::string setter (misattributed symbol)."
+    },
+    {
+      "address": "0x1082a9e0",
+      "currentName": "FUN_1082a9e0",
+      "proposedName": "CEquipEnforceModel::RegisterCommands",
+      "purpose": "Registers equipment enforce/break sub-model command handlers: _requestEquipDetail (FUN_1082ab30), _requireEquipBreak (FUN_1082c380), checkBindStateAfterEnforce (FUN_1082c7b0), _openEquipShow (FUN_1082d450), _CanEquipEnforceORBreak (FUN_1082d4e0).",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration. _requireEquipBreak (equipment 'break'/downgrade-for-materials) and enforce are server-validated mutations.",
+      "notes": "FUN_104d13b0 command binds."
+    },
+    {
+      "address": "0x1082ab30",
+      "currentName": "FUN_1082ab30",
+      "proposedName": "CEquipEnforceModel::OnRequestEquipDetail",
+      "purpose": "Handler for '_requestEquipDetail': builds the enforce-detail panel VO for a selected equipment. Resolves item guid (params 8/0xe), reads two byte flags (params 0x14, 0x20), fetches the currently-selected equip (FUN_107cb630), sets 'openEnforceDiamond' bool, then delegates to sub-builders that emit level/cost/rate/punishment fields.",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "medium",
+      "formulas": [
+        "guidLo=param[8] if (param[7]&0x8f)==3||4; guidHi=param[0xe] if (param[0xd]&0x8f)==3||4",
+        "flag1 = *(byte)(param+0x14) if (param[0x13]&0x8f)==2 else 0; flag2 = *(byte)(param+0x20) if (param[0x1f]&0x8f)==2 else 0",
+        "openEnforceDiamond = FUN_116ebf50() (bool) set via FUN_104d15e0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only detail-panel assembly (reads local equip + config).",
+      "notes": "Sub-builders: FUN_1082b430, FUN_1082b5c0, FUN_1082b860, FUN_1082bc10 (diamond cost+rate), FUN_1082bf40 (punishment), FUN_1082c130. FUN_116ebf00/FUN_116ebf50 gate the diamond-enforce (guaranteed-success item) feature."
+    },
+    {
+      "address": "0x1082b380",
+      "currentName": "FUN_1082b380",
+      "proposedName": "CEquipEnforceModel::BuildLevelCapsVO",
+      "purpose": "Emits equipment enforce/break level fields to the VO: current enforce level, current break level, and the config caps (enforce top level, break top level, level-required-for-break).",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "high",
+      "formulas": [
+        "equipEnforceLevel = FUN_1166c160() (current enforce/strengthen level)",
+        "equipBreakLevel = FUN_1166c400() (current break level)",
+        "enforceTopLevel = FUN_1166d7c0() (max enforce level)",
+        "enforceBreakTopLevel = *(int*)(FUN_1166c4b0() + 0x140)",
+        "enforceLevelForBreak = *(int*)(FUN_1166c4b0() + 0x144)  (enforce level required before break allowed)"
+      ],
+      "costs": [
+        "level caps: enforceTopLevel, enforceBreakTopLevel, enforceLevelForBreak (all read from equip config object)"
+      ],
+      "serverRelevance": "validation-relevant: these caps (config obj +0x140 enforceBreakTopLevel, +0x144 enforceLevelForBreak) are the bounds the server must enforce; here read for display only.",
+      "notes": "FUN_1166c4b0() returns the per-equip enforce config record; offsets 0x140/0x144 hold the two break-related caps."
+    },
+    {
+      "address": "0x1082bc10",
+      "currentName": "FUN_1082bc10",
+      "proposedName": "CEquipEnforceModel::BuildDiamondCostAndRateVO",
+      "purpose": "Emits the enforcement material ('diamond') cost and the enforce success-rate info to the VO. Reads the required diamond/material item id and count for the current enforce level, the player's owned amount, and a localized success-rate string. param_4 (char) selects live-equip mode (0) vs preview mode (1); param_3 selects whether bind materials are used.",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "medium",
+      "formulas": [
+        "cost source (preview mode param_4!=0): rec=FUN_115c3a10(FUN_115997b0(guid)); diamondPacked=*(rec+0xac), *(rec+0xb0); diamondItemID=*(int*)(rec+0xc4); diamondCounts=*(int*)(rec+0xc8)",
+        "cost source (live mode param_4==0): FUN_115999a0(equip,&packed,&packed2,&diamondItemID,&diamondCounts)",
+        "diamondBindCounts = FUN_113fa680(packed,1,1); diamondUnbindCounts = FUN_113fa680(packed,0,1)",
+        "diamondHasCounts = FUN_113fa380(diamondItemID)  (player total owned, emitted via FUN_104d1440 int64)",
+        "guaranteed/effective flag cVar6=param_3; forced false if diamondCounts<1 || diamondItemID<1",
+        "enforceRate = FUN_11599a70(item,cVar6) [live] or FUN_11599c50(item,param_3) [preview]; only when FUN_116698a0() true",
+        "enforceRateInfo = localized string msgId 0x48b (live) / 0x445 (preview), 1 arg = FUN_1024e8a0(enforceRate,2)"
+      ],
+      "costs": [
+        "diamondItemID + diamondCounts = material item consumed per enforce attempt; diamondBindCounts/diamondUnbindCounts split the requirement into bind vs unbind stacks",
+        "enforceRate = success chance (%) displayed to player"
+      ],
+      "serverRelevance": "client-only display (reads local data / client-side rate helper FUN_11599a70). CRITICAL for the authoritative server: it exposes the enforce cost model (a per-level 'diamond' item cost at rec+0xc4/+0xc8) and a success-rate that the server must be the one to actually roll and charge. Gated on server enhancement config present (player+0x260e0 and +0x260e8).",
+      "notes": "Emitted keys: diamondItemID, diamondItemName, diamondCounts, diamondBindCounts, diamondUnbindCounts, diamondHasCounts, enforceRateInfo, enforceRate. FUN_113fa380(id)=total owned (int64)."
+    },
+    {
+      "address": "0x1082bf40",
+      "currentName": "FUN_1082bf40",
+      "proposedName": "CEquipEnforceModel::BuildEnforcePunishmentVO",
+      "purpose": "Emits the enforce-failure penalty (level-loss) info: a localized 'enforcePunishmentInfo' string plus maxLevel/minLevel fields describing how many enforce levels are lost on failure. param_5 selects normal-enforce vs alternate (transfer/break) message set.",
+      "subsystem": "progression/equipment-enforce",
+      "confidence": "high",
+      "formulas": [
+        "penalty range: FUN_115998e0(item,&minLevel,&maxLevel) [normal, param_5==0] or FUN_11599be0() [param_5==1], only when FUN_116698a0() true",
+        "if maxLevel==minLevel && ==0: msg 0x487 (param5=0) / 0x4c3 (param5=1), 0 args (no penalty)",
+        "if maxLevel==minLevel && !=0: msg 0x488 / 0x4c4, 1 arg = FUN_1024e8a0(maxLevel,2) (fixed loss)",
+        "else (range): msg 0x489 / 0x4c5, 2 args = FUN_1024e8a0(minLevel,2), FUN_1024e8a0(maxLevel,2)"
+      ],
+      "costs": [
+        "on-failure penalty = loss of between minLevel and maxLevel enforce levels"
+      ],
+      "serverRelevance": "client-only display of the failure penalty; the actual level-loss on a failed enforce must be applied authoritatively by the server. Gated on player+0x260e0 (enhancement config present).",
+      "notes": "Keys: enforcePunishmentInfo, maxLevel, minLevel. msg IDs 0x487/0x488/0x489 (enforce) and 0x4c3/0x4c4/0x4c5 (transfer/break variant)."
+    },
+    {
+      "address": "0x1083f010",
+      "currentName": "FUN_1083f010",
+      "proposedName": "CStoreModel::RegisterCommands",
+      "purpose": "Registers the shop/store UI model methods and one network handler. Method binds (FUN_10845f00): GetBackItemSalesInfo, GetSalesRequirementBySaleItemID, InitModel, C2AS_NeedEquipShow, GetFilteredStoreData, SetFilterParams, GetUnifiedListData, GetCurrencyData; plus net handler AS2C_NeedCreditCost (server->client credit-cost prompt).",
+      "subsystem": "economy/shop",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only registration. AS2C_NeedCreditCost is a server-originated message confirming the server drives credit (real-money currency) charges. C2AS_NeedEquipShow is client->server.",
+      "notes": "InitModel handler=FUN_1083f300, GetFilteredStoreData=FUN_1083f300 tree... GetUnifiedListData=FUN_10842770, GetCurrencyData=FUN_10843460, GetFilteredStoreData=FUN_10845b30/FUN_108420c0, AS2C_NeedCreditCost=FUN_10845bc0. FUN_10845f00 = model-method bind."
+    },
+    {
+      "address": "0x1083f300",
+      "currentName": "FUN_1083f300",
+      "proposedName": "CStoreModel::OnInitModel",
+      "purpose": "Shop InitModel handler. Registers per-shop request sub-handlers, then populates the initial currency VO for the shop panel.",
+      "subsystem": "economy/shop",
+      "confidence": "high",
+      "formulas": [
+        "CurrentBindMoney / CurrentUnbindMoney = FUN_1025b060() (bind + unbind gold)",
+        "currencyGuildValue = FUN_114b7530(2); currencyFarmValue = FUN_114b7530(1); currencyClanMoney = FUN_114b7530(3); currencyClanMoneyPvp = FUN_114b7530(4); FUN_114b7530(5) fetched but discarded",
+        "switchDrag = *(int*)(FUN_11727ff0()+0x34); switchTipsOpen = *(int*)(FUN_11727ff0()+0x30)  (client UI settings)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display refresh (reads local currency mirror). Currency reads are guarded by player+0x2afc (currency subsystem present).",
+      "notes": "Sub-handlers registered: _requestBuyBackItem=FUN_1083f680, _requestBuyItem=FUN_1083f820, _requestNpcSales=FUN_1083f9c0, _requestSoldList=FUN_1083fb60, _requestSellItem=FUN_10840320, _requestResetSales=FUN_10840470, _requestGetBuyStackCounts=FUN_108416d0, _refreshCurrency=FUN_10841c40, _reqShopName=FUN_10845a20. FUN_114b7530(idx)=currency-amount getter by currency index."
+    },
+    {
+      "address": "0x10841c40",
+      "currentName": "FUN_10841c40",
+      "proposedName": "CStoreModel::OnRefreshCurrency",
+      "purpose": "'_refreshCurrency' handler: reads all player currency balances from the local currency subsystem and writes them to the shop VO. This is the authoritative reference for the game's currency-type taxonomy/indices.",
+      "subsystem": "economy/currency",
+      "confidence": "high",
+      "formulas": [
+        "CurrentBindMoney / CurrentUnbindMoney = FUN_1025b060() (gold, bind & unbind)",
+        "currency index -> field map via FUN_114b7530(idx): 1=currencyFarmValue, 2=currencyGuildValue, 3=currencyClanMoney, 4=currencyClanMoneyPvp, 5=(fetched,discarded), 7=currencyBindCredit, 8=currencyCredit, 9=currencyMonster, 10=currencyLieHun",
+        "each read guarded: player(DAT_1202e818+0xd0+0x90 vtbl+0xb4)!=0 && (that+0x2afc)!=0 else 0"
+      ],
+      "costs": [
+        "enumerated currencies: gold(bind/unbind), Farm(1), Guild(2), ClanMoney(3), ClanMoneyPvp(4), idx5(unknown), BindCredit(7), Credit(8), Monster(9), LieHun/hunt-soul(10)"
+      ],
+      "serverRelevance": "client-only display, but defines the currency ID space the server must own. All 10+ currencies plus bind/unbind gold are separate authoritative balances; the server must be the source of truth for each FUN_114b7530(idx) value.",
+      "notes": "Keys: CurrentBindMoney, CurrentUnbindMoney, currencyGuildValue, currencyFarmValue, currencyClanMoney, currencyClanMoneyPvp, currencyBindCredit, currencyCredit, currencyMonster, currencyLieHun. +0x2afc on the player object = currency-container pointer."
+    },
+    {
+      "address": "0x10842770",
+      "currentName": "FUN_10842770",
+      "proposedName": "CStoreModel::GetUnifiedListData",
+      "purpose": "Builds the 'unified list' of shop entries (item ids/names, sale-point ids/names, valid shop ids) filtered by the player's eligibility. Iterates shop group data, applies permission-bit, hunt-rank, level-range and time-window filters, dedupes via red-black-tree maps, and emits four parallel arrays plus validShopIDs. Uses CCurrencyInfo manager to resolve sale-point currency names.",
+      "subsystem": "economy/shop",
+      "confidence": "medium",
+      "formulas": [
+        "permission gate: rec[2]/rec[3] bitmask vs FUN_100ed750() 64-bit mask -> (mask&rec[2])==rec[2] && (maskHi&rec[3])==rec[3] required (else skip)",
+        "hunt-rank gate: rec[0x1a] <= CPlayer__GetHuntRankOrCount(); if rec[0x1b]>0 also *(FUN_1083eb20(rec[0x1b])+0x18) <= huntRank",
+        "sub-filter: FUN_104d90e0(id)+0x58 quest/unlock check via FUN_114e0340",
+        "special ids 0x0a/0x1a/0x2c require FUN_1139ab70() true",
+        "sale-record time-window compare uses 64-bit now = FUN_111f8d20() against rec fields 100/0x6c (hi) and 0x60/0x68 (lo): available only within [start,end]"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only display filtering. Encodes the eligibility rules (permission bitmask, hunt-rank >= requirement, level/time window) that the server must independently enforce before allowing a purchase of any listed item.",
+      "notes": "Emitted arrays: itemIdArr, itemNameArr, spIdArr, spNameArr, validShopIDs. FUN_1083e990/FUN_1083e900/FUN_1083e450/FUN_1083e4e0 = shop-data iterators. CInfoManager::FindByName('CCurrencyInfo') resolves sale-point currency."
+    },
+    {
+      "address": "0x10843460",
+      "currentName": "FUN_10843460",
+      "proposedName": "CStoreModel::GetCurrencyData",
+      "purpose": "Builds the currency-list VO (CURRENCY_VO_CLASSNAME 'currencyList') for the shop currency display. Emits a hard-coded silver (gold) entry, then iterates CCurrencyInfo manager records emitting id/icon/name/tips/count and per-type count & cap fields. Reveals the currency 'type' enum.",
+      "subsystem": "economy/currency",
+      "confidence": "medium",
+      "formulas": [
+        "currency_silver base entry: nCount = FUN_1025b060() (gold); nCurrencyID=0",
+        "per record: type=rec[4], attrId=rec[5], key=rec[0xe]; strName from rec[0xc]",
+        "type==3 (silver-family): nCount=FUN_1025b060(), nCount2=FUN_1134c890(), nCountMax2=FUN_1134c8b0() (current/cap split)",
+        "type==4 (credit/real-money): count=*(FUN_117fa140()+0xa4), max=*(FUN_117fa140()+0xa0); also nCount=FUN_1025b060(), nCount2=vtbl[0x139]()+0x14",
+        "else: FUN_11348ac0(rec[5]) generic currency amount",
+        "list-order table iterated via DAT_123bcff8..DAT_123bcff0 (rb-tree); each maps to FUN_10254130 item template for icon/name"
+      ],
+      "costs": [
+        "currency type enum: 3=silver/gold-family, 4=credit (点券, cash currency with cap at +0xa0/+0xa4). nCountMax/nCountMax2 = per-currency caps"
+      ],
+      "serverRelevance": "client-only currency panel builder. Confirms credit (type 4) has an authoritative balance+cap held server-side (FUN_117fa140 +0xa0 max / +0xa4 count).",
+      "notes": "Keys: nCurrencyID, strIconPath, strName, strTips, nCount, nCount2, nCountMax, nCountMax2, nAttrID, currencyList. CCurrencyInfo manager (CInfoManager::FindByName). Heavy decompiler stack-noise (pppppuStack_*) but control flow is a manager-record iteration."
+    },
+    {
+      "address": "0x10844080",
+      "currentName": "FUN_10844080",
+      "proposedName": "CStoreModel::GetFilteredStoreData",
+      "purpose": "Core shop-page builder: for the requested page (param_4=pageSize, param_5=pageIndex) it filters the shop's sale records by class/skill/time filters, then emits a full SALE_ITEM_DATA VO per item -- ids, quantities, price, currency, buy-limit, player-level requirement, exchange (barter) cost items, and up to 12 special/discount item entries. Consumes EXCHANGE_DATA_CLASS records for barter costs.",
+      "subsystem": "economy/shop",
+      "confidence": "medium",
+      "formulas": [
+        "sale-record offsets (ppiVar1): [2]=SaleItemId, [3]=shopID, [10]=ItemId(granted), [0xb]=ItemNum(qty), byte(+0xd)=UnBindGold flag, [0x1c]=currencyShowType, [0x1e]=itemClass1, [0x1f]=itemClass2, [0x20]=itemClass3, byte(+0x1d)=enabled",
+        "time window: rec[0x19]/[0x1b] (hi) & rec[0x18]/[0x1a] (lo) vs now=FUN_111f8d20() -> visible only within [start,end]",
+        "class filters: rec[0x1e]/[0x1f]/[0x20] must equal DAT_123bcf90/0x94/0x98 when those >0",
+        "exchange/barter cost list: rec[0x21]..rec[0x22], stride 2 dwords per cost item: [0]=costItemId, [1]=baseCount; actual cost = FUN_114b7110(rec,costItemId) + pair[1]; itemCount = pair[3]*rec[0xb] for material list (FUN_114b6f80(rec[0x16]))",
+        "currentCounts (owned of cost item) = FUN_113f9300(bag,itemId,0); if !bindable also + FUN_113f9300(2,id,0)+FUN_113f9300(10,id,0)",
+        "special items loop idx 1..0xd via FUN_108418c0; discount = rec[0x27][7]; special count = FUN_114b7530(currencyIdx) (idx7 also adds FUN_114b7530(8))",
+        "itemPrice = FUN_114b6660(saleItemId,shopId) (currency price lookup); needPlayerLevel = *(itemDef+0xc8); maxStackCount = *(itemDef+0x50)",
+        "page bound: total shown limited by param_4*param_5; pagination index tracked in uStack_124 (0..param_4-1) with edge flags 0/1/2"
+      ],
+      "costs": [
+        "purchase cost model: primary price FUN_114b6660(item,shop) in currency currencyShowType(rec[0x1c]); UnBindGold flag(+0xd) selects unbind-gold payment; barter cost = list of (costItemId,count) at rec[0x21..0x22]; special/discount multipliers at rec[0x27]",
+        "buy limit: currentLimitBuyCounts + itemLimitType (per-item purchase cap); needPlayerLevel gate"
+      ],
+      "serverRelevance": "client-only VO assembly, but the single richest source of the shop PRICING & COST schema in this chunk. The server must authoritatively re-derive price (FUN_114b6660), barter cost items/counts (rec[0x21..0x22] + FUN_114b7110), buy-limit (currentLimitBuyCounts/itemLimitType), player-level requirement (itemDef+0xc8) and time window before committing a buy. isSkillFormula/isManuFormula/hasBeenLearned* gate purchase of skill/recipe items.",
+      "notes": "Keys: itemLimitType, isSkillFormula, isManuFormula, currentLimitBuyCounts, hasBeenLearnedSkill, hasBeenLearnedFormula, backItem, SaleItemId, shopID, ItemId, ItemNum, UnBindGold, salesCount, itemClass1, itemClass2, currentBindMoney, currentMoney, backItemIndex, packTag, needPlayerLevel, itemPrice, maxStackCount, itemName, itemCount, itemID, currentCounts, arrayExchangeItem, currencyShowType, specialItemName%d, specialItemCounts%d, specialItemDiscount%d, currentSpecialItem%dCounts, specialItemType%d, MatchEntry. FUN_114b74e0/FUN_114b6660=price; FUN_114b7110=exchange cost; FUN_114b6f80=material list; FUN_114b65c0/66e0/8160/7fb0/7c50/7bb0=skill/formula/learned flags."
+    }
+  ]
+}

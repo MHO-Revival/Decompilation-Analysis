@@ -1,0 +1,720 @@
+{
+  "batchIndex": 17,
+  "classes": [
+    {
+      "className": "CExpandStoreHouseSlotInfo",
+      "category": "economy",
+      "purpose": "Config record for expanding storehouse (warehouse) slot capacity, likely holding cost/level thresholds per expansion step. Only the singleton-manager accessor was recovered; no field layout is present.",
+      "methods": [
+        {"address": "108accd0", "currentName": "CExpandStoreHouseSlotInfo::GetManagers", "proposedName": "CExpandStoreHouseSlotInfo::GetManager", "purpose": "Lazy-init accessor: registers this Info type's CInfoManager in the global StcMbrNameSvr<CInfoManager> registry, constructs it, installs an atexit destructor, and returns the singleton pointer."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "34-line stub; only GetManagers recovered. No DebugFormat/reader present."
+    },
+    {
+      "className": "CHunterStarMainBranchInfo",
+      "category": "skill",
+      "purpose": "Config for the Hunter-Star main progression branch (rank/talent tree main path). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108ba2a0", "currentName": "CHunterStarMainBranchInfo::GetManagers", "proposedName": "CHunterStarMainBranchInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor; registers in StcMbrNameSvr<CInfoManager>, constructs, installs atexit destructor, returns singleton."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CEquipLevelUpConsumeInfo",
+      "category": "item",
+      "purpose": "Config for materials/currency consumed when leveling up equipment. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "107ec340", "currentName": "CEquipLevelUpConsumeInfo::GetManagers", "proposedName": "CEquipLevelUpConsumeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CExpandInventorySlotInfo",
+      "category": "item",
+      "purpose": "Config for expanding inventory/bag slot capacity (cost per expansion step). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108abef0", "currentName": "CExpandInventorySlotInfo::GetManagers", "proposedName": "CExpandInventorySlotInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CIllustrateBookGroupInfo",
+      "category": "misc",
+      "purpose": "Group/category definition for the illustration book (bestiary/collection gallery). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109c5490", "currentName": "CIllustrateBookGroupInfo::GetManagers", "proposedName": "CIllustrateBookGroupInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CIllustrateBookStoryInfo",
+      "category": "misc",
+      "purpose": "Story/lore entries associated with illustration-book (bestiary) pages. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109c5940", "currentName": "CIllustrateBookStoryInfo::GetManagers", "proposedName": "CIllustrateBookStoryInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CHubEntryRaidConfigInfo",
+      "category": "activity",
+      "purpose": "Raid-mode configuration attached to a hub entry (raid instance setup). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "107cac90", "currentName": "CHubEntryRaidConfigInfo::GetManagers", "proposedName": "CHubEntryRaidConfigInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLevelEnGroupRewardInfo",
+      "category": "quest",
+      "purpose": "Group reward config for a stage/level (level = mission/stage), likely energy or grouped completion rewards. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108f2d70", "currentName": "CLevelEnGroupRewardInfo::GetManagers", "proposedName": "CLevelEnGroupRewardInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'En' meaning unresolved."
+    },
+    {
+      "className": "CLevelRegularRewardInfo",
+      "category": "quest",
+      "purpose": "Regular (standard) reward config for a stage/level completion. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10976f50", "currentName": "CLevelRegularRewardInfo::GetManagers", "proposedName": "CLevelRegularRewardInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CSystemShortcutDataInfo",
+      "category": "ui",
+      "purpose": "UI system shortcut definitions (quick-access buttons/menu entries). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109239f0", "currentName": "CSystemShortcutDataInfo::GetManagers", "proposedName": "CSystemShortcutDataInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CFreeHuntingCreditInfo",
+      "category": "activity",
+      "purpose": "Config for credits/points earned in a free-hunting activity mode. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10923b00", "currentName": "CFreeHuntingCreditInfo::GetManagers", "proposedName": "CFreeHuntingCreditInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CHunterBranchLevelInfo",
+      "category": "skill",
+      "purpose": "Per-level config for a Hunter progression branch (talent/rank branch level thresholds). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108babd0", "currentName": "CHunterBranchLevelInfo::GetManagers", "proposedName": "CHunterBranchLevelInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CSuperCraftConsumeInfo",
+      "category": "item",
+      "purpose": "Config for materials/currency consumed by 'super craft' (advanced crafting/upgrade). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "107ec7d0", "currentName": "CSuperCraftConsumeInfo::GetManagers", "proposedName": "CSuperCraftConsumeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CTowerLayer_SupplyInfo",
+      "category": "activity",
+      "purpose": "Supply/reward config per layer of a tower-defense or climbing-tower activity. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109166e0", "currentName": "CTowerLayer_SupplyInfo::GetManagers", "proposedName": "CTowerLayer_SupplyInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CCharmRebuildCostInfo",
+      "category": "item",
+      "purpose": "Cost config for rebuilding/rerolling charms (talismans). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109cd610", "currentName": "CCharmRebuildCostInfo::GetManagers", "proposedName": "CCharmRebuildCostInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CEquipReColorRuleInfo",
+      "category": "item",
+      "purpose": "Rules for recoloring equipment (dye/palette constraints). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856e60", "currentName": "CEquipReColorRuleInfo::GetManagers", "proposedName": "CEquipReColorRuleInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CHubPageStarLevelInfo",
+      "category": "activity",
+      "purpose": "Star-level thresholds for a hub page/section (e.g. quest-hub star ratings). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "107ca690", "currentName": "CHubPageStarLevelInfo::GetManagers", "proposedName": "CHubPageStarLevelInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLoadingTipsGroupInfo",
+      "category": "ui",
+      "purpose": "Grouping/categorization of loading-screen tips. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10961df0", "currentName": "CLoadingTipsGroupInfo::GetManagers", "proposedName": "CLoadingTipsGroupInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CPhysicalCardTypeInfo",
+      "category": "item",
+      "purpose": "Definition of physical (stamina/energy) card types used for entering activities. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109c55a0", "currentName": "CPhysicalCardTypeInfo::GetManagers", "proposedName": "CPhysicalCardTypeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'Physical card' meaning inferred."
+    },
+    {
+      "className": "CPlayerVIPLevelUpInfo",
+      "category": "economy",
+      "purpose": "Config for player VIP level-up thresholds and requirements. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1092d3e0", "currentName": "CPlayerVIPLevelUpInfo::GetManagers", "proposedName": "CPlayerVIPLevelUpInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CSoulStoneLevelUpInfo",
+      "category": "item",
+      "purpose": "Config for leveling up soul stones (gem/enhancement stone progression). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10520880", "currentName": "CSoulStoneLevelUpInfo::GetManagers", "proposedName": "CSoulStoneLevelUpInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CWeeklyMoneyLimitInfo",
+      "category": "economy",
+      "purpose": "Config for weekly currency earning/spending caps. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108d1c00", "currentName": "CWeeklyMoneyLimitInfo::GetManagers", "proposedName": "CWeeklyMoneyLimitInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CExpressionGroupInfo",
+      "category": "social",
+      "purpose": "Grouping of expressions/emotes for chat/social use. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109b09d0", "currentName": "CExpressionGroupInfo::GetManagers", "proposedName": "CExpressionGroupInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLegendPearlItemInfo",
+      "category": "item",
+      "purpose": "Item definition for 'legend pearl' consumables/currency used in a legend system. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10855950", "currentName": "CLegendPearlItemInfo::GetManagers", "proposedName": "CLegendPearlItemInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLoadingTemplateInfo",
+      "category": "ui",
+      "purpose": "Template layout definitions for loading screens. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10962340", "currentName": "CLoadingTemplateInfo::GetManagers", "proposedName": "CLoadingTemplateInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLoadingTipsDataInfo",
+      "category": "ui",
+      "purpose": "Individual loading-screen tip text/data entries. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10961ce0", "currentName": "CLoadingTipsDataInfo::GetManagers", "proposedName": "CLoadingTipsDataInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLoadingTutorialInfo",
+      "category": "ui",
+      "purpose": "Tutorial content shown during loading screens. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10962230", "currentName": "CLoadingTutorialInfo::GetManagers", "proposedName": "CLoadingTutorialInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CMaterialTagDescInfo",
+      "category": "item",
+      "purpose": "Descriptions for material tags/categories (crafting material classification). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1080a3f0", "currentName": "CMaterialTagDescInfo::GetManagers", "proposedName": "CMaterialTagDescInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CMessageParmDescInfo",
+      "category": "misc",
+      "purpose": "Descriptions for message parameters (localized message/template parameter definitions). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1024f360", "currentName": "CMessageParmDescInfo::GetManagers", "proposedName": "CMessageParmDescInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CCrossBowWeaponInfo",
+      "category": "weapon",
+      "purpose": "Weapon definition for crossbow/bowgun-type weapons. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856310", "currentName": "CCrossBowWeaponInfo::GetManagers", "proposedName": "CCrossBowWeaponInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CHunterCardBaseInfo",
+      "category": "social",
+      "purpose": "Base data for a hunter profile card (player business/profile card). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "104d8610", "currentName": "CHunterCardBaseInfo::GetManagers", "proposedName": "CHunterCardBaseInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CEquipRelationInfo",
+      "category": "item",
+      "purpose": "Defines relationships between equipment pieces (set/series/upgrade relations). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10855f20", "currentName": "CEquipRelationInfo::GetManagers", "proposedName": "CEquipRelationInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLegendConsumeInfo",
+      "category": "item",
+      "purpose": "Config for consumption (materials/currency) in a legend upgrade/craft system. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109ed7a0", "currentName": "CLegendConsumeInfo::GetManagers", "proposedName": "CLegendConsumeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CUIOpenProcessInfo",
+      "category": "ui",
+      "purpose": "Config for UI unlock/open progression (which UI panels open at what progress). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856940", "currentName": "CUIOpenProcessInfo::GetManagers", "proposedName": "CUIOpenProcessInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CVipFuLiConfigInfo",
+      "category": "economy",
+      "purpose": "VIP welfare/benefits (FuLi) configuration - rewards granted per VIP tier. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1081f250", "currentName": "CVipFuLiConfigInfo::GetManagers", "proposedName": "CVipFuLiConfigInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered. 'FuLi' = Chinese for welfare/benefits."
+    },
+    {
+      "className": "CFarmFacilityInfo",
+      "category": "activity",
+      "purpose": "Definition of farm facilities/buildings in the farm mini-game. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108e1520", "currentName": "CFarmFacilityInfo::GetManagers", "proposedName": "CFarmFacilityInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CRandomWeaponInfo",
+      "category": "weapon",
+      "purpose": "Config for random weapon generation/drops. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1052c940", "currentName": "CRandomWeaponInfo::GetManagers", "proposedName": "CRandomWeaponInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CRoadOfGrowthInfo",
+      "category": "quest",
+      "purpose": "Config for a 'road of growth' progression/achievement path with staged rewards. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1099b850", "currentName": "CRoadOfGrowthInfo::GetManagers", "proposedName": "CRoadOfGrowthInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CTowerDefenseInfo",
+      "category": "activity",
+      "purpose": "Config for a tower-defense activity/game mode. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109c0710", "currentName": "CTowerDefenseInfo::GetManagers", "proposedName": "CTowerDefenseInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CTutorialHintInfo",
+      "category": "ui",
+      "purpose": "Tutorial hint/tooltip content definitions. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1080b2a0", "currentName": "CTutorialHintInfo::GetManagers", "proposedName": "CTutorialHintInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CWeaponTrailInfo",
+      "category": "weapon",
+      "purpose": "Visual weapon-trail (swing effect) definitions per weapon. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109ac470", "currentName": "CWeaponTrailInfo::GetManagers", "proposedName": "CWeaponTrailInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CBulletDataInfo",
+      "category": "combat",
+      "purpose": "Ammo/bullet data definitions (bowgun/bow ammo types and their effects). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856090", "currentName": "CBulletDataInfo::GetManagers", "proposedName": "CBulletDataInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CEquipFoundInfo",
+      "category": "item",
+      "purpose": "Config related to equipment discovery/foundation (likely equipment base/foundry data). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1083bad0", "currentName": "CEquipFoundInfo::GetManagers", "proposedName": "CEquipFoundInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'Found' meaning ambiguous (found/foundation/foundry)."
+    },
+    {
+      "className": "CFarmAdvPetInfo",
+      "category": "pet",
+      "purpose": "Config for advanced/adventure pets in the farm system. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108e1d40", "currentName": "CFarmAdvPetInfo::GetManagers", "proposedName": "CFarmAdvPetInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CLevelGroupInfo",
+      "category": "quest",
+      "purpose": "Grouping of stages/levels (mission grouping). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109006c0", "currentName": "CLevelGroupInfo::GetManagers", "proposedName": "CLevelGroupInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CAttributeInfo",
+      "category": "combat",
+      "purpose": "Definition of character/entity attributes (stat definitions). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1046c700", "currentName": "CAttributeInfo::GetManagers", "proposedName": "CAttributeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor; note this class's init helper is FUN_10470af0 (differs from the common FUN_10250eb0 used by most others)."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered. Uses a distinct manager-construct helper (FUN_10470af0)."
+    },
+    {
+      "className": "CBowWeaponInfo",
+      "category": "weapon",
+      "purpose": "Weapon definition for bow-type weapons. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856490", "currentName": "CBowWeaponInfo::GetManagers", "proposedName": "CBowWeaponInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CCalculateInfo",
+      "category": "misc",
+      "purpose": "Config table for calculation/formula parameters (data-driven arithmetic constants). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108d14b0", "currentName": "CCalculateInfo::GetManagers", "proposedName": "CCalculateInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CEquipWakeInfo",
+      "category": "item",
+      "purpose": "Config for equipment 'wake'/awakening (unlocking latent equipment powers). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856a60", "currentName": "CEquipWakeInfo::GetManagers", "proposedName": "CEquipWakeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CGuildTipsInfo",
+      "category": "social",
+      "purpose": "Guild-related tips/notice text definitions. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10962120", "currentName": "CGuildTipsInfo::GetManagers", "proposedName": "CGuildTipsInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CItemGroupInfo",
+      "category": "item",
+      "purpose": "Grouping/categorization of items (item bundles or categories). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109fdc00", "currentName": "CItemGroupInfo::GetManagers", "proposedName": "CItemGroupInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CSpoorRoadInfo",
+      "category": "monster",
+      "purpose": "Config for spoor/tracking trails (monster footprint paths used in tracking/gathering). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10947b00", "currentName": "CSpoorRoadInfo::GetManagers", "proposedName": "CSpoorRoadInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'Spoor' = animal tracks/trail."
+    },
+    {
+      "className": "CCurrencyInfo",
+      "category": "economy",
+      "purpose": "Definition of in-game currency types. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1083ebf0", "currentName": "CCurrencyInfo::GetManagers", "proposedName": "CCurrencyInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CFireworkInfo",
+      "category": "activity",
+      "purpose": "Config for firework items/effects (festival/celebration content). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109920d0", "currentName": "CFireworkInfo::GetManagers", "proposedName": "CFireworkInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CHubEntryInfo",
+      "category": "activity",
+      "purpose": "Definition of hub entries (quest/activity access points in the hub). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10912d10", "currentName": "CHubEntryInfo::GetManagers", "proposedName": "CHubEntryInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CPetEquipInfo",
+      "category": "pet",
+      "purpose": "Definition of equipment items for pets. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "107cb070", "currentName": "CPetEquipInfo::GetManagers", "proposedName": "CPetEquipInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CTutorialInfo",
+      "category": "ui",
+      "purpose": "Definition of tutorial sequences/steps. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1080b0d0", "currentName": "CTutorialInfo::GetManagers", "proposedName": "CTutorialInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CWardrobeInfo",
+      "category": "item",
+      "purpose": "Definition of wardrobe/fashion (cosmetic outfit) entries. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "109e7510", "currentName": "CWardrobeInfo::GetManagers", "proposedName": "CWardrobeInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CXianYouInfo",
+      "category": "misc",
+      "purpose": "Config for a 'XianYou' feature (Chinese term, possibly a travel/roaming or leisure activity system). Meaning unresolved. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10856d50", "currentName": "CXianYouInfo::GetManagers", "proposedName": "CXianYouInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'XianYou' meaning unresolved."
+    },
+    {
+      "className": "CFarmCPInfo",
+      "category": "activity",
+      "purpose": "Farm system config (CP = capacity/points or combat-power within the farm mini-game). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108e13b0", "currentName": "CFarmCPInfo::GetManagers", "proposedName": "CFarmCPInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "low",
+      "notes": "Stub; only GetManagers recovered. 'CP' meaning ambiguous."
+    },
+    {
+      "className": "CTattooInfo",
+      "category": "misc",
+      "purpose": "Character tattoo/body-marking appearance definitions. Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10849dd0", "currentName": "CTattooInfo::GetManagers", "proposedName": "CTattooInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered. Appearance-customization data."
+    },
+    {
+      "className": "CTitleInfo",
+      "category": "social",
+      "purpose": "Definition of player titles (display titles/honorifics). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "108567d0", "currentName": "CTitleInfo::GetManagers", "proposedName": "CTitleInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    },
+    {
+      "className": "CFaceInfo",
+      "category": "misc",
+      "purpose": "Character face appearance definitions (character-creation face options). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10849ae0", "currentName": "CFaceInfo::GetManagers", "proposedName": "CFaceInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered. Appearance-customization data."
+    },
+    {
+      "className": "CHairInfo",
+      "category": "misc",
+      "purpose": "Character hair appearance definitions (hairstyle options). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "10849840", "currentName": "CHairInfo::GetManagers", "proposedName": "CHairInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered. Appearance-customization data."
+    },
+    {
+      "className": "CSuitInfo",
+      "category": "item",
+      "purpose": "Definition of suits/armor sets (outfit sets). Only the singleton-manager accessor was recovered.",
+      "methods": [
+        {"address": "1052c040", "currentName": "CSuitInfo::GetManagers", "proposedName": "CSuitInfo::GetManager", "purpose": "Lazy-init CInfoManager singleton accessor."}
+      ],
+      "fields": [],
+      "confidence": "medium",
+      "notes": "Stub; only GetManagers recovered."
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x104db710",
+      "currentName": "FUN_104db710",
+      "proposedName": "CNpcTalkUI::BuildNpcInteractionData",
+      "purpose": "Builds the NPC dialogue / interaction menu data model for the client UI: NPC id/name/hello text, friendship (frienddegree / friendshipdescription / valueNpcProgress[Max]), and per-function menu entries (funcType/funcParam/funcParam2/funcTalkId/funcNpcId/funcTitle) including shop 'Sale[%d]' listings, 'ManufactureLearn' (recipe learning), '_CatTreasure', and activity reward grants. Body is <decompile failed/virtualized> so control flow is not recoverable.",
+      "subsystem": "npc-shop-ui",
+      "confidence": "low",
+      "serverRelevance": "client-only: populates a UI data model of NPC menu options (shop sale lists, manufacture-learn entries, activity rewards). Any actual purchase/learn/reward-grant is issued as a separate server request; despite the GrantActivityReward call name the function is a UI builder and its logic could not be decompiled.",
+      "formulas": [],
+      "costs": ["'Sale[%d]' — indexed shop sale entries (NPC vendor listings); amounts not recoverable (virtualized)", "'ManufactureLearn' — recipe/craft learning menu entry", "'_CatTreasure' — cat treasure feature entry"],
+      "notes": "calls CNpcAtdGroupInfo::FindGroupId, GrantActivityReward, CActivityMgr::GetActivityState, _localtime64_s. Strings: npcID/npcName/npcHello/GroupId/valueNpcProgress[Max]/frienddegree/friendshipdescription/ITEM_CLASS_NAME/funcType/funcParam/funcParam2/funcTalkId/funcNpcId/funcTitle. Cannot verify offsets; virtualized."
+    },
+    {
+      "address": "0x104f71e0",
+      "currentName": "FUN_104f71e0",
+      "proposedName": "CGuildActivitySystemUI::RegisterFlashCallbacks",
+      "purpose": "One-time registration of named Flash->C++ callbacks for the guild/camp activity system UI (all commands prefixed 'C2AS_' = Client-to-ActivitySystem). Each block: FUN_100b62c0 builds a std::string key, FUN_104f9970 binds it to a handler function pointer, FUN_10c3d5d0 frees the temp string. Tail installs two extra bindings via FUN_10d17440/FUN_10d17870 gate pattern.",
+      "subsystem": "activity-reward-ui",
+      "confidence": "high",
+      "serverRelevance": "client-only: pure UI callback registration table. The registered commands are client requests; server remains authoritative. Reward-claim commands of interest: C2AS_FetchPersonAward / C2AS_FetchGuildAward / C2AS_FetchCampAward (reward claim requests), C2AS_AcceptDoubleReward (double-reward opt-in), C2AS_AcceptTask/SubmitTask/GiveUpTask/RefreshTasks, C2AS_GetExtraSubmitCount.",
+      "formulas": [],
+      "costs": ["C2AS_FetchPersonAward / FetchGuildAward / FetchCampAward: reward-claim request commands (server grants)", "C2AS_AcceptDoubleReward: request to accept a doubled reward", "C2AS_GetExtraSubmitCount / GetCurrentLevelTicket: task-submit quota / entry-ticket queries"],
+      "notes": "Registration handlers: FUN_104f7850/7890/7900/8240 (LAB_104f83c0)/8400/8460/8540/86b0/87f0 (LAB_104f8930)/89b0/8a80 (LAB_104f8b40)/8b60/8c00/9350/93b0/9410 (LAB_104f9470)/(LAB_104f94b0). Registrar helpers FUN_100b62c0 (string build) + FUN_104f9970 (bind) + FUN_10c3d5d0 (free) are stock CryEngine/GFx plumbing."
+    },
+    {
+      "address": "0x104fd9e0",
+      "currentName": "FUN_104fd9e0",
+      "proposedName": "CCatCuisineUI::BuildCatFoodListModel",
+      "purpose": "Builds the client UI data model for the Felyne/cat cuisine (cooking) system. Iterates every cat-food record (count=FUN_104fd5a0, record=FUN_104fd510(i)), applies unlock/eligibility filters, and for each eligible dish emits fields itemID/itemName/itemDesc/costMoney/foodLevel/cookName/cookType/cookLevel/iconPath/isActivity/FreeInBattle plus catFoodUnlock/itemNew flags, then nested arrays 'arrayMaterial' (required ingredients) and 'arrayBuffer' (granted buffs). Also registers sub-callbacks _refreshSlotState/_PlayEatCuisineRequest/_EatCuisineRequest/_PlayCuisineResultRequest/_onGetRoleMoney/_unlockCatFood.",
+      "subsystem": "cat-cuisine-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only: display model of dishes, their money cost, ingredient requirements (owned vs required), and resulting buffs. The eat/cook action is sent to the server via '_EatCuisineRequest'; ingredient-sufficiency shown here is a client-side display convenience, not the authoritative check. Server must re-validate costMoney and material counts on the eat request.",
+      "formulas": [
+        "Per-material owned count: currentCounts = FUN_113f9300(0,itemID,0) + FUN_113f9300(2,itemID,0) + FUN_113f9300(10,itemID,0) — sums the item's quantity across bag containers 0, 2 and 10.",
+        "Cat-food record offsets (int* piVar4, indices are 4-byte words): [0x1d]=iconPath, [0x1e]=costMoney, [0x20]=category/cookType key (matched against iStack_124), [0x21]=cookLevel, [0x22]=foodLevel, [0x23]=cookType, [0x25]=FreeInBattle (low byte), [0x26]=requiredHuntRank (compared to CPlayer::GetHuntRankOrCount), [0x27]=required-unlock id (checked via *(pcVar3+0x2ab0) vtbl+0x60), [0x28]=required id (checked via vtbl+0x46c then FUN_114e0340), [0x29]=activity id (isActivity; checked via *(pcVar3+0x2acc) vtbl+0x3c). Name/desc: piVar4+5=itemName, +6=itemDesc, +7=cookName.",
+        "Material array entry stride = 2 words (8 bytes): piVar12[0]=itemID (requireCounts source item), piVar12[1]=requireCounts (required quantity).",
+        "Eligibility gate: record shown only if ([0x26]==0 || huntRank>=[0x26]) && ([0x27]==0 || unlock-check) && ([0x28]==0 || feature-off || FUN_114e0340 ok) && ([0x29]==0 || activity-check).",
+        "local_f4 uninitialized sentinel = 0xdeadbeaf when variant tag (in_stack_00000010[7] & 0x8f) is not 3/4 (stock ScriptAnyValue plumbing)."
+      ],
+      "costs": ["costMoney = record[0x1e] — currency cost to cook/eat a dish", "requireCounts = material[1] — required quantity of each ingredient item", "foodLevel=record[0x22], cookLevel=record[0x21], cookType=record[0x23] — dish tiering", "requiredHuntRank = record[0x26] — hunter-rank gate"],
+      "notes": "Cross-ref TLV TlvCatCuisineData / TlvCatCuisineState (cat cuisine wire structs). FUN_113f9300(bagId,itemId,0) = per-container item-count query. Variant unpacking (mask 0x8f, tags 3/4/6/10) is stock CryEngine ScriptAnyValue handling."
+    },
+    {
+      "address": "0x1050ed80",
+      "currentName": "FUN_1050ed80",
+      "proposedName": "CEquipEnchantInfo::GetRecordByIndex",
+      "purpose": "InfoManager table accessor: resolves the CEquipEnchantInfo data manager (via GetInfoMgr, else CInfoManager::FindByName('CEquipEnchantInfo'), else lazy-init fallback DAT_123be480), then returns the enchant record entry for a given index/id using a paged 2D-array lookup.",
+      "subsystem": "enchant-data",
+      "confidence": "high",
+      "serverRelevance": "validation/data: read-only static config-table lookup used by both sides to resolve an equip-enchant definition by id. Server should own the same table to validate enchant references and costs.",
+      "formulas": [
+        "Manager struct offsets: +0x20 = pointer-array of row chunks, +0x24 = total entry count, +0x28 = entries-per-chunk (page size), +0x30 = base-id offset.",
+        "Lookup: i = param_1 - mgr[+0x30]; guard: param_1!=-1 && (param_1!=0 || mgr[+0x30]==0) && mgr[+0x28]!=0 && 0<=i<mgr[+0x24]; row = mgr[+0x20][ i / mgr[+0x28] ]; if row!=0 return row[ i % mgr[+0x28] ]; else 0.",
+        "Returns 0 (not found) on any guard failure."
+      ],
+      "costs": [],
+      "notes": "Identical stock InfoManager paged-getter pattern shared with FUN_10520930 (soulstone). Lazy-init path sets DAT_123be47c|1 and calls FUN_1051d1d0 (table loader)."
+    },
+    {
+      "address": "0x1050f390",
+      "currentName": "FUN_1050f390",
+      "proposedName": "CPetPanelUI::RegisterFlashCallbacks",
+      "purpose": "One-time registration of the pet-management panel's Flash<->C++ callback table (~55 named handlers) and console vars. Registers InitModel/InitSkillModel/InitMyPetListModel, pet name/declaration change, pet skills (flute/normal/temp/talent/buff levelup), OnFire/OnFollow/OnGetBack/OnPack, equip put-on/take-off, GetEnchantInfo, onQuickBuy, GetPetDetailInfo, GetSuiteInfo, SkillLearnNew, CheckSkillBookInfo, checkbox-message config, etc. Caches 'gfx_draw_only'/'gfx_draw' cvars into param_1[100]/[0x65].",
+      "subsystem": "pet-ui",
+      "confidence": "high",
+      "serverRelevance": "client-only: UI callback registration. Notable economy-adjacent commands registered here are client requests (onQuickBuy = quick-purchase, TakeoffEquip/OnPetEquipClick/PetSwapInventoryItem = equipment moves, GetEnchantInfo, BuffLevelup/TalentLevelup/OnPetSkillLevelUp/SkillLearnNew = spend/upgrade requests); server stays authoritative on the corresponding requests.",
+      "formulas": [
+        "DAT_123bcde4 guarded with bit 0x40 (>>6 &1) release pattern; set to 1 after first init (run-once flag).",
+        "cvar cache: param_1[100]=GetCVar('gfx_draw_only'), param_1[0x65]=GetCVar('gfx_draw') via *(DAT_1202e818+0x2c) vtbl+0x54."
+      ],
+      "costs": ["onQuickBuy — pet-panel quick-buy request", "BuffLevelup / TalentLevelup / OnPetSkillLevelUp / SkillLearnNew / UnlockPetSkill — pet skill spend/upgrade request commands"],
+      "notes": "Handlers FUN_10511480.. up through FUN_10519500; tail installs param-taking bindings (FUN_10512150/105122d0/10512310/10512480/DAT_10512570/10512580/10512730/105127a0/105127d0/10512810/10512a20/105129d0/10512b10/10519640) via the FUN_10d17440/FUN_10d17870 gate. FUN_100b62c0/FUN_10519910/FUN_104d0ee0/FUN_10c3d5d0 are stock GFx string+bind+free plumbing."
+    },
+    {
+      "address": "0x105137f0",
+      "currentName": "FUN_105137f0",
+      "proposedName": "CPetPanelUI::BuildEquippedSkillLists",
+      "purpose": "Builds the pet skill list UI model. Creates arrays _PetEquippedInitiativeSkills/_PetEquippedPassiveSkills/_PetEquippedAssistantSkills/_PetEquippedTemporarySkills, _SelfTalentSkill, _SelfBuff, plus PetSkillItemVO entries. For each pet skill (from CPetSkillInfo::BuildSkillDetailList) emits strSkillName/SkillIcon/skilllevel/SkillID/skilltype/skillPoint/skilleffect/quality/aptitude/intimate/curpercent/maxpercent/learntime/bCanLevelUp/bAdvanced/bFixed/nCurSkillLv/nMaxSkillLv and routes each into a list by skilltype.",
+      "subsystem": "pet-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only: read-only display of pet skill state; no mutation. Max-level (nMaxSkillLv) is queried from a pet object vtbl (authoritative source elsewhere).",
+      "formulas": [
+        "SetRequireItemId seed from FUN_116a6a70()+0xf8.",
+        "Skill VO (undefined4* puVar9, stride 0xf words = 60 bytes): [1]=SkillIcon ptr, [2]=skilllevel/nCurSkillLv, [3]=SkillID, [4]=skilltype, [5]=curpercent, [6]=maxpercent, [7]=learntime, [8]=skillPoint, [0xb]=quality, [0xc]=aptitude, [0xd]=field DAT_11dbfae0, [10]=intimate.",
+        "List routing by skilltype=[4]: type7 -> passive list (local_150), type6 -> initiative (local_d0), type8 -> assistant (local_b8), type9 -> sets DAT_11dbfae0=1 and routes to assistant; else skip (LAB_10513f85). Temporary skills appended to local_118.",
+        "bCanLevelUp = CPetSkillInfo::HasNextLevelSkillInList(...); nMaxSkillLv = pet vtbl+0xb8(SkillID); bFixed = CPetSkillInfo::ExistsByIdInAltRegistry(record+0x24); bAdvanced = *(record+0x54).",
+        "Temporary-skill record offsets (iVar3): +0x10=SkillID, +0x14=skilllevel, +0x40=SkillIcon, +0x54=bAdvanced, +0x58=skilltype, +0x64=skillPoint, +0x68=intimate, +0x6c=aptitude, +0x70=quality."
+      ],
+      "costs": ["skillPoint = VO[8] / record+0x64 — skill point cost/value displayed", "intimate/aptitude/quality — pet skill quality metrics"],
+      "notes": "calls CPetSkillInfo::BuildSkillDetailList, CPetStarInfo::FindByKey3, CPetSkillInfo::HasNextLevelSkillInList, CPetSkillInfo::ExistsByIdInAltRegistry, memcpy. DAT_123bcdb0/DAT_123bcdb8 = GFx UI value provider."
+    },
+    {
+      "address": "0x10517530",
+      "currentName": "FUN_10517530",
+      "proposedName": "CPetPanelUI::OnGetEnchantInfo",
+      "purpose": "'GetEnchantInfo' Flash callback handler (param_6==4 path). Resolves the currently selected item's enchant id, looks up the CEquipEnchantInfo record via FUN_1050ed80, and writes the enchant description string 'm_strEnchantDesc' back to the UI (empty string DAT_11d9d32b if no record).",
+      "subsystem": "enchant-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only: read-only enchant-description display. No currency/item mutation.",
+      "formulas": [
+        "Guard: param_6==4 && player-model manager present (*(DAT_1202e818+0xd0)+0x90 vtbl+0xb4) with field +0x260e0 != 0 && *(param_1+0x30)!=0.",
+        "Variant unpack: uVar5 = *(param_5+8) when (*(param_5+4)&0x8f) in {3,4} else 0xdeadbeaf; iVar1 = *(param_5+0x50) when (*(param_5+0x4c)&0x8f) in {3,4} else -0x21524151 (=0xDEADBEAF sentinel).",
+        "Item resolve: if iVar1==6 uVar5 = FUN_112f5b90(uVar5, *(DAT_123bb978+0x34)) then FUN_113f9bb0(6,uVar5); else FUN_113f9bb0(iVar1,uVar5). enchantId = item vtbl+0x3c(); record = FUN_1050ed80(enchantId); desc from FUN_100e5b40 -> +0x14."
+      ],
+      "costs": [],
+      "notes": "FUN_104f42b0 = variant/arg cleanup, FUN_104d7c10 = arg release, FUN_104d1670 = UI setString. Depends on FUN_1050ed80 (enchant table)."
+    },
+    {
+      "address": "0x10520930",
+      "currentName": "FUN_10520930",
+      "proposedName": "CSoulStoneLevelUpInfo::GetRecordByIndex",
+      "purpose": "InfoManager table accessor for soul-stone level-up config: resolves the CSoulStoneLevelUpInfo manager (GetManager, else CInfoManager::FindByName('CSoulStoneLevelUpInfo'), else lazy-init fallback DAT_123c7314) and returns the level-up record for a given index/id via the same paged 2D-array lookup as the enchant table.",
+      "subsystem": "soulstone-data",
+      "confidence": "high",
+      "serverRelevance": "validation/data: read-only static config-table lookup for soul-stone upgrade definitions. Server should own the same table to validate soul-stone level-up costs/success.",
+      "formulas": [
+        "Manager offsets: +0x20 row-chunk array, +0x24 total count, +0x28 page size, +0x30 base id.",
+        "i = param_1 - mgr[+0x30]; guard param_1!=-1 && (param_1!=0 || mgr[+0x30]==0) && mgr[+0x28]!=0 && 0<=i<mgr[+0x24]; return mgr[+0x20][i/mgr[+0x28]][i%mgr[+0x28]] (or 0)."
+      ],
+      "costs": [],
+      "notes": "Byte-identical getter pattern to FUN_1050ed80. Lazy-init sets DAT_123c7310|1 and calls FUN_1052a410 (table loader). Cross-ref soul-beast/soul-stone TLVs (TlvSoulBeastSystemData etc.)."
+    },
+    {
+      "address": "0x1052dd30",
+      "currentName": "FUN_1052dd30",
+      "proposedName": "CEquipForgeUI::OnPanelActivate",
+      "purpose": "Equipment forge/enhance panel activation handler (Flash callback, param_6 = arg-count variant). Registers the dropdown-refresh callbacks (_refreshEquipRankupDropDownData / _refreshEquipUpgradeDropDownData / _refreshEquipBreakLevelDropDownData / _refreshEquipWakeLevelDropDownData / _updateEquipShowContent), sets itemColumn/itemGrid/selectItemID from state, then drives a page state machine selecting which forge sub-mode (rankup / upgrade / enforce-break / awaken) is shown based on active feature/tab flags.",
+      "subsystem": "forge-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only: UI panel state/selection management for the equipment forge (rankup, upgrade, enforce-break, awaken/wake). No currency/item mutation here; each forge action is a separate server request.",
+      "formulas": [
+        "Panel state offsets on param_1: +0x438 = mode (computed 1 + (checkbox bool)), +0x43c = selected equip handle (FUN_1025b060), +0x48c = active page id, +0x468+page*4 = per-page sub-model object, +0x490 = widgetIDOpen (reset to 0xffffffff), +0x494 itemColumn, +0x498 itemGrid, +0x49c selectItemID, +0x4d0..0x4e0 = deque cleanup of pending entries.",
+        "Page selection via FUN_1050a110(featureId): 0x7c set -> ; 0x8b -> page=7,mode=3,+0x464=1 (rankup-with-selection); 0xc1 -> upgrade branch; 0xd1 -> page=6; 0x1d/0xfb -> page=7 (+0x34 flag=0); default mode->page: mode1->page0, mode2->page2. Page objects built via FUN_1052db00(pageId).",
+        "Per-page +0x34 = enable flag, +0x5c = selected equip handle, +0x5a = bool from FUN_1050a110(0xc1)."
+      ],
+      "costs": [],
+      "notes": "FUN_1050a110 = feature/tab-open predicate by id. FUN_1052db00 = allocate page sub-model. FUN_1052d8f0/FUN_1052e650 = refresh helpers. Variant tag mask 0x8f (==2 bool) stock plumbing."
+    },
+    {
+      "address": "0x105319d0",
+      "currentName": "FUN_105319d0",
+      "proposedName": "CEquipForgeUI::RefreshEnforceBreakDropDown",
+      "purpose": "'_refreshEquipBreakLevelDropDownData' handler: builds the equipment enforce/break-level dropdown model for the selected equipment. Emits equipName/itemID/breakLevel/enforceLevel/enforceruleid for the current equip, then iterates all reachable break levels (via CEquipEnforceBreak manager) emitting equipName/itemID/breakLevel per option.",
+      "subsystem": "forge-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only: read-only display of an equip's enforce/break progression options. Actual break/enforce operations are separate server requests; server owns enforceruleid and break-level validation.",
+      "formulas": [
+        "Arg variant unpack from in_stack_00000010: +0x04 tag (string id, wire 6) -> equipName (else DAT_11d9d32b), +0x18 obj ptr, +0x34 tag {3,4} -> local_98 = *(+0x38) else -0x21524151 sentinel, +0x60 obj ptr, +0x64 tag.",
+        "Item id: FUN_1166e250()? FUN_1166dc70() : FUN_11669730(); breakLevel = FUN_1166c400(); enforceLevel = FUN_1166c160(); enforceruleid = FUN_1166c190().",
+        "Iteration: base = FUN_1052bdd0(itemId); loop over levels list via CEquipEnforceBreak::GetManagers_116c4a30 with cursor piStack_94 = local_98+0x14 until reaching FUN_11669730() terminator; each iteration emits itemID=unaff_EBX, breakLevel=current."
+      ],
+      "costs": ["breakLevel / enforceLevel — equipment enforce (强化) and break-limit progression values", "enforceruleid — id of the enforce rule table (governs cost/success on server)"],
+      "notes": "calls CPet::SetName (string setter reuse), CEquipEnforceBreak::GetManagers_116c4a30. FUN_1166c160/c190/c400 = enforce-level / rule-id / break-level getters on the equip object."
+    },
+    {
+      "address": "0x105ac060",
+      "currentName": "FUN_105ac060",
+      "proposedName": "CGameFlashBridge::DispatchFSCommand",
+      "purpose": "Central client-side FSCommand / console-string dispatcher (~150 cases). Reads command name = arg[1], then case-matches via _stricmp and parses trailing string args with strtol/strtod/strtoul before forwarding to a dedicated request/notify handler. Routes gameplay + economy commands: EnterInstance, GMCommand, LeaveInstanceReq, AddCraft, BeginCraft, BeginLoot, RequestPaidBox, AcceptEntrustTask/GiveUpEntrustTask/EntrustSelHuntBox (commissions), OpenChargeInternalUrl (cash-shop top-up), VipLevelNotify, OnResponseActivityResponseAcceptTask/PickupItem, S2CUpdateOperationItemCountsRefresh[Data], plus many UI/tutorial/role/instance messages.",
+      "subsystem": "flash-command-router",
+      "confidence": "high",
+      "serverRelevance": "client-only: string-command routing layer. It only parses args and calls the corresponding request/notify function; it performs NO cost or ownership validation itself. Every economy command it dispatches (crafting begin/add, loot, paid box, commission accept, charge/top-up, activity task accept/pickup) must be validated authoritatively by the target server request handler — this router is not a trust boundary.",
+      "formulas": [
+        "Arg access: count = (*param_1)[1]() ; arg[i] = (*param_1)[2](i). Commands guard on count (e.g. '2 < count' before reading arg[2]).",
+        "Arg typing per command via strtol(base 0) for ints/bools, strtod for floats/doubles, strtoul for unsigned; bools stored as (strtol(..)!=0).",
+        "EnterInstance -> FUN_105dfdd0(instanceId,flag); BeginCraft -> FUN_105e0020(recipeId,count); AddCraft -> FUN_105dffe0(id); BeginLoot -> FUN_105e0060(id); RequestPaidBox -> FUN_105e0b00(id); AcceptEntrustTask -> FUN_105e0940; GiveUpEntrustTask -> FUN_105e0980; EntrustSelHuntBox -> FUN_105e09c0.",
+        "String args copied via FUN_100ea440 / FUN_105fe150 into fixed buffers (local_523 0x400, local_324 0x100, local_224 0x100)."
+      ],
+      "costs": ["AddCraft/BeginCraft — crafting/forge start commands (recipe id + count args)", "BeginLoot — loot pickup command", "RequestPaidBox — paid loot-box / gacha open request", "AcceptEntrustTask/GiveUpEntrustTask/EntrustSelHuntBox — commission (委托) task reward flow", "OpenChargeInternalUrl — opens cash-shop top-up URL", "VipLevelNotify — VIP tier notification", "OnResponseActivityResponseAcceptTask/PickupItem, S2CUpdateOperationItemCountsRefresh[Data] — operation-activity item/reward updates"],
+      "notes": "Handlers FUN_105dfdd0..FUN_105e0c.. are the per-command request/notify shims. _stricmp/strtol/strtod/strtoul/memset stock CRT. Function is 15376 bytes; only economy-relevant cases enumerated. buffer local_523=1024B, local_324/local_224=256B each."
+    }
+  ]
+}

@@ -1,0 +1,343 @@
+{
+  "batchIndex": 11,
+  "classes": [
+    {
+      "className": "CGuildRandCommodityInfo",
+      "category": "economy",
+      "purpose": "Config record for a guild-shop randomized commodity (item sold by the guild store, gated by a level/threshold). Class holds no printer/reader in this bundle; only its CInfoManager accessors and consumer loops were recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "111ef5b0", "currentName": "CGuildRandCommodityInfo::GetManagers", "proposedName": "CGuildRandCommodityInfo::GetInfoManager", "purpose": "Lazy-registers and returns the CInfoManager singleton for CGuildRandCommodityInfo (registers StcMbrNameSvr name, falls back to a static empty manager)."},
+        {"address": "111f30b0", "currentName": "CGuildRandCommodityInfo::GetManagers_111f30b0", "proposedName": "CGuildRandCommodityInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager pointer when arg==0, else 0."},
+        {"address": "111f1f60", "currentName": "CGuildRandCommodityInfo::GetManagers_111f1f60", "proposedName": "CGuildRandCommodityInfo::LookupCommoditiesByIdList", "purpose": "Given an id array (param_2, clamped to 30 entries), looks up each commodity by id in the manager's paged id->object map (mgr+0x20 pages / +0x24 cap / +0x28 pageSize / +0x30 minId) and processes matches."},
+        {"address": "11965990", "currentName": "CGuildRandCommodityInfo::GetManagers_11965990", "proposedName": "CGuildRandCommodityInfo::PrecacheCommodityItems", "purpose": "Iterates every commodity in the flat vector (mgr+0x14..+0x18) and calls CItemBaseInfo helper (11a45200) per entry, resolving/precaching the referenced item."},
+        {"address": "11a06580", "currentName": "CGuildRandCommodityInfo::GetManagers_11a06580", "proposedName": "CGuildRandCommodityInfo::CollectCommoditiesByLevel", "purpose": "Iterates all commodities; collects into an output vector (this+0x1c) every entry whose threshold field (Info+0x14) <= the given level (this+0x10). Filters guild-shop stock by player/guild level."}
+      ],
+      "fields": [
+        {"name": "levelThreshold", "type": "int32", "offset": "0x14", "source": "inferred", "note": "entry[5]; unlock level compared <= player/guild level in 11a06580"}
+      ],
+      "notes": "Manager container convention shared across this whole batch: flat-vector style uses mgr+0x14=begin, mgr+0x18=end, count=(end-begin)>>2, elem=*(begin+i*4); paged id-map style uses mgr+0x20=page array, +0x24=capacity, +0x28=pageSize, +0x30=minId, index=(id-minId). vtable+0x28=GetCount, vtable+0x18=GetId. All method names in source are the bogus 'GetManagers' label."
+    },
+    {
+      "className": "CAchieveGroupInfo",
+      "category": "activity",
+      "purpose": "Config record for an achievement group (a category grouping individual achievements). Only CInfoManager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109e3ad0", "currentName": "CAchieveGroupInfo::GetManagers", "proposedName": "CAchieveGroupInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CAchieveGroupInfo."},
+        {"address": "119c8840", "currentName": "CAchieveGroupInfo::GetManagers_119c8840", "proposedName": "CAchieveGroupInfo::InitAllGroups", "purpose": "Iterates every achievement group in the manager and runs a per-group init/link (FUN_11a81c20)."},
+        {"address": "119c8990", "currentName": "CAchieveGroupInfo::GetManagers_119c8990", "proposedName": "CAchieveGroupInfo::LinkAchievesToGroups", "purpose": "Iterates every group and calls CAchieveInfo iterator (11a81ac0) to attach achievements to each group."},
+        {"address": "11a814e0", "currentName": "CAchieveGroupInfo::GetManagers_11a814e0", "proposedName": "CAchieveGroupInfo::CollectGroupsByKey", "purpose": "Iterates the flat group vector; collects into output vector (param+0x1c) every group whose key field (Info+0x20, entry[8]) equals the given key (param+0x10)."}
+      ],
+      "fields": [
+        {"name": "groupKey", "type": "int32", "offset": "0x20", "source": "inferred", "note": "entry[8]; match key in 11a814e0"}
+      ],
+      "notes": "Address 11a814e0 appears twice (c0 and c3 decompiler passes of the same function)."
+    },
+    {
+      "className": "CAchieveInfo",
+      "category": "activity",
+      "purpose": "Config record for a single achievement. Only CInfoManager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108bad40", "currentName": "CAchieveInfo::GetManagers", "proposedName": "CAchieveInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CAchieveInfo."},
+        {"address": "119c9230", "currentName": "CAchieveInfo::GetManagers_119c9230", "proposedName": "CAchieveInfo::InitAllAchieves", "purpose": "Iterates all achievements, running per-achievement init (FUN_11a82690)."},
+        {"address": "119c9380", "currentName": "CAchieveInfo::GetManagers_119c9380", "proposedName": "CAchieveInfo::PrecacheAchieveItems", "purpose": "Iterates all achievements calling CItemBaseInfo helper (11a82370) per entry (reward-item resolve/precache), then a finalizer FUN_11a82d00."},
+        {"address": "11a81ac0", "currentName": "CAchieveInfo::GetManagers_11a81ac0", "proposedName": "CAchieveInfo::CollectAchievesByGroup", "purpose": "Iterates the flat achievement vector; collects into output vector (param+0x30) every achievement whose group id (Info+0x1c, entry[7]) equals the given key (param+0x10)."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "entry[7]; group-match key in 11a81ac0"}
+      ],
+      "notes": "Address 11a81ac0 appears twice (c0 and c3 passes)."
+    },
+    {
+      "className": "CGuildMatchInfo",
+      "category": "social",
+      "purpose": "Config record for a guild-match / guild-ranking bracket, selected by a score/value threshold. Only manager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10943ab0", "currentName": "CGuildMatchInfo::GetManagers", "proposedName": "CGuildMatchInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CGuildMatchInfo."},
+        {"address": "1171c6b0", "currentName": "CGuildMatchInfo::GetManagers_1171c6b0", "proposedName": "CGuildMatchInfo::FindBracketByValue", "purpose": "Iterates all match brackets; for each computes a 64-bit threshold (FUN_10a19e00) and returns the id of the first bracket whose threshold exceeds the given 64-bit value (param). If none matched, returns the first bracket. Bracket selection by guild score."},
+        {"address": "1196ccb0", "currentName": "CGuildMatchInfo::GetManagers_1196ccb0", "proposedName": "CGuildMatchInfo::BuildBracketChain", "purpose": "Iterates all brackets, invoking per-bracket setup (FUN_1171dd00) and linking each bracket to the next via a next-pointer field (entry+0x234)."}
+      ],
+      "fields": [
+        {"name": "nextBracketId", "type": "int32", "offset": "0x234", "source": "inferred", "note": "written in 1196ccb0 to chain brackets"}
+      ],
+      "notes": "Threshold value is 64-bit (compared with CONCAT44(param_2,param_1))."
+    },
+    {
+      "className": "CEquipPlanInfo",
+      "category": "item",
+      "purpose": "Config record for a saved equipment plan/loadout (id + name + equipment list). Consumer method rebuilds a red-black map keyed by planId. Maps to the runtime save struct TlvEquipPlan (planId/name/equipCnt/equipList).",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108d18e0", "currentName": "CEquipPlanInfo::GetManagers", "proposedName": "CEquipPlanInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CEquipPlanInfo."},
+        {"address": "11592ce0", "currentName": "CEquipPlanInfo::GetManagers_11592ce0", "proposedName": "CEquipPlanInfo::RebuildPlanMap", "purpose": "Clears an existing std::map (this+3 tree header) then iterates every plan in the manager; for plans not yet present, inserts keyed by planId (Info+0x10) copying the plan name string (Info+0x14) when the enabled flag (Info+0x18) is set. Uses 'mh_sharemem_addrinfo' shared memory."}
+      ],
+      "fields": [
+        {"name": "planId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "map key (*local_334); matches TlvEquipPlan.planId"},
+        {"name": "name", "type": "char*", "offset": "0x14", "source": "inferred", "note": "plan name string copied into map; matches TlvEquipPlan.name"},
+        {"name": "enabledFlag", "type": "bool", "offset": "0x18", "source": "inferred", "note": "byte gate at iVar11+0x18 before insertion"}
+      ],
+      "relatedTlv": ["TlvEquipPlan", "TlvEquipPlanList"],
+      "notes": "Ordered-map nodes: node+2/+3 = left/right children, node+4 = key. TLV is the network/save form; this Info is the config form."
+    },
+    {
+      "className": "CGuildTaskGroupInfo",
+      "category": "social",
+      "purpose": "Config record for a guild-task group (set of guild tasks/quests). Only manager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "111ef650", "currentName": "CGuildTaskGroupInfo::GetManagers", "proposedName": "CGuildTaskGroupInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CGuildTaskGroupInfo."},
+        {"address": "111f3100", "currentName": "CGuildTaskGroupInfo::GetManagers_111f3100", "proposedName": "CGuildTaskGroupInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "117d6960", "currentName": "CGuildTaskGroupInfo::GetManagers_117d6960", "proposedName": "CGuildTaskGroupInfo::FindTaskGroup", "purpose": "Iterates an id list (this+0x18..+0x1c); resolves each id via the paged manager map, and on the first entry passing predicate FUN_118a8e70(param_2) writes it to *param_3 and returns true."},
+        {"address": "117d6dc0", "currentName": "CGuildTaskGroupInfo::GetManagers_117d6dc0", "proposedName": "CGuildTaskGroupInfo::CollectTaskGroups", "purpose": "Iterates an id list (this+0x18..+0x1c); resolves each via the manager map and appends resolved groups to an output vector (this+0x44)."},
+        {"address": "1190c520", "currentName": "CGuildTaskGroupInfo::GetManagers_1190c520", "proposedName": "CGuildTaskGroupInfo::InitAllGroups", "purpose": "Iterates every group in the manager and runs CGuildTaskInfo per-group init (118a9020)."}
+      ],
+      "confidence_note": ""
+    },
+    {
+      "className": "CStarStoneLevelAttrInfo",
+      "category": "item",
+      "purpose": "Config record mapping star-stone level to attribute bonuses (star stones are socketable/decoration attributes). Consumer applies level-based attributes; only manager accessors + one applier recovered.",
+      "confidence": "low",
+      "methods": [
+        {"address": "115a3430", "currentName": "CStarStoneLevelAttrInfo::GetManagers", "proposedName": "CStarStoneLevelAttrInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CStarStoneLevelAttrInfo."},
+        {"address": "115a5c10", "currentName": "CStarStoneLevelAttrInfo::GetManagers_115a5c10", "proposedName": "CStarStoneLevelAttrInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "115a7330", "currentName": "CStarStoneLevelAttrInfo::GetManagers_115a7330", "proposedName": "CStarStoneLevelAttrInfo::ApplyStarStoneLevelAttrs", "purpose": "For each of 5 attribute slots (0..4, gated by FUN_1139a650), performs a BST lookup on this+0x30 (node key at +0x10) and touches the manager; then adjusts a value at this+0x44 (subtracts FUN_115a5dc0 result) and applies the attribute to the target entity via a vtable call with constant 0x2d."}
+      ],
+      "fields": [
+        {"name": "attrTree", "type": "rbtree", "offset": "0x30", "source": "inferred", "note": "per-slot attribute tree searched by slot index 0..4"},
+        {"name": "value", "type": "int32", "offset": "0x44", "source": "inferred", "note": "modified by subtracting FUN_115a5dc0"}
+      ],
+      "constants": ["AttrSlots=5", "ApplyOpCode=0x2d"],
+      "notes": "Field semantics low-confidence; the DebugFormat/reader for this class is not in the bundle."
+    },
+    {
+      "className": "CHRLevelInfo",
+      "category": "activity",
+      "purpose": "Config record for a Hunter-Rank (HR) level: the requirements/thresholds to advance to a given HR level. Consumer computes HR level-ups. Only manager accessors + one evaluator recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11393d80", "currentName": "CHRLevelInfo::GetManagers", "proposedName": "CHRLevelInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CHRLevelInfo."},
+        {"address": "11399350", "currentName": "CHRLevelInfo::GetManagers_11399350", "proposedName": "CHRLevelInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "114e3fc0", "currentName": "CHRLevelInfo::GetManagers_114e3fc0", "proposedName": "CHRLevelInfo::EvaluateHRLevelUp", "purpose": "Reads the HR cap from CAttributeInfo id 0x13d (attr+0xd0), then walks HR levels upward from current+1 via the paged manager map; each candidate requires HRLevelInfo+0x14 (>0 => required exp/points must be met) and HRLevelInfo+0x18 (a prerequisite/condition id validated by FUN_114cdd70). Advances HR level while conditions hold and triggers level-up."},
+        {"address": "11914c60", "currentName": "CHRLevelInfo::GetManagers_11914c60", "proposedName": "CHRLevelInfo::InitAllLevels", "purpose": "Iterates every HR level and runs per-level init (FUN_11a08460)."},
+        {"address": "11914db0", "currentName": "CHRLevelInfo::GetManagers_11914db0", "proposedName": "CHRLevelInfo::LinkMHLevels", "purpose": "Iterates every HR level and runs CMHLevelInfo per-level init (11a08370)."}
+      ],
+      "fields": [
+        {"name": "requiredValue", "type": "int32", "offset": "0x14", "source": "inferred", "note": "required exp/points to reach this HR level (checked >0 then compared with player value)"},
+        {"name": "prerequisiteId", "type": "int32", "offset": "0x18", "source": "inferred", "note": "condition/quest id validated by FUN_114cdd70"}
+      ],
+      "formulas": ["HR cap = CAttributeInfo(id=0x13d).field_0xd0; level-up loop advances from current+1 while requiredValue met and prerequisiteId satisfied, not exceeding cap"],
+      "constants": ["HRCapAttributeId=0x13d"]
+    },
+    {
+      "className": "CSpoorInfo",
+      "category": "activity",
+      "purpose": "Config record for a 'spoor' (monster track/footprint investigation entry) identified by a (key1,key2) pair. Only manager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109475d0", "currentName": "CSpoorInfo::GetManagers", "proposedName": "CSpoorInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CSpoorInfo."},
+        {"address": "11629ec0", "currentName": "CSpoorInfo::GetManagers_11629ec0", "proposedName": "CSpoorInfo::FindSpoorByKeys", "purpose": "Iterates the flat spoor vector and returns the entry whose Info+0x18 == param_1 and Info+0x1c == param_2 (lookup by a two-part key, e.g. type + subtype)."},
+        {"address": "1197a780", "currentName": "CSpoorInfo::GetManagers_1197a780", "proposedName": "CSpoorInfo::InitAllSpoors", "purpose": "Iterates all spoors running per-item init (FUN_11a50a80)."},
+        {"address": "1197abb0", "currentName": "CSpoorInfo::GetManagers_1197abb0", "proposedName": "CSpoorInfo::InitAllSpoors2", "purpose": "Iterates all spoors running a second per-item init variant (FUN_11a50a60)."},
+        {"address": "11a51150", "currentName": "CSpoorInfo::GetManagers_11a51150", "proposedName": "CSpoorInfo::CollectSpoorsByGroup", "purpose": "Iterates the flat vector; collects into output vector (param+0x20) every spoor whose group field (Info+0x14, entry[5]) == key (param+0x10) AND enabled flag (Info+0x18, entry[6]) == 1."}
+      ],
+      "fields": [
+        {"name": "key1", "type": "int32", "offset": "0x18", "source": "inferred", "note": "first lookup key in 11629ec0; also the enabled flag position (entry[6]) in 11a51150"},
+        {"name": "key2", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "second lookup key in 11629ec0"},
+        {"name": "groupKey", "type": "int32", "offset": "0x14", "source": "inferred", "note": "entry[5]; group-match key in 11a51150"}
+      ],
+      "notes": "'Spoor' = animal track; likely the hunt-investigation/tracking feature."
+    },
+    {
+      "className": "CTournamentsInfo",
+      "category": "activity",
+      "purpose": "Config record for a tournament/arena event (scheduled competitions with reward lists). Only manager accessors and consumer loops recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11975f30", "currentName": "CTournamentsInfo::GetManagers", "proposedName": "CTournamentsInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CTournamentsInfo."},
+        {"address": "11977770", "currentName": "CTournamentsInfo::GetManagers_11977770", "proposedName": "CTournamentsInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "11977c50", "currentName": "CTournamentsInfo::GetManagers_11977c50", "proposedName": "CTournamentsInfo::LinkTournamentSchedule", "purpose": "Iterates tournaments in order; for each adjacent pair copies the current tournament's end value (entry+0x2c via FUN_10a19950) into the next tournament's start value (entry+0x14), chaining the schedule."},
+        {"address": "11a4f360", "currentName": "CTournamentsInfo::GetManagers_11a4f360", "proposedName": "CTournamentsInfo::PrecacheTournamentRewards", "purpose": "Walks a nested reward structure (param+0x14 list of lists) and touches the CItemBaseInfo manager per reward id to resolve/precache tournament reward items."}
+      ],
+      "fields": [
+        {"name": "startTime", "type": "int64?", "offset": "0x14", "source": "inferred", "note": "next.start set from prev.end in 11977c50"},
+        {"name": "endTime", "type": "int64?", "offset": "0x2c", "source": "inferred", "note": "source of chained schedule value"}
+      ]
+    },
+    {
+      "className": "CLevelEntrustNpcInfo",
+      "category": "quest",
+      "purpose": "Config record for a level/stage's entrust (commission) NPC — the NPC that hands out entrusted quests for a level. Only manager accessors + consumers recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "104d81c0", "currentName": "CLevelEntrustNpcInfo::GetManagers", "proposedName": "CLevelEntrustNpcInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CLevelEntrustNpcInfo."},
+        {"address": "1173f7c0", "currentName": "CLevelEntrustNpcInfo::GetManagers_1173f7c0", "proposedName": "CLevelEntrustNpcInfo::ResolveEntrustNpcForLevel", "purpose": "Looks up a level group in CLevelIDGroupInfo by id (this+0x10), initializes group data (offsets +0x14/+0x20), then scans CLevelEntrustNpcInfo entries and, on the first matching predicate FUN_118a6520(this+0x10), stores the matched NPC's id (vtable+0x18) to this+0x98."},
+        {"address": "118f2f30", "currentName": "CLevelEntrustNpcInfo::GetManagers_118f2f30", "proposedName": "CLevelEntrustNpcInfo::InitEntrustSubGroups", "purpose": "Iterates every entrust-NPC entry; for each, iterates its sub-list (entry+0x18..+0x1c) and touches the CLevelEnSubGroupInfo manager to resolve entrust sub-groups."}
+      ],
+      "fields": [
+        {"name": "levelId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "used as level-group lookup key"},
+        {"name": "resolvedNpcId", "type": "int32", "offset": "0x98", "source": "inferred", "note": "output slot written in 1173f7c0"}
+      ]
+    },
+    {
+      "className": "CTaskChapterInfo",
+      "category": "quest",
+      "purpose": "Config record for a task/quest chapter (groups task series into chapters). Only manager accessors + consumers recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "107eb8e0", "currentName": "CTaskChapterInfo::GetManagers", "proposedName": "CTaskChapterInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CTaskChapterInfo."},
+        {"address": "117c1af0", "currentName": "CTaskChapterInfo::GetManagers_117c1af0", "proposedName": "CTaskChapterInfo::ResolveChapterAndSeries", "purpose": "Iterates chapters and, using CTaskSeriesInfo predicate (118a87d0) on the task at this+0x34, sets the owning chapter into this+0x30. If no series is set, resolves a CTaskSeriesInfo by id (*(this+0x2c)+0x18) via the paged map and stores it to this+0x34."},
+        {"address": "119058d0", "currentName": "CTaskChapterInfo::GetManagers_119058d0", "proposedName": "CTaskChapterInfo::InitAllChapters", "purpose": "Iterates every chapter and runs per-chapter CTaskSeriesInfo init (FUN_118a8af0)."},
+        {"address": "11905a20", "currentName": "CTaskChapterInfo::GetManagers_11905a20", "proposedName": "CTaskChapterInfo::LinkTaskSeries", "purpose": "Iterates every chapter and runs a CTaskSeriesInfo linker variant (118a8980)."}
+      ],
+      "fields": [
+        {"name": "chapterPtr", "type": "ptr", "offset": "0x30", "source": "inferred", "note": "owning chapter set in 117c1af0"},
+        {"name": "seriesId", "type": "int32", "offset": "0x34", "source": "inferred", "note": "resolved task-series id"},
+        {"name": "taskPtr", "type": "ptr", "offset": "0x2c", "source": "inferred", "note": "current task whose +0x18 supplies series id"}
+      ]
+    },
+    {
+      "className": "CGuideBookChapterInfo",
+      "category": "activity",
+      "purpose": "Config record for a guide-book (hunter handbook) chapter, holding chapter actions and linked action infos. Consumer builds chapter/action state from a source record. Runtime/save counterpart is TlvGuideBookData.",
+      "confidence": "low",
+      "methods": [
+        {"address": "1146bd30", "currentName": "CGuideBookChapterInfo::GetManagers", "proposedName": "CGuideBookChapterInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CGuideBookChapterInfo."},
+        {"address": "1146e960", "currentName": "CGuideBookChapterInfo::GetManagers_1146e960", "proposedName": "CGuideBookChapterInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "1146ef30", "currentName": "CGuideBookChapterInfo::GetManagers_1146ef30", "proposedName": "CGuideBookChapterInfo::BuildChapterActions", "purpose": "Populates a guide-book chapter object from a source record (param_2): sets this+4 (autoOpen flag from param_2[0x1b]) and this+8 (chapter count from param_2 byte 0x6d); iterates action entries (param_2+1 stride 0xd) calling CGuideBookActionInfo init; iterates this+0x10..+0x14 action structs (stride 0x3c, gated by flag byte +0xe) resolving each chapter by id in the manager map; finally iterates param_2+0x11a (stride 0xc, count at +0x112) resolving CGuideBookActionInfo ids and writing back action links (+0x20)."}
+      ],
+      "fields": [
+        {"name": "autoOpenFlag", "type": "bool", "offset": "0x04", "source": "inferred", "note": "from param_2[0x1b]; cf. TlvGuideBookData.isFisrtAutoOpenGuideBook"},
+        {"name": "chapterCount", "type": "int32", "offset": "0x08", "source": "inferred", "note": "from param_2 byte 0x6d; cf. TlvGuideBookData.guideBookChapterCount"},
+        {"name": "actionEntries", "type": "vector<0x3c>", "offset": "0x10", "source": "inferred", "note": "chapter action structs (begin at +0x10, end at +0x14, stride 0x3c); flag byte at +0xe"}
+      ],
+      "relatedTlv": ["TlvGuideBookData"],
+      "notes": "TLV is the player-save form (guideBookChapterCount/guideActionInfos/guideBookChapterInfos); this Info is the config/runtime form. Field offsets inferred from the consumer only."
+    },
+    {
+      "className": "CSpoorPrizeInfo",
+      "category": "activity",
+      "purpose": "Config record for a spoor (track-investigation) reward/prize, gated by an accumulated spoor count. Only manager accessors + consumers recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10923cd0", "currentName": "CSpoorPrizeInfo::GetManagers", "proposedName": "CSpoorPrizeInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CSpoorPrizeInfo."},
+        {"address": "115048c0", "currentName": "CSpoorPrizeInfo::GetManagers_115048c0", "proposedName": "CSpoorPrizeInfo::CollectAvailablePrizes", "purpose": "Iterates all prizes; for each prize id (vtable+0x18) checks two BST/maps (this+0x20 and this+0x38, e.g. already-claimed / owned) and, when the prize's required count (Info+0x20, prize[8]) <= the player's spoor count (this+0x1c), appends the prize to the output list; refreshes owner via a vtable call when any were added."},
+        {"address": "1197a9e0", "currentName": "CSpoorPrizeInfo::GetManagers_1197a9e0", "proposedName": "CSpoorPrizeInfo::InitAllPrizes", "purpose": "Iterates all prizes running per-item init (FUN_11a515e0)."},
+        {"address": "1197ae10", "currentName": "CSpoorPrizeInfo::GetManagers_1197ae10", "proposedName": "CSpoorPrizeInfo::InitAllPrizes2", "purpose": "Iterates all prizes running a second per-item init variant (FUN_11a515d0)."}
+      ],
+      "fields": [
+        {"name": "requiredCount", "type": "int32", "offset": "0x20", "source": "inferred", "note": "prize[8]; required spoor count compared <= player count (this+0x1c)"}
+      ]
+    },
+    {
+      "className": "CRandomWeaponAddonInfo",
+      "category": "weapon",
+      "purpose": "Config record for a random weapon addon/affix (a rollable bonus applied to a weapon), with a min/max weighted random range. Only manager accessors + consumers recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11870d30", "currentName": "CRandomWeaponAddonInfo::GetManagers", "proposedName": "CRandomWeaponAddonInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CRandomWeaponAddonInfo."},
+        {"address": "11874fb0", "currentName": "CRandomWeaponAddonInfo::GetManagers_11874fb0", "proposedName": "CRandomWeaponAddonInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "11875b90", "currentName": "CRandomWeaponAddonInfo::GetManagers_11875b90", "proposedName": "CRandomWeaponAddonInfo::RollWeaponAddons", "purpose": "Builds a candidate list from a weapon def (param_2, count at [0xf]) into a vector of 0x18-byte entries, then for each candidate rolls a random value between min and max: value = max - rand01*(max-min), where rand01 = FUN_100ee450()*const. Resolves the addon by id in the paged map and applies it (FUN_11875a10). Candidate struct: +0=addonId, +8=min, +0xc=max."}
+      ],
+      "fields": [
+        {"name": "addonId", "type": "int32", "offset": "0x00", "source": "inferred", "note": "candidate-struct id (paged-map key)"},
+        {"name": "rollMin", "type": "int32", "offset": "0x08", "source": "inferred", "note": "candidate-struct low bound"},
+        {"name": "rollMax", "type": "int32", "offset": "0x0c", "source": "inferred", "note": "candidate-struct high bound"}
+      ],
+      "formulas": ["rolledValue = rollMax - random01*(rollMax - rollMin); random01 = FUN_100ee450() * DAT_11de9a60"]
+    },
+    {
+      "className": "CEquipRandPassiveSkillGroupInfo",
+      "category": "skill",
+      "purpose": "Config record for an equipment random-passive-skill group: a bundle of buff/passive references plus wake/rank-up/level-up links resolved onto an equipment instance. Only manager accessors + one resolver recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "116363e0", "currentName": "CEquipRandPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipRandPassiveSkillGroupInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CEquipRandPassiveSkillGroupInfo."},
+        {"address": "11639f30", "currentName": "CEquipRandPassiveSkillGroupInfo::GetManagers_11639f30", "proposedName": "CEquipRandPassiveSkillGroupInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "116c52a0", "currentName": "CEquipRandPassiveSkillGroupInfo::GetManagers_116c52a0", "proposedName": "CEquipRandPassiveSkillGroupInfo::ResolvePassiveRefs", "purpose": "Resolves an equipment instance's cross-references: iterates a buff array (this+0x200..+0x204, stride 8; entry[0]=buffId) resolving each via CBuffInfo paged map and storing the resolved pointer at entry+4; touches CEquipWakeInfo when this+0x254!=0; counts non-zero slots of a 3-entry array at this+0x258; touches CEquipRankUpInfo when this+0x114>0 and CEquipLevelUpInfo when this+0x11c>0."}
+      ],
+      "fields": [
+        {"name": "buffArray", "type": "array<{id,ptr}>", "offset": "0x200", "source": "inferred", "note": "begin +0x200, end +0x204, stride 8; id at +0, resolved buff ptr written at +4"},
+        {"name": "wakeId", "type": "int32", "offset": "0x254", "source": "inferred", "note": "presence gates CEquipWakeInfo resolve"},
+        {"name": "slots3", "type": "int32[3]", "offset": "0x258", "source": "inferred", "note": "up to 3 non-zero-checked slots"},
+        {"name": "rankUpCount", "type": "int32", "offset": "0x114", "source": "inferred", "note": ">0 gates CEquipRankUpInfo resolve"},
+        {"name": "levelUpCount", "type": "int32", "offset": "0x11c", "source": "inferred", "note": ">0 gates CEquipLevelUpInfo resolve"}
+      ],
+      "notes": "References CBuffInfo, CEquipWakeInfo, CEquipRankUpInfo, CEquipLevelUpInfo managers."
+    },
+    {
+      "className": "CWildHuntTaskRatioInfo",
+      "category": "activity",
+      "purpose": "Config record for wild-hunt task ratios (weighted per-difficulty probability/ratio table used to roll a task outcome). Only manager accessors + a roller recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11806f50", "currentName": "CWildHuntTaskRatioInfo::GetManagers", "proposedName": "CWildHuntTaskRatioInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CWildHuntTaskRatioInfo."},
+        {"address": "11807920", "currentName": "CWildHuntTaskRatioInfo::GetManagers_11807920", "proposedName": "CWildHuntTaskRatioInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "118075e0", "currentName": "CWildHuntTaskRatioInfo::GetManagers_118075e0", "proposedName": "CWildHuntTaskRatioInfo::RollRatioByDifficulty", "purpose": "For a difficulty index (param<3): builds parallel weight/value vectors from every ratio entry (weight/id at Info+0x14, ratio array at Info+0x18 indexed by difficulty), performs a weighted random pick (FUN_10a1cee0), and returns the chosen ratio as a float (0.0 if none)."},
+        {"address": "119b4090", "currentName": "CWildHuntTaskRatioInfo::GetManagers_119b4090", "proposedName": "CWildHuntTaskRatioInfo::InitAllRatios", "purpose": "Iterates all ratio entries running per-item init (FUN_11807b60)."},
+        {"address": "119b41e0", "currentName": "CWildHuntTaskRatioInfo::GetManagers_119b41e0", "proposedName": "CWildHuntTaskRatioInfo::InitAllRatios2", "purpose": "Iterates all ratio entries running a second per-item init variant (FUN_11807b50)."}
+      ],
+      "fields": [
+        {"name": "weightOrId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "used as selection weight/id in the roll"},
+        {"name": "ratioArray", "type": "float[3]", "offset": "0x18", "source": "inferred", "note": "per-difficulty ratio; indexed by difficulty (0..2)"}
+      ],
+      "formulas": ["weighted random pick over entries; result = entry.ratioArray[difficulty]; difficulty must be < 3"],
+      "relatedTlv": ["TlvWildHuntSoulData"],
+      "notes": "TlvWildHuntSoulData is a related wild-hunt runtime struct; directional only."
+    },
+    {
+      "className": "CHunterStarLevelInfo",
+      "category": "activity",
+      "purpose": "Config record for a hunter star-level tier (star progression with branch level and challenge-card links). Only manager accessor + one resolver recovered.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "108baa40", "currentName": "CHunterStarLevelInfo::GetManagers", "proposedName": "CHunterStarLevelInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CHunterStarLevelInfo."},
+        {"address": "118ac740", "currentName": "CHunterStarLevelInfo::GetManagers_118ac740", "proposedName": "CHunterStarLevelInfo::ResolveStarLevel", "purpose": "Resolves a hunter star-level object: looks up star-level by id (this+0x20) in the paged map and applies FUN_118aac00(this+0x10); on a second slot (this+0x28) applies FUN_118aac40; validates a branch level (CHunterBranchLevelInfo by id this+0x1c, predicate FUN_118599b0 vs this+0x24); then iterates challenge-card id list (this+0x2c..+0x30), resolving each in CHunterChallengeCardInfo and appending this+0x10 to the card's registered-star vector (card+0xa4)."}
+      ],
+      "fields": [
+        {"name": "starLevelId", "type": "int32", "offset": "0x20", "source": "inferred", "note": "primary paged-map lookup key"},
+        {"name": "branchLevelId", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "CHunterBranchLevelInfo lookup key"},
+        {"name": "challengeCardIds", "type": "vector<int32>", "offset": "0x2c", "source": "inferred", "note": "begin +0x2c, end +0x30; each resolved in CHunterChallengeCardInfo"},
+        {"name": "selfId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "appended to resolved card's +0xa4 list"}
+      ],
+      "notes": "References CHunterBranchLevelInfo and CHunterChallengeCardInfo managers."
+    },
+    {
+      "className": "CLevelExcellentRankInfo",
+      "category": "activity",
+      "purpose": "Config record for a level 'excellent' rank band (S/A/B-style clear-evaluation tier bounded by a score range). Consumers add score, pick the matching rank, and normalize the rank thresholds.",
+      "confidence": "high",
+      "methods": [
+        {"address": "11294780", "currentName": "CLevelExcellentRankInfo::GetManagers", "proposedName": "CLevelExcellentRankInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CLevelExcellentRankInfo."},
+        {"address": "1129b6f0", "currentName": "CLevelExcellentRankInfo::GetManagers_1129b6f0", "proposedName": "CLevelExcellentRankInfo::GetInfoManagerInstance", "purpose": "Thin getter: returns *manager when arg==0 else 0."},
+        {"address": "114d6fe0", "currentName": "CLevelExcellentRankInfo::GetManagers_114d6fe0", "proposedName": "CLevelExcellentRankInfo::AddScoreAndEvalRank", "purpose": "Adds param_2 to the accumulated score (this+0xc), clamps it to [0,1000], then scans ranks and selects the one whose lowerBound (Info+0x14) < score <= upperBound (Info+0x18); stores that rank's id (vtable+0x18) into this+0x8 and fires a callback (this vtable+0x10). Returns 1 on match."},
+        {"address": "118ce980", "currentName": "CLevelExcellentRankInfo::GetManagers_118ce980", "proposedName": "CLevelExcellentRankInfo::NormalizeRankThresholds", "purpose": "Iterates ranks in order and sets each rank's lowerBound (rank[5], Info+0x14): rank #1 gets 0, each later rank gets the previous rank's upperBound (predecessor Info+0x18), producing contiguous score bands."}
+      ],
+      "fields": [
+        {"name": "lowerBound", "type": "int32", "offset": "0x14", "source": "inferred", "note": "rank[5]; exclusive lower score bound; set by NormalizeRankThresholds"},
+        {"name": "upperBound", "type": "int32", "offset": "0x18", "source": "inferred", "note": "rank[6]; inclusive upper score bound"}
+      ],
+      "formulas": ["score(this+0xc) = clamp(score + delta, 0, 1000)", "rank match: lowerBound < score <= upperBound", "threshold normalize: rank[i].lowerBound = rank[i-1].upperBound (first rank = 0)"],
+      "constants": ["MaxScore=1000"]
+    },
+    {
+      "className": "CCatTreatureInfo",
+      "category": "pet",
+      "purpose": "Config record for a Felyne ('cat') treasure entry (treasure a hunting cat/palico can find). Consumer builds a sorted treasure list. ('Treature' is the game's spelling of 'Treasure'.)",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109836b0", "currentName": "CCatTreatureInfo::GetManagers", "proposedName": "CCatTreatureInfo::GetInfoManager", "purpose": "Registers/returns the CInfoManager singleton for CCatTreatureInfo."},
+        {"address": "112e1e80", "currentName": "CCatTreatureInfo::GetManagers_112e1e80", "proposedName": "CCatTreatureInfo::BuildSortedTreasureList", "purpose": "Iterates all cat-treasure entries collecting (Info+0x1c key, Info+0x10 data ptr) pairs, sorts them (introsort/heapsort via FUN_112e25f0 comparator), then pushes the sorted ids into an output vector at param+0x60."},
+        {"address": "1198ce90", "currentName": "CCatTreatureInfo::GetManagers_1198ce90", "proposedName": "CCatTreatureInfo::InitAllTreasures", "purpose": "Iterates all cat-treasure entries running per-item init (FUN_11a5e3c0)."}
+      ],
+      "fields": [
+        {"name": "sortKey", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "sort key / id used to order the treasure list"},
+        {"name": "dataPtr", "type": "ptr", "offset": "0x10", "source": "inferred", "note": "paired data pointer stored with the key"}
+      ]
+    }
+  ],
+  "notes": "Every method in this batch was auto-mislabeled 'CX::GetManagers'. Two boilerplate CInfoManager accessors recur in most classes: (1) the base @-address that lazily registers the singleton via StcMbrNameSvr<CInfoManager>::GetSingletonName / FUN_11679e10 and returns the manager (renamed GetInfoManager); (2) a thin 'return *mgr if arg==0 else 0' getter (GetInfoManagerInstance). All remaining methods are consumers/iterators that carry the real game logic. Manager container layout (verified repeatedly): flat-vector = mgr+0x14 begin / +0x18 end, count=(end-begin)>>2, elem=*(begin+i*4); paged id->object map = mgr+0x20 page-array / +0x24 capacity / +0x28 pageSize / +0x30 minId, index=(id-minId), obj=pages[index/pageSize][index%pageSize]; vtable+0x28=GetCount, vtable+0x18=GetId. No CX::DebugFormat printer or CX::Read_0x99 loader was present in these bundles, so struct field names/offsets are inferred from consumer access patterns (mostly medium/low confidence) except where a matching Tlv doc corroborates (CEquipPlanInfo/TlvEquipPlan, CGuideBookChapterInfo/TlvGuideBookData)."
+}

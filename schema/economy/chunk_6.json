@@ -1,0 +1,337 @@
+{
+  "chunkIndex": 6,
+  "functions": [
+    {
+      "address": "1089aa10",
+      "currentName": "FUN_1089aa10",
+      "proposedName": "CDailyRewardUI::RegisterHandlers",
+      "purpose": "Constructor/init for the Daily Reward + server-quest UI module. Copies 5 SmartPtr/variant slots out of the incoming arg block (in_stack_00000010), then registers named script->native callbacks and zeroes an instance field.",
+      "confidence": "high",
+      "subsystem": "rewards/daily-reward",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Registers dispatch table via FUN_104d13b0(name, fn): RequestRewardInfo->FUN_1089c930, SetDailyReward->FUN_1089ad50, FetchPrize->FUN_1089c870, SetQuest->FUN_1089b5f0, requestServerQuestInfo->LAB_1089c970, SetQuestInfo->FUN_1089c040, initTextField->FUN_1089c240",
+      "  *(param_1+0x38)=0 (clears an instance state field)",
+        "Standard variant-refcount pattern: for each slot, if (flags>>6 & 1) call vtbl[+4] (addref) on load and vtbl[+8] (release) on teardown"
+      ],
+      "costs": [],
+      "notes": "Stock Scaleform/script binding plumbing. Names FetchPrize/RequestRewardInfo indicate this is the reward-claim UI; the actual grant is server-side (handlers here only build/request VO)."
+    },
+    {
+      "address": "1089ad50",
+      "currentName": "FUN_1089ad50",
+      "proposedName": "CDailyRewardUI::SetDailyReward",
+      "purpose": "'SetDailyReward' handler. Builds the daily-contribution ('add oil'/hunter-honor) reward VO: iterates REWARD_ITEM_MODEL entries, publishes each reward's state/index/contributeValue/ItemID, computes today's contribution vs. the reward thresholds, and the amount still needed to reach the next tier.",
+      "confidence": "medium",
+      "subsystem": "rewards/daily-contribution",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "todayContribute (uVar11): default 0x1e=30; if a valid player/context object present, uVar11 = FUN_1025b060() (query current contribution value)",
+        "maxContribute / todayRestLevelUp loop over reward-threshold array [local_bc .. local_b8), element stride 4 bytes, count uVar5=((local_b8+3-local_bc)>>2): find FIRST threshold pppiVar7 with (todayContribute < threshold) and set: todayRestLevelUp = threshold - todayContribute; maxContribute = threshold (published only when param_2!=0)",
+        "Per reward entry: RewardState = entry[4], rewardIndex = entry[1][1], contributeValue = *(local_b4+0x10), ItemID = *(*(local_b0+8)+0x10)",
+        "Publishes text fields via FUN_1024ebe0 with string-table IDs 0x13b6 contributeTitle, 0x13b7 todayPart1, 0x13b8 todayPart2, 0x13b9 todayPart3, 0x13ba addOilText, 0x13bb finishText, 0x13bc hunterHonor"
+      ],
+      "costs": [
+        "contributeValue and reward thresholds are contribution-point amounts (hunter-honor 'oil' contribution), not currency; values come from REWARD_ITEM_MODEL data table"
+      ],
+      "notes": "Pure VO/display builder for Scaleform. The 30 default and threshold comparison are display defaults; server owns the real contribution counter (FUN_1025b060 reads it)."
+    },
+    {
+      "address": "1089c170",
+      "currentName": "FUN_1089c170",
+      "proposedName": "CDailyRewardUI::BuildRewardStateString",
+      "purpose": "Helper that maps a reward-state enum (0/1/2) to a localized string-table id and publishes it as 'RewardStateString'.",
+      "confidence": "high",
+      "subsystem": "rewards/daily-reward",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "state 0 -> text id 0x13b3; state 1 -> 0x13b4; state 2 -> 0x13b5; any other -> no text emitted",
+        "FUN_1024ebe0(&buf, tmp, textId, 0) resolves string-table entry; result published via FUN_104d1670(\"RewardStateString\", ...)"
+      ],
+      "costs": [],
+      "notes": "Reward state likely: 0=locked/unclaimable, 1=claimable, 2=claimed (order matches text ids). Display only."
+    },
+    {
+      "address": "1089c9b0",
+      "currentName": "FUN_1089c9b0",
+      "proposedName": "CDailyRewardUI::BuildDailyScheduleRewardItemData",
+      "purpose": "'FetchPrize'-related VO builder for STATIC_DailyScheduleRewardItemData: emits the reward item array (itemID/itemName/itemCounts), the pack item name, and the money prices to buy/redeem the pack.",
+      "confidence": "medium",
+      "subsystem": "rewards/lottery-shop-price",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Per reward item: itemID = puVar6[0], itemCounts = puVar6[3]; array element stride 9 dwords (0x24 bytes); itemName resolved via FUN_10254130(itemID) item-def lookup",
+        "Quest/schedule scan: iterate context list at ctx+0x164..ctx+0x168, element stride 0x114; entry valid while entry.state (offset 0x00) == 0xbc9",
+        "boundMoneyPrice = (int)((float)FUN_11a13970() * fStack_1d4)  where fStack_1d4 is a rate/discount factor derived from CPlayer::GetHuntRankOrCount",
+        "moneyPrice = (int)((float)FUN_11a13bb0() * unaff_EDI)  (unaff_EDI second rate factor)",
+        "Only emits prices when player HR-rank context (DAT_1202e818+0xd0 ... +0x90 -> vtbl+0xb4) resolves and FUN_1089a6a0 returns nonzero"
+      ],
+      "costs": [
+        "boundMoneyPrice = bound-money (bind currency) cost of the pack",
+        "moneyPrice = free/unbound money cost of the pack",
+        "Both are base price * rank-based rate factor; base prices from FUN_11a13970 / FUN_11a13bb0 (pack price accessors)"
+      ],
+      "notes": "Client computes displayed prices; SERVER must recompute/validate the actual charge on purchase. fStack_1d4/unaff_EDI are per-rank multipliers — capture the real values from FUN_11a139x0 for the authoritative rebuild."
+    },
+    {
+      "address": "108a3110",
+      "currentName": "FUN_108a3110",
+      "proposedName": "CInventoryUI::RegisterHandlers",
+      "purpose": "Registers the full inventory/enchant/supply-plan dispatch table (script<->native). No economic logic itself; wires request names to handler functions.",
+      "confidence": "high",
+      "subsystem": "inventory/dispatch",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Registered requests (name -> handler): SwapInventoryItem->FUN_108a3ee0, SwapInventoryItems->FUN_108a4420, SplitInventoryItem->FUN_108a4ab0, TidyInventoryItem->FUN_108a4d80, ClickInventoryItem->FUN_108a5550, DiscardInventoryItem->LAB_108a57e0, ExpandInventoryItem->FUN_108a5850, MoveInventoryItem->FUN_108a5890, MsgBoxEnchantOk->LAB_108a5710, GetExpandCostData->FUN_108a7660, GetItemData->FUN_108a6bb0, ClickTaskItemUse->LAB_108a3ab0, requestEnchantForPetEquip->FUN_108a3b40, GetSupplyPlanList->SupplyPlanMo_108a7990, GetItemInSupplyPlan->FUN_108a7c50, RenameSupplyPlan->FUN_108a8030, UnlockSupplyPlan->FUN_108a8160, SaveInventoryToSupplyPlan->FUN_108a81d0, ChangeCurrentSupplyPlan->FUN_108a8240, LoadInventoryFromSupplyPlan->FUN_108a82b0, GetSkillItemInfo->FUN_108a63f0(?)/FUN_108a86a0, requestEnchant-desc FUN_108a69d0/FUN_108a6950, UnionItemRespondOkHandler->FUN_108a4a30, UnionGuildItemRespondOkHandler->FUN_108a48a0, UnEquipALL_OK->LAB_108a67a0, CanItemUseInCurrentLevel->FUN_108a3cd0",
+        "param_1[9]=param_1[10]=0xffffffff (init selected-slot indices)"
+      ],
+      "costs": [],
+      "notes": "Actual add/remove/split/discard/expand/enchant mutations are server-authoritative requests; these client handlers only send requests and build display VO. GetExpandCostData handler (FUN_108a7660) is where inventory-expand costs are read."
+    },
+    {
+      "address": "108a55e0",
+      "currentName": "FUN_108a55e0",
+      "proposedName": "CInventoryUI::PrepareEnchantConfirmMsgBox",
+      "purpose": "Stores two selected item handles (src/target for pet-equip enchant) into instance fields and pops the 'MsgBoxEnchantOk' confirmation dialog with the correct prompt text depending on whether the target already has an enchant.",
+      "confidence": "medium",
+      "subsystem": "crafting/enchant",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Saves item refs: *(this+0x2c)=itemA.lo, +0x30=itemA.hi, +0x34=itemB.lo, +0x38=itemB.hi (0 first)",
+        "Scans an item-data list (FUN_11671b50 -> +0x164..+0x168, stride 0x114) for entry with type *(entry+4)==0xbbc, then uVar6 = *(entry+0xf8)",
+        "Msgbox text id: default 0x1fde; if target enchant slot vtbl[+0x3c]()!=0 then 0x1fdf",
+        "FUN_1112d7d0(textId, \"MsgBoxEnchantOk\", ..., FUN_1050ea70(enchantData+0x38, 0x2a))"
+      ],
+      "costs": [],
+      "notes": "0xbbc = enchant/quench item-def category tag (recurs across enchant fns). Confirmation-only; the real enchant is executed server-side after MsgBoxEnchantOk request."
+    },
+    {
+      "address": "108a63f0",
+      "currentName": "FUN_108a63f0",
+      "proposedName": "CInventoryUI::BuildEnchantTimeInfo",
+      "purpose": "Resolves an item (by handle, or transmogrify id, or current context) and publishes its remaining enchant time and enchant description string.",
+      "confidence": "medium",
+      "subsystem": "crafting/enchant",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Only runs when param_5==8 (VO array element type) and player world-context resolves and *(ctx+0x260e0)!=0",
+        "If enchant-def *(enchantData+0x30)==0: m_nEnchantTime = -1 (0xffffffff = permanent/none)",
+        "Else m_nEnchantTime = FUN_10a136c0() - item.vtbl[+0x40]()  (server-clock now minus enchant expiry timestamp)",
+        "m_strEnchantDesc = string at (FUN_100e5b40(...)+0x14)",
+        "Item-type branch: iVar3==6 uses FUN_112f5b90(itemId, DAT_123bb978+0x34) then FUN_113f9bb0(6, ...)"
+      ],
+      "costs": [],
+      "notes": "Display of enchant countdown. FUN_10a136c0 = current server time accessor (reused in several fns here)."
+    },
+    {
+      "address": "108a69d0",
+      "currentName": "FUN_108a69d0",
+      "proposedName": "CInventoryUI::BuildEnchantRequirementInfo",
+      "purpose": "Publishes the requirement gate for enchanting an item: min/max level, belonging, type, subtype, min quality, min rank, and the requirement description string. Read directly from the enchant item-def row.",
+      "confidence": "high",
+      "subsystem": "crafting/enchant",
+      "serverRelevance": "validation",
+      "formulas": [
+        "Runs only when param arg == 2 and player/world context valid and *(ctx+0x260e0)!=0",
+        "Item-def resolved via FUN_10254130(itemId) with *(def+0x34)==1, then enchant list FUN_10540d00(itemId) scanned (+0x164..+0x168 stride 0x114, entry type *(entry+4)==0xbbc), enchantData = FUN_1050ed80(*(entry+0xf8))",
+        "m_nEnchantNeedLevMin = *(enchantData+0x14); LevMax = +0x18; Belong = +0x1c; Type = +0x20; SubType = +0x24; QualityMin = +0x28; RankMin = +0x2c",
+        "m_strEnchantItemDesc = string at (FUN_100e5b40(...)+0x14)"
+      ],
+      "costs": [
+        "Enchant requirement gate (level/quality/rank thresholds) — these are the eligibility constraints the SERVER must enforce before allowing an enchant."
+      ],
+      "notes": "Client reads these from the same enchant-def table (offsets +0x14..+0x2c) the server should use to validate an enchant request."
+    },
+    {
+      "address": "108a6bb0",
+      "currentName": "FUN_108a6bb0",
+      "proposedName": "CInventoryUI::BuildItemData",
+      "purpose": "'GetItemData' handler: builds the full item VO for the inventory UI. Reads a huge set of item-def and item-instance fields (bind/type/use/CD/rare/price/enchant/quench/skill/transmog) and publishes them into an itemList array.",
+      "confidence": "high",
+      "subsystem": "inventory/item-vo",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Emitted fields (accessor -> key): count = item.vtbl[+0xc](); m_nBindType = FUN_116693d0(); m_bMallItem = def.byte(+0x68); m_typeNormal = def(+0x38); m_typeSub = def(+0x3c); m_nRareType = item.vtbl[+0x2c](); isBind = (item[8]!=0); m_nSellPrice = FUN_11a897a0(); m_nExpireTime = FUN_11669350(); m_nRequire_Sex = def(+0xfc)",
+        "CD group (only if FUN_11669930 true): m_nCDTime=FUN_11671aa0(), m_nCDGroupTag=FUN_11671a80(), m_nUseTimes=FUN_11671c00(), m_nMaxUseTimes=FUN_11671b30(), m_nCDRemainTime=FUN_1154bc80(FUN_11671a80())",
+        "m_nCanUseTimesInBS = FUN_113f9d20(FUN_11669730(0)); m_nCanUseTimesInDB = FUN_113f9d20(FUN_11669730(1))",
+        "Enchant: if not enchantable -> m_nEnchantTime=-1; else if item[0xc]==0 -> -1 else m_nEnchantTime = FUN_10a136c0() - item.vtbl[+0x10]()",
+        "Quench (via FUN_1052bdd0(...)): m_bCanQuench = *(q+0x28c)!=0; m_bCanReQuench = *(q+0x294); m_nMaxQuenchLevel = *(q+0x290); m_nQuenchLevel = *(short*)(item+0x7e)",
+        "m_nTransmogrifyItemId = item[0x7d]; m_fSellPriceFact = (float)FUN_11669880(); m_fBuyPriceFact = (float)FUN_11669280(); m_nFactItemLevel = item.vtbl[+6](); m_nFactRank = FUN_11669840()",
+        "Skill item branch selects between FUN_108a8910 / FUN_108a89a0(FUN_108a8a30(...)) to emit m_bSkillItem/m_nSkillCount/m_nSkillCDTime/m_strSkillName/m_nSkillId"
+      ],
+      "costs": [
+        "m_nSellPrice = per-item sell price (server authoritative on actual sale)",
+        "m_fSellPriceFact / m_fBuyPriceFact = sell/buy price multiplier factors applied to base item price"
+      ],
+      "notes": "Display VO only. Confirms item struct layout: quench level short@0x7e, transmog id@0x7d, bind flag@item[8]. Price factors here mirror the multipliers a server sell/buy calc must use."
+    },
+    {
+      "address": "108ada90",
+      "currentName": "FUN_108ada90",
+      "proposedName": "CGuildLevelUpInfo::GetValueForLevel",
+      "purpose": "2D-table accessor over the CGuildLevelUpInfo data (singleton, lazy-loaded via CInfoManager::FindByName). Given a guild level/index, returns the corresponding table cell (e.g. exp/threshold for that level).",
+      "confidence": "high",
+      "subsystem": "progression/guild-level",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "Resolve info object: singleton = CGuildLevelUpInfo::GetInfoManagerSingleton(); if null, CInfoManager::FindByName(\"CGuildLevelUpInfo\"); fallback &DAT_123bfa54",
+        "Guard: param_1 != -1, (param_1!=0 or *(obj+0x30)==0), *(obj+0x28)!=0",
+        "idx = param_1 - *(obj+0x30) (base offset); require 0 <= idx < *(obj+0x24) (count)",
+        "row = *(int*)(*(obj+0x20) + (idx / *(obj+0x28)) * 4)  where *(obj+0x28) = stride/columns",
+        "return *(int*)(row + (idx % *(obj+0x28)) * 4); returns 0 if row null or out of range"
+      ],
+      "costs": [
+        "Returns per-level guild progression values (level-up exp/points table). Base=+0x30, count=+0x24, stride/cols=+0x28, data ptr=+0x20."
+      ],
+      "notes": "Reference data table for guild leveling — the server must own the same CGuildLevelUpInfo table to validate guild level-up. Confirmed struct offsets for the table header."
+    },
+    {
+      "address": "108bbea0",
+      "currentName": "FUN_108bbea0",
+      "proposedName": "CHunterCardUI::BuildBaseCardData",
+      "purpose": "Builds the hunter-card / branch (star) progression overview VO: branch cards (1/2/3), hunter star level, branch points/total, level score, daily refresh records, upgrade card name, per-star detail array.",
+      "confidence": "medium",
+      "subsystem": "progression/hunter-card",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Defaults: level=1, uStack_70=0x1e (30), maxContribute-like=100",
+        "Builds 3 branch cards: FUN_108bdc90(cardId, branchN in {1,2,3}, ...) for the branchCardArray",
+        "branchLevel: from FUN_114dfc50(cardId) -> *(res+0xc); associated data ptr *(res+0x18)",
+        "hunterStarLevel = FUN_108bac70(cardId) (or FUN_108bab00 for cardId==0)",
+        "star detail count = (*(dataObj+0x14) - *(dataObj+0x10)) >> 3; starLevelDetailArray iterates that block (stride 8 bytes / 2 dwords)",
+        "branchPoints/branchTotalPoint from FUN_108bde10(...); branchCardState = FUN_114e0340(level)"
+      ],
+      "costs": [
+        "branchPoints / branchTotalPoint = hunter-card progression points (not currency); default cap-like value 100"
+      ],
+      "notes": "Display VO for the hunter-card system. Points are progression currency owned by server."
+    },
+    {
+      "address": "108bc6a0",
+      "currentName": "FUN_108bc6a0",
+      "proposedName": "CHunterCardUI::BuildStatisticCardData",
+      "purpose": "Builds the achievement/statistic-card VO array: per card its class, show type, context text, check state, title, current vs target value, award point, reward item id, achieve id, and canFetch/hasFetched flags.",
+      "confidence": "medium",
+      "subsystem": "progression/achievement-card",
+      "serverRelevance": "validation",
+      "formulas": [
+        "Per statistic entry (array *(iVar5+0x8c)..*(iVar5+0x90), stride 8 dwords=0x20): switch on entry[0] type -> 1: FUN_104d8d20(entry[1]) name; 2: FUN_107d7930; 3: FUN_11a88b20(entry[1],1); 4: (skip name)",
+        "currentValue = (achieved ? entry[5] : 0); targetValue = entry[5]",
+        "cardID = entry[1] when type==3 else 0",
+        "Progress mask gate: reads mask *(iVar5+8)/*(iVar5+0xc) vs FUN_100ed750() bitfield; if bits not all set -> card skipped",
+        "canFetch set when reward requirements met (FUN_114e00a0() >= reqB[9], not yet fetched via FUN_115350b0); hasFetched otherwise",
+        "cardAwardPoint = *(iVar5+0x80); rewardItemID = *(iVar5+0x98) (or reqB[10]); achieveID = *(iVar5+0xac)"
+      ],
+      "costs": [
+        "cardAwardPoint = points awarded on achievement completion",
+        "rewardItemID = item granted; canFetch/hasFetched gate the (server-authoritative) reward claim"
+      ],
+      "notes": "Display of achievement progress and claim availability; the SERVER must recompute currentValue/targetValue and canFetch before granting cardAwardPoint/rewardItemID."
+    },
+    {
+      "address": "108d1ef0",
+      "currentName": "FUN_108d1ef0",
+      "proposedName": "CPlayerPropertyUI::RegisterHandlers",
+      "purpose": "Registers the player-property / title / VIP-recharge / equip-plan dispatch table. Pure wiring of request names to handlers.",
+      "confidence": "high",
+      "subsystem": "player-property/dispatch",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Registers (subset): InitModelEx/InitModel, IsNormalLevelMax->FUN_10a039d0, TitleCarry->FUN_10a03a50, HideTitle->FUN_10a03ac0, TitleProperty_OK->LAB_10a03b20, ReChargeVIP->FUN_10a03b50, StartVIP->FUN_10a03b90, ReChargeGrownup->FUN_10a03bd0, ReChargeEarning->FUN_108dabb0, DeleteEquipPlan->FUN_108db130, SaveEquipPlan->FUN_108d9710, StartPreviewEquip->FUN_108d9790, StopPreviewEquip->FUN_108d97c0, GetEquipPreviewDeltaData->FUN_108d9510, UblockPlanSlot->FUN_108db2a0, GetEquipPlans->FUN_108d9570, EquipPlan->FUN_108db020, EditEquipPlan->FUN_108dad00, DeleteEquipSlot->FUN_108d3020, ClearEditRangeNotMatch->FUN_108dae00, RefreshPlayerMoney->FUN_108d2f90, saveTitleShowSetting->FUN_108d2b80, and a nested GetXxx group registered via FUN_108d2d20"
+      ],
+      "costs": [],
+      "notes": "ReChargeVIP/StartVIP/ReChargeGrownup/ReChargeEarning are cash-shop/VIP recharge requests — money mutations are server-authoritative; these are only request senders."
+    },
+    {
+      "address": "108d2d20",
+      "currentName": "FUN_108d2d20",
+      "proposedName": "CPlayerPropertyUI::RegisterDataGetters",
+      "purpose": "Registers the read-only property/currency data getters and buff-check helpers for the player-property UI.",
+      "confidence": "high",
+      "subsystem": "player-property/dispatch",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Only runs when arg==1. Registers: GetPlayerPropertyData->FUN_108d5ef0, GetOtherPlayerPropertyData->FUN_108d6ea0, GetPlayerTitleData->FUN_108d7da0, GetTitlePropertyListData->FUN_108d8370, GetCurrencyData->FUN_108d8660, GetCatFoodData->FUN_108d8b00, _checkEquipItemColor->FUN_108dba40, _requestEquipItemColor->FUN_108db8d0, _checkOtherEquipItemColor->FUN_108dbda0, _requestOtherEquipItemColor->FUN_108dbf30, IsSelfHasBuffer->FUN_108d5bb0, IsSelfHasBuffers->FUN_108d5d60, IsSelfHasBufferGene->FUN_108d5c70"
+      ],
+      "costs": [],
+      "notes": "GetCurrencyData/GetCatFoodData expose currency balances to the UI; read-only."
+    },
+    {
+      "address": "108d6ea0",
+      "currentName": "FUN_108d6ea0",
+      "proposedName": "CPlayerPropertyUI::BuildOtherPlayerPropertyData",
+      "purpose": "'GetOtherPlayerPropertyData' handler: builds another player's full stat + equipment VO (hp/endure/attack/defense/elemental atk & tolerances/level/sex/armor level, star-level detail, title privileges, and the other player's equipment item list).",
+      "confidence": "medium",
+      "subsystem": "player-property/stats-vo",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Stat block puVar5 fields: curhp=puVar5[0], endure=puVar5[1], curendure=puVar5[2](float), Attack=puVar5[3]? level=puVar5[4], defense=puVar5[5], defendeffect=(float)(int)puVar5[7]/DAT_11de9a20, luck fields puVar5[8..9], elemental fire/water/thunder/ice/dragon/poison = puVar5[10..0x11], tolerances puVar5[0x12..0x16]",
+        "weaponAttackContains* flags = individual bits of puVar5[0x5ec]: Water bit0, Fire bit1, Thunder bit2, Dragon bit3, Ice bit4, Poison bit6, Sleep bit7, Palsy bit8",
+        "hrLevel=puVar5[0x5e0], (rank fields) puVar5[0x5e1..0x5e3]=showLevel, sex=puVar5[0x57], ammorLevel=puVar5[0x59]",
+        "privilege/star detail: FUN_108d5a80(i, puVar5[0x5e5..0x5eb]) for i=0..6 (per-star privilege values)",
+        "Equipment loop: 0x18 slots, per-slot stride 0xe4 bytes; emits item VO fields identical to BuildItemData (m_nSellPrice, m_nBindType, m_nQuenchLevel@+0xa0, m_nColorIndex@+0xac, m_nTransmogrifyItemId@+0x9c, etc.); m_bIsLocal=0",
+        "If a weapon (slot type flags) has iVar6==5, all weaponAttackContains* forced 0"
+      ],
+      "costs": [],
+      "notes": "Read-only display of another player. Confirms other-player equip struct stride 0xe4 and stat block field offsets."
+    },
+    {
+      "address": "108d8660",
+      "currentName": "FUN_108d8660",
+      "proposedName": "CPlayerPropertyUI::BuildCurrencyData",
+      "purpose": "'GetCurrencyData' handler: enumerates all currency definitions and builds the currencyList VO (id/attr/icon/name/tips/count/max), with special handling for currency IDs 3 and 4.",
+      "confidence": "high",
+      "subsystem": "economy/currency",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Iterate currency defs: outer FUN_10848370 collection, count = def.vtbl[+0x28](); per row def at *(row+0x14)+idx*4",
+        "Per currency emits: nCurrencyID = row[+0x10], nAttrID = row[+0x14], strIconPath = row[+0x30], strName = row+0x18, strTips = row+0x34",
+        "If nCurrencyID==3: nCount=FUN_1025b060(), nCountMax=FUN_1134c890(), nCount2=FUN_1025b060(), nCountMax2=FUN_1134c8b0()",
+        "If nCurrencyID==4: nCountMax = *(FUN_117fa140()+0xa4), nCount2-source = *(FUN_117fa140()+0xa0), nCount=FUN_1025b060(); if sub-obj (obj+0x4e4)()!=0 -> nCount2 = *(sub+0x14)",
+        "Else (generic): FUN_11348ac0(...,nAttrID); nCount = piStack_64 (queried amount)",
+        "Currency id 4 only emitted if FUN_104d0280 vtbl[+0x54](\"MatchEntry\") gate passes"
+      ],
+      "costs": [
+        "nCount / nCountMax / nCount2 / nCountMax2 = live currency balances and caps for each currency id (ids 3 and 4 are dual-pool currencies with bound/unbound or primary/secondary counts)"
+      ],
+      "notes": "Display of currency balances; SERVER is authoritative over the actual balances (FUN_1025b060 reads the amount, FUN_1134c890/8b0 read caps). Currency IDs 3 and 4 are the important dual-count currencies (likely money and cat-food/points)."
+    },
+    {
+      "address": "108e20c0",
+      "currentName": "FUN_108e20c0",
+      "proposedName": "CFarmUI::RegisterHandlers",
+      "purpose": "Registers the farm/ranch subsystem dispatch table (farm data getters, collection points, training, seeds/tools, plant/upgrade/facility requests, CD reduce, equip-rack avatar, pet info).",
+      "confidence": "high",
+      "subsystem": "farm/dispatch",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Registers (subset): GetFriendFarmListData->FUN_108e25d0, GetCollectPointListData->FUN_108e36f0, GetTrainListData->FUN_108e4680, GetFarmData->FUN_108e3340, GetSeedData->FUN_108e50d0, GetToolData->FUN_108e5e20, GetFLSettlementData->FUN_108e6190, ReqFarmLocationUpgrade->FUN_108e5760, ReqEnterFarm->FUN_108e5860, ReqReturnHomeFarm->FUN_108e57f0, ReqAutoCollection->FUN_108e58c0, ReqSetPetToCollectionPoint->FUN_108e5960, ReqSetPetToTrain->FUN_108e5a20, ReqPlant->FUN_108e5cb0, ReqSetOutputLevel->FUN_108e5d20, ReqFarmLargeFacility->FUN_108e6460, GetFarmCDData->FUN_108e66f0, ReqFarmCDReduce->FUN_108e6d50, ReqGetEquipItemVoByItemID->FUN_108e7140, GetPetInfoData->FUN_108e7d30 (and more)"
+      ],
+      "costs": [],
+      "notes": "Farm upgrades/plant/CD-reduce consume resources server-side; these are request senders / getters only."
+    },
+    {
+      "address": "108e36f0",
+      "currentName": "FUN_108e36f0",
+      "proposedName": "CFarmUI::BuildCollectPointListData",
+      "purpose": "'GetCollectPointListData' handler: builds the collection-point VO array — per point: level/maxLevel/outputLevel/requiredPlayerLevel/curExp/maxExp/desc, upgrade & farm-exp cost, canCollect, remaining totalTime, output material item list, and the assigned pet (id/name/skills).",
+      "confidence": "medium",
+      "subsystem": "farm/collect-point",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "Iterate collect points: block from piStack_264+0xb, per-point stride advances puVar8 = puVar10 + 5 (0x14 bytes), loop while uStack_278 (starts 0x80) < 0x98 -> 6 points",
+        "outputLevel = (ushort)puVar8[3]; curExp = puVar8[-1]; maxExp = *(cpDef+0x1c); requiredPlayerLevel = *(cpDef+0x58)",
+        "canCollect gate: if (DAT_123bbac8/acc timers unset OR farm-time vtbl[+0xc0]() == stored time) -> canCollect based on (*(ushort*)(puVar8+2)==0) else based on (piStack_284[0x39]==0)",
+        "remaining time = (puStack_2bc[1] + upgradeData[7]*0x3c) - _time64(NULL)  (0x3c=60: upgradeData[7] is minutes -> seconds); only marks not-collectable when (canCollectFlag && remaining < 1)",
+        "Output items: 5 entries at cpDef+0x3c stride 1 dword: ItemID=puVar11[-5], count=*puVar11, icon=*(itemDef+0xb4)",
+        "Assigned pet: petID=auStack_6c[0]; if >0 petIndex=FUN_112fb110(petID), petName via FUN_112f64e0; pet skills loop over (auStack_6c - (cpDef+0x54))/0x14 entries -> strSkillName/skilllevel/SkillID/bAutoGather (=skillType==5)",
+        "Farm-wide footer: 4 output-level entries + FUN_1025b060()x4 into uStack_17c..170 (current farm resources/output counts)"
+      ],
+      "costs": [
+        "upgradeCost / farmExpCost = resource cost to upgrade a collection point (published keys 'upgradeCost','farmExpCost')",
+        "remaining totalTime derived from upgradeData[7] minutes * 60"
+      ],
+      "notes": "Display VO for farm collection points; SERVER owns exp/level, upgrade cost deduction, and collection cooldown (0x3c minute->second conversion). bAutoGather = pet skill type 5."
+    }
+  ]
+}

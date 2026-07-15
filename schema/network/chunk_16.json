@@ -1,0 +1,1702 @@
+{
+ "chunkIndex": 16,
+ "functions": [
+  {
+   "address": "104227c0",
+   "currentName": "FUN_104227c0",
+   "proposedName": "PkgHead_TdrDebugFormat",
+   "purpose": "TDR meta/DebugFormat serializer for the transport packet header struct (CPkgHead). Emits each header field with its name to a text/meta buffer via FUN_1024a290(ctx,name,type_meta,value). Reveals the fixed 16-byte packet header wire layout.",
+   "subsystem": "tlv-serializer",
+   "msgId": "n/a (frame header)",
+   "direction": "both",
+   "confidence": "high",
+   "serverRelevance": "CRITICAL: this is the fixed packet-framing header every message is wrapped in. Server MUST produce/parse this exact 16-byte layout: u16 wCmdID (opcode), u16 wHeadLen, u32 dwBodyLen, u32 dwSeqID, u32 dwNoUse.",
+   "protocolFields": [
+    "wCmdID: uint16 @ 0x0 - command/opcode id",
+    "wHeadLen: uint16 @ 0x2 - header length",
+    "dwBodyLen: uint32 @ 0x4 - body/payload length",
+    "dwSeqID: uint32 @ 0x8 - sequence id",
+    "dwNoUse: uint32 @ 0xc - reserved/unused"
+   ],
+   "relatedTlv": [
+    "CPkgHead / packet frame header"
+   ],
+   "tlvDocDiscrepancy": "No packet-header doc present in TLV_DOCS to compare against; layout recovered here (size 0x10). Uses DebugFormat helper FUN_1024a290 with u16 meta DAT_11d9e0b4 and u32 meta DAT_11d9f574.",
+   "notes": "param_1 is CPkgHead*; not a 0x99 TdrBuf writer but the struct's meta/print descriptor. DAT distinguishes u16 vs u32 field meta."
+  },
+  {
+   "address": "10459960",
+   "currentName": "FUN_10459960",
+   "proposedName": "Pkg_TdrDebugFormat_HeadBody",
+   "purpose": "TdrBufUtil.cpp packet meta/DebugFormat wrapper: emits [stHead] (calls PkgHead_TdrDebugFormat 104227c0) then [stBody] and recurses into the body serializer FUN_1043b460. Represents full packet = header + body framing.",
+   "subsystem": "tlv-serializer",
+   "msgId": "n/a (frame)",
+   "direction": "both",
+   "confidence": "high",
+   "serverRelevance": "Confirms packet = {stHead: CPkgHead, stBody: <opcode-specific payload>}. Server must frame every message this way.",
+   "protocolFields": [
+    "stHead: CPkgHead @ header",
+    "stBody: variable payload"
+   ],
+   "relatedTlv": [
+    "CPkgHead + body"
+   ],
+   "tlvDocDiscrepancy": "",
+   "notes": "src string D:\\MHFC\\...\\PacketCode\\TdrBufUtil.cpp; asserts NULL!=variable. Stock TDR meta plumbing."
+  },
+  {
+   "address": "104a6ea0",
+   "currentName": "FUN_104a6ea0",
+   "proposedName": "IsCatArchetypeName",
+   "purpose": "Returns 1 if the passed archetype/class name is one of the cat (Felyne) prototypes: CatPrototype, Cat_Farming, CatInCity, CatNewType. Pure string classification helper.",
+   "subsystem": "other",
+   "msgId": "unknown",
+   "direction": "unknown",
+   "confidence": "high",
+   "serverRelevance": "No. Client-side entity archetype classification.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "_stricmp chain."
+  },
+  {
+   "address": "105474f0",
+   "currentName": "FUN_105474f0",
+   "proposedName": "GameLogicEvent_Dispatch_A (virtualized)",
+   "purpose": "Very large event dispatcher registering/routing named game & logic events (RegisterGameEvent, RegisterLogicEvent, EnterInstance, LeaveInstanceReq, RoleListResponse, SelectRoleResponse, GMCommand, GotoMap, level load, etc). Maps event-name strings to handlers.",
+   "subsystem": "dispatch",
+   "msgId": "multiple (name-keyed)",
+   "direction": "both",
+   "confidence": "low",
+   "serverRelevance": "Indirect: consumes several S2C responses (RoleListResponse, SelectRoleResponse, EnterInstance). Actual wire handling is elsewhere; this is the client event bus.",
+   "protocolFields": [],
+   "relatedTlv": [
+    "RoleListResponse",
+    "SelectRoleResponse",
+    "EnterInstance"
+   ],
+   "tlvDocDiscrepancy": "",
+   "notes": "size 41012, <decompile failed/virtualized> - only string table available."
+  },
+  {
+   "address": "105afde0",
+   "currentName": "FUN_105afde0",
+   "proposedName": "NetEventResponse_Dispatch_B (virtualized)",
+   "purpose": "Very large network-response event dispatcher. String table lists S2C responses: ServerConnectStart/Succeeded/Failed, PingResult, Disconnected, EnterInstanceResponse, InstanceVerifyResponse, GlobalErrcode, CheckVersionResponse, RoleListResponse, SelectRoleResponse, Team*Response, PlayerTask*Response, PVPScore/EventResponse, TeamInviteAsk/Rsp. Routes decoded server messages to UI/logic listeners.",
+   "subsystem": "dispatch",
+   "msgId": "multiple (name-keyed)",
+   "direction": "S2C",
+   "confidence": "low",
+   "serverRelevance": "HIGH (indirect): enumerates the server->client response set the client expects. Server must emit these responses; exact opcodes not visible here (virtualized).",
+   "protocolFields": [],
+   "relatedTlv": [
+    "CheckVersionResponse",
+    "RoleListResponse",
+    "SelectRoleResponse",
+    "EnterInstanceResponse",
+    "InstanceVerifyResponse",
+    "TeamInviteAsk",
+    "TeamInviteRsp",
+    "PVPScoreResponse",
+    "PVPEventResponse"
+   ],
+   "tlvDocDiscrepancy": "",
+   "notes": "size 114292, <decompile failed/virtualized>. Best treated as index of expected S2C events."
+  },
+  {
+   "address": "107fd030",
+   "currentName": "FUN_107fd030",
+   "proposedName": "MsgHandler_TaskDialogClose_A",
+   "purpose": "Message/event handler triggered on a task/dialogue-related network event: looks up the referenced entity by id (param_2+0xc), plays UI Flash notifications (0x139e), clears mini-map trace info when the tracked target matches, and forwards code 0xcb to a subsystem. Task/NPC dialogue completion flow.",
+   "subsystem": "msg-handler",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "low",
+   "serverRelevance": "Server triggers the NPC-task/dialogue state change; these are client-side reactions (UI FX, mini-map). Server must send the driving task-progress/dialogue message; opcode not identifiable here.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "UI action strings: ClearMiniMapTraceInfo. param is an in-game entity/event record, not a raw TLV."
+  },
+  {
+   "address": "107fd390",
+   "currentName": "FUN_107fd390",
+   "proposedName": "MsgHandler_NpcTaskDlgComplete_A",
+   "purpose": "Handler for NPC task dialogue completion: entity lookup by id, fires UI FX 0xff4/0x1389 depending on entity flags, clears mini-map trace, and when condition FUN_1050a110(0xf) set plays PlayNpcTaskDlgCompleteFx via UI action dispatcher.",
+   "subsystem": "msg-handler",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "low",
+   "serverRelevance": "Server triggers the NPC-task/dialogue state change; these are client-side reactions (UI FX, mini-map). Server must send the driving task-progress/dialogue message; opcode not identifiable here.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "UI action strings: ClearMiniMapTraceInfo, PlayNpcTaskDlgCompleteFx. param is an in-game entity/event record, not a raw TLV."
+  },
+  {
+   "address": "107fdf20",
+   "currentName": "FUN_107fdf20",
+   "proposedName": "MsgHandler_NpcTaskDlgComplete_B",
+   "purpose": "Variant of NpcTaskDlgComplete handler taking int* payload; same entity-lookup + UI FX + mini-map clear + PlayNpcTaskDlgCompleteFx path, plus extra branches (FUN_105ec1c0 / FUN_105e4fe0).",
+   "subsystem": "msg-handler",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "low",
+   "serverRelevance": "Server triggers the NPC-task/dialogue state change; these are client-side reactions (UI FX, mini-map). Server must send the driving task-progress/dialogue message; opcode not identifiable here.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "UI action strings: ClearMiniMapTraceInfo, PlayNpcTaskDlgCompleteFx. param is an in-game entity/event record, not a raw TLV."
+  },
+  {
+   "address": "107feb50",
+   "currentName": "FUN_107feb50",
+   "proposedName": "MsgHandler_TaskDialogClose_B",
+   "purpose": "Task/dialogue handler variant (int* payload) with stack-guard frame; entity lookup, UI FX 0x139e, mini-map trace clear, conditional subsystem calls (FUN_105e4fe0/FUN_105ec1c0).",
+   "subsystem": "msg-handler",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "low",
+   "serverRelevance": "Server triggers the NPC-task/dialogue state change; these are client-side reactions (UI FX, mini-map). Server must send the driving task-progress/dialogue message; opcode not identifiable here.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "UI action strings: ClearMiniMapTraceInfo. param is an in-game entity/event record, not a raw TLV."
+  },
+  {
+   "address": "10851330",
+   "currentName": "FUN_10851330",
+   "proposedName": "MsgHandler_ChangeFaceOrSex_S2C",
+   "purpose": "Handles a face/sex change notification: depending on state at param_1+0x128 (1=face, 2=sex) it invokes the FlashUI ActionScript callback _root.onReceiveCurrentChangeFaceNumber or _root.onReceiveCurrentChangeSexNumber with the value from param_2. Character appearance update.",
+   "subsystem": "msg-handler",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "medium",
+   "serverRelevance": "Server sends face/sex change result; client pushes number to Flash UI. Server must deliver the new face/sex value.",
+   "protocolFields": [
+    "value: uint32 @ payload[0] (face) or payload[1] (sex)"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "Uses FlashUI system (DAT_1202e818). Refcount juggling on smart-ptrs."
+  },
+  {
+   "address": "109daac0",
+   "currentName": "FUN_109daac0",
+   "proposedName": "UI_PopulateInstanceLevelInfo",
+   "purpose": "Populates instance/level info fields into a UI data model via FUN_104d1550/FUN_104d1700: LevelId, LevelName, LevelCharLevel, LevelShowMonsterId, LevelNeedPlayerMin/Max, LevelEnterLimitTimes, LevelCurrentEnterTimes, LevelReqBuffId, LevelBuffCnt, LevelCanEnterTimes. Reads from level-config objects and pet/buff managers.",
+   "subsystem": "other",
+   "msgId": "unknown",
+   "direction": "unknown",
+   "confidence": "medium",
+   "serverRelevance": "Reads server-provided level/instance config indirectly; itself a client UI populate routine. Server relevance is in the underlying level data, not this function.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "Calls CPet::SetName; FUN_116ae260(id) fetches level-attribute records."
+  },
+  {
+   "address": "10d0e640",
+   "currentName": "FUN_10d0e640",
+   "proposedName": "AI_LoadFearSteeringParams",
+   "purpose": "Loads AI 'Fear' steering behaviour parameters from a config/property node into the steering struct: Steer_FearMaxEvents, TimeDeltaWeight, SensorDistance, MinDistance, EstimationTime, AnimName, ReactionTime, SpeedMultiplier (written at fixed struct offsets).",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "high",
+   "serverRelevance": "No. Client/AI behaviour config; not network.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "Pure CryAISystem steering param binding."
+  },
+  {
+   "address": "10e1bdd0",
+   "currentName": "FUN_10e1bdd0",
+   "proposedName": "FlowNode_GetFarmInfo_RegisterPorts",
+   "purpose": "Lazy one-time registration of a FlowGraph/UI event node named 'GetFarmInfo' and its output ports: Success, FishingLV, BugLV, HerbLV, LandLV, MineLV, MushroomLV, HoneyLV. Fills a static node descriptor (input def @DAT_120325f0, output defs @DAT_12032628) returned via param_1.",
+   "subsystem": "other",
+   "msgId": "unknown",
+   "direction": "S2C",
+   "confidence": "medium",
+   "serverRelevance": "Indirect: names the farm-info result fields (gathering skill levels) surfaced to UI. The wire data comes via a farm-info response (see TlvFarmData/GetFarmInfo message); this is only the UI/flowgraph descriptor, NOT the wire serializer.",
+   "protocolFields": [
+    "Success",
+    "FishingLV",
+    "BugLV",
+    "HerbLV",
+    "LandLV",
+    "MineLV",
+    "MushroomLV",
+    "HoneyLV"
+   ],
+   "relatedTlv": [
+    "TlvFarmData",
+    "GetFarmInfo (response)"
+   ],
+   "tlvDocDiscrepancy": "These UI port names (skill LVs) do not appear in TlvFarmData.md (which lists farmID/ownerUID/ownerDBID/credit/hits...). This is a different, UI-facing farm summary not the TlvFarmData wire struct - not a direct doc conflict but note the two 'farm' structures are distinct.",
+   "notes": "CryEngine flow-node self-registration pattern with bitmask guard DAT_12032620."
+  },
+  {
+   "address": "115d8840",
+   "currentName": "FUN_115d8840",
+   "proposedName": "PvpDamage_GetTimeDecayMultiplier",
+   "purpose": "Looks up CPvpDamageParmInfo 2D table by a key from vtable+0x2c and returns a damage multiplier = 1.0 - table[key].field14/scale (time-based PvP damage decay).",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "medium",
+   "serverRelevance": "PvP damage-scaling formula from a config table. If server authoritatively computes PvP damage it must replicate this table/formula; but function itself is client-side.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "CPvpDamageParmInfo config table (FindInfoByKey/GetManagers)."
+  },
+  {
+   "address": "115d8940",
+   "currentName": "FUN_115d8940",
+   "proposedName": "PvpDamage_LookupEntryByKey",
+   "purpose": "Indexes the CPvpDamageParmInfo 2D array (base/stride at +0x30/+0x28) by an integer key and returns the matching entry pointer, else 0.",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "medium",
+   "serverRelevance": "PvP damage-scaling formula from a config table. If server authoritatively computes PvP damage it must replicate this table/formula; but function itself is client-side.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "CPvpDamageParmInfo config table (FindInfoByKey/GetManagers)."
+  },
+  {
+   "address": "115daad0",
+   "currentName": "FUN_115daad0",
+   "proposedName": "PvpDamage_GetDistanceScaledValue",
+   "purpose": "CPvpDamageParmInfo lookup via vtable+0x4c returning a distance/level-scaled float (entry.field18*field1c/(dist+field20)); PvP damage falloff calc.",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "medium",
+   "serverRelevance": "PvP damage-scaling formula from a config table. If server authoritatively computes PvP damage it must replicate this table/formula; but function itself is client-side.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "CPvpDamageParmInfo config table (FindInfoByKey/GetManagers)."
+  },
+  {
+   "address": "118a46e0",
+   "currentName": "FUN_118a46e0",
+   "proposedName": "ParseGatherResourceConfigRow",
+   "purpose": "Parses a gathering-resource config record from an XML/property reader (param_2 vtable: HasAttr@0x10, GetInt@0x20, GetStr@0x24, GetFloat@0x30) into a struct: ResourceID, MapID, LevelMin/Max, DifMin/Max, ResType, RichType(1/2), SpecTool, ToolLevel, ToolDmgProb, IsShared(bool), GatherMin/Max, CatGatherMin/Max, ViewArcheTypeName, LifeTime(float). Column-name ids cached in DAT_1239bdbc bitmask.",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "high",
+   "serverRelevance": "Config-table loader (gather resource definitions). Server that spawns/validates gather nodes needs equivalent data, but this is a client XML parser, not wire code.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "size 4994; wchar column names. Lazy interning of column names via FUN_100e1bf0/FUN_100f67b0."
+  },
+  {
+   "address": "11a348f0",
+   "currentName": "FUN_11a348f0",
+   "proposedName": "ParseActivityLootCoeffConfigRow",
+   "purpose": "Parses an activity loot-coefficient config record from a property reader into struct: ActivityId, PlayerLootChanceCoefficient, GatherMinCoefficient, GatherMaxCoefficient (written at +0x10/+0x14/+0x18/+0x1c). Column-name ids cached in DAT_123a965c bitmask.",
+   "subsystem": "other",
+   "msgId": "n/a",
+   "direction": "unknown",
+   "confidence": "high",
+   "serverRelevance": "Config-table loader for activity loot/gather multipliers. Loot chance is server-authoritative in most designs, so server needs this data; function itself is client-side XML parse.",
+   "protocolFields": [],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "Same lazy column-intern pattern as 118a46e0."
+  },
+  {
+   "address": "10a7bea0",
+   "currentName": "FUN_10a7bea0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7bea0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7bf70",
+   "currentName": "FUN_10a7bf70",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7bf70",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x14; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x1c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x14.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x14",
+    "SRMIParams/handler ptr @ +0x1c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c040",
+   "currentName": "FUN_10a7c040",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c040",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c110",
+   "currentName": "FUN_10a7c110",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c110",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x48; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x50)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x48.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x48",
+    "SRMIParams/handler ptr @ +0x50"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c1e0",
+   "currentName": "FUN_10a7c1e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c1e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x24; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x2c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x24.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x24",
+    "SRMIParams/handler ptr @ +0x2c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c2b0",
+   "currentName": "FUN_10a7c2b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c2b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c380",
+   "currentName": "FUN_10a7c380",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c380",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c450",
+   "currentName": "FUN_10a7c450",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c450",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c520",
+   "currentName": "FUN_10a7c520",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c520",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x2c; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x34)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x2c.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x2c",
+    "SRMIParams/handler ptr @ +0x34"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c5f0",
+   "currentName": "FUN_10a7c5f0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c5f0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10a7c6c0",
+   "currentName": "FUN_10a7c6c0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10a7c6c0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10b39950",
+   "currentName": "FUN_10b39950",
+   "proposedName": "RMI_RecvDispatch_Thunk_10b39950",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10b39a20",
+   "currentName": "FUN_10b39a20",
+   "proposedName": "RMI_RecvDispatch_Thunk_10b39a20",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10b3dbc0",
+   "currentName": "FUN_10b3dbc0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10b3dbc0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x24; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x2c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x24.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x24",
+    "SRMIParams/handler ptr @ +0x2c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10b3dc90",
+   "currentName": "FUN_10b3dc90",
+   "proposedName": "RMI_RecvDispatch_Thunk_10b3dc90",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x28; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x30)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x28.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x28",
+    "SRMIParams/handler ptr @ +0x30"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c30f40",
+   "currentName": "FUN_10c30f40",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c30f40",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x14; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x1c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x14.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x14",
+    "SRMIParams/handler ptr @ +0x1c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31010",
+   "currentName": "FUN_10c31010",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31010",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c310e0",
+   "currentName": "FUN_10c310e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c310e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x1c; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x24)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x1c.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x1c",
+    "SRMIParams/handler ptr @ +0x24"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c311b0",
+   "currentName": "FUN_10c311b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c311b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31280",
+   "currentName": "FUN_10c31280",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31280",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31350",
+   "currentName": "FUN_10c31350",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31350",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xac; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0xb4)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xac.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xac",
+    "SRMIParams/handler ptr @ +0xb4"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31430",
+   "currentName": "FUN_10c31430",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31430",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31500",
+   "currentName": "FUN_10c31500",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31500",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c315d0",
+   "currentName": "FUN_10c315d0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c315d0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x188; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x190)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x188.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x188",
+    "SRMIParams/handler ptr @ +0x190"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c316b0",
+   "currentName": "FUN_10c316b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c316b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31780",
+   "currentName": "FUN_10c31780",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31780",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31850",
+   "currentName": "FUN_10c31850",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31850",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31920",
+   "currentName": "FUN_10c31920",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31920",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c319f0",
+   "currentName": "FUN_10c319f0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c319f0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31ac0",
+   "currentName": "FUN_10c31ac0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31ac0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x14; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x1c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x14.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x14",
+    "SRMIParams/handler ptr @ +0x1c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31b90",
+   "currentName": "FUN_10c31b90",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31b90",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31c60",
+   "currentName": "FUN_10c31c60",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31c60",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31d30",
+   "currentName": "FUN_10c31d30",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31d30",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x24; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x2c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x24.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x24",
+    "SRMIParams/handler ptr @ +0x2c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31e00",
+   "currentName": "FUN_10c31e00",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31e00",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x20; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x28)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x20.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x20",
+    "SRMIParams/handler ptr @ +0x28"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31ed0",
+   "currentName": "FUN_10c31ed0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31ed0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c31fa0",
+   "currentName": "FUN_10c31fa0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c31fa0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c32070",
+   "currentName": "FUN_10c32070",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c32070",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x14; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x1c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x14.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x14",
+    "SRMIParams/handler ptr @ +0x1c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c32140",
+   "currentName": "FUN_10c32140",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c32140",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c32210",
+   "currentName": "FUN_10c32210",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c32210",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x24; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x2c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x24.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x24",
+    "SRMIParams/handler ptr @ +0x2c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c322e0",
+   "currentName": "FUN_10c322e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c322e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10c89a30",
+   "currentName": "FUN_10c89a30",
+   "proposedName": "RMI_RecvDispatch_Thunk_10c89a30",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x14; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x1c)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x14.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x14",
+    "SRMIParams/handler ptr @ +0x1c"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10cc5670",
+   "currentName": "FUN_10cc5670",
+   "proposedName": "RMI_RecvDispatch_Thunk_10cc5670",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10cc5740",
+   "currentName": "FUN_10cc5740",
+   "proposedName": "RMI_RecvDispatch_Thunk_10cc5740",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db31e0",
+   "currentName": "FUN_10db31e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db31e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db32b0",
+   "currentName": "FUN_10db32b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db32b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db3380",
+   "currentName": "FUN_10db3380",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db3380",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db3450",
+   "currentName": "FUN_10db3450",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db3450",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db3520",
+   "currentName": "FUN_10db3520",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db3520",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db35f0",
+   "currentName": "FUN_10db35f0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db35f0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x30; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x38)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x30.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x30",
+    "SRMIParams/handler ptr @ +0x38"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db36c0",
+   "currentName": "FUN_10db36c0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db36c0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10db3790",
+   "currentName": "FUN_10db3790",
+   "proposedName": "RMI_RecvDispatch_Thunk_10db3790",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed05e0",
+   "currentName": "FUN_10ed05e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed05e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed06b0",
+   "currentName": "FUN_10ed06b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed06b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed0780",
+   "currentName": "FUN_10ed0780",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed0780",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed0850",
+   "currentName": "FUN_10ed0850",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed0850",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed0920",
+   "currentName": "FUN_10ed0920",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed0920",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed09f0",
+   "currentName": "FUN_10ed09f0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed09f0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x30; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x38)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x30.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x30",
+    "SRMIParams/handler ptr @ +0x38"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed0ac0",
+   "currentName": "FUN_10ed0ac0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed0ac0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10ed0b90",
+   "currentName": "FUN_10ed0b90",
+   "proposedName": "RMI_RecvDispatch_Thunk_10ed0b90",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f27de0",
+   "currentName": "FUN_10f27de0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f27de0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f27eb0",
+   "currentName": "FUN_10f27eb0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f27eb0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f27f80",
+   "currentName": "FUN_10f27f80",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f27f80",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f28050",
+   "currentName": "FUN_10f28050",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f28050",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f28120",
+   "currentName": "FUN_10f28120",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f28120",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f281f0",
+   "currentName": "FUN_10f281f0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f281f0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x30; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x38)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x30.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x30",
+    "SRMIParams/handler ptr @ +0x38"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f282c0",
+   "currentName": "FUN_10f282c0",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f282c0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "10f28390",
+   "currentName": "FUN_10f28390",
+   "proposedName": "RMI_RecvDispatch_Thunk_10f28390",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "1110fe60",
+   "currentName": "FUN_1110fe60",
+   "proposedName": "RMI_RecvDispatch_Thunk_1110fe60",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "1110ff30",
+   "currentName": "FUN_1110ff30",
+   "proposedName": "RMI_RecvDispatch_Thunk_1110ff30",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "11110000",
+   "currentName": "FUN_11110000",
+   "proposedName": "RMI_RecvDispatch_Thunk_11110000",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x10; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x18)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x10.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x10",
+    "SRMIParams/handler ptr @ +0x18"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "111100d0",
+   "currentName": "FUN_111100d0",
+   "proposedName": "RMI_RecvDispatch_Thunk_111100d0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "111101a0",
+   "currentName": "FUN_111101a0",
+   "proposedName": "RMI_RecvDispatch_Thunk_111101a0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "11110270",
+   "currentName": "FUN_11110270",
+   "proposedName": "RMI_RecvDispatch_Thunk_11110270",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x40; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x48)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x40.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x40",
+    "SRMIParams/handler ptr @ +0x48"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "11110340",
+   "currentName": "FUN_11110340",
+   "proposedName": "RMI_RecvDispatch_Thunk_11110340",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0x18; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x20)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0x18.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0x18",
+    "SRMIParams/handler ptr @ +0x20"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "11110410",
+   "currentName": "FUN_11110410",
+   "proposedName": "RMI_RecvDispatch_Thunk_11110410",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "111104e0",
+   "currentName": "FUN_111104e0",
+   "proposedName": "RMI_RecvDispatch_Thunk_111104e0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  },
+  {
+   "address": "111105b0",
+   "currentName": "FUN_111105b0",
+   "proposedName": "RMI_RecvDispatch_Thunk_111105b0",
+   "purpose": "CryEngine RMI receive-dispatch thunk. Resolves the target entity via EntitySystem (gEnv+4 ->vtable+0x3c ->vtable+0x144) using the net entity-id at param+0xc; if the entity's game-object extension (vtable+0x58) exists it invokes the per-RMI decode/handler function pointer stored in the SRMIParams (param+0x14)(param+8, netChannel); on failure it either logs 'Entity %d for RMI %s not found' and, if not in tolerant mode, disconnects the channel with error code 7.",
+   "subsystem": "rmi",
+   "msgId": "unknown (RMI, name in SRMIParams descriptor at runtime)",
+   "direction": "both",
+   "confidence": "medium",
+   "serverRelevance": "Server side must originate the matching RMI invocation (attached to this entity/netchannel) for the client to dispatch it. This is stock CryEngine RMI plumbing (auto-generated per RMI); the concrete message/action is defined by the SRMIParams descriptor pointer, not visible in the thunk. Entity-id lives at struct offset 0xc.",
+   "protocolFields": [
+    "entity_netId: uint32 @ +0xc",
+    "SRMIParams/handler ptr @ +0x14"
+   ],
+   "relatedTlv": [],
+   "tlvDocDiscrepancy": "",
+   "notes": "One of ~72 identical thunks in this chunk; differ only by the entity-id offset (payload prefix size) per RMI signature. Stock CryEngine RMI transport - flag as engine infra."
+  }
+ ]
+}

@@ -1,0 +1,449 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x108ccb40",
+      "currentName": "FUN_108ccb40",
+      "proposedName": "CPetShopController::InitModel_RegisterHandlers",
+      "purpose": "Scaleform/UI controller init for the Pet Shop window. Registers named script callbacks: InitModel, handle_filterinteligence/filterquality/filternature_dropdown_click, onPetFightClick, onPetProduceClick, NotifyPetAvatarEvent, OnClose. Each pair (FUN_100b62c0 build-string, FUN_108cfdf0 register) binds a handler function to a name; FUN_108cf410/FUN_108cf5b0 etc are the concrete handlers. Tail calls FUN_108d03a0 after two guard checks (FUN_10d17440/FUN_10d17870).",
+      "confidence": "high",
+      "subsystem": "pet-ui/shop",
+      "serverRelevance": "client-only (UI event registration; no game state)",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handler names of interest to server protocol: onPetFightClick, onPetProduceClick (pet produce/gathering), NotifyPetAvatarEvent."
+    },
+    {
+      "address": "0x108cce00",
+      "currentName": "FUN_108cce00",
+      "proposedName": "CPetShopController::OnInitModel",
+      "purpose": "InitModel handler for the pet shop. Registers request handlers: _requestBuyBackItem->FUN_108cd070(buyback path), _requestBuyItem->FUN_108cd070, _requestNpcSales->FUN_108cd400, _requestSoldList->FUN_108ce7d0, _requestSellItem->FUN_108cef10, _requestGetBuyStackCounts->FUN_108cfa10 (all via FUN_104d13b0). Sets shop-mode flag DAT_123bbab1 = (param_5 == 2). Pushes CurrentBindMoney/CurrentUnbindMoney (from two FUN_1025b060 money getters) and strPetShopTitle to the Scaleform model when the player entity (DAT_1202e818+0xd0 -> +0x90) is valid.",
+      "confidence": "high",
+      "subsystem": "pet-ui/shop",
+      "serverRelevance": "client-only (display of server-owned money; money values read locally via FUN_1025b060)",
+      "formulas": [
+        "shopModeFlag DAT_123bbab1 = (param_5 == 2)",
+        "param_4[1] presence-flags: bit6 ((>>6)&1) gates optional string/object refs (recurring TDR-style presence pattern across chunk)"
+      ],
+      "costs": ["CurrentBindMoney and CurrentUnbindMoney read from FUN_1025b060 (bound vs unbound gold getters)"],
+      "notes": "DAT_1202e818 = global game/client context; (+0xd0)=local player entity, (+0x90)=its pet/logic component."
+    },
+    {
+      "address": "0x108cd400",
+      "currentName": "FUN_108cd400",
+      "proposedName": "CPetShopController::OnRequestNpcSales_BuildSaleVO",
+      "purpose": "Handles _requestNpcSales (only when param_5==7). Builds shopSaleItemDataArray of SALE_ITEM_DATA entries (each with nested EXCHANGE_DATA_CLASS / arrayExchangeItem) for the pet-shop NPC sale list, with pagination. Iterates the shop's sale-record container, filters by category/shopID/etc, and for each visible page item emits a VO: backItem, SaleItemId(*rec), shopID(rec[1]), ItemId(rec[8]), ItemNum(rec[9]), UnBindGold(byte rec[0xb]), salesCount, backItemIndex, itemPrice, itemName, maxStackCount(itemInfo+0x50), packTag, currentBindMoney, currentMoney, plus per-exchange itemName/itemCount/itemID/currentCounts and up to 13 special-item slots.",
+      "confidence": "medium",
+      "subsystem": "pet-ui/shop",
+      "serverRelevance": "client-only VO builder for display; prices/counts derived from client-side item info + server-synced sale records. Server remains authoritative for actual buy/sell transactions.",
+      "formulas": [
+        "page skip count local_fc = (local_58 >= 0 && local_8c > 0) ? local_58 * local_8c : 0  (local_58=page index/size input arg7@rec[0x14], local_8c=count arg from rec[0xe])",
+        "salesCount local_b4 = (local_d8 - firstRec) / 0xb0  (0xb0 = size of one sale-record struct)",
+        "itemPrice = FUN_114b74e0(rec-2, rec[9])  (unit price * ItemNum); when itemInfo(FUN_10254130(rec[8]))==0 -> itemPrice=0, itemName=empty, maxStackCount=0",
+        "exchange itemCount = rec[9] * exchangePrice, where exchangePrice local_5c = FUN_114b7110(rec-2,*ex)+ex[1]; iterate ex pairs from rec[0x1f]..rec[0x20] (stride 2)",
+        "currentCounts = FUN_113f9300(0,itemID,0) + FUN_113f9300(2,itemID,0) + FUN_113f9300(10,itemID,0)  (owned counts across bag containers 0,2,10)",
+        "packTag local_54: 0 if page position local_88==0 (first); 2 if local_88==local_8c-1 or last record (rec+0x2a==end); else 1 (middle)",
+        "record stride = 0x2c dwords (0xb0 bytes): loop advances local_50 += 0x2c; ItemId at rec[8], ItemNum at rec[9], UnBindGold byte at rec[0xb], SaleItemId at rec[0], shopID at rec[1], exchange list rec[0x1f]..rec[0x20]",
+        "special items: loop iVar3 0..12 (13 types); FUN_108cfae0 gets (count,name), FUN_108cfc80 gets currentSpecial count; fields specialItemName%d/specialItemCounts%d/currentSpecialItem%dCounts/specialItemType%d"
+      ],
+      "costs": [
+        "UnBindGold flag per item (rec[0xb] low byte)",
+        "itemPrice = unit price * ItemNum (FUN_114b74e0)",
+        "currentBindMoney/currentMoney from FUN_1025b060",
+        "13 special-item exchange slots per sale item"
+      ],
+      "notes": "gated by param_5==7 and valid player logic component (DAT_1202e818+0xd0+0x90+0xb4()). local_100 = *(playerLogic+0x2cd8) is the pet/shop sub-component. Sale-record struct size 0xb0 is load-bearing. Verify FUN_114b74e0 (price) and FUN_113f9300 (bag count by container id) against economy chunk."
+    },
+    {
+      "address": "0x108d15f0",
+      "currentName": "FUN_108d15f0",
+      "proposedName": "CCatCuisineInfo::GetRecordByKey",
+      "purpose": "Config-record accessor for CCatCuisineInfo (Felyne/Palico cuisine buff table). Resolves the singleton manager (CCatCuisineInfo::GetManager, fallback CInfoManager::FindByName). Then does the standard CInfoManager 2D paged-array lookup to return the record pointer for key param_1.",
+      "confidence": "high",
+      "subsystem": "pet-cuisine",
+      "serverRelevance": "config-data lookup (cuisine buff definitions); data table shared by client and server, server authoritative for applying cuisine buffs.",
+      "formulas": [
+        "lookup: if param_1==-1 return 0; if (param_1==0 && mgr[0xc]!=0) return 0; require mgr[10]!=0; idx = param_1 - mgr[0xc] (base id at [0xc]); require 0<=idx<mgr[9] (count at [9]); row=*(mgr[8] + (idx / mgr[10])*4) (table ptr [8], stride/page mgr[10]); if row!=0 return *(row + (idx % mgr[10])*4)",
+        "This paged-array pattern (base [0xc], count [9], stride [10], table [8]) is reused by all CInfoManager accessors in this chunk."
+      ],
+      "costs": [],
+      "notes": "Related TLV: TlvCatCuisineData / TlvCatCuisineState. Cuisine buff numeric values live in the record this returns; not dereferenced here."
+    },
+    {
+      "address": "0x108e3340",
+      "currentName": "FUN_108e3340",
+      "proposedName": "CFarmPetModel::BuildFarmPetVO",
+      "purpose": "Builds the farm/gather pet VO for UI. Requires valid player logic component and a gather flag (vtbl+0x16c). Pushes: farmPoint(*(ctx+0x14)), farmExp(FUN_1025b060), bFriendGatherBonus(byte ctx+0xe8), bSkipCutScene(byte ctx+0xe9), bFarmPetVisible(cvar g_ShowFarmPet), ownerID. If owner != local player's 64-bit ID (DAT_123bbac8/DAT_123bbacc), resolves the friend entry and adds friendName, friendFarmPoint(*(friend+0x4c)), friendRemainGatherCnt(*(+0xe4)). Sets param_1 status byte (2,then result 0/1).",
+      "confidence": "medium",
+      "subsystem": "pet-farm/gather",
+      "serverRelevance": "client-only VO builder; farmPoint/farmExp/remainGatherCnt are server-owned values displayed here. Server authoritative for gather counts and rewards.",
+      "formulas": [
+        "friend check: (**(piVar2+0xc0))() (owner 64-bit id) compared to CONCAT44(DAT_123bbacc,DAT_123bbac8) (local player id); equal => own pet path (status=1)",
+        "ctx offsets: farmPoint @ +0x14, bFriendGatherBonus @ +0xe8 (byte), bSkipCutScene @ +0xe9 (byte), friendRemainGatherCnt @ +0xe4",
+        "friend entry offsets: friendFarmPoint @ +0x4c, name id @ +0x24"
+      ],
+      "costs": ["farmPoint, farmExp, friendFarmPoint, friendRemainGatherCnt (gather currency/counters, server-owned)"],
+      "notes": "g_ShowFarmPet is a client cvar via DAT_1202e818+0x2c (console). friendRemainGatherCnt read from unaff_EDI+0xe4 (decompiler lost the base; = ctx)."
+    },
+    {
+      "address": "0x108e7d30",
+      "currentName": "FUN_108e7d30",
+      "proposedName": "CPetModel::BuildPetPropertyAndFLSuccessVO",
+      "purpose": "Builds two VOs. (1) PetPropertyALLVO_CLASS_NAME.petList: iterates the player's pet array (stride 0x30) building per-pet entries strName, level, petindex, petid, status, otherStatus. (2) PetFLSuccessVo (farm-advance / breeding success): iterates advancement levels and, via CFarmAdvPetInfo record lookup (paged-array), fills strSuccess, strBigSuccess into successList, plus needToolCount/needToolID/needToolName/needToolIcon.",
+      "confidence": "medium",
+      "subsystem": "pet-farm/advance",
+      "serverRelevance": "client-only VO builder; pet list & advancement (soul-beast/breeding 'success' rate) data are server-owned and displayed here. CFarmAdvPetInfo supplies success text/tool requirements.",
+      "formulas": [
+        "pet-list iteration count = (iStack_f4 - firstPet) / 0x30 (pet entry stride 0x30 bytes); per entry: status @ +0x00 area, transform block copied from +0x20..+0x2c",
+        "CFarmAdvPetInfo lookup (paged array on puVar7): base +0x30, count +0x24, stride +0x28, table +0x20 -> record used for strSuccess/strBigSuccess",
+        "advancement loop index uVar4 from 1, count = (unaff_EDI - successListBase)/0x30"
+      ],
+      "costs": ["needToolCount / needToolID (materials required for pet advancement/breeding success)"],
+      "notes": "PetFLSuccessVo = 'FL' (farm/breed?) success VO. 'strSuccess'/'strBigSuccess' = normal vs great success outcome strings. Actual success probabilities not computed here (server authoritative); this only reads config text. Verify CFarmAdvPetInfo record fields for numeric success rates in a later chunk."
+    },
+    {
+      "address": "0x108ecfb0",
+      "currentName": "FUN_108ecfb0",
+      "proposedName": "CFarmAdvPetInfo::GetManager",
+      "purpose": "Singleton accessor for the CFarmAdvPetInfo config manager (CFarmAdvPetInfo::GetManager, fallback CInfoManager::FindByName; lazy one-time init guarded by DAT_123c80c4 bit0). Returns manager pointer.",
+      "confidence": "high",
+      "subsystem": "pet-farm/advance",
+      "serverRelevance": "config-manager plumbing (data table lookup).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock CInfoManager singleton boilerplate."
+    },
+    {
+      "address": "0x10900850",
+      "currentName": "FUN_10900850",
+      "proposedName": "CTeamController::InitModel_RegisterHandlers",
+      "purpose": "TEAM/party UI controller init (not pet-specific). Registers a long list of team handlers: GetTeamFiltrationData, RefreshTeamInfo, SearchOtherTeam, SearchTeamChangePage, LookOtherTeamInfo, CreateTeamReq, JoinTeamReq, ReqQuitTeam, ReqChangeLeader, ReqKickMember, SetTeamOptionReq, InviteTeam, QuickJoinTeamReq, ReqSearchByName, onTeamTypeEight/Twelve/SixTeen, GetTeamMemberList, RaidInviteTeam, RaidTeamRequest, GetNetID.",
+      "confidence": "high",
+      "subsystem": "team-ui (tangential; not pets)",
+      "serverRelevance": "client-only (UI handler registration).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Appears in the pets chunk only by address adjacency; belongs to the team/party subsystem. Team sizes 8/12/16 (onTeamTypeEight/Twelve/SixTeen)."
+    },
+    {
+      "address": "0x10970dc0",
+      "currentName": "FUN_10970dc0",
+      "proposedName": "CPetBattleHudController::InitModel_RegisterHandlers",
+      "purpose": "UI controller init for pet battle HUD. Registers: InitModel->RegisterHandler_GetPetMonsterSkillData, IsPetMonsterWithBattle, IsPetMonsterWithPVP, InitEnemyPetHud, InitSelfPetHud, InitPetBattleUI. Tail path (FUN_10d17440/FUN_10d17870) calls FUN_10972290.",
+      "confidence": "high",
+      "subsystem": "pet-ui/battle",
+      "serverRelevance": "client-only (HUD registration).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Handler GetPetMonsterSkillData indicates pets can appear as monster-type battlers (pet-vs-monster and pet PvP). Skill data itself queried elsewhere."
+    },
+    {
+      "address": "0x10a04580",
+      "currentName": "FUN_10a04580",
+      "proposedName": "CCatCuisineRateInfo::GetRecordByKey",
+      "purpose": "Config accessor for CCatCuisineRateInfo (cat cuisine success-rate / quality-rate table). Resolves singleton (fallback CInfoManager::FindByName, lazy init guarded by DAT_123c9370 bit0), then standard paged-array lookup returns record for key param_1.",
+      "confidence": "high",
+      "subsystem": "pet-cuisine",
+      "serverRelevance": "config-data lookup; cuisine outcome rates likely applied server-side (authoritative). Data shared.",
+      "formulas": [
+        "same paged-array lookup: base [0xc], count [9], stride [10], table [8]; idx = param_1 - [0xc]; return table[idx/stride][idx%stride]"
+      ],
+      "costs": [],
+      "notes": "CCatCuisineRateInfo holds the numeric rates (buff activation / quality chance) keyed alongside CCatCuisineInfo. Numeric fields not dereferenced here."
+    },
+    {
+      "address": "0x10aa61d0",
+      "currentName": "FUN_10aa61d0",
+      "proposedName": "CPetApplyGroupEffect::RegisterFlowNodePorts",
+      "purpose": "Registers a CryEngine flowgraph node 'CPetApplyGroupEffect' with input ports GroupId, InputBBName, TargetEntityID (via FUN_1048b080 slot 0/1/2, FUN_1048b170). Represents applying a pet group (buff) effect to a target entity.",
+      "confidence": "medium",
+      "subsystem": "pet-skill/effect",
+      "serverRelevance": "client flownode definition; semantically a pet applies a group effect to TargetEntityID. Effect application is server-authoritative.",
+      "formulas": [
+        "port slots: GroupId (slot 0, type 5=int list?), InputBBName (slot 1, type 1), TargetEntityID (slot 2, type 1)"
+      ],
+      "costs": [],
+      "notes": "GroupId selects an effect group; effect applied to TargetEntityID. Useful for mapping support-cat / pet group-buff skill wiring."
+    },
+    {
+      "address": "0x10aaeba0",
+      "currentName": "FUN_10aaeba0",
+      "proposedName": "CPetInfo::GetRecordByIndex",
+      "purpose": "Config accessor for CPetInfo (pet definition table). Uses FUN_1053ab40(0,'CPetInfo',0) to get the manager, then a flat contiguous-array lookup (not paged): base ptr @ +0x14, end @ +0x18; count = (end-base)>>2; returns element[param_1] if in range.",
+      "confidence": "high",
+      "subsystem": "pet-core/config",
+      "serverRelevance": "config-data lookup; CPetInfo = base pet stats/definitions, shared table. Server authoritative for stat/growth application.",
+      "formulas": [
+        "count = (*(mgr+0x18) - *(mgr+0x14)) >> 2; require 0<=param_1<count; return *(base + param_1*4)",
+        "This is a flat vector<ptr> lookup, distinct from the paged-array pattern used by CCatCuisine*/CPetAvatarInfo."
+      ],
+      "costs": [],
+      "notes": "CPetInfo record fields (level curve / quality / base stats) not dereferenced here; see pet.md cross-ref."
+    },
+    {
+      "address": "0x10ad2e20",
+      "currentName": "FUN_10ad2e20",
+      "proposedName": "CPetAvatarConfig::Load",
+      "purpose": "Loads XML 'libs/avatar/PetAvatarConfig.xml' via the XML system (context vtbl+0x1c0). Reads child node count (vtbl+0xa0); if >0 sets a pointer at param_1+0x6c (then FUN_10c3d580(8) - decompiler flags no-return; likely container alloc). Releases the XML node. Returns 1.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/config",
+      "serverRelevance": "client-only (loads visual/avatar config).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Pet appearance config; not stat data."
+    },
+    {
+      "address": "0x10ae8f20",
+      "currentName": "FUN_10ae8f20",
+      "proposedName": "CPetAvatarInfo::GetRecordByKey",
+      "purpose": "Config accessor for CPetAvatarInfo (pet appearance table) via CPetAvatarInfo::FindInfoByKey manager, then paged-array lookup (base +0x30, count +0x24, stride +0x28, table +0x20).",
+      "confidence": "high",
+      "subsystem": "pet-avatar/config",
+      "serverRelevance": "config-data lookup (appearance); mostly client-only.",
+      "formulas": [
+        "paged lookup with offsets base +0x30, count +0x24, stride +0x28, table +0x20 (same shape as CCatCuisine but different member offsets on this manager type)"
+      ],
+      "costs": [],
+      "notes": "Same lookup body inlined into FUN_10aea450/10aeba30/10af84f0/10af8620/10af8900/10af89c0/10c0a490 for model-string resolution."
+    },
+    {
+      "address": "0x10aea450",
+      "currentName": "FUN_10aea450",
+      "proposedName": "CPetAvatar::ResolveModelAndAttach",
+      "purpose": "Pet avatar model resolution. If flag byte @ +0xac is 0, delegates to FUN_10aeb7b0. Otherwise reads pet-avatar key (*(this+0xb0) -> **), resolves CPetAvatarInfo record, extracts model string (record+0x28, strlen'd) via FUN_1083ab70, then applies attachment via FUN_10aebf60. Handles refcount cleanup.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering/appearance).",
+      "formulas": ["record model string ptr @ record+0x28 (null-terminated; length computed by scan)"],
+      "costs": [],
+      "notes": "CInfoRecord::GetModelString + FUN_1083ab70 set the CGF/model path for the pet avatar slot."
+    },
+    {
+      "address": "0x10aeba30",
+      "currentName": "FUN_10aeba30",
+      "proposedName": "CPetAvatar::RebuildAttachments",
+      "purpose": "Rebuilds pet avatar attachments. Clears prior attachment object (+0x370), optional reset (param_4), resolves CPetAvatarInfo model string, atoi's various string IDs from a record list at param_2 (base id @ +0x44, slot list @ +0x4c..+0x54), resolves each via CAvatarInfo::ResolveRecordById, and attaches/clears slots (CAvatarInfo::ClearSlotAttachment) walking a red-black-tree of slot entries.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (avatar equipment/appearance attachment).",
+      "formulas": [
+        "slot-record type gate: entries with (*(entry+0x10) >= 0x47) vs (<0x47) select different child pointers (0x47 = attachment record type tag)",
+        "record IDs parsed with atoi from string fields (+0x44 base, +0x28 per slot, +0x14 name)"
+      ],
+      "costs": [],
+      "notes": "0x47 recurs as the avatar-attachment record type id (also in FUN_10c0a490). Pure appearance."
+    },
+    {
+      "address": "0x10af84f0",
+      "currentName": "FUN_10af84f0",
+      "proposedName": "CPetAvatarImage::Init",
+      "purpose": "Initializes a pet avatar image object. Copies a 7-dword transform block (pos/rot/scale) from param_4 into this+0x15..+0x1b, resolves CPetAvatarInfo model string, creates the AnimObject entity via FUN_10af8a80 (stored at this+0x14), enables update (vtbl+0xf8(1)), applies transform (FUN_10af8c60/FUN_10af86c0), mirrors transform to +0x21..+0x24, marks ready byte +0x13=1. Returns 1 on success.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering).",
+      "formulas": ["transform block = 7 dwords (quat[4] @ +0x15..+0x18, pos[3] @ +0x19..+0x1b) copied from param_4[0..6]"],
+      "costs": [],
+      "notes": "this+0x14 holds the created render entity (see FUN_10af8a80)."
+    },
+    {
+      "address": "0x10af8620",
+      "currentName": "FUN_10af8620",
+      "proposedName": "CPetAvatar::SetBodyModelByKey",
+      "purpose": "Resolves CPetAvatarInfo record for key param_2 (paged lookup), sets its model string, then calls FUN_10af86c0(this+0x84, valid?1:0) to (re)apply. param_2==-1 means clear.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering).",
+      "formulas": ["valid flag uVar6 = (param_2 != -1) ? 1 : 0"],
+      "costs": [],
+      "notes": "Thin setter around the shared avatar model-resolve body."
+    },
+    {
+      "address": "0x10af8900",
+      "currentName": "FUN_10af8900",
+      "proposedName": "CPetAvatar::SetModelByKey_Temp",
+      "purpose": "Builds a temp transform holder (FUN_10af8c60), resolves CPetAvatarInfo model string for key param_2 (paged lookup), applies via FUN_10af86c0(&temp, valid?1:0).",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering).",
+      "formulas": ["valid flag = (param_2 != -1) ? 1 : 0"],
+      "costs": [],
+      "notes": "Nearly identical to FUN_10af8620 but operates on a local transform."
+    },
+    {
+      "address": "0x10af89c0",
+      "currentName": "FUN_10af89c0",
+      "proposedName": "CPetAvatar::SetTransformAndModel",
+      "purpose": "Stores a 7-dword transform block (from param_3) into this+0x54..+0x6c, computes a key (param_2!=0 ? FUN_113ef9d0() : 1), resolves CPetAvatarInfo model string for that key (paged lookup). Returns 1.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering).",
+      "formulas": [
+        "key iVar6 = (param_2 != 0) ? FUN_113ef9d0() : 1",
+        "transform: quat @ this+0x54..+0x60, pos @ +0x64..+0x6c copied from param_3[0..6]"
+      ],
+      "costs": [],
+      "notes": "FUN_113ef9d0 likely returns the equipped/selected pet avatar id."
+    },
+    {
+      "address": "0x10af8a80",
+      "currentName": "FUN_10af8a80",
+      "proposedName": "CPetAvatar::CreateAnimObjectEntity",
+      "purpose": "Creates the pet render entity. Gets EntitySystem (ctx+0x50), creates entity class 'AnimObject' named 'AvatarImagePet' flags 0x200000 with the given transform (7 dwords), then loads character model 'Objects/characters/pet/pet_skeleton.cdf' (vtbl+0x1d4), gets its render node (vtbl+0x1b8), ORs render flag |0x10 and enables (vtbl+0x1c4(1)). Returns the entity pointer.",
+      "confidence": "high",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (spawns visual-only entity).",
+      "formulas": ["render flag |= 0x10 on the pet's IRenderNode", "spawn flags = 0x200000"],
+      "costs": [],
+      "notes": "Pet skeleton asset path: Objects/characters/pet/pet_skeleton.cdf."
+    },
+    {
+      "address": "0x10af8d80",
+      "currentName": "FUN_10af8d80",
+      "proposedName": "CPetAvatar::AttachWeaponModel",
+      "purpose": "Creates the pet weapon render entity 'AvatarImagePetWeapon' (class BasicEntity, flags 0x200000), resolves weapon avatar record via CAvatarInfo::ResolveRecordById(param_2), loads its model (record+0x2c), attaches to a named weapon bone from table (&PTR_s_weapon_11df7434)[param_3], applies material (record+0x6c via material manager), and sets a full attach transform (rotation/pos from record offsets 0xc4..0xdc, scale 0x3f800000=1.0f).",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (rendering pet's weapon).",
+      "formulas": [
+        "attach transform constant 0x3f800000 = 1.0f (uniform scale)",
+        "record offsets: model @ +0x2c, material @ +0x6c (!= +0x68), rot block @ +0xc4/+0xc8/+0xcc/+0xd0/+0xd4/+0xd8/+0xdc, byte flag +0xe4, +0xe0",
+        "weapon bone name = (&PTR_s_weapon_11df7434)[param_3]"
+      ],
+      "costs": [],
+      "notes": "param_3 = weapon slot index into a bone-name pointer table."
+    },
+    {
+      "address": "0x10afb7d0",
+      "currentName": "FUN_10afb7d0",
+      "proposedName": "CPetSoul::InitAndPlayIdle",
+      "purpose": "Initializes/positions the pet SOUL (soul-beast) render object and plays 'pet_soul_idle'. Requires this+0x14 (entity) valid. Copies transform (quat this+0x15..+0x18, pos +0x19..+0x1b) plus extra params (+0x1c..+0x22), loads model param_2 (vtbl+0x1d4), enables render node (|0x10). Then computes an offset world transform via quaternion rotation of a local offset vector and applies it (vtbl+0xc4). Plays 'pet_soul_idle' loop via FUN_10afbd40. Returns 1.",
+      "confidence": "medium",
+      "subsystem": "pet-soul-beast/render",
+      "serverRelevance": "client-only (soul-beast visual/idle anim).",
+      "formulas": [
+        "uses fcos/fsin of 1.5707964 (pi/2) for a 90-degree rotation term (local_c=cos(pi/2))",
+        "quaternion rotate: rotates local offset (this+0x1c..+0x1e) by quat (this+0x15..+0x18) to produce world pos added to base pos (this+0x19..+0x1b)"
+      ],
+      "costs": [],
+      "notes": "'pet_soul_idle' is the soul-beast idle animation clip. Rendering only; evolution/state is server-owned."
+    },
+    {
+      "address": "0x10c0a490",
+      "currentName": "FUN_10c0a490",
+      "proposedName": "CPetAvatar::ResolveAvatarAndPetModel",
+      "purpose": "Given a base avatar id string (param_2), resolves it in CAvatarInfo, then resolves CPetAvatarInfo record for param_3 to get the pet model string, compares param_4 vs empty (custom weapon/attach id); if non-empty resolves it in CAvatarInfo (expects type 0x47) and applies. Finally calls FUN_10ad8ca0(param_1, avatarId, modelString). String refcount cleanup throughout.",
+      "confidence": "medium",
+      "subsystem": "pet-avatar/render",
+      "serverRelevance": "client-only (model resolution).",
+      "formulas": [
+        "avatar type check == 0x47 (attachment record type)",
+        "both CAvatarInfo and CPetAvatarInfo use paged-array lookup (base +0x30, count +0x24, stride +0x28, table +0x20)"
+      ],
+      "costs": [],
+      "notes": "mh_sharemem_addrinfo string appears (shared-memory addr info) but is stock plumbing here."
+    },
+    {
+      "address": "0x10d2b150",
+      "currentName": "FUN_10d2b150",
+      "proposedName": "CPetEntity::PushShopItemIdsToScript",
+      "purpose": "Writes pet shop/sell item ids into the pet entity's script table. Gets the entity script (component +0x58), sets script vars m_nPetShopItemID = (float)param_2[0], m_nPetSellItemID = (float)param_2[1] (stored as script number type 4), then fires script event 0x3e (FUN_10d1d220). Only runs if the two linked-list heads at (+0xac+0x6cc) / (+0xac+0x6d4) are non-empty.",
+      "confidence": "medium",
+      "subsystem": "pet-ui/shop",
+      "serverRelevance": "client-only (sets client-side entity Lua vars for shop UI).",
+      "formulas": [
+        "m_nPetShopItemID / m_nPetSellItemID stored as float from param_2[0]/param_2[1]",
+        "script event id 0x3e fired on the entity script proxy"
+      ],
+      "costs": [],
+      "notes": "Bridges pet entity to shop UI; ids originate from server pet data."
+    },
+    {
+      "address": "0x10e1bb00",
+      "currentName": "FUN_10e1bb00",
+      "proposedName": "CFlowNode_PetQuery::GetConfig",
+      "purpose": "Flowgraph node config (one-time static init, guarded by DAT_12032a70 bits 0/1). Input port: Index. Output ports: Success, Failed, IsEmpty(type6), PetID(type1=int), NeverUsed(type6). Assigns port arrays into param_1.",
+      "confidence": "medium",
+      "subsystem": "pet flownode",
+      "serverRelevance": "client flownode definition.",
+      "formulas": ["port types: PetID type 1 (int/entityid), IsEmpty/NeverUsed type 6 (bool)"],
+      "costs": [],
+      "notes": "Queries a pet slot by Index; branches Success/Failed/IsEmpty and outputs PetID. Server owns pet-slot data queried by higher layer."
+    },
+    {
+      "address": "0x10e1c720",
+      "currentName": "FUN_10e1c720",
+      "proposedName": "CFlowNode_PetUI::GetConfig",
+      "purpose": "Flowgraph node config (guard DAT_120329a8). Inputs enable/disable/Index(default -1). Outputs OnEvent, Start, FirstShow(type6), petID(type1). Assigns port tables.",
+      "confidence": "medium",
+      "subsystem": "pet flownode",
+      "serverRelevance": "client flownode definition.",
+      "formulas": ["Index default 0xffffffff (-1); petID type 1"],
+      "costs": [],
+      "notes": "Fires pet UI events (Start/FirstShow) with petID output."
+    },
+    {
+      "address": "0x10e76270",
+      "currentName": "FUN_10e76270",
+      "proposedName": "CFlowNode_PetFacilityA::GetConfig",
+      "purpose": "Flowgraph node config (guard DAT_12038110). Inputs enable/disable/triggerOnce(bool)/logicEntityNetID. Outputs OnEvent, PetCount(type1), PetFacilityType(type5), PetFacilityFirstUse(type6).",
+      "confidence": "medium",
+      "subsystem": "pet flownode/facility",
+      "serverRelevance": "client flownode; PetCount/PetFacilityType/FirstUse reflect server-owned facility state.",
+      "formulas": ["port types: PetCount type1(int), PetFacilityType type5, PetFacilityFirstUse type6(bool)"],
+      "costs": [],
+      "notes": "Pet 'facility' = farm/training building. triggerOnce gates single fire."
+    },
+    {
+      "address": "0x10e76580",
+      "currentName": "FUN_10e76580",
+      "proposedName": "CFlowNode_PetFacilityB::GetConfig",
+      "purpose": "Flowgraph node config (guard DAT_120381e0). Inputs enable/disable/triggerOnce/logicEntityNetID. Outputs OnEvent, PetCount(type1), PetFacilityType(type5). Same as FUN_10e76270 minus FirstUse output.",
+      "confidence": "medium",
+      "subsystem": "pet flownode/facility",
+      "serverRelevance": "client flownode definition.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Variant of the pet-facility flownode."
+    },
+    {
+      "address": "0x10e89600",
+      "currentName": "FUN_10e89600",
+      "proposedName": "CFlowNode_PetCutsceneA::GetConfig",
+      "purpose": "Flowgraph node config (guard DAT_12038bc0). Inputs Enable/Disable/eventID(int 'fired event id'). Outputs cutsceneType(type1), petNetID(type1), PetCharacter(type1), PetMaterialLeft(type1), PetMaterialRight(type1).",
+      "confidence": "medium",
+      "subsystem": "pet flownode/cutscene",
+      "serverRelevance": "client flownode definition (cutscene wiring).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Pet appearance in cutscenes (character + left/right materials/weapons)."
+    },
+    {
+      "address": "0x10e898f0",
+      "currentName": "FUN_10e898f0",
+      "proposedName": "CFlowNode_PetCutsceneB::GetConfig",
+      "purpose": "Flowgraph node config (guard DAT_12038b18). Inputs Enable/Disable/eventID. Outputs cutsceneType(type1), petNetID(type1). Reduced variant of FUN_10e89600.",
+      "confidence": "medium",
+      "subsystem": "pet flownode/cutscene",
+      "serverRelevance": "client flownode definition.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Simpler pet cutscene node."
+    },
+    {
+      "address": "0x10f769c0",
+      "currentName": "FUN_10f769c0",
+      "proposedName": "CPetActionController::RegisterActionStates",
+      "purpose": "Builds the pet (Palico) animation/action state machine: registers the full set of pet action states and their signal->locomotion transition rules. Sets default state NORMAL_RUN (0x17), a blend param +0x2d4=0.5f. Enumerated actions include: eat drug/meat/dragon meat/chocolate/coke meat, flute type 1 & 2, set-on-ground, set large/small bucket, throw, smash, sharpen weapon, collect plant, strip, mine, go-to-cuisine, catch, cliff-jump/parapet fall/fall, fish begin, vehicle/speedboat, net fishing, climb ladder, low/med climb, find egg, bake start, carry egg idle; plus tired/creep/back-to-boss locomotion variants.",
+      "confidence": "medium",
+      "subsystem": "pet-action/animation",
+      "serverRelevance": "client-only (animation graph). Enumerates the pet's supported actions/attack-modes for cross-reference, but does not compute stats.",
+      "formulas": [
+        "initial action state id = 0x17 (NORMAL_RUN)",
+        "flag bits: (param_1+0x80) |= 0x11; (param_1+0x2d4) = 0x3f000000 = 0.5f (blend/transition weight)",
+        "FUN_10f5bd40(6, handler) registers priority-6 transitions; FUN_10f5a480(a,b,list) wires tired/locomotion sub-states"
+      ],
+      "costs": [],
+      "notes": "Best client-side inventory of pet actions. Action-state names (NORMAL_TAKE_MEAT, FLUTE_TYPE_1/2, NORMAL_MINE, NORMAL_COLLECT, BAKE_START, NET_FISHING, etc.) map to gather/combat/support behaviors the server drives. 28 trailing FUN_10f61a80() are per-state cleanup/finalize calls."
+    }
+  ]
+}

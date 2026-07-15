@@ -1,0 +1,392 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "0x104f9760",
+      "currentName": "FUN_104f9760",
+      "proposedName": "CGameContext::GetWildHuntModeId_Cached",
+      "purpose": "Lazily resolves and caches the interned id for the game mode string \"WildHunt\". Returns cached value at this+0x20 if non-zero; otherwise walks camera/level manager (DAT_1202e818+0xd0 -> +0x90 -> vfunc 0xb4) and, only if that object's flag at +0x260fc != 0, interns \"WildHunt\" via FUN_1122b8f0 and caches it at this+0x20.",
+      "subsystem": "wildhunt-mode",
+      "confidence": "medium",
+      "formulas": [
+        "cache slot: this+0x20 (returns early if != 0)",
+        "gate: DAT_1202e818+0xd0 != 0 && *(DAT_1202e818+0xd0 +0xd0)!=0 && (mgr->+0x90) != 0; obj=vfunc0xb4(); require *(obj+0x260fc)!=0",
+        "id = FUN_1122b8f0(\"WildHunt\") (string intern/hash)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "WildHunt is an MHO PvE/hunt mode. This is a mode-id memoizer; not authoritative logic. DAT_1202e818 is the global engine/context singleton used throughout this chunk (managers at +0x30 particle, +0x50 entity, +0xd0 level/camera, +0x4 world, +0x16 record, +0xa0 char)."
+    },
+    {
+      "address": "0x109627c0",
+      "currentName": "FUN_109627c0",
+      "proposedName": "CLoadingScreen::BuildLoadingScreenData",
+      "purpose": "Builds the level-loading UI/screen dataset: picks a weighted-random loading tip, evaluates operation-activity data, selects loading-animation elements, and for specific map ids (0x2bf85 / 0x2bfe9) chooses a WildHunt/xHunter background. Pure UI/data assembly written into the passed struct (param_4).",
+      "subsystem": "loading-screen-ui",
+      "confidence": "medium",
+      "formulas": [
+        "hunt rank: iStack_15c = CPlayer::GetHuntRankOrCount() (only if a valid actor found)",
+        "tip group filter per entry: entry+0x18 <= huntRank <= entry+0x1c AND (entry+0x14 == 0 || entry+0x14 == uStack_16c[some category from record+0x20]); weight range accumulator ppuVar16 = prev + entry+0x20 (weight at +0x10)",
+        "tip roll: r = rand() % totalWeight; select bucket where bucket[1] <= r < bucket[2]",
+        "data-info index math (repeated pattern): idx = key - mgr+0x30; row = *(mgr+0x20 + (idx / mgr+0x28)*4); elem = *(row + (idx % mgr+0x28)*4); count = (elem+0x18 - elem+0x14)>>3 (or /0x1c, or >>2 depending on stride); pick = rand()%count",
+        "background pick (map 0x2bf85 or 0x2bfe9): rand()&0x80000001 parity chooses \"wildhunt\"/\"xHunter\"; when both flags set: rand()%3==0 -> \"xHunter\", %3==1/2 -> parity of that toward wildhunt",
+        "aeroboat gating: only if local_150[8]>0 && ppuStack_174>0 && they differ && cVar17 (screen type (local_154 & 0x8f)==10)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Emits keys: tipsString, loadingOperationPath, loadingNewMapPath, gameLoadingElementPic/Title/Desc, specialText, loadingAnimStyle, loadingCharImgPath, levelMainBGPath, loadingTutorialShow, flyingTime, canMoveAeroBoat, sourcePosX/Y, destPosX/Y, mapName, hasLoadingNewMapData. Map ids 0x2bf85=179589, 0x2bfe9=179689. Not monster AI; it is the loading UI that happens to reference WildHunt."
+    },
+    {
+      "address": "0x109d87e0",
+      "currentName": "FUN_109d87e0",
+      "proposedName": "COperationActivityConstTable::Load",
+      "purpose": "Parses mh.view.NewOperationActivity.Data.ConstTableData record and copies WildHunt button-image URL strings (ServerConfigUrl, ImageUrlPrefix, ButtonImageUrl variants) from a config record (iVar1 offsets 0x74..0x120) into output std::string fields.",
+      "subsystem": "operation-activity-config",
+      "confidence": "medium",
+      "formulas": [
+        "source record field offsets: +0x74/0x78 (ServerConfigUrl/ImageUrlPrefix pair), +0x8c/0x90, +0xa4/0xa8, +0xbc/0xc0, +0xd4/0xd8, +0xec/0xf0, +0x104/0x108, +0x11c/0x120"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Emits keys ButtonImageUrl_WildHunt, _WildHunt_Red, _WildHunt_Yellow, _WildHuntSecret_Red, _WildHuntSecret_Yellow. Pure UI config copy."
+    },
+    {
+      "address": "0x10a63840",
+      "currentName": "FUN_10a63840",
+      "proposedName": "CBTLevelActor::InitFromEntityProperties",
+      "purpose": "Behavior-tree actor init from an entity's script 'Properties' table. If bHaveBehaviorTree is true, marks this+0xc4=1, reads bLevelActor, obtains the AI/level-actor manager (DAT_1202e818+0xd0), pulls the actor's group/context (manager+0x1d) and registers a CBTActor via FUN_10a685d0/FUN_10a68570. Branches on entity state this+0x155c (1 vs 8) to pick a spawn context; state 8 uses \"CatInCity\" when the level manager reports in-city (vfuncs 0x16c/0x164).",
+      "subsystem": "behavior-tree-actor",
+      "confidence": "medium",
+      "formulas": [
+        "gate: Properties table present AND bHaveBehaviorTree(local_10)!=0",
+        "sets this+0xc4 = 1 (has-BT flag); reads bLevelActor -> local_5",
+        "context id local_10 = *(levelMgr + 0x1d*4 = +0x74)",
+        "state switch: this+0x155c == 1 -> FUN_10a60b80 path; == 8 -> in-city test; else default",
+        "if levelMgr in-city (vfunc 0x16c || 0x164) -> FUN_100e0410(\"CatInCity\") else FUN_100e0410(*(levelActor[0x7b4]+0x94))",
+        "if DAT_1202e818+0x209 == 0 (non-editor?) and !bLevelActor: FUN_10a685d0(...,1) and if resulting node's +8 child count *( *(ret+8)+0x28) > 0 set this+0x157d = 1"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "MHO-specific BT actor bootstrap. Server drives monster BT so it must load bHaveBehaviorTree/bLevelActor and register the actor. this+0x155c is an actor-type/state enum (1=?, 8=city-cat variant). refcount++/-- pattern (puVar6[1]) is CryEngine smart-ptr."
+    },
+    {
+      "address": "0x10a68450",
+      "currentName": "FUN_10a68450",
+      "proposedName": "IdPtrNameSvr_CBTActor::GetIdPtrBaseName_Init",
+      "purpose": "Initializes an IdPtr-name-server handle triplet {hash, typeId(DAT_12020970), object} for a CBTActor and back-links the object header (+8/+0xc/+0x10). CryEngine named-smart-pointer registration.",
+      "subsystem": "bt-actor-plumbing",
+      "confidence": "high",
+      "formulas": [
+        "param_1[0]=hash(FUN_100bcc20), param_1[1]=DAT_12020970 (CBTActor type id), param_1[2]=object",
+        "object header backlink: obj+8=hash, obj+0xc=typeId, obj+0x10=obj"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine IdPtrNameSvr<CBTActor> plumbing. DAT_12020970 = CBTActor runtime type id."
+    },
+    {
+      "address": "0x10a68510",
+      "currentName": "FUN_10a68510",
+      "proposedName": "IdPtrNameSvr_CBTLevelActor::GetIdPtrBaseName_Init",
+      "purpose": "Same as FUN_10a68450 but for CBTLevelActor (type id DAT_12020964).",
+      "subsystem": "bt-actor-plumbing",
+      "confidence": "high",
+      "formulas": ["param_1[1]=DAT_12020964 (CBTLevelActor type id)"],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine plumbing. DAT_12020964 = CBTLevelActor type id."
+    },
+    {
+      "address": "0x10a6b810",
+      "currentName": "FUN_10a6b810",
+      "proposedName": "CBTActor::Create_WithIdPtr",
+      "purpose": "Allocates a CBTActor (0x2f0 bytes via FUN_100dde50), registers its IdPtrNameSvr handle, then constructs it (FUN_10257270) from param_2/param_3 plus a refcounted arg (*param_4).",
+      "subsystem": "behavior-tree-actor",
+      "confidence": "medium",
+      "formulas": [
+        "sizeof(CBTActor) = 0x2f0",
+        "arg refcount: (*param_4)+4 incremented before FUN_10257270(*param_2,*param_3,arg)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Factory for the server-side monster behavior-tree actor object. FUN_10257270 is the CBTActor ctor."
+    },
+    {
+      "address": "0x10a6b950",
+      "currentName": "FUN_10a6b950",
+      "proposedName": "CBTLevelActor::Create_WithIdPtr",
+      "purpose": "Allocates a CBTLevelActor (800=0x320 bytes), registers IdPtrNameSvr handle (type DAT_12020964), constructs via FUN_10263ac0.",
+      "subsystem": "behavior-tree-actor",
+      "confidence": "medium",
+      "formulas": ["sizeof(CBTLevelActor) = 800 (0x320)", "ctor = FUN_10263ac0(*param_2,*param_3,arg)"],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Factory for level-placed BT actor. Distinct ctor/size from CBTActor confirms two separate actor classes."
+    },
+    {
+      "address": "0x10a6c630",
+      "currentName": "FUN_10a6c630",
+      "proposedName": "IdPtrNameSvr_CBTActor::RegisterType",
+      "purpose": "Registers the IdPtrNameSvr type descriptor for CBTActor (vtable PTR_FUN_11cbefa0) via FUN_100d6da0.",
+      "subsystem": "bt-actor-plumbing",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock plumbing / static type registration."
+    },
+    {
+      "address": "0x10a6c690",
+      "currentName": "FUN_10a6c690",
+      "proposedName": "IdPtrNameSvr_CBTLevelActor::RegisterType",
+      "purpose": "Registers the IdPtrNameSvr type descriptor for CBTLevelActor (vtable PTR_FUN_11cbef80).",
+      "subsystem": "bt-actor-plumbing",
+      "confidence": "high",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock plumbing."
+    },
+    {
+      "address": "0x10a86ac0",
+      "currentName": "FUN_10a86ac0",
+      "proposedName": "AISystem::LoadAngerAndSpawnSettings",
+      "purpose": "Loads the AI perception/anger + spawn-cap settings from the '/Scripts/AI' config node (via localization/root path FUN_10478770). Iterates config entries reading each entry's name (DAT_11dbac80) and 'value', matching against a fixed set of setting names and writing them into the AI-settings struct (iVar2).",
+      "subsystem": "ai-anger-spawn-config",
+      "confidence": "high",
+      "formulas": [
+        "DefaultAnger        -> *(float*)(settings+0x40) = atof(value)  [FUN_10a933f0 = parse float]",
+        "AngerPeak           -> *(float*)(settings+0x44)",
+        "BaseDecayFactor     -> *(float*)(settings+0x54)",
+        "MaxDecayOffset      -> *(float*)(settings+0xa4)",
+        "MaxAgentsIntensitySpawned -> *(float*)(settings+0xac)",
+        "MaxEnemiesSpawned   -> *(int*)(settings+0xb0)   [FUN_10a93410 = parse int]",
+        "name key attribute read via DAT_11dbac80 ('name'); value key literal 'value'"
+      ],
+      "costs": [
+        "MaxAgentsIntensitySpawned = cap on concurrently spawned high-intensity agents",
+        "MaxEnemiesSpawned = hard cap on concurrently spawned enemies"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "HIGH interest: this is the global aggro/anger tuning (anger baseline, peak, exponential-style decay factor + max decay offset) plus AI spawn caps. Server must load identical values to reproduce threat/anger decay and spawn limits. DefaultAnger/AngerPeak/BaseDecayFactor/MaxDecayOffset are the anger-model constants; MaxEnemiesSpawned/MaxAgentsIntensitySpawned are spawn-manager caps. Complements the per-monster anger fields in combat.md (EmotionAngryTime@+0xa50, AngryDamagePeakValue@+0xa54)."
+    },
+    {
+      "address": "0x10aa66e0",
+      "currentName": "FUN_10aa66e0",
+      "proposedName": "CBTActor::InstantiateBehaviorTreeForEntity",
+      "purpose": "Instantiates the behavior tree (or BT control object) for an entity. Looks up an existing BT record by the entity's BT name (vfunc 0x50); if none, resolves the entity class's script and checks whether it derives from 'BehaviorTreeBase' or 'BTCtrlObject', then creates the appropriate BT instance (FUN_11317f30 -> vfunc 0xc0, or FUN_10b24e30). If a record exists, bumps instance counter (this+0x1c) and starts/attaches the tree via FUN_10db7340 keyed by (this+0x1b + this+0x1c).",
+      "subsystem": "behavior-tree-runtime",
+      "confidence": "medium",
+      "formulas": [
+        "early-out: FUN_11318380() true -> return 1",
+        "class-kind branch: script class 'BehaviorTreeBase' -> tree; 'BTCtrlObject' -> control object",
+        "instance id = this+0x1b (base) + ++this+0x1c (per-instance counter); this+0x1a low byte = flags; this+0x18 = BT context",
+        "return 2 on successful (re)instantiate, 1 otherwise"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Core MHO monster BT instantiation. Server-authoritative: the BT that drives monster behavior is built here. 'BehaviorTreeBase' vs 'BTCtrlObject' distinguishes a full behavior tree from a lightweight controller. m_pThis_exref = entity-system singleton."
+    },
+    {
+      "address": "0x10aab760",
+      "currentName": "FUN_10aab760",
+      "proposedName": "CGmMonsterAiInfo::DumpToProtocol",
+      "purpose": "GM/debug command handler that serializes monster AI info (GmMonsterAiInfo.xml) and streams it back to the requester as protocol message id 0x71, chunked into <=0x7ff-byte packets (multi-part with a part-flag field). If access level (vfunc 4) < 2 it instead just references the xml filename.",
+      "subsystem": "gm-debug",
+      "confidence": "medium",
+      "formulas": [
+        "packet id = 0x71 at *local_18",
+        "chunk size = 0x7ff bytes; nChunks = (size + 0x7fe)/0x7ff",
+        "part flag at local_18+10: 0=single, 1=first, 2=middle, 3=last; result code at local_18+8",
+        "privilege gate: (*param_1 vfunc4) >= 2 required to dump",
+        "copy loop uses 0x1ff dwords (=0x7fc) + 2-byte + 1-byte tail = 0x7ff per chunk (strncpy/memcpy limit 0x7ff)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation",
+      "notes": "Server-side GM tooling that emits monster AI state; privilege-checked (level>=2). Not gameplay math. Confirms server owns monster AI info and can dump it."
+    },
+    {
+      "address": "0x10aacc30",
+      "currentName": "FUN_10aacc30",
+      "proposedName": "AISystem::PreloadEntityBehaviorTreeFiles",
+      "purpose": "Given an entity class/archetype, walks its script definition for 'AISetting' nodes and preloads the referenced behavior-tree assets: sBTFolder (base path, prefixed '/Scripts/AI/BehaviorTree/'), sBlackBoardFile, sEventBT, and per-child 'BehaviorTree'/'ClientBehaviorTree' collections' sFilename entries. Loads via the BT loader at param_2+8.",
+      "subsystem": "behavior-tree-loading",
+      "confidence": "medium",
+      "formulas": [
+        "node name selector: param_3 low byte -> 'ClientBehaviorTree' if !=0 else 'BehaviorTree'",
+        "base folder literal '/Scripts/AI/BehaviorTree/' set on loader (vfunc 0x1c)",
+        "keys: sBTFolder, sBlackBoardFile (vfunc 0x18 load), sEventBT (AISystem::LoadEntityBehaviorTree_Recursive), sFilename (vfunc 4, flag 1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "MHO BT asset preloader. Distinguishes server 'BehaviorTree' from 'ClientBehaviorTree' collections (param_3 flag) — server should load the server-side tree set. AISystem::LoadEntityBehaviorTree_Recursive is a named import."
+    },
+    {
+      "address": "0x10aad5c0",
+      "currentName": "FUN_10aad5c0",
+      "proposedName": "AISystem::ScanArchetypesAndPreloadBTs",
+      "purpose": "Scans /Libs/EntityArchetypes/*.xml (findfirst/next), parses each EntityPrototypeLibrary/EntityPrototype/Properties, and for prototypes declaring a BTFolder preloads their behavior-tree files: file_BlackBoardFile, file_BTEventFileName, file_BTFileName1..3, resolving them under 'Scripts/AI/BehaviorTree/<BTFolder>'.",
+      "subsystem": "behavior-tree-loading",
+      "confidence": "medium",
+      "formulas": [
+        "glob: <gameRoot>/Libs/EntityArchetypes/*.xml",
+        "BT path = 'Scripts/AI/BehaviorTree/' + BTFolder (FUN_104977f0 join)",
+        "keys: BTFolder, file_BlackBoardFile (loader vfunc 0x18), file_BTEventFileName (vfunc 4,1), file_BTFileName1/2/3 (vfunc 4,1)",
+        "param_2 flag chooses per-archetype id path (DAT_11df7390 auto-increment id) vs caller-provided loader (param_1)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Bulk archetype BT preload. DAT_11df7390 is a monotonically increasing prototype id counter. Server needs these to know each monster archetype's BT/blackboard set."
+    },
+    {
+      "address": "0x10aae120",
+      "currentName": "FUN_10aae120",
+      "proposedName": "CBTActor::Create_WithIdPtr_dup",
+      "purpose": "Identical to FUN_10a6b810 — allocate CBTActor (0x2f0), register IdPtrNameSvr, construct via FUN_10257270.",
+      "subsystem": "behavior-tree-actor",
+      "confidence": "high",
+      "formulas": ["sizeof=0x2f0; type=DAT_12020970; ctor=FUN_10257270"],
+      "costs": [],
+      "serverRelevance": "authoritative",
+      "notes": "Duplicate/inlined copy of the CBTActor factory used by the archetype scanner."
+    },
+    {
+      "address": "0x10ab1740",
+      "currentName": "FUN_10ab1740",
+      "proposedName": "SAmmoParams::ParseFlagsAndParams",
+      "purpose": "Parses an ammo/projectile (spawnable entity) params from its script: a 'flags' sub-node (ClientOnly/ServerOnly/ServerSpawn/PredictSpawn/Reusable) and a 'params' sub-node (lifetime, showtime, bulletType, hitPoints, noBulletHits, quietRemoval, sleepTime, radius, aitype).",
+      "subsystem": "projectile-spawn-params",
+      "confidence": "high",
+      "formulas": [
+        "flags bits into *param_1: ClientOnly -> |0x100 ; ServerOnly -> |0x200",
+        "ServerSpawn(bool) -> byte at param_1+4; if ServerSpawn set -> PredictSpawn(bool) -> byte param_1+5; else Reusable(bool) -> byte param_1+6",
+        "params: lifetime -> param_1+8(float via vfunc0x1c); showtime -> param_1+0xc; bulletType(int) -> param_1+0x14; hitPoints(int) -> param_1+0x18; noBulletHits(bool) -> param_1+0x1c; quietRemoval(bool) -> param_1+0x1d; sleepTime(float) -> param_1+0x20; radius(float) -> param_1+0x30",
+        "aitype string: _stricmp 'grenade' -> *(u16*)(param_1+0x10)=0x96 (150); 'rpg' -> 0x97 (151)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation",
+      "notes": "Stock CryEngine SAmmoParams parser, but the ServerSpawn/PredictSpawn/Reusable + ClientOnly/ServerOnly flags are directly relevant to spawn authority: ServerSpawn entities must be created server-side, PredictSpawn are client-predicted then reconciled. Server must honor these when deciding what it authoritatively spawns."
+    },
+    {
+      "address": "0x10b13370",
+      "currentName": "FUN_10b13370",
+      "proposedName": "CBoids::PlaySpawnBubbleOrSplashEffect",
+      "purpose": "Plays a particle/effect for a boid/fish entity on spawn: lazily resolves script functions OnSpawnBubble (this+0xb0) and OnSpawnSplash (this+0xb4); param_4 selects which (0=bubble,1=splash). Sets up a script-call table with 3 args from param_2 and invokes the resolved script function via the script system (DAT_1202e818+0x30).",
+      "subsystem": "boids-effect",
+      "confidence": "low",
+      "formulas": [
+        "effect selector param_4: 0 -> this+0xb0 (OnSpawnBubble), 1 -> this+0xb4 (OnSpawnSplash), else return",
+        "3 script args from param_2[0..2] with type-code 4/6/7 refcount handling"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Client presentation (particle/audio on boid spawn). Script-function caching pattern."
+    },
+    {
+      "address": "0x10b1e3f0",
+      "currentName": "FUN_10b1e3f0",
+      "proposedName": "SBoidsCreateContext::LoadFromParams",
+      "purpose": "Loads a boids/flock creation context from a params record: count, model/model1..4 (via CInfoRecord::GetModelString), character, animation, behavior, and a large set of boid tuning floats (mass, size, heights, attraction distances, speeds, alignment/cohesion/separation/origin factors, flight/takeoff/landing, fov, ground sub-params, Sounds[] and Animations[] arrays).",
+      "subsystem": "boids-flock",
+      "confidence": "medium",
+      "formulas": [
+        "float fields into param_2: boid_mass+0x28, boid_size+0xa8, boid_size_random+0xac, min_height+0x38, max_height+0x3c, min_attract_distance+0x44, max_attract_distance+0x40, min_speed+0x50, max_speed+0x4c, factor_align+0x58, factor_cohesion+0x5c, factor_separation+0x60, factor_origin+0x64, factor_keep_height+0x68, factor_avoid_land+0x6c, factor_random_accel+0x78, flight_time+0x48, factor_take_off+0x70, land_deceleration_height+0x54, max_anim_speed+0x90, max_view_distance+0xa0, spawn_radius+0x1c, gravity_at_death+0x2c",
+        "min_attract clamp: if attract_min <= DAT_11de98c4 (epsilon) -> 0.05f; if attract_max <= attract_min -> attract_max = attract_min + DAT_11de98c4",
+        "max_animation_distance stored squared: (+0xa4) = d*d",
+        "fov_angle: v *= DAT_11de98e8 (0.5)? then cos((v*DAT_11de99b0)/DAT_11de9a34) -> +0x74  (fov cosine cache)",
+        "bool flags (byte): follow_player+0x94, avoid_obstacles+0x95, no_landing+0x96, start_on_ground+0x97, avoid_water+0x98, spawn_from_point+0x99",
+        "ground sub-node: factor_align+0x7c, factor_cohesion+0x80, factor_separation+0x84, factor_origin+0x88, walk_speed+0x8c, offset+0x9c",
+        "Sounds[] and Animations[] loops capped at index < 100"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine boids (CBoidObject/SBoidContext) config. Mostly ambient wildlife/flock; not the authoritative monster AI. Server generally does not simulate boids. Documented for completeness; low RE priority."
+    },
+    {
+      "address": "0x10b367b0",
+      "currentName": "FUN_10b367b0",
+      "proposedName": "CBoids::SpawnParticleEffectWithStatus",
+      "purpose": "Spawns 'Particle.SpawnEffect' particle at a bone (default 'Bip01 Spine') on a boid/entity, computing the emitter transform from the entity quaternion (this+0x48..0x54) into a rotation matrix, then scaling by DAT_11de9a28. If the entity has PoisonEffect/BurnEffect, builds a network packet (id 0x2a7) with the transformed position/orientation and sends it via m_pThis_exref.",
+      "subsystem": "spawn-effect",
+      "confidence": "low",
+      "formulas": [
+        "quaternion->matrix from this+0x48(x),0x4c(y),0x50(z),0x54(w); columns scaled *DAT_11de9a28",
+        "network packet id = 0x2a7; bone name default 'Bip01 Spine' (this+0x58 override)",
+        "PoisonEffect/BurnEffect gate via FUN_10a675d0 name compare"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Client visual + a status-effect network notify (0x2a7). Heavy quaternion/matrix math is presentation. DAT_11de9a28 is a scale constant."
+    },
+    {
+      "address": "0x10b839c0",
+      "currentName": "FUN_10b839c0",
+      "proposedName": "CBattleDust::LoadConfig",
+      "purpose": "Loads /Scripts/GameRules/BattleDust.xml: 'params' (fogspawnpower, defaultlifetime, maxlifetime, maxeventpower, minparticlecount, maxparticlecount, distancebetweenevents) and 'events' sub-collections (shotfired, explosion, vehicleexplosion, bulletimpact), each entry with name/power/lifetime; builds per-event-type effect tables.",
+      "subsystem": "gamerules-battledust",
+      "confidence": "low",
+      "formulas": [
+        "params floats into this: fogspawnpower+0x0, defaultlifetime+0x4, maxlifetime+0x8, maxeventpower+0xc, minparticlecount+0x10, maxparticlecount+0x14, distancebetweenevents+0x18",
+        "per-event default power/lifetime = 1.0 (0x3f800000); 'default' entry stored to fixed slots (shotfired +0x20/+0x24, explosion +0x30/+0x34, vehicleexplosion +0x40/+0x44, bulletimpact +0x50/+0x54)",
+        "named entries hashed into per-type maps (particle id via effect mgr DAT_1202e818[0x14] vfunc 0x20 -> 0xc)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine BattleDust gamerules (ambient combat dust FX). Not monster AI. Low priority."
+    },
+    {
+      "address": "0x10b898f0",
+      "currentName": "FUN_10b898f0",
+      "proposedName": "CFunnelCloud::InitFromProperties",
+      "purpose": "Initializes a funnel/tornado entity ('FunnelEffect') from script Properties: fWanderSpeed, fCloudHeight, Radius, fSpinImpulse, fAttractionImpulse, fUpImpulse. Sets defaults then reads overrides, builds bounding volume from the entity world transform, and spawns the funnel particle effect.",
+      "subsystem": "funnel-entity",
+      "confidence": "low",
+      "formulas": [
+        "defaults: fCloudHeight(+0x28)=376.0; fWanderSpeed(+0xa4)=10.0(0x41200000); Radius(+0x30)=300.0(0x43960000); fSpinImpulse(+0xc0)=9.0(0x41100000); fAttractionImpulse(+0xc4)=13.0(0x41500000); fUpImpulse(+0xc8)=18.0(0x41900000)",
+        "bbox built from entity transform scaled by DAT_11cca92c; height bands at +0x4c(base), +0x58(+height*DAT_11de98e8=0.5), +0x64(+full height)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Environmental/weather entity (possibly WildHunt-mode ambient). Presentation. DAT_41200000=10.0, 0x43960000=300.0, 0x41100000=9.0, 0x41500000=13.0, 0x41900000=18.0."
+    },
+    {
+      "address": "0x10b8b1c0",
+      "currentName": "FUN_10b8b1c0",
+      "proposedName": "CGroundEffect::LoadSpawnProperties",
+      "purpose": "Loads a ground/screen effect entity's spawn config from script: Properties (fScale, fStrength, bEnabled), Spawning (bAutoSpawn, bSpawnOnMovement, fFrequency), Randomization (fRandomFreq, fRandomScale, fRandomStrength, fRandomOffsetX/Y).",
+      "subsystem": "ground-effect",
+      "confidence": "medium",
+      "formulas": [
+        "Properties: fScale->this+0x0, fStrength->this+0x4, bEnabled->this+0x18",
+        "Spawning: bAutoSpawn->this+0x19, bSpawnOnMovement->this+0x1a, fFrequency->this+0x8",
+        "Randomization: fRandomFreq->this+0xc, fRandomScale->this+0x10, fRandomStrength->this+0x14, fRandomOffsetX->this+0x1c, fRandomOffsetY->this+0x20"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only",
+      "notes": "Stock CryEngine GroundEffect (footstep/decal spawner). 'bAutoSpawn'/'bSpawnOnMovement'/'fFrequency' are effect-spawn timers, not monster spawns. Presentation."
+    },
+    {
+      "address": "0x10bcb9a0",
+      "currentName": "FUN_10bcb9a0",
+      "proposedName": "CGameCollectPoint::SpawnEntity",
+      "purpose": "Creates the in-world entity for a GameCollectPoint (gathering node / captured-monster drop / bound monster). Names it 'CGameCollectPoint_%08x' from netid, resolves the 'MHCommonArea' entity class, fills script properties (collect_point_net_id, collect_type, monster_net_id, monster_info_id, bind_entity_class, life_time, trigger_radius, model_filename, particlefile, Scale), computes spawn position/orientation (including a bone-attached offset with rotation for bound monsters), and spawns the entity via the entity system; marks the source object 'Spawned'.",
+      "subsystem": "collect-point-spawn",
+      "confidence": "medium",
+      "formulas": [
+        "entity name = snprintf('CGameCollectPoint_%08x', netid @ collectObj+4)",
+        "collect_type = vfunc 0x1c8 (this+0x13 gets model/radius depending on type)",
+        "type gate for monster fields: (9 < type) && (type < 0xc || type == 0xe)  i.e. types 10,11,14 carry monster_net_id/monster_info_id/bind_entity_class/life_time",
+        "trigger_radius read only when type == 0xb (11)",
+        "type 0xe (14): this+0x13 = *(collectObj+0x170); else resolve monster info FUN_107d7df0(monster_info_id) -> +0x938",
+        "bound-monster offset (type 3 attachment): pos += monsterInfo[0x255/0x256/599] bone offset; heading angle = monsterInfo[600]*DAT_11de98c0(deg->rad)*DAT_11de98e8(0.5) -> fcos/fsin rotation applied to attach transform",
+        "default scale/orientation: 1.0 (0x3f800000); model transform from source object vfunc 0x1c"
+      ],
+      "costs": [
+        "life_time = collect point despawn timer (from collectObj+0x174)",
+        "trigger_radius = pickup/interaction radius (type 11)"
+      ],
+      "serverRelevance": "authoritative",
+      "notes": "Monster/collect spawning: server authoritatively creates collect points and their bound monsters. collect_type enum: types 10/11/14 are monster-bearing (11 adds trigger_radius, 14 uses fixed radius field). bind_entity_class links a monster/NPC. Uses MHCommonArea shared entity class. Cross-refs flowgraph node monster/collectPoint/combatNPC outcomes in combat.md:846. DAT_11de98c0=deg->rad, DAT_11de98e8=0.5."
+    }
+  ]
+}

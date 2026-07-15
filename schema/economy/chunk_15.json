@@ -1,0 +1,440 @@
+{
+  "chunkIndex": 15,
+  "functions": [
+    {
+      "address": "0x11826f60",
+      "currentName": "FUN_11826f60",
+      "proposedName": "CLevelCatExtRewardCfgInfo::GetRewardByScore",
+      "purpose": "Looks up a level-category extra-reward config entry from a score/points value. Computes a bucket index = (param_1 / 100000) then subtracts the config's minId base at mgr+0x24; bounds-checks against the flat vector, and if the slot is non-null delegates to FUN_11826c90(param_1) to build the reward.",
+      "subsystem": "rewards",
+      "confidence": "high",
+      "formulas": [
+        "bucketIndex = param_1 / 100000 - *(mgr+0x24)   (0x100000-style divisor is decimal 100000, i.e. score->bucket)",
+        "valid if 0 <= bucketIndex < ((*(mgr+0x18) - *(mgr+0x14)) >> 2) and *( *(mgr+0x14) + bucketIndex*4 ) != 0",
+        "mgr from CLevelCatExtRewardCfgInfo::FindInfoByKey(0,\"CLevelCatExtRewardCfgInfo\",0)"
+      ],
+      "costs": ["score bucket width = 100000 points per category tier"],
+      "serverRelevance": "authoritative (server maps accumulated score/points to a reward tier via config; must use same 100000 divisor and minId base)",
+      "notes": "FUN_11826c90 (reward builder) is out-of-chunk."
+    },
+    {
+      "address": "0x11826fc0",
+      "currentName": "FUN_11826fc0",
+      "proposedName": "CLevelCatExtRewardCfgInfo::ApplyReward_wrapper",
+      "purpose": "Thin wrapper: ensures CLevelCatExtRewardCfgInfo manager is loaded then calls FUN_11826d40(param_1). No bounds logic here.",
+      "subsystem": "rewards",
+      "confidence": "medium",
+      "serverRelevance": "authoritative (reward apply path; body in FUN_11826d40, out-of-chunk)"
+    },
+    {
+      "address": "0x11827070",
+      "currentName": "FUN_11827070",
+      "proposedName": "CLevelRewardInfo::GetByIndex",
+      "purpose": "Flat-vector accessor: returns the CLevelRewardInfo record at index param_1 (per-level reward table).",
+      "subsystem": "rewards",
+      "confidence": "high",
+      "formulas": ["valid if 0 <= param_1 < ((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; server uses per-level reward table)"
+    },
+    {
+      "address": "0x11844120",
+      "currentName": "CLeagueRewardSchedule__GetManagers",
+      "proposedName": "CLeagueRewardSchedule::GetInfoManager",
+      "purpose": "Stock CInfoManager singleton accessor for CLeagueRewardSchedule (RegisterAndGetSingleton + FindByName, with fallback default instance).",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "high",
+      "serverRelevance": "client-only (CryEngine InfoManager plumbing)"
+    },
+    {
+      "address": "0x11845ea0",
+      "currentName": "FUN_11845ea0",
+      "proposedName": "CLeagueRewardSchedule::GetByIndex",
+      "purpose": "Flat-vector accessor into the CLeagueRewardSchedule table by index.",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "high",
+      "formulas": ["valid if 0 <= param_1 < ((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x11845f00",
+      "currentName": "CLeagueRewardSchedule__GetManagers_11845f00",
+      "proposedName": "CLeagueRewardSchedule::GetSingletonRaw",
+      "purpose": "Returns the raw singleton pointer (*DAT_12398144) for CLeagueRewardSchedule when param==0; registers singleton on first call.",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "high",
+      "serverRelevance": "client-only (InfoManager plumbing)"
+    },
+    {
+      "address": "0x11846750",
+      "currentName": "CLeagueRoundSchedule__GetManagers_11846750",
+      "proposedName": "CLeagueRoundSchedule::BuildRoundAndRewardLists",
+      "purpose": "Builds, for a league object (param_1), the sorted list of matching round-schedule entries and reward-schedule entries. Iterates CLeagueRoundSchedule table; keeps entries whose entry+0x14 (owner/leagueType) equals the league's virtual-call result (**(*param_1+0x18))(); inserts into a set keyed by entry+0x18 (round order) via a balanced tree (local_34/puStack_30 = red-black-like node walk comparing at offset 4). Collected round ptrs are pushed to vector param_1[0x2c..0x2e], then binary-insertion-sorted (FUN_118447c0 heap/introsort with FUN_11847310 comparator; threshold 0x10/0x40 elements). Then iterates CLeagueRewardSchedule table; keeps entries where entry+0x14 == param_1[5] (league type) AND FUN_118b2170(param_1[6]) passes; pushes to vector param_1[0x2f..0x31] and sorts with FUN_118472f0 comparator (skipped when param_1[5]==4).",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "medium",
+      "formulas": [
+        "round kept if entry+0x14 == (**(*param_1+0x18))()  (owner match)",
+        "reward kept if entry+0x14 == param_1[5] (leagueType) AND FUN_118b2170(param_1[6]) != 0",
+        "sort depth = log2(count) via loop halving (iVar5>>=1); introsort threshold count<0x11 -> insertion sort, else heap-partition first 0x40",
+        "league type 4 is special-cased (reward list not sorted/built): if (param_1[5] != 4) ...",
+        "round vector at param_1[0x2c](begin)/[0x2d](end)/[0x2e](cap); reward vector at [0x2f]/[0x30]/[0x31]; league type at [5], sub-key at [6]"
+      ],
+      "serverRelevance": "authoritative (server determines which reward/round schedules apply to a league instance; ordering drives reward distribution)",
+      "notes": "FUN_118b2170 = time/window predicate; FUN_11847310/118472f0 = sort comparators; FUN_10a1a390/3c0 = string/container init. param_1 is a CLeague* whose vtable+0x18 returns its group id."
+    },
+    {
+      "address": "0x11848010",
+      "currentName": "FUN_11848010",
+      "proposedName": "FirstLoginAddExp::ctor_registerConfigKey",
+      "purpose": "Constructor/registrar for a 'FirstLoginAddExp' config object: sets vtable PTR_FUN_11d4f068 and registers the config key string 'FirstLoginAddExp'. (One-time EXP bonus granted on first login.)",
+      "subsystem": "leveling/exp",
+      "confidence": "medium",
+      "serverRelevance": "authoritative (first-login EXP bonus is a server-granted reward; this is its config binding)",
+      "notes": "Decompiler shows a noreturn tail (FUN_10c3d580(0x24)) — likely a throw/placement artifact, not real."
+    },
+    {
+      "address": "0x118514b0",
+      "currentName": "FUN_118514b0",
+      "proposedName": "CEquipEnchaseRuleInfo::GetRuleById",
+      "purpose": "Paged id-map accessor for CEquipEnchaseRuleInfo (equipment gem-enchase/socket rules). Returns the rule record for key param_1.",
+      "subsystem": "crafting/enchase",
+      "confidence": "high",
+      "formulas": [
+        "reject if key==-1, or (key==0 && minId!=0), or pageSize==0",
+        "idx = key - minId(mgr+0x30); valid if 0<=idx<capacity(mgr+0x24)",
+        "page = *(*(mgr+0x20) + (idx/pageSize)*4); if page!=0 return *(page + (idx%pageSize)*4)",
+        "pageSize = *(mgr+0x28)"
+      ],
+      "serverRelevance": "validation (server reads enchase rule config to validate/compute gem-socketing)"
+    },
+    {
+      "address": "0x11851500",
+      "currentName": "FUN_11851500",
+      "proposedName": "CEquipEnforceRuleInfo::GetRuleById",
+      "purpose": "Paged id-map accessor for CEquipEnforceRuleInfo (equipment enforce/enhancement rules). Same page-map algorithm as enchase.",
+      "subsystem": "upgrade/enforce",
+      "confidence": "high",
+      "formulas": [
+        "idx = key - minId(mgr+0x30); page=*(*(mgr+0x20)+(idx/pageSize)*4); return *(page+(idx%pageSize)*4); pageSize=*(mgr+0x28), capacity=*(mgr+0x24)"
+      ],
+      "serverRelevance": "validation (server reads enforce rule config for enhancement cost/success)"
+    },
+    {
+      "address": "0x11852330",
+      "currentName": "FUN_11852330",
+      "proposedName": "CEquipEnchaseRuleInfo::HasRuleForObject",
+      "purpose": "Takes an object (param_1), reads its enchase-rule key at param_1+0x30, looks it up in CEquipEnchaseRuleInfo; if a non-null rule exists calls FUN_11852170() (likely returns/applies the rule). Existence/dispatch helper.",
+      "subsystem": "crafting/enchase",
+      "confidence": "medium",
+      "formulas": ["key = *(param_1+0x30); same paged-map lookup as CEquipEnchaseRuleInfo::GetRuleById"],
+      "serverRelevance": "validation (server checks equip has a valid enchase rule before applying)"
+    },
+    {
+      "address": "0x11852450",
+      "currentName": "FUN_11852450",
+      "proposedName": "CEquipEnforceRuleInfo::HasRuleForObject",
+      "purpose": "Reads object's enforce-rule key at param_1+0x2c, looks it up in CEquipEnforceRuleInfo; if non-null calls FUN_11852390().",
+      "subsystem": "upgrade/enforce",
+      "confidence": "medium",
+      "formulas": ["key = *(param_1+0x2c); same paged-map lookup as CEquipEnforceRuleInfo::GetRuleById"],
+      "serverRelevance": "validation (server checks equip has a valid enforce rule)"
+    },
+    {
+      "address": "0x11854570",
+      "currentName": "FUN_11854570",
+      "proposedName": "CEquipRule::ValidateAllRuleRefs",
+      "purpose": "Validates that all rule-config references on an equipment-generation descriptor exist. Reads five keys off param_1 and confirms each referenced rule table has the entry (or the key is <=0 meaning unused): +0x24 CEquipRandBaseItemRuleInfo, +0x28 CWeaponWakeUpRandRuleInfo, +0x2c CEquipEnforceRuleInfo, +0x34 (via FUN_11851550), +0x30 (via FUN_118514b0 enchase). Returns early if a required (>0) key resolves to null.",
+      "subsystem": "crafting/equip-generation",
+      "confidence": "medium",
+      "formulas": [
+        "for each rule table: paged-map lookup idx=key-minId(+0x30), page=*(*(+0x20)+(idx/pageSize)*4), val=*(page+(idx%pageSize)*4); pageSize=*(+0x28), cap=*(+0x24)",
+        "field map: param_1+0x24=RandBaseItemRuleId, +0x28=WeaponWakeUpRandRuleId, +0x2c=EnforceRuleId, +0x30=EnchaseRuleId, +0x34=key checked via FUN_11851550",
+        "if (key>0 && lookup==0) abort (invalid config reference)"
+      ],
+      "serverRelevance": "validation (integrity check of an equip template's rule references; server should reject items referencing missing rules)"
+    },
+    {
+      "address": "0x118b27a0",
+      "currentName": "FUN_118b27a0",
+      "proposedName": "League::PreloadRewardManagers",
+      "purpose": "Loads/warms the CLeagueInfo and CLeagueRewardInfo config managers (FindInfoByKey on both).",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "high",
+      "serverRelevance": "client-only (config preload plumbing)"
+    },
+    {
+      "address": "0x118e6fc0",
+      "currentName": "FUN_118e6fc0",
+      "proposedName": "CAdditionLevelRewardInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CAdditionLevelRewardInfo (additional/bonus per-level reward table).",
+      "subsystem": "rewards/leveling",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x118f3ff0",
+      "currentName": "FUN_118f3ff0",
+      "proposedName": "EventDef::LevelUp::GetSingleton",
+      "purpose": "Lazily constructs a named event/token descriptor for L\"LevelUp\" with numeric id 0x5f (95). Sets *param_2=1 (found flag), returns descriptor.",
+      "subsystem": "leveling/exp",
+      "confidence": "high",
+      "formulas": ["event id = 0x5f (95); name = L\"LevelUp\""],
+      "serverRelevance": "authoritative (server fires LevelUp event; id 95 is the wire/event constant)"
+    },
+    {
+      "address": "0x118f4640",
+      "currentName": "FUN_118f4640",
+      "proposedName": "EventDef::VIPLevelUp::GetSingleton",
+      "purpose": "Lazily constructs the named event descriptor for L\"VIPLevelUp\" with id 0x60 (96).",
+      "subsystem": "leveling/vip",
+      "confidence": "high",
+      "formulas": ["event id = 0x60 (96); name = L\"VIPLevelUp\""],
+      "serverRelevance": "authoritative (VIP level-up event constant id 96)"
+    },
+    {
+      "address": "0x1190ae70",
+      "currentName": "FUN_1190ae70",
+      "proposedName": "CGuildLevelUpInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CGuildLevelUpInfo (guild level-up curve/requirements table).",
+      "subsystem": "leveling/guild",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; guild level thresholds)"
+    },
+    {
+      "address": "0x119167f0",
+      "currentName": "FUN_119167f0",
+      "proposedName": "CEquipLevelUpInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CEquipLevelUpInfo (equipment level-up / cost curve table).",
+      "subsystem": "upgrade/equip-levelup",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; equip level-up costs)"
+    },
+    {
+      "address": "0x11916850",
+      "currentName": "FUN_11916850",
+      "proposedName": "CEquipQuickLevelUpInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CEquipQuickLevelUpInfo (batch/quick equip level-up config).",
+      "subsystem": "upgrade/equip-levelup",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x1191c470",
+      "currentName": "FUN_1191c470",
+      "proposedName": "CEquipEnforceTransferInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CEquipEnforceTransferInfo (transfer of enhancement level between equipment).",
+      "subsystem": "upgrade/enforce",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; enforce-transfer rules)"
+    },
+    {
+      "address": "0x1191c4d0",
+      "currentName": "FUN_1191c4d0",
+      "proposedName": "CEquipQuenchRuleInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CEquipQuenchRuleInfo (equipment quench/temper rule table).",
+      "subsystem": "upgrade/quench",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; quench rules)"
+    },
+    {
+      "address": "0x1191c5c0",
+      "currentName": "FUN_1191c5c0",
+      "proposedName": "EventDef::enforcetransfer::GetSingleton",
+      "purpose": "Lazily constructs the named descriptor for L\"enforcetransfer\" with id 0x9e (158).",
+      "subsystem": "upgrade/enforce",
+      "confidence": "high",
+      "formulas": ["id = 0x9e (158); name = L\"enforcetransfer\""],
+      "serverRelevance": "authoritative (enforce-transfer operation/event constant id 158)"
+    },
+    {
+      "address": "0x1195c4b0",
+      "currentName": "FUN_1195c4b0",
+      "proposedName": "EventDef::RankReward::GetSingleton",
+      "purpose": "Lazily constructs the named descriptor for L\"RankReward\" with id 0x113 (275).",
+      "subsystem": "rewards/rank",
+      "confidence": "high",
+      "formulas": ["id = 0x113 (275); name = L\"RankReward\""],
+      "serverRelevance": "authoritative (rank-reward operation/event constant id 275)"
+    },
+    {
+      "address": "0x11970b00",
+      "currentName": "FUN_11970b00",
+      "proposedName": "CFinalGuildMatchRewardInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CFinalGuildMatchRewardInfo (final guild-match reward table).",
+      "subsystem": "rewards/guild-match",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x11970b60",
+      "currentName": "FUN_11970b60",
+      "proposedName": "CGuildMatchRewardInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CGuildMatchRewardInfo (guild-match reward table).",
+      "subsystem": "rewards/guild-match",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x119753f0",
+      "currentName": "FUN_119753f0",
+      "proposedName": "CEquipUpgradeInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CEquipUpgradeInfo (equipment upgrade/promotion table).",
+      "subsystem": "upgrade",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read; upgrade requirements/costs)"
+    },
+    {
+      "address": "0x1197dfd0",
+      "currentName": "FUN_1197dfd0",
+      "proposedName": "CItemDecomposeInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CItemDecomposeInfo (item decompose/salvage yield table).",
+      "subsystem": "crafting/decompose",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "authoritative (server computes salvage yields from this config; must validate item->material output)"
+    },
+    {
+      "address": "0x119869a0",
+      "currentName": "FUN_119869a0",
+      "proposedName": "CPlayerLvAppraisalRewardInfo::FindReward",
+      "purpose": "Three-level lookup in CPlayerLvAppraisalRewardInfo (player-level appraisal reward). Paged-map by param_1 (level), then walks a linked list at record+0x14 matching node[2]==param_2 (a sub-key/type), then walks that node's sub-list (node[3]..) returning the first entry whose entry[2] >= param_3 (threshold); returns entry+3.",
+      "subsystem": "rewards/appraisal",
+      "confidence": "medium",
+      "formulas": [
+        "record = paged-map(param_1): idx=param_1-minId(+0x30), page=*(*(+0x20)+(idx/pageSize)*4), record=*(page+(idx%pageSize)*4), pageSize=*(+0x28)",
+        "list1 at record+0x14: match node where node[2]==param_2 (intrusive list, next=*node)",
+        "list2 at node[3]: return (entry+3) for first entry with entry[2] >= param_3",
+        "returns null if no match"
+      ],
+      "serverRelevance": "authoritative (server selects appraisal reward by player level + type + threshold)"
+    },
+    {
+      "address": "0x11986bb0",
+      "currentName": "FUN_11986bb0",
+      "proposedName": "CPlayerLvAppraisalRewardInfo::GetByLevel",
+      "purpose": "Paged id-map accessor returning the CPlayerLvAppraisalRewardInfo record for a player level key param_1.",
+      "subsystem": "rewards/appraisal",
+      "confidence": "high",
+      "formulas": ["idx=param_1-minId(+0x30), page=*(*(+0x20)+(idx/pageSize)*4), return *(page+(idx%pageSize)*4); pageSize=*(+0x28), cap=*(+0x24)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x119a08b0",
+      "currentName": "FUN_119a08b0",
+      "proposedName": "CLeagueRewardInfo::GetByIndex",
+      "purpose": "Flat-vector accessor into CLeagueRewardInfo table.",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "high",
+      "formulas": ["valid if 0<=param_1<((*(mgr+0x18)-*(mgr+0x14))>>2); returns *(*(mgr+0x14)+param_1*4)"],
+      "serverRelevance": "validation (config read)"
+    },
+    {
+      "address": "0x119a1880",
+      "currentName": "CLeagueRewardSchedule__GetManagers_119a1880",
+      "proposedName": "CLeagueRewardSchedule::ForEachActive_PreloadLeague",
+      "purpose": "Iterates all CLeagueRewardSchedule entries (count via vtable+0x28); for each non-null slot calls FUN_118b27a0(param_1) to preload league/reward managers. Bulk warm-up over the schedule.",
+      "subsystem": "leagues/pvp-rewards",
+      "confidence": "medium",
+      "serverRelevance": "client-only (config preload iteration)"
+    },
+    {
+      "address": "0x119cd000",
+      "currentName": "CLegendUpgrade__GetManagers_119cd000",
+      "proposedName": "CLegendUpgrade::PreloadPearlAndItemRefs",
+      "purpose": "Iterates all CLegendUpgrade config entries (legendary weapon upgrade via pearls). For each entry it walks its sub-entry list (record+0x1c..+0x20, stride 0xb0), calling FUN_117e4e60 and touching CLegendPearlItemInfo; each sub-entry has an inner item list (sub+4..+8, stride 8) iterated against CItemBaseInfo. Warms/validates the pearl and item-base references used by legend upgrades.",
+      "subsystem": "upgrade/legend",
+      "confidence": "medium",
+      "formulas": [
+        "outer records: flat vector at CLegendUpgrade mgr +0x14/+0x18",
+        "sub-entry list per record: begin=*(rec+0x1c), end=*(rec+0x20), stride 0xb0",
+        "inner item list per sub-entry: count = (*(sub+8)-*(sub+4))>>3 (stride 8)"
+      ],
+      "serverRelevance": "validation (integrity/preload of legend-upgrade pearl+material references)",
+      "notes": "FUN_117e4e60 out-of-chunk; likely per-entry pearl resolve."
+    },
+    {
+      "address": "0x11a2c0b0",
+      "currentName": "FUN_11a2c0b0",
+      "proposedName": "CMonsterWaveLayerCfg::LoadFromXml",
+      "purpose": "XML/config reader that parses a monster-wave/spawn-layer record into a struct. Uses the standard field-read pattern (attr-name intern + vtable getters +0x10 has, +0x20 int, +0x24/+0x28 string). Notably includes bound-gold and unbind-gold reward fields and a drop item group.",
+      "subsystem": "monster/rewards",
+      "confidence": "high",
+      "formulas": [
+        "field->offset: layer=+0x10, modelGroupID=+0x18, time=+0x1c, delayStartTime=+0x20, isTriggerStart(bool)=+0x24, bindGlod=+0x28, unBingGold=+0x2c, addPlayerBuffID(u\"IsHaveReward\"-adjacent DAT_11d6f09c)=+0x30, dropItemGroupID=+0x34, addBossBuffID=+0x38, IsHaveReward=+0x3c(?), ResouceID=+0x40, +0x44, MonsterID=+0x48, MonsterNum=+0x4c",
+        "name field stored via CPet::SetName (string setter reused)"
+      ],
+      "costs": [
+        "bindGlod (bound gold reward for clearing the wave) -> struct+0x28",
+        "unBingGold (unbound/tradeable gold reward) -> struct+0x2c",
+        "dropItemGroupID -> struct+0x34 (item drop table reference)"
+      ],
+      "serverRelevance": "authoritative (server-side spawn config: gold/item rewards and monster counts the server must grant and validate)",
+      "notes": "'bindGlod'/'unBingGold' are the game's spellings for bound vs unbound gold. Field offsets past 0x30 inferred from write order; IsHaveReward/ResouceID exact offsets approximate."
+    },
+    {
+      "address": "0x11a33fe0",
+      "currentName": "FUN_11a33fe0",
+      "proposedName": "CActivityLevelCoefficientCfg::LoadFromXml",
+      "purpose": "XML reader for an activity/level reward-multiplier config. Parses per-activity-per-level scaling coefficients applied to EXP, gold, and drop rewards. Central economy tuning table for events/activities.",
+      "subsystem": "activity/economy-scaling",
+      "confidence": "high",
+      "formulas": [
+        "ActivityId=+0x10, LevelId=+0x14, LevelType=+0x18, ExpCoefficient=+0x1c, BoundGoldCoefficient=+0x20, GoldCoefficient=+0x24, RegularRewardCoefficient=+0x28, RandomRewardCoefficient=+0x2c, MonsterBasicMaterialCoefficient=+0x30, MonsterPartBrokenCoefficient=+0x34, CaptureMaterialCoefficient=+0x38",
+        "coefficients read via getter vtable+0x20 (stored as 4-byte; semantically float multipliers applied to base reward)"
+      ],
+      "costs": [
+        "ExpCoefficient: multiplier on EXP gained in this activity/level",
+        "BoundGoldCoefficient / GoldCoefficient: multipliers on bound vs unbound gold rewards",
+        "RegularRewardCoefficient / RandomRewardCoefficient: multipliers on fixed vs random drop rewards",
+        "MonsterBasicMaterialCoefficient / MonsterPartBrokenCoefficient / CaptureMaterialCoefficient: multipliers on crafting-material drops"
+      ],
+      "serverRelevance": "authoritative (server MUST apply these coefficients when computing EXP/gold/material/drop rewards; core reward-scaling config)"
+    },
+    {
+      "address": "0x11a3c0f0",
+      "currentName": "FUN_11a3c0f0",
+      "proposedName": "CRankRewardCfg::LoadFromXml",
+      "purpose": "XML reader for a rank-reward config: RankId plus a list of RewardIds pushed into a vector on the struct.",
+      "subsystem": "rewards/rank",
+      "confidence": "high",
+      "formulas": [
+        "RankId=+0x10; RewardId appended to vector at struct+0x1c(end ptr)/+0x20(cap) (push_back of 4-byte id)"
+      ],
+      "costs": ["RewardId list = reward package(s) granted at this rank"],
+      "serverRelevance": "authoritative (server grants rank rewards from this config)"
+    },
+    {
+      "address": "0x11a5b1e0",
+      "currentName": "FUN_11a5b1e0",
+      "proposedName": "CPlayerLvRewardMiniGroupInfo::GetById",
+      "purpose": "Paged id-map accessor into CPlayerLvRewardMiniGroupInfo (player-level reward mini-group table).",
+      "subsystem": "rewards/leveling",
+      "confidence": "high",
+      "formulas": ["idx=param_1-minId(+0x30), page=*(*(+0x20)+(idx/pageSize)*4), return *(page+(idx%pageSize)*4); pageSize=*(+0x28), cap=*(+0x24)"],
+      "serverRelevance": "validation (config read; per-level reward grouping)"
+    },
+    {
+      "address": "0x11a68990",
+      "currentName": "FUN_11a68990",
+      "proposedName": "CCurrencyCfg::LoadFromXml",
+      "purpose": "XML reader for a currency-definition config record. Defines each in-game currency: its CurrencyID, the player-attribute it maps to (AttrID), display Name/Icon/Tips, and an SPId. This is the authoritative currency registry.",
+      "subsystem": "currency",
+      "confidence": "high",
+      "formulas": [
+        "CurrencyID=+0x10, AttrID=+0x14, Name(string via CPet::SetName)=+0x18(str obj), Icon(string via getter vtable+0x24)=+0x1c, Tips(string)=+? , SPId=+0x38",
+        "AttrID at +0x14 links a currency to the player-stat/attribute slot that holds its balance"
+      ],
+      "costs": ["defines the set of currencies and their balance attribute mapping (AttrID) — foundational for all currency mutation validation"],
+      "serverRelevance": "authoritative (server currency registry; every currency add/remove must resolve through CurrencyID->AttrID defined here)",
+      "notes": "Name and Tips are wide-string fields set via the shared CPet::SetName string setter; Icon set via string getter at param_1+0x1c."
+    }
+  ]
+}

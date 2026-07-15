@@ -1,0 +1,328 @@
+{
+  "batchIndex": 8,
+  "classes": [
+    {
+      "className": "CMartGoodsInfo",
+      "category": "economy",
+      "purpose": "Data-registry for cash-shop / mall (\"Mart\") goods. Each entry carries a goods id (this+0x10) and a price/points field (this+0x44); entries are looked up by id through the CInfoManager deque. Higher-level methods pick goods by VIP level and build purchase quantity lists.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "104fa590", "currentName": "CMartGoodsInfo::GetManagers", "proposedName": "CMartGoodsInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CMartGoodsInfo (registers profiler scope + StcMbrNameSvr singleton name). Real embedded name is GetManagers; every other method inlines it, which is why they were all mislabeled."},
+        {"address": "11547fd0", "currentName": "CMartGoodsInfo::GetManagers", "proposedName": "CMartGoodsInfo::SelectGoodsByVipLevel", "purpose": "Given a VIP level (param_1), accumulates a budget/points curve across CPlayerVIPLevelUpInfo levels (summing field+0x14), then walks a working set (RB-tree) of mart goods choosing the entry with the minimum price (field+0x44), returning its goods id (field+0x10); distributes quantities across goods for the else-branch."},
+        {"address": "11551680", "currentName": "CMartGoodsInfo::GetManagers", "proposedName": "CMartGoodsInfo::BuildGoodsIndex", "purpose": "Clears two intrusive lists on the target (offsets 0x10-0x1c and 0x28-0x34) then iterates every registered mart good (count via vtable+0x28, indexed via manager vector puVar[5]) calling FUN_1154ef90/FUN_11552af0 to (re)build lookup indices keyed by good/item id. Increments a rebuild counter at +4."},
+        {"address": "1181cc60", "currentName": "CMartGoodsInfo::GetManagers", "proposedName": "CMartGoodsInfo::ValidateItemRefs", "purpose": "Iterates a vector (this[7]..this[8]) and touches the CItemBaseInfo and CMartGoodsInfo managers; validates/links each mart good against its CItemBaseInfo entry (post-load consistency check)."},
+        {"address": "11973450", "currentName": "CMartGoodsInfo::GetManagers", "proposedName": "CMartGoodsInfo::ForEachGoods", "purpose": "Iterates all registered mart goods and calls FUN_11816390(param_1) for each non-null entry (bulk visit / collect into caller-supplied container)."}
+      ],
+      "fields": [
+        {"name": "goodsId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "id written out by SelectGoodsByVipLevel"},
+        {"name": "price", "type": "int32", "offset": "0x44", "source": "inferred", "note": "cost/points; min is selected"}
+      ],
+      "formulas": [
+        "VIP budget = sum over VIP levels [start..target) of CPlayerVIPLevelUpInfo.field+0x14 (a level curve)",
+        "Manager id lookup (deque): idx = id - mgr[0x30]; block = mgr[0x20][idx / mgr[0x28]]; entry = block[idx % mgr[0x28]] (standard CInfoManager pattern used everywhere)"
+      ],
+      "nameNext": [
+        {"address": "11816390", "proposedName": "CMartGoodsInfo::AppendGoodsToList", "why": "callee of ForEachGoods; pushes a good into caller container"},
+        {"address": "1154ef90", "proposedName": "CMartGoodsInfo::IndexGood", "why": "callee of BuildGoodsIndex building per-id index node"}
+      ],
+      "relatedTlv": ["TlvCommoditySales"],
+      "notes": "No DebugFormat/reader present in bundle, so field names are inferred from control flow only. 'GetManagers' is the genuine singleton-accessor name embedded as a profiler string."
+    },
+    {
+      "className": "CCommodityGroupInfo",
+      "category": "economy",
+      "purpose": "Data-registry for shop 'commodity groups' (a group bundles a list of commodity ids). Holds an id-list at this+0x40..0x44 and a resolved commodity-pointer vector at this+0x18. Supports finding, collecting and weighted-refreshing the commodities of a group.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1083e7c0", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CCommodityGroupInfo."},
+        {"address": "11720730", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::FindCommodity", "purpose": "Walks the group's commodity-id list (this+0x40..0x44), resolves each id to a CCommodityGroupInfo entry via the manager deque, applies predicate FUN_117df8c0(param_2); on first match writes the entry pointer to *param_3 and returns 1, else *param_3=0 and returns 0."},
+        {"address": "11721020", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::CollectCommodities", "purpose": "Walks the group's id list, resolves each commodity from the deque and appends the resolved pointer to the vector at this+0x18 (grows via FUN_11721d80). Builds the group's resolved member list."},
+        {"address": "117ddac0", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::RefreshCommodities", "purpose": "Iterates the entries vector (this+0x1c..0x20); for each commodity resolves its CItemBaseInfo (calls CItemBaseInfo::GetManagers_117daf50), checks stock/flags (entry+0x58, +0x74) and a probability compare against DAT_11de98bc, then rolls a weighted sub-list (entry+0x84..0x88, stride 8). This is the shop stock refresh / restock roll."},
+        {"address": "11909600", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::InitAllGroups", "purpose": "Iterates every registered commodity group and calls FUN_117e0070() on each (post-load init / precache)."},
+        {"address": "11909750", "currentName": "CCommodityGroupInfo::GetManagers", "proposedName": "CCommodityGroupInfo::LoadAllCommodities", "purpose": "Iterates every group and calls CCommodityInfo::GetManagers_117dff10() for each (loads/links the underlying CCommodityInfo entries)."}
+      ],
+      "fields": [
+        {"name": "commodityIdList_begin", "type": "int32*", "offset": "0x40", "source": "inferred"},
+        {"name": "commodityIdList_end", "type": "int32*", "offset": "0x44", "source": "inferred"},
+        {"name": "resolvedCommodities_begin", "type": "ptr*", "offset": "0x18", "source": "inferred"},
+        {"name": "entries_begin", "type": "ptr*", "offset": "0x1c", "source": "inferred", "note": "used by RefreshCommodities"}
+      ],
+      "formulas": ["Restock roll uses per-item weight sub-list at entry+0x84..0x88 (stride 8) with float probability threshold DAT_11de98bc"],
+      "nameNext": [
+        {"address": "117df8c0", "proposedName": "CCommodityInfo::MatchesFilter", "why": "predicate used by FindCommodity"},
+        {"address": "117dff10", "proposedName": "CCommodityInfo::GetManagers", "why": "sibling manager accessor loaded per-group"}
+      ],
+      "relatedTlv": ["TlvCommoditySales", "TlvCommodityRefresh", "TlvCommodityRefreshReset"],
+      "notes": "RefreshCommodities strongly aligns with the TlvCommodityRefresh network struct (shop stock refresh). Field offsets inferred from access patterns only."
+    },
+    {
+      "className": "CNpcSaleInfo",
+      "category": "social",
+      "purpose": "Per-NPC content descriptor keyed by npc id (this+0x14). Post-load it wires together everything an NPC exposes: monster-part sale items, manufacture/skill-learn entries, daily-work entries, tasks and illustrate-book entries, plus its commodity groups. this+0x74 points to the built runtime NPC object.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1052c230", "currentName": "CNpcSaleInfo::GetManagers", "proposedName": "CNpcSaleInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CNpcSaleInfo."},
+        {"address": "1168f070", "currentName": "CNpcSaleInfo::GetManagers", "proposedName": "CNpcSaleInfo::BuildNpcContent", "purpose": "Master post-load linker for one NPC. (1) Resolves monster-part infos for its sale list (this+0x84..0x88 -> CMonsterPartInfo::GetManagers_1188ea40). (2) Rebuilds the runtime NPC map at this+0x74 (+0xc0 RB-tree). (3) Scans CManufactureSkillLearnInfo for entries whose field[5]==npcId and appends them (list at npc+0xdc). (4) Scans CNpcClientDailyWork for entries whose +0x10==npcId and appends 5-word records. (5) Delegates to CTaskInfo::GetManagers_1168f7d0 and CIllustrateBookInfo::GetManagers_1168f680."},
+        {"address": "11720f30", "currentName": "CNpcSaleInfo::GetManagers", "proposedName": "CNpcSaleInfo::CollectCommodities", "purpose": "Ensures the CNpcSaleInfo + CCommodityGroupInfo managers exist then delegates to CCommodityGroupInfo::CollectCommodities (thin wrapper resolving the NPC's commodity groups)."},
+        {"address": "118f38c0", "currentName": "CNpcSaleInfo::GetManagers", "proposedName": "CNpcSaleInfo::RefreshAllCommodities", "purpose": "Iterates every registered NPC-sale entry and calls CCommodityGroupInfo::GetManagers_117ddac0(param_1) (RefreshCommodities) for each valid one - global shop restock pass."}
+      ],
+      "fields": [
+        {"name": "npcId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "matched against learn[5] and dailywork+0x10"},
+        {"name": "runtimeNpc", "type": "ptr", "offset": "0x74", "source": "inferred", "note": "built NPC object; +0xc0 RB-tree of sale items, +0xdc list"},
+        {"name": "saleList_begin", "type": "ptr*", "offset": "0x84", "source": "inferred"}
+      ],
+      "formulas": [],
+      "nameNext": [
+        {"address": "1168f7d0", "proposedName": "CTaskInfo::LinkNpcTasks", "why": "called by BuildNpcContent to attach tasks to the NPC"},
+        {"address": "1168f680", "proposedName": "CIllustrateBookInfo::LinkNpc", "why": "called by BuildNpcContent to attach illustrate-book entries"}
+      ],
+      "relatedTlv": [],
+      "notes": "Ties together sales, skill-learn, daily-work, tasks and illustrate book under one npc id. High fan-out linker; names of sub-linkers proposed in nameNext."
+    },
+    {
+      "className": "CEquipRelationAttrInfo",
+      "category": "item",
+      "purpose": "Data-registry for equipment set/relation attribute bonuses. Each entry has a weight (+0x18), an attribute-id sub-list (+0x2c..0x30) and threshold/pair data (+0x24). Provides matching-collection and a weighted random roll (capped at 6 selections) of relation attributes for a piece of equipment, then links associated buffs.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10855da0", "currentName": "CEquipRelationAttrInfo::GetManagers", "proposedName": "CEquipRelationAttrInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CEquipRelationAttrInfo."},
+        {"address": "11611490", "currentName": "CEquipRelationAttrInfo::GetManagers", "proposedName": "CEquipRelationAttrInfo::CollectMatchingAttrs", "purpose": "Enumerates candidate ids (FUN_1166dcf0 count / FUN_1166dcb0 index), resolves each relation-attr entry, applies predicate FUN_116112a0(param_1,entry); on match pushes the id into vector param_3 and memcpy-appends the entry's attribute-id list (entry+0x2c..0x30) into vector param_4."},
+        {"address": "1186cc00", "currentName": "CEquipRelationAttrInfo::GetManagers", "proposedName": "CEquipRelationAttrInfo::RollRelationAttrs", "purpose": "Weighted random roll of relation attributes for equipment, capped at 6 (loop guard local_30<6). Reads candidate ids (this+0x14..0x18), plus a {threshold,value} pair table (this+0x20..0x24, stride 8), uses RNG (FUN_11a89331) and world RB-tree lookups (FUN_11679c30 + 0x3b724/0x3b73c) to accumulate weights (entry+0x18) until a random threshold is exceeded, selecting entries; results copied into caller vector param_2."},
+        {"address": "1195df20", "currentName": "CEquipRelationAttrInfo::GetManagers", "proposedName": "CEquipRelationAttrInfo::InitAllBuffs", "purpose": "Iterates every relation-attr entry (manager vector at mgr+0x14..0x18) and calls CBuffInfo::GetManagers_11a3c750() for each valid one (links the buff each relation attribute grants)."}
+      ],
+      "fields": [
+        {"name": "weight", "type": "int32", "offset": "0x18", "source": "inferred", "note": "accumulated vs random threshold in RollRelationAttrs"},
+        {"name": "attrIdList_begin", "type": "int32*", "offset": "0x2c", "source": "inferred"},
+        {"name": "attrIdList_end", "type": "int32*", "offset": "0x30", "source": "inferred"},
+        {"name": "thresholdPairs", "type": "struct[2]", "offset": "0x24", "source": "inferred", "note": "stride-8 {threshold,value} table on the owning object (this+0x20..0x24)"}
+      ],
+      "formulas": [
+        "RollRelationAttrs: random r = FUN_11a89331(); accumulate sum += entry.weight(+0x18) over candidates; select entry when r < accumulated sum (weighted pick); at most 6 attributes selected"
+      ],
+      "nameNext": [
+        {"address": "116112a0", "proposedName": "CEquipRelationAttrInfo::MatchesEquip", "why": "predicate in CollectMatchingAttrs"},
+        {"address": "11a3c750", "proposedName": "CBuffInfo::GetManagers", "why": "buff manager linked per relation attr"}
+      ],
+      "relatedTlv": [],
+      "notes": "Max-6 cap suggests up to 6 relation/set attribute slots per equipment. Offsets inferred from arithmetic only."
+    },
+    {
+      "className": "CEquipPassiveSkillGroupInfo",
+      "category": "skill",
+      "purpose": "Data-registry mapping equipment to groups of passive skills. Group entries carry a group id (+0x10) and a level-indexed sub-table (+0x30..0x34, stride 0x50) whose +0x24 is a level threshold. Provides name lookup, level-based skill resolution, and buff linking.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1050eb10", "currentName": "CEquipPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipPassiveSkillGroupInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CEquipPassiveSkillGroupInfo."},
+        {"address": "1159d660", "currentName": "CEquipPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipPassiveSkillGroupInfo::CollectValidGroups", "purpose": "Fetches a source list via FUN_10867910(this+0x7c+0x1bc), walks it with stride 0x1c; for entries whose type word (offset 0) != 1 reads a group id (offset 8) and, if that group resolves in the manager deque, appends the id to caller vector param_2. Returns freed buffer."},
+        {"address": "1159e040", "currentName": "CEquipPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipPassiveSkillGroupInfo::FindGroupsByName", "purpose": "Iterates all groups, compares a name string (this+0x14) via FUN_100fd370/string ops; on match writes the group id (entry+0x10) into output array param_3 and increments count *param_2, capped at 200 (guard '199 < *param_2')."},
+        {"address": "115b7e90", "currentName": "CEquipPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipPassiveSkillGroupInfo::ResolveSkillsByLevel", "purpose": "Walks an RB-tree of requests (this+8) each {groupId +0x10, level +0x14}; resolves the group, scans its level sub-table (group+0x30..0x34, stride 0x50) picking the entry whose level threshold (+0x24) best matches the requested level, and appends a 0x14-byte {groupId, selectedEntry,...} record to vector this+0x34."},
+        {"address": "118e4710", "currentName": "CEquipPassiveSkillGroupInfo::GetManagers", "proposedName": "CEquipPassiveSkillGroupInfo::InitAllBuffs", "purpose": "Iterates every group and calls CBuffInfo::GetManagers_118006a0() for each valid one (links the buffs each passive-skill group applies)."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x10", "source": "inferred"},
+        {"name": "name", "type": "char*", "offset": "0x14", "source": "inferred", "note": "compared in FindGroupsByName"},
+        {"name": "levelTable_begin", "type": "ptr", "offset": "0x30", "source": "inferred", "note": "stride 0x50 entries; +0x24 = level threshold"},
+        {"name": "levelTable_end", "type": "ptr", "offset": "0x34", "source": "inferred"}
+      ],
+      "formulas": [
+        "ResolveSkillsByLevel: among level-table entries (stride 0x50) pick the one whose threshold(+0x24) is the highest <= requested level (sign-aware comparison handling negative/level-cap sentinels)",
+        "FindGroupsByName result array is capped at 200 ids"
+      ],
+      "nameNext": [
+        {"address": "118006a0", "proposedName": "CBuffInfo::GetManagers", "why": "buff manager linked per passive skill group"}
+      ],
+      "relatedTlv": [],
+      "notes": "Level sub-table stride 0x50 confirmed by pointer arithmetic; threshold at +0x24."
+    },
+    {
+      "className": "CExpressionInfo",
+      "category": "activity",
+      "purpose": "Data-registry for the 'Expression' collection/progression system (matches TLV ExpressionItem: id, level, point, collectlevel). Entries are keyed by a composite id = category*100 + sub-index; each has a per-level point cost (+0x20) and a max/collect level (+0x3c). Methods sum point ranges, count valid entries, enumerate categories, look up by name, and advance a level by consuming points.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "109b0ae0", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CExpressionInfo."},
+        {"address": "1152b570", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::SumPointsRange", "purpose": "For a category (param_1) sums the point value (entry+0x20) over sub-indices 1..param_2 (id = category*100 + i), returning the accumulated total. A cumulative cost/points curve helper."},
+        {"address": "1152b6a0", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::FindByName", "purpose": "Iterates all expressions, applies name predicate FUN_100e5770; on match outputs two fields (entry+0x14, entry+0x1c) via out-params and returns true."},
+        {"address": "1152ba60", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::CountValid", "purpose": "Walks an RB-tree of owned expressions (this+8); for each node {category +0x10, sub +0x14} builds id=cat*100+sub, resolves the entry and counts it when its conditions hold (node+0x18 / entry+0x20 nonzero). Returns the count."},
+        {"address": "1152bea0", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::EnumerateCategories", "purpose": "Iterates all expression entries and invokes virtual callback (*param_1+0xc)(entry.id/100, 0) - enumerates distinct categories to the caller."},
+        {"address": "1152c000", "currentName": "CExpressionInfo::GetManagers", "proposedName": "CExpressionInfo::AdvanceLevel", "purpose": "Advances an expression's level by consuming points: for category param_2 (base id cat*100) walks successive sub-levels, subtracting each entry's point cost (+0x20) from the player's remaining points (state+4 via FUN_1152abb0) and bumping level/count, stopping at the entry's max level (+0x3c) or when points run out; sets *param_3=1 if level increased."}
+      ],
+      "fields": [
+        {"name": "id", "type": "int32", "offset": "0x10", "source": "tlv-doc", "note": "composite id; id/100 = category, id%100 = sub-index"},
+        {"name": "point", "type": "int32", "offset": "0x20", "source": "tlv-doc", "note": "per-level point cost (ExpressionItem.point)"},
+        {"name": "collectlevel", "type": "int32", "offset": "0x3c", "source": "inferred", "note": "max level cap used by AdvanceLevel (ExpressionItem.collectlevel)"},
+        {"name": "fieldA", "type": "int32", "offset": "0x14", "source": "inferred", "note": "output by FindByName"},
+        {"name": "fieldB", "type": "int32", "offset": "0x1c", "source": "inferred", "note": "output by FindByName"}
+      ],
+      "formulas": [
+        "id = category * 100 + subIndex",
+        "SumPointsRange(cat,n) = sum_{i=1..n} entry(cat*100+i).point(+0x20)",
+        "AdvanceLevel: while remainingPoints >= entry.point and level < collectlevel(+0x3c): remainingPoints -= entry.point; level++"
+      ],
+      "nameNext": [
+        {"address": "1152abb0", "proposedName": "CExpressionInfo::GetProgressState", "why": "returns the mutable per-expression progress struct {count,remainingPoints,level}"}
+      ],
+      "relatedTlv": ["ExpressionItem"],
+      "notes": "Cross-referenced with ExpressionItem.md (id/level/point/collectlevel), which confirms this is a level+points collection system rather than chat emotes. Offsets 0x10/0x20 map to id/point; 0x3c inferred as collectlevel."
+    },
+    {
+      "className": "CLevelEnGroupInfo",
+      "category": "activity",
+      "purpose": "Data-registry for level 'En' groups (groups of CLevelEnSubGroupInfo, tied to CItemBaseInfo). Holds a group id (+0x10) and a sub-group id vector (+0x18..0x1c). Links sub-groups back to their parent group and precaches referenced sub-groups/items.",
+      "confidence": "low",
+      "methods": [
+        {"address": "104d84a0", "currentName": "CLevelEnGroupInfo::GetManagers", "proposedName": "CLevelEnGroupInfo::GetManagers", "purpose": "CInfoManager singleton accessor for CLevelEnGroupInfo."},
+        {"address": "117e96b0", "currentName": "CLevelEnGroupInfo::GetManagers", "proposedName": "CLevelEnGroupInfo::PrecacheSubGroups", "purpose": "Iterates a stride-0x1c record list (this+0x14..0x18); for records with a nonzero ref (+0x18) ensures the CItemBaseInfo and CLevelEnSubGroupInfo managers are loaded (precache pass)."},
+        {"address": "118042c0", "currentName": "CLevelEnGroupInfo::GetManagers", "proposedName": "CLevelEnGroupInfo::LinkSubGroups", "purpose": "Iterates the group's sub-group id vector (this+0x18..0x1c), resolves each CLevelEnSubGroupInfo from the deque and writes this group's id (this+0x10) into sub+0x94 (parent back-reference)."},
+        {"address": "118ef910", "currentName": "CLevelEnGroupInfo::GetManagers", "proposedName": "CLevelEnGroupInfo::LinkAllSubGroups", "purpose": "Iterates every registered group and calls LinkSubGroups (GetManagers_118042c0) for each valid one."},
+        {"address": "11a5de80", "currentName": "CLevelEnGroupInfo::GetManagers", "proposedName": "CLevelEnGroupInfo::EnsureManagerLoaded", "purpose": "Loops *(param_1+0x10) times, each iteration only forcing lazy init of the CLevelEnGroupInfo manager singleton (no per-entry side effect visible)."}
+      ],
+      "fields": [
+        {"name": "groupId", "type": "int32", "offset": "0x10", "source": "inferred", "note": "written into sub+0x94"},
+        {"name": "subGroupIds_begin", "type": "int32*", "offset": "0x18", "source": "inferred"},
+        {"name": "subGroupIds_end", "type": "int32*", "offset": "0x1c", "source": "inferred"}
+      ],
+      "formulas": [],
+      "nameNext": [
+        {"address": "104d8340", "proposedName": "CLevelEnSubGroupInfo::GetManagers", "why": "sibling sub-group manager (referenced heavily)"}
+      ],
+      "relatedTlv": [],
+      "notes": "Meaning of 'En' unresolved (enchant/energy?). Tightly coupled to CLevelEnSubGroupInfo (parent id stored at sub+0x94) and CItemBaseInfo."
+    },
+    {
+      "className": "CLevelBoxRewardInfo",
+      "category": "item",
+      "purpose": "Data-registry for level-up 'box' rewards. An entry lists {boxRewardId, rollCount} pairs (this+0xc..0x10, stride 8). On first use it rolls each box rollCount times using a weighted item pool, resolves items via CItemBaseInfo, splits stackable items into multiple stacks, and produces reward records into this+0x3c and this+0x58; a done-flag at this+8 prevents re-rolling.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1144d4c0", "currentName": "CLevelBoxRewardInfo::GetManagers", "proposedName": "CLevelBoxRewardInfo::GetManagers", "purpose": "CInfoManager singleton accessor (name/flag overload) for CLevelBoxRewardInfo."},
+        {"address": "1144f2e0", "currentName": "CLevelBoxRewardInfo::GetManagers", "proposedName": "CLevelBoxRewardInfo::GetManagerRaw", "purpose": "Raw manager accessor: returns *DAT (the manager) when param_1==0, else 0."},
+        {"address": "1144f630", "currentName": "CLevelBoxRewardInfo::GetManagers", "proposedName": "CLevelBoxRewardInfo::RollRewards", "purpose": "Guarded by done-flag this+8. For each {boxId,count} pair (this+0xc..0x10) resolves the box entry, then rolls 'count' times: builds a cumulative weighted item pool (each pool entry {itemId +0, weight +4}), draws threshold = rand01 * totalWeight, picks the item, validates via CItemBaseInfo, and computes a random stack quantity between min(+8) and max(+0xc). Type-2 stackable items (item+0x34==2, +0x2a8 set) are split across multiple stacks appended to this+0x58; others append a single record to this+0x3c. Sets this+8=1 when finished."}
+      ],
+      "fields": [
+        {"name": "builtFlag", "type": "uint8", "offset": "0x8", "source": "inferred", "note": "1 once rewards rolled"},
+        {"name": "boxList_begin", "type": "struct*", "offset": "0xc", "source": "inferred", "note": "stride 8 {boxRewardId, rollCount}"},
+        {"name": "boxList_end", "type": "struct*", "offset": "0x10", "source": "inferred"},
+        {"name": "singleRewards", "type": "vector", "offset": "0x3c", "source": "inferred"},
+        {"name": "stackRewards", "type": "vector", "offset": "0x58", "source": "inferred"}
+      ],
+      "formulas": [
+        "Weighted pick: threshold = rand01 * sum(weights); walk pool subtracting weight(+4) until threshold < weight; DAT_11de98f0 is 1/RAND_MAX scale factor",
+        "Stack quantity = min(+8) + round(rand01 * (max(+0xc) - min(+8) + 1)) roughly; stackable split when item+0x34==2 && item+0x2a8"
+      ],
+      "nameNext": [
+        {"address": "11450ac0", "proposedName": "CLevelBoxRewardInfo::RollCountForBox", "why": "computes number of draws for a box"},
+        {"address": "11521920", "proposedName": "CItemBaseInfo::ComputeItemQuality", "why": "called with resolved item to derive quality/grade of a reward"}
+      ],
+      "relatedTlv": ["TlvLotteryBoxItemPool", "TlvLotteryBoxContainer"],
+      "notes": "Same weighted-pool roll idiom as CSRLMaterialLotteryInfo; conceptually aligns with the LotteryBox item-pool TLVs."
+    },
+    {
+      "className": "CLevelResInfo",
+      "category": "activity",
+      "purpose": "Data-registry describing a level/instance's resource bindings. A runtime level object holds mapId(+0x14=[5]), levelModeId([8]) and difficulty/level values; ResolveLevelData fills in the resolved CMHMapInfo([6]), CMHLevelModeInfo([9]), static weather, matching CLevelResInfo config slots, and the appropriate hub-entry configs, plus spawn monster groups.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "10d38960", "currentName": "CLevelResInfo::GetManagers", "proposedName": "CLevelResInfo::GetManagers", "purpose": "CInfoManager singleton accessor (name/flag overload) for CLevelResInfo."},
+        {"address": "10d3f150", "currentName": "CLevelResInfo::GetManagers", "proposedName": "CLevelResInfo::GetManagerRaw", "purpose": "Raw manager accessor: returns *DAT when param_1==0, else 0."},
+        {"address": "116b2a30", "currentName": "CLevelResInfo::GetManagers", "proposedName": "CLevelResInfo::ResolveLevelData", "purpose": "Builds a level instance's resource set on the target object: resolves CMHMapInfo by [5]->[6] and CMHLevelModeInfo by [8]->[9]; copies weather (5x5 int block via FUN_116ae5b0) and mode fields; scans CLevelResInfo entries matching map id and the object's level/difficulty ranges (entry+0x18/0x1c/0x20/0x24), storing them into two slot arrays (this+99 for type 1, this+0x77 for type 2) indexed by entry+0x28 (<20); then searches CHubEntryConfigInfo / CHubEntryRaidConfigInfo / CHubEntryConfigKingQuestInfo / CHubEntryConfigLetterQuestInfo managers for the matching hub entry (sets this[0x9c],[0x9d]); finally, if this[0x9e]!=0, loads CSpawnMonsterGroupInfo."}
+      ],
+      "fields": [
+        {"name": "mapId", "type": "int32", "offset": "0x14", "source": "inferred", "note": "param_1[5]"},
+        {"name": "mapInfo", "type": "ptr", "offset": "0x18", "source": "inferred", "note": "param_1[6] resolved CMHMapInfo"},
+        {"name": "levelModeId", "type": "int32", "offset": "0x20", "source": "inferred", "note": "param_1[8]"},
+        {"name": "levelModeInfo", "type": "ptr", "offset": "0x24", "source": "inferred", "note": "param_1[9]"},
+        {"name": "resSlots_type1", "type": "ptr[20]", "offset": "0x18c", "source": "inferred", "note": "param_1+99 words, indexed by entry+0x28"},
+        {"name": "resSlots_type2", "type": "ptr[20]", "offset": "0x1dc", "source": "inferred", "note": "param_1+0x77 words"},
+        {"name": "hubEntry", "type": "int32[2]", "offset": "0x270", "source": "inferred", "note": "param_1[0x9c],[0x9d]"}
+      ],
+      "formulas": [
+        "Config match: entry.mapId(+0x14)==obj.mapId && entry.levelMin(+0x18) <= obj.level(+0xe) <= entry.levelMax(+0x1c) && entry.rangeMin(+0x20) <= obj[0xc] <= entry.rangeMax(+0x24); slot index = entry+0x28 (must be < 20); array = type1(+99) if entry+0x2c==1 else type2(+0x77) if ==2"
+      ],
+      "nameNext": [
+        {"address": "116ae5b0", "proposedName": "CLevelResInfo::CopyWeatherBlock", "why": "copies the 5x5 weather int block from the mode info"},
+        {"address": "107ca350", "proposedName": "CHubEntryConfigInfo::MatchEntry", "why": "hub-entry match callback used in ResolveLevelData"}
+      ],
+      "relatedTlv": [],
+      "notes": "Array base offsets given as word-index*4 from object base; slot count cap 20 (0x14) confirmed. Ties level instances to map/mode/weather/hub-entry/spawn data."
+    },
+    {
+      "className": "CSRLMaterialLotteryInfo",
+      "category": "item",
+      "purpose": "Data-registry for the 'SRL' material lottery / item-box. Given a box description (CSRLItemBoxDescriptionInfo) it either emits a fixed 8-slot result or performs a weighted lottery: builds a weight map (RB-tree keyed by entry+0x4c) of lottery entries, filters CNormalItemInfo by predicate, and fills 8 output result slots (stride-5 records {?, itemId, count, ...}).",
+      "confidence": "medium",
+      "methods": [
+        {"address": "1153b3e0", "currentName": "CSRLMaterialLotteryInfo::GetManagers", "proposedName": "CSRLMaterialLotteryInfo::GetManagers", "purpose": "CInfoManager singleton accessor (name/flag overload) for CSRLMaterialLotteryInfo."},
+        {"address": "1153cb20", "currentName": "CSRLMaterialLotteryInfo::GetManagers", "proposedName": "CSRLMaterialLotteryInfo::RollLottery", "purpose": "Resolves the box description by id (param_2) from CSRLItemBoxDescriptionInfo. If FUN_1180e4b0 is false, copies 8 fixed item records from the input (param_1+2, stride) to the output (local_8, 8 slots stride 5) and returns. Otherwise copies the box's item id list, builds a weight-keyed RB-tree of CSRLMaterialLotteryInfo entries (key entry+0x4c), scans CNormalItemInfo (predicate FUN_116c0790(param_3)) collecting item ids whose +0x4c falls in the tree, then fills 8 result slots picking from the collected list (weighted) or falling back to fixed items, resolving each CNormalItemInfo (id +0x10)."},
+        {"address": "1153e7e0", "currentName": "CSRLMaterialLotteryInfo::GetManagers", "proposedName": "CSRLMaterialLotteryInfo::GetManagerRaw", "purpose": "Raw manager accessor: returns *DAT when param_1==0, else 0."}
+      ],
+      "fields": [
+        {"name": "weightKey", "type": "int32", "offset": "0x4c", "source": "inferred", "note": "RB-tree key; compared against CNormalItemInfo+0x4c"},
+        {"name": "itemId(CNormalItemInfo)", "type": "int32", "offset": "0x10", "source": "inferred", "note": "output item id"}
+      ],
+      "formulas": [
+        "Output is always 8 result slots (stride-5 records). Roll selects among CNormalItemInfo entries whose +0x4c key matches an entry weight bucket; empty picks fall back to the box's fixed items."
+      ],
+      "nameNext": [
+        {"address": "1180e4b0", "proposedName": "CSRLItemBoxDescriptionInfo::IsRandomBox", "why": "chooses fixed-vs-lottery path"},
+        {"address": "1180e500", "proposedName": "CSRLItemBoxDescriptionInfo::GetItemList", "why": "supplies the candidate id list"},
+        {"address": "116c0790", "proposedName": "CNormalItemInfo::MatchesLotteryFilter", "why": "per-item predicate"}
+      ],
+      "relatedTlv": ["TlvLotteryBoxItemPool", "TlvLotteryBoxContainer", "TlvDragonBoxLotteryData"],
+      "notes": "'SRL' prefix meaning unresolved. Behavior matches the lottery-box family; 8-slot fixed output is notable."
+    },
+    {
+      "className": "CTaskGroupInfo",
+      "category": "quest",
+      "purpose": "Data-registry for task/quest groups. A group's owner object (this+0x2c) holds a task-id list (+0x3c..0x40); the group resolves those ids to CTaskGroupInfo entries. Provides find-by-predicate, collect-all-tasks, and post-load linking to task bounty levels.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "11745800", "currentName": "CTaskGroupInfo::GetManagers", "proposedName": "CTaskGroupInfo::GetManagers", "purpose": "CInfoManager singleton accessor (name/flag overload) for CTaskGroupInfo."},
+        {"address": "117460f0", "currentName": "CTaskGroupInfo::GetManagers", "proposedName": "CTaskGroupInfo::FindTask", "purpose": "Walks the owner's task-id list (*(this+0x2c)+0x3c..0x40), resolves each id, applies predicate FUN_11722800(param_2); first match written to *param_3, returns 1 (else 0)."},
+        {"address": "11746b90", "currentName": "CTaskGroupInfo::GetManagers", "proposedName": "CTaskGroupInfo::GetManagerRaw", "purpose": "Raw manager accessor: returns *DAT when param_1==0, else 0."},
+        {"address": "11747290", "currentName": "CTaskGroupInfo::GetManagers_117472a0", "proposedName": "CTaskGroupInfo::CollectTasks", "purpose": "Walks the owner's task-id list, resolves each task and appends the pointer to vector this+0x34 (duplicate/pre-dedup copy of the 117472a0 body)."},
+        {"address": "117472a0", "currentName": "CTaskGroupInfo::GetManagers_117472a0", "proposedName": "CTaskGroupInfo::CollectTasks", "purpose": "Walks the owner's task-id list, resolves each task via the deque and appends the pointer to vector this+0x34 (grows via FUN_117476e0)."},
+        {"address": "11906270", "currentName": "CTaskGroupInfo::GetManagers", "proposedName": "CTaskGroupInfo::InitAllGroups", "purpose": "Iterates every task group and calls FUN_11722e20() on each (post-load init)."},
+        {"address": "119063c0", "currentName": "CTaskGroupInfo::GetManagers", "proposedName": "CTaskGroupInfo::LinkAllBountyLevels", "purpose": "Iterates every task group and calls CTaskBountyLevelInfo::GetManagers_11722bc0() on each (links bounty-level data)."}
+      ],
+      "fields": [
+        {"name": "owner", "type": "ptr", "offset": "0x2c", "source": "inferred", "note": "owner object; +0x3c..0x40 = task-id list"},
+        {"name": "resolvedTasks", "type": "vector", "offset": "0x34", "source": "inferred"}
+      ],
+      "formulas": [],
+      "nameNext": [
+        {"address": "11722800", "proposedName": "CTaskInfo::MatchesFilter", "why": "predicate in FindTask"},
+        {"address": "11722bc0", "proposedName": "CTaskBountyLevelInfo::GetManagers", "why": "bounty-level manager linked per group"}
+      ],
+      "relatedTlv": [],
+      "notes": "The 11747290/117472a0 pair are the same function (auto-tool emitted a c0 and a c3 decode of one body)."
+    },
+    {
+      "className": "CTaskSeriesInfo",
+      "category": "quest",
+      "purpose": "Data-registry for task series (quest chains); structurally parallel to CTaskGroupInfo. The owner object (this+0x2c) holds a task-id list (+0x2c..0x30); the series resolves those to CTaskSeriesInfo entries. Provides find-by-predicate, collect-all, and bulk post-load passes.",
+      "confidence": "medium",
+      "methods": [
+        {"address": "117c0970", "currentName": "CTaskSeriesInfo::GetManagers", "proposedName": "CTaskSeriesInfo::GetManagers", "purpose": "CInfoManager singleton accessor (name/flag overload) for CTaskSeriesInfo."},
+        {"address": "117c1690", "currentName": "CTaskSeriesInfo::GetManagers", "proposedName": "CTaskSeriesInfo::GetManagerRaw", "purpose": "Raw manager accessor: returns *DAT when param_1==0, else 0."},
+        {"address": "118a87d0", "currentName": "CTaskSeriesInfo::GetManagers", "proposedName": "CTaskSeriesInfo::FindTask", "purpose": "Walks the owner's task-id list (*(this+0x2c)+0x2c..0x30), resolves each id, applies predicate FUN_119d88b0(param_2); first match written to *param_3, returns 1 (else 0)."},
+        {"address": "118a8970", "currentName": "CTaskSeriesInfo::GetManagers_118a8980", "proposedName": "CTaskSeriesInfo::CollectTasks", "purpose": "Walks the owner's task-id list, resolves each task and appends the pointer to vector this+0x34 (pre-dedup copy of the 118a8980 body)."},
+        {"address": "118a8980", "currentName": "CTaskSeriesInfo::GetManagers_118a8980", "proposedName": "CTaskSeriesInfo::CollectTasks", "purpose": "Walks the owner's task-id list, resolves each series task via the deque and appends the pointer to vector this+0x34 (grows via FUN_118a8c10)."},
+        {"address": "11905100", "currentName": "CTaskSeriesInfo::GetManagers", "proposedName": "CTaskSeriesInfo::InitAllSeries", "purpose": "Iterates every task series and calls FUN_119d8c40() on each (post-load init)."},
+        {"address": "11905250", "currentName": "CTaskSeriesInfo::GetManagers", "proposedName": "CTaskSeriesInfo::ForEachSeries", "purpose": "Iterates every task series and calls FUN_119d8a40(param_1) on each valid one (bulk visit with a caller-supplied context)."}
+      ],
+      "fields": [
+        {"name": "owner", "type": "ptr", "offset": "0x2c", "source": "inferred", "note": "owner object; +0x2c..0x30 = task-id list"},
+        {"name": "resolvedTasks", "type": "vector", "offset": "0x34", "source": "inferred"}
+      ],
+      "formulas": [],
+      "nameNext": [
+        {"address": "119d88b0", "proposedName": "CTaskInfo::MatchesFilter", "why": "predicate in FindTask"},
+        {"address": "119d8c40", "proposedName": "CTaskSeriesInfo::InitSeries", "why": "per-series init callee"}
+      ],
+      "relatedTlv": [],
+      "notes": "Mirror of CTaskGroupInfo (owner list at +0x2c vs +0x3c). The 118a8970/118a8980 pair are the same function decoded twice."
+    }
+  ],
+  "notes": "All 12 are C*Info data-registry classes. The auto-labeler tagged every method 'GetManagers' because each inlines the class's CInfoManager singleton accessor, whose profiler-scope string literal ('ClassName::GetManagers') is the genuine name of that small accessor. Standard CInfoManager id->entry lookup idiom recurs everywhere: idx = id - mgr[0x30]; block = mgr[0x20][idx/mgr[0x28]]; entry = block[idx%mgr[0x28]] (deque), or contiguous vector at mgr+0x14/0x18 or mgr[5]/mgr[6]. No DebugFormat printers or XML/TLV readers appear in these bundles, so field names/offsets are inferred from control flow except CExpressionInfo, which was cross-checked against ExpressionItem.md (id/level/point/collectlevel). Confidence is medium/low accordingly."
+}

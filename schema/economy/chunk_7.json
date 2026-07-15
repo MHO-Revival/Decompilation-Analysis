@@ -1,0 +1,144 @@
+{
+  "chunkIndex": 7,
+  "functions": [
+    {
+      "address": "0x108e4680",
+      "currentName": "FUN_108e4680",
+      "proposedName": "CPetTrainUI::BuildTrainInfoVO",
+      "purpose": "Client UI-model builder for the pet-training panel. Allocates a TRAIN_VO_CLASSNAME VO, then loops over 6 training levels emitting per-level cost fields, an embedded MATERIAL_ITEM_VO list, and a PET_VO list of the 4 candidate pets (facialityIndex counting 4->1). Also emits m_nUIMaxTrainPointLevel. Populates the flash/UI databinding via FUN_104d1550 (int prop) / FUN_104d1670 (string prop) / FUN_104d12b0 (array prop).",
+      "confidence": "medium",
+      "subsystem": "pet-training",
+      "serverRelevance": "client-only (UI VO builder); the cost values it displays (upgradeCost/farmExpCost/trainCost) mirror server-authoritative training config and must be re-validated server-side on any train/upgrade request.",
+      "formulas": [
+        "Outer loop: iVar2 = 0..5 (6 training levels); puVar8 (train-level record ptr) advances by 1 ushort each iter, piStack_24c (pet-list cursor) advances by 4 ints/iter.",
+        "Per-level record (iVar4, from FUN_108e15c0(trainLevelId)): level = (short)*piStack_270; upgradeCost = *(iVar4+0x24); farmExpCost = *(iVar4+0x20).",
+        "trainCost = *(FUN_108e1aa0(uVar3)+0x38) (only emitted when that lookup != 0).",
+        "Material list: 5 entries read from puVar9 = iVar4+0x3c, iterating puVar9[-5] (material item-id via FUN_10254130) and *puVar9 (count); fields ItemID, count(&DAT_11dbdc0c), itemIconPathName(offset +0x2d*4=0xb4).",
+        "Pet list: 4 entries, facialityIndex = 4,3,2,1 (iVar4 decremented); petid = *ppcVar7; if petid>0 resolve CPet via FUN_112fb110/FUN_112f64e0, emit strName, level(uStack_198), remainTrainTime(uStack_d4)."
+      ],
+      "costs": [
+        "upgradeCost @ trainRecord+0x24",
+        "farmExpCost @ trainRecord+0x20 (EXP cost to farm/train)",
+        "trainCost @ trainCfg+0x38",
+        "material list: 5 (materialItemId, count) pairs at trainRecord+0x3c region",
+        "6 training levels max; 4 selectable pets per panel"
+      ],
+      "notes": "trainRecord offsets 0x20/0x24/0x38 and the 5-material array at +0x3c are the load-bearing economy data; verify against the training config TLV before trusting exact byte offsets."
+    },
+    {
+      "address": "0x108ef270",
+      "currentName": "FUN_108ef270",
+      "proposedName": "CForgeUI::RegisterModelHandlers",
+      "purpose": "Registers the flash/UI message handlers for the pet-equipment forge/craft panel. Binds 5 named UI callbacks via FUN_100b62c0 (create handler slot) + FUN_108f0580 (install). Names in registration order: InitModel->FUN_108efeb0, RequireCraftMaterialId->FUN_108ef420, PetTypeSelcted->DAT_108efe30, OnStartForge->FUN_108efe40, ForgeItemLevel->DAT_108ef410.",
+      "confidence": "medium",
+      "subsystem": "forge-craft",
+      "serverRelevance": "client-only (UI event-binding plumbing).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock UI databinding registration; only relevance is the handler map it establishes (InitModel/RequireCraftMaterialId/PetTypeSelcted/OnStartForge/ForgeItemLevel)."
+    },
+    {
+      "address": "0x108ef420",
+      "currentName": "FUN_108ef420",
+      "proposedName": "CForgeUI::BuildSelectedForgeItemVO",
+      "purpose": "Handler (RequireCraftMaterialId, expects 3 args: in_stack_00000014==3) that builds the detail VO for the currently-selected forge/craft item. Populates full weapon/armor stat block, a 'forgematerialList' of required materials with owned counts, and a 'forgeOtherInfo' block containing the affordability check (bReallyCanForge/bMoneyIsEnough/nHaveNum/nMoney).",
+      "confidence": "medium",
+      "subsystem": "forge-craft",
+      "serverRelevance": "client-only preview; the bMoneyIsEnough / material-count checks it computes are a client-side affordability PREVIEW. Server must independently validate currency and material inventory before consuming them on craft/forge commit.",
+      "formulas": [
+        "Item resolved via FUN_107ec240(itemInstance) -> FUN_10254130(cfg+0x5c) -> stat struct iVar5.",
+        "Item type check: *(iVar5+0x34)==4 => weapon branch (emits weapon slash + elemental fields); else armor.",
+        "Weapon/armor stat offsets in iVar5: m_nDefense +0x128, m_nLife +0x12c(300), m_nWeaponCurrentSlash +0x140, Slash_Red +0x144, Orange +0x148, Yellow +0x14c, Green +0x150, Blue +0x154, White +0x158, Purple +0x15c, Copper +0x160; EAttack Water +0x170 Fire +0x174 Thunder +0x178 Dragon +0x17c Ice +0x180; Resistance Water +0x194 Fire +0x198 Thunder +0x19c Dragon +0x1a0 Ice +0x1a4; PoisonAdd +0x184 SleepAdd +0x188 NarcosisAdd +0x18c DynamiteAdd +0x190(400). m_nWeaponMaxSlash = *(FUN_116cc020()+0x40).",
+        "Owned-count formula (repeated pattern): count = FUN_113f9300(0,itemId,0) + FUN_113f9300(2,itemId,0) + FUN_113f9300(10,itemId,0)  — sum of the item quantity across three inventory containers (container type ids 0, 2, 10).",
+        "forgeOtherInfo: nHaveNum = sum over the recipe's own material (FUN_113f9300 across containers 0/2/10); nMoney = *(cfg+0x80).",
+        "Per-material loop over recipe material array [*(iVar4+0x120) .. *(iVar4+0x124)), stride 2 ints: entry[0]=materialId, entry[1]=nNeedItemNum; nSelfHasItemNum = FUN_113f9300(0,id)+FUN_113f9300(2,id)+FUN_113f9300(10,id)."
+      ],
+      "costs": [
+        "nMoney (forge/craft currency cost) @ cfg+0x80",
+        "material requirement pairs (materialId, nNeedItemNum) at recipe+0x120..+0x124",
+        "owned inventory counts summed across containers 0,2,10 via FUN_113f9300"
+      ],
+      "notes": "FUN_113f9300(containerType,itemId,0) = inventory quantity lookup for a container; recurs across the economy chunks. bMoneyIsEnough/bReallyCanForge are display booleans only."
+    },
+    {
+      "address": "0x108efeb0",
+      "currentName": "FUN_108efeb0",
+      "proposedName": "CForgeUI::BuildCraftListVO",
+      "purpose": "InitModel handler (expects 1 arg: in_stack_00000014==1) that builds the full craftable-item list VO ('forgeitemdataCacheList'). Iterates all craft recipes (count FUN_10876bc0, each FUN_10876b30), skipping hidden ones, and emits per-recipe PET_FORGE_ITEM_DATA_CLASS entries with an embedded PET_MATERIAL_ITEM_DATA_CLASS material list. Ends by calling CCraftInfo::BuildCraftLists.",
+      "confidence": "medium",
+      "subsystem": "forge-craft",
+      "serverRelevance": "client-only (UI list of craft recipes mirrored from client config); server owns the authoritative recipe table and must validate craftID/materials/money on commit.",
+      "formulas": [
+        "Recipe count = FUN_10876bc0(); recipe[i] = FUN_10876b30(i). Skip entry when recipe[0x11]==1 (byte offset 0x44 flag: hidden/locked).",
+        "canCraft = (bool)FUN_1124f6a0(recipe); craftID = virtual getter recipe->vtbl[0x18/4]().",
+        "Recipe struct int-index -> byte-offset fields: PetType = recipe[0x14] (0x50); PetEquipType = recipe[0x12] (0x48); PetEquipSeries = recipe[0x13] (0x4c); EquipLevel = recipe[0x15] (0x54); EquipProperty = recipe[0x16] (0x58); nMoney = recipe[0x20] (0x80); resultItemId(&DAT_11dbb0b4) = recipe[0x17] (0x5c).",
+        "nLevelLimit = *(itemCfg+0x110) where itemCfg = FUN_10254130(recipe[0x17]) and *(itemCfg+0x34)==4; else nLevelLimit branch emits 0/empty.",
+        "Material list: iterate recipe material array [recipe[0x48]..recipe[0x49]) i.e. bytes [+0x120..+0x124), stride 2 ints: *piVar6 = materialId(&DAT_11dbb0b4), piVar6[1] = nNeedItemNum.",
+        "Icon/desc fallback when itemCfg==0: strItemIconName='item_icon_42', strItemDescrbie='ceshi'."
+      ],
+      "costs": [
+        "nMoney (craft currency cost) @ recipe+0x80",
+        "resultItemId @ recipe+0x5c",
+        "EquipLevel @ recipe+0x54, nLevelLimit @ itemCfg+0x110",
+        "material (id, nNeedItemNum) pairs at recipe+0x120..+0x124"
+      ],
+      "notes": "Consistent with FUN_108ef420: same recipe material array at +0x120/+0x124 and nMoney at +0x80. 'ceshi'/'item_icon_42' are debug placeholder strings (missing-config fallback)."
+    },
+    {
+      "address": "0x108f07e0",
+      "currentName": "FUN_108f07e0",
+      "proposedName": "CDecomposeUI::RegisterModelHandlers",
+      "purpose": "Registers flash/UI message handlers for the item-decompose (salvage) panel. Same FUN_100b62c0 + FUN_108f0ae0 binding pattern as FUN_108ef270. Handler map: InitModel->FUN_108f0980, OnDecompose->DAT_108f09f0, OnCancel->DAT_108f0a00, OnContinue->DAT_108f0a10, OnEnd->DAT_108f0a20.",
+      "confidence": "medium",
+      "subsystem": "item-decompose",
+      "serverRelevance": "client-only (UI event-binding plumbing).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Decompose/salvage grants materials; the actual mutation is server-side. This is only the UI handler registration."
+    },
+    {
+      "address": "0x108f2e10",
+      "currentName": "FUN_108f2e10",
+      "proposedName": "CLevelEnGroupRewardInfo::GetRewardByIndex",
+      "purpose": "Looks up a reward entry from the level-entrust group reward config (singleton via CLevelEnGroupRewardInfo::GetManager, else CInfoManager::FindByName). Given a global index, resolves a 2D reward table (row pointers array) and returns the reward value at that cell, or 0.",
+      "confidence": "high",
+      "subsystem": "level-entrust",
+      "serverRelevance": "validation/config lookup — client mirror of the group-reward table; server owns authoritative reward grant. Useful for reconstructing the reward config layout.",
+      "formulas": [
+        "cfg = singleton or FindByName('CLevelEnGroupRewardInfo'); if missing use default DAT_123bfbfc (lazy-init guarded by DAT_123bfbf8 bit0).",
+        "Guard: return 0 unless (param_1 != -1) && ((param_1 != 0 || *(cfg+0x30)==0) && *(cfg+0x28)!=0).",
+        "idx = param_1 - *(cfg+0x30) (base index offset); require 0 <= idx < *(cfg+0x24) (total entry count).",
+        "row = *(int*)(*(cfg+0x20) + (idx / *(cfg+0x28)) * 4)  where cfg+0x28 = columns-per-row / stride; if row==0 return 0.",
+        "return *(int*)(row + (idx % *(cfg+0x28)) * 4)."
+      ],
+      "costs": [
+        "returns a reward id/value from the group reward matrix (row-major, stride = cfg+0x28)"
+      ],
+      "notes": "cfg layout: +0x20 row-pointer array base, +0x24 total count, +0x28 stride(cols), +0x30 base-index offset. Reward matrix is [ceil(count/stride)] rows x [stride] cols."
+    },
+    {
+      "address": "0x108f3b90",
+      "currentName": "FUN_108f3b90",
+      "proposedName": "CLevelEntrustUI::BuildEntrustListVO",
+      "purpose": "Large UI-model builder (param_5==2) for the level-entrust (quest commission) list panel. Emits a LEVELENTRUST_LISTVO with group header fields (groupID, title, maxEntrustCount, repeatCycle, curEntrustCount, nEntrustVipCnt) and a LEVELENTRUST_TASKVO_CLASSNAME sub-list. Per task it evaluates unlock conditions (level, quest task, hunter star / gold hunter star, finish-level, hunter card, use-item cost) and computes a display 'state'/'codes', plus reward info via CLevelEnGroupRewardInfo::GetRewardByIndex, CLevelEnSubGroupRewardInfo::SumSubGroupRewards, and league schedule via CLeagueInfo::CollectLeagueScheduleEntries.",
+      "confidence": "low",
+      "subsystem": "level-entrust",
+      "serverRelevance": "client-only VO builder, but surfaces validation-relevant economy limits: maxEntrustCount / curEntrustCount / repeatCycle (how many commissions may be accepted per cycle) and the per-task unlock item cost (iUseItemID / iUseItemCount). Server must authoritatively enforce these caps and item consumption.",
+      "formulas": [
+        "Unlock condition records fetched by type index via FUN_117e7460(type): observed types 1 (HunterStar rank, compared vs CPlayer::GetHuntRankOrCount), 2, 3, 4, 5, 6 (finish-level), 7 (finish-level string), 8 (hunter card / quest task), 0xa (iUnlockNeedLevelsCount, list), 0xb (appraisal + levels count). Each writes str/int unlock fields when the player's value < required (*(rec+4)).",
+        "condition value getters FUN_1130bb80(type)/FUN_1130cb50(type) supply current player progress; e.g. state bump when current < required.",
+        "VIP reward/count scaling: when pppppuStack_35c[9] != 0 && pppppuStack_35c[9][6]==1 (VIP-active flag), value = (int)((double)value * DAT_11de9968) applied to two reward counters (ppppppuStack_330 and uVar18). DAT_11de9968 is the VIP entrust multiplier (a double constant).",
+        "A config base offset constant 0x261d0 is added to a level-entrust config pointer (aiStack_25c[0] += 0x261d0).",
+        "'state' (ppppppiVar19) computed by cascading condition checks; a reward-count comparison drives state 2 with sub-code (ppppiStack_314 set to 0xa or 0x4). Task material-list branch compares (int)((rec[4]-rec[3])>>2) == rec[1]/rec[2] to set bIsAndOpration and iUnlockNeedLevelsCount.",
+        "League-schedule sub-loop (only when high byte of unaff_EDI set): iterates entries of size 0x18; counts matching league notices (local_2a8 < 2 gate) and emits noticeLeagueName."
+      ],
+      "costs": [
+        "maxEntrustCount, curEntrustCount, repeatCycle, nEntrustVipCnt (commission accept caps per cycle)",
+        "iUseItemID / iUseItemCount (item cost to unlock an entrust task)",
+        "VIP multiplier DAT_11de9968 (double) applied to entrust reward/count values when VIP flag set",
+        "reward ids resolved via GetRewardByIndex / SumSubGroupRewards"
+      ],
+      "notes": "Decompiler produced deeply-nested pointer noise; control flow understood at subsystem level but exact struct offsets for the count/cost fields are not fully recovered here. Cross-check against TlvGroupEntrustStatData / TlvEntrustGroupStatList and the server entrust structs (groupID/groupStatCnt/groupLevelCnt) for authoritative field ids. Confidence low on precise offsets, high on subsystem role."
+    }
+  ]
+}

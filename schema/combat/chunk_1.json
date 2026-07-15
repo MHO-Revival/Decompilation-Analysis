@@ -1,0 +1,404 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x102d9480",
+      "proposedName": "CMHHitInfo::SerializeToKeyValue",
+      "currentName": "FUN_102d9480",
+      "purpose": "Debug/telemetry serializer that dumps the full client<->server HIT/DAMAGE event structure field-by-field as labelled key/value lines via FUN_1024a290(printer,indent,ctx,label,fmtStr,value) and FUN_102713d0 (Vec3 dumper). Because it enumerates every field of the hit message with its exact name, offset and type, it is the authoritative field map for the GameOnHit / hit-report structure.",
+      "confidence": "high",
+      "subsystem": "hit-validation",
+      "serverRelevance": "validation - this is the exact layout of the hit/damage event the client emits; the authoritative server must parse and validate these fields (attacker/firemode/attackName hashes, skill seq, defense result, hit index).",
+      "constants": [
+        "&DAT_11d9f574 = \"%u\" (u32 fmt, used 11x)",
+        "&DAT_11d9e0b4 = \"%d\" (int fmt, used 255x)",
+        "&DAT_11da0cf4 = float fmt \"%f\"/\"%.3f\" (double-promoted, used 6x)",
+        "\"%I64i\" = int64 fmt for llSkillSeq"
+      ],
+      "protocolFields": [
+        "dwShooterId: u32 @ this+0x00",
+        "dwTargetId: u32 @ this+0x04",
+        "dwWeaponId: u32 @ this+0x08",
+        "dwProjectileId: u32 @ this+0x0c",
+        "iMaterial: int @ this+0x10",
+        "iType: int @ this+0x14",
+        "iBulletType: int @ this+0x18",
+        "fDamageMin: float @ this+0x1c",
+        "fPierce: float @ this+0x20",
+        "iPartId: int @ this+0x24 (hitzone/part id)",
+        "stPos: Vec3 @ this+0x28 (world hit pos)",
+        "stLpos: Vec3 @ this+0x34 (local hit pos)",
+        "stDir: Vec3 @ this+0x40 (hit/shot direction)",
+        "stNormal: Vec3 @ this+0x4c",
+        "stLnorm: Vec3 @ this+0x58 (local normal)",
+        "stAttackDir: Vec3 @ this+0x64",
+        "stTScarDir: Vec3 @ this+0x70 (target scar direction)",
+        "stTPos: Vec3 @ this+0x7c (target pos)",
+        "stTUp: Vec3 @ this+0x88 (target up)",
+        "stTNormal: Vec3 @ this+0x94 (target normal)",
+        "stLocalnormangle: Vec3 @ this+0xa0",
+        "fShakeStrength: float @ this+0xac",
+        "fShakeDurationTime: float @ this+0xb0",
+        "fShakeStillTime: float @ this+0xb4",
+        "wProjectileClassId: u16 @ this+0xb8",
+        "wWeaponClassId: u16 @ this+0xba",
+        "iRemote: int @ this+0xbc",
+        "iDamageLevel: int @ this+0xc0",
+        "dwAttackType: u32 @ this+0xc4",
+        "dwHitType: u32 @ this+0xc8",
+        "iDefenseResult: int @ this+0xcc",
+        "iHitIndex: int @ this+0xd0",
+        "iShooterSrvId: int @ this+0xd4",
+        "iTargetSrvId: int @ this+0xd8",
+        "iWeaponSrvId: int @ this+0xdc",
+        "iProjectileSrvId: int @ this+0xe0",
+        "dwHashWeaponClass: u32 @ this+0xe4",
+        "dwHashFireMode: u32 @ this+0xe8",
+        "dwHashAttacker: u32 @ this+0xec",
+        "dwHashMeleeParams: u32 @ this+0xf0",
+        "dwHashCurEvent: u32 @ this+0xf4",
+        "iSkillResID: int @ this+0xf8 (skill resource/config id)",
+        "llSkillSeq: i64 @ this+0xfc (skill sequence number, [0x3f]/[0x40])",
+        "fCurStamina: float @ this+0x104"
+      ],
+      "formulas": [
+        "Vec3 fields are emitted as 3 consecutive floats each (11 vectors span this+0x28..this+0xa4).",
+        "llSkillSeq occupies two dwords this+0xfc (low) and this+0x100 (high), printed with %I64i.",
+        "Client-side srv-id fields (iShooterSrvId/iTargetSrvId/iWeaponSrvId/iProjectileSrvId) are the server-authoritative entity ids paired with the client dwShooterId/dwTargetId/etc."
+      ],
+      "notes": "No matching TLV struct found in TLV_DOCS/ for these field names (not one of the 12 catalogued combat TLVs); this is a raw in-memory event struct, likely the payload behind GameOnHit and the hit-report opcode. This layout should drive the server's hit-validation parser."
+    },
+    {
+      "address": "0x10a5ab60",
+      "proposedName": "Weapon::DispatchOnChgFireMode",
+      "currentName": "FUN_10a5ab60",
+      "purpose": "Builds a small script-event descriptor (event 0x11d, flags 0x4ffff, name \"OnChgFireMode\", param=param_2) and dispatches it through the entity's script proxy vtable (+0x24).",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - fire-mode change is a client FSM/script notification (fx/animation).",
+      "constants": ["event id 0x11d", "flags 0x4ffff"],
+      "notes": "Same event-dispatch pattern as the GameOnHit builders (local struct then vtbl+0x24 call)."
+    },
+    {
+      "address": "0x10a9bc30",
+      "proposedName": "RegisterCombatBehaviorTreeNodes",
+      "currentName": "FUN_10a9bc30",
+      "purpose": "One-time (guard DAT_12020a88) registration of combat/NPC behavior-tree action nodes with the BT factory: CChangeArea, CSetTimerEvent, CBuffAreaPorcess[sic], CNpcSkillPlay, CNpcStateAbnoraml, CCombatNpcRotateToPos/ToTarget, CBTObjEnableItemListener, CPetExistNearestLedge, CApplyEffect, CShowIcon, CLocalPlayerGotoState, CNpcGetClientTimeTable, CPetAddGroupBuff, CPetApplyGroupEffect, CEnableMoveCollision, CEntityFollowTarget/PursuitTarget, CResetLocomotion, CCommonRotateToPos, CEntityMoveToPosEx, CLMGRotateToPos, CNpcStartCombo/NextCombo/LeaveCombo, CSceneObjectHide, CSwitchMonsterPartDefence, CCheckBattleGround.",
+      "confidence": "high",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - client BT node factory registration. Node NAMES are useful reference for what NPC combat behaviors exist (CSwitchMonsterPartDefence, CNpcSkillPlay, combo nodes) but the registration itself is client plumbing.",
+      "notes": "Each entry calls factory-create then a per-node param-descriptor init (e.g. FUN_10aa0760)."
+    },
+    {
+      "address": "0x10aa0760",
+      "proposedName": "BTNode_CCombatNpcRotateToPos::DescribeParams",
+      "currentName": "FUN_10aa0760",
+      "purpose": "Registers the parameter descriptors (TargetOrientation, RotateAngle, TargetPos) for the CCombatNpcRotateToPos behavior-tree node.",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - BT node schema plumbing.",
+      "notes": "Stock BT param-registration idiom (string ctor + FUN_1048b080/170/250)."
+    },
+    {
+      "address": "0x10aa10c0",
+      "proposedName": "BTNode_CCombatNpcRotateToTarget::DescribeParams",
+      "currentName": "FUN_10aa10c0",
+      "purpose": "Registers the TargetID parameter for the CCombatNpcRotateToTarget BT node.",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - BT node schema plumbing."
+    },
+    {
+      "address": "0x10aa1800",
+      "proposedName": "BTNode_CEnableMoveCollision::DescribeParams",
+      "currentName": "FUN_10aa1800",
+      "purpose": "Registers parameters (Living, WithWall, CombatNPCMovCol) for the CEnableMoveCollision BT node.",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - BT node schema plumbing."
+    },
+    {
+      "address": "0x10aa4e10",
+      "proposedName": "CCombatNPCComboInfo::GetRecordByIndex",
+      "currentName": "FUN_10aa4e10",
+      "purpose": "Indexed lookup into the CCombatNPCComboInfo data table (found via FindInfoByKey). Standard paged-array accessor: validates index against base (+0x30), page size (+0x28), count (+0x24), returns element from page array (+0x20).",
+      "confidence": "high",
+      "subsystem": "combat-npc",
+      "serverRelevance": "validation/data - combo-definition table accessor; server needs equivalent combo data if it validates NPC combo chains.",
+      "formulas": [
+        "idx' = index - table[+0x30]; require 0<=idx'<table[+0x24]; page=table[+0x20][idx'/table[+0x28]]; return page[idx'%table[+0x28]]"
+      ]
+    },
+    {
+      "address": "0x10aaea10",
+      "proposedName": "CCombatNPCInfo::GetRecordByIndex",
+      "currentName": "FUN_10aaea10",
+      "purpose": "Bounds-checked accessor into the CCombatNPCInfo flat array: valid range 0..((table[+0x18]-table[+0x14])>>2), returns table[+0x14][index].",
+      "confidence": "high",
+      "subsystem": "combat-npc",
+      "serverRelevance": "data - combat-NPC definition table accessor.",
+      "formulas": ["count = (table[+0x18]-table[+0x14])>>2; if 0<=index<count return *(table[+0x14]+index*4)"]
+    },
+    {
+      "address": "0x10abaa70",
+      "proposedName": "CDamageInfo::GetRecordById",
+      "currentName": "FUN_10abaa70",
+      "purpose": "Paged-array accessor into the CDamageInfo data table (manager via CDamageInfo::GetManager). Same base/page/count layout as combo table.",
+      "confidence": "high",
+      "subsystem": "damage-calc",
+      "serverRelevance": "authoritative/data - resolves a damage-definition record by id; the damage table this reads is a prime candidate for server-side damage math input. Worth locating the record struct fields.",
+      "formulas": [
+        "idx' = id - table[+0x30]; require 0<=idx'<table[+0x24]; page=table[+0x20][idx'/table[+0x28]]; return page[idx'%table[+0x28]]"
+      ],
+      "notes": "Only the accessor is here; the CDamageInfo record layout (multipliers etc.) is elsewhere. Flag for follow-up."
+    },
+    {
+      "address": "0x10ae4c50",
+      "proposedName": "CItemFsm::LoadWeaponAvatarFireMode",
+      "currentName": "FUN_10ae4c50",
+      "purpose": "Loads/applies a weapon or avatar visual by id: resolves CAvatarInfo record, picks male/female variant, loads .fxparams, WE99FSMStates.xml FSM, and /Scripts/Entities/Items/XML/Weapons/<name>_firemode.xml. Branches on param_3 slot range (0x1e..0x2b weapon avatar vs <8 equip slots).",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - character/weapon model + firemode XML loading (visuals/FSM).",
+      "notes": "Heavy CryString refcount plumbing; error string 'Can not find avatar info...'."
+    },
+    {
+      "address": "0x10ae6470",
+      "proposedName": "CPetFsm::LoadWeaponAvatarFireMode",
+      "currentName": "FUN_10ae6470",
+      "purpose": "Pet/companion variant of the avatar+firemode loader: resolves CAvatarInfo and CPetAvatarInfo records, builds the _firemode.xml path, applies model strings for three material/mesh slots (+0x18/+0x30/+0x58 with data at +0x2c/+0x44/+0x6c).",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - pet model/firemode visual loading."
+    },
+    {
+      "address": "0x10b21b70",
+      "proposedName": "CombatEntity::HandleGameEvent_HitBreakage",
+      "currentName": "FUN_10b21b70",
+      "purpose": "Entity game-event handler dispatching on event id: 0x124 -> GameCommonEvent (EventName/EventParam forwarded to script), 0x125 -> OnHit with monster-part Breakage:Breakage effect trigger + camera/impulse math and OnHit FSM fire, 0x126 -> forwards two params via vtbl+0xe0.",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "client-only - hit/breakage FX and OnHit FSM handling on the client entity. The 0x125 path reads the hit record (puVar6) and triggers part-breakage visuals; not authoritative but confirms OnHit event routing.",
+      "constants": [
+        "event 0x124 = GameCommonEvent",
+        "event 0x125 = OnHit/Breakage",
+        "event 0x126 = paired-param forward",
+        "DAT_11de993c = small height offset added to breakage effect Z"
+      ],
+      "protocolFields": [
+        "hit record puVar6[0x14..0x16]: Vec3 breakage position",
+        "puVar6[0x53]: breakage effect id/param",
+        "puVar6[0x54]: flag gating alternate hit path (FUN_10bab190)"
+      ],
+      "notes": "Breakage:Breakage = monster part-break effect. DAT_1202e818+0x209 branch = dedicated-server/authoritative flag toggling networked vs local handling."
+    },
+    {
+      "address": "0x10b255c0",
+      "proposedName": "CombatEntity::BuildGameOnHitEvent_Melee",
+      "currentName": "FUN_10b255c0",
+      "purpose": "Computes hit geometry for a melee/entity hit and dispatches a 'GameOnHit' script event (event 0x11f, flags 0x4ffff) to the target entity. Normalizes attack direction, rotates vectors by target orientation quaternion, derives a scar/impact rotation via acos+sin/cos, and packs a bounding region (500 units) + hash into the event table.",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "client-only - builds the client GameOnHit visual/scar event. The math is presentation (impact rotation), not damage; but it reads the same hit record and is the client emitter of GameOnHit.",
+      "constants": [
+        "rsqrt Newton refine: (1.5 - 0.5*v*x*x)*x  -> DAT_11de9938=1.5f, DAT_11de98e8=0.5f",
+        "DAT_11de9c90 = 0x80000000 float sign-flip mask (vector negation)",
+        "DAT_11de98a0 = tiny epsilon added to |v|^2 before rsqrt",
+        "DAT_11cbf070 = near-zero length threshold; DAT_11cbf074 = min-scale guard",
+        "DAT_11de9918 = 1.0f (reciprocal numerator)",
+        "0x43fa0000 = 500.0f and DAT_11cc4cc0 = 500.0f (region half-extents)"
+      ],
+      "formulas": [
+        "normalize(v): x=rsqrt(|v|^2+eps); x=(1.5-0.5*|v|^2*x*x)*x; v*=x",
+        "impact angle theta = acos(dot(dir, refDir)); rotationVec = axis * cos(theta*0.5) style half-angle (fcos/fsin of dVar9*0.5)",
+        "region extents set to (500,500,500) around hit"
+      ],
+      "notes": "Quaternion/half-angle rotation of the impact normal for decal/scar placement."
+    },
+    {
+      "address": "0x10b78ab0",
+      "proposedName": "DebugHud::DrawWeaponRaycastInfo",
+      "currentName": "FUN_10b78ab0",
+      "purpose": "Debug overlay: casts RayWorldIntersection(Game) from the current firemode and prints hovered surface info (Firemode name+id, pierceability, distance %.1f m, mass %.1f kg, pe_type, submerged, velocity m/s, Frozen amount, health/%% health/passengers/Running).",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "client-only - developer debug HUD / raycast diagnostics.",
+      "constants": [
+        "DAT_11cbf0b8, DAT_11cc9180, DAT_11de9a5c, DAT_11de9900, DAT_11de9a30 = HUD layout/scale factors",
+        "0x3dcccccd=0.1f and 0x3e4ccccd=0.2f passed to a draw call (line widths)",
+        "0x3fb33333=1.4f, 0x3f99999a=1.2f = text scales"
+      ],
+      "notes": "0x3dcccccd=0.1f confirmed here as a UI draw parameter, NOT a damage constant."
+    },
+    {
+      "address": "0x10bc0de0",
+      "proposedName": "PlayerInput::BindActionHandlers",
+      "currentName": "FUN_10bc0de0",
+      "purpose": "Zeroes a ~0x164-entry action table then binds ~356 named input actions (moveleft/right/forward/back, crouch, prone, sprint, attack1, attack2, zoom, reload, use, item slots, weapon/firemode, godmode/flymode debug, etc.) by resolving each name through the input manager (DAT_1202e818+0x70) and storing refcounted handler pointers.",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "client-only - local player input action map (keybind -> action).",
+      "notes": "Stock CryEngine action-map binding; attack1/attack2/zoom are the melee/fire triggers but binding is client-side."
+    },
+    {
+      "address": "0x10bc94c0",
+      "proposedName": "BuffArea::BuildGameOnHitEvent",
+      "currentName": "FUN_10bc94c0",
+      "purpose": "BuffArea variant of the GameOnHit builder: resolves source (param_1+0x44) and target (param_2+8) entities, computes normalized direction between them, derives impact rotation (same acos+half-angle math as FUN_10b255c0), and dispatches 'GameOnHit' (via vtbl+0x144 -> +0x24) to the target with a 'BuffArea' event-name hash.",
+      "confidence": "medium",
+      "subsystem": "buff",
+      "serverRelevance": "client-only - buff-area hit visual/GameOnHit emission. Confirms buff areas route through the same GameOnHit path with a BuffArea tag.",
+      "constants": [
+        "same as FUN_10b255c0: rsqrt 1.5/0.5, sign mask DAT_11de9c90, region 500.0f",
+        "event name hashes via FUN_10b27fd0(\"BuffArea\") and FUN_10b27fd0(param_3)"
+      ],
+      "formulas": [
+        "dir = normalize(targetPos - sourcePos); impact rotation = half-angle(cos/sin) of acos(dot)"
+      ]
+    },
+    {
+      "address": "0x10bc9f20",
+      "proposedName": "CLogicBuffArea::ReadPropertiesFromXml",
+      "currentName": "FUN_10bc9f20",
+      "purpose": "Parses a BuffArea entity's XML Properties into its runtime struct (param_1[0x10]): SkillInfo{b_HaveSkill, s_i_SkillID(atoi), i_SkillLv, AttackName}, BuffInfo{i_BuffID, f_LifeTime, f_CheckDelta, b_Continous, b_InitEnable->SetEnable, b_EnterTrigger, b_LeaveTrigger, b_EnterAdd, b_LeaveAdd, b_NeedRemove}, TriggerInfo{b_UseBox, vBoxParam}.",
+      "confidence": "high",
+      "subsystem": "buff",
+      "serverRelevance": "validation/authoritative - defines buff-area semantics (skill id, buff id, lifetime, tick delta, enter/leave add/remove). The server needs these fields to apply/validate area buffs; struct offsets given.",
+      "protocolFields": [
+        "obj+0x18c: b_HaveSkill (byte)",
+        "obj+0x184: s_i_SkillID (int, atoi)",
+        "obj+0x188: i_SkillLv (int)",
+        "obj+0x170: i_BuffID (int)",
+        "obj+0x178: f_LifeTime (float)",
+        "obj+0x16c: f_CheckDelta (float, tick interval)",
+        "obj+0x168: b_Continous (byte)",
+        "obj+0x1a8: b_EnterTrigger, +0x1a9: b_LeaveTrigger, +0x1aa: b_EnterAdd, +0x1ab: b_LeaveAdd, +0x1ac: b_NeedRemove (bytes)"
+      ],
+      "notes": "obj = param_1[0x10] (the CLogicBuffArea logic component). AttackName resolved via FUN_11415410 (name-hash)."
+    },
+    {
+      "address": "0x10bcfb70",
+      "proposedName": "CombatNpc::Destructor_Release",
+      "currentName": "FUN_10bcfb70",
+      "purpose": "CombatNpc teardown: sets vtable pointers, detaches the entity's 'CombatNpc' game-object extension (param_1[0x16]/[0x17]) via GetGameObject +0xec activation=3, releases the script/state string at +0x20.",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - CombatNpc game-object extension teardown.",
+      "notes": "&PTR_FUN_11ccf8d0 etc are vtables for the CombatNpc extension."
+    },
+    {
+      "address": "0x10bcfc00",
+      "proposedName": "CombatNpc::Init",
+      "currentName": "FUN_10bcfc00",
+      "purpose": "Initializes a CombatNpc game-object extension: acquires the 'CombatNpc' extension, registers RMI/event listeners for opcodes 0x401 and 0x6a9, sets up network-serialized aspects OwnerPlayerID/SelfFSMState, and (on authoritative/dedicated branch DAT_1202e818+0x209) reads owner/state, NpcName, NpcWeaponType and pushes them to the sync layer.",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "validation - CombatNpc networked entity setup; OwnerPlayerID/SelfFSMState/NpcName/NpcWeaponType are replicated aspects the server owns. Relevant for spawning/owning summoned combat NPCs.",
+      "protocolFields": [
+        "aspect OwnerPlayerID (init 0xffffffff)",
+        "aspect SelfFSMState (init 0xffffffff)",
+        "NpcName (string)",
+        "NpcWeaponType (int)",
+        "RMI/event ids: 0x401, 0x6a9, 0x8a8"
+      ],
+      "notes": "DAT_1202e818+0x209 = authoritative/dedicated-server flag; the true-branch does the server-side aspect writes."
+    },
+    {
+      "address": "0x10bd08a0",
+      "proposedName": "CombatNpc::Constructor",
+      "currentName": "FUN_10bd08a0",
+      "purpose": "Trivial CombatNpc ctor: sets self back-pointers (+0x10,+0x14) and initializes an embedded CryString to \"CombatNpc\".",
+      "confidence": "high",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only - object construction plumbing."
+    },
+    {
+      "address": "0x10bd1c70",
+      "proposedName": "PlayerParams::RegisterCVars",
+      "currentName": "FUN_10bd1c70",
+      "purpose": "Registers/parses the large client player+camera CVar/param block (cl_fov, cl_bob, cl_headBob, cl_tpvDist, cl_sensitivity, cl_invertMouse, cl_sprintTime, cl_strengthscale, ...). Decompiler reports the body as failed/virtualized.",
+      "confidence": "low",
+      "subsystem": "other",
+      "serverRelevance": "client-only - local player/camera tuning CVars.",
+      "notes": "34686-byte function, body not decompiled (<decompile failed/virtualized>); classified purely from string table."
+    },
+    {
+      "address": "0x10be3840",
+      "proposedName": "GameFactory::RegisterEntityClasses",
+      "currentName": "FUN_10be3840",
+      "purpose": "One-time game-object/entity class registration with the factory: NullAI, BTEmCommon, BTCtrlObject, MHBuffArea, BehaviorTreeBase, MHCommonArea, MHTestSpawner, SceneObject, MHAttackable, MHBurnable, MHContAttacker, GroupAI, EmCommon, RageBullet, Player, CombatNpc, MonsterCtrlPlugin, CatHandcart, PlayerFeature, Accessory, Weapon, VehicleWeapon, CameraRegion, OffHand; vehicle-part attachments; environment entities (Tornado/Shake/Rain/Snow/...); GameRules classes (SinglePlayer/DeathMatch -> GameRulesClient).",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "client-only - entity/component class factory registration. Class NAMES (MHAttackable, MHBurnable, MHContAttacker, RageBullet, MHBuffArea) are a useful inventory of combat entity types.",
+      "notes": "Stock CryEngine class-registration idiom with per-class one-shot guards."
+    },
+    {
+      "address": "0x10bec410",
+      "proposedName": "CItemFsm::ApplyWeaponAvatarModel",
+      "currentName": "FUN_10bec410",
+      "purpose": "Third avatar/firemode loader variant: resolves CAvatarInfo by id, and either applies a resolved sub-record model (FUN_10ad9880 with param_4 avatarid whose record+0x14==1) or manually builds and loads the .fxparams / WE99FSMStates.xml / _firemode.xml model strings for slots +0x2c/+0x44/+0x6c.",
+      "confidence": "medium",
+      "subsystem": "other",
+      "serverRelevance": "client-only - weapon avatar model + firemode visual loading."
+    },
+    {
+      "address": "0x10c25a20",
+      "proposedName": "LocalPlayer::OnHit_CameraShakeAndFsm",
+      "currentName": "FUN_10c25a20",
+      "purpose": "On-hit handler for a specific entity: if the hit target is the local view target it triggers a camera shake scaled by the hit value at param_2+0x44, forwards the hit to the target's vtbl+0x674, records it (FUN_10c06020) and fires the 'OnHit' FSM event (id 4) with cleanup.",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "client-only - camera shake + OnHit FSM on the local client.",
+      "constants": [
+        "shake amplitude = value(param_2+0x44) * DAT_11cbf080",
+        "shake frequency/other = value(param_2+0x44) * 0.5f(DAT_11de98e8) * DAT_11de98bc",
+        "'OnHit' FSM transition code == 4"
+      ],
+      "protocolFields": ["param_2+0x04: hit source entity id", "param_2+0x44: hit magnitude/value driving shake"],
+      "formulas": ["cameraShake.amp = hitVal*DAT_11cbf080; cameraShake.freq = hitVal*0.5*DAT_11de98bc"]
+    },
+    {
+      "address": "0x10c25c70",
+      "proposedName": "CombatNpc::OnHit_ProcessAndBroadcast",
+      "currentName": "FUN_10c25c70",
+      "purpose": "NPC/entity OnHit processing: resolves attacker (param_2[0]) and validates target alive (health via vtbl+0x304 > 0) and not blocking (attacker vtbl+0x1a4). If valid: records hit, fires 'OnHit' FSM event (code 4), notifies all registered hit-listeners (array param_1+0x25c..+0x260), and sends impact/decal events (types 0x17/0x18/0x19) carrying the damage value param_2[0x11] to the render/effect layer (param_1+0x40 vtbl+0x18).",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "client-only - client OnHit reaction, listener fan-out and decal events. Confirms damage/value carried at hit record +0x44 (param_2[0x11]) and health gate, but the authoritative kill/damage decision is elsewhere.",
+      "constants": [
+        "DAT_11de9890 = min value threshold for decal/impact (param_2[0x11] must exceed)",
+        "effect event type bytes: 0x17, 0x18, 0x19",
+        "'OnHit' FSM code == 4"
+      ],
+      "protocolFields": [
+        "param_2[0]=target/self id, param_2[1]=attacker id, param_2[2]=weapon/proj id",
+        "param_2[0x11] (=+0x44): damage/hit value"
+      ]
+    },
+    {
+      "address": "0x10c26e50",
+      "proposedName": "MeleeAttack::QueryTargetsAndEmitGameOnHit",
+      "currentName": "FUN_10c26e50",
+      "purpose": "Melee/area attack resolver: runs a physics/proximity query (vtbl+0x288) around the attacker producing up to 100 candidate part-entities (results in local_384[], ids in local_514[]); for each candidate it enforces a per-target hit-count cap (param_1[0xa]) and, when allowed, computes the normalized hit direction (attacker pos param_1[4..6] minus target center) and dispatches a 'GameOnHit' script event (event 0x4ffff via vtbl+0x144 -> +0x24) to that target, tagging self-hit (isSelf = queried root id == hit id).",
+      "confidence": "medium",
+      "subsystem": "hit-validation",
+      "serverRelevance": "validation - this is the CLIENT melee hit-detection geometry: radius/range query + per-target multi-hit cap. An authoritative server must reproduce the same proximity test (center param_1[4..6], radius param_1[7]) and per-target hit cap (param_1[0xa]) to validate claimed hits.",
+      "constants": [
+        "candidate buffer capacity = 100 (param_1[0xb])",
+        "DAT_11de9890 = min radius/value gate on param_1[7]",
+        "rsqrt normalize constants 1.5f/0.5f, sign mask DAT_11de9c90",
+        "GameOnHit event flags 0x4ffff"
+      ],
+      "protocolFields": [
+        "param_1[0]=attackerRootId, param_1[1]=?, param_1[4..6]=attack center Vec3, param_1[7]=radius/range",
+        "param_1[0xa]=max hits per target (hit-count cap), param_1[0xb]=result capacity(100), param_1[0xc]=results ptr, param_1[0xd]=id-out ptr, param_1[0xe]=event/attack hash",
+        "byte param_1+0x26: multi-hit-tracking enabled flag"
+      ],
+      "formulas": [
+        "for each hit part: dir = normalize(center - partCenter) with rsqrt (1.5-0.5*|v|^2*x*x)*x; if !multiHit or hitCount<cap emit GameOnHit",
+        "isSelf = (m_pThis vtbl+0x2a8 root id) == attackerRootId"
+      ],
+      "notes": "This function is the closest thing in this chunk to authoritative client hit-detection; pairs with FUN_102d9480's hit record. Verify radius/cap semantics against server design."
+    }
+  ]
+}

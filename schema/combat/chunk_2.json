@@ -1,0 +1,447 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "10c38390",
+      "currentName": "FUN_10c38390",
+      "proposedName": "CGameRules::ClientProcessHitReaction",
+      "purpose": "Master client-side hit-application/reaction pipeline for one hit. Resolves attacker (param_1[0]), victim (param_1[1]) and a 3rd actor (param_1[0x4a]) via the entity->actor manager (DAT_1202e818+0x50 vtable 0x2c), fetches their CDamageInfo controllers (vtable 0x288), gates on actor kind (vtable 0xa8 returns 0=player/1=monster/other) and blend state (vtable 0x180), then builds hit context and applies the reaction/animation blend. Emits a sequence of anim/effect events with ids 0xc1e,0xc1f,0xc20,0xc21,0xc22,0xc23 via FUN_10c38d30. Core damage/impulse work is delegated to FUN_1142b1a0 and FUN_10c393e0; final impulse vector written back to caller out-param param_8[0..2].",
+      "subsystem": "status",
+      "confidence": "medium",
+      "constants": [
+        "0xc1e/0xc1f/0xc20/0xc21/0xc22/0xc23 = hit-effect / animation event ids passed to FUN_10c38d30",
+        "DAT_11de9a58 = damping/velocity threshold: if (param_9 >= DAT_11de9a58) local_314=param_9 else local_314 = attacker-speed (local_8 vtable 0x50)",
+        "1.4013e-45 = 0x00000001 reinterpreted as float (a boolean/enum flag, not a real magnitude) used at param_9 compare and local_2bc gate -> FUN_1139cdb0(0x1e)/FUN_1139c8d0(0x1e)"
+      ],
+      "formulas": [
+        "damping/speed select: local_314 = (param_9 >= DAT_11de9a58) ? param_9 : attacker->GetSpeed() (vtable+0x50); passed into FUN_1142b1a0 alongside firemode(param_1[0x57]), hit-id(param_1[0x12]) and hit position (param_1[0x1a],[0x1b],[0x1c] copied to local_28/24/20)",
+        "if victim is player (vtable 0xa8 == 0): copy computed hit position local_28/24/20 into local_150/14c/148 and out param_8[0]=local_28, param_8[1]=local_24, param_8[2]=local_20 (impulse/knockback direction result)",
+        "no closed-form damage number here; magnitude computed inside FUN_1142b1a0 (see chunk covering 0x1142b1a0) using local_2f8 result struct and local_400 damage-info buffer (memset 0x108 bytes)"
+      ],
+      "protocolFields": [],
+      "notes": "Reads param_1 struct heavily: [0]=attackerId,[1]=victimId,[3]=weapon/thirdActorId,[4]=?,[0x12]=hitInfo/hashId,[0x1a..0x1c]=hit world position,[0x48]=?,[0x49],[0x4a]=3rd actor,[0x4c]=count(>0 gates FUN_10b27fa0),[0x57]=fireMode. local_18 vtable calls 0x338/0x33c are the per-actor 'apply hit reaction' handlers. This is the ORCHESTRATOR; the authoritative arithmetic lives in FUN_1142b1a0/FUN_10c393e0.",
+      "serverRelevance": "validation/authoritative-adjacent: this is the client reaction driver, but it is the entry that consumes the server/GameRules hit record and calls the shared damage-info evaluator (FUN_1142b1a0). Server must reimplement the FUN_1142b1a0 math it feeds; the reaction/anim event emission (0xc1e-0xc23) is client-only."
+    },
+    {
+      "address": "10c39260",
+      "currentName": "FUN_10c39260",
+      "proposedName": "CGameRules::ResolveHitMaterialOrEffectRecord",
+      "purpose": "Given the hit context (param_1) and an actor/damageinfo object (param_2), builds a lookup key string and resolves a CDamageInfo/effect record. Chooses between two resolver paths (FUN_116cd660 vs FUN_10970c70) based on a bool from param_2 vtable+0x10, optionally overlays a second key via param_2 vtable+0x64 (FUN_10540d00), then looks up the record with FUN_116e50d0 using id at param_1+0x18. Falls back to CDamageInfo manager array element [0][0] if not found.",
+      "subsystem": "damage-calc",
+      "confidence": "low",
+      "constants": [
+        "param_1+0x15c = optional key-count gate (>0)",
+        "param_1+0x18 = damage-info/effect record id used for FUN_116e50d0 lookup"
+      ],
+      "formulas": [
+        "CDamageInfo manager fallback indexing: rec = mgr[0x20][ (0 / mgr[0x28]) ][ (0 % mgr[0x28]) ] guarded by mgr[0x30]==0 && mgr[0x28]!=0 && mgr[0x24]>0 (standard slotted-array accessor: bucket = idx/stride, slot = idx%stride)"
+      ],
+      "protocolFields": [],
+      "notes": "Helper returning a record pointer used by FUN_10c38390 (local_14). The slotted-array pattern (0x20=buckets,0x24=count,0x28=stride,0x30=base-offset) recurs across CDamageInfo/CProjectileExplosionInfo managers in this chunk.",
+      "serverRelevance": "validation: resolves which damage/material record applies to a hit; server needs the equivalent record lookup to compute authoritative damage, though string-key building here is client-flavored."
+    },
+    {
+      "address": "10c65530",
+      "currentName": "FUN_10c65530",
+      "proposedName": "CVehicleWeapon::ParseRocketFiremodeHelpers",
+      "purpose": "Parses a weapon/vehicle XML 'params' node for a rocket firemode: reads string attrs rocket_firemode, radar_helper, barrel_helper, fire_helper, rocket_helper (all via GetAttr 'value'), interns them, and stores 4 resolved firemode ids (via FUN_10cdd560) at this+0x600/0x60c/0x618/0x624 from source ids at this+0x5f0/0x5f4/0x5f8/0x5fc. Also wires a 'turret' node's 'search'/other sub-nodes and caches a helper object at this+0x574.",
+      "subsystem": "other",
+      "confidence": "medium",
+      "constants": [
+        "this+0x5f0..0x5fc = source firemode ids; this+0x600/0x60c/0x618/0x624 = resolved firemode records; the '3,1,1,1' first arg to FUN_10cdd560 is a firemode-type/category selector"
+      ],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Weapon/vehicle rocket setup from XML. Stock item-system parsing, not damage math.",
+      "serverRelevance": "client-only (weapon visual/helper setup from XML); firemode ids may matter but resolution is data-driven config."
+    },
+    {
+      "address": "10c6ef90",
+      "currentName": "FUN_10c6ef90",
+      "proposedName": "CActor::OnHitDeathReactionInterrupted",
+      "purpose": "When an actor's death-reaction/hit-reaction state (this+0x54) is 0 or 1, copies a value (this+0x3c) into an event object (+0x24) and, if the global flow-node system is enabled (DAT_1202e818+0x16c) and the actor is not in a blocking state (vtable 0x1c4 false) and has a valid script table (vtable 0x134), fires the flowgraph event 'OnHitDeathReactionInterrupted'.",
+      "subsystem": "status",
+      "confidence": "medium",
+      "constants": ["this+0x54 == 0 || 1 gate; this+0x3c = payload copied to event+0x24"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Notifies scripts that a death/hit reaction animation was interrupted.",
+      "serverRelevance": "client-only (flowgraph/script notification for animation state)."
+    },
+    {
+      "address": "10cb3320",
+      "currentName": "FUN_10cb3320",
+      "proposedName": "CItemAnimationTable::RegisterActionNames",
+      "purpose": "Zero-initializes a 0x3d-slot table (DAT_1202f450) and interns ~60 weapon/item animation action name strings (activate, begin_reload, cannon, change_firemode, reload_shell, select, zoom_in/out, swim_*, etc.) via the string-atom function FUN_10ab4370.",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": [],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Pure animation-action name registry initialization. CryEngine item-system plumbing.",
+      "serverRelevance": "client-only (animation action name table)."
+    },
+    {
+      "address": "10cce380",
+      "currentName": "FUN_10cce380",
+      "proposedName": "CItem::ParseAccessoryFiremodeActions",
+      "purpose": "Parses an item accessory XML node: requires 'attach' and 'detach' sub-nodes, interns their action/helper/layer attrs, reads the 'firemodes' string list, splits it, and for each firemode name interns it and appends to a vector at this+0x1c. Also reads switchToFireMode/zoommode actions and the bool flags 'exclusive'->this+0x28 and 'client_only'->this+0x29, stores 'params' node ptr at this+0x24.",
+      "subsystem": "other",
+      "confidence": "medium",
+      "constants": ["this+0x28 = exclusive flag, this+0x29 = client_only flag, this+0x24 = params node, this+0x1c/0x20 = firemode-name vector begin/end"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Item accessory/firemode XML parsing; the client_only flag is notable but this is config parsing, not runtime damage.",
+      "serverRelevance": "client-only (item accessory config parsing)."
+    },
+    {
+      "address": "10d53a60",
+      "currentName": "FUN_10d53a60",
+      "proposedName": "CGameRules::RegisterGameHitListeners",
+      "purpose": "For a hit record param_1 (param_1[0]=attacker netId, param_1[1]=target netId): looks up both game objects (vtable 0x144 by id), then registers the RMI/schedule 'GameOnHit' on the target-object channel and 'GameHit' on the attacker-object channel (both event flags 0x4ffff, payload = param_1). If FUN_10c007c0(target) resolves an actor, calls FUN_10d53b90(param_1, param_2+0x58) and FUN_10d53fe0(param_1, param_2+0xd8).",
+      "subsystem": "hit-validation",
+      "confidence": "medium",
+      "constants": ["0x4ffff = aspect/event flag mask for GameOnHit/GameHit scheduling", "event name id from vtable 0x18 ('GameOnHit'/'GameHit')"],
+      "formulas": [],
+      "protocolFields": [
+        "param_1[0]: attacker netId (u32)",
+        "param_1[1]: target netId (u32)",
+        "param_2+0x58: attacker-side hit data blob passed to FUN_10d53b90",
+        "param_2+0xd8: target-side hit data blob passed to FUN_10d53fe0"
+      ],
+      "notes": "'GameOnHit' and 'GameHit' are the network hit events threaded through GameObject scheduling. This wires the client emission of those events.",
+      "serverRelevance": "validation: GameOnHit/GameHit are the client->server (and server->client) hit notifications the server must receive and validate; this function is the client-side registrar."
+    },
+    {
+      "address": "10d607a0",
+      "currentName": "FUN_10d607a0",
+      "proposedName": "CMelee::ComputeHitDirectionAndEmitGameOnHit",
+      "purpose": "For a hit where the target actor kind (vtable 0xa8) == 2 and species (vtable 0x88) matches attacker's, computes the hit direction/orientation in the attacker's local frame. Fetches target hit position (vtable 0x28), validates via FUN_10d60650, gets both entities' world transforms, builds direction vectors with quaternion->basis rotation and cross products, normalizes (Newton-Raphson rsqrt), computes an angle via acos and rotates by cos/sin, then emits 'GameOnHit' (flags 0x4ffff) with the assembled payload (local_208..local_1ec).",
+      "subsystem": "hit-validation",
+      "confidence": "medium",
+      "constants": [
+        "DAT_11de9c90 = 0x80000000 float sign-flip mask (vector/quaternion negation)",
+        "DAT_11de9938 = 1.5f, DAT_11de98e8 = 0.5f (Newton-Raphson refine: n = (1.5 - 0.5*x*n*n)*n on rsqrtss estimate)",
+        "DAT_11de9918 = 1.0f",
+        "DAT_11cbf070 = length^2 epsilon (skip-normalize threshold)",
+        "DAT_11cc4cc0 / 0x43fa0000 = 500.0f (used to build a large bound / clamp box local_150..local_170)",
+        "DAT_11cbf074 = min-length gate before acos path; DAT_11de98e8 reused as rad<->? scale on the acos result",
+        "0x3f800000 = 1.0f (w component)",
+        "0x4ffff = GameOnHit event flag mask"
+      ],
+      "formulas": [
+        "normalize(v): e = rsqrtss(|v|^2); n = (1.5 - 0.5*|v|^2*e*e)*e; v_hat = v*n  (guarded by |v|^2 > DAT_11cbf070)",
+        "quaternion(q=x,y,z,w) rotate of vector: t = 2*cross(q.xyz, v); v' = v + q.w*t + cross(q.xyz,t) (expanded inline as (y*Bz - z*By)+w*Bx etc.)",
+        "scale factor: fVar14 = (pos[0]==0)? 1.0 : 1.0/pos[0] applied to rotated axis (local_1ac = axis*scale)",
+        "angle path: theta = acos(dot) ; rotated = axis*sin(theta*0.5?) with cos(theta) stored (local_2c._4_4_) -- fcos/fsin of (acos_result * DAT_11de98e8)"
+      ],
+      "protocolFields": [
+        "GameOnHit payload local_208 = attacker damage-info type (piVar3 vtable+4)",
+        "local_204 = attacker context id (iVar4+8)",
+        "local_1fc = target damage-info type (param_2 vtable+4)",
+        "local_1f0/local_1ec = computed direction/segment id (FUN_10b27fd0 of intersect record +0x14)"
+      ],
+      "notes": "This is the melee/monster-part hit direction resolver (kind==2 path). Heavy Vec3/Quat math is standard CryEngine; the load-bearing output is the GameOnHit payload with attacker/target damage-info type tags.",
+      "serverRelevance": "validation: server must recognize the GameOnHit hit-direction payload; the geometric direction is client-computed but the attacker/target type tags and hit region are validated server-side. Math itself is client FX-adjacent."
+    },
+    {
+      "address": "10d7d4e0",
+      "currentName": "FUN_10d7d4e0",
+      "proposedName": "CProjectile::DoExplosionAreaDamage",
+      "purpose": "Area-of-effect explosion damage for a projectile. Looks up a CProjectileExplosionInfo record by key (param_2 as index into the slotted manager), iterates its explosion entries (each entry stride 0xb*4=0x2c). For each entry: computes effective radius = entry.radius(piVar7[1]) * projectile scale (owner vtable+0xbc [0]); gets explosion center (param_3[1..3] if *param_3>=3 else projectile position). Then EITHER (mode *param_3<3) runs a PrimitiveWorldIntersection sphere sweep collecting hit actors and applies per-hit damage via FUN_10d7c730, OR (mode>=3) runs an AABB entity query (DAT_1202e818+0x50 vtable 0x50) around center +/- radius and applies damage. Skips already-hit entities (dedup list local_20..local_1c). Emits 'GameOnHit' per hit and triggers 'ProjectileExplode' camera shake.",
+      "subsystem": "projectile",
+      "confidence": "medium",
+      "constants": [
+        "collision filter local_c: 0xa10 default, 0xa18 if target is a monster/part-based (g_EnableMonsterPartBasedAttack cvar enabled or vtable 0x1c8 state), 0xf10 otherwise -- selects hittable geometry class for PrimitiveWorldIntersection",
+        "0x4000 = intersection flag arg to FUN_10a797c0",
+        "ProjectileExplode camera-shake params: 0x3f800000=1.0 (amount), 0x3f4ccccd=0.8 (x2), 0x3f000000=0.5 (x2) = shake magnitude/frequency tuple",
+        "DAT_11de9990 = 2.0f (quaternion->direction basis factor)",
+        "DAT_11de9918 = 1.0f",
+        "0x11d = material/surface-type filter id passed to FUN_10a797c0",
+        "entry stride 0xc per radius sample; entry loop stride local_14+0xb ints (0x2c bytes)"
+      ],
+      "formulas": [
+        "effective damage radius: param_2 (=entry.value piVar7[1]) *= projectile->GetScale() (owner vtable 0xbc, first float) when owner exists",
+        "explosion center: (*param_3 < 3) ? projectile world pos (owner vtable 0xC8) : param_3[1],param_3[2],param_3[3]",
+        "AABB query box (mode>=3): min = center - radius, max = center + radius on all axes (local_58/local_4c built as center-/+param_2)",
+        "hit facing vector (mode>=3 damage dir) from target quaternion q(pfVar5[0..3]): dir.x=(q.x*q.y - q.z*q.w)*2, dir.y=(q.w*q.x + q.z*q.y)*2, dir.z=(q.w^2+q.y^2)*2 - 1  (standard quat forward/up column, factor DAT_11de9990=2)",
+        "hit surface distance dir (mode<3): d = targetPos - projectilePos, then normalize(d) via rsqrt Newton-Raphson (1.5 - 0.5*|d|^2*e*e)*e"
+      ],
+      "protocolFields": [
+        "FUN_10d7c730(hitCtx, targetObj, entry.attackNameId(local_14[10]), hitPointIdx, &dir, surfaceId, 0) is the per-victim damage-apply call carrying attackName id local_14[10]"
+      ],
+      "notes": "AoE damage core. The actual scalar damage per victim is applied inside FUN_10d7c730 (uses entry.value param_2 as damage/impulse). Radius scaling by projectile scale is the load-bearing arithmetic here. Two query modes (sphere primitive sweep vs AABB entity list).",
+      "serverRelevance": "authoritative: explosion radius, target selection (sphere/AABB), friendly-fire/part filtering, and per-target damage application must be reproduced server-side. The GameOnHit emission and camera shake are client presentation but the hit set + FUN_10d7c730 damage must be authoritative."
+    },
+    {
+      "address": "10dc27f0",
+      "currentName": "FUN_10dc27f0",
+      "proposedName": "CMonsterHitEffectTable::LoadMaterialEffectPaths",
+      "purpose": "Populates the monster hit-effect resource tables: loads dozens of MaterialEffects XML paths (KnifeFlash normal/crit/awaken/ncrit, Blood normal/skill per material metal/hide/bone/scale/stone/slippy/fur/wood/shell01-04/noblood, Spark per material, PiyoAttack, AttrDamage normal/lower/higher, SpecialAttack, WeaponHitSound per material, scale-base/ext variants, TimeDelay, MerchantWeaponEffect) and stores the resolved effect ids into arrays at this+0x18/0x48/0x54/0x84/0x90/0x9c/0xb4 etc.",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": [
+        "14 (0xe) material variants per effect category; 3 variants for AttrDamage/SpecialAttack (normal/lower/higher)"
+      ],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Pure client visual/audio effect resource table construction. The normal-vs-crit and lower/normal/higher(attribute) split is interesting for understanding damage classification but no math here.",
+      "serverRelevance": "client-only (hit blood/spark/sound/knife-flash effect resource loading)."
+    },
+    {
+      "address": "10ddeef0",
+      "currentName": "FUN_10ddeef0",
+      "proposedName": "CItem::PreloadFiremodeXmlModels",
+      "purpose": "For a given weapon class id (param_2), enumerates the class's ammo/firemode name list and builds 'Scripts/Entities/Items/XML/Weapons/<name>_firemode.xml' path strings, dedups against an already-loaded list (this+0x50), and preloads each via CInfoRecord::GetModelString.",
+      "subsystem": "other",
+      "confidence": "medium",
+      "constants": [],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Weapon firemode XML preloading. String assembly + dedup. Config/asset plumbing.",
+      "serverRelevance": "client-only (firemode XML asset preloading)."
+    },
+    {
+      "address": "10e10460",
+      "currentName": "FUN_10e10460",
+      "proposedName": "CFlowNode_Weapon::GetConfiguration",
+      "purpose": "One-time init of a flowgraph node port descriptor for a Weapon node: input ports Enable/Disable/OnWeaponChange/OnFiremodeChange/OnShoot/OnZoom/OnReloaded/OnOutOfAmmo/OnStartFire/OnStopFire and output ports WeaponId/WeaponName/IsMelee/AmmoType/AmmoName/MaxAmmo/AmmoPool/Spread/Zoomed/ZoomMode/ZoomName/CurrZoomStep/MaxZoomStep (with port type codes 1=int,2=float,3=entity,5=string,6=bool).",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": ["port type codes: 1=int,2=float,3=EntityId,5=string,6=bool; flags 0x11 set on param_1[2]"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Stock CryEngine flowgraph node config (weapon FG node). No combat logic.",
+      "serverRelevance": "client-only (flowgraph/editor node definition)."
+    },
+    {
+      "address": "10e377e0",
+      "currentName": "FUN_10e377e0",
+      "proposedName": "CFlowNode_RemoveEntity::GetConfiguration",
+      "purpose": "One-time init of a flowgraph node descriptor: input Remove + netID(int), output ports monsterOk/collectPointOk/combatNPCOk(bool) and success. Registers with FUN_11a8911f.",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": [],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Flowgraph node config referencing monster/collectPoint/combatNPC removal outcomes. Editor/script plumbing.",
+      "serverRelevance": "client-only (flowgraph node definition)."
+    },
+    {
+      "address": "10e943d0",
+      "currentName": "FUN_10e943d0",
+      "proposedName": "CFlowNode_QueryEntities::GetConfiguration",
+      "purpose": "One-time init of a flowgraph node descriptor for an area entity query: inputs ClearOutput/inside(bool)/ignoreHeight(bool)/maxOut(int)/player(bool)/monster(bool)/combatNPC(bool); outputs GetSuccess/GetFailed/ClearDone/OutputComplete/outNetID(int).",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": [],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Flowgraph node config for spatial entity queries filtered by player/monster/combatNPC.",
+      "serverRelevance": "client-only (flowgraph node definition)."
+    },
+    {
+      "address": "10eb4d30",
+      "currentName": "FUN_10eb4d30",
+      "proposedName": "CFlowNode_OnHit::GetConfiguration",
+      "purpose": "One-time init of a flowgraph node descriptor: single OnHit trigger input; outputs Health/GreenHealth(float)/RedHealth(float). Flag 0x20 (approved/entity node).",
+      "subsystem": "other",
+      "confidence": "high",
+      "constants": ["GreenHealth/RedHealth port type 2 = float; Health type 1 = int"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Flowgraph OnHit node exposing target Health/GreenHealth/RedHealth. Green vs Red health is the MHO two-layer HP model (recoverable green / lost red), but no math here.",
+      "serverRelevance": "client-only (flowgraph node definition); note the GreenHealth/RedHealth split as a data-model hint for HP."
+    },
+    {
+      "address": "10ee5920",
+      "currentName": "FUN_10ee5920",
+      "proposedName": "CGrabHandWeapon::Serialize",
+      "purpose": "Network/save serialization of a grab/hold weapon state. Serializes fields: m_lastFireModeId(this+0x4b4), m_usable(0x550), m_currentState(0x568), m_preHeldEntityId(0x4d4), m_startPickUp(0x52f), m_heldEntityId(0x4d0), m_constraintId(0x518), m_grabType(0x4cc), m_grabbedNPCSpecies(0x520), m_killTimeOut(0x528,float), m_effectRunning(0x52d), m_grabbedNPCInitialHealth(0x530,float), m_prevMainHandId(0x574), m_holdScale(0x50c,float). On reading (vtable 0x20 true) if heldEntityId changed, resets grab visuals/physics flags on the previously held entity.",
+      "subsystem": "status",
+      "confidence": "high",
+      "constants": [
+        "offsets: 0x4b4 lastFireModeId, 0x4cc grabType, 0x4d0 heldEntityId, 0x4d4 preHeldEntityId, 0x50c holdScale(float), 0x518 constraintId, 0x520 grabbedNPCSpecies, 0x528 killTimeOut(float), 0x52d effectRunning, 0x52f startPickUp, 0x530 grabbedNPCInitialHealth(float), 0x550 usable, 0x568 currentState, 0x574 prevMainHandId"
+      ],
+      "formulas": [],
+      "protocolFields": [
+        "m_heldEntityId (EntityId, vtable 0x44)",
+        "m_grabbedNPCSpecies (u32/short, vtable 0x54)",
+        "m_grabbedNPCInitialHealth (float, vtable 0x70)",
+        "m_killTimeOut (float, vtable 0x70)",
+        "m_currentState (u32, vtable 0x54)",
+        "m_grabType (EntityId/enum, vtable 0x44)",
+        "m_holdScale (float, vtable 0x68)"
+      ],
+      "notes": "The grab/capture mechanic serialization. Useful struct map for the grab-hand weapon; server must track heldEntityId, grabbedNPCSpecies, grabbedNPCInitialHealth for the capture/kill mechanic.",
+      "serverRelevance": "authoritative/validation: these fields are network-serialized state the server tracks (which NPC is grabbed, its initial health, grab type, kill timeout). Server must own this state."
+    },
+    {
+      "address": "10efe700",
+      "currentName": "FUN_10efe700",
+      "proposedName": "CDamageInfoController::InitEntityDamageResources",
+      "purpose": "On entity/actor setup, if the actor's CDamageInfo controller (vtable 800/0x320) exists, resolves 4 resource ids from the config struct param_2 (0x2c->0xe0, 0x114->0xd4, 0x118->0xd0, 0x120->0x10c) via the controller's material/effect resolvers, runs post-init, and links the actor's CDamageInfo record (param_2+0x138 as index into CDamageInfo manager) storing entity ptr at record+0x924 and config at +0x928.",
+      "subsystem": "damage-calc",
+      "confidence": "medium",
+      "constants": [
+        "param_2 offsets: 0x2c/0x114/0x118/0x120 = source resource ids -> resolved into 0xe0/0xd4/0xd0/0x10c; 0x138 = CDamageInfo record index; record+0x924 = back-ptr to entity, +0x928 = config",
+        "controller vtable 800(0x320)=GetDamageInfo, 0x5c/0x60/0x64/0x68 = per-slot resolvers, 700(0x2bc)=finalize"
+      ],
+      "formulas": [
+        "CDamageInfo record lookup: rec = mgr[0x20][idx/mgr[0x28]][idx%mgr[0x28]] with idx=param_2+0x138 (slotted-array accessor)"
+      ],
+      "protocolFields": [],
+      "notes": "Binds a spawned entity to its CDamageInfo record (hitzones/material data). Establishes the record<->entity link the damage evaluator later reads.",
+      "serverRelevance": "authoritative: the CDamageInfo record (hitzone/material multipliers) bound here is what damage math consumes; server must load the same records and bind them to monsters/actors."
+    },
+    {
+      "address": "10f17270",
+      "currentName": "FUN_10f17270",
+      "proposedName": "CCombatNPC::SelectCombatNPCModel",
+      "purpose": "If the entity's damage controller reports actor kind (vtable 0xa8) == 0xb (combat NPC), copies a 2-byte model/variant id from a lookup (FUN_11419510, +200) into this+0xb4 and, if the character slot 2 has a valid entity, fires the script event 'SelectCombatNPCModel' with the resolved data.",
+      "subsystem": "combat-npc",
+      "confidence": "medium",
+      "constants": ["actor kind 0xb = combat NPC; this+0x2d(word) = model/variant id copied from record+200(0xc8)"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Combat-NPC model selection notification. Kind==0xb is the combat-NPC discriminator (compare with kind 0=player,1=monster,2=part seen elsewhere in this chunk).",
+      "serverRelevance": "client-only (model/variant selection + script event); the kind==0xb enum is a useful server-side discriminator."
+    },
+    {
+      "address": "10f19670",
+      "currentName": "FUN_10f19670",
+      "proposedName": "CActor::EmitGameOnHitFromLocalHit",
+      "purpose": "Builds and emits a 'GameOnHit' event for a local hit. Resolves the hit surface/segment (via team/effect manager DAT_1202e818+0xd0 vtable 0x90->0x7c using param_2), fills payload: local_19c = hit-part id (intersect+8 or self id), local_198 = self id, local_134/local_12c = negated hit position (XOR DAT_11de9c90 = -pos), local_184 = attack-name id (FUN_10b27fd0 of record+0x28 from FUN_10abaa70(param_3)); then fires GameOnHit (flags 0x4ffff) on this entity's game object.",
+      "subsystem": "hit-validation",
+      "confidence": "medium",
+      "constants": ["DAT_11de9c90 = 0x80000000 (negates the hit position vector)", "0x4ffff = event flag mask"],
+      "formulas": ["hit position payload = -(pos) i.e. each component XOR 0x80000000 (sign flip) -> local_134,local_12c"],
+      "protocolFields": [
+        "local_19c: hit part/bone id (from intersect record +8, else GetEntityId vtable+4)",
+        "local_198: victim entity id (vtable+4)",
+        "local_134/local_12c: negated hit world position (Vec3)",
+        "local_184: attackName id (FUN_10b27fd0 of surface record +0x28)"
+      ],
+      "notes": "Another GameOnHit emitter path (simpler than 10d607a0). Payload structure {partId, victimId, -hitPos, attackNameId} is the load-bearing protocol shape.",
+      "serverRelevance": "validation: this is a client->server GameOnHit report; server validates the part id, victim, position and attackName id it carries."
+    },
+    {
+      "address": "10f596e0",
+      "currentName": "FUN_10f596e0",
+      "proposedName": "CItem::PlaySelectActionAndTransition",
+      "purpose": "Weapon select/holster transition driver. Guards against busy state (this+0x18 +0x108/+0x105 flags), resolves the target action set (FUN_10fb8160 by params), runs pre/post action callback lists, plays the fragment/animation via the item character (vtable 0x600/0xfc), handles CarryEgg / PLInjurySignal / Unholstered special cases, and on transition failure sets state 6 and logs 'TransitionError:%d'. Returns success bool.",
+      "subsystem": "other",
+      "confidence": "low",
+      "constants": ["error code 6 = transition failure (this+0x10=6, 'TransitionError:%d')", "action ids 7/8/9 = failure reasons passed to FUN_10f5c5d0", "'CombatNPC' default action-set name"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "Large animation/action-transition state machine for weapon select. Mostly client presentation with script callbacks; the error codes 6/7/8/9 are internal, not network.",
+      "serverRelevance": "client-only (weapon animation/action transition state machine)."
+    },
+    {
+      "address": "10f80770",
+      "currentName": "FUN_10f80770",
+      "proposedName": "CActor::AccumulateInjuryAndSetInjuryLevel",
+      "purpose": "Accumulates injury from a hit and classifies injury level. Looks up the CDamageInfo record (param_3 index into manager), and if FUN_10facec0 validates, adds record+0x19c (injury/rage value of this attack) to this+0x228 (accumulated injury). Then compares accumulated injury against 3 threshold accessors (FUN_116db630/640/650) to set this+0x220 (and mirror +0x224) to injury level 1/2/3.",
+      "subsystem": "status",
+      "confidence": "high",
+      "constants": [
+        "record+0x19c = per-attack injury/stagger value",
+        "this+0x228 = accumulated injury total; this+0x220/0x224 = injury level output (1,2,3)",
+        "thresholds: t1=FUN_116db630, t2=FUN_116db640, t3=FUN_116db650"
+      ],
+      "formulas": [
+        "this+0x228 += record[0x19c]",
+        "level = (accum < t1 || accum < t2) ? 1 : (accum < t3) ? 2 : 3   (note: t1 and t2 both checked, level 1 if below either)",
+        "this+0x224 = this+0x220 (mirror)"
+      ],
+      "protocolFields": [],
+      "notes": "This is the stagger/injury/rage tier calculation. The three thresholds gate level 1/2/3. record[0x19c] is the attack's injury contribution — a concrete server-relevant value from the damage record.",
+      "serverRelevance": "authoritative: injury accumulation and level thresholds drive stagger/part-break/enrage state that the server should own. Server must reproduce this += record[0x19c] and the t1/t2/t3 comparison."
+    },
+    {
+      "address": "10fd48b0",
+      "currentName": "FUN_10fd48b0",
+      "proposedName": "CActor::SelectHitReaction",
+      "purpose": "Chooses the hit reaction/knockback response for an incoming hit. If actor is dead/knocked (health vtable 0x304 <= 0) picks a death path. Otherwise: reads the hit's CDamageInfo record (param_3[0x4e] index) and sets a 'force big reaction' flag if record+0x194 (>0, has forced reaction) AND incoming damage *param_3 > DAT_11de9890 threshold. Then dispatches one of: FUN_10fd54e0 (impulse-only reaction, using impulse vector param_3[0x6a..0x6c]), FUN_10fd51c0 (directional reaction with dir param_3[0x10]), or FUN_10fd6170 (scripted reaction when param_3[0xf] > 0).",
+      "subsystem": "status",
+      "confidence": "medium",
+      "constants": [
+        "param_3[0x4e] = damage-info record index; record+0x194 = forced-reaction flag (>0)",
+        "DAT_11de9890 = damage magnitude threshold that qualifies a hit for a forced big reaction",
+        "param_3[0x6a..0x6c] = impulse/knockback direction Vec3; param_3[0x10] = hit direction id; param_3[0xf] = reaction-type count (>0)",
+        "param_3[0] (*param_3) = incoming damage amount"
+      ],
+      "formulas": [
+        "bigReaction = (record[0x194] > 0) AND (incomingDamage(*param_3) > DAT_11de9890)",
+        "reaction dispatch precedence: forced-big -> directional(FUN_10fd51c0 with param_3[0x10]) -> scripted(FUN_10fd6170 if param_3[0xf]>0) -> default impulse(FUN_10fd54e0)"
+      ],
+      "protocolFields": [],
+      "notes": "Hit-reaction/flinch selection. The damage-vs-threshold gate (DAT_11de9890) deciding forced reactions is combat-relevant. Impulse vector at param_3[0x6a..0x6c].",
+      "serverRelevance": "validation/authoritative-adjacent: reaction selection is client-side animation, but the damage>threshold and record.forcedReaction logic mirrors server stagger decisions; server may replicate to stay authoritative on flinch/knockback."
+    },
+    {
+      "address": "11000d20",
+      "currentName": "FUN_11000d20",
+      "proposedName": "CActor::OnHitLocalAndReportToServer",
+      "purpose": "Local OnHit handler. Validates the hit (this vtable 0x108 = CanHit/IsValidHit(param_2)), records the hit-info into this+8 buffer (FUN_10b26050), fires the client script event 'OnHit'. Then: if this is the server instance (DAT_1202e818+0x209 set) calls FUN_11000e30 (ServerOnHit script event); ELSE if the hit target is the local player (attacker id == local player id via vtable 0x128) builds and sends network message 0x2b0 to the server carrying weapon class (vtable 0x274), region 0, and the local net id (vtable 0x2ac).",
+      "subsystem": "hit-validation",
+      "confidence": "medium",
+      "constants": ["0x2b0 = client->server hit RMI/message id", "DAT_1202e818+0x209 = isServer / authoritative-context flag", "vtable 0x274 = weapon class id, 0x2ac = channel/net id, 0x128 = local player id"],
+      "formulas": [],
+      "protocolFields": [
+        "message id 0x2b0 (client->server hit report)",
+        "field @local_8+0: 0x2b0 (msg type tag / opcode, u16)",
+        "field @local_8+8 (offset 0x20): weaponClassId (vtable 0x274)",
+        "field @local_8+0xa (offset 0x28): region = 0 (constant here)",
+        "field @local_8+0xc (offset 0x30): local net/channel id (vtable 0x2ac)"
+      ],
+      "notes": "This is a concrete client->server hit report (opcode 0x2b0). The isServer branch runs ServerOnHit directly; the client branch marshals the message. Struct built via FUN_100e49c0/FUN_100e4a80 (message writer).",
+      "serverRelevance": "validation: server receives 0x2b0 and must validate weaponClassId/region/netId before applying. Cross-check with TLV docs for opcode 0x2b0 (see discrepancy note)."
+    },
+    {
+      "address": "11000e30",
+      "currentName": "FUN_11000e30",
+      "proposedName": "CActor::FireServerOnHitScriptEvent",
+      "purpose": "Stores the hit source (param_2) at this+0x198 and invokes the Lua/script table function 'ServerOnHit' on this entity's script proxy (character slot 2 -> script table vtable 0x34 lookup, then FUN_10a69650 push + call vtable 0x44).",
+      "subsystem": "hit-validation",
+      "confidence": "high",
+      "constants": ["this+0x198 = current server hit-source ptr", "'ServerOnHit' = script table method invoked authoritatively"],
+      "formulas": [],
+      "protocolFields": [],
+      "notes": "The authoritative server-side hit callback into game script. Called from FUN_11000d20 when running as server. 'ServerOnHit' is the server damage-resolution entry into Lua.",
+      "serverRelevance": "authoritative: ServerOnHit is the server-side script hook that resolves/applies damage. This is a key server entry point — the server must implement ServerOnHit semantics."
+    },
+    {
+      "address": "11006ea0",
+      "currentName": "FUN_11006ea0",
+      "proposedName": "CMeleeCollision::SweepAndReportGameOnHit",
+      "purpose": "Melee weapon collision sweep that detects hit actors and reports GameOnHit. Gets the weapon collision box world transform (vtable 0xC8 -> local_ac Vec3), cleans the tracked-entity list (this+0x35..0x36 removing stale ids via entity system 0x54), runs PrimitiveWorldIntersection(Game) box sweep (filter 0x208, or 0xa08 when weapon record+0x18 flag set), and for each intersected entity: resolves the actor, skips self and (in PvP mode: DAT_1202e818+0xd0 team-mgr getMode==1) friendly targets (vtable 0x50 friendly check), builds a hit record with direction/rotation (quaternion basis + cross products), and appends to one of two hit lists (local_40 = damageable, local_20 = non-damageable/blocked). After the sweep it emits 'GameOnHit' (flags 0x4ffff, extra data 0x2a) for every entity in local_40, and 'GameOnHit' for local_20. Includes a same-position repeat-hit debounce (counter this+0x34, needs > 3 frames or position delta > DAT_11de98c4 to re-hit). A secondary radius query (3.0f, filter 0x1e) catches near-miss entities.",
+      "subsystem": "hit-validation",
+      "confidence": "medium",
+      "constants": [
+        "collision filter uVar10: 0x208 default, 0xa08 when weapon-record[0xb4]+0x18 flag != 0 (extended/monster-part hittable set)",
+        "0x1c = intersection object-types flag for FUN_10a797c0 box sweep",
+        "second query radius 0x40400000 = 3.0f, filter 0x1e",
+        "GameOnHit event extra byte local_60 = 0x2a",
+        "0x4ffff = GameOnHit event flag mask",
+        "DAT_11de9c90 = 0x80000000 sign-flip; DAT_11de9938=1.5, DAT_11de98e8=0.5 (rsqrt refine); DAT_11de9918=1.0",
+        "DAT_11de98c4 = per-axis position-delta threshold for repeat-hit debounce; DAT_11de9c70 = 0x7fffffff abs mask; DAT_3f800000 = 1.0f, DAT_40400000 = 3.0f",
+        "repeat-hit debounce: this[0x34] counter, must exceed 3; last position cached this[0x31..0x33]"
+      ],
+      "formulas": [
+        "hit direction vec = target quaternion rotated basis: v' = v + q.w*cross(q.xyz,v) + cross(q.xyz,cross(q.xyz,v)) expanded with dot terms; each source vector negated (XOR 0x80000000) before rotation",
+        "surface normal normalize: e=rsqrtss(|d|^2); n=(1.5 - 0.5*|d|^2*e*e)*e; d_hat=d*n (guarded |d|^2 > DAT_11cbf070)",
+        "angular-velocity scale piVar9 = (targetPos[0]==0)? 1.0 : 1.0/targetPos[0] applied to rotated velocity vectors",
+        "repeat-hit gate: re-hit allowed if |curPos - lastPos| > DAT_11de98c4 on any axis (abs via &0x7fffffff), else increment this[0x34]; force hit when this[0x34] > 3 then reset to 0"
+      ],
+      "protocolFields": [
+        "GameOnHit payload per hit (local_a0 block): local_a0 = 'GameOnHit' name id, flags 0x4ffff, target/self ids and hit id from list entry (pppppppiVar11[3]=targetGameObjectId, [0x14]=attackName/weapon-hit id, [0x16..0x18]=impact direction Vec3)",
+        "extra field local_60=0x2a with dir/normal appended via vtable 0x110",
+        "friendly-flag stored: entry[0x56] bool = (localPlayerId == entryTargetId)"
+      ],
+      "notes": "This is the primary CLIENT melee hit-detection sweep. It produces the GameOnHit reports that FUN_10d53a60 registers and that the server validates. Two-list split (damageable local_40 vs blocked local_20) and the same-target debounce (this[0x34]>3, DAT_11de98c4 pos-delta) are the load-bearing anti-double-hit logic. Uses PvP friendly-fire filter (team mgr getMode==1 + vtable 0x50).",
+      "serverRelevance": "validation: the client computes candidate melee hits here and emits GameOnHit; the SERVER must validate these (attacker weapon box overlap, friendly-fire rule, debounce/no-double-hit, target reachability). Server should reproduce the box sweep + friendly check to reject spoofed GameOnHit reports. Direction/normal math is client presentation but the hit set and attackName id are authoritative-critical."
+    }
+  ]
+}

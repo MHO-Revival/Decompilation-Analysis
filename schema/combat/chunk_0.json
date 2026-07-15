@@ -1,0 +1,76 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x101dc8a0",
+      "currentName": "FUN_101dc8a0",
+      "proposedName": "TdrCharBaseInfo::ToDebugString",
+      "purpose": "TDR (Tencent packet framework) debug/ToString serializer for a character 'base info' struct. Walks the struct field-by-field, appending each named field to a text buffer using helpers FUN_1024a140 (write header/tag), FUN_1010c010 (append raw value with fmt DAT_11d9f710='%I64i'-style int), FUN_1024a290 (append a named scalar field with fmt DAT_11d9e0b4), FUN_1024a3b0/FUN_1010c060 (begin/end a fixed 7-element array section). No arithmetic. Format string '%s[0 : %I64i]:' and label '[oCharLevel]' confirm this is a human-readable dump, not the wire packer. Bounds-checks buffer with _wassert(\"position <= length\", TdrBuf.h:0xc4).",
+      "confidence": "high",
+      "subsystem": "other",
+      "serverRelevance": "client-only (TDR debug/ToString of a character base-info packet struct). Value is only as a STRUCT-LAYOUT REFERENCE: documents field order/offsets the server must fill. Not authoritative and no validation logic.",
+      "constants": [
+        "fmt DAT_11d9f710 = integer/'%I64i'-style field format",
+        "fmt DAT_11d9e0b4 = named-scalar field format",
+        "fmt DAT_11da064c = float field format (used for float members)",
+        "array count = 7 (each stat block written as 7 consecutive dwords)"
+      ],
+      "formulas": [],
+      "protocolFields": [
+        "Struct offsets (base-info variant): +0x1c oCharSex, +0x20 oCharExp, +0x24 oStarLevel, +0x28 oCharHP, oCharMaxHP[7]@0x2c, oCharMaxReju[7]@0x48, +0x64 oDeath(short), +0x66 oSharpness, oCharAnimSpeed[7]@0x6a, +0x86 oMaleFace, +0x8a oMaleHair, +0x8e oQiRenLevel, +0x92 oRejuFlag, +0x96 oTeamID, oPVPDef[7]@0x9a, oPVPDefAngle[7]@0xb6, +0xd2 oRegion, +0xd6 oUnderClothes, oCharRejuPer[7]@0xda, +0xf6 oCharRemainsExp, +0x11a oCombatNPCID, +0x124 oJinLiValue, +0x130 oGuildId, oDefenseReduceHPModifyRate[7 floats]@0x1ba, oDefenseReduceStaModifyRate[7 floats]@0x1d6, +0x1f6 oWildHuntCamp, +0x21a oSoulStoneAtkLevel",
+        "Many oFacialInfo1..47 shorts and VIP fields interleaved (cosmetic/account, not combat)"
+      ],
+      "notes": "src TdrBufUtil.cpp / TdrBuf.h. Stock Tencent TDR plumbing. The 7-element arrays likely represent value + per-source modifier slots (base/equip/buff/etc.). Note this variant lacks the elemental attack/res block that appears in FUN_101ea1c0."
+    },
+    {
+      "address": "0x101ea1c0",
+      "currentName": "FUN_101ea1c0",
+      "proposedName": "TdrCharFullStat::ToDebugString",
+      "purpose": "TDR debug/ToString serializer for the FULL character stat struct — the combat-relevant attribute block. Same helper pattern as FUN_101dc8a0 (FUN_1024a290 named scalar, FUN_1024a3b0+7-loop+FUN_1010c060 for 7-element arrays, DAT_11da064c float format for float members). No math; pure field enumeration. Its value is that it enumerates the exact authoritative combat-stat layout the server must reproduce, with offsets.",
+      "confidence": "high",
+      "subsystem": "damage-calc",
+      "serverRelevance": "client-only serializer, BUT it is the definitive STRUCT-LAYOUT REFERENCE for the character combat-stat block the server computes and sends. Offsets/field names below are authoritative for building the stat packet; the numbers themselves are server-authoritative (server must compute atk/def/res/crit).",
+      "constants": [
+        "each stat = fixed array of 7 dwords/floats (base + modifier slots)",
+        "float fmt DAT_11da064c for oCharMelee/oCharRange/oPlayerAtk/oPlayerCrit/oDefenseReduce* (these are float stats); int fmt DAT_11d9f710 for the rest"
+      ],
+      "formulas": [],
+      "protocolFields": [
+        "+0x48 oCharHP; oCharMaxHP[7]@0x4c; +0x68 oDeath(short); oCharMaxSta[7]@0x6a",
+        "Primary attributes (each [7]): oCharStr@0x86, oCharBst@0xa2, oCharLck@0xbe, oCharVgr@0xda",
+        "oCharMelee[7 float]@0xf6, oCharRange[7 float]@0x112 (weapon raw attack)",
+        "oCharDefence[7]@0x12e, oCritLevel[7]@0x14a, oCritDmg[7]@0x166, oAntiCritDmg[7]@0x182",
+        "Elemental ATTACK (each [7]): oWaterAttack@0x19e, oFireAttack@0x1ba, oLightningAttack@0x1d6, oDragonAttack@0x1f2, oIceAttack@0x20e, oNonAttack@0x22a, oPoisonAttack@0x246, oSleepyAttack@0x262, oParalysisAttack@0x27e",
+        "Elemental RESIST (each [7]): oWaterRes@0x29a, oFireRes@0x2b6, oLightningRes@0x2d2, oDragonRes@0x2ee, oIceRes@0x30a; oParaThrsh[7]@0x326 (paralysis threshold)",
+        "+0x342 oCharEnergy; oCharMaxEnergy[7]@0x346",
+        "Weapon EXP: oClaymoreExp@0x362, oHammerExp@0x366, oKatanaExp@0x36a, oDuelSwordExp@0x36e, oSwordExp@0x372, oSpearExp@0x376, oGunExp@0x37a, oBowExp@0x37e, oCrossbowExp@0x382, oFluteExp@0x386",
+        "oPVEDef[7]@0x39a, oPVEDefAngle[7]@0x3b6, oPVPDef[7]@0x3d2, oPVPDefAngle[7]@0x3ee (defense values + defense arc angles)",
+        "oAdditionalHate[7]@0x44c (aggro/hate bonus); oPlayerAtk[7 float]@0x468; oPlayerCrit[7 float]@0x488 (final computed attack & crit-rate)",
+        "+0x4c8 oCombatNPCID, +0x4cc oBattleState, oHammerModeTime[7]@0x4d0",
+        "oDefenseReduceHPModifyRate[7 float]@0x5dc, oDefenseReduceStaModifyRate[7 float]@0x5f8 (defense-broken HP/stamina damage multipliers)",
+        "oDynamiteAttack[7]@0x63c, oDynamiteThrsh[7]@0x658; +0x674 oGuildBanChatEndTime"
+      ],
+      "notes": "src TdrBufUtil.cpp. This struct is the master combat-stat definition: raw weapon attack (Melee/Range), per-element attack & resist, crit level/dmg/anti-crit, status-ailment attack values (poison/sleep/paralysis/dynamite) plus their thresholds (oParaThrsh/oDynamiteThrsh), PVE/PVP defense with directional arc angles, and final computed oPlayerAtk/oPlayerCrit. oDefenseReduce*ModifyRate are the multipliers applied once a monster part's defense is broken. The actual damage arithmetic using these fields lives elsewhere (not in this chunk) — search later chunks for consumers of these offsets. The 7-slot arrays are the modifier stack (base/equipment/skill/buff/etc.)."
+    },
+    {
+      "address": "0x10259b80",
+      "currentName": "FUN_10259b80",
+      "proposedName": "AISystem::LoadEntityBehaviorTree_Recursive",
+      "purpose": "Recursive loader/registrar for CryEngine AI Behavior-Tree assets tied to combat entities. Reads XML-ish node attributes (Parent, BTFile, BTFolder, EntityType, Event, FunBT), and for each child decides handling by entity type. Calls vtable slot (*obj+0xa8)() to get an entity-type id and compares: EntityType 'monster' => type id 1, 'combatnpc' => type id 0xb (11), 'pet' => type id 8. Builds the BT path by concatenating '/Scripts/AI/BehaviorTree/' + folder + name (via string helpers FUN_100b62c0/FUN_100f21e0). Registers event-BT bindings into an array at struct +0x10c..+0x110 (12-byte entries) indexed by an id from FUN_10256f10. Recurses into child nodes (self-call at 0x1025a154).",
+      "confidence": "medium",
+      "subsystem": "combat-npc",
+      "serverRelevance": "client-only (CryEngine AI behavior-tree asset loading / event-BT registration; fx/AI-driver plumbing). The only server-useful datum is the EntityType->typeId mapping: monster=1, combatnpc=11(0xb), pet=8, which likely matches the authoritative entity-type enum used elsewhere in combat.",
+      "constants": [
+        "entity type id: monster=1, combatnpc=0xb (11), pet=8",
+        "paths: '/Scripts/AI/EventBT', '/Scripts/AI/BehaviorTree/'",
+        "attribute keys: Parent, BTFile, BTFolder, EntityType, Event, FunBT",
+        "event-BT registry entry size = 0xc (12) bytes at struct +0x10c/+0x110"
+      ],
+      "formulas": [
+        "registry bounds check: index in [0, (this[0x110]-this[0x10c])/0xc); store 12-byte record at this[0x10c] + index*0xc"
+      ],
+      "protocolFields": [],
+      "notes": "Stock CryEngine 3.3.8 AI behavior-tree plumbing (not authoritative combat math). Uses stack-canary DAT_11e11390. Retained here only for the entity-type enum mapping and confirmation that combatnpc is a distinct AI-driven entity class (type 11)."
+    }
+  ]
+}

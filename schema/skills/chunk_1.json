@@ -1,0 +1,602 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "0x10013030",
+      "currentName": "FUN_10013030",
+      "proposedName": "Crt::FloatToAscii_Scientific",
+      "purpose": "MSVCRT-style float-to-ASCII conversion (like _gcvt / _fcvt): normalizes the double via frexp/modf/floor, emits significant digits, optional decimal point and 'E' exponent, and handles inf/0. Clamps precision to [1,0x10] (default 0xf).",
+      "confidence": "high",
+      "subsystem": "crt-runtime",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "precision default = 0xf if param_5==0; capped: if param_5>0x10 then 0x10",
+        "requires buffer: param_5+5 <= bufsize(param_3) else emits 'ASCII conversion buffer too small'",
+        "exponent estimate: frexp(x,&e); e = (e*0x4d)>>8  (0x4d/0x100 ~= log10(2)=0.30078)",
+        "DAT_11cd9c80 = 10.0 (repeated *10 to scale mantissa); DAT_11de9968 = rounding 0.5 add-const"
+      ],
+      "costs": [],
+      "notes": "Stock C runtime numeric formatting. Not game logic. Stack canary DAT_11e11390."
+    },
+    {
+      "address": "0x100135f0",
+      "currentName": "FUN_100135f0",
+      "proposedName": "Crt::FixedPointToAscii",
+      "purpose": "Integer/fixed-point to ASCII with an implied decimal at 5 digits from the right. Handles sign, magnitude limit 0x80000001, inserts '.' when integer part < 6 digits. MSVCRT internal helper.",
+      "confidence": "medium",
+      "subsystem": "crt-runtime",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "requires bufsize(param_3) > 0xc",
+        "abs value must be <= 0x80000000 (local_8 < 0x80000001)",
+        "5 trailing digits treated as fractional; decimal point emitted when leading digit index (local_c) < 6"
+      ],
+      "costs": [],
+      "notes": "Stock runtime. Not game logic."
+    },
+    {
+      "address": "0x1001a0a0",
+      "currentName": "FUN_1001a0a0",
+      "proposedName": "LibPng::png_set_filter",
+      "purpose": "libpng png_set_filter(): maps caller filter selection (Sub/Up/Avg/Paeth) into the internal filter mask byte at struct+0x13a and lazily allocates prev-row buffers (offsets 0x10c/0x110/0x114/0x118). Errors if adding Up/Average/Paeth after row processing started.",
+      "confidence": "high",
+      "subsystem": "libpng",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "filter mask byte @ +0x13a: case1->0x10(Sub) case2->0x20(Up) case3->0x40(Avg) case4->0x80(Paeth) case0->8(None); default->raw param_4",
+        "if(*(+0x600)&4 && method==0x40) method=0; only method 0 (PNG) supported else 'Unknown custom filter method'",
+        "buffer alloc size = *(+0xf4)+1 via FUN_10025d00"
+      ],
+      "costs": [],
+      "notes": "Stock libpng. Struct is png_struct."
+    },
+    {
+      "address": "0x1001dd20",
+      "currentName": "FUN_1001dd20",
+      "proposedName": "LibPng::png_do_read_transformations",
+      "purpose": "libpng row-transform dispatcher: applies the enabled read transforms in order based on the transform flag bitfield at png_struct+0x74 (quantize, expand, RGB->gray, gray->RGB, alpha, bgr, swap, shift, packswap, invert, etc). Pure image decode.",
+      "confidence": "high",
+      "subsystem": "libpng",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "transform flags read from *(+0x74); each bit gates one transform (0x1000 gray, 0x40000 alpha add, 0x600000 rgb<->gray, 0x40 quantize, etc)",
+        "final pixel_depth @ row+0xb = channels(+9) * bit_depth(+10); rowbytes = (pixel_depth<8)? (depth*width+7)>>3 : (depth>>3)*width"
+      ],
+      "costs": [],
+      "notes": "Stock libpng. Not game logic."
+    },
+    {
+      "address": "0x10025990",
+      "currentName": "FUN_10025990",
+      "proposedName": "LibPng::png_set_compression_buffer_size",
+      "purpose": "libpng: frees old zlib output buffer (+0xb0), stores new size (+0xb4), reallocates buffer, resets zstream next_out/avail_out pointers (+0x84/+0x88/+0x7c).",
+      "confidence": "high",
+      "subsystem": "libpng",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock libpng/zlib plumbing."
+    },
+    {
+      "address": "0x10026610",
+      "currentName": "FUN_10026610",
+      "proposedName": "LibPng::png_decompress_chunk",
+      "purpose": "Runs a zlib inflate loop over a compressed PNG chunk datastream, copying up to param_5 bytes into output buffer param_4. Reports zlib errors (buffer/data/incomplete) via png_error.",
+      "confidence": "high",
+      "subsystem": "libpng",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "inflate ret: 1=stream end ok; 0=continue; -5 buffer error; -3 data error; else incomplete",
+        "copies min(avail_out, remaining_want) each pass via memcpy"
+      ],
+      "costs": [],
+      "notes": "Stock libpng+zlib."
+    },
+    {
+      "address": "0x1002e9a0",
+      "currentName": "FUN_1002e9a0",
+      "proposedName": "LibPng::png_write_sCAL",
+      "purpose": "libpng writes the sCAL chunk (physical scale): assembles unit byte + two null-terminated ASCII numbers into a <=64-byte buffer and calls png_write_chunk with tag 0x7343414c ('sCAL').",
+      "confidence": "high",
+      "subsystem": "libpng",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "total = strlen(width)+2+strlen(height); must be < 0x41 (64) else 'Can't write sCAL (buffer too small)'",
+        "chunk fourcc = 0x7343414c"
+      ],
+      "costs": [],
+      "notes": "Stock libpng."
+    },
+    {
+      "address": "0x1004bc30",
+      "currentName": "FUN_1004bc30",
+      "proposedName": "Pal::TFile_ReadWhole",
+      "purpose": "Tencent PAL (platform abstraction) tfile.c: reads an entire file into a newly calloc'd, null-terminated buffer. Returns size via out params. Asserts both out pointers non-null.",
+      "confidence": "high",
+      "subsystem": "pal",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "size = FUN_1004be50(handle); alloc calloc(1, size+1); returns -1 on error, 0 on success/empty"
+      ],
+      "costs": [],
+      "notes": "Tencent PAL library (lib_src/pal/tfile.c). Infra, both client/server."
+    },
+    {
+      "address": "0x1004f9b0",
+      "currentName": "FUN_1004f9b0",
+      "proposedName": "TcltApi::SendPackage",
+      "purpose": "tconnd tcltapi client-connection send: writes a length-prefixed package via the low-level socket send (FUN_10049b90), logs success/failure with errno. Sets handle error code (field[1]) 4=bad-arg, 1=send-fail.",
+      "confidence": "high",
+      "subsystem": "tconnd-net",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "returns 0 on full send (iRet==len), -1 otherwise; handle->errcode field[1]=4(bad param)/1(send error)"
+      ],
+      "costs": [],
+      "notes": "Tencent tconnd network API (tcltapi.c). Transport layer plumbing."
+    },
+    {
+      "address": "0x1004fad0",
+      "currentName": "FUN_1004fad0",
+      "proposedName": "TcltApi::TryParseOnePackage",
+      "purpose": "tconnd: extracts one complete package from the recv ring buffer. Reads a big-endian package-length header (header width 1/2/4/8 bytes at buf+0x30, and a second optional length field at +0x38), compacts buffer if incomplete, else memcpy's the full package out.",
+      "confidence": "high",
+      "subsystem": "tconnd-net",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "header field width selects endian-swap: 2->bswap16, 4->bswap32, 8->bswap64 (via __aullshr/__allshl), else raw byte",
+        "pkglen = local_8 + local_c (two length fields at offsets +0x30 and +0x38)",
+        "returns 1 when full package copied, 0 when need more data"
+      ],
+      "costs": [],
+      "notes": "Tencent tconnd. Big-endian length framing. Transport plumbing."
+    },
+    {
+      "address": "0x100502a0",
+      "currentName": "FUN_100502a0",
+      "proposedName": "TcltApi::RecvPackage",
+      "purpose": "tconnd receive: tries to parse a buffered package (FUN_1004fad0); if none, recv()s more data into buffer (respecting free space = field[7]-field[8]-field[9]) then re-parses. Logs no-space/recv-error/recv-data.",
+      "confidence": "high",
+      "subsystem": "tconnd-net",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "free space = recvbuff(field[7]) - field[8] - leftdata(field[9]); if<1 errcode=3(no space)",
+        "recv dest = buf(field[6]) + field[8] + field[9]; on data field[9]+=n"
+      ],
+      "costs": [],
+      "notes": "Tencent tconnd. Transport plumbing."
+    },
+    {
+      "address": "0x10050f10",
+      "currentName": "FUN_10050f10",
+      "proposedName": "TcltApi::RecvPackage_Variant",
+      "purpose": "Identical structure to RecvPackage (0x100502a0) but uses parser FUN_100506b0 (a different framing variant). tconnd receive + reparse loop.",
+      "confidence": "high",
+      "subsystem": "tconnd-net",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "same free-space and offset math as FUN_100502a0"
+      ],
+      "costs": [],
+      "notes": "Tencent tconnd. Transport plumbing; duplicate of 0x100502a0 with alternate parser."
+    },
+    {
+      "address": "0x10067670",
+      "currentName": "FUN_10067670",
+      "proposedName": "Tdr::MetalibInputEntries",
+      "purpose": "TDR (Tencent Data Representation) metalib deserializer core: iterates struct entries (0xb4-byte descriptors starting at meta+0xb8), resolves array refer-counts, validates refer value in [0,array_count], and copies/decodes each field into the host buffer honoring version cutoff. Generic serialization engine.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "entry stride = idx*0xb4 + 0xb8 + meta base",
+        "refer-count width at entry+0x58: 2->u16, 4->i32(sign-extend), 8->i64, else u8",
+        "error 0x82010403 invalid refer value; 0x82010407 buffer not enough; error mask bit 0x80000000",
+        "inline string copy loop when size<=0x40 else memcpy"
+      ],
+      "costs": [],
+      "notes": "TDR runtime. Generic; not skill-specific but underlies all struct decode."
+    },
+    {
+      "address": "0x1006a610",
+      "currentName": "FUN_1006a610",
+      "proposedName": "Tdr::HostToXml_Buffer",
+      "purpose": "TDR export entry point (data/struct -> XML or host-text into a buffer). Validates meta/xml/host pointers, clamps cutoff version to [baseVersion, meta.maxVersion], dispatches to output mode 1/3/other (FUN_10066d50 / FUN_10069c70 / FUN_10066510).",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "cutoff = (param_4==0 || param_4>meta.maxVer(+0xc)) ? meta.maxVer : param_4",
+        "reject if cutoff < baseVersion(meta+8): error 0x82010401",
+        "param invalid: 0x82010468",
+        "mode==1 -> FUN_10066d50; mode==3 -> FUN_10069c70; else FUN_10066510"
+      ],
+      "costs": [],
+      "notes": "TDR runtime export. Plumbing."
+    },
+    {
+      "address": "0x1006a790",
+      "currentName": "FUN_1006a790",
+      "proposedName": "Tdr::HostToXml_FilePtr",
+      "purpose": "TDR export variant writing to a FILE* (a_fpXml). Same validation/cutoff dispatch as 0x1006a610.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "same cutoff/version checks; errors 0x82010468 / 0x82010401"
+      ],
+      "costs": [],
+      "notes": "TDR runtime export. Plumbing."
+    },
+    {
+      "address": "0x1006a8e0",
+      "currentName": "FUN_1006a8e0",
+      "proposedName": "Tdr::HostToXml_FileName",
+      "purpose": "TDR export to a named file: fopen(path,'w'), writes XML prolog with encoding, dispatches by mode, fclose. Same version validation.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "writes '<?xml version=\"1.0\" encoding=%s standalone=\"yes\" ?>'; error 0x82010446 on open fail"
+      ],
+      "costs": [],
+      "notes": "TDR runtime export. Plumbing."
+    },
+    {
+      "address": "0x1006aa90",
+      "currentName": "FUN_1006aa90",
+      "proposedName": "Tdr::HostToXml_IOWrap",
+      "purpose": "TDR export via an IOWrap descriptor struct (chooses file-name / FILE* / memory-buffer output source, and mode field). Validates the wrap fields and dispatches.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "IOWrap layout: [0]=meta [1]=fileName [2]=FILE* [3]=buf [4]=buflen [5]=host.buf [6]=host.len [7]=cutoffVer [8]=mode [9]=arg"
+      ],
+      "costs": [],
+      "notes": "TDR runtime export. Plumbing."
+    },
+    {
+      "address": "0x1006e120",
+      "currentName": "FUN_1006e120",
+      "proposedName": "Tdr::XmlToHost_Buffer",
+      "purpose": "TDR import (XML text buffer -> host struct). Builds an xml_parser_tree, finds root, then decodes into host via FUN_1006dff0 respecting cutoff version. Reverse of 0x1006a610.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "cutoff default 0x7fffffff when 0; reject cutoff<baseVer -> -0x7dfefbff; no-root -> -0x7dfefbf5; param err -0x7dfefb98"
+      ],
+      "costs": [],
+      "notes": "TDR runtime import. Plumbing."
+    },
+    {
+      "address": "0x1006e330",
+      "currentName": "FUN_1006e330",
+      "proposedName": "Tdr::XmlToHost_FilePtr",
+      "purpose": "TDR import from a FILE* (parses xml tree via FUN_10070300). Same decode/version flow as 0x1006e120.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "same error codes -0x7dfefbff / -0x7dfefbf5 / -0x7dfefb98"
+      ],
+      "costs": [],
+      "notes": "TDR runtime import. Plumbing."
+    },
+    {
+      "address": "0x1006e510",
+      "currentName": "FUN_1006e510",
+      "proposedName": "Tdr::XmlToHost_FileName",
+      "purpose": "TDR import from a named file (parses via FUN_10070410). Same decode/version flow as 0x1006e120.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "same error codes as sibling importers"
+      ],
+      "costs": [],
+      "notes": "TDR runtime import. Plumbing."
+    },
+    {
+      "address": "0x1006e6f0",
+      "currentName": "FUN_1006e6f0",
+      "proposedName": "Tdr::XmlToHost_IOWrap",
+      "purpose": "TDR import via IOWrap descriptor: selects source (filename / FILE* / buffer), builds xml tree, decodes into host struct. Reverse counterpart of 0x1006aa90.",
+      "confidence": "medium",
+      "subsystem": "tdr-serialization",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "cutoff default 0x7fffffff; same error codes"
+      ],
+      "costs": [],
+      "notes": "TDR runtime import. Plumbing."
+    },
+    {
+      "address": "0x10073760",
+      "currentName": "FUN_10073760",
+      "proposedName": "Pal::TIpc_PathToName",
+      "purpose": "Tencent PAL tipc.c: converts a filesystem path into an IPC-safe name via GetShortPathNameA, then replaces backslashes with '_' and lowercases everything. Optional prefix param_4.",
+      "confidence": "high",
+      "subsystem": "pal",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "each '\\\\' -> '_'; every other char -> tolower; requires prefixlen+pathlen < bufsize"
+      ],
+      "costs": [],
+      "notes": "Tencent PAL IPC helper. Infra."
+    },
+    {
+      "address": "0x100f74f0",
+      "currentName": "FUN_100f74f0",
+      "proposedName": "Sys::BuildWindowsVersionString",
+      "purpose": "Microsoft sample-code 'GetOSDisplayString': builds a human-readable Windows version/edition banner via GetVersionExA/GetNativeSystemInfo/GetProductInfo. Diagnostic only.",
+      "confidence": "high",
+      "subsystem": "platform-diag",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock MSDN sample. Not game logic."
+    },
+    {
+      "address": "0x100f8d60",
+      "currentName": "FUN_100f8d60",
+      "proposedName": "Log::DebugPrintf",
+      "purpose": "Formats a varargs message into a 0xfff (4095) byte static buffer via _vsnprintf and writes it to a debug/log file handle (DAT_123ba71c). Emits an error line if the format overflows.",
+      "confidence": "high",
+      "subsystem": "logging",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "buffer cap 0xfff; error string len 0x2a written on overflow"
+      ],
+      "costs": [],
+      "notes": "Logging plumbing. Uses global va_list DAT_123bd5d8."
+    },
+    {
+      "address": "0x100fa1d0",
+      "currentName": "FUN_100fa1d0",
+      "proposedName": "GlobalVarBuffer::InitSharedMem",
+      "purpose": "Creates/opens a per-process named shared-memory region 'Local\\GloablVarBuffer_PID_%u' (0xffff bytes) guarded by a named mutex, maps it, and either initializes it or increments a refcount at offset +4. Diagnostic/global-variable store.",
+      "confidence": "medium",
+      "subsystem": "diag-shared-mem",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "mapping size 0xffff; refcount at mapped+4 incremented when pre-existing (ERROR_ALREADY_EXISTS 0xb7)"
+      ],
+      "costs": [],
+      "notes": "Debug global-var buffer. Note typo 'Gloabl' in original name. Infra."
+    },
+    {
+      "address": "0x101106b0",
+      "currentName": "FUN_101106b0",
+      "proposedName": "Tlv::ItemUseWithSkillBeads_DebugFormat",
+      "purpose": "TDR DebugFormat (text dump) for an item-use request struct containing itemId(u64), itemType, targetPos, posColumn(u8), posGrid(u16 @ +0x11), and a [skillBeadsInfo] array (max 3 elements, each via FUN_1010fbe0). Debug/logging serializer — reveals the client's item-use-with-decoration wire struct.",
+      "confidence": "high",
+      "subsystem": "skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0/+4 itemId(u64 %I64u), +8 itemType, +0xc targetPos, +0x10 posColumn(u8), +0x11 posGrid(u16)",
+        "skillBeadsInfo array count capped at 3 (uVar3<3), element decoder FUN_1010fbe0"
+      ],
+      "costs": [],
+      "notes": "DebugFormat is client text-dump, but the struct layout is authoritative wire format the server must validate. skillBeadsInfo = decoration/jewel skill beads slotted in item."
+    },
+    {
+      "address": "0x10127c60",
+      "currentName": "FUN_10127c60",
+      "proposedName": "Tlv::SkillLevelPair_DebugFormat_Guarded",
+      "purpose": "TDR DebugFormat for a {skill:int16, level:int8} pair, wrapped in an SEH frame with a scratch buffer (FUN_10c3da30 cleanup). Emits [skill] and [level] fields.",
+      "confidence": "high",
+      "subsystem": "skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0 skill(int16), +2 level(int8); returns -0x13 if buf handle null"
+      ],
+      "costs": [],
+      "notes": "Skill+level pair used across skill lists. DebugFormat variant with exception frame."
+    },
+    {
+      "address": "0x10127d40",
+      "currentName": "FUN_10127d40",
+      "proposedName": "Tlv::SkillLevelPair_DebugFormat",
+      "purpose": "Simple TDR DebugFormat for the same {skill:int16 @ +0, level:int8 @ +2} pair. Emits [skill] then [level].",
+      "confidence": "high",
+      "subsystem": "skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0 skill(int16), +2 level(int8)"
+      ],
+      "costs": [],
+      "notes": "Skill+level pair text dump. Wire struct authoritative for server."
+    },
+    {
+      "address": "0x10189710",
+      "currentName": "FUN_10189710",
+      "proposedName": "Tlv::SkillGroupLayout_DebugFormat",
+      "purpose": "TDR DebugFormat for a player skill-group / skill-bar layout struct: skillGroup(int32 @ +0), leftEditCnt(int32 @ +4), skillCnt(u8 @ +8), then parallel arrays [skillID] (int32 each, starting @ +9) and [actFlag] (u8 each, starting @ +0x2d9), both length=skillCnt (max 0xb4=180).",
+      "confidence": "high",
+      "subsystem": "skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct: +0 skillGroup(i32), +4 leftEditCnt(i32), +8 skillCnt(u8, max 0xb4)",
+        "skillID[i] at +9 + i*4 (i32); actFlag[i] at +0x2d9 + i (u8)",
+        "actFlag array base offset 0x2d9 => skillID array capacity = (0x2d9-9)/4 = 180 entries"
+      ],
+      "costs": [],
+      "notes": "Skill loadout/hotbar with per-skill active flags. leftEditCnt likely remaining free respec/edit count. Server must validate skillCnt<=180."
+    },
+    {
+      "address": "0x1019fe20",
+      "currentName": "FUN_1019fe20",
+      "proposedName": "Tlv::PetSupportAttrs_DebugFormat",
+      "purpose": "TDR DebugFormat for a pet/companion (cat) attribute block: an id field, quality, character, atkTarget, atkMode, name(string @ +5..), skin(+0xd), supportSkill(+0xe), randType(+0xf). Part of the larger pet struct (0x101a5dd0).",
+      "confidence": "high",
+      "subsystem": "pet-skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "struct(int32 idx): +0 id, +1 quality, +2 character, +3 atkTarget, +4 atkMode, +5.. name, +0xd skin, +0xe supportSkill, +0xf randType"
+      ],
+      "costs": [],
+      "notes": "Palico/cat combat AI attrs incl supportSkill and atkMode. Sub-struct of pet data."
+    },
+    {
+      "address": "0x101a5dd0",
+      "currentName": "FUN_101a5dd0",
+      "proposedName": "Tlv::PetFullData_DebugFormat",
+      "purpose": "TDR DebugFormat for the full pet/Palico record: idx, uId, id, name, desc, sex, state, level, exp, loyal, potential, spirit, vigour, supportSkill, giftSkill, rename, groupNum + [groupExp] array, potentialNum + [potentialValue] array, [train], [rngAttrs], talkStyle, [equipSkills] (TlvSkillAndSlotList), growHigher float @ +0x488, [waitSkills] (TlvSkillList), growHigherCat. Reveals pet skill/talent storage layout.",
+      "confidence": "high",
+      "subsystem": "pet-skill-schema",
+      "serverRelevance": "validation",
+      "formulas": [
+        "offsets: +0 idx(u8), +1 uId(i32), +5 id(i32), +9.. name, +0x29.. desc, +0x49 sex(u8), +0x4a state(u8), +0x4b level(i32), +0x4f exp(i32), +0x53 loyal(i16), +0x55 potential(i16), +0x57 spirit(i16), +0x59 vigour(i16), +0x5b supportSkill(i32), +0x5f giftSkill(i32), +0x63 rename(u8), +0x64 groupNum(i16, max 0x46=70)",
+        "+0x2dc potentialNum(i16, max 10); groupExp[] via FUN_1019e530; potentialValue[] via FUN_1019eba0",
+        "+0x38f talkStyle(u8); equipSkills via TlvSkillAndSlotList_DebugFormat; +0x488 growHigher(float); waitSkills via TlvSkillList_DebugFormat"
+      ],
+      "costs": [],
+      "notes": "Master/Palico companion full record. supportSkill+giftSkill+equipSkills+waitSkills are the pet skill loadout the server owns. groupExp cap 70, potential cap 10."
+    },
+    {
+      "address": "0x101fcbe0",
+      "currentName": "FUN_101fcbe0",
+      "proposedName": "Tlv::BuffInfo_DebugFormat",
+      "purpose": "TDR DebugFormat for TlvBuffInfo (confirmed vs schema doc @ 0x101FC830): buffId, uID, ownerId, retainTime, expireTime, count, stack, from, effectNum + [effectData] array (max 10, element decoder FUN_101fbd20). This is the authoritative active-buff instance record.",
+      "confidence": "high",
+      "subsystem": "buff-schema",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "struct: +0 buffId(i32), +4 uID(i32), +8 ownerId(i32), +0xc retainTime(i32), +0x10 expireTime(i32), +0x14 count(i16), +0x16 stack(i16), +0x18 from(i16), +0x1a effectNum(i16, max 10)",
+        "effectData[] per-element via FUN_101fbd20; count>10 -> error -7, <0 -> error -6",
+        "NOTE: DebugFormat orders count(@+0x14) then stack(@+0x16) then from(@+0x18); schema doc lists offsets differently (count@10,stack@11,from@12) — trust these decode offsets as they read the live struct"
+      ],
+      "costs": [],
+      "notes": "Core buff instance: retainTime (duration remaining) + expireTime (absolute), count (magnitude/charges), stack (stack count), from (source), effectData (per-effect magnitudes). Server authoritative for durations/stacking. Cross-ref TLV_DOCS/TlvBuffInfo.md."
+    },
+    {
+      "address": "0x10256190",
+      "currentName": "FUN_10256190",
+      "proposedName": "BehaviorTree::RegisterEventAndAbnormalStatusEnums",
+      "purpose": "Registers the numeric ID -> string-name table for all behavior-tree event types AND monster abnormal-status effects (each entry FUN_10256e40(id, name)). This is the authoritative enum of status-effect IDs and their _End counterparts, plus BT combat events (rage/angry, enter-combat, skill-hit, cooperation-attack, etc). Critical for server status-effect logic.",
+      "confidence": "high",
+      "subsystem": "status-effect-enum",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "Abnormal status IDs (apply): 0x8b4 Paralysis, 0x8b5 Traped(trap), 0x8b6 Poison, 0x8b7 Stun, 0x8b8 Flare, 0x8b9 SonicGranade, 0x8ba Poo, 0x8bb Marked, 0x8bc Slivervine(catnip), 0x8bd Sleep, 0x8be Balance, 0x8bf Falldown, 0x8c0 PartBreak, 0x8c1 TailBreak, 0x8c2 CrazyRun, 0x8c3 FireFall, 0x8c4 Stuck, 0x8c6 Anethesia, 0x8c7 ParalysisTrap, 0x8c8 AdvancedTrap, 0x8c9 WindPressure, 0x8ca DragonWindPressure, 0x8cb Quake, 0x8cc Roar, 0x8cd Paralyse, 0x8ce Snowman, 0x8cf Exhaust, 0x8d0 Piyo, 0x8d1 Scare, 0x8d2 Bound, 0x8d3 Carry, 0x8d4 Haze, 0x8d5 Sink, 0x954 Dynamite",
+        "Abnormal status _End IDs = apply_id + 0x22 (e.g. 0x8b4->0x8d6, 0x8b5->0x8d7 ... 0x8d5 Sink->0x8f7 Sink_End); Anethesia 0x8c6->0x8e8, etc. Dynamite 0x954 apply / 0x955 end (irregular)",
+        "BT stimuli events 0x89c-0x8b1: 0x89c CommonAIBehaviorStart, 0x89d End, 0x89e DAMAGE_EVENT, 0x89f TRAP, 0x8a0 PARARYSIS_TRAP, 0x8a1 PARARYSIS, 0x8a2 FLASH, 0x8a3 SONIC, 0x8a4 CATCH, 0x8a5 POOL, 0x8a6 ATTACKPLAYER, 0x8a7 ATTACKMONSTER, 0x8a8 INIT, 0x8a9 DESTROY, 0x8aa GAME, 0x8ab OnNoTarget, 0x8ac OnInterestingSoundHeard, 0x8ad OnThreateningSoundHeard, 0x8ae OnSomethingSeen, 0x8af OnEnemySeen, 0x8b0 COLLIDEWALL, 0x8b1 MOVETIMEOUT",
+        "Monster events 0x516-0x529: 0x516 HEALTH_LOW, 0x517 DEAD, 0x518 ATTR_THRESHOLD, 0x519 PART_BREAK, 0x51b PART_BALANCE_LOST, 0x51c STATE_ABNORMAL, 0x51d STATE_ABNORMAL_END, 0x520 ADD_THREAT, 0x521 PART_FALLDOWN, 0x522 PART_SCAR, 0x526 LOSTBALANCE, 0x527 HEALTH_REACH_CAPTURE, 0x528 HEALTH_CHANGE, 0x529 PET_TIMEOUT",
+        "Master/self events 0x8f8-0x909: Abnormalized/End, Buffed/End, HitReactioned, DoAttack, DoDefense, DoDodge, DoUseItem, Died, SendCommand, EnterCombat, ExitCombat, StateChanged, DoStartMove, DoStopMove",
+        "GroupMember events 0x90a-0x918; AttentionTarget events 0x919-0x92d",
+        "Misc combat: 0x936 SKILL_HIT, 0x937 ENTER_ANGRY(rage), 0x939 ENTER_LEMON, 0x93a LEAVE_LEMON, 0x938 SMPET_Summon, 0x947 COOPERATION_ATTACK, 0x948 COOPERATION_ATTACK_END, 0x949 KEY_ATTR_CHANGE, 0x931 Inner_After_Abnormal, 0x952 SOULBEAST_INTERACT",
+        "Emotion states 0x94b-0x950: NORMAL_START/END, ANGRY_START/END, TIRED_START/END; monster ctrl fight/power levels 0x93c-0x943; 3v3/mvm win events 0x944-0x946"
+      ],
+      "costs": [],
+      "notes": "AUTHORITATIVE status-effect and combat-event enum. Server must recognize these IDs to apply/expire abnormal statuses and drive AI. _End = _apply + 0x22 offset pattern. 'ENTER_ANGRY' = monster rage. Traped/PARARYSIS spelling matches original."
+    },
+    {
+      "address": "0x10258da0",
+      "currentName": "FUN_10258da0",
+      "proposedName": "BehaviorTree::RegisterBlackboardKeys",
+      "purpose": "Registers/caches behavior-tree blackboard variable keys (name->id via FUN_113168d0, stored into struct offsets). Includes combat-relevant keys: HitSkillId, HitDamageType, AbnormalCauserId, Input_AbnormalType, Sense_Master/TargetAbnormalType, PartBrokenLevel, Damage{Fire,Water,Electric,Dragon,Ice}Attr, HitSkillResID/ID/Level, Cooperation_Attack_TargetId, plus NpcAnimationName1..8. Maps skill/damage/abnormal data into the AI blackboard.",
+      "confidence": "high",
+      "subsystem": "behavior-tree",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "each key resolved and stored at fixed offsets, e.g. HitPart@+0x228, HitSkillId@+0x22c, HitDamageHealth@+0x230, HitDamageType@+0x238, HitAttrDmgType@+0x23c, HitPos@+0x240, ShooterId@+0x248, Input_AbnormalType@+0x260, Sense_MasterAbnormalType@+0x264, Sense_TargetAbnormalType@+0x268, PartBrokenLevel@+0x26c, DamageCauserId@+0x270, LastAbnormalCauserId@+0x274, AbnormalCauserId@+0x278, Health@+0x280",
+        "Damage element attrs: DamageFireAttr@+0x2d4, Water@+0x2d8, Electric@+0x2dc, Dragon@+0x2e0, Ice@+0x2e4; Cooperation_Attack_TargetId@+0x2e8",
+        "HitSkillResID@+0x2c4, HitSkillID@+0x2c8, HitSkillLevel@+0x2cc; unresolved keys default 0xffffffff"
+      ],
+      "costs": [],
+      "notes": "Blackboard key binding for monster AI. Ties skill hits, elemental damage, and abnormal-status causers into the behavior tree. Server-side AI relevant."
+    },
+    {
+      "address": "0x10262280",
+      "currentName": "FUN_10262280",
+      "proposedName": "SkillBehaviorTree::LoadFromConfig",
+      "purpose": "Iterates a 'SkillBehaviorTree' config node; for each child reads 'FileName' and 'SkillID' attributes, then loads/creates the behavior-tree instance for that skill (via FUN_10262e90/FUN_100b4ca0) and marks it initialized (byte @ +0xe9 = 1). Builds the SkillID -> behavior-tree-file mapping.",
+      "confidence": "medium",
+      "subsystem": "skill-behavior-tree",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "reads attr 'FileName' (into node) and 'SkillID'; instance init flag byte at instance+0xe9",
+        "vtable-driven config iteration; skill BT stored in map keyed by SkillID"
+      ],
+      "costs": [],
+      "notes": "Skill logic is driven by per-skill behavior trees loaded from config. Decompile is heavy vtable/register plumbing; exact map struct uncertain. Relevant: server executes these skill BTs."
+    },
+    {
+      "address": "0x10262e70",
+      "currentName": "FUN_10262e70",
+      "proposedName": "SkillBehaviorTree::ReadSkillIDAttr_Thunk",
+      "purpose": "Tiny thunk: sets attribute name to 'SkillID' and tail-calls the config reader vtable slot (+0x20) to fetch the SkillID attribute. Helper for the loader above.",
+      "confidence": "medium",
+      "subsystem": "skill-behavior-tree",
+      "serverRelevance": "client-only",
+      "formulas": [],
+      "costs": [],
+      "notes": "Jump-table thunk (decompiler warned indirect jump). Config-read helper."
+    },
+    {
+      "address": "0x10289b70",
+      "currentName": "FUN_10289b70",
+      "proposedName": "Tlv::PingDelayInfo_DebugFormat",
+      "purpose": "TDR DebugFormat for a network ping/latency struct: dwPingID(u32 @ +0), wDelay(u16 @ +4), wCurDelay(u16 @ +6), wAverageDelay(u16 @ +8), chServerFps(i8 @ +0xa), dwServerTm(u32 @ +0xb). Not skill-related.",
+      "confidence": "high",
+      "subsystem": "network-schema",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "struct: +0 dwPingID(u32), +4 wDelay(u16), +6 wCurDelay(u16), +8 wAverageDelay(u16), +0xa chServerFps(i8), +0xb dwServerTm(u32)"
+      ],
+      "costs": [],
+      "notes": "Ping/RTT telemetry. Included in this chunk incidentally; not buff/skill."
+    },
+    {
+      "address": "0x1029caa0",
+      "currentName": "FUN_1029caa0",
+      "proposedName": "Tlv::SkillActionPoint_DebugFormat",
+      "purpose": "TDR DebugFormat for a skill/talent action-point allocation record: iNetID, iActionType, iPoint, iLevel, iBuffID (all int32). Represents a point spent into a skill/talent producing a buff — talent-tree allocation entry.",
+      "confidence": "high",
+      "subsystem": "talent-schema",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "struct: +0 iNetID(i32), +4 iActionType(i32), +8 iPoint(i32), +0xc iLevel(i32), +0x10 iBuffID(i32)"
+      ],
+      "costs": [],
+      "notes": "Talent/skill-point allocation: iPoint points at iLevel of an action grant iBuffID to entity iNetID. Server authoritative for talent-point spend and resulting passive buff. Likely element of TlvActionPointData."
+    },
+    {
+      "address": "0x102a5490",
+      "currentName": "FUN_102a5490",
+      "proposedName": "Tlv::PlayerSceneBrief_DebugFormat",
+      "purpose": "TDR DebugFormat for a large player scene/appearance broadcast struct: iNetID, dwSessionID, szName, bGender, stPose, avatar/health/faction/weapon/state, equipment array [astEquip] (max 0x28=40), raw attribute blob [szAttr] (max 0x5000), raw buff blob [szBuff] (max 0x2800), projectile ids, entity GUID, state bitmasks dwState1-4/AGState/SubState, guild, star level, facial info (0x2e entries), vehicle/growHigh fields.",
+      "confidence": "high",
+      "subsystem": "player-schema",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "offsets: +0 iNetID(i32), +4 dwSessionID(u32), +8.. szName, +0x28 bGender(u8), stPose sub-struct, +0x45 bAvatarSetID(u8), +0x46 fHealth(float), +0x4a fHealthRecover(float), +0x4e iFaction(i32), +0x52 iWeapon(i32), +0x56 iState(i32), +0x5a bHasTeam(u8), +0x5b bTeamHasPwd(u8), +0x5c dwRandSeed(u32), +0x60 wEquipCount(u16, max 40)",
+        "astEquip[] via FUN_10274670; wAttrSize(u16 @ +0x422, max 0x5000) then raw bytes @ +0x424; wBuffSize(u16 @ +0x5424... shown as param_1+0x1509 word = +0x5424) then raw buff bytes @ +0x5426 (max 0x2800)",
+        "iProjIdCount(i32 @ +0x7c26, max 0x14) astProjIds @ +0x7c2a; ullParentEntityGUID(u64 @ +0x7cca); bType(u8 @ +0x7cd2); dwState1..4 @ +0x7cd3/+0x7cd7/+0x7cdb/+0x7cdf; dwAGState @ +0x7ce3; dwSubState @ +0x7ce7; facialInfo[0x2e] i16 @ +0x7dc3; iVehicleID @ +0x7e1f; iGrowHighDay @ +0x7e23; iGrowHeight @ +0x7e27"
+      ],
+      "costs": [],
+      "notes": "Full player state broadcast incl embedded attr and buff blobs (szBuff = serialized active buffs, up to 0x2800 bytes). Server owns this. Relevant to buffs: szBuff is the packed buff array shipped in scene sync."
+    },
+    {
+      "address": "0x102afba0",
+      "currentName": "FUN_102afba0",
+      "proposedName": "Tlv::InstanceSceneInfo_DebugFormat",
+      "purpose": "TDR DebugFormat for an instance/dungeon scene-info struct: iCreatePlayerMaxLv, iStartTime, remain-seconds (normal/vip/item), max-limits, iPlayerNum, iIsHunterOfficer, region weather array [astRegionWeather] (max 0x19=25), cross-server/warning/hunting-mode flags, cat-car use info, rules info, paid items [astPaidItems] (max 100), paid buffs [astPaidBuffs] (max 100), iIsBigRand. Instance metadata, largely not skill-related.",
+      "confidence": "high",
+      "subsystem": "instance-schema",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "offsets: +0 iCreatePlayerMaxLv, +4 iStartTime, +8 iRemainSeconds, +0xc iVipRemainSeconds, +0x10 iItemRemainSeconds, +0x14 iNormalMaxLimit, +0x18 iVipMaxLimit, +0x1c iItemMaxLimit, +0x20 iPlayerNum, +0x24 iIsHunterOfficer, +0x28 nRegionCount(i16, max 25)",
+        "flags @ +0x2ff iIsCrossServerInstance, +0x303 iIsWarning, +0x307 iHuntingMode, +0x30b iActHuntingMode; iRulesInfoType @ +0x493",
+        "iItemDataCount @ +0x9ef (max 100) astPaidItems[]; iBuffDataCount @ +0xd13 (max 100) astPaidBuffs[]; iIsBigRand @ +0x1037",
+        "astPaidItems/astPaidBuffs share element decoder FUN_102ada60"
+      ],
+      "costs": [
+        "astPaidItems (max 100) and astPaidBuffs (max 100) are cash-shop/paid item & buff lists inside an instance — buffs purchasable for the dungeon session"
+      ],
+      "notes": "Instance session config. Buff relevance: astPaidBuffs = purchasable temporary buffs applied within the instance; server authoritative for their limits and durations."
+    }
+  ]
+}

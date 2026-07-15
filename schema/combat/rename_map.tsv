@@ -1,0 +1,116 @@
+101dc8a0	TdrCharBaseInfo::ToDebugString
+101ea1c0	TdrCharFullStat::ToDebugString
+10259b80	AISystem::LoadEntityBehaviorTree_Recursive
+102d9480	CMHHitInfo::SerializeToKeyValue
+10a5ab60	Weapon::DispatchOnChgFireMode
+10a9bc30	RegisterCombatBehaviorTreeNodes
+10aa0760	BTNode_CCombatNpcRotateToPos::DescribeParams
+10aa10c0	BTNode_CCombatNpcRotateToTarget::DescribeParams
+10aa1800	BTNode_CEnableMoveCollision::DescribeParams
+10aa4e10	CCombatNPCComboInfo::GetRecordByIndex
+10aaea10	CCombatNPCInfo::GetRecordByIndex
+10abaa70	CDamageInfo::GetRecordById
+10ae4c50	CItemFsm::LoadWeaponAvatarFireMode
+10ae6470	CPetFsm::LoadWeaponAvatarFireMode
+10b21b70	CombatEntity::HandleGameEvent_HitBreakage
+10b255c0	CombatEntity::BuildGameOnHitEvent_Melee
+10b78ab0	DebugHud::DrawWeaponRaycastInfo
+10bc0de0	PlayerInput::BindActionHandlers
+10bc94c0	BuffArea::BuildGameOnHitEvent
+10bc9f20	CLogicBuffArea::ReadPropertiesFromXml
+10bcfb70	CombatNpc::Destructor_Release
+10bcfc00	CombatNpc::Init
+10bd08a0	CombatNpc::Constructor
+10bd1c70	PlayerParams::RegisterCVars
+10be3840	GameFactory::RegisterEntityClasses
+10bec410	CItemFsm::ApplyWeaponAvatarModel
+10c25a20	LocalPlayer::OnHit_CameraShakeAndFsm
+10c25c70	CombatNpc::OnHit_ProcessAndBroadcast
+10c26e50	MeleeAttack::QueryTargetsAndEmitGameOnHit
+10c38390	CGameRules::ClientProcessHitReaction
+10c39260	CGameRules::ResolveHitMaterialOrEffectRecord
+10c65530	CVehicleWeapon::ParseRocketFiremodeHelpers
+10c6ef90	CActor::OnHitDeathReactionInterrupted
+10cb3320	CItemAnimationTable::RegisterActionNames
+10cce380	CItem::ParseAccessoryFiremodeActions
+10d53a60	CGameRules::RegisterGameHitListeners
+10d607a0	CMelee::ComputeHitDirectionAndEmitGameOnHit
+10d7d4e0	CProjectile::DoExplosionAreaDamage
+10dc27f0	CMonsterHitEffectTable::LoadMaterialEffectPaths
+10ddeef0	CItem::PreloadFiremodeXmlModels
+10e10460	CFlowNode_Weapon::GetConfiguration
+10e377e0	CFlowNode_RemoveEntity::GetConfiguration
+10e943d0	CFlowNode_QueryEntities::GetConfiguration
+10eb4d30	CFlowNode_OnHit::GetConfiguration
+10ee5920	CGrabHandWeapon::Serialize
+10efe700	CDamageInfoController::InitEntityDamageResources
+10f17270	CCombatNPC::SelectCombatNPCModel
+10f19670	CActor::EmitGameOnHitFromLocalHit
+10f596e0	CItem::PlaySelectActionAndTransition
+10f80770	CActor::AccumulateInjuryAndSetInjuryLevel
+10fd48b0	CActor::SelectHitReaction
+11000d20	CActor::OnHitLocalAndReportToServer
+11000e30	CActor::FireServerOnHitScriptEvent
+11006ea0	CMeleeCollision::SweepAndReportGameOnHit
+11008410	MHAttackable::HandleGameOnHitAnimEvent
+11010ab0	CFlowNode_MHOnHitResult::Init
+11011110	CFlowNode_MHOnHitResult::ProcessEvent
+11014af0	MHCombat::BuildAndSendGameOnHit_Variant1
+11017ff0	MHCombat::BuildAndSendGameOnHit_Variant2
+110219a0	CScriptBind_MHLogicObject::RegisterMethods
+110265d0	CScriptBind_MHLogicObject::SetContinuousAttackInfo
+1102bc00	CScriptBind_Actor::RegisterMethods
+110442b0	CScriptBind_GameRules::RegisterMethods
+1104bc00	CScriptBind_HitReaction::Register
+1104dea0	CScriptBind_InteractiveEntity::RegisterMethods
+11050cf0	CScriptBind_Weapon::RegisterMethods
+110553b0	CClientHitValidator::CheckVerticalMovement (Security code 3)
+11059000	CEvpDamageChecker::EvaluateMonsterAttackErrorRatios
+11059210	CEvpDamageChecker::HandleClientHit (monster/Boss hit validation, codes 9/10/11)
+110597f0	CEvpDamageChecker::UpdateAckAndTimeouts
+11059b30	CEvpDamageChecker::ValidateSequence (Security code 5)
+11059d60	CDamageChecker::EvaluateAllErrorRatiosAndSanction
+1105a890	CEvpDamageChecker::IsFiremodeRegistered
+1105ab90	CEvpDamageChecker::ClearExpiredFiremodes
+11061560	CPveDamageChecker::HandleClientHit (player attack validation, codes 1-12/15)
+11061f30	CPveDamageChecker::ValidateAoEHitTarget (Security code 6)
+11062220	CPveDamageChecker::HandleProjectileEffect (Security code 7)
+110626d0	CPveDamageChecker::VerifyProjectileLaunchType
+110627a0	CPveDamageChecker::VerifyProjectileLaunchPosition (Security code 6)
+11062a30	CPveDamageChecker::VerifyProjectileLaunchCount (Security code 7)
+110baa60	CVehicleClient::RegisterActionMaps
+110bf030	CVehicleDamageBehaviorCameraShake::Init
+110bf130	CVehicleDamageBehaviorCameraShake::OnDamageEvent
+110bfd70	CVehicleDamageBehaviorBlowTire::Init
+110fd1a0	CWeapon::FullSerialize (ammo + weapon stats)
+110fdf60	CWeapon::NetSerialize (ammo + weapon stats, network variant)
+110fe590	CWeaponFireMode::OnAnimationEvent_FxAndModeSwitch
+110ff0d0	CWeaponData::GetMemoryUsage_FireModesZoomModesAmmos
+11102000	CItem::SelectFireModeByNameOnAttachedItems
+111047e0	CWeapon::InitFromItemParamsXml
+11104c00	CWeapon::FindFireModeByName
+11104d20	CWeapon::LoadFireModeXml
+11116730	FireModeName::ComputeHash32AndRegister
+1130f590	CCombatNPC::ApplyLevelScaledAttributes
+1130f850	CCombatNPCLevelInfo::GetEntryByRank
+11419510	CCombatNPCInfo::GetRecordForThisNpc
+114195a0	CCombatNPCInfo::GetRecordByIndex
+114195f0	CCombatNPC::GetCachedWeaponEquipId
+11419690	CCombatNPC::SetDebugName
+1142b3d0	CDamageInfo::BuildDamageEventRecord
+1142ba90	CDamageDampingInfo::GetCurveByIndex
+1142c620	CDamageDampingInfo::EvalDampingMultiplier
+11482a60	CMovementChecker::CheckPosition_NoSpeed
+11482b30	CMovementChecker::CheckSpeedAndPosition
+11482d20	CMovementChecker::CheckPositionAndResetState
+11483990	CSecurityChecker::CheckPlayerAttr_StaminaRageSp
+11484eb0	CPlayerFsmValidation::LoadTransitionTablesXml
+11614340	CSecurityChecker::CheckSyncTime
+116657c0	CCombatNPC::IsDamageableBySkill_0x2f
+116878f0	CCombatNPCInfo::ParseMonsterConfigXml
+116e5410	CDamageInfo::ParseAttackInfoXml_[DECOMPILE_FAILED]
+116eeb20	CDmgRangeInfo::ParseAreaDamageXml
+118c0a60	CDamageInfo::GetIdByIndex
+119dff50	CAttackHitVolumeInfo::ParseHitSphereXml
+11a0f9e0	CWeaponFireModeDef::LoadFromXml
+123f6da5	Game::TriggerScriptEvent_GameOnHit

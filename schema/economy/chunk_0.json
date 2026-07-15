@@ -1,0 +1,370 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x10136e50",
+      "currentName": "FUN_10136e50",
+      "proposedName": "TlvGuildData::DebugFormat",
+      "purpose": "TDR human-readable text-dump of the full Guild data TLV struct (guild economy state). Walks every field/nested-list emitting '[label] value' lines. No arithmetic; pure struct-to-text. Reveals the guild economy layout: fund, reputation, resources (A/B/C/D), and their daily/weekly/max counters, guild-commerce commodity unlocks, celebration scores and hunt-soul.",
+      "confidence": "high",
+      "subsystem": "guild-economy",
+      "serverRelevance": "client-only (debug/log text formatter); but documents the server-authoritative guild economy struct layout",
+      "formulas": [
+        "level @ param_1[0x89]; exp @ [0x8a]; repute @ [0x8b]; fund @ [0x8c] (i32); arena @ [0x8d]; resA @ [0x8e]; resB @ [0x8f]; joinLevel @ [0x90]; leader int64 @ [0x91],[0x92]",
+        "fundMax int64 @ byte-off 0x362e9 (param_1[0xd8b9],[0xd8ba]); hallLevel(u8) @ 0x362ec; recruitingLevel(u8) @ 0x362ed; resourcingLevel(u8) @ 0x362ee; tradingLevel(u8) @ 0x362ef; trainingLevel(u8) @ 0x362f0; guilderCountMax(u32) @ 0x362f1",
+        "fundDaily int64 @ 0x362f5; fundWeekly int64 @ 0x362fd; commodityUnlock1 int64 @ 0x36305; commodityUnlock2 @ 0x3630d; commodityUnlock3 @ 0x36315; fundDailyTime @ 0x3631d; fundWeeklyTime @ 0x36321",
+        "resC @ 0x36325; resD @ 0x36329; resA/B/C/D Daily @ 0x3632d/0x36331/0x36335/0x36339; resA/B/C/D Weekly @ 0x3633d/0x36341/0x36345/0x36349; resA/B/C/D Max @ 0x3634d/0x36351/0x36355/0x36359",
+        "addFundWithDay @ 0x3635d; consumeFundWithDay @ 0x36361; plot @ 0x36365; questPrize @ 0x6df65; contribution @ 0x6df69; huntSoul int64 @ 0x6df71; celebrationScore @ 0x6df91",
+        "signUpCount(i32) @ 0x38dda validated: <0 -> -6, >0x40(64) -> -7; depotOpenFlag(u8) @ param_1[0x1b7b4]"
+      ],
+      "costs": [
+        "Guild fund (i64 fund/fundMax/fundDaily/fundWeekly) and 4 guild resources resA-D with daily/weekly accrual and max caps — guild economy currency pools",
+        "guilderCountMax = guild member capacity"
+      ],
+      "notes": "Calls TlvTitleList/GuildMemberList/GuildApplyList/SkillList/StoreData/GuildCommerceData/GuildFuncRecords/GuildBuyRecords printers. seed int64 @ [0..1], icon @ [0xb]. Signup array elements printed via FUN_1012c700; stores via TlvStoreData_DebugPrint; randCommodities via FUN_1012a660; quest via FUN_1012aea0."
+    },
+    {
+      "address": "0x1014d8b0",
+      "currentName": "FUN_1014d8b0",
+      "proposedName": "TlvLevelRecordSoA::DebugFormat",
+      "purpose": "TDR text-dump of a struct-of-arrays holding per-level challenge/arena records. Prints parallel arrays keyed by levelCnt: levelID, theBestScore, state, historyFinalRank, gainRewardFlag, lastTm.",
+      "confidence": "medium",
+      "subsystem": "rewards/challenge",
+      "serverRelevance": "client-only text formatter; documents challenge-record array layout",
+      "formulas": [
+        "levelCnt(u16) @ param_1[0] (word), array cap 5000 (>5000 -> -7)",
+        "levelID[] u32 @ base+2 (param_1 + i*2 + 1 word-index); theBestScore[] u16 @ word 0x2711; state[] u8 @ byte 0x7532; historyFinalRank[] u8 @ byte 0x88ba; gainRewardFlag[] u8 @ byte 0x9c42; lastTm[] u32 @ word 0x57e5"
+      ],
+      "costs": [],
+      "notes": "Each element scalar printed via FUN_1010c010. All 6 arrays share the same count (levelCnt), cap 5000."
+    },
+    {
+      "address": "0x1014e300",
+      "currentName": "FUN_1014e300",
+      "proposedName": "TlvRewardResetCounters::DebugFormat",
+      "purpose": "TDR text-dump of a daily-reset reward-claim counter struct: last reset time plus 4 gain-reward-times counters (normal/success challenge, VIP variants).",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter; struct is server-authoritative claim tracking (limits how many times a reward may be claimed per reset window)",
+      "formulas": [
+        "iLastResetTime @ [0] (time fmt); iGainChallangeRewardTimes @ [1]; iGainSuccessRewardTimes @ [2]; iGainVipChallangeRewardTimes @ [3]; iGainVipSuccessRewardTimes @ [4]"
+      ],
+      "costs": ["reward-claim counters gate free/VIP reward grants per reset period"],
+      "notes": "Same shape as FUN_102babc0 (dw-prefixed variant)."
+    },
+    {
+      "address": "0x1017f1e0",
+      "currentName": "FUN_1017f1e0",
+      "proposedName": "TlvPvpSeasonStats::DebugFormat",
+      "purpose": "TDR text-dump of a PVP/arena season stats struct: season, score, top score, weekly reward flag, streak, win/lose/total counts, reward mask and extra reward/medal counters.",
+      "confidence": "high",
+      "subsystem": "pvp-rewards",
+      "serverRelevance": "client-only formatter; documents PVP season reward-eligibility state",
+      "formulas": [
+        "iCurSeason [0]; iScore [1]; iScoreTop [2]; iWeekReward [3]; iStreak [4]; iWinNum [5]; iLoseNum [6]; iTotalNum [7]; iRewardMask [8]; iExRewardCount [9]; iStepReward [10]; iExMedalCount [0xb]"
+      ],
+      "costs": ["iRewardMask/iStepReward/iExRewardCount/iExMedalCount drive season reward payout eligibility"],
+      "notes": "All i32 sequential fields."
+    },
+    {
+      "address": "0x101817b0",
+      "currentName": "FUN_101817b0",
+      "proposedName": "TlvDailyActivityRecord::DebugFormat",
+      "purpose": "TDR text-dump of a per-day activity/encounter record: dateDay, curHigher, meetTime, giantTime, dailyRewardFlag, rewardFlag, activity.",
+      "confidence": "medium",
+      "subsystem": "activity-rewards",
+      "serverRelevance": "client-only formatter; documents daily activity/reward-flag state",
+      "formulas": [
+        "dateDay [0]; curHigher [1]; meetTime [2]; giantTime [3]; dailyRewardFlag [4]; rewardFlag [5]; activity [6]"
+      ],
+      "costs": ["dailyRewardFlag/rewardFlag/activity gate daily activity reward grants"],
+      "notes": "All i32 fields."
+    },
+    {
+      "address": "0x1018f060",
+      "currentName": "FUN_1018f060",
+      "proposedName": "TlvChapterRewardRecord::DebugFormat",
+      "purpose": "TDR text-dump of a chapter reward-progress record: chapterId, getRewardCount, isNotNew(bool).",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter; documents chapter reward-claim tracking",
+      "formulas": ["chapterId [0]; getRewardCount [1]; isNotNew(u8/char) @ [2]"],
+      "costs": ["getRewardCount limits chapter reward claims"],
+      "notes": ""
+    },
+    {
+      "address": "0x101b8940",
+      "currentName": "FUN_101b8940",
+      "proposedName": "TlvCharRoleAttributes::DebugFormat",
+      "purpose": "TDR text-dump of the master character attribute TLV (TlvCharRoleAttributes @0x101B6660 per TLV_DOCS). Emits ~168 fields. This is the authoritative per-character economy/progression state: all currencies, weapon EXP pools, VIP timers, clan/PVP currencies, hunt-soul, HR level. No arithmetic — just field-by-field print, but it is the canonical currency-offset map.",
+      "confidence": "high",
+      "subsystem": "character-economy",
+      "serverRelevance": "client-only formatter; struct is fully server-authoritative — these are the exact offsets the server must own for currency/EXP mutations",
+      "formulas": [
+        "roleGID int64 @ [0],[1]; oCharLevel @ [2]; oCharExp @ [3]; oStarLevel @ [4]; oCharHP @ [5]; oCharMaxHP @ [6]; oCharStr [7]; oCharBst [8]; oCharLck [9]; oCharVgr [10]; oCharDefence [0xb]",
+        "CURRENCIES: oCharMoney @ [0xc]; oCharBoundMoney @ [0xd]; oCharCredit @ [0xe]; oCharBoundCredit @ [0xf]; oCharCatCredit @ [0x30]; oCharReviveCredit @ [0x31]; oClanMoney @ +0x152; oClanMoneyPVP @ +0x15e; oPVPMoney @ +0x196; oCharCatMoney @ +0x19a; oCharCatMoneyWeek @ +0x19e (cap oCharCatMoneyWeekMax @ +0x1a2); oTotalCredit float @ +0x1ba",
+        "oCharFatigue @ [0x10]; oCharMaxFatigue @ [0x11]; weapon EXP: oClaymoreExp [0x12], oHammerExp [0x13], oKatanaExp [0x14], oDuelSwordExp [0x15], oSwordExp [0x16], oSpearExp [0x17], oGunExp [0x18], oBowExp [0x19], oCrossbowExp [0x1a], oFluteExp [0x1b]",
+        "oCharContribution @ [0x21]; oCharRemainsExp @ [0x22]; oFarmExp @ +0x8e; oExtDailyExp @ [0x33]; oCharRemainsDoubleExp @ [0x45]; oExtDailyDoubleExp @ [0x46]",
+        "VIP: oVIPLevel [0x47]; oVIPExp [0x48]; oVIPBaseEndTime [0x49]; oVIPGrowthEndTime [0x4a]; oVIPProfitEndTime [0x4b]; oBanChatEndTime [0x4c]",
+        "oHuntSoul @ +0x1a6; oLevelHuntSoul @ [0x87]; oTaskHuntSoul @ [0x88]; oCampHuntSoul @ [0x89]; oLastHuntSoul @ +0x1c6; oCharHRLevel @ +0x156; oCharHRPoint @ +0x15a; oTotalHRPoint @ +0x1ca; oShouHunPoint @ +0x1ee; oLieHunPoint @ +0x1f2; oMVPPoint @ +0x1f6; oIllustratePoint @ [0x8b]"
+      ],
+      "costs": [
+        "Primary tradable currency oCharMoney (i32) + bound variant oCharBoundMoney; premium currency oCharCredit + bound oCharBoundCredit + float oTotalCredit",
+        "Secondary currencies: cat money/credit (weekly-capped), clan money, PVP money, hunt-soul pools, HR points, MVP/hunt points",
+        "Per-weapon EXP pools (10 weapon types) — progression",
+        "oCharCatMoneyWeek capped by oCharCatMoneyWeekMax (weekly earning cap)"
+      ],
+      "notes": "Confirmed against TLV_DOCS/TlvCharRoleAttributes.md (roleGID@0, oCharLevel@8, oCharExp@12, oStarLevel@16). Many facial/appearance (oFacialInfo1..47), farm, clan-score, monopoly, x-hunter, soul-stone fields also present but non-economy. oIsNewbie @ +0x21a."
+    },
+    {
+      "address": "0x102166e0",
+      "currentName": "FUN_102166e0",
+      "proposedName": "TlvStarBranchRecord::DebugFormat",
+      "purpose": "TDR text-dump of a single star-system branch record: branchType(u8), branchLevel(u16), allScore, dayScore, recordCardLevelUpTimes, challengeScore.",
+      "confidence": "high",
+      "subsystem": "progression/star",
+      "serverRelevance": "client-only formatter; documents star-branch scoring record",
+      "formulas": [
+        "branchType(u8) @ +0; branchLevel(u16) @ +1; branchAllScore(u32) @ +3; branchDayScore(u32) @ +7; branchRecordCardLevelUpTimes(u32) @ +0xb; branchChallengeScore(u32) @ +0xf",
+        "struct is packed (byte offsets, not word-indexed): size ~0x13"
+      ],
+      "costs": ["recordCardLevelUpTimes = count of card-level-up spends for this branch"],
+      "notes": "Element type of the levelInfo list in FUN_1021dd80."
+    },
+    {
+      "address": "0x1021dd80",
+      "currentName": "FUN_1021dd80",
+      "proposedName": "TlvStarSystemData::DebugFormat",
+      "purpose": "TDR text-dump of the star-system container: openFlag, resetTime, recordCardLevelUpTimes, starScore, then nested levelInfo(StarBranchData list), cardInfo, statInfo(StatContainer), trackCards, plus a new-stat SoA (ids u16 / vals u32).",
+      "confidence": "high",
+      "subsystem": "progression/star",
+      "serverRelevance": "client-only formatter; documents star-system state and stat container",
+      "formulas": [
+        "openFlag [0]; resetTime [1] (time); recordCardLevelUpTimes [2]; starScore [3]",
+        "weeklyRefreshTime @ byte-off 0x9116; newStatCount(i32) @ 0x911a, validated <0 -> -6, >3000 -> -7",
+        "newStatIds[] u16 @ 0x911e; newStatVals[] u32 @ 0xa88e (both length newStatCount)"
+      ],
+      "costs": [],
+      "notes": "Calls TlvStarBranchData_DebugFormat (levelInfo), FUN_1021a3d0 (cardInfo), TlvStatContainer_DebugFormat (statInfo), FUN_1021c8d0 (trackCards)."
+    },
+    {
+      "address": "0x10276530",
+      "currentName": "FUN_10276530",
+      "proposedName": "TlvRewardResetResult::DebugFormat",
+      "purpose": "TDR text-dump of a reward-reset RPC result: retCode + 4 gain-reward-times counters + superSeqId + delayRefreshTime.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter; documents server reward-reset response payload",
+      "formulas": [
+        "iRetCode [0]; iGainChallangeRewardTimes [1]; iGainSuccessRewardTimes [2]; iGainVipChallangeRewardTimes [3]; iGainVipSuccessRewardTimes [4]; iSuperSeqId [5]; iDelayRefreshTime [6]"
+      ],
+      "costs": ["reward-times counters returned to client after a reset"],
+      "notes": "Superset of FUN_1014e300 with retCode/seq/delay."
+    },
+    {
+      "address": "0x10294d70",
+      "currentName": "FUN_10294d70",
+      "proposedName": "TlvRewardGrantPayload::DebugFormat",
+      "purpose": "TDR text-dump of a reward-grant payload: additive amounts applied to a character. iAddExp, iAddBindGold, iAddUnBindGold, iAddFarmPoint, iGuildAthPoint, iAddPetExp, iPetRoyalPoint.",
+      "confidence": "high",
+      "subsystem": "rewards/economy",
+      "serverRelevance": "client-only formatter; the payload it describes is a server-computed currency/EXP grant delta",
+      "formulas": [
+        "iAddExp [0]; iAddBindGold [1]; iAddUnBindGold [2]; iAddFarmPoint [3]; iGuildAthPoint [4]; iAddPetExp [5]; iPetRoyalPoint [6]"
+      ],
+      "costs": [
+        "Grant deltas: EXP, bound gold, unbound gold, farm point, guild athletics point, pet EXP, pet royal point — server must compute and apply these"
+      ],
+      "notes": "Distinguishes bind vs unbind gold — mirrors oCharMoney/oCharBoundMoney currency split."
+    },
+    {
+      "address": "0x10296b50",
+      "currentName": "FUN_10296b50",
+      "proposedName": "TlvRewardDef::DebugFormat",
+      "purpose": "TDR text-dump of a reward/loot-table definition: reward type, ext id, attribute-reward pairs (type[]/value[]), reward-affect list, item loot list, box item loot list, and instance item data.",
+      "confidence": "high",
+      "subsystem": "rewards/lottery",
+      "serverRelevance": "client-only formatter; documents the reward-table struct the server rolls/grants",
+      "formulas": [
+        "nRewardType(i16) @ [0]; iExtId(i32) @ word+1; iAttrRewardCnt(i32) @ word+3, cap 10 (<0 -> -6, >10 -> -7)",
+        "attrRewardType[] i16 @ word+5; attrRewardValue[] i32 @ word+0xf (stride 2 words)",
+        "iRewardAffectCnt(i32) @ word+0x23, cap 10; astRewardAffectList[] @ word+0x25 (element via FUN_10295dd0)",
+        "iInstanceLootCnt(i32) @ word+0x4a5, cap 5; astInstanceItemData[] @ word+0x4a7 (TypedItemData)"
+      ],
+      "costs": [
+        "stItemLootList + stBoxItemLootList = item reward payloads (via TdrDebugFormat_ItemList40, 40-item lists); attrReward pairs = stat rewards"
+      ],
+      "notes": "Calls TdrDebugFormat_ItemList40 (item + box item loot), TdrDebugFormat_TypedItemData (instance items), FUN_10295dd0 (reward affect element)."
+    },
+    {
+      "address": "0x102989e0",
+      "currentName": "FUN_102989e0",
+      "proposedName": "TlvPlayerRewardFlag::DebugFormatBuffered",
+      "purpose": "Buffered TDR text-dump wrapper for {iPlayerID, iRewardFlag}. Sets up a local text buffer (returns -0x13 if dest null), prints two fields, frees temp buffer via FUN_10c3da30.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iPlayerID [0]; iRewardFlag [1]"],
+      "costs": ["iRewardFlag = per-player reward-claimed bitmask"],
+      "notes": "Buffer-managing variant of FUN_10298a80; returns -0x13 (-19) when param_2 buffer is null."
+    },
+    {
+      "address": "0x10298a80",
+      "currentName": "FUN_10298a80",
+      "proposedName": "TlvPlayerRewardFlag::DebugFormat",
+      "purpose": "TDR text-dump of {iPlayerID, iRewardFlag} (plain, no buffer management).",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iPlayerID [0]; iRewardFlag [1]"],
+      "costs": ["iRewardFlag = reward-claimed bitmask"],
+      "notes": ""
+    },
+    {
+      "address": "0x10299330",
+      "currentName": "FUN_10299330",
+      "proposedName": "TlvRewardIdx::DebugFormatBuffered",
+      "purpose": "Buffered TDR text-dump wrapper for a single {iRewardIdx} field. Returns 0xffffffed (-19) if dest null; allocates local buffer, prints, frees via FUN_10c3da30.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iRewardIdx [0]"],
+      "costs": [],
+      "notes": "One of several near-identical single-field iRewardIdx printers (buffer variant)."
+    },
+    {
+      "address": "0x102993b0",
+      "currentName": "FUN_102993b0",
+      "proposedName": "TlvRewardIdx::DebugFormat",
+      "purpose": "Minimal TDR text-dump of a single {iRewardIdx} field.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iRewardIdx [0]"],
+      "costs": [],
+      "notes": "Plain single-field printer."
+    },
+    {
+      "address": "0x102993e0",
+      "currentName": "FUN_102993e0",
+      "proposedName": "TlvRewardIdx::DebugFormatToCharBuf",
+      "purpose": "TDR text-dump of {iRewardIdx} into a caller char buffer with length clamp and NUL-termination; returns &DAT_11d9d32b (empty string) if buffer null/zero-length.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iRewardIdx [0]; NUL written at min(written_len, buflen-1)"],
+      "costs": [],
+      "notes": "char*-returning buffer variant of the iRewardIdx printer."
+    },
+    {
+      "address": "0x10299470",
+      "currentName": "FUN_10299470",
+      "proposedName": "TlvRewardIdx::DebugFormatWithNulAt",
+      "purpose": "TDR text-dump of {iRewardIdx} using an in-struct buffer descriptor {ptr,len,cap}, then TdrBuf_PutNulAt to clamp/terminate; returns empty string if unset.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": ["iRewardIdx [0]; nul index = min(len, cap-1)"],
+      "costs": [],
+      "notes": "Buffer-descriptor variant."
+    },
+    {
+      "address": "0x10299900",
+      "currentName": "FUN_10299900",
+      "proposedName": "TlvItemRewardResult::DebugFormat",
+      "purpose": "TDR text-dump of an item-reward RPC result (SoA): retCode + rewardTypeCnt, then parallel arrays itemType[], itemCnt[], bindType[], rewardIdx[].",
+      "confidence": "high",
+      "subsystem": "rewards/lottery",
+      "serverRelevance": "client-only formatter; documents server item-grant result payload",
+      "formulas": [
+        "iRetCode [0]; iRewardTypeCnt(i32) [1], cap 0x28=40 (<0 -> -6, >40 -> -7)",
+        "itemType[] @ [2]; itemCnt[] @ [0x2a]; bindType[] @ [0x52]; rewardIdx[] @ [0x7a] (each length rewardTypeCnt, u32 elems via FUN_1010c010)"
+      ],
+      "costs": [
+        "Granted items: (itemType, itemCnt, bindType, rewardIdx) tuples — up to 40 distinct item stacks per reward; bindType marks bound vs tradable"
+      ],
+      "notes": "SoA layout, 4 arrays of stride 0x28 words each."
+    },
+    {
+      "address": "0x1029a5d0",
+      "currentName": "FUN_1029a5d0",
+      "proposedName": "TlvLotteryResult::DebugFormat",
+      "purpose": "TDR text-dump of a lottery/reset reward result (SoA): retCode, resetCnt, rewardCnt, then arrays itemType[], itemCount[], bindType[].",
+      "confidence": "high",
+      "subsystem": "rewards/lottery",
+      "serverRelevance": "client-only formatter; documents server lottery result payload",
+      "formulas": [
+        "iRetCode [0]; iResetCnt [1]; iRewardCnt(i32) [2], cap 0x28=40 (<0 -> -6, >40 -> -7)",
+        "itemType[] @ [3]; itemCount[] @ [0x2b]; bindType[] @ [0x53] (each length rewardCnt, u32 via FUN_1010c010)"
+      ],
+      "costs": [
+        "Lottery output: (itemType, itemCount, bindType) up to 40 stacks; iResetCnt = number of lottery resets consumed"
+      ],
+      "notes": "Similar SoA to FUN_10299900 but with resetCnt and no rewardIdx array."
+    },
+    {
+      "address": "0x102a3f50",
+      "currentName": "FUN_102a3f50",
+      "proposedName": "TlvCelebrationMember::DebugFormat",
+      "purpose": "TDR text-dump of a member/identity record with celebration reward: szName, ullDbid(i64), dwRtid, ullUin(i64), iCelebrationReward.",
+      "confidence": "high",
+      "subsystem": "guild-rewards",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "szName @ +0; ullDbid int64 @ +0x20/+0x24; dwRtid @ +0x28; ullUin int64 @ +0x2c/+0x30; iCelebrationReward @ +0x34"
+      ],
+      "costs": ["iCelebrationReward = per-member guild celebration reward amount/flag"],
+      "notes": "szName is an inline fixed char array at offset 0 (0x20 bytes before ids)."
+    },
+    {
+      "address": "0x102babc0",
+      "currentName": "FUN_102babc0",
+      "proposedName": "TlvRewardResetCountersDw::DebugFormat",
+      "purpose": "TDR text-dump of a daily-reset reward counter struct (dw-labelled variant): dwLastResetTime + 4 gain-reward-times counters.",
+      "confidence": "high",
+      "subsystem": "rewards",
+      "serverRelevance": "client-only formatter; struct is server claim-limit tracking",
+      "formulas": [
+        "dwLastResetTime @ [0] (time); iGainChallangeRewardTimes [1]; iGainSuccessRewardTimes [2]; iGainVipChallangeRewardTimes [3]; iGainVipSuccessRewardTimes [4]"
+      ],
+      "costs": ["reward-claim counters per reset window (normal/VIP challenge/success)"],
+      "notes": "Identical layout to FUN_1014e300 (dw vs i naming only)."
+    },
+    {
+      "address": "0x102bafa0",
+      "currentName": "FUN_102bafa0",
+      "proposedName": "TlvLevelRecordAoS::DebugFormat",
+      "purpose": "TDR text-dump of a single per-level record (AoS element): iLevelID, iTheBestScore, bState(u8), dwHistoryFinalRank, dwGainRewardFlag, dwLastTm.",
+      "confidence": "high",
+      "subsystem": "rewards/challenge",
+      "serverRelevance": "client-only formatter",
+      "formulas": [
+        "iLevelID @ [0]; iTheBestScore @ [1]; bState(u8) @ [2]; dwHistoryFinalRank(u32) @ byte+9; dwGainRewardFlag(u32) @ byte+0xd; dwLastTm(u32) @ byte+0x11 (packed struct size ~0x15)"
+      ],
+      "costs": ["dwGainRewardFlag gates per-level reward claim"],
+      "notes": "Array-of-structs counterpart to the SoA in FUN_1014d8b0 (same 6 fields)."
+    },
+    {
+      "address": "0x102ca4c0",
+      "currentName": "FUN_102ca4c0",
+      "proposedName": "TlvOnlineRoleData::DebugFormat",
+      "purpose": "TDR text-dump of the master online-player data blob sent at login/entity-init. Emits session/world/server identity then every inventory and system sub-blob: bag/equip/store items, shortcuts, buffs, skills, pets, attrs, tasks, guild, action-point, guide steps, cooldowns, schedule prizes, mail, npc attitude, item box, item rebuild, soul stone, battle-item use, cuisine level, celebration reward. Documents inventory sizing/caps.",
+      "confidence": "high",
+      "subsystem": "player-state/inventory",
+      "serverRelevance": "client-only formatter; struct is the server-authoritative full player snapshot and defines inventory capacity caps the server must enforce",
+      "formulas": [
+        "identity: dwAccountID [0]; iNetID [1]; ullDBId i64 [2],[3]; dwSessionID [4]; dwWorldID [5]; dwServerID [6]; dwWorldSvrID [7]; dwServerTime [8]; dwIsReConnect [9]; szName @ [10]; bGender(u8) @ [0x12]; bIsGM(u8) @ +0x49; iFaction @ +0x6f; iWeapon @ +0x77",
+        "INVENTORY CAPS: iBagSize(i32) @ +0x89 cap 82000; szBagItem[] @ +0x8d; wEquipSize(u16) @ +0x140dd cap 0x1000(4096), szEquipItem @ +0x140df; iStoreDataSize(i32) @ +0x150df cap 200000, szStoreItem @ +0x150e3; wStoreSize @ +0x83; wNormalSize @ +0x85; wMaterialStoreSize @ +0x87",
+        "wShortcutCount(u16) @ +0x45e23 cap 0x3c(60); wBuffSize @ +0x46005 cap 0x2800(10240); wSkillSize @ +0x48807 cap 0x2800; wPetSize @ +0x4b009 cap 0x2800; wAttrSize @ +0x5685d cap 0x5000(20480)",
+        "social caps: iFriendCount @ +0x4d80b cap 500; iPasserbyCount @ +0x55ed3 cap 0x14(20); iBlacklistCount @ +0x562fb cap 0x14; iFriendGroupCount @ +0x5670f cap 10",
+        "iTaskLen @ +0x5b85f cap 0x2800; iGuildLen @ +0x5e063 cap 0x400(1024); wGuideStepCount @ +0x5e487 cap 0x100; wCDSize @ +0x5e689 cap 0x400; iSchedulePrizeLen @ +0x5ea8b cap 0x400; iMailInfoLen @ +0x5ee8f cap 0x400; iNpcAtdInfoLen @ +0x5f293 cap 0x400",
+        "array count validation pattern throughout: cnt<0 -> -6, cnt>cap -> -7"
+      ],
+      "costs": [
+        "Defines maximum inventory/store sizes (bag 82000, store 200000, equip 4096) that bound how many items a player may hold — server must cap adds against these",
+        "Contains item box / item rebuild / soul stone / battle-item-use sub-blobs (crafting & consumable inventories) and iCelebrationReward / iCanGetRewarded reward flags"
+      ],
+      "notes": "Calls TdrDebugFormat_ByteThenFloatSub (stPose), FUN_102b78c0 (shortcut), FUN_102b7db0 (friend), FUN_102b8330 (passerby), FUN_102b8800 (blacklist), FUN_102b8c80 (friend group), TdrDebugFormat_ActionPointData (stActionPoint), FUN_102bc530 (guide step), TdrText_ItemBoxList_astItemBoxList (item box). Tail fields: bCatCuisineLevel, szItemRebuild/iItemRebuildLen, szSoulStone/iSoulStoneLen, szBattleItemUse/dwBattleItemUseLen, itemUseOnceList/wItemUseOnceCount, iCanGetRewarded."
+    }
+  ]
+}

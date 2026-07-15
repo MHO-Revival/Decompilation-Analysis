@@ -1,0 +1,634 @@
+{
+  "chunkIndex": 1,
+  "functions": [
+    {
+      "address": "10c96130",
+      "currentName": "FUN_10c96130",
+      "proposedName": "CGamePadItemBar::MapActionToUICode",
+      "purpose": "Gamepad/action-name dispatcher for the quick-item/radial bar. Only runs when FUN_10bac530()==3 (some UI/game mode ==3) and param_3==1 (key-down). Compares the incoming action string (*param_2) and a long chain of IsActionActive checks (FUN_10b73690) against named bindings and produces a small UI opcode, then posts UI event 0x33 with a payload {code, 0xffffffff, 9999}.",
+      "subsystem": "items/input",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "guard: FUN_10bac530() must == 3 else return 1; param_3 must == 1 (key-down) else return 1",
+        "direct _stricmp map: \"GP_moveleft\"->100(0x64), \"GP_moveright\"->0x65, \"GP_moveup\"->0x66",
+        "FUN_10b73690 (action-active test) chain assigns codes: GP_movedown->0x67; *_Quick left/right/up/down->0x74/0x75/0x76/0x77; *_Focus->0x78/0x7c/0x7d/0x7e; *_Bullet(down)->0x7f..; DAT_11ccddb4->0x68; GP_useitem/1/2->0x69/0x6a/0x6b; DAT_11ccdde4->0x6c (also calls FUN_10c95210(0,param_2,0,0)); ui_unGamePad_start->0x71; ui_unGamePad_back->0x72? ; GP_lb->0x6d; GP_lt->0x6e; GP_close->0x73; GP_open->0x72; GP_rb->0x6f; GP_rt->0x70 (via -(uint)(cVar!=0)&0x70)",
+        "final: local_c=code; post UI msg id 0x33 with &{local_10=9999, local_8=0xffffffff, local_c} via vtbl+4 of FUN_10d17870()"
+      ],
+      "costs": [],
+      "notes": "UI opcode dispatch; codes 0x64-0x7f are internal quick-bar/item-use action ids, not network opcodes. Event id 0x33 is a client UI event."
+    },
+    {
+      "address": "10c978d0",
+      "currentName": "FUN_10c978d0",
+      "proposedName": "CWardrobe::OnIdleActivity",
+      "purpose": "Wardrobe-screen idle handler. Requires global player ctx DAT_1202e818 valid, the \"Wardrobe\" action-map active, and mode FUN_10bac530()==3. Plays \"NORMAL_IDLE_WARDROBE\" model anim and grants an activity reward; on an alternate branch grants a different reward and posts a UI notice.",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "authoritative",
+      "formulas": [
+        "if wardrobe entity subtree valid and idle-anim (vtbl+0x790) present: GetModelString(\"NORMAL_IDLE_WARDROBE\"); if FUN_10fd2467()==0 -> GrantActivityReward(0x1376) and return",
+        "else (widget vtbl+0x168 false path) posts UI struct {0x10f, 2, 0, 0} via FUN_104ef270; the +0x168-true path calls GrantActivityReward(0x1373)"
+      ],
+      "costs": [
+        "GrantActivityReward reward id 0x1376 (4982) on idle-anim success",
+        "GrantActivityReward reward id 0x1373 (4979) on alternate branch",
+        "UI notice code 0x10f with subcode 2"
+      ],
+      "serverRelevanceNote": "GrantActivityReward is presumably a server-authoritative reward grant; verify against activity system.",
+      "notes": "Reward-granting is the only server-relevant part; the rest is wardrobe presentation."
+    },
+    {
+      "address": "10d2d3b0",
+      "currentName": "FUN_10d2d3b0",
+      "proposedName": "CItemColumnUI::SerializeOpenWidgetMessage",
+      "purpose": "Serializes an item-column widget-open request into a network/UI message object and posts it as message 0x51 (81). Reads a 5-element param_2 array and writes named typed fields into a serializer obtained from vtbl+0x30 of the channel at +0x58.",
+      "subsystem": "items/inventory-ui",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "field writes via serializer vtbl+0x18(name,&type,0): \"m_nOpenWidgetID\"=(int)(float)param_2[0] type4; \"m_nItemColumn\"=(int)(float)param_2[1] type4; \"m_nItemGrid\"=(int)(float)param_2[2] type4; \"m_nSelectItemID\"=(int)(float)param_2[3] type4; \"m_bUpdateProcess\"=(char)param_2[4] type2",
+        "guarded by two empty-list checks at *(param_1+0xac)+0x8e0 and +0x8e8",
+        "posts message via FUN_10d1d220(*(param_1+0x58), 0x51, &local_18, &local_28)"
+      ],
+      "costs": [
+        "message opcode 0x51 (81)",
+        "serializer type tags: 4=int32, 2=bool/byte"
+      ],
+      "notes": "Field names m_nOpenWidgetID/m_nItemColumn/m_nItemGrid/m_nSelectItemID/m_bUpdateProcess reveal the item-column open message wire schema. param_2[0..3] are stored as floats client-side but serialized as ints."
+    },
+    {
+      "address": "10e0f640",
+      "currentName": "FUN_10e0f640",
+      "proposedName": "CFlowNode_ActorEvents::GetConfiguration",
+      "purpose": "Stock CryEngine flowgraph node port-definition builder. Lazily initializes input ports (\"Enable\",\"Disable\") and a large output-port table for actor/entity events including item-related events \"ItemPickedUp\",\"ItemDropped\",\"ItemUsed\", plus vehicle/NPC/object/stance/death events.",
+      "subsystem": "engine/flowgraph",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "one-time init guarded by DAT_120318c0 bits 1 and 2; port trailing int is port type (1,3,6 = int/entity/bool-ish)",
+        "writes param_1[0]=inputs table, [1]=outputs table, [2]=(flags&0xfffff01f)|0x11, [3]=empty-string sentinel"
+      ],
+      "costs": [],
+      "notes": "Stock CryEngine flownode plumbing; only relevant as evidence of client-side ItemPickedUp/ItemDropped/ItemUsed event names."
+    },
+    {
+      "address": "10e5a160",
+      "currentName": "FUN_10e5a160",
+      "proposedName": "CFlowNode_UseItemLogic::GetConfiguration",
+      "purpose": "Stock CryEngine flownode port config for a use-item logic node. Inputs \"enable\",\"disable\",\"triggerOnce\",\"useItem\"; outputs \"OnEvent\",\"playerNetID\".",
+      "subsystem": "engine/flowgraph",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "init guarded by DAT_120375e8 bits 1/2; param_1[2]=(flags&0xfffff01f)|0x10"
+      ],
+      "costs": [],
+      "notes": "Flowgraph plumbing; 'useItem' input + 'playerNetID' output name the item-use logic-entity node."
+    },
+    {
+      "address": "10e73e70",
+      "currentName": "FUN_10e73e70",
+      "proposedName": "CFlowNode_UseItemLogicEntity::GetConfiguration",
+      "purpose": "Stock CryEngine flownode port config; variant of 10e5a160 that adds a \"logicEntityNetID\" input alongside \"enable\",\"disable\",\"triggerOnce\",\"useItem\"; outputs \"OnEvent\",\"playerNetID\".",
+      "subsystem": "engine/flowgraph",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "init guarded by DAT_120382b8 bits 1/2; param_1[2]=(flags&0xfffff01f)|0x10"
+      ],
+      "costs": [],
+      "notes": "Flowgraph plumbing."
+    },
+    {
+      "address": "10ea7530",
+      "currentName": "FUN_10ea7530",
+      "proposedName": "CTutorialStep::ReadFromXml",
+      "purpose": "Parses a tutorial/teach step from XML. Recognizes tags BeginTeach/EndTeach with attributes ShortcutSet, clearShortcut, itemid, ItemList, initInventory, itemCounts, Steps, PresentActions. Can populate a starter inventory (itemid + itemCounts) for the tutorial and set step flags on the owner object.",
+      "subsystem": "items/tutorial",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "default id when a required getter (vtbl+0x74) fails: *(param_1+8)=0xc379",
+        "ShortcutSet count read: *(bool*)(param_1+0x38)=0<local_10 (has-shortcut)",
+        "initInventory count read: *(bool*)(param_1+0x39)=0<local_14 (has-init-items); reads \"itemCounts\" into local_10 alongside item ids",
+        "iterates child nodes via vtbl+0xa0 (count) / +0xa8 (getChild); sub-parsers FUN_10ea9bc0, CCombatActionDef::ReadFromXml, FUN_10ea6920"
+      ],
+      "costs": [
+        "sentinel/default item id 0xc379 (50041)"
+      ],
+      "notes": "Tutorial config only; initInventory/itemCounts here seed a scripted tutorial bag, not the authoritative live inventory. Decompiler produced garbled stack (noreturn FUN_10c3d580 = throw/longjmp), so exact struct is partial."
+    },
+    {
+      "address": "10f69ad0",
+      "currentName": "FUN_10f69ad0",
+      "proposedName": "CWardrobeViewState::OnStateEvent",
+      "purpose": "WardrobeView camera/FSM state event handler. switch(param_2) with cases 0=enter,1=update,2=leave-begin,3=leave-end. Manages third-person wardrobe camera, hides HUD nameplates and other players via console vars, and restores camera pitch/yaw stored in param_1[10].",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "camera pitch clamp constant param_1[9] = -0x40800000 (=-4.0f)",
+        "wardrobe zoom/offset *(DAT_120286b8+0x1e8) = 0x40333333 (=2.8f); *(DAT_120286b8+0xa58)=1 on enter",
+        "restores from param_1[10] struct: byte@0->+0xad4, +4->+0x1e0, +8->+0x1ec, +0xc->+0x1e8, +0x10->+0x98, +0x14->+0x50c",
+        "console vars toggled by case: \"g_hidden_namepad\", \"g_hide_other_players\" (values 0/1/2 driven by param_1[0xc]); dedup via bitmask uRam1203cd6c bits 1/2/4/8",
+        "activates action-map \"UpView\" on leave"
+      ],
+      "costs": [],
+      "notes": "Pure client presentation/camera for the wardrobe dressing view; no server relevance."
+    },
+    {
+      "address": "10f78f70",
+      "currentName": "FUN_10f78f70",
+      "proposedName": "CGliderFlyState::OnAnimEvent",
+      "purpose": "Glider/fly FSM animation-event callback. Matches anim event names (\"OnLeave\") and current model-state names (\"Glide_TakeOff\",\"Gliding_Throw_Bomb\",\"HolsteredFly\",\"HolsteredFlyLeave\") to advance a fly sub-state at +0x234 and a holstered flag at +0x238.",
+      "subsystem": "player/anim",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "state id checked via FUN_10f5c510(&{0x24},1)",
+        "on Glide_TakeOff while +0x234==0: call func_0x12402b6c(1,1,0); +0x234=1; attach \"flyingLoop\"",
+        "on Gliding_Throw_Bomb while +0x234==2: same, +0x234=1",
+        "on HolsteredFlyLeave: +0x238=1"
+      ],
+      "costs": [],
+      "notes": "Not item/inventory logic despite bundle; glider mount animation. Included for completeness."
+    },
+    {
+      "address": "10f79790",
+      "currentName": "FUN_10f79790",
+      "proposedName": "CFlyState::Enter",
+      "purpose": "Builds/enters the flying-glider FSM state. Pushes anim-event and update callbacks (FUN_10fad1e0/10facfd0/10fad070/10f78f70), registers state ids and model strings (\"NORMAL_FLY\",\"Glide_TakeOff\",\"HolsteredFly\",\"Gliding_Throw_Bomb\",\"PLLocomotion\",\"PLBaseSignal\",\"Glider_Throw_Bomb\",\"StartFall\",\"NORMAL_FALL\").",
+      "subsystem": "player/anim",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "state id 0x24 pushed at +0x44 queue; sets *(param_1+0x80) |= 0x2011; resets +0x234=0, +0x238=0",
+        "stores signal handle FUN_116db5e0() at +0x230"
+      ],
+      "costs": [],
+      "notes": "Client FSM setup; callback pointers registered into per-controller vectors. Not inventory."
+    },
+    {
+      "address": "10f7be10",
+      "currentName": "FUN_10f7be10",
+      "proposedName": "CWardrobeIdleState::Enter",
+      "purpose": "Enters the \"NORMAL_IDLE_WARDROBE\" FSM state. Clears +0x250, plays the model string, registers state id 0x2d and callbacks (FUN_10fad420 enter, FUN_10fad480 leave, FUN_10fad510 via FUN_10f5bd40(6,...)), and prunes two prior callback entries.",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "state id 0x2d pushed at +0x44 queue",
+        "FUN_10f5bd40(6, FUN_10fad510) registers signal-6 callback"
+      ],
+      "costs": [],
+      "notes": "Client wardrobe-idle animation state; state id 0x2d = WardrobeView anim state (reused across 10fad420/480/510)."
+    },
+    {
+      "address": "10f7f490",
+      "currentName": "FUN_10f7f490",
+      "proposedName": "CUseItemState::OnAnimEvent_PLUseItem",
+      "purpose": "Handles the \"PLUseItem\" animation event (state id 0x1d). On match, calls into the item-use effect system (vtbl+800 accessor, then vtbl+0x14/+0x30) passing the event name to trigger the use-item VFX/logic.",
+      "subsystem": "items/use",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "state id via FUN_10f5c510(&{0x1d},1)",
+        "string-compares event name (param_2+0xc) to \"PLUseItem\"; on match invokes *(*(param_1+0x18)+0x100) vtbl+800 then vtbl+0x14/+0x30(name,0,0)"
+      ],
+      "costs": [],
+      "notes": "Client-side item-use animation event -> effect trigger. 800 = 0x320 vtbl offset."
+    },
+    {
+      "address": "10f7fad0",
+      "currentName": "FUN_10f7fad0",
+      "proposedName": "CEatState::OnAnimEvent_PLUseItem",
+      "purpose": "On \"PLUseItem\" anim event, plays the \"PLBaseSignal\"/\"EatSatisfy\" animation signal (eating/consumable satisfy animation).",
+      "subsystem": "items/use",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "if event name == \"PLUseItem\": call anim vtbl+0x600(\"PLBaseSignal\",\"EatSatisfy\")"
+      ],
+      "costs": [],
+      "notes": "Client eat/consume animation."
+    },
+    {
+      "address": "10fad420",
+      "currentName": "FUN_10fad420",
+      "proposedName": "CWardrobeIdleState::OnEnterCallback",
+      "purpose": "WardrobeView enter callback (anim state id 0x2d). Sets owner flag +0x250=1, resolves the \"WardrobeView\" FSM state, and clears the flag again if FUN_10fdc1d0()==1.",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "guard state id 0x2d via FUN_10f5c510; set *(byte)(this+0x250)=1"
+      ],
+      "costs": [],
+      "notes": "Client wardrobe presentation callback."
+    },
+    {
+      "address": "10fad480",
+      "currentName": "FUN_10fad480",
+      "proposedName": "CWardrobeIdleState::OnLeaveCallback",
+      "purpose": "WardrobeView leave callback. Resolves \"WardrobeView\" state; if the owning entity is not in wardrobe mode (*(entity+0x2405)!=1) toggles widget vtbl+0x30(0); then FUN_10fdc1b0(1); refcount-decrements a temp string.",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "check *(char*)(entity+0x2405) == 1 (wardrobe-active flag on player entity)",
+        "string refcount teardown: if refcount(*(p-0xc)) drops <1, DAT_123be268 += (-0xd - *(p-4)); free"
+      ],
+      "costs": [],
+      "notes": "Entity offset 0x2405 = wardrobe-active bool, reused across wardrobe functions."
+    },
+    {
+      "address": "10fad510",
+      "currentName": "FUN_10fad510",
+      "proposedName": "CWardrobeIdleState::OnSignal6Callback",
+      "purpose": "WardrobeView signal-6 callback (state id 0x2d). If owner flag +0x250 set, clears it and re-enables the WardrobeView widget via vtbl+0x30(1).",
+      "subsystem": "items/wardrobe",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "guard state id 0x2d; if *(char)(this+0x250)!=0 then set 0 and widget->vtbl+0x30(1)"
+      ],
+      "costs": [],
+      "notes": "Client wardrobe presentation callback."
+    },
+    {
+      "address": "10fb7c30",
+      "currentName": "FUN_10fb7c30",
+      "proposedName": "CPlayerViewState::Exit",
+      "purpose": "FSM state-exit/cleanup for view/wardrobe states. Plays exit anims (\"NORMAL_IDLE_VIEW\",\"NORMAL_SIT_DOWN\"), tears down the WardrobeView on state 3, and releases many per-state resource vectors and callback handlers on the player controller.",
+      "subsystem": "items/wardrobe",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "if WardrobeView state (vtbl[0]()==3) and *(char)(this+0x15) set: FUN_10f699e0(this+0x1c); *(byte)(this+0x14)=1",
+        "iterates and refcount-releases callback list [+0xe8..+0xec], resource lists at +0xd4/+0x224, and singletons at +0x190/+0x18c/+0x1c50"
+      ],
+      "costs": [],
+      "notes": "Large client cleanup routine; entity offset 0x2405 wardrobe flag referenced again."
+    },
+    {
+      "address": "10fb8270",
+      "currentName": "FUN_10fb8270",
+      "proposedName": "CPlayerFSM::LoadWeaponStates",
+      "purpose": "Loads weapon-specific FSM states from XML \"Libs\\PlayerFSM\\WE%02dFSMStates.xml\" (weapon type formatted as 2-digit). Parses <Weapon>/<Extensions>/<States>, creates each state via CStateFactory, and specially wires the \"WardrobeView\" state (id==3) into the controller when the wardrobe flag (this+0x15) is set.",
+      "subsystem": "player/fsm",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "weapon type parsed via atoi(local_24); guard uVar5 < 0xd (max 13 weapon types)",
+        "path format \"Libs\\\\PlayerFSM\\\\WE%02dFSMStates.xml\"",
+        "state count = (*(param_1+0xec)-*(param_1+0xe8))>>2; strncmp(name,\"WardrobeView\",100)",
+        "WardrobeView special-case: if name matches and stateType(vtbl[0])==3 and *(char)(param_1+0x15)==1 -> FUN_10f69a40 + FUN_10f6a5b0(*(byte)(param_1+0x38))"
+      ],
+      "costs": [
+        "13 (0xd) = number of weapon types (WE00..WE12 FSM state files)"
+      ],
+      "notes": "13-weapon-type cap is a useful game constant. Client FSM loader; no server authority."
+    },
+    {
+      "address": "10fd1b60",
+      "currentName": "FUN_10fd1b60",
+      "proposedName": "CPlayerFSM::UpdateWardrobeTimers",
+      "purpose": "Per-frame FSM update handling the wardrobe idle timer (+0x18), timed callback list (+0xf4 entries of {fn,arg,time}), and per-frame handler dispatch. Counts down each callback's remaining time by the frame delta and fires/removes expired ones.",
+      "subsystem": "items/wardrobe",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "if *(float)(this+0x18) <= DAT_11de9890 (threshold, likely 0.0f): run timed-callback + per-frame handler update path",
+        "else: pause anim, and if *(float)(this+0x18)*DAT_11de98b0 - deltaWardrobeTimer > DAT_11de9890 restore NORMAL_IDLE_WARDROBE and clear +0x18=0",
+        "timed callback: t -= frameDelta(vtbl+0x1c); if t<=0 call cb(0) and swap-remove (stride 0xc = {fn,arg,float time})",
+        "DAT_11de98b0 = anim playback-rate scalar applied to +0x18"
+      ],
+      "costs": [],
+      "notes": "Client animation timing; DAT_11de9890/DAT_11de98b0 are float consts (threshold/scale) not recovered numerically here."
+    },
+    {
+      "address": "10fd5d60",
+      "currentName": "FUN_10fd5d60",
+      "proposedName": "CPlayerFSM::TransitionToIdle",
+      "purpose": "Transitions the player FSM to an idle state, choosing \"NORMAL_IDLE\" vs \"CHANGE_WEAPON\" (param_2) and specially handling \"NORMAL_IDLE_WARDROBE\" when the entity wardrobe flag (+0x2405) is set. Wires PLLocomotion/PLBaseAction signals and copies pose transform (+0xb0..+0xbc) from the target state.",
+      "subsystem": "player/fsm",
+      "confidence": "low",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "anim: param_2==0 -> \"NORMAL_IDLE\", else \"CHANGE_WEAPON\"",
+        "if entity(+0x100) present and *(char)(+0x2405)==1: use \"NORMAL_IDLE_WARDROBE\", copy transform iVar4+0x20..0x2c -> this+0xb0..0xbc",
+        "wardrobe branch sets *(float)(this+0x18)=poseTime*DAT_11de98b0 and PLLocomotion/HolsteredIdleCreate + PLBaseAction signals",
+        "resolves \"WardrobeView\" state (id==3) to clear this+0x14 wardrobe flag"
+      ],
+      "costs": [],
+      "notes": "Client FSM idle transition; wardrobe entity flag 0x2405 again."
+    },
+    {
+      "address": "11230460",
+      "currentName": "FUN_11230460",
+      "proposedName": "CItemColumnInfo::GetRecordByIndex",
+      "purpose": "Indexed lookup into the CItemColumnInfo static config table (bag column/slot layout) using the standard CInfoManager 2D paged-table pattern. Returns the record pointer for a given column/slot index, or 0.",
+      "subsystem": "items/inventory-config",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "mgr = CItemColumnInfo::GetInfoManager(0,\"CItemColumnInfo\",0)",
+        "validate: idx!=-1; (idx!=0 || baseId(+0x30)==0); pageSize(+0x28)!=0; idx-=baseId; 0<=idx<count(+0x24)",
+        "row = *(table(+0x20) + (idx/pageSize)*4); return *(row + (idx%pageSize)*4)"
+      ],
+      "costs": [],
+      "notes": "Manager layout (shared across this chunk): +0x20 page-pointer array, +0x24 total count, +0x28 rows-per-page, +0x30 base-id offset. Matches item.md CItemColumnInfo (MaxColumns=11)."
+    },
+    {
+      "address": "11231b60",
+      "currentName": "FUN_11231b60",
+      "proposedName": "CItemColumnUI::OnSlotOperationRequest",
+      "purpose": "Handles an item-bag column/slot operation from the UI and sends the request to the server. Input param_1 is a packed struct {col: byte@0, grid/pos: uint16@1, action: byte@3}. Validates the column against CItemColumnInfo, resolves the live item at that column (FUN_113ffac0), and emits two client->server messages carrying item id/count/position.",
+      "subsystem": "items/inventory",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "col = param_1[0]; grid = *(uint16*)(param_1+1); action = param_1[3]",
+        "column validation identical to CItemColumnInfo::GetRecordByIndex (2D paged lookup), then require slot cell !=0 and live item FUN_113ffac0(col)!=0",
+        "if action==1: FUN_11460dc0(grid)",
+        "build payload local_28={col, id=item->vtbl+0x38(), count=item->vtbl+0x34(), pos=item->vtbl+0x3c(&x,&y)}",
+        "send message 0x78 (120) with &local_28; send message 0x20a (522) with {col}"
+      ],
+      "costs": [
+        "network opcode 0x78 (120) = item-column slot detail",
+        "network opcode 0x20a (522) = item-column select/use by index"
+      ],
+      "notes": "Client sends 0x78 and 0x20a to the authoritative server; server must revalidate col/grid bounds and item ownership. item vtbl: +0x38=GetId, +0x34=GetCount, +0x3c=GetGridPos(&x,&y)."
+    },
+    {
+      "address": "113ffb00",
+      "currentName": "FUN_113ffb00",
+      "proposedName": "CStoreHouse::GetExpandSlotRecordPtr",
+      "purpose": "Resolves a storehouse-expansion slot config record for a given container type and slot index. For type 2 uses CExpandStoreHouseSlotInfo (returns record+0x10); for type 10 uses FUN_108aca50 (returns record+0x18).",
+      "subsystem": "items/storehouse",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "group index = param_2/10 + 1 (10 slots per expansion group)",
+        "type 2: CExpandStoreHouseSlotInfo 2D lookup by group index -> return record+0x10",
+        "type 10: FUN_108aca50(group) -> return record+0x18"
+      ],
+      "costs": [
+        "10 = storehouse slots per expansion group (integer div by 10)"
+      ],
+      "notes": "Storehouse expansion: slot->group mapping is floor(slot/10)+1. param_1 is container/bag-type selector (2 = expandable storehouse)."
+    },
+    {
+      "address": "115226e0",
+      "currentName": "FUN_115226e0",
+      "proposedName": "CStoreHouse::GetExpandSlotUnlockValue",
+      "purpose": "Returns a scalar field from the storehouse-expansion slot config for a slot index. Type 2 -> *(CExpandStoreHouseSlotInfo record+0x20); type 0 -> *(FUN_108aca50 record+0x14). Likely the unlock cost/requirement for that expansion slot group.",
+      "subsystem": "items/storehouse",
+      "confidence": "medium",
+      "serverRelevance": "validation",
+      "formulas": [
+        "group index = param_2/10 + 1",
+        "type 2: return *(int*)(record+0x20)",
+        "type 0: return *(int*)(FUN_108aca50(group)+0x14)"
+      ],
+      "costs": [
+        "field +0x20 of CExpandStoreHouseSlotInfo (per-group value, likely unlock cost/threshold; exact meaning unknown)"
+      ],
+      "notes": "Same 10-per-group mapping as 113ffb00. Field semantics inferred, not confirmed."
+    },
+    {
+      "address": "1153d200",
+      "currentName": "FUN_1153d200",
+      "proposedName": "CSRLItemBoxDescription::Init",
+      "purpose": "Constructs/initializes a CSRLItemBoxDescriptionInfo view object: stores key (param_3) at [0], param_2 at [4], resolves the description record via the 2D paged lookup and stores it at [0x25], zeroes [0x26].",
+      "subsystem": "items/itembox",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "record = CSRLItemBoxDescriptionInfo::FindInfoByKey table 2D lookup by param_3 (same paged pattern)",
+        "this[0]=key; this[4]=param_2; this[0x25]=record; this[0x26]=0"
+      ],
+      "costs": [],
+      "notes": "SRL item-box description (loot-box UI text) accessor."
+    },
+    {
+      "address": "1153ebd0",
+      "currentName": "FUN_1153ebd0",
+      "proposedName": "CSRLItemBoxDescription::GetRecordByIndex",
+      "purpose": "Indexed lookup into CSRLItemBoxDescriptionInfo config table via the standard 2D paged pattern; returns record pointer or 0.",
+      "subsystem": "items/itembox",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "same 2D paged lookup as 11230460 against CSRLItemBoxDescriptionInfo manager"
+      ],
+      "costs": [],
+      "notes": "Standard config accessor."
+    },
+    {
+      "address": "116ffe40",
+      "currentName": "CFGModuleOnUseItem__GetManagers",
+      "proposedName": "CFGModuleOnUseItem::GetManagers",
+      "purpose": "Singleton CInfoManager accessor for the CFGModuleOnUseItem static config (on-use-item behavior module). Lazily registers the manager and returns it (or a default sentinel if not found).",
+      "subsystem": "items/use-config",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "one-time RegisterAndGetSingleton(\"CFGModuleOnUseItem::GetManagers\") guarded by DAT_1238eca8 bit 1; fallback sentinel &DAT_1238ee0c"
+      ],
+      "costs": [],
+      "notes": "Stock CInfoManager singleton boilerplate."
+    },
+    {
+      "address": "117045f0",
+      "currentName": "FUN_117045f0",
+      "proposedName": "CFGModuleOnUseItem::GetRecordByIndex",
+      "purpose": "Indexed lookup into the CFGModuleOnUseItem config table (2D paged pattern) to fetch the on-use behavior record for an item/module index.",
+      "subsystem": "items/use-config",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "same 2D paged lookup against CFGModuleOnUseItem::GetManagers"
+      ],
+      "costs": [],
+      "notes": "Defines what happens when an item is used (config-driven)."
+    },
+    {
+      "address": "11704bb0",
+      "currentName": "CFGModuleOnUseItem__GetManagers_11704bb0",
+      "proposedName": "CFGModuleOnUseItem::GetSingleton",
+      "purpose": "Inlined-duplicate singleton accessor for CFGModuleOnUseItem: returns the registered manager pointer (*DAT_1238ec8c) when param==0, else 0.",
+      "subsystem": "items/use-config",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "one-time RegisterAndGetSingleton guarded by DAT_1238eca8 bit 1; returns *DAT_1238ec8c"
+      ],
+      "costs": [],
+      "notes": "Duplicate of 116ffe40 singleton path."
+    },
+    {
+      "address": "1177f5e0",
+      "currentName": "FUN_1177f5e0",
+      "proposedName": "CSpeakUseItemContentDef::ctor",
+      "purpose": "Constructor for a SpeakUseItemContentDef object: initializes an intrusive list (this+0x10/+0x14 self-link) and sets the type name string \"SpeakUseItemContentDef\".",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this (empty doubly-linked list head)"
+      ],
+      "costs": [],
+      "notes": "Dialogue/NPC-speak use-item content container; list-head init."
+    },
+    {
+      "address": "1177f610",
+      "currentName": "FUN_1177f610",
+      "proposedName": "CSpeakUseItemGroupContentDef::ctor",
+      "purpose": "Constructor for SpeakUseItemGroupContentDef; same list-head init pattern, type name \"SpeakUseItemGroupContentDef\".",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this"
+      ],
+      "costs": [],
+      "notes": "Group variant of speak-use-item content."
+    },
+    {
+      "address": "117805a0",
+      "currentName": "FUN_117805a0",
+      "proposedName": "CTaskUseItemContentDef::ctor",
+      "purpose": "Constructor for TaskUseItemContentDef (quest/task use-item requirement content); list-head init + type name.",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this"
+      ],
+      "costs": [],
+      "notes": "Quest use-item content container."
+    },
+    {
+      "address": "117812c0",
+      "currentName": "FUN_117812c0",
+      "proposedName": "CSpeakUseItemContentDef::ctor_dup",
+      "purpose": "Duplicate constructor for SpeakUseItemContentDef (identical to 1177f5e0).",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this"
+      ],
+      "costs": [],
+      "notes": "Compiler-emitted duplicate."
+    },
+    {
+      "address": "117812f0",
+      "currentName": "FUN_117812f0",
+      "proposedName": "CSpeakUseItemGroupContentDef::ctor_dup",
+      "purpose": "Duplicate constructor for SpeakUseItemGroupContentDef.",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this"
+      ],
+      "costs": [],
+      "notes": "Compiler-emitted duplicate."
+    },
+    {
+      "address": "11782280",
+      "currentName": "FUN_11782280",
+      "proposedName": "CTaskUseItemContentDef::ctor_dup",
+      "purpose": "Duplicate constructor for TaskUseItemContentDef.",
+      "subsystem": "items/use-content",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "this[0x10]=this; this[0x14]=this"
+      ],
+      "costs": [],
+      "notes": "Compiler-emitted duplicate."
+    },
+    {
+      "address": "118ba760",
+      "currentName": "FUN_118ba760",
+      "proposedName": "CUIWidgetFactory::RegisterItemColumn",
+      "purpose": "One-time static registration descriptor for the UI widget class named u\"ItemColumn\" (the inventory bag-grid widget). Sets its type id and returns the shared descriptor; param_2 set to 1 (registered).",
+      "subsystem": "items/inventory-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "widget type id _DAT_1239cac8 = 0xd (13); guarded by DAT_1239cae8 bit 1; name FUN_100f67b0(L\"ItemColumn\")"
+      ],
+      "costs": [
+        "ItemColumn UI widget type id = 0xd (13)"
+      ],
+      "notes": "Client UI widget registration for the item-column/bag view."
+    },
+    {
+      "address": "11923ca0",
+      "currentName": "FUN_11923ca0",
+      "proposedName": "CItemBoxGroupInfo::GetRecordByIndex",
+      "purpose": "Flat-array indexed lookup into CItemBoxGroupInfo (loot/reward box group table). Bounds-checks against ((+0x18)-(+0x14))>>2 element count and returns record pointer.",
+      "subsystem": "items/itembox",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "mgr = FUN_1053b200(0,\"CItemBoxGroupInfo\",0)",
+        "count = (*(mgr+0x18) - *(mgr+0x14)) >> 2; if 0<=idx<count return *(*(mgr+0x14)+idx*4)"
+      ],
+      "costs": [],
+      "notes": "Flat contiguous-array manager (not the paged 2D layout). Matches item.md CItemBoxGroupInfo (weighted reward-box roll)."
+    },
+    {
+      "address": "11924470",
+      "currentName": "FUN_11924470",
+      "proposedName": "CItemBoxInfo::GetRecordByIndex",
+      "purpose": "Flat-array indexed lookup into CItemBoxInfo (item-box/container definition table). Same contiguous-array bounds check as CItemBoxGroupInfo.",
+      "subsystem": "items/itembox",
+      "confidence": "high",
+      "serverRelevance": "validation",
+      "formulas": [
+        "mgr = CItemBoxInfo::GetInfoManager(0,\"CItemBoxInfo\",0)",
+        "count = (*(mgr+0x18)-*(mgr+0x14))>>2; if 0<=idx<count return *(*(mgr+0x14)+idx*4)"
+      ],
+      "costs": [],
+      "notes": "Flat-array manager accessor."
+    },
+    {
+      "address": "11935c70",
+      "currentName": "FUN_11935c70",
+      "proposedName": "CUIWidgetFactory::RegisterOnUseItem",
+      "purpose": "One-time static registration descriptor for the UI widget/event class named u\"OnUseItem\". Sets type id 0xe1 and a flag, returns the shared descriptor.",
+      "subsystem": "items/use-ui",
+      "confidence": "medium",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "type id _DAT_1239faf0 = 0xe1 (225); flag _DAT_1239faf8 = 1; guarded by DAT_1239fb10 bit 1; name L\"OnUseItem\""
+      ],
+      "costs": [
+        "OnUseItem widget/event type id = 0xe1 (225)"
+      ],
+      "notes": "Client UI registration for on-use-item widget/event."
+    },
+    {
+      "address": "11a088c0",
+      "currentName": "FUN_11a088c0",
+      "proposedName": "CUIWindowDef::ReadFromXml",
+      "purpose": "Reads a UI window definition record from an XML/attribute node into a config struct. Parses all window layout/behavior attributes; each attribute is looked up by cached wide-name and, if present, stored at a fixed struct offset; missing attributes emit a formatted warning. Includes the inventory-specific 'inventoryShowMode' and 'weaponType' fields.",
+      "subsystem": "items/inventory-ui",
+      "confidence": "high",
+      "serverRelevance": "client-only",
+      "formulas": [
+        "attribute -> struct-offset writes: name->+0x14(str), path->+0x2c(str), CacheType->+0x44(int), xPos->+0x48(int), yPos->+0x4c(int), layer->+0x50(int), layoutModel->+0x54(int), isLockPos->+0x58(bool), CallMouseTyp->+0x5c(int), winModel->+0x60(int), togetherOpenWin->+0x64(int), togetherCloseWin->+0x68(int), escLevel->+0x6c(int), uiModelElement->+0x70(bool), inventoryShowMode->+0x74(int), weaponType->+0x78(int), canCloseByEsc->+0x7c(bool), openDenyOther->+0x7d(bool), WontDenyByOther->+0x7e(bool)",
+        "first field (unnamed, via DAT_123a6af4) -> +0x10 (id/enum)",
+        "per-field: cVar=HasAttr(name); if false memset(warnbuf,0,0x3ff)+FormatWarning; else read value (vtbl+0x20 int / +0x24 string)"
+      ],
+      "costs": [],
+      "notes": "Authoritative-looking field layout for a UI window/inventory-panel config record. inventoryShowMode(+0x74) and weaponType(+0x78) drive which bag/weapon view a window shows. Pure client UI config (no server relevance) but gives exact struct offsets."
+    }
+  ]
+}

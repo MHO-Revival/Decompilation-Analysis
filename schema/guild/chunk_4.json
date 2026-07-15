@@ -1,0 +1,327 @@
+{
+  "chunkIndex": 4,
+  "functions": [
+    {
+      "address": "0x108e1f60",
+      "currentName": "FUN_108e1f60",
+      "proposedName": "CFriendFarmModel::InitModel",
+      "subsystem": "social/friend-farm",
+      "purpose": "UI-model init entrypoint for the friend-farm feature. Registers the client script/UI callback pair \"InitModel\" and \"QueryFriendInfo\" (via FUN_100b62c0 name-hash + FUN_108e89c0/FUN_108e88f0 binder), then walks a model-manager chain (FUN_10d17440/FUN_10d17870) to attach two sub-models (FUN_108ee190, FUN_108ee1e0).",
+      "confidence": "medium",
+      "serverRelevance": "client-only (UI/script binding and model wiring; no server state).",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock UI-model registration plumbing. The acStack byte arrays (e.g. -0x6c,0x1f,-0x72,0x10 = ptr 0x108e1f94) are inlined return/thunk addresses from the decompiler, not data."
+    },
+    {
+      "address": "0x108e25d0",
+      "currentName": "FUN_108e25d0",
+      "proposedName": "CFriendFarmModel::BuildFriendFarmListVO",
+      "subsystem": "social/friend-farm",
+      "purpose": "Builds the \"FirendFarmList\" VO array pushed to the UI listing a player's friends' farms. For each friend entry it emits a FRIEND_FARM_CLASS_NAME VO with fields netId, name(CPet::SetName), a bound-flag, isOnline, farmPoint, intimate, collectionNum; then emits nRemainGatherCnt (remaining daily gather count) for the local player.",
+      "confidence": "medium",
+      "serverRelevance": "client-only presentation, but the cap it renders is authoritative on the server: server owns farmPoint/intimate/collectionNum and the daily gather counter.",
+      "formulas": [
+        "nRemainGatherCnt = 10 - FUN_1025b060(); if (result < 1) result = 0  -> daily friend-farm gather cap = 10",
+        "friend-entry field offsets (relative to entry ptr iVar1): +0x24 name, +0x28 netId, +0x2c field(FUN_104d1550 &DAT_11dccf88), +0x34 gate(if 0 ->0 else FUN_1025b060 result at +0x38 region), +0x38 isOnline(byte), +0x48 intimate, +0x4c farmPoint, +0x50 collectionNum",
+        "manager player ptr = *(*(DAT_1202e818+0xd0)+0x90) then vtbl+0xb4; guild/farm mgr accessed via player[0xb57] (checked != 0)"
+      ],
+      "costs": [
+        "max daily gather count = 10 (used to compute remaining gathers)"
+      ],
+      "notes": "String 'FirendFarmList' is misspelled in-game. intimate written via FUN_104d1440 (float setter) vs FUN_104d1550 (int setter) for the rest."
+    },
+    {
+      "address": "0x108e3340",
+      "currentName": "FUN_108e3340",
+      "proposedName": "CFriendFarmModel::BuildEnterFarmVO",
+      "subsystem": "social/friend-farm",
+      "purpose": "Builds the VO for entering/viewing a farm (own or a friend's). Emits farmPoint, farmExp, bFriendGatherBonus, bSkipCutScene, bFarmPetVisible (driven by CVar g_ShowFarmPet), ownerID; if viewing a friend's farm also emits friendName, friendFarmPoint, friendRemainGatherCnt.",
+      "confidence": "medium",
+      "serverRelevance": "client-only display; underlying farmPoint/farmExp/gather-bonus flags are server-owned.",
+      "formulas": [
+        "farm-context struct offsets (base local_64): +0x14 farmPoint, +0xe4 friendRemainGatherCnt, +0xe8 bFriendGatherBonus(byte), +0xe9 bSkipCutScene(byte)",
+        "friend-record offsets (iVar5): +0x24 name(CPet::SetName), +0x4c friendFarmPoint",
+        "ownerID compared against CONCAT44(DAT_123bbacc,DAT_123bbac8) (local player 64-bit uid); equal => own farm branch, else friend branch",
+        "bFarmPetVisible = (CVar g_ShowFarmPet != 0)"
+      ],
+      "costs": [],
+      "notes": "farmExp read via FUN_1025b060 (same accessor used for gather count elsewhere)."
+    },
+    {
+      "address": "0x108f2f20",
+      "currentName": "FUN_108f2f20",
+      "proposedName": "CLeagueInfo::GetEntryByIndex",
+      "subsystem": "league",
+      "purpose": "Indexed accessor into the CLeagueInfo static data-table (config table of league definitions). Resolves the CLeagueInfo manager singleton (CLeagueInfo::GetManager / CInfoManager::FindByName fallback), then returns element[param_1] of the manager's contiguous pointer array.",
+      "confidence": "high",
+      "serverRelevance": "client-only read of static league config table.",
+      "formulas": [
+        "bounds check: return element only if (param_1 >= 0) && (param_1 < (mgr[6]-mgr[5])>>2); array base = mgr[5], element = *(mgr[5] + param_1*4); else return 0",
+        "count = (mgr[6]-mgr[5])>>2 (pointer array, 4-byte stride)"
+      ],
+      "costs": [],
+      "notes": "Stock CInfoManager data-table plumbing; DAT_123bde1c is the default/empty fallback manager."
+    },
+    {
+      "address": "0x108f2fb0",
+      "currentName": "FUN_108f2fb0",
+      "proposedName": "CLeagueInfo::ReleaseManager",
+      "subsystem": "league",
+      "purpose": "Resolves the CLeagueInfo manager singleton (same pattern as GetEntryByIndex) and invokes its vtable+0x28 method (release/clear) after re-pointing the local vtable stub to PTR_FUN_11da54a8.",
+      "confidence": "medium",
+      "serverRelevance": "client-only.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock CInfoManager lifecycle helper."
+    },
+    {
+      "address": "0x108f3050",
+      "currentName": "CLeagueRoundSchedule__GetManagers",
+      "proposedName": "CLeagueRoundSchedule::GetManagers",
+      "subsystem": "league",
+      "purpose": "Lazy singleton initializer for the CLeagueRoundSchedule InfoManager (league round-schedule config table). One-time guarded init (DAT_123bfc68 bit0) that sets up the StcMbrNameSvr<CInfoManager> singleton name and registers cleanup.",
+      "confidence": "high",
+      "serverRelevance": "client-only static config-table singleton.",
+      "formulas": [
+        "one-time guard: if ((DAT_123bfc68 & 1)==0) { set bit0; init list head DAT_123bfc60/DAT_123bfc64 -> &DAT_123bfc50; DAT_123bfc50=0; register names } ; returns DAT_123bfc4c"
+      ],
+      "costs": [],
+      "notes": "Stock CryEngine Meyers-singleton registration."
+    },
+    {
+      "address": "0x108f30f0",
+      "currentName": "FUN_108f30f0",
+      "proposedName": "CLeagueRoundSchedule::GetEntryByIndex",
+      "subsystem": "league",
+      "purpose": "Indexed accessor into the CLeagueRoundSchedule static data-table (league round schedule config). Same pattern as CLeagueInfo::GetEntryByIndex.",
+      "confidence": "high",
+      "serverRelevance": "client-only read of static league round-schedule config table.",
+      "formulas": [
+        "return element only if (param_1 >= 0) && (param_1 < (mgr[6]-mgr[5])>>2); element = *(mgr[5]+param_1*4) else 0"
+      ],
+      "costs": [],
+      "notes": "Fallback empty manager DAT_123bfb84."
+    },
+    {
+      "address": "0x108f3180",
+      "currentName": "FUN_108f3180",
+      "proposedName": "CLeagueRoundSchedule::ReleaseManager",
+      "subsystem": "league",
+      "purpose": "Resolves the CLeagueRoundSchedule manager singleton and invokes its vtable+0x28 (release/clear) method.",
+      "confidence": "medium",
+      "serverRelevance": "client-only.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Stock lifecycle helper."
+    },
+    {
+      "address": "0x108f32b0",
+      "currentName": "FUN_108f32b0",
+      "proposedName": "CLevelEntrustUI::RegisterScriptCallbacks",
+      "subsystem": "guild-instance/entrust",
+      "purpose": "Registers the client script/UI callback table for the level-entrust & guild-instance UI. Binds names to handler functions: GetEntrustListData->CLevelEntrustUI::BuildEntrustListVO, GetLevelUnlockInfo->FUN_108f63e0, GetGroupUnlockInfo->FUN_108f6610, UnlockInstance->FUN_108f6840, UnlockSubGroup->FUN_108f68b0, UpdateGuildMemberData->FUN_108f6f70, GetLevelInstanceGoData->FUN_108f77f0, GetHunterBoxData->FUN_108f69a0, GetAvalidActionPoint->FUN_108f6920, GetLocalPlayerIsCoach->FUN_108f8110, plus request handlers (SelHuntPacket, EntrustReady, RequestEntrustList, ReqOpenEntrustGoView, ReqOpenWeaponTrialGoView, ReqLevelTrackData, ReqOpenEntrustInfoByTrack, FetechGuildInstanceMemberData, RequestLeagueList) and IsShowCountDown->FUN_108f8250.",
+      "confidence": "high",
+      "serverRelevance": "client-only registration; the Req*/RequestLeagueList/FetechGuildInstanceMemberData entries are the client hooks that ultimately fire server RPCs.",
+      "formulas": [
+        "FUN_100b62c0 = string/name-hash key builder; FUN_108f84a0 = 'command' (Req/action) binder, FUN_108f83e0 = 'data getter' binder; distinguishes read-only getters from server-request commands"
+      ],
+      "costs": [],
+      "notes": "Repetitive per-entry name-key + bind + free(FUN_10c3d5d0) idiom; the two binder variants (0x108f84a0 vs 0x108f83e0) separate action callbacks from data-query callbacks."
+    },
+    {
+      "address": "0x108f6f70",
+      "currentName": "FUN_108f6f70",
+      "proposedName": "CLevelEntrustUI::BuildGuildInstanceMemberVO",
+      "subsystem": "guild-instance",
+      "purpose": "Handler for UpdateGuildMemberData. Builds the guildmemberInfoArr VO array of GUILDINSTANCE_MEMBERVO_CLASS_CLASSNAME entries. For each guild member it emits a roleId and two flags bIsInTeam and bIsInCamp: bIsInTeam set by matching the member uid against the local team roster (vtbl+0xa4 count / +0xb8 iterator), bIsInCamp compares the member's camp id (vtbl+0x48) against CMHLevelSystem::GetCurrentContext()+0x44.",
+      "confidence": "medium",
+      "serverRelevance": "client-only VO builder; team/camp membership itself is server-authoritative (this only visualizes it).",
+      "formulas": [
+        "member array iterate: base=puStack_a4[0x13], end=puStack_a4[0x14], stride 0x30 (48 bytes/member); member count = (end-base)/0x30",
+        "guild/instance mgr obtained via player[0xaaf] (checked !=0) then vtbl+0x3a4 -> team object",
+        "bIsInCamp = ( member.camp(vtbl+0x48) == CMHLevelSystem::GetCurrentContext()[0x44] )",
+        "roleId source via FUN_1149e560 (member uid accessor)"
+      ],
+      "costs": [],
+      "notes": "Confirms guild-instance member record stride 0x30. player[0xaaf] is the guild-instance/entrust manager slot (also seen in other guild fns as player[0xaaf]/+0x2abc)."
+    },
+    {
+      "address": "0x10900850",
+      "currentName": "FUN_10900850",
+      "proposedName": "CTeamMatchUI::RegisterScriptCallbacks",
+      "subsystem": "matchmaking/team-party",
+      "purpose": "Registers the client callback table for the team/party matchmaking UI. Binds: GetTeamFiltrationData, RefreshTeamInfo, SearchOtherTeam, SearchTeamChangePage, LookOtherTeamInfo, CreateTeamReq, JoinTeamReq, ReqQuitTeam, ReqChangeLeader, ReqKickMember, SetTeamOptionReq, InviteTeam, QuickJoinTeamReq, ReqSearchByName, onTeamTypeEight, onTeamTypeTwelve, onTeamTypeSixTeen, GetTeamMemberList, RaidInviteTeam, RaidTeamRequest, GetNetID.",
+      "confidence": "high",
+      "serverRelevance": "client-only registration; Create/Join/Quit/ChangeLeader/KickMember/Invite/QuickJoin/RaidTeamRequest are the client-side triggers for server-authoritative team operations.",
+      "formulas": [
+        "team-type callbacks onTeamTypeEight/Twelve/SixTeen indicate supported party/raid sizes of 8, 12 and 16"
+      ],
+      "costs": [
+        "party/raid size tiers: 8, 12, 16 members (onTeamType Eight/Twelve/SixTeen)"
+      ],
+      "notes": "Same name-key + binder (FUN_10904960) idiom as the entrust registrar."
+    },
+    {
+      "address": "0x109094c0",
+      "currentName": "FUN_109094c0",
+      "proposedName": "CPvpLevelUI::BuildPvpStageScoreVO",
+      "subsystem": "league/pvp-scoring",
+      "purpose": "Populates PvP level data: registers lookups _getPlayerFactionByID (FUN_10909320) and _IsInPvpLevel (FUN_109085d0), then writes restTimeGameOverFlash, scorePvp1stStage, scorePvp2ndStage (two-stage PvP faction scores) and realStartWithoutReadyGo flag.",
+      "confidence": "medium",
+      "serverRelevance": "client-only display of PvP scores; the score/time values are server-authoritative (read from the local battle context populated by server).",
+      "formulas": [
+        "restTimeGameOverFlash = FUN_11742460(); scorePvp1stStage = FUN_11742350(); scorePvp2ndStage = FUN_11742360() (all after FUN_117423e0 context fetch)",
+        "realStartWithoutReadyGo = DAT_123bbab2 (byte flag)",
+        "arg VO accessed via in_stack_00000010[1..4] (presence-flag/handle idiom, bit 0x40 => held ref)"
+      ],
+      "costs": [],
+      "notes": "Two-stage PvP scoring (1st/2nd stage) confirms staged faction league scoring."
+    },
+    {
+      "address": "0x10912f00",
+      "currentName": "FUN_10912f00",
+      "proposedName": "CLevelMatchUI::RegisterScriptCallbacks",
+      "subsystem": "matchmaking/instance",
+      "purpose": "Registers the client callback table for instance/level matchmaking. Binds: GetInstanceEnterData, GetSpecLevelData, IsCrossRegion, GetCrossRegionRoomID, GetGuildMathSignUP (guild-match sign-up state), IsBattleWatch, LevelTeamMatch, LevelTeamMatchByEntrust, ReqSpecLevelData, ReqStopMatch, IsLocalBattleMap, GetCurLevelID, GetCurLevelMode, IsCrossServerPlayer, IsBattleLevelCanTrade.",
+      "confidence": "high",
+      "serverRelevance": "client-only registration; LevelTeamMatch/LevelTeamMatchByEntrust/ReqSpecLevelData/ReqStopMatch trigger server matchmaking. Cross-region/cross-server getters are read-only.",
+      "formulas": [],
+      "costs": [],
+      "notes": "GetGuildMathSignUP ('Math' = Match typo) ties into the guild-league sign-up flow handled by FUN_1091a630/FUN_1091a8a0."
+    },
+    {
+      "address": "0x1091a630",
+      "currentName": "FUN_1091a630",
+      "proposedName": "CGuildLeagueUI::SendGuildMatchSignUpListReq",
+      "subsystem": "league/guild-match-signup",
+      "purpose": "When param_1[0]==1 and a guild manager is present, fires the network notification 'sendGuildMatchSignUpListNft' (via net-object vtbl+0x18) to request/broadcast the guild-league sign-up list.",
+      "confidence": "medium",
+      "serverRelevance": "client-only send-trigger for a server RPC/notify; server owns the sign-up list.",
+      "formulas": [
+        "guard: DAT_1202e818 !=0 && *(DAT_1202e818+0xd0)!=0 && player=*(*(..+0xd0)+0x90)!=0 && player.vtbl+0xb4 !=0 && *param_1 == 1",
+        "net object handle from globals DAT_123bd1e8/ec/f0/f4/f8 (presence-flag ref idiom, bit0x40)"
+      ],
+      "costs": [],
+      "notes": "'Nft' = notify. Uses the standard held-ref release (vtbl+8) after send."
+    },
+    {
+      "address": "0x1091a8a0",
+      "currentName": "FUN_1091a8a0",
+      "proposedName": "CGuildLeagueUI::BuildLeagueRegistrationVO",
+      "subsystem": "league/guild-registration",
+      "purpose": "Builds the guild-league registration view. Emits 'registered' flag, then a GuildLREGDataArray of GuildLREG_CLASS_NAME entries (one per registered team) with per-team teamName, isSelf flag, and up to 4 member names (member1..4). Also builds a memberNameStr/memberRoleId list for the local guild team roster (member iteration via team vtbl+0xa4/+0xb8), then fires 'updataLeagueRegistrationViewUpdata' UI notify.",
+      "confidence": "medium",
+      "serverRelevance": "client-only VO builder; registration roster and team membership are server-authoritative. Reveals the 4-member team structure and registration record stride.",
+      "formulas": [
+        "registration record count: iStack_144 = ( ((int*)guild[0xe])[1] - *(int*)guild[0xe] ) / 0x58  -> registration entry stride = 0x58 (88 bytes)",
+        "per-team member name slots use string constants for index 1..4: iVar15==1 -> DAT_11dd9b54, ==2 -> DAT_11dd9b64, ==3 -> DAT_11dd9b60, ==4 -> DAT_11dd9b78 (member field names member1..member4); member sub-array walked in 0xc-dword (0x30-byte) strides",
+        "guild manager via player[0xaaf]; guild registration list at guild[0xe]",
+        "isSelf set to 1 when FUN_1149e820() (self-check) is true",
+        "updata notify payload flag ppppiStack_130 = 3"
+      ],
+      "costs": [
+        "guild-league teams displayed with up to 4 named members"
+      ],
+      "notes": "Heavy std::string copy (memcpy) boilerplate for name marshalling. 'GuildLREG' = Guild League Registration; 'updata' misspelled in-game."
+    },
+    {
+      "address": "0x1091c340",
+      "currentName": "FUN_1091c340",
+      "proposedName": "CGuildUnlockUI::BuildUnlockDataVO",
+      "subsystem": "guild/building-unlock",
+      "purpose": "Builds the guild instance/content 'UnlockDataArray' VO of Unlock_CLASS_NAME entries and computes each entry's lock state relative to the current guild. For each unlock id 1..N it emits nUnlockID, itemID, itemName(0), itemIcon(0), and a computed lockState + lockFund + lockLevel; then emits current guildfund and fires 'UnlockUpdate'.",
+      "confidence": "high",
+      "serverRelevance": "validation/display: the lockState decision is computed client-side from server-owned inputs (guildfund, guild building level, per-guild unlocked-set). Server must be the authority on which content is unlocked and on fund spending; client only mirrors it.",
+      "formulas": [
+        "unlock count: iStack_4c = FUN_1145eed0(); loop unlockID = 1..iStack_4c",
+        "per-unlock def (iVar3 = FUN_1145f170(unlockID)): itemID = *(def+0x14), lockFund = *(def+0x1c), lockLevel = *(def+0x18)",
+        "lockState decision: if FUN_1145fa30(guild,unlockID)!=0 -> lockState=1 (already unlocked); else if FUN_1145e690(guild,unlockID)!=0 -> lockState=2; else if def.lockLevel(*(def+0x18)) <= currentGuildBuildingLevel( (uint)*(byte*)(guild+0x223) ) -> lockState=4 (level met, fund needed); else lockState=3 and compare def.lockLevel vs CGuildBuildingLevelUpInfo::GetMaxLevelForBuilding(4)",
+        "guildfund = FUN_114a8610()",
+        "building level stored as byte at guildObj+0x223",
+        "GetMaxLevelForBuilding called with building type constant 4"
+      ],
+      "costs": [
+        "each unlock has a lockFund (guild-fund cost, def+0x1c) and lockLevel (required guild building level, def+0x18)",
+        "guildfund is the guild's current fund balance (spent to unlock)"
+      ],
+      "notes": "lockState enum inferred: 1=unlocked, 2=? (pending/available), 3=locked-needs-higher-max?, 4=level-met-fund-pending. GetMaxLevelForBuilding(4) => building category id 4."
+    },
+    {
+      "address": "0x1091f090",
+      "currentName": "FUN_1091f090",
+      "proposedName": "CGuildTaskUI::RegisterGetGuildTaskData",
+      "subsystem": "guild/tasks",
+      "purpose": "Registers the single client callback 'GetGuildTaskData' -> FUN_10922d70 (which routes to the builder FUN_1091f100).",
+      "confidence": "high",
+      "serverRelevance": "client-only registration.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Thin registrar."
+    },
+    {
+      "address": "0x1091f100",
+      "currentName": "FUN_1091f100",
+      "proposedName": "CGuildTaskUI::BuildGuildTaskDataVO",
+      "subsystem": "guild/tasks",
+      "purpose": "Builds the 'guildTaskArray' VO (GUILDTASK_CLASS_NAME entries) plus, for the active-quest branch, per-quest reward and target VOs. Emits bGuildTask, remainTime, quest_id, questStatus, taskName, description, curCount/maxCount, curStage/totalStage, groupType, group_id, bTracked, canShared; an 'other_info' sub-VO with farm_actuarialpoint/gold_bind/hunter_exp/hunter_fund/hunter_contribution/npcfriendvalue/queststatus; a 'task_awardList' (TASK_AWARD_CLASS_NAME) of reward items (itemIconPathName/slotid/ItemID/count); and a 'task_targets' list (TASK_TARGET_VO_NAME) with nTargetID1..5, strTarget1..5, nOpType, nCurCount, nMaxCount.",
+      "confidence": "medium",
+      "serverRelevance": "client-only display builder, but it recomputes reward amounts locally from award-definition tables scaled by the local player's hunt rank/count. Rewards and quest progress are server-authoritative; the client math here mirrors the server reward formula (useful for reproducing reward curves).",
+      "formulas": [
+        "totalStage=1, group_id=1, curStage=1 (constants written for guild tasks); groupType = quest[2]",
+        "reward amount scaling: amount = (int)( (float)(int)awardDef[2] * (float)factor ), where factor = 0 unless player exists, then factor derived from CPlayer::GetHuntRankOrCount(awardDef[1], ...) via FUN_1185f2e0. Applied for award ids fetched by: FUN_10804980, FUN_10804cd0 (field &DAT_11dbfbc8 == hunter_exp-related), FUN_10804940 (field &DAT_11dc0944) with a second component awardDef[3]*factor2",
+        "hunter_exp = questDef[0x14], hunter_fund = questDef[0x15] (dword offsets into quest def pppppppiVar14)",
+        "gold reward (id 0x21 via FUN_108049c0): gold_bind = def+8, and a paired value def+0xc; hunter_fund path uses def+4",
+        "reward-def category ids queried: 0x5f7 (task def base), 0x19, 0x18, 0x21, 0x1f (award slot types); target op fields at target-record stride 0x3b dwords",
+        "task-target record offsets (piVar15 stride 0x3b ints): [0..4] nTargetID1..5, [5] nOpType, [6] nCurCount, [7] nMaxCount, [0xd/0x13/0x19/0x1f/0x25] strTarget1..5; filter: only when target[0x3a]==3 && target[0x34]!=4, with curCount==maxCount vs curCount<maxCount branch selecting completed vs in-progress rendering",
+        "remainTime computed only if server epoch globals DAT_123bbcc8/ccc are 0 else uses _time64(0) baseline"
+      ],
+      "costs": [
+        "guild task rewards: hunter_exp, hunter_fund, gold_bind, plus item awards (task_awardList) each with a count",
+        "reward amounts scale multiplicatively with player hunt rank/count factor (float multiply of awardDef base value)"
+      ],
+      "notes": "Very large function with pervasive presence-flag/held-ref idiom. Reward scaling by GetHuntRankOrCount is the key server-relevant formula to replicate. Award-def struct: [1]=rank/count key, [2]=base value, [3]=secondary base."
+    },
+    {
+      "address": "0x10924360",
+      "currentName": "FUN_10924360",
+      "proposedName": "CSystemShortcutUI::RegisterCallbacksAndBuildActionBarVO",
+      "subsystem": "ui/hud-shortcut",
+      "purpose": "Registers system-shortcut/widget callbacks (GetSystemShortcutData, ProcessSystemWidget, ReqCatTicketData, ReqFetchHuntCredit, GetHuntCreditData, GetKeyString, ReqBuyExpLimit, IsItemHasUnuseEffect) and writes action-bar visibility flags (nActionBarGiftPackVisible, nActionBarBangBangVisible, nActionBarOperationActivityVisible, nActionBarExchangeVisible, nActionBarMailVisible) read from a system-config struct. Also registers two HUD widgets (ids 0x9c8, 0x9c9).",
+      "confidence": "medium",
+      "serverRelevance": "client-only HUD/action-bar setup. ReqCatTicketData/ReqFetchHuntCredit/ReqBuyExpLimit are client triggers for server currency/limit operations.",
+      "formulas": [
+        "action-bar flags read from struct S=FUN_11727ff0(): GiftPack=*(S+0x3c), BangBang=*(S+0x40), OperationActivity=*(S+0x44), Exchange=*(S+0x48), Mail=*(S+0x4c)",
+        "widget ids registered: 0x9c8 and 0x9c9 (via mgr[0x1c] vtbl+0x1c)"
+      ],
+      "costs": [],
+      "notes": "Only executes when in_stack_00000014 (arg count) == 1. Not guild-specific; ReqBuyExpLimit touches player exp-limit purchase."
+    },
+    {
+      "address": "0x10929840",
+      "currentName": "FUN_10929840",
+      "proposedName": "CPvpFactionModel::InitModels",
+      "subsystem": "league/pvp-faction",
+      "purpose": "PvP-faction UI-model init. Registers model builders InitModelPersonal (FUN_10929b60), InitModelGroup (FUN_10929ea0), InitModelPvpHunterBox (FUN_1092ac90), InitModelPvpFactionPlayers (FUN_1092b8f0), plus a fifth (FUN_1092c2d0), then attaches five sub-models via the model-manager chain (FUN_10d17440/FUN_10d17870 -> FUN_1092c7e0/830/880/8d0/920).",
+      "confidence": "medium",
+      "serverRelevance": "client-only model wiring.",
+      "formulas": [],
+      "costs": [],
+      "notes": "Same registration + sub-model attach idiom as FUN_108e1f60."
+    },
+    {
+      "address": "0x1092b8f0",
+      "currentName": "FUN_1092b8f0",
+      "proposedName": "CPvpFactionModel::RegisterPlayerCallbacks",
+      "subsystem": "league/pvp-faction",
+      "purpose": "Registers PvP-faction player callbacks: _PvpFaction_setPlayerBaseInfo (FUN_1092ba00), _PvpFaction_getPlayerFaction (FUN_1092bbc0), _PvpFaction_setBoxInfo (FUN_1092bc60), _PvpFaction_reselectHunterBox (FUN_1092be30), _PvpFaction_setFactionInfo (FUN_1092be80).",
+      "confidence": "high",
+      "serverRelevance": "client-only registration; reselectHunterBox is the client trigger for a server-side box reselection.",
+      "formulas": [
+        "guard: DAT_1202e818 !=0 && *(DAT_1202e818+0x58)!=0 (script/system context present)"
+      ],
+      "costs": [],
+      "notes": "Hunter-box / faction selection UI for PvP league."
+    }
+  ]
+}

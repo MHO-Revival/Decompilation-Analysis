@@ -1,0 +1,428 @@
+{
+  "chunkIndex": 7,
+  "functions": [
+    {
+      "address": "0x101f4c50",
+      "currentName": "FUN_101f4c50",
+      "proposedName": "TlvPetExtAttrData_Write",
+      "purpose": "Binary TDR WRITE serializer for a 58-field pet attribute struct. For each field it writes the field tag (FUN_1010c5f0), advances 4 bytes for a length placeholder (FUN_1010bf70), serializes a nested 'observed value' sub-struct (FUN_101b0280 -> sub_101B0520 family), then backpatches the LEN_DELIM length (FUN_1010c3c0). All 58 fields are wire-type 5 (LEN_DELIM) nested sub-structs. Field-id count (58) matches TlvPetExtAttrData DebugFormat (58).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetExtAttrData"],
+      "protocolFields": [
+        "field 4 (tag 0x45): oPetName — wire5 LEN nested observed-value substruct",
+        "field 5 (tag 0x55): oPetSex — wire5 LEN nested",
+        "field 7 (tag 0x75): oOwner — wire5 LEN nested",
+        "field 8 (tag 0x85): oPetSignature — wire5 LEN nested",
+        "field 9 (tag 0x95): oPetExp — wire5 LEN nested",
+        "field 10 (tag 0xa5): oPetLevel — wire5 LEN nested",
+        "fields 18,19,20,21 (tags 0x125,0x135,0x145,0x155): wire5 LEN nested — names unknown",
+        "fields 23,24,25 (tags 0x175,0x185,0x195): wire5 LEN nested — names unknown",
+        "fields 30,31,32 (tags 0x1e5,0x1f5,0x205): wire5 LEN nested",
+        "fields 34,35,36 (tags 0x225,0x235,0x245): wire5 LEN nested",
+        "fields 42-56 (tags 0x2a5..0x365, gaps): wire5 LEN nested",
+        "fields 67,68,69,70 (tags 0x435,0x445,0x455,0x465): wire5 LEN nested",
+        "fields 76-91 (tags 0x4c5..0x5b5): wire5 LEN nested",
+        "fields 142,143,145,146 (tags 0x8e5,0x8f5,0x915,0x925): wire5 LEN nested"
+      ],
+      "tlvDocDiscrepancy": "Generated TlvPetExtAttrData doc lists only the 5-field 0x99 subset and types the fields as plain int32 with wire3 tags (e.g. oPetName 0x43). Actual writer emits ALL 58 fields as wire5 (LEN_DELIM) nested sub-structs (oPetName tag 0x45, not 0x43). The 'oXxx' fields are nested observed-value wrappers (sub_101B0520), not scalar int32. Doc field count (5) vs real (58).",
+      "serverRelevance": "High. This is a real wire producer; a server rebuild must emit these 58 optional nested fields in field-id order with correct LEN_DELIM framing to be parsed by the client.",
+      "confidence": "high",
+      "notes": "Uses TdrBuf primitives: FUN_1010c5f0=WriteTag, FUN_1010bf70=ReserveLenPlaceholder(+4), FUN_1010c3c0=BackpatchLen, FUN_101b0280=nested element serializer. Preamble reserves a 4-byte struct length prefix and asserts position<=length (TdrBuf.h:0x92)."
+    },
+    {
+      "address": "0x101f89d0",
+      "currentName": "FUN_101f89d0",
+      "proposedName": "TlvPetFullAttrData_DebugFormat",
+      "purpose": "DebugFormat / human-readable text dump (TdrBufUtil.cpp) of the pet full-attribute struct. Emits labeled lines '[fieldName]' + printf value for each field via FUN_1024a1e0/FUN_101b0710/FUN_1024a140. Not a wire serializer. ~54 fields (size 3657) matching TlvPetFullAttrData DebugFormat field count.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvPetFullAttrData"],
+      "protocolFields": [
+        "[oPetName]", "[oPetSex]", "[oOwner]", "[oPetSignature]", "[oPetExp]", "[oPetLevel]",
+        "[oSpirit]", "[oVigour]", "[oPetHP]", "[oPetMaxHP]", "[oPetMelee]", "[oPetDefence]",
+        "[oCritLevel]", "[oPetExecution]", "[oPetObservation]", "[oPetLoadBearing]", "[oPetMaxSp]", "[oPetSp]",
+        "(remaining fields truncated in view; total ~54 attribute fields)"
+      ],
+      "tlvDocDiscrepancy": "Generated TlvPetFullAttrData doc shows only 5 fields (0x99 subset). This DebugFormat proves the struct actually carries ~54 pet-attribute fields (Exp/Level/Spirit/Vigour/HP/MaxHP/Melee/Defence/CritLevel/Execution/Observation/LoadBearing/MaxSp/Sp and more). Field names recovered here should populate the real struct definition.",
+      "serverRelevance": "Low. Debug text dumper; a server does not need it, but it authoritatively documents the field set/order the wire serializer uses.",
+      "confidence": "medium",
+      "notes": "TdrBufUtil helpers: FUN_1024a140=indent/prefix, FUN_1024a1e0=field label, FUN_1010c010=printf-to-buffer, FUN_101b0710=nested observed-value text dump. Association to FullAttr (vs ExtAttr) inferred from ~54-field size."
+    },
+    {
+      "address": "0x101f9b60",
+      "currentName": "FUN_101f9b60",
+      "proposedName": "TlvPetOptionData_Serialize_variantA",
+      "purpose": "Binary TDR serializer for the 12-field pet option/appearance struct. Writes/patches 12 wire5 (LEN_DELIM) nested observed-value sub-structs via FUN_101b01d0. Field-id set {4,5,7,8,10,85,86,87,88,89,90,91} maps 1:1 to the 12 field names in the paired DebugFormat FUN_101faee0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetOptionData"],
+      "protocolFields": [
+        "field 4 (tag 0x45): oPetName — wire5 LEN nested",
+        "field 5 (tag 0x55): oPetSex — wire5 LEN nested",
+        "field 7 (tag 0x75): oOwner — wire5 LEN nested",
+        "field 8 (tag 0x85): oPetSignature — wire5 LEN nested",
+        "field 10 (tag 0xa5): oPetLevel — wire5 LEN nested",
+        "field 85 (tag 0x555): oPetWeaponID — wire5 LEN nested",
+        "field 86 (tag 0x565): oPetHatID — wire5 LEN nested",
+        "field 87 (tag 0x575): oPetBodyID — wire5 LEN nested",
+        "field 88 (tag 0x585): oFashionWeaponID (spelled oFashionWwaponID) — wire5 LEN nested",
+        "field 89 (tag 0x595): oFashionHatID — wire5 LEN nested",
+        "field 90 (tag 0x5a5): oFashionBodyID — wire5 LEN nested",
+        "field 91 (tag 0x5b5): oRegion — wire5 LEN nested"
+      ],
+      "tlvDocDiscrepancy": "Generated TlvPetOptionData doc lists only 4 fields (oPetName/oPetSex/oOwner/oPetSignature) typed as int32 with wire3 tags (0x43 etc). Actual code emits 12 fields, all wire5 (LEN_DELIM) nested sub-structs (oPetName tag 0x45), adding oPetLevel(10) and appearance/fashion fields at ids 85-91.",
+      "serverRelevance": "High. Real wire (de)serializer for pet appearance/option data; server must handle all 12 nested fields.",
+      "confidence": "high",
+      "notes": "Differs from FUN_101f9f40 only in the nested element routine (FUN_101b01d0 here vs FUN_101b0280 there) — likely the read-path vs write-path variant of the same struct."
+    },
+    {
+      "address": "0x101f9f40",
+      "currentName": "FUN_101f9f40",
+      "proposedName": "TlvPetOptionData_Serialize_variantB",
+      "purpose": "Binary TDR serializer for the same 12-field pet option struct as FUN_101f9b60, identical field-id/tag sequence, but nested elements handled by FUN_101b0280 (the other of the read/write pair).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetOptionData"],
+      "protocolFields": [
+        "field 4 (0x45) oPetName", "field 5 (0x55) oPetSex", "field 7 (0x75) oOwner",
+        "field 8 (0x85) oPetSignature", "field 10 (0xa5) oPetLevel", "field 85 (0x555) oPetWeaponID",
+        "field 86 (0x565) oPetHatID", "field 87 (0x575) oPetBodyID", "field 88 (0x585) oFashionWeaponID",
+        "field 89 (0x595) oFashionHatID", "field 90 (0x5a5) oFashionBodyID", "field 91 (0x5b5) oRegion"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_101f9b60: doc under-counts (4 vs 12) and mistypes the wire3/int32 tags; real fields are wire5 nested sub-structs.",
+      "serverRelevance": "High. Wire (de)serializer counterpart for pet option data.",
+      "confidence": "high",
+      "notes": "Byte-for-byte structural twin of FUN_101f9b60 except nested routine FUN_101b0280 vs FUN_101b01d0."
+    },
+    {
+      "address": "0x101faee0",
+      "currentName": "FUN_101faee0",
+      "proposedName": "TlvPetOptionData_DebugFormat",
+      "purpose": "DebugFormat text dump (TdrBufUtil.cpp) for the pet option/appearance struct. Emits 12 labeled fields, providing the authoritative names for the binary serializers FUN_101f9b60/FUN_101f9f40.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvPetOptionData"],
+      "protocolFields": [
+        "[oPetName]", "[oPetSex]", "[oOwner]", "[oPetSignature]", "[oPetLevel]", "[oPetWeaponID]",
+        "[oPetHatID]", "[oPetBodyID]", "[oFashionWwaponID] (sic; = FashionWeaponID)", "[oFashionHatID]",
+        "[oFashionBodyID]", "[oRegion]"
+      ],
+      "tlvDocDiscrepancy": "Confirms the 12-field real layout vs the generated doc's 4 fields. Note the source typo 'oFashionWwaponID'.",
+      "serverRelevance": "Low. Debug-only text output; documents field names/order.",
+      "confidence": "high",
+      "notes": "Uses FUN_1024a1e0 (label) + FUN_101b0710 (nested observed-value text). Ends by dumping [oRegion] then returning."
+    },
+    {
+      "address": "0x101fd7b0",
+      "currentName": "FUN_101fd7b0",
+      "proposedName": "RoleDataList_DebugFormat",
+      "purpose": "DebugFormat text dump of a role-keyed variable list: [roleGID] as %I64u (int64), [count] as int16 (validated 0..0x28=40), then [data] array of 'count' nested elements dumped via FUN_101fcbe0. Returns -6 if count<0, -7 if count>40.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "roleGID: int64 @ +0 (printed %I64u)",
+        "count: int16 @ +8 (range 0..40)",
+        "data[count]: nested element (serializer sub_101fcbe0), one per index printed as '[data][i]'"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Low. Debug dumper, but establishes a roleGID + bounded(40) array shape used by some role/friend list struct.",
+      "confidence": "medium",
+      "notes": "Format strings '%I64u', '%s[%u]%c'. FUN_1024a290=scalar field dump, FUN_1024a140=prefix, FUN_1010c010=printf. Owning TLV name unknown."
+    },
+    {
+      "address": "0x101ff870",
+      "currentName": "FUN_101ff870",
+      "proposedName": "TdrField_WriteInt16BE",
+      "purpose": "TDR write helper for a single 16-bit field with two encoding modes selected by param_5. Mode 0: writes variant marker 0x99 (FUN_1010c0c0), tag 0x12 (field 1, wire2=2B), then the uint16 big-endian into the output buffer (2 bytes). Mode 1: writes marker 0xaa, tag 0x10 (field1, wire0 varint) via FUN_1010c430. Returns bytes-written via param_4; returns -0x13 if dest buffer/len null.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1 (tag 0x12 mode0 / 0x10 mode1): int16 value, written big-endian (hi byte first) in 2B mode"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Confirms 0x99 = NoVariant marker and shows the exact big-endian byte order (MSB first) the client expects for a wire2 int16 field; server must match this ordering.",
+      "confidence": "medium",
+      "notes": "0x99/0xaa are TDR variant/head bytes. FUN_1010c0c0=WriteHead, FUN_1010c5f0=WriteTag, FUN_1010c430=WriteShortVarint. Big-endian encoding: *dst=(u>>8); dst[1]=(u&0xff)."
+    },
+    {
+      "address": "0x101ffb50",
+      "currentName": "FUN_101ffb50",
+      "proposedName": "TdrField_ReadInt16BE",
+      "purpose": "TDR READ deserializer for a struct with a single int16 field. Loops reading tags (FUN_1010ccb0) until end; when tag>>4 (field_id) == 1 it sets presence-flag bit 0x1 (*(param_1+2)) and reads 2 bytes big-endian into param_1[0]=buf[pos+1], param_1[1]=buf[pos+0]; other field_ids are skipped via FUN_1010d4f0. Read counterpart of FUN_101ff870.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1: int16 @ +0 (big-endian on wire), presence bit 0x1 stored at +2",
+        "presence_flags: uint32 @ +2"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Shows how the client parses a single-int16 TLV incl. presence-flag bit and big-endian order; server must produce matching bytes.",
+      "confidence": "high",
+      "notes": "Returns 0xfffffffe (-2) on truncated buffer, 0xffffffde on overrun. Skip path FUN_1010d4f0=SkipUnknownField."
+    },
+    {
+      "address": "0x101fff70",
+      "currentName": "FUN_101fff70",
+      "proposedName": "TdrStruct3_Write_variantA",
+      "purpose": "Binary TDR WRITE for a 3-field struct: field1 tag 0x11 (wire1=1B) writes 1 byte (*param_1); field2 tag 0x20 (wire0 varint) writes *(param_1+1) via FUN_1010c560; field3 tag 0x30 (wire0 varint) writes *(param_1+5) via FUN_1010c560.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1 (tag 0x11): int8 @ +0",
+        "field 2 (tag 0x20): varint @ +1 (FUN_1010c560)",
+        "field 3 (tag 0x30): varint @ +5 (FUN_1010c560)"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Wire writer for a small {byte,int,int} sub-struct; server must reproduce.",
+      "confidence": "medium",
+      "notes": "FUN_1010c560=WriteVarint. Paired read = FUN_10200180. Struct identity unknown."
+    },
+    {
+      "address": "0x10200010",
+      "currentName": "FUN_10200010",
+      "proposedName": "TdrStruct3_Write_variantB",
+      "purpose": "Binary TDR WRITE for the same 3-field {byte,int,int} struct as FUN_101fff70 but with different value encodings: field1 tag 0x11 (1B), field2 tag 0x23 (wire3=4B), field3 tag 0x33 (wire3=4B), values via FUN_1010c190.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1 (tag 0x11): int8 @ +0",
+        "field 2 (tag 0x23): fixed32/int @ +1 (FUN_1010c190)",
+        "field 3 (tag 0x33): fixed32/int @ +5 (FUN_1010c190)"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Alternate-encoding wire writer for the {byte,int,int} sub-struct.",
+      "confidence": "medium",
+      "notes": "FUN_1010c190=WriteFixed32/int. Paired read = FUN_10200290."
+    },
+    {
+      "address": "0x10200180",
+      "currentName": "FUN_10200180",
+      "proposedName": "TdrStruct3_Read_variantA",
+      "purpose": "Binary TDR READ deserializer for the 3-field struct. Reads tags; field_id 1 -> int8 into *param_1 (presence 0x1); field_id 2 -> value into param_1+1 via FUN_1010cbd0 (presence 0x2); field_id 3 -> param_1+5 via FUN_1010cbd0 (presence 0x4); else skip. Presence flags stored at param_1+9.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1: int8 @ +0 (presence 0x1)",
+        "field 2: varint @ +1 (FUN_1010cbd0, presence 0x2)",
+        "field 3: varint @ +5 (FUN_1010cbd0, presence 0x4)",
+        "presence_flags: uint32 @ +9"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Read counterpart of FUN_101fff70.",
+      "confidence": "medium",
+      "notes": "FUN_1010cbd0=ReadVarint, FUN_1010ccb0=ReadTag, FUN_1010d4f0=Skip."
+    },
+    {
+      "address": "0x10200290",
+      "currentName": "FUN_10200290",
+      "proposedName": "TdrStruct3_Read_variantB",
+      "purpose": "Binary TDR READ deserializer for the 3-field struct, using FUN_1010c870 (read fixed32) for fields 2 and 3. Read counterpart of FUN_10200010.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["unknown"],
+      "protocolFields": [
+        "field 1: int8 @ +0 (presence 0x1)",
+        "field 2: fixed32 @ +1 (FUN_1010c870, presence 0x2)",
+        "field 3: fixed32 @ +5 (FUN_1010c870, presence 0x4)",
+        "presence_flags: uint32 @ +9"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Read counterpart of FUN_10200010.",
+      "confidence": "medium",
+      "notes": "FUN_1010c870=ReadFixed32."
+    },
+    {
+      "address": "0x10201100",
+      "currentName": "FUN_10201100",
+      "proposedName": "PetTimeSlot_Write_variantA",
+      "purpose": "Binary TDR WRITE for a 2-field struct where each field is a fixed 4-element scalar array. field1 tag 0x15 (wire5 LEN): reserve len, write 4 varints from param_1+0..+0xc (FUN_1010c560), backpatch. field2 tag 0x25 (wire5 LEN): write 4 varints from param_1+0x10..+0x1c, backpatch. Per paired DebugFormat FUN_10201900 these are [petID] (4 dwords) and [startTime] (4 dwords).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetFarmShowData"],
+      "protocolFields": [
+        "field 1 (tag 0x15): petID — LEN array of 4 x int32 @ +0 (16 bytes)",
+        "field 2 (tag 0x25): startTime — LEN array of 4 x int32 @ +0x10 (16 bytes)"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Wire writer for the pet time-slot element embedded (x6) inside TlvPetFarmShowData's sPFData array.",
+      "confidence": "medium",
+      "notes": "petID/startTime each stored as 4 consecutive int32 (likely 2x int64 or a 16-byte blob). FUN_1010c560=WriteVarint. Paired read is FUN_10200710 (called by the array wrapper). DebugFormat = FUN_10201900."
+    },
+    {
+      "address": "0x102012c0",
+      "currentName": "FUN_102012c0",
+      "proposedName": "PetTimeSlot_Write_variantB",
+      "purpose": "Structural twin of FUN_10201100 (same {petID[4], startTime[4]} 2-field LEN layout, tags 0x15/0x25) but writes each dword via FUN_1010c190 (fixed32) instead of FUN_1010c560 (varint).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetFarmShowData"],
+      "protocolFields": [
+        "field 1 (tag 0x15): petID — LEN array of 4 x fixed32 @ +0",
+        "field 2 (tag 0x25): startTime — LEN array of 4 x fixed32 @ +0x10"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "High. Alternate-encoding wire writer for the pet time-slot element.",
+      "confidence": "medium",
+      "notes": "FUN_1010c190=WriteFixed32. Paired read is FUN_10200800."
+    },
+    {
+      "address": "0x10201900",
+      "currentName": "FUN_10201900",
+      "proposedName": "PetTimeSlot_DebugFormat",
+      "purpose": "DebugFormat text dump of the pet time-slot element: prints [petID] as 4 dwords ('%s[0 : %I64i]:' header + 4x hex) then a separator byte, then [startTime] as 4 dwords. Documents the layout used by FUN_10201100/FUN_102012c0.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvPetFarmShowData"],
+      "protocolFields": [
+        "[petID]: 4 x int32 @ +0",
+        "[startTime]: 4 x int32 @ +0x10"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Low. Debug-only; confirms petID/startTime naming and 4-dword width.",
+      "confidence": "medium",
+      "notes": "Format '%s[0 : %I64i]:' and DAT_11d9f710 (likely ' 0x%08x'). FUN_1010c010=printf."
+    },
+    {
+      "address": "0x10201d10",
+      "currentName": "FUN_10201d10",
+      "proposedName": "TlvPetFarmShowData_Serialize_variantA",
+      "purpose": "Binary TDR WRITE for the pet-farm-show container. field1 tag 0x15 (wire5 LEN): array of 6 PetTimeSlot elements (each nested via FUN_10201100 with per-element length backpatch). field2 tag 0x20 (wire0): petAvatarCount int16 (FUN_1010c430; validated 0..0x1e=30, returns -6/-7 on out-of-range). field3 tag 0x35 (wire5 LEN): array of 'petAvatarCount' pet-avatar elements (FUN_10200710).",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetFarmShowData", "TlvPetAvatarData"],
+      "protocolFields": [
+        "field 1 (tag 0x15): sPFData — LEN array[6] of PetTimeSlot (FUN_10201100)",
+        "field 2 (tag 0x20): petAvatarCount — int16 (range 0..30)",
+        "field 3 (tag 0x35): petAvatarInfo — LEN array[petAvatarCount] of TlvPetAvatarData element (FUN_10200710)"
+      ],
+      "tlvDocDiscrepancy": "Generated TlvPetFarmShowData doc lists sPFData as a single int16 @+108 (tag 0x22) and petAvatarCount as field3. Actual struct: field1=sPFData is a fixed array[6] of the 32-byte PetTimeSlot sub-struct (tag 0x15 wire5), field2=petAvatarCount int16, field3=petAvatarInfo array[count]. Doc field ids/types/widths are wrong.",
+      "serverRelevance": "High. Real wire (de)serializer for pet-farm-show data (sPFData[6] + petAvatarInfo[]); server must honor the 6-element array and the count<=30 bound.",
+      "confidence": "medium",
+      "notes": "Bounds: count in [0,30] else error -6/-7. DebugFormat = FUN_10202790. Twin: FUN_10201f60."
+    },
+    {
+      "address": "0x10201f60",
+      "currentName": "FUN_10201f60",
+      "proposedName": "TlvPetFarmShowData_Serialize_variantB",
+      "purpose": "Structural twin of FUN_10201d10 for the pet-farm-show container: sPFData array[6] via FUN_102012c0, petAvatarCount via FUN_1010c120 with tag 0x22, petAvatarInfo array via FUN_10200800. The read/write counterpart variant.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "both",
+      "relatedTlv": ["TlvPetFarmShowData", "TlvPetAvatarData"],
+      "protocolFields": [
+        "field 1 (tag 0x15): sPFData — LEN array[6] of PetTimeSlot (FUN_102012c0)",
+        "field 2 (tag 0x22): petAvatarCount — int16 fixed16 (FUN_1010c120, range 0..30)",
+        "field 3 (tag 0x35): petAvatarInfo — LEN array[count] (FUN_10200800)"
+      ],
+      "tlvDocDiscrepancy": "Same as FUN_10201d10: real sPFData is array[6] of a sub-struct, not a scalar int16; doc mis-shapes fields 2/3.",
+      "serverRelevance": "High. Counterpart wire (de)serializer for pet-farm-show data.",
+      "confidence": "medium",
+      "notes": "Note field2 uses tag 0x22 (wire2) / FUN_1010c120 here vs tag 0x20 / FUN_1010c430 in FUN_10201d10 — the two variants encode the count field differently."
+    },
+    {
+      "address": "0x10202790",
+      "currentName": "FUN_10202790",
+      "proposedName": "TlvPetFarmShowData_DebugFormat",
+      "purpose": "DebugFormat text dump for the pet-farm-show container: iterates [sPFData] index 0..5 dumping each PetTimeSlot via FUN_10201900, prints [petAvatarCount] (int16, 0..30), then [petAvatarInfo] array via FUN_10200df0. Provides authoritative field names for FUN_10201d10/FUN_10201f60.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvPetFarmShowData", "TlvPetAvatarData"],
+      "protocolFields": [
+        "[sPFData][0..5]: 6 x PetTimeSlot element (FUN_10201900)",
+        "[petAvatarCount]: int16 (0..30)",
+        "[petAvatarInfo][i]: TlvPetAvatarData element (FUN_10200df0)"
+      ],
+      "tlvDocDiscrepancy": "Confirms sPFData is a 6-element array (not scalar int16 as the generated doc states) and that petAvatarInfo is a count-prefixed array.",
+      "serverRelevance": "Low. Debug-only; documents field names/order/bounds.",
+      "confidence": "high",
+      "notes": "Address 0x10202790 sits adjacent to TlvPetFarmShowData read sub_102024A0, confirming ownership. FUN_1024a290=scalar dump, '%s[%u]%c' array header."
+    },
+    {
+      "address": "0x102033d0",
+      "currentName": "FUN_102033d0",
+      "proposedName": "EquipShowInfo_DebugFormat",
+      "purpose": "DebugFormat text dump of an equipment-show element: [index] int16; [equipID] as 6 dwords ('%s[0 : %I64i]:' + 6x hex from param_1+2, likely 3x int64); a separator byte; [dataLen] int32 (validated 0..5000, -6/-7 on range); [equipData] byte array of dataLen bytes (header via FUN_1024a3b0). This is the per-element formatter for TlvFarmData's equipShowInfo[].",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvFarmData"],
+      "protocolFields": [
+        "index: int16 @ +0",
+        "equipID: 6 x int32 @ +2 (24 bytes; likely 3 x int64)",
+        "dataLen: int32 @ +0x1a (range 0..5000)",
+        "equipData: uint8[dataLen] @ +0x1e"
+      ],
+      "tlvDocDiscrepancy": "",
+      "serverRelevance": "Low. Debug dumper, but defines the equipShowInfo element layout (index + equipID[6dw] + dataLen + variable byte blob<=5000) needed to build the real struct.",
+      "confidence": "medium",
+      "notes": "Called from FUN_10205ad0 for [equipShowInfo]. FUN_1024a3b0=byte-array field header. equipData bound 5000 bytes."
+    },
+    {
+      "address": "0x10205ad0",
+      "currentName": "FUN_10205ad0",
+      "proposedName": "TlvFarmData_DebugFormat",
+      "purpose": "DebugFormat text dump for TlvFarmData (paired read is sub_10205140). Emits the FULL 27-field farm record: scalars, fixed byte arrays, nested-struct arrays (sBCPData[6], sPFData[6], sPlowLandData[3], petAvatarInfo[], equipShowInfo[]), and trailing flags. This is the ground-truth layout of the farm struct.",
+      "subsystem": "tlv-serializer",
+      "msgId": "unknown",
+      "direction": "unknown",
+      "relatedTlv": ["TlvFarmData", "TlvPetAvatarData"],
+      "protocolFields": [
+        "farmID: int32 @ +0",
+        "ownerUID: int32 @ +4",
+        "ownerDBID: int64 @ +8 (%I64u)",
+        "remark: int32 @ +0x10",
+        "credit: int32 @ +0x14",
+        "hits: int32 @ +0x18",
+        "currentHits: int32 @ +0x1c",
+        "maxGatherCount: int32 @ +0x20",
+        "autoGatherPetID: int32 @ +0x24",
+        "autoGatherBCPType: int32 @ +0x28",
+        "sACPOpen: uint8[4] @ +0x2c (' 0x%02x')",
+        "sOFOpen: uint8[2] @ +0x30",
+        "sBCPData: array[6] nested (FUN_101ff650)",
+        "sPFData: array[6] nested (FUN_101ffd00)",
+        "sPlowLandData: array[3] nested (FUN_10200470)",
+        "lastFarmRefreshTime: int32 @ +0x101",
+        "farmCanBeGatheredCount: int32 @ +0x105",
+        "friendGatherBonus: int8 @ +0x109 ('0x%02x')",
+        "safeDataFlag: int16 @ +0x10a",
+        "facilityUseFlag: int32 @ +0x10c",
+        "farmOpenFlag: int8 @ +0x110",
+        "petAvatarCount: int16 @ +0x111 (0..30)",
+        "petAvatarInfo: array[petAvatarCount] TlvPetAvatarData element (FUN_10200df0)",
+        "equipShowCount: int16 @ +0x5e1 (0..12)",
+        "equipShowInfo: array[equipShowCount] EquipShowInfo element (FUN_102033d0)",
+        "gender: int8 @ +0xf1db ('0x%02x')",
+        "skipCutScene: int8"
+      ],
+      "tlvDocDiscrepancy": "Generated TlvFarmData doc lists only 8 fields (farmID..maxGatherCount) as the 0x99 subset. This DebugFormat proves the real struct has 27 fields incl. autoGatherPetID/autoGatherBCPType, the sACPOpen/sOFOpen byte arrays, sBCPData[6]/sPFData[6]/sPlowLandData[3] nested arrays, timestamp/flag fields, petAvatarInfo[] and equipShowInfo[] arrays, gender and skipCutScene. Offsets above from the dumper's member reads.",
+      "serverRelevance": "Low as code (debug), but High as documentation: the farm record the server must (de)serialize has all 27 fields with the array bounds shown (petAvatar<=30, equipShow<=12).",
+      "confidence": "high",
+      "notes": "FUN_1024a290=scalar dump, FUN_1024a230=array element header, FUN_1024a3b0=byte-array header, FUN_1010c060=array close. Nested element serializers: sBCPData=FUN_101ff650, sPFData=FUN_101ffd00, sPlowLandData=FUN_10200470, petAvatarInfo=FUN_10200df0, equipShowInfo=FUN_102033d0."
+    }
+  ]
+}

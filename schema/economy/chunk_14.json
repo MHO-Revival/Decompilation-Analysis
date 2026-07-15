@@ -1,0 +1,640 @@
+{
+  "chunkIndex": 14,
+  "functions": [
+    {
+      "address": "0x11599830",
+      "currentName": "FUN_11599830",
+      "proposedName": "CEquipEnforceBreak::GetNextLevelField_0xac",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Sparse-array (CInfoManager) accessor into the CEquipEnforceBreak config table. Index = current break level (FUN_1166c400) + 1, i.e. the record for the NEXT break level. On a valid record, writes field at record+0xAC into *param_2. FUN_116c5290/51f0/5260 select the equip category (weapon/armor/jewelry) before the lookup.",
+      "formulas": [
+        "idx = FUN_1166c400() + 1  (current break level + 1 -> next level record)",
+        "manager sparse lookup: rec = mgr[0x20][(idx-mgr[0x30])/mgr[0x28]][(idx-mgr[0x30])%mgr[0x28]]; guarded by idx!=-1, idx<mgr[0x24]",
+        "*param_2 = *(rec + 0xAC)"
+      ],
+      "serverRelevance": "validation/authoritative data source: read-only config lookup; break/enhance tables are shared, server reads same field to validate the next-level parameters",
+      "confidence": "medium",
+      "notes": "CEquipEnforceBreak record offset 0xAC is one of several per-level break parameters read by the 11599xxx accessor family."
+    },
+    {
+      "address": "0x115998e0",
+      "currentName": "FUN_115998e0",
+      "proposedName": "CEquipEnforceBreak::GetNextLevelFields_0xb4_0xb8",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Same NEXT-break-level record lookup as FUN_11599830. Writes record+0xB4 into *param_2 and record+0xB8 into *param_3.",
+      "formulas": [
+        "idx = FUN_1166c400() + 1",
+        "*param_2 = *(rec + 0xB4); *param_3 = *(rec + 0xB8)"
+      ],
+      "serverRelevance": "validation/authoritative data source: read-only config lookup",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x115999a0",
+      "currentName": "FUN_115999a0",
+      "proposedName": "CEquipEnforceBreak::GetNextLevelFields_0xa4_0xa8_0xbc_0xc0",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Same NEXT-break-level record lookup. Writes four fields: rec+0xA4->param_2, rec+0xA8->param_3, rec+0xBC->param_4, rec+0xC0->param_5.",
+      "formulas": [
+        "idx = FUN_1166c400() + 1",
+        "*param_2=*(rec+0xA4); *param_3=*(rec+0xA8); *param_4=*(rec+0xBC); *param_5=*(rec+0xC0)"
+      ],
+      "serverRelevance": "validation/authoritative data source: read-only config lookup (likely material/cost/success parameters for the break level)",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x11599a70",
+      "currentName": "FUN_11599a70",
+      "proposedName": "CEquipEnforceBreak::GetSuccessChancePercent",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Computes a break/enhance success-or-protect percentage from the NEXT-break-level record (idx = current+1). If param_2>0 (protection/aid item present) returns base+bonus, else returns base only; both clamped to 100.",
+      "formulas": [
+        "idx = FUN_1166c400() + 1; rec looked up in CEquipEnforceBreak manager",
+        "if (param_2 > 0): result = *(rec+0xC4) + *(rec+0xB0); if (result>100) result=100",
+        "else: result = *(rec+0xB0); if (result>100) result=100",
+        "rec+0xB0 = base success percent; rec+0xC4 = bonus percent added when param_2>0; hard cap 100"
+      ],
+      "costs": ["success chance is a percentage capped at 100"],
+      "serverRelevance": "authoritative: server must compute this success chance from the same table (offsets 0xB0 base, 0xC4 bonus, cap 100) rather than trust client",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11599ce0",
+      "currentName": "FUN_11599ce0",
+      "proposedName": "CEquipQuickLevelUpInfo::GetRecordById",
+      "subsystem": "equipment-quick-levelup",
+      "purpose": "CInfoManager sparse-array accessor: returns the CEquipQuickLevelUpInfo config record pointer for index param_1 (0 if out of range / missing).",
+      "formulas": [
+        "standard mgr sparse lookup: guard idx!=-1 && (idx!=0||mgr[0x30]==0) && mgr[0x28]!=0; idx-=mgr[0x30]; 0<=idx<mgr[0x24]; row=mgr[0x20][idx/mgr[0x28]]; return row[idx%mgr[0x28]]"
+      ],
+      "serverRelevance": "validation/authoritative data source: read-only config lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11599df0",
+      "currentName": "FUN_11599df0",
+      "proposedName": "CItemDecomposeInfo::GetRecordById",
+      "subsystem": "item-decompose",
+      "purpose": "CInfoManager sparse-array accessor: returns the CItemDecomposeInfo config record pointer for index param_1 (item decompose/salvage rules).",
+      "formulas": [
+        "standard mgr sparse lookup (same shape as FUN_11599ce0)"
+      ],
+      "serverRelevance": "validation/authoritative data source: decompose output tables; server reads to compute salvage results",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115bf220",
+      "currentName": "CEquipEnforceArmor__GetManagers",
+      "proposedName": "CEquipEnforceArmor::GetManagers",
+      "subsystem": "equipment-enhance",
+      "purpose": "Stock CInfoManager singleton accessor/registrar for the CEquipEnforceArmor config table (armor enhance rules). Registers on first call, caches at DAT_122df5b0, falls back to placeholder DAT_122df744.",
+      "serverRelevance": "client-only plumbing (config-manager singleton); table itself shared",
+      "confidence": "high",
+      "notes": "Standard CryEngine/MHO InfoManager boilerplate."
+    },
+    {
+      "address": "0x115bf2c0",
+      "currentName": "CEquipEnforceJewelry__GetManagers",
+      "proposedName": "CEquipEnforceJewelry::GetManagers",
+      "subsystem": "equipment-enhance",
+      "purpose": "Stock CInfoManager singleton accessor/registrar for CEquipEnforceJewelry config table (jewelry/decoration enhance rules). Cache DAT_122df5d0.",
+      "serverRelevance": "client-only plumbing (config-manager singleton)",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115bf400",
+      "currentName": "CEquipEnforceWeapon__GetManagers",
+      "proposedName": "CEquipEnforceWeapon::GetManagers",
+      "subsystem": "equipment-enhance",
+      "purpose": "Stock CInfoManager singleton accessor/registrar for CEquipEnforceWeapon config table (weapon enhance rules). Cache DAT_122df5f0.",
+      "serverRelevance": "client-only plumbing (config-manager singleton)",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c2610",
+      "currentName": "FUN_115c2610",
+      "proposedName": "CEquipQuickLevelUp::ValidateAndLog",
+      "subsystem": "equipment-quick-levelup",
+      "purpose": "Guard/validation path for a quick-level-up action on an equip. Verifies the CEquipQuickLevelUpInfo record exists for index param_1, then runs predicate checks FUN_1183e200(level), FUN_1052bdd0(equip), FUN_116c4620(idx); on the success branch builds a key/value log record ('Equip'=param_2, 'Level'=param_3) and calls a non-returning handler FUN_10c3d580(0xc) (throw/assert-style). Returns a boolean (low byte cleared => false on the normal fall-through).",
+      "formulas": [
+        "idx=param_1 sparse lookup into CEquipQuickLevelUpInfo",
+        "return value = uVar2 & 0xFFFFFF00 (boolean in low byte, normally false)"
+      ],
+      "serverRelevance": "unknown (looks like a client-side precondition/telemetry guard around quick-level-up); authoritative equivalent would validate equip+level server-side",
+      "confidence": "low"
+    },
+    {
+      "address": "0x115c3960",
+      "currentName": "FUN_115c3960",
+      "proposedName": "CEquipEnforce::GetRuleRecordByCategoryAndLevel",
+      "subsystem": "equipment-enhance",
+      "purpose": "Dispatches an enhance-rule lookup by equip category. Builds composite index = param_2*100 + param_3. If the current equip is weapon-type (FUN_116c5290 || FUN_116c5250) looks up CEquipEnforceWeapon by that index; if armor-type (FUN_116c51f0) delegates to FUN_115c3b80; if jewelry-type (FUN_116c5260) delegates to FUN_115c3bd0. Returns the record pointer.",
+      "formulas": [
+        "compositeIndex = param_2 * 100 + param_3   (category-block * 100 + level)",
+        "weapon: CEquipEnforceWeapon sparse lookup by compositeIndex",
+        "armor: return FUN_115c3b80(compositeIndex); jewelry: return FUN_115c3bd0(compositeIndex)"
+      ],
+      "serverRelevance": "authoritative data source: resolves the enhance cost/success rule row; server must use identical index math (cat*100+level)",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3a90",
+      "currentName": "FUN_115c3a90",
+      "proposedName": "CEquipEnforceBreak::GetNextLevelRecord",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Returns the CEquipEnforceBreak config record pointer for the NEXT break level (idx = current break level FUN_1166c400 + 1). Category selected first via FUN_116c5290/51f0/5260.",
+      "formulas": ["idx = FUN_1166c400() + 1; standard CEquipEnforceBreak sparse lookup; returns row pointer"],
+      "serverRelevance": "authoritative data source: read-only lookup of next break-level rule",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3b80",
+      "currentName": "FUN_115c3b80",
+      "proposedName": "CEquipEnforceArmor::GetRecordById",
+      "subsystem": "equipment-enhance",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipEnforceArmor rule record for index param_1.",
+      "serverRelevance": "authoritative data source: read-only config lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3bd0",
+      "currentName": "FUN_115c3bd0",
+      "proposedName": "CEquipEnforceJewelry::GetRecordById",
+      "subsystem": "equipment-enhance",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipEnforceJewelry rule record for index param_1.",
+      "serverRelevance": "authoritative data source: read-only config lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3c20",
+      "currentName": "FUN_115c3c20",
+      "proposedName": "CEquipEnforceTransferInfo::GetRecordById",
+      "subsystem": "equipment-enhance-transfer",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipEnforceTransferInfo record for index param_1 (rules for transferring enhancement level between equipment).",
+      "serverRelevance": "authoritative data source: read-only config lookup; enhance-transfer cost/rules",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3c70",
+      "currentName": "FUN_115c3c70",
+      "proposedName": "CEquipEnforceWeapon::GetRecordById",
+      "subsystem": "equipment-enhance",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipEnforceWeapon rule record for index param_1.",
+      "serverRelevance": "authoritative data source: read-only config lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c3cc0",
+      "currentName": "FUN_115c3cc0",
+      "proposedName": "CEquipQuench::ValidateLevelAndGetRule",
+      "subsystem": "equipment-quench",
+      "purpose": "Validates a quench (refine/temper) operation. Reads the player/equip quench state via FUN_1166c4b0(): current quench id at state+0x28C, max quench cap at state+0x290. If requested param_2 <= cap(+0x290) AND a valid CEquipQuenchRuleInfo record exists for the current quench id (+0x28C), returns FUN_11830c10(param_2); otherwise returns 0.",
+      "formulas": [
+        "cap  = *(state + 0x290)   (max allowed quench level)",
+        "curId= *(state + 0x28C)   (current quench rule id, used as manager index)",
+        "guard: param_2 <= cap AND CEquipQuenchRuleInfo[curId] valid",
+        "on success: return FUN_11830c10(param_2)"
+      ],
+      "costs": ["quench level bounded by state+0x290 cap"],
+      "serverRelevance": "validation: server must enforce quench level <= cap and that the quench-rule row exists before applying",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x115c3d40",
+      "currentName": "FUN_115c3d40",
+      "proposedName": "CEquipQuenchRuleInfo::GetRecordById",
+      "subsystem": "equipment-quench",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipQuenchRuleInfo record for index param_1.",
+      "serverRelevance": "authoritative data source: read-only config lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c4180",
+      "currentName": "CEquipEnforceArmor__GetManagers_115c4180",
+      "proposedName": "CEquipEnforceArmor::GetSingletonRaw",
+      "subsystem": "equipment-enhance",
+      "purpose": "Lightweight variant of CEquipEnforceArmor::GetManagers that only returns the cached singleton (*DAT_122df5b0) after first-call registration; returns 0 for non-zero param.",
+      "serverRelevance": "client-only plumbing (config-manager singleton)",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c41d0",
+      "currentName": "CEquipEnforceJewelry__GetManagers_115c41d0",
+      "proposedName": "CEquipEnforceJewelry::GetSingletonRaw",
+      "subsystem": "equipment-enhance",
+      "purpose": "Lightweight singleton getter for CEquipEnforceJewelry (*DAT_122df5d0).",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x115c4270",
+      "currentName": "CEquipEnforceWeapon__GetManagers_115c4270",
+      "proposedName": "CEquipEnforceWeapon::GetSingletonRaw",
+      "subsystem": "equipment-enhance",
+      "purpose": "Lightweight singleton getter for CEquipEnforceWeapon (*DAT_122df5f0).",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1160b030",
+      "currentName": "FUN_1160b030",
+      "proposedName": "CActivityDef::LoadFromDataNode",
+      "subsystem": "activity/events",
+      "purpose": "Deserializes an in-game Activity (limited-time event) definition from a config/data node. Reads scalar fields ACTIVITY_ID, ACTIVITY_NAME(+0xD), ACTIVITY_NOTE(+0x2D), ACTIVITY_TYPE, ACTIVITY_TIME(+0x4D), ACTIVITY_RULE(+0x14D), ACTIVITY_ICON(+0x94D), ACTIVITY_BUBBLE(+0xA4D), ACTIVITY_BUBBLEINTERVAL(+0xACD), ACTIVITY_SERIAL(+0xAD1), ACTIVITY_URL(+0x54D); date range START_DATE/STOP_DATE/SHOW_DATE (validates STOP>=START); array ACTIVITY_PERIOD (Type='iParam1'), ACTIVITY_PHASES; ACTIVITY_PARAMS (iParam1..6 ints at +0x11B19,+0x11B1D,+0x11B21,+0x11B25,+0x11B29,+0x11B2D; szStr1 at +0x11B31 len 0x80, szStr2 at +0x11BB1 len 0x80); and a large ACTIVITY_DATA phase array. Each ACTIVITY_DATA entry (record size 0x423, stored at base+0xAD3 + n*0x423, count byte at +0xAD2, cap DAT_122e0088=0x40) has an InitState type byte selecting a variant parser and a condition dispatch switch(bCondType) cases 1..0x12. Case 0x30 ('0') parses an item-reward sub-block: dwItemID, nItemCount, bBindType, bOpenType, chColumn, dwFlags, bCondType, nGetCountMax, szDesc, plus a nested ItemRewards array (dwItemID,nItemCount,bBindType,chColumn; up to DAT_122e0090=10 entries).",
+      "formulas": [
+        "ACTIVITY_PARAMS ints stored at record 0x11B19..0x11B2D (4 bytes each, iParam1..6)",
+        "ACTIVITY_DATA entry stride = 0x423 bytes; entries at (base+0x11393? no) base+0xAD3 + n*0x423; count byte at base+0xAD2",
+        "hunt-task sub-records stride 200 (0xC8), stored at auStack region, cap DAT_122e008c=3",
+        "phase/period record type tag == 0xC (data-node object type)",
+        "date sanity: reject if STOP_DATE < START_DATE",
+        "caps: DAT_122e0080=5 (period list), DAT_122e0088=0x40 (activity-data), DAT_122e0090=10 (item rewards), DAT_122e008c=3 (hunt tasks)"
+      ],
+      "costs": ["item-reward sub-block carries dwItemID / nItemCount / bBindType (reward grants defined by the event config)"],
+      "serverRelevance": "client-only (config-node deserialization) — but populates the authoritative event/reward tables the server also loads; item-reward amounts here are the source data an authoritative reward grant must honor",
+      "confidence": "medium",
+      "notes": "Very large hand-written parser; condition switch cases map to activity trigger types. Item-reward offsets/limits (10 items, count byte) are the load-bearing economy detail."
+    },
+    {
+      "address": "0x116b9a90",
+      "currentName": "FUN_116b9a90",
+      "proposedName": "CLevelEntryPointDef::LoadFromDataNode",
+      "subsystem": "level/entry-point",
+      "purpose": "Deserializes a level entry-point / mission-tab definition (wide-char field names): Entry_ID(->+0x10), Entry_Point, Position_X, Position_Y, Level_ID, FromLevelID, FromTriggerName, TaskShowCondition, TabID, TabName, IsSpecReward (stored as bool at local_40c: value==1). Uses the standard per-field 'register name / cache / read' idiom with a shared init bitmask DAT_1238b3b4.",
+      "formulas": ["IsSpecReward stored as (parsedValue == 1)"],
+      "serverRelevance": "client-only (UI/level entry-point config); IsSpecReward flags a special-reward level",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x116c49e0",
+      "currentName": "FUN_116c49e0",
+      "proposedName": "CEquipLevelUpInfo::GetRecordById",
+      "subsystem": "equipment-levelup",
+      "purpose": "CInfoManager sparse-array accessor returning the CEquipLevelUpInfo record for index param_1.",
+      "serverRelevance": "authoritative data source: equip level-up curve/cost table lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x116c4a30",
+      "currentName": "CEquipEnforceBreak__GetManagers_116c4a30",
+      "proposedName": "CEquipEnforceBreak::GetNextBreakStageId",
+      "subsystem": "equipment-enhance/break",
+      "purpose": "Given a break record index param_1, reads its break-stage/tier at record+0xC8 (200): if stage==3 returns the same index (already max), if stage>2 returns 0; otherwise scans forward (idx+1, idx+2, ...) through CEquipEnforceBreak for the next record whose stage (+0xC8) == currentStage+1 and returns that index. Returns 0 if none found.",
+      "formulas": [
+        "stage = *(rec + 0xC8)   (0xC8 = 200 = break stage/tier field)",
+        "if stage==3: return same index (max stage is 3)",
+        "if stage>2: return 0",
+        "else: find smallest idx' > param_1 with *(rec' + 0xC8) == stage+1; return idx'"
+      ],
+      "serverRelevance": "authoritative: resolves the next break stage; server should compute progression using field 0xC8 (max stage = 3) not trust client",
+      "confidence": "high",
+      "notes": "Confirms CEquipEnforceBreak record field +0xC8 = break stage, with 3 stages total."
+    },
+    {
+      "address": "0x116d3ab0",
+      "currentName": "FUN_116d3ab0",
+      "proposedName": "CFunctionSwitchDef::LoadFromDataNode(virtualized)",
+      "subsystem": "feature-flags/unlock",
+      "purpose": "Config parser (size 24299, marked <decompile failed/virtualized>) for a feature-unlock/permission table. Field names indicate per-feature enable flags: Title, ForgeEnabled, SupplyBoxEnabled, Mail, Auction, Enhance, RankUp, ManufactureLearn, Storage, Found, WeaponWake, EquipEmbed, plus many HunterGroup* actions.",
+      "serverRelevance": "unknown (body not decompilable); by field names this is a feature-gate config — an authoritative server would enforce whether Forge/Enhance/Auction/etc. are enabled",
+      "confidence": "low",
+      "notes": "Body virtualized; only string table recovered. Names suggest which economy features (forge, enhance, rank-up, auction) can be gated."
+    },
+    {
+      "address": "0x116ebd80",
+      "currentName": "FUN_116ebd80",
+      "proposedName": "COpenEnforceDiamond::ctor",
+      "subsystem": "equipment-enhance",
+      "purpose": "Constructor for an 'OpenEnforceDiamond' object: sets vtable PTR_FUN_11d41958, initializes an intrusive list head (local_c=local_10), registers the name 'OpenEnforceDiamond', then calls non-returning FUN_10c3d580(0x24). Stock object-init boilerplate.",
+      "serverRelevance": "client-only plumbing (object ctor)",
+      "confidence": "medium",
+      "notes": "'OpenEnforceDiamond' likely a diamond/currency-gated enhance-slot-open action; only the ctor is here."
+    },
+    {
+      "address": "0x1177c850",
+      "currentName": "FUN_1177c850",
+      "proposedName": "GameDefFactory::DispatchByTypeName (type -> struct size)",
+      "subsystem": "config-factory",
+      "purpose": "Large string-dispatch factory: compares an incoming type-name against ~150 Def type names (FUN_100fd0c0 = strcmp) and, on match, invokes FUN_10c3d580(size) with that type's struct size. Effectively a map of def-type-name -> allocation size. Economy-relevant sizes recovered: EquipDef=0x10, DragonDef=0x40, DragonItemDef=8; GiftBagDef=0x30, GiftBagGroupDef=0xC4, GiftBagItemDef=0x10, GiftBagGoldPrizeDef=0xC, GiftBagItemPrizeDef=0x14, GiftBagHuntCreditPrizeDef=8, GiftItem=0xC; ItemNumRateDef=0xC, FixedItemDef=0x20, RandomItemDef=0x10, RandomItemGroupDef=0x24, ItemDecomposeDef=0x24; RapidHuntDef=0x18, RapidHuntGoldPrizeDef=0xC, RapidHuntItemsPrizeDef=0x10, AttendAwardDef=0x10, RapidAwardDef=0x14, MasterAwardDef=0x10, MasterAward=0xC; ScheduleDef family (SchedulePrizeDef=0x2C, ScheduleGoldPrizeDef=0xC, ScheduleExpPrizeDef=8, ScheduleItemsPrizeDef=0x14, ScheduleGoldShowDef=0xC, ScheduleItemsShowDef=0x10, ScheduleItemDef=0x10); SoulBeastDef=0x4C, SoulBeastFoodDef=0x14, SoulBeastImageDef=0x84, SoulBeastSocialActionDef=0x38; TaskDef=0x138, TaskGoldPrizeDef=0x10, TaskExpPrizeDef=0xC, TaskMerExpPrizeDef=8, TaskItemPrizeDef=8, TaskItemsPrizeDef=0x10, TaskItemReclaimDef=0x10, TaskGuildPrizeDef=0x10, TaskHRPointPrizeDef=8, TaskHuntCreditPrizeDef=8, TaskFarmExpPrizeDef=0xC, TaskNpcAtdPrizeDef=0xC, TaskContributionPrizeDef=8, TaskHuntSoulPrizeDef=8, TaskSpoorPrizeDef=8.",
+      "formulas": ["type-name string == matched -> FUN_10c3d580(<size const>) for that type (see purpose for the size map)"],
+      "serverRelevance": "client-only plumbing (config object factory); the recovered struct sizes are useful reference for reconstructing the reward/prize/def layouts",
+      "confidence": "high",
+      "notes": "Primary value is the def-type -> size table for GiftBag / Task / Schedule / RapidHunt / Item reward structures."
+    },
+    {
+      "address": "0x1177efb0",
+      "currentName": "FUN_1177efb0",
+      "proposedName": "CItemDecomposeDef::ctor",
+      "subsystem": "item-decompose",
+      "purpose": "Def-object constructor: initializes intrusive list head at +0x10/+0x14 to self, registers type name 'ItemDecomposeDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1177fb20",
+      "currentName": "FUN_1177fb20",
+      "proposedName": "CTaskFarmLevelUpAnyContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor (list-head init + register 'TaskFarmLevelUpAnyContentDef'). Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1177fb50",
+      "currentName": "FUN_1177fb50",
+      "proposedName": "CTaskFarmLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskFarmLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1177fb80",
+      "currentName": "FUN_1177fb80",
+      "proposedName": "CTaskFarmPetLevelUpAnyContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskFarmPetLevelUpAnyContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1177fbb0",
+      "currentName": "FUN_1177fbb0",
+      "proposedName": "CTaskFarmPetLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskFarmPetLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x1177ffa0",
+      "currentName": "FUN_1177ffa0",
+      "proposedName": "CTaskLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11780090",
+      "currentName": "FUN_11780090",
+      "proposedName": "CTaskManufactureLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskManufactureLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11780210",
+      "currentName": "FUN_11780210",
+      "proposedName": "CTaskNpcAtdLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskNpcAtdLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117802a0",
+      "currentName": "FUN_117802a0",
+      "proposedName": "CTaskNpcOrgLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskNpcOrgLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11780330",
+      "currentName": "FUN_11780330",
+      "proposedName": "CTaskPetLevelUpContentDef::ctor",
+      "subsystem": "quest/task-def",
+      "purpose": "Def-object ctor registering 'TaskPetLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11780c90",
+      "currentName": "FUN_11780c90",
+      "proposedName": "CItemDecomposeDef::ctor_dup",
+      "subsystem": "item-decompose",
+      "purpose": "Duplicate def-object ctor registering 'ItemDecomposeDef' (second copy, likely a different translation unit). Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781800",
+      "currentName": "FUN_11781800",
+      "proposedName": "CTaskFarmLevelUpAnyContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskFarmLevelUpAnyContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781830",
+      "currentName": "FUN_11781830",
+      "proposedName": "CTaskFarmLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskFarmLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781860",
+      "currentName": "FUN_11781860",
+      "proposedName": "CTaskFarmPetLevelUpAnyContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskFarmPetLevelUpAnyContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781890",
+      "currentName": "FUN_11781890",
+      "proposedName": "CTaskFarmPetLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskFarmPetLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781c80",
+      "currentName": "FUN_11781c80",
+      "proposedName": "CTaskLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781d70",
+      "currentName": "FUN_11781d70",
+      "proposedName": "CTaskManufactureLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskManufactureLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781ef0",
+      "currentName": "FUN_11781ef0",
+      "proposedName": "CTaskNpcAtdLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskNpcAtdLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11781f80",
+      "currentName": "FUN_11781f80",
+      "proposedName": "CTaskNpcOrgLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskNpcOrgLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11782010",
+      "currentName": "FUN_11782010",
+      "proposedName": "CTaskPetLevelUpContentDef::ctor_dup",
+      "subsystem": "quest/task-def",
+      "purpose": "Duplicate def-object ctor registering 'TaskPetLevelUpContentDef'. Stock boilerplate.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x11783760",
+      "currentName": "FUN_11783760",
+      "proposedName": "CSoulBeastDef::LoadSubTables",
+      "subsystem": "soul-beast",
+      "purpose": "Parses the sub-collections of a SoulBeastDef config object from its data node: AcceptChecks(->+0x10), Foods(->+0x1C), Images(->+0x28), EvolveRule(->+0x34), LevelUpRule(->+0x38), SocialActions(->+0x3C), and one more list (DAT_11de09d4 name ->+0x48). Each present child node is passed to a type-specific list reader.",
+      "formulas": [
+        "child 'AcceptChecks' -> FUN_11768560(node, this+0x10)",
+        "child 'Foods' -> FUN_117686e0(node, this+0x1C)",
+        "child 'Images' -> FUN_117687a0(node, this+0x28)",
+        "child 'EvolveRule' -> FUN_118a68a0(node, this+0x34)",
+        "child 'LevelUpRule' -> FUN_118a68a0(node, this+0x38)",
+        "child 'SocialActions' -> FUN_117689e0(node, this+0x3C)"
+      ],
+      "serverRelevance": "client-only (config deserialization); soul-beast feeding/evolve/levelup rules are the underlying data",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117b1d30",
+      "currentName": "FUN_117b1d30",
+      "proposedName": "CPlayerLevelUpInfo::GetField0x2cById",
+      "subsystem": "player-levelup",
+      "purpose": "CInfoManager sparse-array accessor into CPlayerLevelUpInfo for index param_1; on a valid record returns the field at record+0x2C (a per-level value, e.g. required EXP or level reward reference).",
+      "formulas": ["standard mgr sparse lookup; return *(rec + 0x2C)"],
+      "serverRelevance": "authoritative data source: player level curve; server reads +0x2C per level",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x117b1da0",
+      "currentName": "FUN_117b1da0",
+      "proposedName": "CPlayerLevelUpInfo::GetValueByIndex(vector)",
+      "subsystem": "player-levelup",
+      "purpose": "Contiguous-vector accessor: returns element param_1 from the CPlayerLevelUpInfo vector (base *(mgr+0x14), size (mgr[0x18]-mgr[0x14])/4).",
+      "formulas": [
+        "count = (*(mgr+0x18) - *(mgr+0x14)) >> 2",
+        "if 0<=idx<count: return *(*(mgr+0x14) + idx*4)"
+      ],
+      "serverRelevance": "authoritative data source: player level table indexed lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117b6d70",
+      "currentName": "FUN_117b6d70",
+      "proposedName": "CEquipLevelUpInfo::LookupMap0xf0ByKey",
+      "subsystem": "equipment-levelup",
+      "purpose": "Looks up CEquipLevelUpInfo record for index param_1, then performs a std::map / red-black tree lower-bound over the tree rooted at record+0xF0 keyed by param_2. Returns the mapped value (+0x14) of the entry with the greatest key(+0x10) not exceeding param_2; 0 if none. Node layout: left=+0x08, right=+0x0C, key=+0x10, value=+0x14.",
+      "formulas": [
+        "tree root = *(rec + 0xF0), sentinel = rec+0xEC",
+        "walk: if key(node+0x10) < param_2 go right(+0xC) else go left(+0x8), remember candidate",
+        "return value(+0x14) of best node with key <= param_2 (lower_bound-style)"
+      ],
+      "serverRelevance": "authoritative data source: maps an equip level/EXP threshold (param_2) to a level-up value; server must use same table",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117b6e00",
+      "currentName": "FUN_117b6e00",
+      "proposedName": "CEquipLevelUpInfo::LookupMap0x108ByKey",
+      "subsystem": "equipment-levelup",
+      "purpose": "Identical to FUN_117b6d70 but over the second map rooted at record+0x108 (sentinel +0x104). Same node layout and lower-bound semantics keyed by param_2, returning value(+0x14).",
+      "formulas": [
+        "tree root = *(rec + 0x108), sentinel = rec+0x104",
+        "same lower_bound-by-key(+0x10) -> value(+0x14) logic as FUN_117b6d70"
+      ],
+      "serverRelevance": "authoritative data source: second equip level-up threshold map (e.g. the inverse curve)",
+      "confidence": "high",
+      "notes": "CEquipLevelUpInfo holds two ordered maps: +0xF0 and +0x108 (likely level->exp and exp->level)."
+    },
+    {
+      "address": "0x117b8f50",
+      "currentName": "FUN_117b8f50",
+      "proposedName": "CSoulBeastLevelUpInfo::GetValueByIndex(vector)",
+      "subsystem": "soul-beast",
+      "purpose": "Contiguous-vector accessor into CSoulBeastLevelUpInfo: returns element param_1 (base *(mgr+0x14), count (mgr[0x18]-mgr[0x14])/4).",
+      "formulas": ["count=(*(mgr+0x18)-*(mgr+0x14))>>2; if 0<=idx<count return *(*(mgr+0x14)+idx*4)"],
+      "serverRelevance": "authoritative data source: soul-beast level table lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117e2fe0",
+      "currentName": "CLegendUpgrade__GetManagers",
+      "proposedName": "CLegendUpgrade::GetManagers",
+      "subsystem": "legend-upgrade",
+      "purpose": "Stock CInfoManager singleton accessor/registrar for the CLegendUpgrade config table (legendary equipment upgrade). Cache DAT_123945c0, placeholder DAT_1239476c.",
+      "serverRelevance": "client-only plumbing (config-manager singleton)",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117e3a10",
+      "currentName": "FUN_117e3a10",
+      "proposedName": "CLegendUpgrade::GetValueByIndex(vector)",
+      "subsystem": "legend-upgrade",
+      "purpose": "Contiguous-vector accessor into CLegendUpgrade: returns element param_1 (base *(mgr+0x14), count (mgr[0x18]-mgr[0x14])/4).",
+      "formulas": ["count=(*(mgr+0x18)-*(mgr+0x14))>>2; if 0<=idx<count return *(*(mgr+0x14)+idx*4)"],
+      "serverRelevance": "authoritative data source: legend-upgrade table lookup",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117e3ae0",
+      "currentName": "CLegendUpgrade__GetManagers_117e3ae0",
+      "proposedName": "CLegendUpgrade::GetSingletonRaw",
+      "subsystem": "legend-upgrade",
+      "purpose": "Lightweight singleton getter for CLegendUpgrade (*DAT_123945c0) after first-call registration.",
+      "serverRelevance": "client-only plumbing",
+      "confidence": "high"
+    },
+    {
+      "address": "0x117e3be0",
+      "currentName": "CLegendUpgrade__GetManagers_117e3be0",
+      "proposedName": "CLegendPearl::CanUpgrade",
+      "subsystem": "legend-upgrade",
+      "purpose": "Validation: for a CLegendPearlItemInfo record at index param_1, reads its field +0x1C0 (an already-applied/flag value), then iterates all CLegendUpgrade entries; for each valid entry it calls FUN_117e1b00(param_1). If an applicable upgrade exists it returns 1 when +0x1C0==0 (not yet upgraded) and 0 when +0x1C0!=0 (already upgraded); returns 0 when no entry applies.",
+      "formulas": [
+        "pearlField = *(pearlRec + 0x1C0)",
+        "for idx' in [0, CLegendUpgrade.count): if entry valid and FUN_117e1b00(param_1)!=0 -> return (pearlField==0) ? 1 : 0",
+        "else return 0"
+      ],
+      "serverRelevance": "validation: server-side eligibility check for legendary-pearl upgrade (must confirm not already upgraded, +0x1C0==0)",
+      "confidence": "medium"
+    },
+    {
+      "address": "0x1180a8a0",
+      "currentName": "FUN_1180a8a0",
+      "proposedName": "CGuideGoalDef::LoadFromDataNode",
+      "subsystem": "rewards/guide-goals",
+      "purpose": "Deserializes a guide / beginner-goal definition (wide-char fields) that maps completion counts to reward ids. Reads: id(->+0x10), OpenCondition(->+0x14), Name; Instruction0..Instruction9 (each resolved to a level/entry id via FUN_100e1bf0/1c30 and appended to the vector at this+0x2C, 4 bytes each); and up to 9 (FinishCount_n, RewardId_n) pairs appended as 8-byte pairs {FinishCount, RewardId} to the vector at this+0x20 (grows by 8; stops early when a RewardId is 0).",
+      "formulas": [
+        "Instruction list: vector at this+0x2C, element stride 4, capacity end at this+0x30",
+        "reward pairs: vector at this+0x20, element = {u32 FinishCount (local_440), u32 RewardId (local_43c)}, stride 8, end at this+0x24",
+        "loop pattern: parse FinishCountN then RewardIdN; if RewardId==0 stop; supports N=1..9"
+      ],
+      "costs": ["each entry pairs a FinishCount threshold with a RewardId to grant on reaching it (up to 9 tiers)"],
+      "serverRelevance": "client-only (config-node deserialization); populates the guide-goal reward table that authoritative reward-granting reads (FinishCount->RewardId mapping)",
+      "confidence": "medium",
+      "notes": "Field order confirms pair storage is (FinishCount, RewardId). Instruction0..9 are level/entry references, not rewards."
+    }
+  ]
+}
