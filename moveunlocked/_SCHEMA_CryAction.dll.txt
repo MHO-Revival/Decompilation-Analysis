@@ -1,0 +1,81 @@
+# move-node param schemas recovered from CryAction.dll
+# a registrar pushes one string literal per param, in index order
+
+######## CEntityMoveToUnlocked
+  string at [11307b9c]   referencing functions: 2
+  -- 105fc120 FUN_105fc120 (18140 bytes)
+     [too large, skipped]
+  -- 10572920 FUN_10572920 (1230 bytes)
+     [ 0] AnimSeqName
+     [ 1] SkillSpeed
+     [ 2] MoveSpeedScalar
+     [ 3] MoveSpeedMultiplier
+     [ 4] TargetType
+     [ 5] TargetID
+     [ 6] TargetPos
+     [ 7] TargetAngle
+     [ 8] CancelUnlockedMoveTo
+     [ 9] AnimSeqName
+     [10] SkillSpeed
+     [11] MoveSpeedScalar
+     [12] MoveSpeedMultiplier
+     [13] TargetType
+     [14] TargetID
+     [15] TargetPos
+     [16] TargetAngle
+     [17] CancelUnlockedMoveTo
+     [18] MoveSpeedByAnim
+     -> reg_CryAction_10572920.c
+
+######## CEntityMove
+  string at [11307688]   referencing functions: 2
+  -- 105fc120 FUN_105fc120 (18140 bytes)
+     [too large, skipped]
+  -- 1056c9d0 FUN_1056c9d0 (614 bytes)
+     [ 0] DisablePhy
+     [ 1] MoveSpeed
+     [ 2] TargetDistance
+     [ 3] AlwaysStartDirInMove
+     [ 4] MoveSpeedByAnim
+     [ 5] DisablePhy
+     [ 6] MoveSpeed
+     [ 7] TargetDistance
+     [ 8] AlwaysStartDirInMove
+     [ 9] MoveSpeedByAnim
+     -> reg_CryAction_1056c9d0.c
+
+######## CEntityMoveToPos
+  string at [113078e0]   referencing functions: 2
+  -- 105fc120 FUN_105fc120 (18140 bytes)
+     [too large, skipped]
+  -- 1056f700 FUN_1056f700 (12 bytes)
+     -> reg_CryAction_1056f700.c
+
+######## CEntityMoveToTarget
+  string at [11307aac]   referencing functions: 2
+  -- 105fc120 FUN_105fc120 (18140 bytes)
+     [too large, skipped]
+  -- 10571bc0 FUN_10571bc0 (1578 bytes)
+     [ 0] EnableSpeedScalar
+     [ 1] DisablePhy
+     [ 2] MoveSpeed
+     [ 3] TargetID
+     [ 4] TargetSrvID
+     [ 5] MoveSpeedScalar
+     [ 6] MoveSpeedByAnim
+     [ 7] NeedMoveSpeedAcc
+     [ 8] MoveSpeedAccelerate
+     [ 9] EnableSpeedScalar
+     [10] DisablePhy
+     [11] MoveSpeed
+     [12] TargetID
+     [13] TargetSrvID
+     [14] MoveSpeedScalar
+     [15] MoveSpeedByAnim
+     [16] NeedMoveSpeedAcc
+     [17] MoveSpeedAccelerate
+     [18] MoveSpeedAccStart
+     [19] MoveSpeedAccEnd
+     [20] MoveSpeedAccDuringTime
+     [21] MoveSpeedAccDuringSpeed
+     -> reg_CryAction_10571bc0.c

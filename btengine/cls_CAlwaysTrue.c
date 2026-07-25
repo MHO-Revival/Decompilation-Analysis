@@ -1,0 +1,148 @@
+// ===== creator FUN_106014e0 @ 106014e0 =====
+
+/* [RE-AUTO c0] */
+
+int * FUN_106014e0(int param_1,undefined4 param_2,int param_3)
+
+{
+  int *piVar1;
+  int iVar2;
+  
+  if (param_3 != 0) {
+    piVar1 = (int *)FUN_10653d70(0x60);
+    if (piVar1 == (int *)0x0) {
+      piVar1 = (int *)0x0;
+    }
+    else {
+      FUN_103f4300(param_3);
+      *piVar1 = (int)&PTR_FUN_113bf2e4;
+      piVar1[0x15] = *(int *)(param_3 + 0x54);
+      piVar1[0x16] = *(int *)(param_3 + 0x58);
+      piVar1[0x17] = *(int *)(param_3 + 0x5c);
+      *piVar1 = (int)&PTR_FUN_11306074;
+    }
+    piVar1[2] = param_1;
+    (**(code **)(*piVar1 + 4))(param_2);
+    (**(code **)(*piVar1 + 0x18))();
+    return piVar1;
+  }
+  iVar2 = FUN_10653d70(0x60);
+  if (iVar2 != 0) {
+    piVar1 = (int *)FUN_10553790(param_1,param_2);
+    piVar1[0xf] = 0x10;
+    return piVar1;
+  }
+  uRam0000003c = 0x10;
+  return (int *)0x0;
+}
+
+
+// ===== CTOR (writes vtbl 113bf2e4) FUN_106014e0 @ 106014e0 =====
+
+/* [RE-AUTO c0] */
+
+int * FUN_106014e0(int param_1,undefined4 param_2,int param_3)
+
+{
+  int *piVar1;
+  int iVar2;
+  
+  if (param_3 != 0) {
+    piVar1 = (int *)FUN_10653d70(0x60);
+    if (piVar1 == (int *)0x0) {
+      piVar1 = (int *)0x0;
+    }
+    else {
+      FUN_103f4300(param_3);
+      *piVar1 = (int)&PTR_FUN_113bf2e4;
+      piVar1[0x15] = *(int *)(param_3 + 0x54);
+      piVar1[0x16] = *(int *)(param_3 + 0x58);
+      piVar1[0x17] = *(int *)(param_3 + 0x5c);
+      *piVar1 = (int)&PTR_FUN_11306074;
+    }
+    piVar1[2] = param_1;
+    (**(code **)(*piVar1 + 4))(param_2);
+    (**(code **)(*piVar1 + 0x18))();
+    return piVar1;
+  }
+  iVar2 = FUN_10653d70(0x60);
+  if (iVar2 != 0) {
+    piVar1 = (int *)FUN_10553790(param_1,param_2);
+    piVar1[0xf] = 0x10;
+    return piVar1;
+  }
+  uRam0000003c = 0x10;
+  return (int *)0x0;
+}
+
+
+// CAlwaysTrue vtbl[0] @ 103dc890 (already emitted)
+
+// CAlwaysTrue vtbl[1] @ 103dc6c0 (already emitted)
+
+// CAlwaysTrue vtbl[2] @ 103dc930 (already emitted)
+
+// CAlwaysTrue vtbl[3] @ 103d8a10 (already emitted)
+
+// CAlwaysTrue vtbl[4] @ 103dc9d0 (already emitted)
+
+// ===== CTOR (writes vtbl 11306074) FUN_106014e0 @ 106014e0 =====
+
+/* [RE-AUTO c0] */
+
+int * FUN_106014e0(int param_1,undefined4 param_2,int param_3)
+
+{
+  int *piVar1;
+  int iVar2;
+  
+  if (param_3 != 0) {
+    piVar1 = (int *)FUN_10653d70(0x60);
+    if (piVar1 == (int *)0x0) {
+      piVar1 = (int *)0x0;
+    }
+    else {
+      FUN_103f4300(param_3);
+      *piVar1 = (int)&PTR_FUN_113bf2e4;
+      piVar1[0x15] = *(int *)(param_3 + 0x54);
+      piVar1[0x16] = *(int *)(param_3 + 0x58);
+      piVar1[0x17] = *(int *)(param_3 + 0x5c);
+      *piVar1 = (int)&PTR_FUN_11306074;
+    }
+    piVar1[2] = param_1;
+    (**(code **)(*piVar1 + 4))(param_2);
+    (**(code **)(*piVar1 + 0x18))();
+    return piVar1;
+  }
+  iVar2 = FUN_10653d70(0x60);
+  if (iVar2 != 0) {
+    piVar1 = (int *)FUN_10553790(param_1,param_2);
+    piVar1[0xf] = 0x10;
+    return piVar1;
+  }
+  uRam0000003c = 0x10;
+  return (int *)0x0;
+}
+
+
+// ===== CAlwaysTrue vtbl[0] @ 105537e0  FUN_105537e0 =====
+
+/* [RE-AUTO c0] */
+
+undefined4 __thiscall FUN_105537e0(undefined4 param_1,byte param_2)
+
+{
+  FUN_103dc920();
+  if ((param_2 & 1) != 0) {
+    FUN_10653dc0(param_1);
+  }
+  return param_1;
+}
+
+
+// CAlwaysTrue vtbl[1] @ 103dc6c0 (already emitted)
+
+// CAlwaysTrue vtbl[2] @ 103dc930 (already emitted)
+
+// CAlwaysTrue vtbl[3] @ 103d8a10 (already emitted)
+

@@ -1,0 +1,59 @@
+CSelector string VA = 00000000
+
+#################### CBTRandomSelecNode (str @ 113bf5ac) ####################
+  ref@103ecb91 <none>
+  ref@103ecba1 <none>
+  ref@103f704b in FUN_103f7010@103f7010
+  ref@103f70d2 in FUN_103f7010@103f7010
+  ref@103f7159 in FUN_103f7010@103f7010
+  ref@103f71e0 in FUN_103f7010@103f7010
+  ref@103f7267 in FUN_103f7010@103f7010
+  ref@103f72ee in FUN_103f7010@103f7010
+  ref@103f7375 in FUN_103f7010@103f7010
+  ref@103f73fc in FUN_103f7010@103f7010
+  ref@103f7483 in FUN_103f7010@103f7010
+  ref@103f750a in FUN_103f7010@103f7010
+  ref@103f7591 in FUN_103f7010@103f7010
+  ref@103f7618 in FUN_103f7010@103f7010
+  ref@103f769f in FUN_103f7010@103f7010
+  ref@103f7726 in FUN_103f7010@103f7010
+  ref@103f77ad in FUN_103f7010@103f7010
+  ref@103f7834 in FUN_103f7010@103f7010
+  ref@103f78bb in FUN_103f7010@103f7010
+  ref@103f7942 in FUN_103f7010@103f7010
+  ref@103f79c9 in FUN_103f7010@103f7010
+  ref@103f7a50 in FUN_103f7010@103f7010
+  candidate NON-leaf vtables: 
+
+#################### CBTRandomSelectAction (str @ 113bf5c0) ####################
+  ref@103eccb1 <none>
+  ref@103eccc1 <none>
+  ref@103f877b in FUN_103f8740@103f8740
+  ref@103f8802 in FUN_103f8740@103f8740
+  ref@103f8889 in FUN_103f8740@103f8740
+  ref@103f8910 in FUN_103f8740@103f8740
+  ref@103f8997 in FUN_103f8740@103f8740
+  ref@103f8a1e in FUN_103f8740@103f8740
+  ref@103f8aa5 in FUN_103f8740@103f8740
+  ref@103f8b2c in FUN_103f8740@103f8740
+  ref@103f8bb3 in FUN_103f8740@103f8740
+  ref@103f8c3a in FUN_103f8740@103f8740
+  ref@103f8cc1 in FUN_103f8740@103f8740
+  ref@103f8d48 in FUN_103f8740@103f8740
+  ref@103f8dcf in FUN_103f8740@103f8740
+  ref@103f8e56 in FUN_103f8740@103f8740
+  ref@103f8edd in FUN_103f8740@103f8740
+  ref@103f8f64 in FUN_103f8740@103f8740
+  ref@103f8feb in FUN_103f8740@103f8740
+  ref@103f9072 in FUN_103f8740@103f8740
+  ref@103f90f9 in FUN_103f8740@103f8740
+  ref@103f9180 in FUN_103f8740@103f8740
+  candidate NON-leaf vtables: 
+
+#################### CLoopFilter (str @ 113bf5d8) ####################
+  ref@103ed031 <none>
+  ref@103ed041 <none>
+  ref@103f974b in FUN_103f9710@103f9710
+  candidate NON-leaf vtables: 
+
+#### CSelector: string not found

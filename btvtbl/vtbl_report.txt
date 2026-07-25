@@ -1,0 +1,180 @@
+CAnimSequencePlay            getters: [10555e80,10555f10]
+CAnimSequenceSetInput        getters: [10556f90,10556ff0]
+CAnimSequenceIsPlaying       getters: [105542d0,10554330]
+CEntityMove                  getters: [1056ccf0,1056cd50]
+CEntityMoveToTarget          getters: [10572240,105722a0]
+CEntityMoveToPos             getters: [1056f700,1056f750,1056f760]
+CEntityRotateToTarget        getters: [1057a390,1057a3f0]
+CEntityRotateToPos           getters: [10575c20,10575c80]
+CEntityRotateOrientation     getters: [10574360,105743c0]
+CSetTargetPosOrientation     getters: [105d3b10,10622510]
+CSetTarget                   getters: [105c6500,105d3200,10622220]
+CDistanceCheck               getters: [105f74b0,106217e0]
+CBlackBoardCheck             getters: [105f4e80,10621470]
+CSetBlackBoard               getters: [105ce850,10622340]
+CSetBlackBoardEqualString    getters: [106212e0,10628fa0]
+CSetBlackBoardEqualFloat     getters: [106212c0,10628f80]
+CTimeCheck                   getters: [105fb980,106226f0]
+CSetTime                     getters: [105d4450,10622520]
+CSetArea                     getters: [105cdc80,10622330]
+CHandleDeath                 getters: [10597c90,10621c60]
+CCaculateDamagedValue        getters: [10560ab0,10560b10]
+CCaculateDamagedState        getters: [10560940,105609a0]
+CSelector                    getters: [105ed590,105ed5f0]
+CBTRandomSelecNode           getters: [103ecb90,103ecba0]
+CBTRandomSelectAction        getters: [103eccb0,103eccc0]
+CLoopFilter                  getters: [103ed030,103ed040]
+CNodeRepeatExecuteCounter    getters: [105f9a50,10621ef0]
+CConditionSuccessful         getters: [106216c0,10629030]
+CConditionFailure            getters: [106216b0,10629020]
+CBTOperation                 getters: [1055f000,10621450]
+
+================ CAnimSequencePlay ================
+  --- VTABLE 11306200  (name getter at slot 0) ---
+    [ 0] 10555e80  FUN_10555e80     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CAnimSequenceSetInput ================
+  --- VTABLE 1130641c  (name getter at slot 0) ---
+    [ 0] 10556f90  FUN_10556f90     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CAnimSequenceIsPlaying ================
+  --- VTABLE 11306184  (name getter at slot 0) ---
+    [ 0] 105542d0  FUN_105542d0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityMove ================
+  --- VTABLE 11307668  (name getter at slot 0) ---
+    [ 0] 1056ccf0  FUN_1056ccf0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityMoveToTarget ================
+  --- VTABLE 11307a8c  (name getter at slot 0) ---
+    [ 0] 10572240  FUN_10572240     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityMoveToPos ================
+  --- VTABLE 113078c0  (name getter at slot 0) ---
+    [ 0] 1056f750  FUN_1056f750     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityRotateToTarget ================
+  --- VTABLE 11307eec  (name getter at slot 0) ---
+    [ 0] 1057a390  FUN_1057a390     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityRotateToPos ================
+  --- VTABLE 11307d64  (name getter at slot 0) ---
+    [ 0] 10575c20  FUN_10575c20     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CEntityRotateOrientation ================
+  --- VTABLE 11307ccc  (name getter at slot 0) ---
+    [ 0] 10574360  FUN_10574360     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetTargetPosOrientation ================
+  --- VTABLE 1130e750  (name getter at slot 0) ---
+    [ 0] 10622510  FUN_10622510     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetTarget ================
+  --- VTABLE 1130e948  (name getter at slot 0) ---
+    [ 0] 10622220  FUN_10622220     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CDistanceCheck ================
+  --- VTABLE 1130ffb0  (name getter at slot 0) ---
+    [ 0] 106217e0  FUN_106217e0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CBlackBoardCheck ================
+  --- VTABLE 1130feb4  (name getter at slot 0) ---
+    [ 0] 10621470  FUN_10621470     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetBlackBoard ================
+  --- VTABLE 1130e238  (name getter at slot 0) ---
+    [ 0] 10622340  FUN_10622340     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetBlackBoardEqualString ================
+  --- VTABLE 1130e4e8  (name getter at slot 0) ---
+    [ 0] 106212e0  FUN_106212e0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetBlackBoardEqualFloat ================
+  --- VTABLE 1130e334  (name getter at slot 0) ---
+    [ 0] 106212c0  FUN_106212c0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CTimeCheck ================
+  --- VTABLE 11310154  (name getter at slot 0) ---
+    [ 0] 106226f0  FUN_106226f0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetTime ================
+  --- VTABLE 1130e7f8  (name getter at slot 0) ---
+    [ 0] 10622520  FUN_10622520     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSetArea ================
+  --- VTABLE 1130f2d8  (name getter at slot 0) ---
+    [ 0] 10622330  FUN_10622330     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CHandleDeath ================
+  --- VTABLE 1130f4d0  (name getter at slot 0) ---
+    [ 0] 10621c60  FUN_10621c60     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CCaculateDamagedValue ================
+  --- VTABLE 11306c80  (name getter at slot 0) ---
+    [ 0] 10560ab0  FUN_10560ab0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CCaculateDamagedState ================
+  --- VTABLE 11306be8  (name getter at slot 0) ---
+    [ 0] 10560940  FUN_10560940     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CSelector ================
+  --- VTABLE 1130d0dc  (name getter at slot 0) ---
+    [ 0] 105ed590  FUN_105ed590     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CBTRandomSelecNode ================
+  --- VTABLE 113c05e0  (name getter at slot 0) ---
+    [ 0] 103ecb90  FUN_103ecb90     6 bytes
+    [ 1] 103d7a50 <stop>
+
+================ CBTRandomSelectAction ================
+  --- VTABLE 113c0730  (name getter at slot 0) ---
+    [ 0] 103eccb0  FUN_103eccb0     6 bytes
+    [ 1] 103d7a50 <stop>
+
+================ CLoopFilter ================
+  --- VTABLE 113c06dc  (name getter at slot 0) ---
+    [ 0] 103ed030  FUN_103ed030     6 bytes
+    [ 1] 103ed0a0 <stop>
+
+================ CNodeRepeatExecuteCounter ================
+  --- VTABLE 11310504  (name getter at slot 0) ---
+    [ 0] 10621ef0  FUN_10621ef0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CConditionSuccessful ================
+  --- VTABLE 1131447c  (name getter at slot 0) ---
+    [ 0] 106216c0  FUN_106216c0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CConditionFailure ================
+  --- VTABLE 11314414  (name getter at slot 0) ---
+    [ 0] 106216b0  FUN_106216b0     6 bytes
+    [ 1] 103dc6d0 <stop>
+
+================ CBTOperation ================
+  --- VTABLE 1130e600  (name getter at slot 0) ---
+    [ 0] 10621450  FUN_10621450     6 bytes
+    [ 1] 103dc6d0 <stop>

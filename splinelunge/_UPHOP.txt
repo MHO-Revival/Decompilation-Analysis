@@ -1,0 +1,74 @@
+############ callers of 11077e10 (FUN_11077e10)
+call sites: 2
+
+==== CALL at 10a5a634 in FUN_10a5a590 @ 10a5a590
+   10a5a590   PUSH EBP
+   10a5a591   MOV EBP,ESP
+   10a5a593   SUB ESP,0x14
+   10a5a596   PUSH ESI
+   10a5a597   MOV ESI,ECX
+   10a5a599   PUSH EDI
+   10a5a59a   CMP dword ptr [ESI + 0xbc],0x0
+   10a5a5a1   JZ 0x10a5a641
+   10a5a5a7   MOV EAX,dword ptr [ESI]
+   10a5a5a9   CALL dword ptr [EAX + 0x320]
+   10a5a5af   MOV EDI,dword ptr [EBP + 0x8]
+   10a5a5b2   TEST EAX,EAX
+   10a5a5b4   MOV EAX,dword ptr [ESI]
+   10a5a5b6   MOV ECX,ESI
+   10a5a5b8   JZ 0x10a5a5f3
+   10a5a5ba   CALL dword ptr [EAX + 0x320]
+   10a5a5c0   MOV dword ptr [EBP + -0x8],EAX
+   10a5a5c3   MOV ECX,ESI
+   10a5a5c5   MOV EAX,dword ptr [ESI]
+   10a5a5c7   MOV dword ptr [EBP + -0x14],0x70d
+   10a5a5ce   MOV dword ptr [EBP + -0x10],0xffffffff
+   10a5a5d5   MOV dword ptr [EBP + -0xc],0xffffffff
+   10a5a5dc   MOV dword ptr [EBP + -0x4],EDI
+   10a5a5df   CALL dword ptr [EAX + 0x320]
+   10a5a5e5   LEA EDX,[EBP + -0x14]
+   10a5a5e8   PUSH EDX
+   10a5a5e9   MOV ECX,dword ptr [EAX + 0x1c]
+   10a5a5ec   MOV EAX,dword ptr [ECX]
+   10a5a5ee   CALL dword ptr [EAX + 0x14]
+   10a5a5f1   JMP 0x10a5a603
+   10a5a5f3   CALL dword ptr [EAX + 0x648]
+   10a5a5f9   MOV EAX,dword ptr [ESI]
+   10a5a5fb   MOV ECX,ESI
+   10a5a5fd   CALL dword ptr [EAX + 0x648]
+   10a5a603   MOVSS XMM0,dword ptr [EBP + 0x1c]
+   10a5a608   SUB ESP,0x10
+   10a5a60b   MOV EAX,dword ptr [EBP + 0x18]
+   10a5a60e   MOV ECX,ESP
+   10a5a610   MOVSS dword ptr [ESP + 0xc],XMM0
+   10a5a616   MOVQ XMM0,qword ptr [EBP + 0x10]
+   10a5a61b   MOVQ qword ptr [ECX],XMM0
+   10a5a61f   MOVSS XMM0,dword ptr [EBP + 0xc]
+   10a5a624   PUSH ECX
+   10a5a625   MOV dword ptr [ECX + 0x8],EAX
+   10a5a628   MOV ECX,dword ptr [ESI + 0xbc]
+   10a5a62e   MOVSS dword ptr [ESP],XMM0
+   10a5a633   PUSH EDI
+   10a5a634   CALL 0x11077e10   <-- CALL
+
+==== CALL at 10a5a693 in FUN_10a5a650 @ 10a5a650
+   10a5a650   PUSH EBP
+   10a5a651   MOV EBP,ESP
+   10a5a653   MOV EDX,ECX
+   10a5a655   MOV EAX,dword ptr [EDX + 0xbc]
+   10a5a65b   TEST EAX,EAX
+   10a5a65d   JZ 0x10a5a69c
+   10a5a65f   SUB ESP,0x10
+   10a5a662   MOV byte ptr [EAX + 0x31],0x1
+   10a5a666   MOVQ XMM0,qword ptr [EBP + 0x10]
+   10a5a66b   MOV ECX,ESP
+   10a5a66d   MOV EAX,dword ptr [EBP + 0x18]
+   10a5a670   MOV dword ptr [ESP + 0xc],0x0
+   10a5a678   MOVQ qword ptr [ECX],XMM0
+   10a5a67c   MOVSS XMM0,dword ptr [EBP + 0xc]
+   10a5a681   PUSH ECX
+   10a5a682   MOV dword ptr [ECX + 0x8],EAX
+   10a5a685   MOV ECX,dword ptr [EDX + 0xbc]
+   10a5a68b   MOVSS dword ptr [ESP],XMM0
+   10a5a690   PUSH dword ptr [EBP + 0x8]
+   10a5a693   CALL 0x11077e10   <-- CALL

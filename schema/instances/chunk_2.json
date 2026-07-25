@@ -1,0 +1,386 @@
+{
+  "chunkIndex": 2,
+  "functions": [
+    {
+      "address": "10d658d0",
+      "currentName": "FUN_10d658d0",
+      "proposedName": "CNewLobbyUI::NotifyReady",
+      "purpose": "FlashUI 'NewLobby' widget plumbing: sets flag at param_1+0x18=1, optionally pushes a color/vec3 (0xc09eb852,0xbeff559b,0x4330b852) via FUN_10b44230, fetches the FlashUI system, resolves the 'NewLobby' UI element, releases refcounted handles, then calls vtable+0x24(1) and DAT_120286c0+0x594 vtbl+0x18(1) to enable input/window.",
+      "confidence": "medium",
+      "subsystem": "lobby-ui",
+      "serverRelevance": "client-only (FlashUI/CryEngine UI plumbing; no server authority)",
+      "formulas": ["writes 1 to *(param_1+0x18)", "float triplet local_10=0xc09eb852(-4.96f), local_c=0xbeff559b(-0.499f), local_8=0x4330b852(176.72f) passed to FUN_10b44230 when *(DAT_120286c8+0xd0)+0x5c != 0"],
+      "notes": "Standard refcount release idiom (LOCK; [+1]--; if 0 vtbl+4; [+2]--; if 1 vtbl+8) repeated throughout chunk."
+    },
+    {
+      "address": "10d66b30",
+      "currentName": "FUN_10d66b30",
+      "proposedName": "CNewLobbyUI::SendLoadLocalData",
+      "purpose": "Resolves FlashUI 'NewLobby' element; if valid, obtains its model (vtbl+0x8c) and invokes UI callback 'LoadLocalData' (vtbl+0xc0) passing an arg struct {local_18=*param_1, local_20[0]=3}.",
+      "confidence": "medium",
+      "subsystem": "lobby-ui",
+      "serverRelevance": "client-only",
+      "formulas": ["arg count constant 3 (local_20[0]=3); local_18 = *param_1"]
+    },
+    {
+      "address": "10d679a0",
+      "currentName": "FUN_10d679a0",
+      "proposedName": "CNewLobbyUI::SetWindowVisible",
+      "purpose": "If flag *(param_1+0xd95)!=0, destroys old splash window (FindWindowA/DestroyWindow) then Show/Focus/Foreground the game window (DAT_1202e818+0x10 vtbl+0x50c). Then sets NewLobby visibility = (*param_2=='\\0') via vtbl+100 and model vtbl+0x94, stores bool at param_1+0xd8f, and propagates cursor/UI visibility.",
+      "confidence": "medium",
+      "subsystem": "lobby-ui",
+      "serverRelevance": "client-only (Win32 window + UI visibility)",
+      "formulas": ["bVar4 = (*param_2 == 0); stored to *(param_1+0xd8f) and pushed to UI vtbl+100/+0x94"]
+    },
+    {
+      "address": "10d69790",
+      "currentName": "FUN_10d69790",
+      "proposedName": "CNewLobbyUI::SetActive",
+      "purpose": "Sets NewLobby UI active state bVar5 = (*param_1==1) via vtbl+100 and model vtbl+0x94; writes bool to *(local_8+0xd8f); refreshes a related manager (FUN_10d17440 -> +4 -> vtbl+0x28 -> vtbl+0x1c).",
+      "confidence": "low",
+      "subsystem": "lobby-ui",
+      "serverRelevance": "client-only",
+      "formulas": ["bVar5 = (*param_1 == 1)"],
+      "notes": "local_8 read uninitialized in decompile (likely 'this'); decompiler artifact."
+    },
+    {
+      "address": "10d6b8e0",
+      "currentName": "FUN_10d6b8e0",
+      "proposedName": "CGameStartup::HideSplashShowLobby",
+      "purpose": "Startup/splash->lobby transition. If not already done (DAT_1202e818+0x209==0): unless cvar 'r_hidewindowuntilelobby' is set, destroys splash window and Show/Focus/Foreground game window; caches cvar 'e_SplashHideMouseTime' float into param_1+0x2c (ptr at +0x28, +0x30=0, flag +0x24=1). If param_1+0x25==0, hides FlashUI 'BottomAnnounce' and 'WaterPrint' widgets (vtbl+100(1)) and calls FUN_10b6a400.",
+      "confidence": "medium",
+      "subsystem": "startup-splash",
+      "serverRelevance": "client-only (window/cvar/UI startup plumbing)",
+      "formulas": ["*(param_1+0x2c) = (float)cvar('e_SplashHideMouseTime')->vtbl+0xc()", "*(param_1+0x24)=1 (splash-hidden flag)"],
+      "costs": ["cvar 'e_SplashHideMouseTime' = mouse-hide delay seconds during splash"]
+    },
+    {
+      "address": "10e35140",
+      "currentName": "FUN_10e35140",
+      "proposedName": "CFlowNode_LevelResult::GetConfiguration",
+      "purpose": "One-time static init of a CryEngine flowgraph node port descriptor set for a level-result node. Input ports: 'enable', 'levelResult', 'winCamp', 'atOnceExitEnable'. Output port group named 'Result' (port type 6). Sets param_1 descriptor pointers and flags (&0xfffff01f | 0x10).",
+      "confidence": "high",
+      "subsystem": "level-result-flownode",
+      "serverRelevance": "client-only (UI/flowgraph presentation of result); the authoritative result comes from server",
+      "formulas": ["port config flag: param_1[2] = param_1[2] & 0xfffff01f | 0x10", "output port type constant 6"],
+      "notes": "'winCamp' = winning camp/faction; 'atOnceExitEnable' = allow immediate exit after result."
+    },
+    {
+      "address": "10eabda0",
+      "currentName": "FUN_10eabda0",
+      "proposedName": "CFlowNode_WeaponTutorial::GetConfiguration",
+      "purpose": "One-time static init of flowgraph node ports for the weapon-tutorial node. Input ports: 'Success' plus name1..name16 (type 5=string) each paired with type1..type16 (type 1=int), and teach-ID ports: maleTeachID, femaleTeachID, selWeaponID, quitTeachID, baseTeachID, advanceTeachID, backTeachID, nextTeachID, doTeachID, previewTeachID, currentPlayerWeaponType, EnterLevelTeachID, SelectWeaponTeachID, QuitLessonTeachID.",
+      "confidence": "high",
+      "subsystem": "tutorial-flownode",
+      "serverRelevance": "client-only (tutorial UI flowgraph)",
+      "formulas": ["port type constants: name* = 5 (string), type* = 1 (int); 'Success' output type 6", "16 name/type pairs (name1..name16)"]
+    },
+    {
+      "address": "10ead340",
+      "currentName": "FUN_10ead340",
+      "proposedName": "CWeaponTutorialConfig::LoadFromXML",
+      "purpose": "Loads 'Libs/LevelXML/WeaponTutorialV2.xml'. Reads root 'WeaponTutorial' attrs into this: MaleTeachID(+0x28), WeaponTutorialTaskID(+0x58), FemaleTeachID(+0x2c), EnterLevelTeachID(+0x5c), SelectWeaponTeachID(+0x60), QuitLessonTeachID(+0x64). Iterates child 'TextMessageInfo' nodes (count vtbl+0xa0) building a linked list. Then 'selWeaponID' block reads selWeaponID(+0x30), quitTeachID(+0x34), baseTeachID(+0x38), advanceTeachID(+0x3c), backTeachID(+0x40), nextTeachID(+0x44), doTeachID(+0x48), previewTeachID(+0x4c), and stores an ID at +0x50 from FUN_10eacf00->vtbl+0x294. Returns 1 on full success else 0.",
+      "confidence": "high",
+      "subsystem": "tutorial-config",
+      "serverRelevance": "client-only (tutorial content config)",
+      "formulas": ["struct offsets written: +0x28 MaleTeachID, +0x2c FemaleTeachID, +0x30 selWeaponID, +0x34 quitTeachID, +0x38 baseTeachID, +0x3c advanceTeachID, +0x40 backTeachID, +0x44 nextTeachID, +0x48 doTeachID, +0x4c previewTeachID, +0x50 (weapon obj id), +0x58 WeaponTutorialTaskID, +0x5c EnterLevelTeachID, +0x60 SelectWeaponTeachID, +0x64 QuitLessonTeachID"]
+    },
+    {
+      "address": "10eb85d0",
+      "currentName": "FUN_10eb85d0",
+      "proposedName": "CFlowNode_VideoPlayer::GetConfiguration",
+      "purpose": "One-time static init of flowgraph video/cutscene node ports. Inputs: (2 leading unnamed play/stop trigger ports), 'Pause', 'Resume', 'InstanceID'(int, default -1), 'VideoFile'(string), 'Transparent'(bool default 0), an unnamed bool, 'Skipable'(bool default 1), 'AudioChannel'(int 0), 'SubtitleChannel'(int 0). Outputs: 'OnPlay','OnStop','OnPause','OnResume','OnLooped','OnVideoNotFound'.",
+      "confidence": "high",
+      "subsystem": "video-flownode",
+      "serverRelevance": "client-only (cutscene playback UI)",
+      "formulas": ["defaults: InstanceID = -1 (0xffffffff), Transparent = 0, Skipable = 1, AudioChannel = 0, SubtitleChannel = 0", "config flag param_1[2] = &0xfffff02f | 0x20"]
+    },
+    {
+      "address": "1109d790",
+      "currentName": "FUN_1109d790",
+      "proposedName": "CSPAnalyst::SerializeSessionStats",
+      "purpose": "Serializes single-player analyst/telemetry block 'SPAnalyst': writes levelStartTime(param_1+0x20), gameStartTime(param_1+0x28), then a nested record with kills(param_1+0x18) and deaths(param_1+0x1c).",
+      "confidence": "medium",
+      "subsystem": "level-stats-telemetry",
+      "serverRelevance": "client-only telemetry serialization (values may originate from gameplay; not itself authoritative)",
+      "formulas": ["struct offsets: +0x18 kills, +0x1c deaths, +0x20 levelStartTime, +0x28 gameStartTime"]
+    },
+    {
+      "address": "110ae0e0",
+      "currentName": "FUN_110ae0e0",
+      "proposedName": "CNewLobbyUISH::RegisterCallbacks",
+      "purpose": "Constructs a FlashUI ScaleForm callback handler for the lobby. Resolves DAT_11dbd178 UI element and 'NewLobby'; registers named callbacks via CInfoRecord::GetModelString + vtbl+0xf0: 'UIModeRelationUICount', 'DisablePlayerInput', 'DisableUIInput', 'UISHCallBack', 'OnPlayUISound', 'OnPauseGameCallBack' (first element) and 'OnPlayUISound' (NewLobby). Then registers 4 delegates via FUN_110af700/5b0/620/690.",
+      "confidence": "medium",
+      "subsystem": "lobby-ui",
+      "serverRelevance": "client-only (UI callback registration)",
+      "formulas": ["clears *(param_1+1)(u16)=0, *(param_1+4)=0, *(param_1+3)(u8)=0"]
+    },
+    {
+      "address": "11161990",
+      "currentName": "CCliLogicPlayer__AfterEnterBattleGround",
+      "proposedName": "CCliLogicPlayer::AfterEnterBattleGround",
+      "purpose": "Client-side hook run after the local player enters a battleground/instance. Calls FUN_113966e0(instance), refreshes state (vtbl+0x2e8). If in-battle (vtbl+0x280): sends net msg 0x6e (levelID param_1[0xb], local_14=0x6e) then 0x6f to server message channel. Fires a series of vtbl+0x2c0 subsystem-init calls with tags 8,0,2,4,0x12,5. If in-battle again sends msg 0x276 (level id). Conditionally FUN_11218530 when a flag+0x164 and slot [0xb8d] set. Schedules a 10000ms timer 'CCliLogicPlayer::AfterEnterBattleGround' -> LAB_11167250, storing handle at [0x9830] when [0x9830]==-1.",
+      "confidence": "medium",
+      "subsystem": "instance-lifecycle-client",
+      "serverRelevance": "validation/client (client announces battleground entry to server via msgs 0x6e/0x6f/0x276; server owns authoritative entry)",
+      "formulas": ["net message opcodes: 0x6e, 0x6f, 0x276; subsystem init tags {8,0,2,4,0x12,5}", "timer period 10000 ms; sentinel [0x9830]==-1 guards one-shot scheduling", "levelID read from param_1[0xb]"]
+    },
+    {
+      "address": "112a7670",
+      "currentName": "FUN_112a7670",
+      "proposedName": "CClientCmd::EnterInstanceOrLevel",
+      "purpose": "Debug/console command handler. Formats 'InstanceId = %d, LevelId = %d' from param_3[1] (instanceId) and *param_3 (levelId) and prints (FUN_1115cba0 chat/console channel 8). Dispatch: if instanceId(>0) call FUN_111c5790 (enter instance); else if levelId(>0) call FUN_111bb9b0 (enter level); else prints a fallback message.",
+      "confidence": "medium",
+      "subsystem": "instance-entry-cmd",
+      "serverRelevance": "client-only entry-point (issues request; server validates/authorizes actual entry)",
+      "formulas": ["param_3[1] = InstanceId, param_3[0] = LevelId; branch on >0"]
+    },
+    {
+      "address": "112ee750",
+      "currentName": "CCliFarmBattleGround___InitCP",
+      "proposedName": "CCliFarmBattleGround::_InitCP",
+      "purpose": "One-time init (guard flag at param_1+0xb4) for a farm/grind battleground checkpoint. Registers a delegate (PTR_FUN_11d21668) on object [0x27], then schedules a 1000ms periodic timer 'CCliFarmBattleGround::_InitCP' (-> LAB_112ee7d0), storing handle at [0xb5].",
+      "confidence": "medium",
+      "subsystem": "instance-lifecycle-client",
+      "serverRelevance": "client-only (checkpoint timer scheduling)",
+      "formulas": ["timer period 1000 ms; one-time guard *(param_1+0xb4)"]
+    },
+    {
+      "address": "11425c30",
+      "currentName": "FUN_11425c30",
+      "proposedName": "CMonsterLevelMatch::ApplyLevelModeScaling",
+      "purpose": "Computes and applies monster stat scaling for the current level based on LevelMode + difficulty. Resolves a CMHLevelModeInfo entry from the level's mode index (level+0x78 -> +0x20), reads its mode field (+0x110), combines with difficulty (FUN_1025b060) to build a composite key modeKey = FUN_1140dce0() + (modeField + diff*10)*10, and looks up a CMonsterLevelMatch entry with it. Then multiplies match-entry, mode-entry, and global (FUN_11680c20) float factors to set HP, attack, and other combat multipliers.",
+      "confidence": "medium",
+      "subsystem": "level-mode-scaling",
+      "serverRelevance": "authoritative-mirror (client computes monster stat multipliers; server must apply identical curve for combat correctness)",
+      "formulas": [
+        "modeField = CMHLevelModeInfo[levelModeIdx].(+0x110), default 1 if entry missing",
+        "diff = FUN_1025b060() (difficulty tier)",
+        "modeKey = FUN_1140dce0() + (modeField + diff*10)*10",
+        "HP factor (FUN_11428a10) = match(+0x14) * mode(+0x20) * global(+0x2c) * mode(+0x2c)",
+        "ATK factor (FUN_11428ac0) = match(+0x1c) * mode(+0x20) * global(+0x2c) * mode(+0x2c)",
+        "*(param_1+0x30c) = mode(+0x20) * global(+0x2c) * mode(+0x2c)",
+        "extra (FUN_1025afc0) = match(+0x4c) * mode(+0x20) * normalTable(+0x14) * mode(+0x2c), with normalTable = FUN_117cdd70(0,0,'Normal')",
+        "additional per-type factors from FUN_114270b0/11427190/11427270 * local_34(+0xc/+0x8/+0x4) and level(+0x78)(+0x11c/+0x120/+0x118)"
+      ],
+      "notes": "Uses the standard InfoManager 2D-index lookup (see pattern note). local_34 defaults to &DAT_1219011c {two vec-copies of _DAT_11cca120 and 0x3f800000=1.0f}."
+    },
+    {
+      "address": "1142ca4b",
+      "currentName": "FUN_1142ca4b",
+      "proposedName": "thunk_FUN_1142c9f0",
+      "purpose": "Thunk/wrapper: LOCK/UNLOCK barrier, FUN_123f16d9(0x52d754f8) (likely SEH/stack-guard or TLS token), then tail-calls FUN_1142c9f0. Header lists CMonsterLevelMatch/CDamageDampingInfo but body is just the wrapper.",
+      "confidence": "low",
+      "subsystem": "level-mode-scaling",
+      "serverRelevance": "unknown (wrapper)",
+      "formulas": ["constant 0x52d754f8 passed to FUN_123f16d9"]
+    },
+    {
+      "address": "1142e3a0",
+      "currentName": "FUN_1142e3a0",
+      "proposedName": "CDamageDampingInfo::EvalDampingMultiplier",
+      "purpose": "Returns a damage-damping multiplier for the current LevelMode/difficulty and a damage-type selector param_3. Builds the same composite CMonsterLevelMatch key as ApplyLevelModeScaling (mode field +0x110 default 1, plus difficulty*10, *10, + base), looks up the match entry, and — only if actor gate vtbl+8 true and vtbl+0x18 false — returns the type-specific float. Default 1.0.",
+      "confidence": "medium",
+      "subsystem": "level-mode-scaling",
+      "serverRelevance": "authoritative-mirror (damage damping applied to combat; server must match)",
+      "formulas": [
+        "levelModeIdx = actorCtx(+0xc)(+0x78)(+0x20); base = actorCtx(+0xc)(+0x78)(+0x30)",
+        "modeField = CMHLevelModeInfo[levelModeIdx].(+0x110), default 1",
+        "key = base + (modeField + vtbl+0x2c()*10)*10",
+        "return by param_3: 3 -> match(+0x48), 4 -> match(+0x4c), 5 -> match(+0x50), 0x10 -> match(+0x54); else 1.0",
+        "gate: only if param_1 vtbl+8()!=0 AND vtbl+0x18()==0"
+      ]
+    },
+    {
+      "address": "11497fc0",
+      "currentName": "FUN_11497fc0",
+      "proposedName": "CMHLevelMode::GetEntryCountRemaining_Idx60",
+      "purpose": "Looks up CMHLevelModeInfo entry at fixed index 0x3c (60). If the level context (param_1+4) exists and entry valid, reads limit field (+0x6c). If a counter subsystem (vtbl+0x388) is active, returns limit(+0x6c) unless adjusted by FUN_1156c660(4) - FUN_1156c660(3) counters: returns cnt4 + (limit - cnt3). Otherwise returns limit(+0x6c). Returns 0 if unavailable.",
+      "confidence": "low",
+      "subsystem": "instance-entry-limit",
+      "serverRelevance": "validation (per-mode entry/attempt allowance; server should be authoritative)",
+      "formulas": [
+        "modeInfo index = 0x3c (60)",
+        "if counter subsystem present and FUN_1156c6b0(0xfffffff8)==0: return entry(+0x6c)",
+        "else: return FUN_1156c660(4) + (entry(+0x6c) - FUN_1156c660(3))"
+      ],
+      "notes": "0xfffffff8 = -8 (same special selector used in FUN_1156c340)."
+    },
+    {
+      "address": "114d2aa0",
+      "currentName": "FUN_114d2aa0",
+      "proposedName": "CLevelSuperSequence::GetRemainingCount_Idx54",
+      "purpose": "Cross-references a CLevelSuperSequence entry (index from param_1 vtbl+0x30(0)) and a CMHLevelModeInfo entry at fixed index 0x36 (54). If counter subsystem active (this[1] vtbl+0x388) and FUN_1156c6b0(seq(+0x2c))!=0: returns clamp(FUN_1156c660(4) + (mode(+0x6c) - FUN_1156c660(3)), min 0); else returns mode(+0x6c). Returns 0 if not resolvable.",
+      "confidence": "low",
+      "subsystem": "instance-entry-limit",
+      "serverRelevance": "validation (remaining attempts/count for a level super-sequence)",
+      "formulas": [
+        "CMHLevelModeInfo index = 0x36 (54)",
+        "remaining = FUN_1156c660(4) + (mode(+0x6c) - FUN_1156c660(3)), clamped to >= 0",
+        "selector = CLevelSuperSequence[seqIdx].(+0x2c)"
+      ]
+    },
+    {
+      "address": "1156c340",
+      "currentName": "FUN_1156c340",
+      "proposedName": "CMHLevel::CheckEntryAllowed",
+      "purpose": "Validates whether the player may enter/continue a level/instance. Two paths keyed on param_1: (a) param_1==-8 uses CMHLevelModeInfo index 0x3c(60): checks a session gate (FUN_1171ebf0); if entry has count fields set (+0x68 !=0 and +0x6c > 0), compares current count FUN_1156c660(4) against limit entry(+0x70), sets error 0x32e when at/over limit, returns whether count < limit. (b) otherwise param_1 indexes CMHLevelInfo and reads its mode ref (+0x24). Sets *param_3 error codes: 0x332 (session/precondition fail), 0x32e (limit reached), 1 (invalid level).",
+      "confidence": "medium",
+      "subsystem": "instance-entry-validation",
+      "serverRelevance": "validation (server-authoritative entry gate; error codes are the reject reasons)",
+      "formulas": [
+        "special selector param_1 == -8 (0xfffffff8) -> CMHLevelModeInfo idx 0x3c",
+        "count limit check: allowed = (FUN_1156c660(4) < entry(+0x70)); if >= limit set err 0x32e",
+        "requires entry(+0x68)!=0 && entry(+0x6c)>0 else err 0x32e",
+        "err 0x332 when session gate FUN_1171ebf0()==0",
+        "err 1 when level index invalid"
+      ],
+      "costs": ["error codes: 0x332 (=818), 0x32e (=814 entry-limit reached), 1 (invalid level)"]
+    },
+    {
+      "address": "1156c7d0",
+      "currentName": "FUN_1156c7d0",
+      "proposedName": "CMHLevelMode::SumEntryCounters_Idx44",
+      "purpose": "Looks up CMHLevelModeInfo entry at fixed index 0x2c (44), iterates its pointer-vector [+0x124 .. +0x128) (count = (end-begin)>>2), for each element resolves a counter via FUN_1156c6b0(elem->(+0x10)) and, walking a red-black tree (nodes at +4/+8/+0xc/+0x10/+0x14), accumulates the found value at (+0x14). Returns the total sum.",
+      "confidence": "low",
+      "subsystem": "instance-entry-limit",
+      "serverRelevance": "validation (aggregate of per-mode counters)",
+      "formulas": ["modeInfo index = 0x2c (44)", "vector element stride 4 bytes; total = sum of tree-lookup(+0x14) over elements"]
+    },
+    {
+      "address": "11741590",
+      "currentName": "FUN_11741590",
+      "proposedName": "CGlobalCfg_PvpGroupSettlementTime::ctor",
+      "purpose": "Constructs a global-config accessor object bound to key 'PvpGroupSettlementTime' (sets vtable PTR_FUN_11d4528c). Reads a PvP group-settlement time value from config. NOTE: ends in FUN_10c3d580(0x24) marked 'does not return' — this is the string-temp destructor tail, a decompiler artifact.",
+      "confidence": "medium",
+      "subsystem": "pvp-settlement",
+      "serverRelevance": "validation/config (settlement timing; likely server-authoritative timer)",
+      "costs": ["config key 'PvpGroupSettlementTime' = PvP group result/settlement duration"]
+    },
+    {
+      "address": "1177ff70",
+      "currentName": "FUN_1177ff70",
+      "proposedName": "CTaskLevelFinishContentDef::ctor",
+      "purpose": "Constructor for a 'TaskLevelFinishContentDef' object: initializes an intrusive linked-list head (self-links +0x10 and +0x14 to self) and binds the type name.",
+      "confidence": "medium",
+      "subsystem": "level-finish-def",
+      "serverRelevance": "unknown (data definition container)",
+      "formulas": ["+0x10 = self, +0x14 = self (empty list sentinels)"]
+    },
+    {
+      "address": "11781c50",
+      "currentName": "FUN_11781c50",
+      "proposedName": "CTaskLevelFinishContentDef::ctor_dup",
+      "purpose": "Identical constructor to FUN_1177ff70 for 'TaskLevelFinishContentDef' (self-linking list head + type name bind). Duplicate/second instantiation.",
+      "confidence": "medium",
+      "subsystem": "level-finish-def",
+      "serverRelevance": "unknown (data definition container)",
+      "formulas": ["+0x10 = self, +0x14 = self"]
+    },
+    {
+      "address": "11785e60",
+      "currentName": "FUN_11785e60",
+      "proposedName": "CTeamConfig::ReadTeamMemberCount",
+      "purpose": "Reads config field 'TeamMemberCount' (via FUN_118a6e70 lookup, FUN_118a68e0 fetch) into this+4. Party/team size for a level or matchmaking config.",
+      "confidence": "medium",
+      "subsystem": "party-team",
+      "serverRelevance": "validation (team-size rule; server enforces)",
+      "formulas": ["*(this+4) = config['TeamMemberCount']"]
+    },
+    {
+      "address": "117b92a0",
+      "currentName": "FUN_117b92a0",
+      "proposedName": "CLevelModeFilter::ParseXML",
+      "purpose": "Parses a level-mode filter/definition XML element. Reads wide-attr 'LevelMode' (string; on-miss logs error) into param_1[0] via enum/string map, and 'Difficulty' (int, default 0xffffffff) into param_1[1].",
+      "confidence": "medium",
+      "subsystem": "level-mode-config",
+      "serverRelevance": "validation/config (level mode + difficulty selection def)",
+      "formulas": ["param_1[0] = LevelMode (enum via FUN); param_1[1] = Difficulty, default 0xffffffff (-1 = any)"]
+    },
+    {
+      "address": "117d6590",
+      "currentName": "FUN_117d6590",
+      "proposedName": "CGlobalCfg_MinTeamMemberNum::ctor",
+      "purpose": "Constructs a global-config accessor bound to key 'MinTeamMemberNum' (vtable PTR_FUN_11d4a00c). Minimum party size required to enter/matchmake. Tail FUN_10c3d580(0x24) is string-temp dtor artifact.",
+      "confidence": "medium",
+      "subsystem": "party-team",
+      "serverRelevance": "validation (minimum team size gate; server enforces)",
+      "costs": ["config key 'MinTeamMemberNum' = minimum party members required"]
+    },
+    {
+      "address": "118a33d0",
+      "currentName": "FUN_118a33d0",
+      "proposedName": "CInstancePortalDef::ParseXML",
+      "purpose": "Parses an instance-transition/portal entity from XML. Reads: (DAT_11da7300 key)->this+0x1c, 'EntityClass'->this+0x34, 'iToInstanceId'->this+0x4c, position 'Pos'(DAT_11cca8a0, default '0,0,0')-> sscanf %f,%f,%f into this+0x10/+0x14/+0x18, 'Rotate'(default '0,0,0,0')-> %f,%f,%f,%f into this+0xc/+0x0/+0x4/+0x8, 'RegionID'->this+0x50.",
+      "confidence": "high",
+      "subsystem": "instance-portal",
+      "serverRelevance": "validation/config (instance teleport target; server should own destination instance id)",
+      "formulas": [
+        "offsets: +0x10/+0x14/+0x18 = pos xyz, +0xc/+0x0/+0x4/+0x8 = rotation quat (w,x,y,z), +0x1c = name, +0x34 = EntityClass, +0x4c = iToInstanceId, +0x50 = RegionID",
+        "pos default '0,0,0'; rotate default '0,0,0,0'"
+      ],
+      "costs": ["'iToInstanceId' = destination instance id; 'RegionID' = target region"]
+    },
+    {
+      "address": "118e6110",
+      "currentName": "FUN_118e6110",
+      "proposedName": "CMHLevelModeInfo::GetIdByIndex",
+      "purpose": "Array accessor into CMHLevelModeInfo id list: bounds-checks param_1 against (mgr+0x18 - mgr+0x14)>>2 (element count) and returns the id at mgr+0x14 + index*4, else 0.",
+      "confidence": "high",
+      "subsystem": "level-mode-config",
+      "serverRelevance": "client/shared (config table accessor)",
+      "formulas": ["count = (mgr(+0x18) - mgr(+0x14)) >> 2; return mgr(+0x14)[index] if 0 <= index < count else 0"]
+    },
+    {
+      "address": "119d7880",
+      "currentName": "FUN_119d7880",
+      "proposedName": "CLevelResult::GetSingletonTypeInfo",
+      "purpose": "Lazy one-time init (guard DAT_123a3a08 bit0) of the 'LevelResult' type/class registration (FUN_1024f010), returns the cached type ptr DAT_123a3a04 into *param_1.",
+      "confidence": "medium",
+      "subsystem": "level-result",
+      "serverRelevance": "unknown (RTTI/type registration for LevelResult)",
+      "formulas": []
+    },
+    {
+      "address": "119e26f0",
+      "currentName": "FUN_119e26f0",
+      "proposedName": "CLevelGroupDef::ParseXML",
+      "purpose": "Parses a level-group definition XML element. Reads wide attrs: 'LevelGrpID'(int)->this+0x10, 'LevelMode'(int)->this+0x14, 'Name'(string)-> object name (CPet::SetName reused as a generic setter), 'Params'(string)-> parsed into this+0x1c via FUN_1162bea0. Missing attrs log errors.",
+      "confidence": "medium",
+      "subsystem": "level-mode-config",
+      "serverRelevance": "validation/config (level group -> mode mapping used by matchmaking/entry)",
+      "formulas": ["offsets: +0x10 = LevelGrpID, +0x14 = LevelMode, +0x1c = Params (parsed)"]
+    },
+    {
+      "address": "11a56660",
+      "currentName": "FUN_11a56660",
+      "proposedName": "CLevelWeightDef::ParseXML",
+      "purpose": "Parses a weighted level-selection table entry from XML. Reads wide attrs: 'TypeID'(int)->this+0x10, 'LevelMode'(int)->this+0x14, 'LevelMin'(int)->this+0x18, 'LevelMax'(int)->this+0x1c, 'Weighted'(int)->this+0x20. Used for random/weighted level pick within a player level range.",
+      "confidence": "high",
+      "subsystem": "matchmaking-level-select",
+      "serverRelevance": "authoritative-mirror (weighted random level selection by player level; server should own RNG/selection)",
+      "formulas": ["offsets: +0x10 TypeID, +0x14 LevelMode, +0x18 LevelMin, +0x1c LevelMax, +0x20 Weighted (selection weight); entry active when LevelMin <= playerLevel <= LevelMax"],
+      "costs": ["'Weighted' = relative probability weight for this level within its type pool"]
+    },
+    {
+      "address": "11a732b0",
+      "currentName": "FUN_11a732b0",
+      "proposedName": "CBattlePunishLevelModeFilterInfo::GetIdByIndex",
+      "purpose": "Array accessor into CBattlePunishLevelModeFilterInfo id list: bounds-checks index against (mgr+0x18 - mgr+0x14)>>2 and returns id at mgr+0x14 + index*4, else 0. Governs which level modes apply battle-punish (e.g., death/desertion penalty) filtering.",
+      "confidence": "medium",
+      "subsystem": "battle-punish",
+      "serverRelevance": "validation (which modes trigger battle-punish; server enforces penalties)",
+      "formulas": ["count = (mgr(+0x18) - mgr(+0x14)) >> 2; return mgr(+0x14)[index] if in range else 0"]
+    },
+    {
+      "address": "11a98d10",
+      "currentName": "FUN_11a98d10",
+      "proposedName": "CInstanceManager::CreateInstance",
+      "purpose": "Instance factory. Increments the running instance counter at this+0x3a34, builds an instance name 'instance{N}' (N = counter, formatted via FUN_11b2ffe0/FUN_11a8b6e0 with width 0x30=48 buffer), invokes a manager hook (this+0xc vtbl+0xdc), then creates/looks up the instance object (FUN_11abe680) storing it in *param_2 and bumping its refcount at obj+0xc.",
+      "confidence": "medium",
+      "subsystem": "instance-lifecycle",
+      "serverRelevance": "authoritative (instance creation + naming/counter; server owns instance registry)",
+      "formulas": ["*(this+0x3a34) += 1 (monotonic instance counter); instance name = format 'instance{0}' with counter value; obj(+0xc) refcount += 1"]
+    }
+  ]
+}

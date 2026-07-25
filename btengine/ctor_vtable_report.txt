@@ -1,0 +1,130 @@
+
+================ CVotingSelector creator @ 10611660 ================
+  scanned 4 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_1061be50 @ 1061be50 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 1130d140 (RVA 130d140) written in FUN_1061be50 @ 1061be50 ---
+    [ 0] 105f0a30  FUN_105f0a30
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105ed980 <stop>
+
+================ CDecisionTreeSelector creator @ 10604500 ================
+  scanned 4 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_106140b0 @ 106140b0 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 113097a0 (RVA 13097a0) written in FUN_106140b0 @ 106140b0 ---
+    [ 0] 105a36d0  FUN_105a36d0
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105a2710  FUN_105a2710
+    [ 5] 103d79d0 <stop>
+
+================ CNodeRepeatExecuteCounter creator @ 1060ad90 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_1060ad90 @ 1060ad90 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 113104d0 (RVA 13104d0) written in FUN_1060ad90 @ 1060ad90 ---
+    [ 0] 1061f9c0  FUN_1061f9c0
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105f95a0 <stop>
+
+================ CBehaviorRepeatExecuteCounter creator @ 10601f90 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_10601f90 @ 10601f90 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 11310524 (RVA 1310524) written in FUN_10601f90 @ 10601f90 ---
+    [ 0] 1061da10  FUN_1061da10
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105f45b0  FUN_105f45b0
+    [ 5] 103d79d0 <stop>
+
+================ CBTOperation creator @ 10601ef0 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_10601ef0 @ 10601ef0 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 1130e5cc (RVA 130e5cc) written in FUN_10601ef0 @ 10601ef0 ---
+    [ 0] 1061d9e0  FUN_1061d9e0
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 1055ea90 <stop>
+
+================ CConditionSuccessful creator @ 10603d60 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_10603d60 @ 10603d60 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 11314448 (RVA 1314448) written in FUN_10603d60 @ 10603d60 ---
+    [ 0] 1061e130  FUN_1061e130
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105fbff0 <stop>
+
+================ CAlwaysTrue creator @ 106014e0 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_106014e0 @ 106014e0 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 11306074 (RVA 1306074) written in FUN_106014e0 @ 106014e0 ---
+    [ 0] 105537e0  FUN_105537e0
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105537b0 <stop>
+
+================ CScriptAction creator @ 1060c830 ================
+  scanned 6 fns (creator+callees); vtables found: 2
+  --- VTABLE @ 113bf2e4 (RVA 13bf2e4) written in FUN_1060c830 @ 1060c830 ---
+    [ 0] 103dc890  FUN_103dc890
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 103dc9d0  FUN_103dc9d0
+    [ 5] 103d79d0 <stop>
+  --- VTABLE @ 1130e578 (RVA 130e578) written in FUN_1060c830 @ 1060c830 ---
+    [ 0] 10620080  FUN_10620080
+    [ 1] 103dc6c0  FUN_103dc6c0
+    [ 2] 103dc930  FUN_103dc930
+    [ 3] 103d8a10  FUN_103d8a10
+    [ 4] 105be440 <stop>

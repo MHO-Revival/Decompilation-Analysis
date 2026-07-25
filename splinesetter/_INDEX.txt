@@ -1,0 +1,93 @@
+# indirect CALL sites through vtable slots around the spline-scale getter (+0x3f0)
+# the getter has 2 sites, both in FUN_11067e40; a rare neighbour is the likely setter
+
+== slot +0x3e4   sites: 14
+     10ad7c71  in FUN_10ad7ac0 @ 10ad7ac0   CALL dword ptr [EAX + 0x3e4]
+     10ad82f9  in FUN_10ad7f30 @ 10ad7f30   CALL dword ptr [EAX + 0x3e4]
+     10ad953f  in FUN_10ad9430 @ 10ad9430   CALL dword ptr [EAX + 0x3e4]
+     10c8a285  in FUN_10c8a270 @ 10c8a270   CALL dword ptr [EAX + 0x3e4]
+     10cb1d55  in FUN_10cb1cb0 @ 10cb1cb0   CALL dword ptr [EAX + 0x3e4]
+     10cb1e0b  in FUN_10cb1d70 @ 10cb1d70   CALL dword ptr [EAX + 0x3e4]
+     10d9680c  in FUN_10d967d0 @ 10d967d0   CALL dword ptr [EDX + 0x3e4]
+     10d969e0  in FUN_10d967d0 @ 10d967d0   CALL dword ptr [EDX + 0x3e4]
+     10d9b59e  in FUN_10d9af10 @ 10d9af10   CALL dword ptr [EAX + 0x3e4]
+     10da284b  in FUN_10da2830 @ 10da2830   CALL dword ptr [EAX + 0x3e4]
+     10dbd937  in _ChangeColor @ 10dbd740   CALL dword ptr [EAX + 0x3e4]
+     10ec4604  in FUN_10ec3fb0 @ 10ec3fb0   CALL dword ptr [EAX + 0x3e4]
+     10ecaf5b  in FUN_10ecaf40 @ 10ecaf40   CALL dword ptr [EAX + 0x3e4]
+     10f127fb  in FUN_10f127e0 @ 10f127e0   CALL dword ptr [EAX + 0x3e4]
+
+== slot +0x3e8   sites: 4
+     10b92d5e  in FUN_10b92bb0 @ 10b92bb0   CALL dword ptr [EDX + 0x3e8]
+     10b93349  in FUN_10b931b0 @ 10b931b0   CALL dword ptr [EDX + 0x3e8]
+     10d4e671  in ?   CALLF 0x3e8:0x1ae34d07
+     123fdd87  in FUN_123fdc7c @ 123fdc7c   CALLF 0x3e8:0xce34d07
+
+== slot +0x3ec   sites: 2
+     10b92de2  in FUN_10b92bb0 @ 10b92bb0   CALL dword ptr [EDX + 0x3ec]
+     10b933d6  in FUN_10b931b0 @ 10b931b0   CALL dword ptr [EDX + 0x3ec]
+
+== slot +0x3f0   sites: 2
+     11067f1f  in FUN_11067e40 @ 11067e40   CALL dword ptr [EAX + 0x3f0]
+     11067f87  in FUN_11067e40 @ 11067e40   CALL dword ptr [EAX + 0x3f0]
+
+== slot +0x3f4   sites: 20
+     1051132b  in FUN_10511310 @ 10511310   CALL dword ptr [EAX + 0x3f4]
+     105161ad  in FUN_105161a0 @ 105161a0   CALL dword ptr [EAX + 0x3f4]
+     1051622d  in FUN_10516220 @ 10516220   CALL dword ptr [EAX + 0x3f4]
+     105166be  in FUN_10516670 @ 10516670   CALL dword ptr [EAX + 0x3f4]
+     10516e55  in CPetPanelUI::RenderPetAvatar3D @ 10516d50   CALL dword ptr [EAX + 0x3f4]
+     1052596c  in FUN_10525940 @ 10525940   CALL dword ptr [EAX + 0x3f4]
+     10525cfd  in FUN_10525cf0 @ 10525cf0   CALL dword ptr [EAX + 0x3f4]
+     10525f29  in CSoulBeastPanelUI::RenderAvatar3D @ 10525e00   CALL dword ptr [EAX + 0x3f4]
+     1052e3aa  in FUN_1052e290 @ 1052e290   CALL dword ptr [EAX + 0x3f4]
+     105328a7  in FUN_10532890 @ 10532890   CALL dword ptr [EAX + 0x3f4]
+     10532937  in FUN_10532920 @ 10532920   CALL dword ptr [EAX + 0x3f4]
+     10532f87  in ?   CALL dword ptr [EAX + 0x3f4]
+     10533a79  in ?   CALL dword ptr [EAX + 0x3f4]
+     10533f99  in ?   CALL dword ptr [EAX + 0x3f4]
+     105344b9  in ?   CALL dword ptr [EAX + 0x3f4]
+     10534829  in ?   CALL dword ptr [EAX + 0x3f4]
+     10af7b86  in CAvatarInfo::UpdateLocalPlayerAppearance @ 10af7200   CALL dword ptr [EAX + 0x3f4]
+     10b6158f  in FUN_10b61510 @ 10b61510   CALL dword ptr [EAX + 0x3f4]
+     10b6160a  in ?   CALL dword ptr [EAX + 0x3f4]
+     10b65b33  in FUN_10b65aa0 @ 10b65aa0   CALL dword ptr [EAX + 0x3f4]
+
+== slot +0x3f8   sites: 11
+     10b69b1a  in FUN_10b69b00 @ 10b69b00   CALL dword ptr [EAX + 0x3f8]
+     10bde8df  in FUN_10bde8d0 @ 10bde8d0   CALL dword ptr [EAX + 0x3f8]
+     10bf3bb0  in FUN_10bf3ba0 @ 10bf3ba0   CALL dword ptr [EAX + 0x3f8]
+     10bf3c70  in FUN_10bf3c60 @ 10bf3c60   CALL dword ptr [EAX + 0x3f8]
+     10ef3f5b  in FUN_10ef3d10 @ 10ef3d10   CALL dword ptr [EAX + 0x3f8]
+     10ef50a7  in CPlayer::OnGameObjectEvent @ 10ef4f80   CALL dword ptr [EAX + 0x3f8]
+     10ef5145  in CPlayer::OnGameObjectEvent @ 10ef4f80   CALL dword ptr [EAX + 0x3f8]
+     10f15c9a  in FUN_10f15c00 @ 10f15c00   CALL dword ptr [EAX + 0x3f8]
+     1103b768  in FUN_1103b740 @ 1103b740   CALL dword ptr [EAX + 0x3f8]
+     110aef69  in FUN_110aef50 @ 110aef50   CALL dword ptr [EAX + 0x3f8]
+     110aef7e  in FUN_110aef50 @ 110aef50   CALL dword ptr [EAX + 0x3f8]
+
+== slot +0x3fc   sites: 6
+     104d93e4  in FUN_104d93c0 @ 104d93c0   CALL dword ptr [EAX + 0x3fc]
+     104d9760  in FUN_104d9740 @ 104d9740   CALL dword ptr [EAX + 0x3fc]
+     104d97e9  in FUN_104d97c0 @ 104d97c0   CALL dword ptr [EAX + 0x3fc]
+     104e5e69  in FUN_104e5e00 @ 104e5e00   CALL dword ptr [EAX + 0x3fc]
+     104e5f2e  in FUN_104e5f10 @ 104e5f10   CALL dword ptr [EAX + 0x3fc]
+     10dcbf13  in FUN_10dcbee0 @ 10dcbee0   CALL dword ptr [EAX + 0x3fc]
+
+== slot +0x400   sites: 3
+     10b92dd1  in FUN_10b92bb0 @ 10b92bb0   CALL dword ptr [EAX + 0x400]
+     10b933c5  in FUN_10b931b0 @ 10b931b0   CALL dword ptr [EAX + 0x400]
+     111e70d6  in FUN_111e7050 @ 111e7050   CALL dword ptr [EAX + 0x400]
+
+## decompiled callers of the rare slots
+  10b92bb0 FUN_10b92bb0
+  10b931b0 FUN_10b931b0
+  123fdc7c FUN_123fdc7c
+  11067e40 FUN_11067e40
+  104d93c0 FUN_104d93c0
+  104d9740 FUN_104d9740
+  104d97c0 FUN_104d97c0
+  104e5e00 FUN_104e5e00
+  104e5f10 FUN_104e5f10
+  10dcbee0 FUN_10dcbee0
+  111e7050 FUN_111e7050

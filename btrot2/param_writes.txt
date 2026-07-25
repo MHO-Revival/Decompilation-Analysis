@@ -1,0 +1,97 @@
+
+================ CEntityMove::Evaluate  @1056c440 ================
+  read   readBool2      param[5]   @1056c52c
+
+================ CEntityMove::drive  @1056c5a0 ================
+  read   readBool       param[0]   @1056c910
+  WRITE  writeVec3      param[2]   @1056c98a
+
+================ CEntityMoveToTarget::Evaluate  @10570c80 ================
+  read   readBool       param[0]   @10570d5b
+  read   readFloat      param[5]   @10570d73
+  read   readBool2      param[6]   @10570ddb
+  WRITE  writeVec3      param[2]   @10570e4b
+  read   readBool2      param[7]   @10570f09
+  read   readFloat      param[b]   @10570f27
+  WRITE  writeFloat?    param[b]   @10570f3c
+  read   readVec3       param[c]   @10570f5e
+  WRITE  writeVec3      param[c]   @10570f6f
+  read   readVec3       param[8]   @10570f91
+  read   readFloat      param[9]   @10570fa5
+  read   readFloat      param[a]   @10570fb9
+
+================ CEntityMoveToTarget::drive  @10571000 ================
+  read   readVec3       param[8]   @1057137a
+  read   readFloat      param[9]   @1057138e
+  read   readFloat      param[a]   @105713a2
+  read   readVec3       param[c]   @105713c1
+  read   readFloat      param[b]   @105713ef
+  WRITE  writeFloat?    param[b]   @105717d2
+  WRITE  writeVec3      param[c]   @105717df
+  read   readBool       param[1]   @1057191c
+  read   readBool       param[0]   @1057192d
+  read   readFloat      param[5]   @10571949
+
+================ CEntityMoveToPos::Evaluate  @1056e300 ================
+  read   readStr        param[8]   @1056e3b6
+  read   readVec3       param[4]   @1056e3d8
+  read   readVec3       param[5]   @1056e3ed
+  read   readBool3      param[2]   @1056e453
+  read   readBool3      param[0]   @1056e464
+  read   readFloat      param[6]   @1056e47e
+  read   readBool2      param[7]   @1056e497
+  WRITE  writeVec3      param[4]   @1056e4d3
+  read   readBool       param[1]   @1056e675
+
+================ CEntityMoveToPos::alt  @1056e6d0 ================
+  read   readBool3      param[0]   @1056e6fd
+  read   readBool       param[1]   @1056e7d9
+  read   readStr        param[9]   @1056e941
+  read   readBool       param[3]   @1056e94b
+  read   readBool3      param[a]   @1056e9d7
+  read   readBool3      param[2]   @1056eb8d
+  read   readFloat      param[6]   @1056ec11
+  read   readStr        param[9]   @1056eeb9
+  read   readBool3      param[a]   @1056eecb
+
+================ CEntityRotateOrientation::Evaluate  @10573430 ================
+  read   readBool       param[4]   @1057349f
+  WRITE  writeVec3      param[3]   @105735d2
+
+================ CEntityRotateOrientation::drive  @105736a0 ================
+  WRITE  writeVec3      param[2]   @10573f58
+
+================ CEntityRotateToTarget::Evaluate  @10578a00 ================
+  WRITE  writeVec3      param[5]   @10578af2
+
+================ CEntityRotateToTarget::drive  @10578bd0 ================
+  WRITE  writeVec3      param[4]   @10578cdc
+  read   readVec3       param[5]   @10578ce9
+
+================ CEntityRotateToPos::Evaluate  @10574410 ================
+  read   readBool       param[2]   @1057447f
+  WRITE  writeVec3      param[1]   @10574a0b
+
+================ CSetTargetIDOrientation::Evaluate  @105d3220 ================
+  read   hasParam       param[0]   @105d3232
+  WRITE  writeVec3      param[1]   @105d331d
+  WRITE  writeVec3      param[3]   @105d354b
+
+================ CSetTargetPosOrientation::Evaluate  @105d3760 ================
+  WRITE  writeVec3      param[1]   @105d39de
+
+================ CAnimSequencePlay::Evaluate  @10554370 ================
+  read   readStr        param[1]   @105543df
+  read   readBool3      param[1c]   @10554416
+  read   readBool3      param[7]   @105544de
+  read   readBool3      param[10]   @1055452a
+  read   readStr        param[3]   @105545c6
+  read   readFloat      param[6]   @10554688
+  read   readBool3      param[c]   @105547b0
+  read   readBool3      param[d]   @105547d8
+  read   readVec3       param[e]   @105547ef
+  read   readBool3      param[13]   @10554a8d
+
+================ CBlackBoardCheck::Evaluate  @105f4960 ================
+  read   readInt        param[1]   @105f49ef
+  read   readStr        param[2]   @105f4a5e

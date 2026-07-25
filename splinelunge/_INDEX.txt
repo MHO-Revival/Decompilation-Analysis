@@ -1,0 +1,491 @@
+# consumers of CSkillSequence +0x116 / +0x117 (CatchUpDist, EnableMoveSplineScale, ...)
+# program: CryGame.dll
+
+== 106011d0  FUN_106011d0  (20 bytes)
+     106011d8  PUSH 0x116
+     -> fn_106011d0.c
+
+== 106011f0  FUN_106011f0  (20 bytes)
+     106011f8  PUSH 0x117
+     -> fn_106011f0.c
+
+== 11079e90  FUN_11079e90  (24 bytes)
+     11079e93  MOV AL,byte ptr [ECX + 0x116]
+     11079e9e  XOR byte ptr [ECX + 0x116],AL
+     -> fn_11079e90.c
+
+== 1107a0a0  FUN_1107a0a0  (26 bytes)
+     1107a0a8  XOR AL,byte ptr [ECX + 0x117]
+     1107a0b0  XOR byte ptr [ECX + 0x117],AL
+     -> fn_1107a0a0.c
+
+== 11078550  FUN_11078550  (31 bytes)
+     1107855a  MOV AL,byte ptr [ECX + 0x116]
+     11078565  XOR byte ptr [ECX + 0x116],AL
+     -> fn_11078550.c
+
+== 11068770  FUN_11068770  (54 bytes)
+     11068793  OR byte ptr [EDI + 0x116],0x2
+     -> fn_11068770.c
+
+== 105e5fa0  FUN_105e5fa0  (55 bytes)
+     105e5fc9  PUSH 0x116
+     -> fn_105e5fa0.c
+
+== 105e5fe0  FUN_105e5fe0  (55 bytes)
+     105e6009  PUSH 0x117
+     -> fn_105e5fe0.c
+
+== 11067980  FUN_11067980  (56 bytes)
+     11067987  AND byte ptr [EDI + 0x117],0xfd
+     1106798e  AND byte ptr [EDI + 0x116],0x7f
+     -> fn_11067980.c
+
+== 108d2cd0  FUN_108d2cd0  (61 bytes)
+     108d2cfd  PUSH 0x116
+     -> fn_108d2cd0.c
+
+== 108d3580  FUN_108d3580  (63 bytes)
+     108d35ad  PUSH 0x116
+     -> fn_108d3580.c
+
+== 108d35c0  FUN_108d35c0  (63 bytes)
+     108d35ed  PUSH 0x116
+     -> fn_108d35c0.c
+
+== 108d3600  FUN_108d3600  (63 bytes)
+     108d362d  PUSH 0x116
+     -> fn_108d3600.c
+
+== 108d3640  FUN_108d3640  (63 bytes)
+     108d366d  PUSH 0x116
+     -> fn_108d3640.c
+
+== 108d3680  FUN_108d3680  (63 bytes)
+     108d36ad  PUSH 0x116
+     -> fn_108d3680.c
+
+== 108d36c0  FUN_108d36c0  (63 bytes)
+     108d36ed  PUSH 0x116
+     -> fn_108d36c0.c
+
+== 108d3700  FUN_108d3700  (63 bytes)
+     108d372d  PUSH 0x116
+     -> fn_108d3700.c
+
+== 108d3740  FUN_108d3740  (63 bytes)
+     108d376d  PUSH 0x116
+     -> fn_108d3740.c
+
+== 108d3780  FUN_108d3780  (63 bytes)
+     108d37ad  PUSH 0x116
+     -> fn_108d3780.c
+
+== 108d37c0  FUN_108d37c0  (63 bytes)
+     108d37ed  PUSH 0x116
+     -> fn_108d37c0.c
+
+== 108d3800  FUN_108d3800  (63 bytes)
+     108d382d  PUSH 0x116
+     -> fn_108d3800.c
+
+== 108d3840  FUN_108d3840  (63 bytes)
+     108d386d  PUSH 0x116
+     -> fn_108d3840.c
+
+== 108d3880  FUN_108d3880  (63 bytes)
+     108d38ad  PUSH 0x116
+     -> fn_108d3880.c
+
+== 108d38c0  FUN_108d38c0  (63 bytes)
+     108d38ed  PUSH 0x116
+     -> fn_108d38c0.c
+
+== 108d3900  FUN_108d3900  (63 bytes)
+     108d392d  PUSH 0x116
+     -> fn_108d3900.c
+
+== 108d3940  FUN_108d3940  (63 bytes)
+     108d396d  PUSH 0x116
+     -> fn_108d3940.c
+
+== 108d3980  FUN_108d3980  (63 bytes)
+     108d39ad  PUSH 0x116
+     -> fn_108d3980.c
+
+== 108d39c0  FUN_108d39c0  (63 bytes)
+     108d39ed  PUSH 0x116
+     -> fn_108d39c0.c
+
+== 108d3a00  FUN_108d3a00  (63 bytes)
+     108d3a2d  PUSH 0x116
+     -> fn_108d3a00.c
+
+== 108d3a40  FUN_108d3a40  (63 bytes)
+     108d3a6d  PUSH 0x116
+     -> fn_108d3a40.c
+
+== 108d3a80  FUN_108d3a80  (63 bytes)
+     108d3aad  PUSH 0x116
+     -> fn_108d3a80.c
+
+== 108d3ac0  FUN_108d3ac0  (63 bytes)
+     108d3aed  PUSH 0x116
+     -> fn_108d3ac0.c
+
+== 108d3b00  FUN_108d3b00  (63 bytes)
+     108d3b2d  PUSH 0x116
+     -> fn_108d3b00.c
+
+== 108d3b40  FUN_108d3b40  (63 bytes)
+     108d3b6d  PUSH 0x116
+     -> fn_108d3b40.c
+
+== 108d3b80  FUN_108d3b80  (63 bytes)
+     108d3bad  PUSH 0x116
+     -> fn_108d3b80.c
+
+== 108d3fa0  FUN_108d3fa0  (65 bytes)
+     108d3fcd  PUSH 0x116
+     -> fn_108d3fa0.c
+
+== 108d4070  FUN_108d4070  (65 bytes)
+     108d409d  PUSH 0x116
+     -> fn_108d4070.c
+
+== 108d40c0  FUN_108d40c0  (65 bytes)
+     108d40ed  PUSH 0x116
+     -> fn_108d40c0.c
+
+== 108d4110  FUN_108d4110  (65 bytes)
+     108d413d  PUSH 0x116
+     -> fn_108d4110.c
+
+== 108d4160  FUN_108d4160  (65 bytes)
+     108d418d  PUSH 0x116
+     -> fn_108d4160.c
+
+== 108d41b0  FUN_108d41b0  (65 bytes)
+     108d41dd  PUSH 0x116
+     -> fn_108d41b0.c
+
+== 108d4200  FUN_108d4200  (65 bytes)
+     108d422d  PUSH 0x116
+     -> fn_108d4200.c
+
+== 108d4250  FUN_108d4250  (65 bytes)
+     108d427d  PUSH 0x116
+     -> fn_108d4250.c
+
+== 108d42a0  FUN_108d42a0  (65 bytes)
+     108d42cd  PUSH 0x116
+     -> fn_108d42a0.c
+
+== 108d42f0  FUN_108d42f0  (65 bytes)
+     108d431d  PUSH 0x116
+     -> fn_108d42f0.c
+
+== 108d4340  FUN_108d4340  (65 bytes)
+     108d436d  PUSH 0x116
+     -> fn_108d4340.c
+
+== 108d4390  FUN_108d4390  (65 bytes)
+     108d43bd  PUSH 0x116
+     -> fn_108d4390.c
+
+== 108d43e0  FUN_108d43e0  (65 bytes)
+     108d440d  PUSH 0x116
+     -> fn_108d43e0.c
+
+== 108d4430  FUN_108d4430  (65 bytes)
+     108d445d  PUSH 0x116
+     -> fn_108d4430.c
+
+== 108d4480  FUN_108d4480  (65 bytes)
+     108d44ad  PUSH 0x116
+     -> fn_108d4480.c
+
+== 108d4960  FUN_108d4960  (65 bytes)
+     108d498d  PUSH 0x116
+     -> fn_108d4960.c
+
+== 108d49c0  FUN_108d49c0  (65 bytes)
+     108d49ed  PUSH 0x116
+     -> fn_108d49c0.c
+
+== 108d4a10  FUN_108d4a10  (65 bytes)
+     108d4a3d  PUSH 0x116
+     -> fn_108d4a10.c
+
+== 108d4a60  FUN_108d4a60  (65 bytes)
+     108d4a8d  PUSH 0x116
+     -> fn_108d4a60.c
+
+== 108d4ab0  FUN_108d4ab0  (65 bytes)
+     108d4add  PUSH 0x116
+     -> fn_108d4ab0.c
+
+== 108d4b00  FUN_108d4b00  (65 bytes)
+     108d4b2d  PUSH 0x116
+     -> fn_108d4b00.c
+
+== 108d4b50  FUN_108d4b50  (65 bytes)
+     108d4b7d  PUSH 0x116
+     -> fn_108d4b50.c
+
+== 108d4ba0  FUN_108d4ba0  (65 bytes)
+     108d4bcd  PUSH 0x116
+     -> fn_108d4ba0.c
+
+== 108d3ff0  FUN_108d3ff0  (118 bytes)
+     108d401d  PUSH 0x116
+     108d4052  PUSH 0x116
+     -> fn_108d3ff0.c
+
+== 11066f10  FUN_11066f10  (120 bytes)
+     11066f69  OR byte ptr [EDI + 0x117],0x1
+     -> fn_11066f10.c
+
+== 108dbd20  FUN_108dbd20  (122 bytes)
+     108dbd86  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 1135a740  FUN_1135a740  (126 bytes)
+     1135a767  PUSH 0x116
+     1135a782  PUSH 0x116
+     1135a7a6  MOV dword ptr [EBP + -0xc],0x116
+     [skipped decompile: cap reached]
+
+== 1195ddc0  FUN_1195ddc0  (132 bytes)
+     1195dde5  MOV dword ptr [0x123a0924],0x116
+     [skipped decompile: cap reached]
+
+== 1195e860  FUN_1195e860  (132 bytes)
+     1195e885  MOV dword ptr [0x123a0950],0x117
+     [skipped decompile: cap reached]
+
+== 11540d60  FUN_11540d60  (145 bytes)
+     11540d8d  PUSH 0x117
+     [skipped decompile: cap reached]
+
+== 11369580  FUN_11369580  (158 bytes)
+     11369595  PUSH 0x116
+     113695d8  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 11375a60  FUN_11375a60  (158 bytes)
+     11375a75  PUSH 0x117
+     11375ab8  PUSH 0x117
+     [skipped decompile: cap reached]
+
+== 115fbe60  FUN_115fbe60  (158 bytes)
+     115fbe93  CMP EAX,0x116
+     [skipped decompile: cap reached]
+
+== 113657c0  FUN_113657c0  (174 bytes)
+     11365813  PUSH 0x117
+     11365831  PUSH 0x117
+     11365855  MOV dword ptr [EBP + -0x10],0x117
+     [skipped decompile: cap reached]
+
+== 11382200  FUN_11382200  (177 bytes)
+     1138222c  PUSH 0x116
+     1138224f  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 11390910  FUN_11390910  (179 bytes)
+     1139093c  PUSH 0x117
+     11390960  PUSH 0x117
+     [skipped decompile: cap reached]
+
+== 11067490  FUN_11067490  (202 bytes)
+     11067496  AND byte ptr [ECX + 0x117],0xfd
+     [skipped decompile: cap reached]
+
+== 10b24680  FUN_10b24680  (203 bytes)
+     10b246aa  MOV byte ptr [ESI + 0x116],AL
+     [skipped decompile: cap reached]
+
+== 11065c80  FUN_11065c80  (221 bytes)
+     11065d04  TEST byte ptr [EBX + 0x116],0x4
+     [skipped decompile: cap reached]
+
+== 110673a0  FUN_110673a0  (227 bytes)
+     110673bc  TEST byte ptr [ESI + 0x116],0x2
+     110673fa  AND byte ptr [ESI + 0x116],0xfd
+     [skipped decompile: cap reached]
+
+== 108d47e0  FUN_108d47e0  (279 bytes)
+     108d48d1  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 104f9560  FUN_104f9560  (304 bytes)
+     104f9630  MOV EAX,dword ptr [EDI + 0x117]
+     [skipped decompile: cap reached]
+
+== 10571700  FUN_10571700  (305 bytes)
+     10571773  MOV dword ptr [ESP + 0x18],0x116
+     105717c0  CMP dword ptr [EAX],0x116
+     [skipped decompile: cap reached]
+
+== 10571840  FUN_10571840  (305 bytes)
+     105718b3  MOV dword ptr [ESP + 0x18],0x117
+     10571900  CMP dword ptr [EAX],0x117
+     [skipped decompile: cap reached]
+
+== 103d5ef0  FUN_103d5ef0  (316 bytes)
+     103d5fe6  MOV byte ptr [EDI + 0x117],0x0
+     [skipped decompile: cap reached]
+
+== 11077e10  FUN_11077e10  (321 bytes)
+     11077e9a  AND byte ptr [EAX + 0x117],0xfd
+     11077f2e  OR byte ptr [ECX + 0x117],0x2
+     [skipped decompile: cap reached]
+
+== 108d4680  FUN_108d4680  (338 bytes)
+     108d47ac  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 11066d80  FUN_11066d80  (368 bytes)
+     11066e01  TEST byte ptr [ESI + 0x116],0x1
+     11066eb3  TEST byte ptr [ESI + 0x117],0x1
+     11066ee3  AND byte ptr [ESI + 0x117],0xfe
+     [skipped decompile: cap reached]
+
+== 11065ac0  FUN_11065ac0  (433 bytes)
+     11065c16  AND byte ptr [ESI + 0x117],0xf8
+     11065c26  MOV byte ptr [ESI + 0x116],0x21
+     [skipped decompile: cap reached]
+
+== 109da6c0  FUN_109da6c0  (463 bytes)
+     109da864  PUSH dword ptr [ESI + 0x117]
+     [skipped decompile: cap reached]
+
+== 11551b60  FUN_11551b60  (544 bytes)
+     11551d4d  MOV EAX,dword ptr [ESI + 0x116]
+     [skipped decompile: cap reached]
+
+== 115312e0  CMHLevelInfo::CheckWildHuntPhaseRewardWindow  (573 bytes)
+     115314ca  MOV EAX,dword ptr [EDI + 0x117]
+     [skipped decompile: cap reached]
+
+== 101d62e0  FUN_101d62e0  (635 bytes)
+     101d63e6  MOV dword ptr [ECX + 0x116],EAX
+     [skipped decompile: cap reached]
+
+== 108d3290  FUN_108d3290  (748 bytes)
+     108d3567  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 11066f90  FUN_11066f90  (952 bytes)
+     11066fcd  TEST byte ptr [EBX + 0x116],0x20
+     110670b6  OR byte ptr [EBX + 0x116],0x1
+     11067115  OR byte ptr [EBX + 0x117],0x2
+     1106711e  OR byte ptr [EBX + 0x117],0x1
+     11067175  TEST byte ptr [EBX + 0x116],0x2
+     110671ae  TEST byte ptr [EBX + 0x116],0x10
+     11067228  MOVZX EAX,byte ptr [EBX + 0x116]
+     [skipped decompile: cap reached]
+
+== 10058c70  FUN_10058c70  (988 bytes)
+     10058fa8  PUSH 0x117
+     [skipped decompile: cap reached]
+
+== 11422d50  FUN_11422d50  (1143 bytes)
+     11423079  LEA EDX,[ECX + 0x117]
+     [skipped decompile: cap reached]
+
+== 103794b0  FUN_103794b0  (1166 bytes)
+     1037992d  PUSH dword ptr [EDI + 0x116]
+     [skipped decompile: cap reached]
+
+== 10ab9190  FUN_10ab9190  (1272 bytes)
+     10ab962a  TEST byte ptr [EAX + 0x116],0x2
+     [skipped decompile: cap reached]
+
+== 103799a0  FUN_103799a0  (1310 bytes)
+     10379eac  LEA EAX,[EDI + 0x116]
+     [skipped decompile: cap reached]
+
+== 11067e40  FUN_11067e40  (1312 bytes)
+     11067eff  TEST byte ptr [ESI + 0x117],0x4
+     1106832d  MOVZX EAX,byte ptr [ESI + 0x116]
+     [skipped decompile: cap reached]
+
+== 10379f40  FUN_10379f40  (1349 bytes)
+     1037a461  PUSH dword ptr [ESI + 0x116]
+     [skipped decompile: cap reached]
+
+== 11065140  FUN_11065140  (1546 bytes)
+     11065149  MOV AL,byte ptr [ESI + 0x116]
+     1106515c  MOV byte ptr [ESI + 0x116],AL
+     [skipped decompile: cap reached]
+
+== 109f35d0  FUN_109f35d0  (1883 bytes)
+     109f3bce  MOV dword ptr [ESP + 0x117],EAX
+     [skipped decompile: cap reached]
+
+== 1100a550  FUN_1100a550  (1897 bytes)
+     1100a835  MOV dword ptr [EBP + 0xfffffefc],0x117
+     [skipped decompile: cap reached]
+
+== 10b21320  FUN_10b21320  (1898 bytes)
+     10b217d3  CMP byte ptr [EDI + 0x116],0x0
+     [skipped decompile: cap reached]
+
+== 11065d70  CSkillSequence::LoadFromXmlNode  (2019 bytes)
+     11065e33  XOR AL,byte ptr [EBX + 0x116]
+     11065e3f  XOR byte ptr [EBX + 0x116],AL
+     11065e5c  XOR AL,byte ptr [EBX + 0x116]
+     11065e68  XOR byte ptr [EBX + 0x116],AL
+     11065e85  XOR AL,byte ptr [EBX + 0x117]
+     11065e91  XOR byte ptr [EBX + 0x117],AL
+     11065eae  XOR AL,byte ptr [EBX + 0x116]
+     11065eb6  XOR byte ptr [EBX + 0x116],AL
+     11065f0b  XOR AL,byte ptr [EBX + 0x116]
+     11065f13  XOR byte ptr [EBX + 0x116],AL
+     [skipped decompile: cap reached]
+
+== 1132dc10  FUN_1132dc10  (2097 bytes)
+     1132de12  LEA EAX,[ESI + 0x116]
+     [skipped decompile: cap reached]
+
+== 104f7900  WildHunt::BuildActivityViewData  (2344 bytes)
+     104f79f2  MOV EAX,dword ptr [ECX + 0x117]
+     [skipped decompile: cap reached]
+
+== 1132e450  FUN_1132e450  (2664 bytes)
+     1132e835  MOV dword ptr [EDI + 0x116],EAX
+     [skipped decompile: cap reached]
+
+== 10a523b0  Actor::HandleEvent  (2702 bytes)
+     10a524de  CMP EAX,0x116
+     10a5250d  CMP EAX,0x117
+     [skipped decompile: cap reached]
+
+== 10ceafa0  FUN_10ceafa0  (4271 bytes)
+     10ceb721  MOV dword ptr [ESP + 0xd8],0x117
+     [skipped decompile: cap reached]
+
+== 101dc8a0  TdrCharBaseInfo::ToDebugString  (4959 bytes)
+     101dcec6  PUSH dword ptr [EDI + 0x116]
+     [skipped decompile: cap reached]
+
+== 101d6660  TlvCharBattleAttributes_Pack_Varint  (5414 bytes)
+     101d6d25  PUSH dword ptr [EDI + 0x116]
+     [skipped decompile: cap reached]
+
+== 101d7ba0  TlvCharBattleAttributes_Pack_FixedBE  (5414 bytes)
+     101d8265  PUSH dword ptr [EDI + 0x116]
+     [skipped decompile: cap reached]
+
+== 11335dd0  FUN_11335dd0  (6917 bytes)
+     113372b4  PUSH 0x116
+     [skipped decompile: cap reached]
+
+== 105474f0  GameLogicEvent_Dispatch_A_virtualized_  (41012 bytes)
+     1054a1a8  MOV EAX,0x116
+     1054a1c4  MOV EAX,0x117
+     1054ee33  MOV EAX,0x116
+     1054ee4c  MOV EAX,0x117
+     [skipped decompile: too large]

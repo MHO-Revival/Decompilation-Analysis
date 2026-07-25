@@ -1,0 +1,955 @@
+==== NAMED NODE VTABLES (name @ vtbl+0x54) ====
+  CAlwaysFalse                   vtbl=11306010 eval10=105536d0 s4=105536c0 s13=10553720 s19=103d7ae0
+  CAlwaysTrue                    vtbl=11306074 eval10=105537c0 s4=105537b0 s13=10553810 s19=103d7ae0
+  CAnimSequenceIsPlaying         vtbl=11306150 eval10=10554160 s4=10554150 s13=105542d0 s19=103d7ae0
+  CAnimSequencePlay              vtbl=113061cc eval10=10554370 s4=10554360 s13=10555e80 s19=10554fb0
+  CAnimSequenceSetInput          vtbl=113063e8 eval10=10555f60 s4=10555f50 s13=10556f90 s19=10556690
+  CAssessTargetWeapon            vtbl=11306454 eval10=10557030 s4=10557020 s13=105573b0 s19=105572b0
+  CBodyWidthToMeter              vtbl=113066a0 eval10=105592d0 s4=105592c0 s13=10559660 s19=10559590
+  CBroadcastFsmEvent             vtbl=11306750 eval10=10559bb0 s4=10559ba0 s13=10559eb0 s19=10559e60
+  CActiveFGOutput                vtbl=113067e4 eval10=1055a430 s4=1055a420 s13=1055a750 s19=103d7ae0
+  CBuildString                   vtbl=11306b2c eval10=10560460 s4=10560450 s13=10560790 s19=10560540
+  CCaculateDamagedState          vtbl=11306bb4 eval10=10644f35 s4=10560820 s13=10560940 s19=10560840
+  CCaculateDamagedValue          vtbl=11306c4c eval10=105609e0 s4=105609d0 s13=10560ab0 s19=105609f0
+  CCheckGeneralState             vtbl=11306f28 eval10=10564c60 s4=10564c50 s13=10564e20 s19=10564db0
+  CCombatNpcMoveToTarget         vtbl=11306fb0 eval10=10565270 s4=1056e2e0 s13=105655c0 s19=1056f710
+  CDebugBreak                    vtbl=113070d4 eval10=10566e80 s4=10566e70 s13=10566ed0 s19=103d7ae0
+  CDelayTime                     vtbl=11307154 eval10=10567100 s4=105670f0 s13=10567310 s19=103d7ae0
+  CDelayFrame                    vtbl=113071d0 eval10=105673b0 s4=105673a0 s13=105674e0 s19=103d7ae0
+  CAIDirectorQuery               vtbl=11307290 eval10=10567d20 s4=10567d10 s13=105680b0 s19=10568060
+  CEntityFlyDiveToTarget1        vtbl=11307510 eval10=1056b780 s4=1056b5f0 s13=1056bdb0 s19=103d7ae0
+  CEntityFlyToPos                vtbl=113075bc eval10=1056c060 s4=1056bfe0 s13=1056c3e0 s19=1056c050
+  CEntityMove                    vtbl=11307634 eval10=1056c440 s4=1056c420 s13=1056ccf0 s19=1056cc40
+  CEntityMoveSlide               vtbl=113076f0 eval10=1056cde0 s4=1056cdc0 s13=1056d4b0 s19=1056d460
+  CEntityMoveSpeedUp             vtbl=11307770 eval10=1056d5c0 s4=1056d590 s13=1056e250 s19=103d7ae0
+  CEntityMoveToPos               vtbl=1130788c eval10=1056e300 s4=1056e2e0 s13=1056f750 s19=1056f710
+  CEntityMoveToPosSmooth         vtbl=1130799c eval10=1056f800 s4=1056f7d0 s13=10570a60 s19=10570630
+  CEntityMoveToTarget            vtbl=11307a58 eval10=10570c80 s4=10570c60 s13=10572240 s19=105721f0
+  CEntityMoveToUnlocked          vtbl=11307b48 eval10=105723b0 s4=105722d0 s13=10572ec0 s19=10572df0
+  CEntityPlayAnimation           vtbl=11307c0c eval10=10572f80 s4=10572f70 s13=10573370 s19=103d7ae0
+  CEntityRotateOrientation       vtbl=11307c98 eval10=10573430 s4=10573410 s13=10574360 s19=105741f0
+  CEntityRotateToPos             vtbl=11307d30 eval10=10574410 s4=105743f0 s13=10575c20 s19=10575b30
+  CEntityRotateToPosEx           vtbl=11307dac eval10=10575ce0 s4=10575cc0 s13=105772c0 s19=10577270
+  CEntityRotateToPosXZ           vtbl=11307e38 eval10=10577390 s4=10577370 s13=105787a0 s19=10577bb0
+  CEntityRotateToTarget          vtbl=11307eb8 eval10=10578a00 s4=105789e0 s13=1057a390 s19=10579740
+  CExecuteAIBehavior             vtbl=11307f60 eval10=1057a970 s4=1057a960 s13=1057ab50 s19=103d7ae0
+  CDefuzzify                     vtbl=11308248 eval10=10582d40 s4=10582d30 s13=105830d0 s19=10583050
+  CFuzzify                       vtbl=113082d4 eval10=10583190 s4=10583180 s13=105835c0 s19=10583450
+  CFuzzyRule11                   vtbl=11308360 eval10=10583660 s4=10583650 s13=10583e00 s19=10583bc0
+  CFuzzyRule21                   vtbl=113083fc eval10=10584260 s4=10584250 s13=10584970 s19=10584920
+  CRamp                          vtbl=113084a0 eval10=10584a10 s4=10584a00 s13=10584d20 s19=10584cd0
+  CGetAttr                       vtbl=11308580 eval10=10585680 s4=10585670 s13=10585cb0 s19=10585b40
+  CGetDistanceToTarget           vtbl=1130872c eval10=10587990 s4=10587980 s13=10587fb0 s19=10587f00
+  CGetFsmState                   vtbl=113087b4 eval10=10588050 s4=10588040 s13=10588320 s19=105882a0
+  CGetPhysicalRadius             vtbl=113088d0 eval10=105890a0 s4=10589090 s13=10589300 s19=10589280
+  CGroupAICommon                 vtbl=11308ddc eval10=103dc6a0 s4=103dc9d0 s13=10592630 s19=103d7ae0
+  CLocateRingFormation           vtbl=11308ed8 eval10=105935a0 s4=10593530 s13=10593d60 s19=103d7ae0
+  CHideEntity                    vtbl=1130921c eval10=105996b0 s4=105996a0 s13=10599890 s19=103d7ae0
+  CHitFlyAnimPlay                vtbl=113092c4 eval10=10599f00 s4=10599ef0 s13=1059a2b0 s19=1059a0e0
+  CHitFlyAnimSetInput            vtbl=1130939c eval10=1059a3a0 s4=1059a390 s13=1059a710 s19=1059a540
+  CIntToString                   vtbl=1130942c eval10=1059ab00 s4=1059aaf0 s13=1059ad20 s19=1059abc0
+  CInvisibleEntity               vtbl=1130949c eval10=1059adc0 s4=1059adb0 s13=1059af80 s19=103d7ae0
+  CIsBTCoroutineRunning          vtbl=11309510 eval10=1059b020 s4=1059b010 s13=1059b1f0 s19=1059b1a0
+  CDecisionTreeSelector          vtbl=113097a0 eval10=105a27d0 s4=105a2710 s13=105a3760 s19=105a2e40
+  CMonteCarloLearner             vtbl=11309868 eval10=105a3d90 s4=105a3d80 s13=105a5450 s19=105a4660
+  CQLearner                      vtbl=11309980 eval10=105a6830 s4=105a6820 s13=105a7d20 s19=105a7170
+  CMeterToBodyWidth              vtbl=11309a78 eval10=105a9810 s4=105a9800 s13=105a9b40 s19=105a9ac0
+  CModifyPartBrokenValue         vtbl=11309ae8 eval10=105a9e40 s4=105a9e30 s13=105aa250 s19=105aa200
+  CCurrentRegionPathFindRequest  vtbl=11309c58 eval10=105ac2e0 s4=105ac2d0 s13=105ac560 s19=105ac490
+  CGetCanBeReachedNearPos        vtbl=11309ccc eval10=105ac610 s4=105ac600 s13=105ac840 s19=105ac7f0
+  CGetNextRegionChangePoint      vtbl=11309d38 eval10=105ac8e0 s4=105ac8d0 s13=105ac9f0 s19=105ac980
+  CGetNextTraversePath           vtbl=11309da8 eval10=105aca90 s4=105aca80 s13=105acc00 s19=105acbb0
+  CGetPathNextPos                vtbl=11309e2c eval10=105acca0 s4=105acc90 s13=105acfd0 s19=105acf80
+  CGetRandomPosAround            vtbl=11309eac eval10=105ad070 s4=105ad060 s13=105ad590 s19=105ad480
+  CGetRandomPosAwayFromTarget    vtbl=11309f44 eval10=105ad940 s4=105ad930 s13=105adcd0 s19=103d7ae0
+  CGetRandomPosInCurrentRegion   vtbl=1130a008 eval10=105add30 s4=105add20 s13=105ae220 s19=105ae1d0
+  CGetRandomPosInRange           vtbl=1130a08c eval10=105ae2d0 s4=105ae2c0 s13=105aea80 s19=105aea30
+  CGetRandomPosNearTarget        vtbl=1130a110 eval10=105aec10 s4=105aec00 s13=105aef20 s19=105aeed0
+  CIsLastEdgeInPath              vtbl=1130a17c eval10=105aefc0 s4=105aefb0 s13=105af080 s19=105af030
+  CIsOnSameVolume                vtbl=1130a1e4 eval10=105af120 s4=105af110 s13=105af2a0 s19=105af250
+  CIsOnVolume                    vtbl=1130a248 eval10=105af340 s4=105af330 s13=105af480 s19=105af430
+  CPathFindRequest               vtbl=1130a2a8 eval10=105af520 s4=105af510 s13=105af760 s19=105af710
+  CRegionPathFindRequest         vtbl=1130a310 eval10=105af810 s4=105af800 s13=105afc10 s19=103d7ae0
+  CTraverseEdge                  vtbl=1130a38c eval10=105afcb0 s4=105afca0 s13=105afd20 s19=105afcd0
+  CPlaySymbolAction              vtbl=1130a6a8 eval10=105b5170 s4=105b5160 s13=105b5360 s19=105b5310
+  CRandomAnimsPlayByNum          vtbl=1130a83c eval10=105b6cf0 s4=105b6c10 s13=105b7830 s19=105b7120
+  CSelectTargetActionPlayer      vtbl=1130afec eval10=105c6540 s4=105c6530 s13=105c6780 s19=105c6730
+  CSelectTargetAttackInvaildPlayer vtbl=1130b06c eval10=105c6820 s4=105c6810 s13=105c6a60 s19=105c6a10
+  CSelectTargetAttackPlayer      vtbl=1130b0e4 eval10=105c6b00 s4=105c6af0 s13=105c6d40 s19=105c6cf0
+  CSendEventToBTWithResult       vtbl=1130b1d4 eval10=105c7d00 s4=105c7cf0 s13=105c7f90 s19=103d7ae0
+  CSendEventToFG                 vtbl=1130b244 eval10=105c8030 s4=105c8020 s13=105c82c0 s19=103d7ae0
+  CSendFsmEvent                  vtbl=1130b2a8 eval10=105c8360 s4=105c8350 s13=105c8650 s19=105c8600
+  CSendMonsterEventToPlayer      vtbl=1130b30c eval10=105c86f0 s4=105c86e0 s13=105c8a10 s19=103d7ae0
+  CSendMonsterScriptEvent        vtbl=1130b394 eval10=105c8ab0 s4=105c8aa0 s13=105c8d80 s19=103d7ae0
+  CCanStepBackward               vtbl=1130b4c0 eval10=105ca1a0 s4=105ca190 s13=105ca430 s19=105ca3e0
+  CCanStepForward                vtbl=1130b538 eval10=105ca4d0 s4=105ca4c0 s13=105ca760 s19=105ca710
+  CCanStepLeft                   vtbl=1130b59c eval10=105ca800 s4=105ca7f0 s13=105cab30 s19=105caae0
+  CCanStepRight                  vtbl=1130b600 eval10=105cabd0 s4=105cabc0 s13=105caef0 s19=105caea0
+  CCanWalkTo                     vtbl=1130b664 eval10=105caf90 s4=105caf80 s13=105cb650 s19=105cb350
+  CSenseSpatialRestriction       vtbl=1130b754 eval10=105cc3b0 s4=105cc3a0 s13=105cc640 s19=105cc5f0
+  CSetDamageable                 vtbl=1130b920 eval10=105cf2f0 s4=105cf2e0 s13=105cf430 s19=103d7ae0
+  CSetGeneralState               vtbl=1130b998 eval10=105cf600 s4=105cf5f0 s13=105cf8c0 s19=105cf870
+  CSetHitReactionByHitPart       vtbl=1130ba0c eval10=105cf960 s4=105cf950 s13=105d0230 s19=105cfd00
+  CSetMoveSpeedBy2D              vtbl=1130baf8 eval10=105d1140 s4=105d1130 s13=105d1530 s19=103d7ae0
+  CSetState                      vtbl=1130bd5c eval10=105d27a0 s4=105d2790 s13=105d2b70 s19=105d2ad0
+  CGetSkillInfo                  vtbl=1130bed0 eval10=105d4d80 s4=103dc9d0 s13=105d51d0 s19=103d7ae0
+  CSetPetSkill                   vtbl=1130bf6c eval10=105d5270 s4=103dc9d0 s13=105d62b0 s19=103d7ae0
+  CSkillIsEnd                    vtbl=1130c13c eval10=105d69e0 s4=105d69d0 s13=105d6ac0 s19=103d7ae0
+  CStartPetSkill                 vtbl=1130c19c eval10=105d6b50 s4=105d6cb0 s13=105d7540 s19=103d7ae0
+  CStartSkill                    vtbl=1130c2a4 eval10=105d7c40 s4=103dc9d0 s13=105d8750 s19=103d7ae0
+  CTriggerSkillEffect            vtbl=1130c32c eval10=105d87e0 s4=103dc9d0 s13=105d8970 s19=103d7ae0
+  CSpawnEntityAttachment         vtbl=1130c568 eval10=105dc990 s4=105dc980 s13=105dce50 s19=103d7ae0
+  CStartBTCoroutine              vtbl=1130c744 eval10=105e1590 s4=105e1580 s13=105e17e0 s19=105e1790
+  CSteerAroundTarget             vtbl=1130c880 eval10=105e2540 s4=105e2520 s13=105e30b0 s19=105e3030
+  CGetFleePosAwayTarget          vtbl=1130c900 eval10=105e3100 s4=105e30f0 s13=105e3900 s19=105e38b0
+  CGetWanderPos                  vtbl=1130c9b0 eval10=105e3de0 s4=105e3dd0 s13=105e44a0 s19=105e43f0
+  CIsInSteering                  vtbl=1130ca58 eval10=105e45a0 s4=103dc9d0 s13=105e4670 s19=103d7ae0
+  CMoveFlocking                  vtbl=1130cad0 eval10=105e47b0 s4=105e4780 s13=105e6650 s19=105e60d0
+  CMoveStick                     vtbl=1130cbc8 eval10=105e67a0 s4=105e6770 s13=105e8240 s19=105e8090
+  CSeekToPosition                vtbl=1130cc48 eval10=105e8340 s4=105e82d0 s13=105e86e0 s19=105e8680
+  CSeekToTarget                  vtbl=1130ccf8 eval10=105e87e0 s4=105e8770 s13=105e9020 s19=105e8fd0
+  CSeekToTargetBone              vtbl=1130cd98 eval10=105e9120 s4=105e90b0 s13=105eb200 s19=105eb1a0
+                                 vtbl=1130ce58 eval10=105eb340 s4=103dc9d0 s13=105eb440 s19=103d7ae0
+                                 vtbl=1130ced0 eval10=105eb5e0 s4=103dc9d0 s13=105eb910 s19=103d7ae0
+  CStopSteering                  vtbl=1130cf50 eval10=105ebb00 s4=103dc9d0 s13=105ebbf0 s19=103d7ae0
+  CStopBTCoroutine               vtbl=1130cfb4 eval10=105ebc90 s4=105ebc80 s13=105ebde0 s19=105ebd90
+  CSelectorVoter                 vtbl=1130d0a8 eval10=105ed490 s4=105ed530 s13=105ed590 s19=105ed540
+  CVotingSelector                vtbl=1130d140 eval10=105ed910 s4=105ed980 s13=105f0b20 s19=105eeba0
+  CAddAbnormalFlag               vtbl=1130d40c eval10=103dc6a0 s4=103dc9d0 s13=103d7a40 s19=103d7ae0
+  CIsBTRunning                   vtbl=1130d6b4 eval10=105f8380 s4=105f8370 s13=105f8560 s19=105f8510
+  CPercentageRandomCheck         vtbl=1130d7b4 eval10=105fa340 s4=105fa330 s13=105fa480 s19=103d7ae0
+                                 vtbl=1130d8f0 eval10=105b4a70 s4=105b4a60 s13=10621f70 s19=103d7ae0
+  CDropTarget                    vtbl=1130d944 eval10=105699a0 s4=10569990 s13=10621820 s19=103d7ae0
+                                 vtbl=1130d9a4 eval10=105b4450 s4=105b4440 s13=10621f60 s19=103d7ae0
+                                 vtbl=1130d9f8 eval10=105696c0 s4=105696b0 s13=10621810 s19=103d7ae0
+                                 vtbl=1130da4c eval10=105b0d50 s4=105b0d40 s13=10621670 s19=103d7ae0
+                                 vtbl=1130daa0 eval10=105b0930 s4=105b0920 s13=10621600 s19=103d7ae0
+                                 vtbl=1130daf4 eval10=105b41d0 s4=105b41c0 s13=10622460 s19=103d7ae0
+                                 vtbl=1130db48 eval10=105b0650 s4=105b0600 s13=106215f0 s19=103d7ae0
+  CCheckCollideWithWall          vtbl=1130db9c eval10=105b0560 s4=105b0550 s13=106215e0 s19=105b05f0
+                                 vtbl=1130dc08 eval10=105b11c0 s4=105b11b0 s13=10621870 s19=103d7ae0
+                                 vtbl=1130dc5c eval10=105b3260 s4=105b3250 s13=10622010 s19=103d7ae0
+                                 vtbl=1130dcb0 eval10=105b3fd0 s4=105b3fc0 s13=10622020 s19=103d7ae0
+                                 vtbl=1130dd04 eval10=105b0be0 s4=103dc9d0 s13=10621630 s19=103d7ae0
+                                 vtbl=1130dd58 eval10=10599990 s4=10599980 s13=10621d00 s19=10599ea0
+                                 vtbl=1130ddac eval10=1056ac00 s4=1056abf0 s13=10621850 s19=103d7ae0
+                                 vtbl=1130de00 eval10=105d4470 s4=105d4460 s13=10622530 s19=103d7ae0
+  CRemoveTriggerProxy            vtbl=1130de54 eval10=105d47a0 s4=105d4790 s13=10622090 s19=103d7ae0
+                                 vtbl=1130debc eval10=105d1c30 s4=105d1c20 s13=10622490 s19=103d7ae0
+                                 vtbl=1130df10 eval10=10560b30 s4=10560b20 s13=106214e0 s19=103d7ae0
+                                 vtbl=1130df64 eval10=105619e0 s4=105619d0 s13=10621510 s19=103d7ae0
+                                 vtbl=1130dfb8 eval10=105615f0 s4=105615e0 s13=106214f0 s19=105617b0
+                                 vtbl=1130e00c eval10=10557900 s4=105578f0 s13=106213d0 s19=103d7ae0
+                                 vtbl=1130e060 eval10=1059b270 s4=1059b260 s13=10621d60 s19=1059b5e0
+                                 vtbl=1130e0b4 eval10=10553890 s4=10553880 s13=10621390 s19=10553c10
+                                 vtbl=1130e108 eval10=1057e200 s4=1057e1f0 s13=10621930 s19=1057e990
+                                 vtbl=1130e15c eval10=1057f0e0 s4=1057f0d0 s13=10621940 s19=1057fc40
+                                 vtbl=1130e1b0 eval10=10553ce0 s4=10553cd0 s13=106213a0 s19=103d7ae0
+                                 vtbl=1130e204 eval10=116fe1cc s4=105cdc90 s13=10622340 s19=105ce7d0
+                                 vtbl=1130e258 eval10=105ce870 s4=105ce860 s13=10622360 s19=105cec40
+                                 vtbl=1130e2ac eval10=105ced50 s4=105ced40 s13=10622350 s19=105cf010
+  CSetBlackBoardEqualFloat       vtbl=1130e300 eval10=1062b4f0 s4=1062b410 s13=106212c0 s19=103d7ae0
+  CSetBlackBoardEqualInt         vtbl=1130e370 eval10=1062b470 s4=1062b400 s13=106212b0 s19=103d7ae0
+  CSetBlackBoardEqualVec3        vtbl=1130e3dc eval10=1062b540 s4=1062b420 s13=106212d0 s19=103d7ae0
+  CSetBlackBoardEqualBool        vtbl=1130e448 eval10=1062b680 s4=1062b440 s13=106212f0 s19=103d7ae0
+  CSetBlackBoardEqualString      vtbl=1130e4b4 eval10=1062b5f0 s4=1062b430 s13=106212e0 s19=103d7ae0
+                                 vtbl=1130e524 eval10=105a8cb0 s4=105a8ca0 s13=10621e50 s19=105a8da0
+                                 vtbl=1130e578 eval10=105be450 s4=105be440 s13=10622130 s19=103d7ae0
+                                 vtbl=1130e5cc eval10=1055eaa0 s4=1055ea90 s13=10621450 s19=103d7ae0
+                                 vtbl=1130e620 eval10=10559f30 s4=10559f20 s13=10621400 s19=103d7ae0
+                                 vtbl=1130e674 eval10=105c7a50 s4=105c7a40 s13=10622270 s19=103d7ae0
+                                 vtbl=1130e6c8 eval10=105d3220 s4=105d3210 s13=106224f0 s19=103d7ae0
+                                 vtbl=1130e71c eval10=105d3760 s4=105d3750 s13=10622510 s19=105d3af0
+                                 vtbl=1130e770 eval10=10553f20 s4=10553f10 s13=106213b0 s19=10554110
+                                 vtbl=1130e7c4 eval10=105d42b0 s4=105d42a0 s13=10622520 s19=105d4440
+                                 vtbl=1130e818 eval10=105853d0 s4=105853c0 s13=106219c0 s19=10585620
+                                 vtbl=1130e86c eval10=105cc980 s4=105cc970 s13=10622320 s19=105cd790
+                                 vtbl=1130e8c0 eval10=1058b180 s4=1058b170 s13=10621bd0 s19=103d7ae0
+                                 vtbl=1130e914 eval10=105c5700 s4=105c56f0 s13=10622220 s19=105c64f0
+                                 vtbl=1130e968 eval10=105c72e0 s4=105c72d0 s13=10622240 s19=103d7ae0
+                                 vtbl=1130e9bc eval10=105c2ba0 s4=105c2b90 s13=106221d0 s19=105c3240
+                                 vtbl=1130ea10 eval10=105c3370 s4=105c3360 s13=106221e0 s19=105c3620
+  CMissTarget                    vtbl=1130ea64 eval10=105a9bb0 s4=105a9dd0 s13=10621ec0 s19=105a9de0
+                                 vtbl=1130eac4 eval10=105980b0 s4=105980a0 s13=10621ce0 s19=105991b0
+                                 vtbl=1130eb18 eval10=105b1670 s4=105b1660 s13=10621c80 s19=105b23c0
+                                 vtbl=1130eb6c eval10=105d48f0 s4=105d48e0 s13=10622550 s19=105d4d40
+                                 vtbl=1130ebc0 eval10=10568ab0 s4=10568aa0 s13=10621800 s19=10569550
+                                 vtbl=1130ec14 eval10=10588e70 s4=10588e60 s13=10621b40 s19=10589040
+                                 vtbl=1130ec68 eval10=105d3c30 s4=105d3c20 s13=10622500 s19=105d41f0
+                                 vtbl=1130ecbc eval10=105aa2d0 s4=105aa2c0 s13=10621ed0 s19=103d7ae0
+                                 vtbl=1130ed10 eval10=10564880 s4=10564870 s13=10621590 s19=103d7ae0
+                                 vtbl=1130ed64 eval10=10582920 s4=10582910 s13=10621980 s19=10582ab0
+                                 vtbl=1130edb8 eval10=1059b610 s4=1059b600 s13=10621d80 s19=1059b780
+                                 vtbl=1130ee0c eval10=1058b9f0 s4=1058b9e0 s13=10621c10 s19=1058bd20
+                                 vtbl=1130ee60 eval10=10564ea0 s4=10564e90 s13=10621680 s19=10565030
+                                 vtbl=1130eeb4 eval10=105ecca0 s4=105ecc90 s13=10622730 s19=105ed080
+                                 vtbl=1130ef08 eval10=105ec8f0 s4=105ec8e0 s13=10622720 s19=105ecc70
+                                 vtbl=1130ef5c eval10=105662e0 s4=105662d0 s13=10621730 s19=105666b0
+                                 vtbl=1130efb0 eval10=105ebf10 s4=105ebf00 s13=106226d0 s19=105ec250
+                                 vtbl=1130f004 eval10=105cbea0 s4=105cbe90 s13=10622310 s19=105cc280
+                                 vtbl=1130f058 eval10=105cc6c0 s4=105cc6b0 s13=10622380 s19=105cc870
+                                 vtbl=1130f0ac eval10=105cb870 s4=105cb860 s13=10621a10 s19=105cb9e0
+                                 vtbl=1130f100 eval10=105cba20 s4=105cba10 s13=10622300 s19=105cbe70
+                                 vtbl=1130f154 eval10=105521d0 s4=105521c0 s13=10621310 s19=103d7ae0
+                                 vtbl=1130f1a8 eval10=10551fa0 s4=10551f90 s13=10621300 s19=103d7ae0
+                                 vtbl=1130f1fc eval10=1057a410 s4=1057a400 s13=106218b0 s19=1057a920
+                                 vtbl=1130f250 eval10=10568130 s4=10568120 s13=106217d0 s19=105686b0
+                                 vtbl=1130f2a4 eval10=105cdaa0 s4=105cda90 s13=10622330 s19=105cdc20
+                                 vtbl=1130f2f8 eval10=105d1850 s4=105d1840 s13=10622480 s19=105d1b40
+                                 vtbl=1130f34c eval10=105d15b0 s4=105d15a0 s13=10622470 s19=105d1790
+                                 vtbl=1130f3a0 eval10=105c6dc0 s4=105c6db0 s13=10622230 s19=105c72a0
+                                 vtbl=1130f3f4 eval10=105b7f30 s4=105b7f20 s13=10622000 s19=105b83b0
+                                 vtbl=1130f448 eval10=10552530 s4=10552520 s13=10621380 s19=10552bd0
+                                 vtbl=1130f49c eval10=105979b0 s4=105979a0 s13=10621c60 s19=10597c80
+                                 vtbl=1130f4f0 eval10=105977a0 s4=10597790 s13=10621c50 s19=10597940
+                                 vtbl=1130f544 eval10=10582ae0 s4=10582ad0 s13=10621990 s19=103d7ae0
+  CSpawnMonster                  vtbl=1130f598 eval10=105b6920 s4=105b6910 s13=10622600 s19=105b6b00
+  CConfirmTeam                   vtbl=1130f5fc eval10=105b6600 s4=105b65f0 s13=106216d0 s19=105b6610
+  CHandlePVPDeath                vtbl=1130f660 eval10=105b6630 s4=105b6620 s13=10621c70 s19=105b6770
+                                 vtbl=1130f6c4 eval10=105b6800 s4=105b67f0 s13=10621f30 s19=105b68f0
+                                 vtbl=1130f718 eval10=105cf4b0 s4=105cf4a0 s13=10622390 s19=103d7ae0
+                                 vtbl=1130f76c eval10=105c2800 s4=105c27f0 s13=106221c0 s19=105c2b70
+                                 vtbl=1130f7c0 eval10=105d20a0 s4=105d2090 s13=106224d0 s19=105d25b0
+  CPreCacuTargetPos              vtbl=1130f814 eval10=105b5570 s4=105b5560 s13=10621fa0 s19=105b5bf0
+                                 vtbl=1130f87c eval10=105c2150 s4=105c2140 s13=106221b0 s19=103d7ae0
+                                 vtbl=1130f8d0 eval10=105cf050 s4=105cf040 s13=10622370 s19=105cf2a0
+                                 vtbl=1130f924 eval10=105c0830 s4=105c0820 s13=10622180 s19=105c1200
+                                 vtbl=1130f978 eval10=105c3ac0 s4=105c3ab0 s13=10622200 s19=105c43d0
+                                 vtbl=1130f9cc eval10=105bf270 s4=105bf260 s13=10622170 s19=105bfdb0
+                                 vtbl=1130fa20 eval10=105c4400 s4=105c43f0 s13=10622210 s19=105c4910
+                                 vtbl=1130fa74 eval10=105c1250 s4=105c1240 s13=10622190 s19=105c1630
+                                 vtbl=1130fac8 eval10=105c3650 s4=105c3640 s13=106221f0 s19=105c3a90
+                                 vtbl=1130fb1c eval10=105c1910 s4=105c1900 s13=106221a0 s19=105c2120
+  CEatMeat                       vtbl=1130fb70 eval10=10569b00 s4=10569af0 s13=10621830 s19=10569be0
+                                 vtbl=1130fbd0 eval10=10569c40 s4=10569c30 s13=10621840 s19=1056a330
+  CSetRegionID                   vtbl=1130fc24 eval10=105d1fa0 s4=105d1f90 s13=106224c0 s19=105d2060
+                                 vtbl=1130fc88 eval10=1059b7b0 s4=1059b7a0 s13=10621e00 s19=1059b920
+                                 vtbl=1130fcdc eval10=105d02b0 s4=105d02a0 s13=10622410 s19=105d0430
+                                 vtbl=1130fd30 eval10=10564b70 s4=10564b60 s13=106215a0 s19=10564c10
+                                 vtbl=1130fd84 eval10=105f8d70 s4=105f8d60 s13=10621dd0 s19=105f91b0
+                                 vtbl=1130fdd8 eval10=105f91e0 s4=105f91d0 s13=10621de0 s19=105f9480
+                                 vtbl=1130fe2c eval10=105f4ea0 s4=105f4e90 s13=10621480 s19=105f5190
+                                 vtbl=1130fe80 eval10=105f4960 s4=105f4950 s13=10621470 s19=105f4e50
+                                 vtbl=1130fed4 eval10=105f4050 s4=105f4040 s13=106213f0 s19=105f4590
+                                 vtbl=1130ff28 eval10=105f5950 s4=105f5940 s13=10621490 s19=105f5a50
+                                 vtbl=1130ff7c eval10=105f6ba0 s4=105f6b80 s13=106217e0 s19=105f73e0
+                                 vtbl=1130ffd0 eval10=105fac30 s4=105fac20 s13=10622150 s19=103d7ae0
+                                 vtbl=11310024 eval10=105f8aa0 s4=105f8a90 s13=10621da0 s19=103d7ae0
+                                 vtbl=11310078 eval10=105f9e20 s4=105f9e10 s13=10621f20 s19=105fa2f0
+                                 vtbl=113100cc eval10=105fa630 s4=105fa620 s13=10622140 s19=103d7ae0
+                                 vtbl=11310120 eval10=105fb5f0 s4=105fb5e0 s13=106226f0 s19=105fb970
+                                 vtbl=11310174 eval10=105fbcb0 s4=105fbca0 s13=10622710 s19=103d7ae0
+                                 vtbl=113101c8 eval10=105fb470 s4=105fb460 s13=106226b0 s19=105fb5c0
+                                 vtbl=1131021c eval10=105f8bd0 s4=105f8bc0 s13=10621db0 s19=103d7ae0
+                                 vtbl=11310270 eval10=105fb9a0 s4=105fb990 s13=10622700 s19=105fbc80
+                                 vtbl=113102c4 eval10=105f68c0 s4=105f68b0 s13=10621780 s19=105f6b60
+                                 vtbl=11310318 eval10=105fad60 s4=105fad50 s13=106226a0 s19=105fb440
+  CCheckTargetInfo               vtbl=1131036c eval10=105f6870 s4=105f6860 s13=10621650 s19=105f6880
+                                 vtbl=113103d4 eval10=105f7a90 s4=105f7a80 s13=10621d20 s19=105f7c80
+                                 vtbl=11310428 eval10=105f85e0 s4=105f85d0 s13=10621d90 s19=105f8710
+                                 vtbl=1131047c eval10=105f5e40 s4=105f5e30 s13=10621620 s19=105f62c0
+                                 vtbl=113104d0 eval10=105f95b0 s4=105f95a0 s13=10621ef0 s19=105f97e0
+                                 vtbl=11310524 eval10=105f45e0 s4=105f45b0 s13=10621460 s19=105f47f0
+                                 vtbl=11310578 eval10=105f7930 s4=105f7920 s13=10621cd0 s19=105f7a60
+                                 vtbl=113105cc eval10=105f5cf0 s4=105f5ce0 s13=10621560 s19=105f5e10
+                                 vtbl=11310620 eval10=105f74d0 s4=105f74c0 s13=106218c0 s19=105f7900
+                                 vtbl=11310674 eval10=105c9450 s4=105c9440 s13=10622290 s19=103d7ae0
+                                 vtbl=113106c8 eval10=105c8e10 s4=105c8e00 s13=10622280 s19=103d7ae0
+                                 vtbl=1131071c eval10=105c9c20 s4=105c9c10 s13=106222d0 s19=105c9c40
+                                 vtbl=11310770 eval10=10558e30 s4=10558e20 s13=106213e0 s19=103d7ae0
+                                 vtbl=113107c4 eval10=105b5fe0 s4=105b5fd0 s13=10621fb0 s19=105b65d0
+                                 vtbl=11310818 eval10=105db660 s4=105db650 s13=106225c0 s19=103d7ae0
+                                 vtbl=1131086c eval10=105e2210 s4=105e2200 s13=10622670 s19=103d7ae0
+                                 vtbl=113108c0 eval10=105a8dd0 s4=105a8dc0 s13=10621e60 s19=103d7ae0
+                                 vtbl=11310914 eval10=105d25e0 s4=105d25d0 s13=106224e0 s19=103d7ae0
+                                 vtbl=11310968 eval10=10580680 s4=10580670 s13=10621960 s19=10580b90
+                                 vtbl=113109bc eval10=10581510 s4=10581500 s13=10621970 s19=10581c30
+                                 vtbl=11310a10 eval10=1058b6a0 s4=1058b690 s13=10621c00 s19=103d7ae0
+                                 vtbl=11310a64 eval10=1057d2b0 s4=1057d2a0 s13=10621910 s19=1057d7d0
+                                 vtbl=11310ab8 eval10=105656e0 s4=105656d0 s13=106216e0 s19=103d7ae0
+                                 vtbl=11310b0c eval10=105ec2c0 s4=105ec2b0 s13=106226e0 s19=105ec8c0
+                                 vtbl=11310b60 eval10=105b87a0 s4=105b8790 s13=10622080 s19=103d7ae0
+  CRemoveAllDynamicEffects       vtbl=11310bb4 eval10=105b85d0 s4=105b85c0 s13=10622060 s19=103d7ae0
+                                 vtbl=11310c24 eval10=10551600 s4=105515f0 s13=10621340 s19=103d7ae0
+                                 vtbl=11310c78 eval10=105dced0 s4=105dcec0 s13=106225e0 s19=103d7ae0
+                                 vtbl=11310ccc eval10=105624f0 s4=105624e0 s13=10621520 s19=105625f0
+                                 vtbl=11310d20 eval10=10562180 s4=10562170 s13=10621500 s19=103d7ae0
+                                 vtbl=11310d74 eval10=10550be0 s4=10550bd0 s13=10621330 s19=10550e60
+                                 vtbl=11310dc8 eval10=105a9220 s4=105a9210 s13=10621e70 s19=105a97c0
+                                 vtbl=11310e1c eval10=105b7d00 s4=105b7cf0 s13=10621ff0 s19=103d7ae0
+                                 vtbl=11310e70 eval10=105b7860 s4=105b7850 s13=10621fd0 s19=103d7ae0
+                                 vtbl=11310ec4 eval10=105b7ac0 s4=105b7ab0 s13=10621fe0 s19=103d7ae0
+                                 vtbl=11310f18 eval10=10563430 s4=10563420 s13=10621540 s19=10563e10
+                                 vtbl=11310f6c eval10=10563e60 s4=10563e50 s13=10621550 s19=10564850
+                                 vtbl=11310fc0 eval10=105627b0 s4=105627a0 s13=10621530 s19=105631b0
+                                 vtbl=11311014 eval10=1057b680 s4=1057b670 s13=106218e0 s19=1057bd20
+                                 vtbl=11311068 eval10=1057c830 s4=1057c820 s13=106218f0 s19=1057c8c0
+  CDestroySelf                   vtbl=113110bc eval10=10567c80 s4=10567c70 s13=106217c0 s19=103d7ae0
+  CSuicide                       vtbl=11311120 eval10=105ebe60 s4=105ebe50 s13=10622690 s19=103d7ae0
+  CHideSelf                      vtbl=11311180 eval10=10599930 s4=10599920 s13=10621cf0 s19=103d7ae0
+                                 vtbl=113111e0 eval10=10567b70 s4=10567b60 s13=106217b0 s19=103d7ae0
+                                 vtbl=11311234 eval10=1057b300 s4=1057b2f0 s13=106218d0 s19=1057b520
+                                 vtbl=11311288 eval10=10597cd0 s4=10597cc0 s13=10621ca0 s19=103d7ae0
+                                 vtbl=113112dc eval10=105b1390 s4=105b1380 s13=10621890 s19=105b1610
+                                 vtbl=11311330 eval10=10589380 s4=10589370 s13=10621b50 s19=10589680
+                                 vtbl=11311384 eval10=105896b0 s4=105896a0 s13=10621b60 s19=10589e80
+                                 vtbl=113113d8 eval10=10588590 s4=10588580 s13=10621b10 s19=105889c0
+                                 vtbl=1131142c eval10=105889f0 s4=105889e0 s13=10621b30 s19=10588e40
+                                 vtbl=11311480 eval10=10585d30 s4=10585d20 s13=106219d0 s19=10586170
+                                 vtbl=113114d4 eval10=1059c0d0 s4=1059c0c0 s13=10621e30 s19=103d7ae0
+                                 vtbl=11311528 eval10=10586c90 s4=10586c80 s13=10621a00 s19=10586ee0
+                                 vtbl=1131157c eval10=10589eb0 s4=10589ea0 s13=10621b70 s19=1058a3f0
+                                 vtbl=113115d0 eval10=1058b030 s4=1058b020 s13=10621bc0 s19=1058b120
+                                 vtbl=11311624 eval10=1058ad00 s4=1058acf0 s13=10621bb0 s19=1058af60
+                                 vtbl=11311678 eval10=1058b360 s4=1058b350 s13=10621bf0 s19=1058b600
+                                 vtbl=113116cc eval10=105f2630 s4=105f25f0 s13=10621580 s19=103d7ae0
+                                 vtbl=11311720 eval10=105f3790 s4=105f3780 s13=10621b90 s19=105f3a70
+                                 vtbl=11311774 eval10=105d0460 s4=105d0450 s13=10622450 s19=105d0f70
+                                 vtbl=113117c8 eval10=105d1da0 s4=105d1d90 s13=106224a0 s19=105d1f60
+                                 vtbl=1131181c eval10=10586500 s4=105864f0 s13=106219e0 s19=10586960
+                                 vtbl=11311870 eval10=105dd570 s4=105dd560 s13=10622620 s19=105dd9b0
+                                 vtbl=113118c4 eval10=105dffb0 s4=105dffa0 s13=10622570 s19=103d7ae0
+                                 vtbl=11311918 eval10=105e0a40 s4=103dc9d0 s13=10622610 s19=103d7ae0
+                                 vtbl=1131196c eval10=1056ad50 s4=1056ad40 s13=10621860 s19=103d7ae0
+                                 vtbl=113119c0 eval10=105b00c0 s4=105afff0 s13=10621430 s19=103d7ae0
+                                 vtbl=11311a14 eval10=105b53f0 s4=105b53d0 s13=10621f90 s19=103d7ae0
+                                 vtbl=11311a68 eval10=1055dad0 s4=1055dac0 s13=10622540 s19=103d7ae0
+                                 vtbl=11311abc eval10=1055bda0 s4=1055bd90 s13=10621c30 s19=103d7ae0
+  CIsServer                      vtbl=11311b10 eval10=1055c9a0 s4=1055c990 s13=10621df0 s19=103d7ae0
+  CClearAllLinkedEntities        vtbl=11311b70 eval10=1055b090 s4=1055b080 s13=10621690 s19=103d7ae0
+                                 vtbl=11311bdc eval10=1055a7d0 s4=1055a7c0 s13=10621410 s19=1055aab0
+                                 vtbl=11311c30 eval10=1055ada0 s4=103dc9d0 s13=10621420 s19=1055b040
+                                 vtbl=11311c84 eval10=1055b140 s4=103dc9d0 s13=10621a40 s19=1055b490
+                                 vtbl=11311cd8 eval10=1055c540 s4=103dc9d0 s13=10621c90 s19=103d7ae0
+                                 vtbl=11311d2c eval10=1055c9c0 s4=103dc9d0 s13=10622260 s19=103d7ae0
+                                 vtbl=11311d80 eval10=1055c750 s4=103dc9d0 s13=10621d10 s19=103d7ae0
+                                 vtbl=11311dd4 eval10=1055b4d0 s4=103dc9d0 s13=10621b80 s19=103d7ae0
+                                 vtbl=11311e28 eval10=1055ab30 s4=103dc9d0 s13=10621440 s19=103d7ae0
+                                 vtbl=11311e7c eval10=105bb660 s4=103dc9d0 s13=10621ee0 s19=103d7ae0
+                                 vtbl=11311ed0 eval10=105bbc10 s4=103dc9d0 s13=106220f0 s19=103d7ae0
+                                 vtbl=11311f24 eval10=105bb540 s4=103dc9d0 s13=10621c20 s19=103d7ae0
+                                 vtbl=11311f78 eval10=105ba700 s4=105ba6f0 s13=10621950 s19=105baaf0
+                                 vtbl=11311fcc eval10=105bc5c0 s4=105bc5b0 s13=106222a0 s19=103d7ae0
+                                 vtbl=11312020 eval10=105bcfb0 s4=103dc9d0 s13=10622430 s19=103d7ae0
+                                 vtbl=11312074 eval10=105bd0d0 s4=103dc9d0 s13=106224b0 s19=103d7ae0
+                                 vtbl=113120c8 eval10=105bb920 s4=103dc9d0 s13=10621f80 s19=103d7ae0
+                                 vtbl=1131211c eval10=105bc130 s4=105bc060 s13=10622110 s19=103d7ae0
+                                 vtbl=11312170 eval10=105bd3b0 s4=105bd3a0 s13=10622630 s19=103d7ae0
+                                 vtbl=113121c4 eval10=105dee10 s4=105dee00 s13=10622640 s19=105df580
+                                 vtbl=11312218 eval10=105be0c0 s4=103dc9d0 s13=106226c0 s19=103d7ae0
+                                 vtbl=1131226c eval10=105daf90 s4=105daf80 s13=106225b0 s19=103d7ae0
+                                 vtbl=113122c0 eval10=105df5b0 s4=105df5a0 s13=10622650 s19=103d7ae0
+                                 vtbl=11312314 eval10=105d8b60 s4=105d8b50 s13=10622580 s19=105d93d0
+                                 vtbl=11312368 eval10=105dbd70 s4=105dbd60 s13=106225d0 s19=103d7ae0
+                                 vtbl=113123bc eval10=105da9d0 s4=105da9c0 s13=106225a0 s19=103d7ae0
+                                 vtbl=11312410 eval10=1058d250 s4=1058d240 s13=10621900 s19=1058d960
+                                 vtbl=11312464 eval10=105970f0 s4=105970d0 s13=10622440 s19=103d7ae0
+                                 vtbl=113124b8 eval10=1058f490 s4=1058f430 s13=10621a20 s19=103d7ae0
+                                 vtbl=1131250c eval10=105913c0 s4=105913b0 s13=10621b00 s19=10591950
+                                 vtbl=11312560 eval10=1058c4b0 s4=1058c4a0 s13=106216a0 s19=103d7ae0
+                                 vtbl=113125b4 eval10=105947b0 s4=105947a0 s13=106220d0 s19=10594f20
+                                 vtbl=11312608 eval10=105933d0 s4=105933c0 s13=10621e40 s19=103d7ae0
+  CCheckTargetValid              vtbl=1131265c eval10=1058c320 s4=1058c2e0 s13=10621660 s19=103d7ae0
+                                 vtbl=113126c4 eval10=105932e0 s4=103dc9d0 s13=10621e10 s19=105932f0
+                                 vtbl=11312718 eval10=105926a0 s4=103dc9d0 s13=10621c40 s19=10592c00
+                                 vtbl=1131276c eval10=10596270 s4=103dc9d0 s13=106223d0 s19=103d7ae0
+                                 vtbl=113127c0 eval10=1058cb20 s4=103dc9d0 s13=10621720 s19=103d7ae0
+                                 vtbl=11312814 eval10=1058cff0 s4=103dc9d0 s13=10621760 s19=103d7ae0
+                                 vtbl=11312868 eval10=10594320 s4=103dc9d0 s13=10621fc0 s19=103d7ae0
+                                 vtbl=113128bc eval10=1058f200 s4=103dc9d0 s13=106219f0 s19=103d7ae0
+                                 vtbl=11312910 eval10=10590140 s4=103dc9d0 s13=10621a90 s19=103d7ae0
+                                 vtbl=11312964 eval10=1058fe70 s4=103dc9d0 s13=10621a80 s19=103d7ae0
+                                 vtbl=113129b8 eval10=10596510 s4=103dc9d0 s13=106223e0 s19=103d7ae0
+                                 vtbl=11312a0c eval10=10596d50 s4=103dc9d0 s13=10622400 s19=103d7ae0
+                                 vtbl=11312a60 eval10=105968b0 s4=105968a0 s13=106223f0 s19=103d7ae0
+                                 vtbl=11312ab4 eval10=10590450 s4=103dc9d0 s13=10621aa0 s19=103d7ae0
+                                 vtbl=11312b08 eval10=10590f70 s4=103dc9d0 s13=10621ad0 s19=103d7ae0
+                                 vtbl=11312b5c eval10=10593060 s4=103dc9d0 s13=10621d70 s19=103d7ae0
+                                 vtbl=11312bb0 eval10=10591d90 s4=103dc9d0 s13=10621b20 s19=103d7ae0
+                                 vtbl=11312c04 eval10=10595500 s4=105954e0 s13=106222b0 s19=103d7ae0
+                                 vtbl=11312c58 eval10=1058c100 s4=103dc9d0 s13=10621610 s19=103d7ae0
+                                 vtbl=11312cac eval10=1058d120 s4=103dc9d0 s13=10621790 s19=103d7ae0
+                                 vtbl=11312d00 eval10=1058bfa0 s4=103dc9d0 s13=106215d0 s19=103d7ae0
+                                 vtbl=11312d54 eval10=10592f20 s4=10592f10 s13=10621d50 s19=103d7ae0
+                                 vtbl=11312da8 eval10=105da550 s4=105da500 s13=10622590 s19=103d7ae0
+                                 vtbl=11312dfc eval10=105dd270 s4=105dd260 s13=106225f0 s19=103d7ae0
+                                 vtbl=11312e50 eval10=105aa600 s4=105aa5f0 s13=10621920 s19=105aab70
+                                 vtbl=11312ea4 eval10=10565e40 s4=10565e30 s13=106216f0 s19=105660d0
+                                 vtbl=11312ef8 eval10=1058c5c0 s4=103dc9d0 s13=10621700 s19=103d7ae0
+                                 vtbl=11312f4c eval10=1058c850 s4=103dc9d0 s13=10621710 s19=103d7ae0
+                                 vtbl=11312fa0 eval10=10595330 s4=103dc9d0 s13=10622100 s19=103d7ae0
+                                 vtbl=11312ff4 eval10=1058bd40 s4=103dc9d0 s13=10621570 s19=103d7ae0
+                                 vtbl=11313048 eval10=10592c40 s4=103dc9d0 s13=10621cb0 s19=103d7ae0
+                                 vtbl=1131309c eval10=10592d50 s4=103dc9d0 s13=10621cc0 s19=103d7ae0
+                                 vtbl=113130f0 eval10=10594690 s4=103dc9d0 s13=10622040 s19=103d7ae0
+                                 vtbl=11313144 eval10=1058fa10 s4=103dc9d0 s13=10621a50 s19=103d7ae0
+                                 vtbl=11313198 eval10=1058fbe0 s4=103dc9d0 s13=10621a60 s19=103d7ae0
+                                 vtbl=113131ec eval10=10596fd0 s4=103dc9d0 s13=10622420 s19=103d7ae0
+                                 vtbl=11313240 eval10=105911e0 s4=103dc9d0 s13=10621ae0 s19=103d7ae0
+                                 vtbl=11313294 eval10=105931d0 s4=103dc9d0 s13=10621dc0 s19=103d7ae0
+                                 vtbl=113132e8 eval10=1058f0f0 s4=103dc9d0 s13=106219a0 s19=103d7ae0
+                                 vtbl=1131333c eval10=10590780 s4=103dc9d0 s13=10621ab0 s19=103d7ae0
+                                 vtbl=11313390 eval10=10590920 s4=103dc9d0 s13=10621ac0 s19=103d7ae0
+                                 vtbl=113133e4 eval10=1058fcf0 s4=103dc9d0 s13=10621a70 s19=103d7ae0
+                                 vtbl=11313438 eval10=10595830 s4=103dc9d0 s13=106223a0 s19=103d7ae0
+                                 vtbl=1131348c eval10=10595e20 s4=103dc9d0 s13=106223c0 s19=103d7ae0
+                                 vtbl=113134e0 eval10=105959d0 s4=103dc9d0 s13=106223b0 s19=103d7ae0
+                                 vtbl=11313534 eval10=1058f870 s4=103dc9d0 s13=10621a30 s19=103d7ae0
+                                 vtbl=11313588 eval10=10593dd0 s4=103dc9d0 s13=10621f10 s19=103d7ae0
+                                 vtbl=113135dc eval10=10551820 s4=10551810 s13=10621360 s19=10551c00
+                                 vtbl=11313630 eval10=10551d60 s4=10551d50 s13=10621370 s19=10551f60
+                                 vtbl=11313684 eval10=1055f3e0 s4=1055f3d0 s13=106215b0 s19=1055f750
+                                 vtbl=113136d8 eval10=1055f930 s4=1055f920 s13=106215c0 s19=1055fb50
+                                 vtbl=1131372c eval10=1055fde0 s4=1055fdd0 s13=10621f40 s19=1055fef0
+                                 vtbl=11313780 eval10=1055ff20 s4=1055ff10 s13=106220c0 s19=10560030
+                                 vtbl=113137d4 eval10=105b8660 s4=105b8650 s13=10622070 s19=105b8770
+                                 vtbl=11313828 eval10=105597b0 s4=105597a0 s13=106214b0 s19=10559b00
+                                 vtbl=1131387c eval10=1055f020 s4=1055f010 s13=106214c0 s19=1055f3b0
+                                 vtbl=113138d0 eval10=1055fb90 s4=1055fb80 s13=106218a0 s19=1055fda0
+                                 vtbl=11313924 eval10=10560060 s4=10560050 s13=10622160 s19=10560390
+                                 vtbl=11313978 eval10=105f7cb0 s4=105f7ca0 s13=10621d30 s19=105f7e30
+                                 vtbl=113139cc eval10=105f3f20 s4=105f3f10 s13=10621350 s19=105f4020
+                                 vtbl=11313a20 eval10=105fa500 s4=105fa4f0 s13=10622050 s19=105fa600
+                                 vtbl=11313a74 eval10=105f64e0 s4=105f64d0 s13=10621640 s19=105f6840
+                                 vtbl=11313ac8 eval10=105b83e0 s4=105b83d0 s13=10622030 s19=105b85a0
+                                 vtbl=11313b1c eval10=10568940 s4=10568930 s13=106217f0 s19=10568a60
+                                 vtbl=11313b70 eval10=105e1c50 s4=105e1c40 s13=10622660 s19=103d7ae0
+                                 vtbl=11313bc4 eval10=10567610 s4=10567600 s13=10621770 s19=103d7ae0
+                                 vtbl=11313c18 eval10=105e2400 s4=105e23f0 s13=10622680 s19=105e24a0
+                                 vtbl=11313c6c eval10=105afda0 s4=105afd90 s13=10621f50 s19=105affd0
+  CReturnItem                    vtbl=11313cc0 eval10=105ba6c0 s4=105ba6b0 s13=106220e0 s19=105ba6e0
+                                 vtbl=11313d20 eval10=1058a490 s4=1058a480 s13=10621ba0 s19=1058acd0
+                                 vtbl=11313d74 eval10=105dfd30 s4=105dfd20 s13=10621be0 s19=105dff70
+                                 vtbl=11313dc8 eval10=10584da0 s4=10584d90 s13=106219b0 s19=105853a0
+                                 vtbl=11313e1c eval10=105b8a50 s4=105b8a40 s13=106220a0 s19=105b9540
+                                 vtbl=11313e70 eval10=105f7e60 s4=105f7e50 s13=10621d40 s19=105f8220
+                                 vtbl=11313ec4 eval10=105676d0 s4=105676c0 s13=106217a0 s19=10567a20
+                                 vtbl=11313f18 eval10=105bc9d0 s4=103dc9d0 s13=106222e0 s19=103d7ae0
+                                 vtbl=11313f6c eval10=105bcd90 s4=103dc9d0 s13=106222f0 s19=103d7ae0
+                                 vtbl=11313fc0 eval10=105bc760 s4=103dc9d0 s13=106222c0 s19=103d7ae0
+  CAIRedecide                    vtbl=11314014 eval10=10553610 s4=10553600 s13=10621320 s19=103d7ae0
+  CResetAI                       vtbl=11314074 eval10=105ba650 s4=105ba640 s13=106220b0 s19=103d7ae0
+                                 vtbl=113140d4 eval10=105c7740 s4=105c7730 s13=10622250 s19=105c7a00
+                                 vtbl=11314128 eval10=1056aff0 s4=1056afe0 s13=10621880 s19=1056b200
+                                 vtbl=1131417c eval10=1059b950 s4=1059b940 s13=10621e20 s19=1059c0a0
+                                 vtbl=113141d0 eval10=10557430 s4=10557420 s13=106213c0 s19=105578d0
+  CCalcHitFlyDir                 vtbl=11314224 eval10=10560d70 s4=10560d60 s13=106214d0 s19=10561200
+                                 vtbl=11314288 eval10=10566f50 s4=10566f40 s13=10621750 s19=103d7ae0
+                                 vtbl=113142dc eval10=10566730 s4=10566720 s13=10621740 s19=10566ac0
+                                 vtbl=11314330 eval10=105883a0 s4=10588390 s13=10621af0 s19=10588530
+  CNop                           vtbl=11314384 eval10=1062b710 s4=1062b700 s13=10621f00 s19=103d7ae0
+  CConditionFailure              vtbl=113143e0 eval10=105f3f00 s4=105f3ef0 s13=106216b0 s19=103d7ae0
+  CConditionSuccessful           vtbl=11314448 eval10=105fc000 s4=105fbff0 s13=106216c0 s19=103d7ae0
+                                 vtbl=113144b4 eval10=105be1e0 s4=105be1d0 s13=10622120 s19=103d7ae0
+                                 vtbl=11314508 eval10=105f5a80 s4=105f5a70 s13=106214a0 s19=105f5c80
+                                 vtbl=1131455c eval10=105ab670 s4=105ab660 s13=10621e80 s19=103d7ae0
+                                 vtbl=113145b0 eval10=105ab920 s4=105ab910 s13=10621e90 s19=103d7ae0
+                                 vtbl=11314604 eval10=105abd50 s4=105abd40 s13=10621ea0 s19=103d7ae0
+                                 vtbl=11314658 eval10=105ac1d0 s4=105ac1c0 s13=10621eb0 s19=103d7ae0
+  CSoulBeastSetImg               vtbl=113146ac eval10=105d89f0 s4=105d89e0 s13=10622560 s19=105d8ad0
+                                 vtbl=113bf2e4 eval10=103dc6a0 s4=103dc9d0 s13=103d7a40 s19=103d7ae0
+
+==== callers of slot2 FUN_103dc930 ====
+  DATA from 113bf2ec
+  DATA from 1130645c
+  DATA from 11306758
+  DATA from 11306bbc
+  DATA from 11306c54
+  DATA from 11306fb8
+  DATA from 11307518
+  DATA from 113075c4
+  DATA from 11307778
+  DATA from 113079a4
+  DATA from 11307c14
+  DATA from 11307db4
+  DATA from 11308250
+  DATA from 113082dc
+  DATA from 11308de4
+  DATA from 11308ee0
+  DATA from 113097a8
+  DATA from 11309870
+  DATA from 11309988
+  DATA from 11309eb4
+  DATA from 1130a094
+  DATA from 1130a394
+  DATA from 1130a844
+  DATA from 1130bb00
+  DATA from 1130c888
+  DATA from 1130c9b8
+  DATA from 1130cad8
+  DATA from 1130cbd0
+  DATA from 1130ced8
+  DATA from 1130d0b0
+  DATA from 1130d148
+  DATA from 1130d414
+  DATA from 1130e378
+  DATA from 1130e308
+  DATA from 1130e3e4
+  DATA from 1130e4bc
+  DATA from 1130e450
+  DATA from 113119c8
+  DATA from 1130fe34
+  DATA from 1130db50
+  DATA from 11312e58
+  DATA from 11310970
+  DATA from 11311824
+  DATA from 11312124
+  DATA from 1130f884
+  DATA from 113106d0
+  DATA from 1131067c
+  DATA from 11310724
+  DATA from 1130e2b4
+  DATA from 1130e260
+  DATA from 1130f300
+  DATA from 11312db0
+  DATA from 1130f5a0
+  DATA from 11311530
+  DATA from 11306018
+  DATA from 1130607c
+  DATA from 11306158
+  DATA from 113061d4
+  DATA from 113063f0
+  DATA from 113066a8
+  DATA from 113067ec
+  DATA from 11306b34
+  DATA from 11306f30
+  DATA from 113070dc
+  DATA from 1130715c
+  DATA from 113071d8
+  DATA from 11307298
+  DATA from 1130763c
+  DATA from 113076f8
+  DATA from 11307894
+  DATA from 11307a60
+  DATA from 11307b50
+  DATA from 11307ca0
+  DATA from 11307d38
+  DATA from 11307e40
+  DATA from 11307ec0
+  DATA from 11307f68
+  DATA from 11308368
+  DATA from 11308404
+  DATA from 113084a8
+  DATA from 11308588
+  DATA from 11308734
+  DATA from 113087bc
+  DATA from 113088d8
+  DATA from 11309224
+  DATA from 113092cc
+  DATA from 113093a4
+  DATA from 11309434
+  DATA from 113094a4
+  DATA from 11309518
+  DATA from 11309a80
+  DATA from 11309af0
+  DATA from 11309c60
+  DATA from 11309cd4
+  DATA from 11309d40
+  DATA from 11309db0
+  DATA from 11309e34
+  DATA from 11309f4c
+  DATA from 1130a010
+  DATA from 1130a118
+  DATA from 1130a184
+  DATA from 1130a1ec
+  DATA from 1130a250
+  DATA from 1130a2b0
+  DATA from 1130a318
+  DATA from 1130a6b0
+  DATA from 1130aff4
+  DATA from 1130b074
+  DATA from 1130b0ec
+  DATA from 1130b1dc
+  DATA from 1130b24c
+  DATA from 1130b2b0
+  DATA from 1130b314
+  DATA from 1130b39c
+  DATA from 1130b4c8
+  DATA from 1130b540
+  DATA from 1130b5a4
+  DATA from 1130b608
+  DATA from 1130b66c
+  DATA from 1130b75c
+  DATA from 1130b928
+  DATA from 1130b9a0
+  DATA from 1130ba14
+  DATA from 1130bd64
+  DATA from 1130bed8
+  DATA from 1130bf74
+  DATA from 1130c144
+  DATA from 1130c1a4
+  DATA from 1130c2ac
+  DATA from 1130c334
+  DATA from 1130c570
+  DATA from 1130c74c
+  DATA from 1130c908
+  DATA from 1130ca60
+  DATA from 1130cc50
+  DATA from 1130cd00
+  DATA from 1130cda0
+  DATA from 1130ce60
+  DATA from 1130cf58
+  DATA from 1130cfbc
+  DATA from 1130d6bc
+  DATA from 1130d7bc
+  DATA from 1130d8f8
+  DATA from 1130d94c
+  DATA from 1130d9ac
+  DATA from 1130da00
+  DATA from 1130da54
+  DATA from 1130daa8
+  DATA from 1130dafc
+  DATA from 1130dba4
+  DATA from 1130dc10
+  DATA from 1130dc64
+  DATA from 1130dcb8
+  DATA from 1130dd0c
+  DATA from 1130dd60
+  DATA from 1130ddb4
+  DATA from 1130de08
+  DATA from 1130de5c
+  DATA from 1130dec4
+  DATA from 1130df18
+  DATA from 1130df6c
+  DATA from 1130dfc0
+  DATA from 1130e014
+  DATA from 1130e068
+  DATA from 1130e0bc
+  DATA from 1130e110
+  DATA from 1130e164
+  DATA from 1130e1b8
+  DATA from 1130e20c
+  DATA from 1130e52c
+  DATA from 1130e580
+  DATA from 1130e5d4
+  DATA from 1130e628
+  DATA from 1130e67c
+  DATA from 1130e6d0
+  DATA from 1130e724
+  DATA from 1130e778
+  DATA from 1130e7cc
+  DATA from 1130e820
+  DATA from 1130e874
+  DATA from 1130e8c8
+  DATA from 1130e91c
+  DATA from 1130e970
+  DATA from 1130e9c4
+  DATA from 1130ea18
+  DATA from 1130ea6c
+  DATA from 1130eacc
+  DATA from 1130eb20
+  DATA from 1130eb74
+  DATA from 1130ebc8
+  DATA from 1130ec1c
+  DATA from 1130ec70
+  DATA from 1130ecc4
+  DATA from 1130ed18
+  DATA from 1130ed6c
+  DATA from 1130edc0
+  DATA from 1130ee14
+  DATA from 1130ee68
+  DATA from 1130eebc
+  DATA from 1130ef10
+  DATA from 1130ef64
+  DATA from 1130efb8
+  DATA from 1130f00c
+  DATA from 1130f060
+  DATA from 1130f0b4
+  DATA from 1130f108
+  DATA from 1130f15c
+  DATA from 1130f1b0
+  DATA from 1130f204
+  DATA from 1130f258
+  DATA from 1130f2ac
+  DATA from 1130f354
+  DATA from 1130f3a8
+  DATA from 1130f3fc
+  DATA from 1130f450
+  DATA from 1130f4a4
+  DATA from 1130f4f8
+  DATA from 1130f54c
+  DATA from 1130f604
+  DATA from 1130f668
+  DATA from 1130f6cc
+  DATA from 1130f720
+  DATA from 1130f774
+  DATA from 1130f7c8
+  DATA from 1130f81c
+  DATA from 1130f8d8
+  DATA from 1130f92c
+  DATA from 1130f980
+  DATA from 1130f9d4
+  DATA from 1130fa28
+  DATA from 1130fa7c
+  DATA from 1130fad0
+  DATA from 1130fb24
+  DATA from 1130fb78
+  DATA from 1130fbd8
+  DATA from 1130fc2c
+  DATA from 1130fc90
+  DATA from 1130fce4
+  DATA from 1130fd38
+  DATA from 1130fd8c
+  DATA from 1130fde0
+  DATA from 1130fe88
+  DATA from 1130fedc
+  DATA from 1130ff30
+  DATA from 1130ff84
+  DATA from 1130ffd8
+  DATA from 1131002c
+  DATA from 11310080
+  DATA from 113100d4
+  DATA from 11310128
+  DATA from 1131017c
+  DATA from 113101d0
+  DATA from 11310224
+  DATA from 11310278
+  DATA from 113102cc
+  DATA from 11310320
+  DATA from 11310374
+  DATA from 113103dc
+  DATA from 11310430
+  DATA from 11310484
+  DATA from 113104d8
+  DATA from 1131052c
+  DATA from 11310580
+  DATA from 113105d4
+  DATA from 11310628
+  DATA from 11310778
+  DATA from 113107cc
+  DATA from 11310820
+  DATA from 11310874
+  DATA from 113108c8
+  DATA from 1131091c
+  DATA from 113109c4
+  DATA from 11310a18
+  DATA from 11310a6c
+  DATA from 11310ac0
+  DATA from 11310b14
+  DATA from 11310b68
+  DATA from 11310bbc
+  DATA from 11310c2c
+  DATA from 11310c80
+  DATA from 11310cd4
+  DATA from 11310d28
+  DATA from 11310d7c
+  DATA from 11310dd0
+  DATA from 11310e24
+  DATA from 11310e78
+  DATA from 11310ecc
+  DATA from 11310f20
+  DATA from 11310f74
+  DATA from 11310fc8
+  DATA from 1131101c
+  DATA from 11311070
+  DATA from 113110c4
+  DATA from 11311128
+  DATA from 11311188
+  DATA from 113111e8
+  DATA from 1131123c
+  DATA from 11311290
+  DATA from 113112e4
+  DATA from 11311338
+  DATA from 1131138c
+  DATA from 113113e0
+  DATA from 11311434
+  DATA from 11311488
+  DATA from 113114dc
+  DATA from 11311584
+  DATA from 113115d8
+  DATA from 1131162c
+  DATA from 11311680
+  DATA from 113116d4
+  DATA from 11311728
+  DATA from 1131177c
+  DATA from 113117d0
+  DATA from 11311878
+  DATA from 113118cc
+  DATA from 11311920
+  DATA from 11311974
+  DATA from 11311a1c
+  DATA from 11311a70
+  DATA from 11311ac4
+  DATA from 11311b18
+  DATA from 11311b78
+  DATA from 11311be4
+  DATA from 11311c38
+  DATA from 11311c8c
+  DATA from 11311ce0
+  DATA from 11311d34
+  DATA from 11311d88
+  DATA from 11311ddc
+  DATA from 11311e30
+  DATA from 11311e84
+  DATA from 11311ed8
+  DATA from 11311f2c
+  DATA from 11311f80
+  DATA from 11311fd4
+  DATA from 11312028
+  DATA from 1131207c
+  DATA from 113120d0
+  DATA from 11312178
+  DATA from 113121cc
+  DATA from 11312220
+  DATA from 11312274
+  DATA from 113122c8
+  DATA from 1131231c
+  DATA from 11312370
+  DATA from 113123c4
+  DATA from 11312418
+  DATA from 1131246c
+  DATA from 113124c0
+  DATA from 11312514
+  DATA from 11312568
+  DATA from 113125bc
+  DATA from 11312610
+  DATA from 11312664
+  DATA from 113126cc
+  DATA from 11312720
+  DATA from 11312774
+  DATA from 113127c8
+  DATA from 1131281c
+  DATA from 11312870
+  DATA from 113128c4
+  DATA from 11312918
+  DATA from 1131296c
+  DATA from 113129c0
+  DATA from 11312a14
+  DATA from 11312a68
+  DATA from 11312abc
+  DATA from 11312b10
+  DATA from 11312b64
+  DATA from 11312bb8
+  DATA from 11312c0c
+  DATA from 11312c60
+  DATA from 11312cb4
+  DATA from 11312d08
+  DATA from 11312d5c
+  DATA from 11312e04
+  DATA from 11312eac
+  DATA from 11312f00
+  DATA from 11312f54
+  DATA from 11312fa8
+  DATA from 11312ffc
+  DATA from 11313050
+  DATA from 113130a4
+  DATA from 113130f8
+  DATA from 1131314c
+  DATA from 113131a0
+  DATA from 113131f4
+  DATA from 11313248
+  DATA from 1131329c
+  DATA from 113132f0
+  DATA from 11313344
+  DATA from 11313398
+  DATA from 113133ec
+  DATA from 11313440
+  DATA from 11313494
+  DATA from 113134e8
+  DATA from 1131353c
+  DATA from 11313590
+  DATA from 113135e4
+  DATA from 11313638
+  DATA from 1131368c
+  DATA from 113136e0
+  DATA from 11313734
+  DATA from 11313788
+  DATA from 113137dc
+  DATA from 11313830
+  DATA from 11313884
+  DATA from 113138d8
+  DATA from 1131392c
+  DATA from 11313980
+  DATA from 113139d4
+  DATA from 11313a28
+  DATA from 11313a7c
+  DATA from 11313ad0
+  DATA from 11313b24
+  DATA from 11313b78
+  DATA from 11313bcc
+  DATA from 11313c20
+  DATA from 11313c74
+  DATA from 11313cc8
+  DATA from 11313d28
+  DATA from 11313d7c
+  DATA from 11313dd0
+  DATA from 11313e24
+  DATA from 11313e78
+  DATA from 11313ecc
+  DATA from 11313f20
+  DATA from 11313f74
+  DATA from 11313fc8
+  DATA from 1131401c
+  DATA from 1131407c
+  DATA from 113140dc
+  DATA from 11314130
+  DATA from 11314184
+  DATA from 113141d8
+  DATA from 1131422c
+  DATA from 11314290
+  DATA from 113142e4
+  DATA from 11314338
+  DATA from 1131438c
+  DATA from 113143e8
+  DATA from 11314450
+  DATA from 113144bc
+  DATA from 11314510
+  DATA from 11314564
+  DATA from 113145b8
+  DATA from 1131460c
+  DATA from 11314660
+  DATA from 113146b4
+
+==== callers of FUN_103dd050 (resolve tree exec-record) ====
+  from 101d5050 in FUN_101d5040
+  from 101d527b in FUN_101d5250
+  from 1055223c in FUN_105521d0
+  from 1055362f in FUN_10553610
+  from 10558e9a in FUN_10558e30
+  from 10558f5b in FUN_10558e30
+  from 10559f90 in FUN_10559f30
+  from 1055eac8 in FUN_1055eaa0
+  from 1056e632 in FUN_1056e300
+  from 1056e769 in FUN_1056e6d0
+  from 105683fe in FUN_10568130
+  from 105685a3 in FUN_10568130
+  from 1056c5c2 in FUN_1056c5a0
+  from 10571084 in FUN_10571000
+  from 1058ff3a in FUN_1058fe70
+  from 10590514 in FUN_10590450
+  from 10590fe7 in FUN_10590f70
+  from 10591689 in FUN_105913c0
+  from 105965da in FUN_10596510
+  from 105969a6 in FUN_105968b0
+  from 10596aa4 in FUN_105968b0
+  from 10596dcb in FUN_10596d50
+  from 10597199 in FUN_105970f0
+  from 10597253 in FUN_105970f0
+  from 1059b047 in FUN_1059b020
+  from 105a2749 in FUN_105a2710
+  from 105b6847 in FUN_105b6800
+  from 105b9188 in FUN_105b8a50
+  from 105ba66f in FUN_105ba650
+  from 105c7864 in FUN_105c7740
+  from 105c7a78 in FUN_105c7a50
+  from 105cce2a in FUN_105cc980
+  from 105d8a10 in FUN_105d89f0
+  from 105e15b5 in FUN_105e1590
+  from 105e1620 in FUN_105e1600
+  from 105e1642 in FUN_105e1600
+  from 105e4a17 in FUN_105e49d0
+  from 105e6ad7 in FUN_105e6a90
+  from 105e8946 in FUN_105e88a0
+  from 105ebcad in FUN_105ebc90
+  from 105ed4ca in FUN_105ed490
+  from 105ede83 in FUN_105ede60
+  from 105f45ce in FUN_105f45b0
+  from 105f766e in FUN_105f74d0
+  from 105f83a7 in FUN_105f8380
+  from 105f95eb in FUN_105f95b0
+  from 116ff23b in FUN_116ff22c
+  from 103dd114 in FUN_103dd110
+  from 105a8ce1
+  from 105818cb
+  from 1058d67d
+  from 10594bcf

@@ -1,0 +1,148 @@
+
+######## callers of 10551520 (FUN_10551520) ########
+  10551270  FUN_10551270  (120 bytes)
+  10551360  FUN_10551360  (75 bytes)
+  105ac8e0  FUN_105ac8e0  (150 bytes)
+  105ad070  FUN_105ad070  (1031 bytes)
+  105f3d40  FUN_105f3d40  (126 bytes)
+  105d1850  FUN_105d1850  (361 bytes)
+  1062b540  FUN_1062b540  (167 bytes)
+
+######## callers of 10551270 (FUN_10551270) ########
+  10550be0  FUN_10550be0  (255 bytes)
+  105615f0  FUN_105615f0  (445 bytes)
+  105624f0  FUN_105624f0  (251 bytes)
+  10564ea0  FUN_10564ea0  (400 bytes)
+  10565270  FUN_10565270  (612 bytes)
+  1056e300  FUN_1056e300  (961 bytes)
+  1056c5a0  FUN_1056c5a0  (1059 bytes)
+  10570c80  FUN_10570c80  (895 bytes)
+  10571000  FUN_10571000  (3006 bytes)
+  10573430  FUN_10573430  (619 bytes)
+  105736a0  FUN_105736a0  (2258 bytes)
+  10574410  FUN_10574410  (2803 bytes)
+  10578a00  FUN_10578a00  (450 bytes)
+  10578bd0  FUN_10578bd0  (2058 bytes)
+  1057fc50  FUN_1057fc50  (336 bytes)
+  10585d30  FUN_10585d30  (561 bytes)
+  10588590  FUN_10588590  (428 bytes)
+  105889f0  FUN_105889f0  (708 bytes)
+  10589380  FUN_10589380  (486 bytes)
+  105896b0  FUN_105896b0  (1352 bytes)
+  10589eb0  FUN_10589eb0  (461 bytes)
+  1058a490  FUN_1058a490  (1591 bytes)
+  1058ad00  FUN_1058ad00  (220 bytes)
+  1058b6a0  FUN_1058b6a0  (299 bytes)
+  1058f490  FUN_1058f490  (328 bytes)
+  1058fa10  FUN_1058fa10  (177 bytes)
+  105935a0  FUN_105935a0  (934 bytes)
+  105a9220  FUN_105a9220  (679 bytes)
+  105aa2d0  FUN_105aa2d0  (386 bytes)
+  105ac610  FUN_105ac610  (213 bytes)
+  105add30  FUN_105add30  (435 bytes)
+  105ae2d0  FUN_105ae2d0  (1127 bytes)
+  105aec10  FUN_105aec10  (307 bytes)
+  105af810  FUN_105af810  (566 bytes)
+  105b3260  FUN_105b3260  (1834 bytes)
+  105c0830  FUN_105c0830  (1167 bytes)
+  105c1910  FUN_105c1910  (1066 bytes)
+  105c2150  FUN_105c2150  (784 bytes)
+  105c2800  FUN_105c2800  (244 bytes)
+  105c3650  FUN_105c3650  (589 bytes)
+  105c3ac0  FUN_105c3ac0  (1097 bytes)
+  105c4400  FUN_105c4400  (554 bytes)
+  105c5ad0  FUN_105c5ad0  (378 bytes)
+  105c6dc0  FUN_105c6dc0  (624 bytes)
+  105c72e0  FUN_105c72e0  (459 bytes)
+  105ca1a0  FUN_105ca1a0  (427 bytes)
+  105ca4d0  FUN_105ca4d0  (427 bytes)
+  105ca800  FUN_105ca800  (586 bytes)
+  105cabd0  FUN_105cabd0  (574 bytes)
+  105cc3b0  FUN_105cc3b0  (427 bytes)
+  105d0460  FUN_105d0460  (1815 bytes)
+  105d1140  FUN_105d1140  (498 bytes)
+  105d2bf0  FUN_105d2bf0  (647 bytes)
+  105d3220  FUN_105d3220  (827 bytes)
+  105d3760  FUN_105d3760  (654 bytes)
+  105d3c30  FUN_105d3c30  (1457 bytes)
+  105e2540  FUN_105e2540  (1936 bytes)
+  105e3100  FUN_105e3100  (1075 bytes)
+  105e3de0  FUN_105e3de0  (900 bytes)
+  105e51e0  FUN_105e51e0  (1585 bytes)
+  105e7170  FUN_105e7170  (1641 bytes)
+  105e88a0  FUN_105e88a0  (1104 bytes)
+
+
+######## 2nd level: callers-of-callers of the param writer ########
+
+  10550be0 FUN_10550be0 <- 
+  105615f0 FUN_105615f0 <- 
+  105624f0 FUN_105624f0 <- 
+  10564ea0 FUN_10564ea0 <- 
+  10565270 FUN_10565270 <- 
+  1056e300 FUN_1056e300 <- 10565270(FUN_10565270) 
+  1056c5a0 FUN_1056c5a0 <- 1056c440(FUN_1056c440) 
+  10570c80 FUN_10570c80 <- 
+  10571000 FUN_10571000 <- 10570c80(FUN_10570c80) 
+  10573430 FUN_10573430 <- 
+  105736a0 FUN_105736a0 <- 10573430(FUN_10573430) 
+  10574410 FUN_10574410 <- 
+  10578a00 FUN_10578a00 <- 
+  10578bd0 FUN_10578bd0 <- 10578a00(FUN_10578a00) 
+  1057fc50 FUN_1057fc50 <- 
+  10585d30 FUN_10585d30 <- 
+  10588590 FUN_10588590 <- 
+  105889f0 FUN_105889f0 <- 
+  10589380 FUN_10589380 <- 
+  105896b0 FUN_105896b0 <- 
+  10589eb0 FUN_10589eb0 <- 
+  1058a490 FUN_1058a490 <- 
+  1058ad00 FUN_1058ad00 <- 
+  1058b6a0 FUN_1058b6a0 <- 
+  1058f490 FUN_1058f490 <- 
+  1058fa10 FUN_1058fa10 <- 
+  105935a0 FUN_105935a0 <- 
+  105a9220 FUN_105a9220 <- 
+  105aa2d0 FUN_105aa2d0 <- 
+  105ac610 FUN_105ac610 <- 
+  105add30 FUN_105add30 <- 
+  105ae2d0 FUN_105ae2d0 <- 
+  105aec10 FUN_105aec10 <- 
+  105af810 FUN_105af810 <- 
+  105b3260 FUN_105b3260 <- 
+  105c0830 FUN_105c0830 <- 
+  105c1910 FUN_105c1910 <- 
+  105c2150 FUN_105c2150 <- 
+  105c2800 FUN_105c2800 <- 
+  105c3650 FUN_105c3650 <- 
+  105c3ac0 FUN_105c3ac0 <- 
+  105c4400 FUN_105c4400 <- 
+  105c5ad0 FUN_105c5ad0 <- 105c5700(FUN_105c5700) 
+  105c6dc0 FUN_105c6dc0 <- 
+  105c72e0 FUN_105c72e0 <- 
+  105ca1a0 FUN_105ca1a0 <- 
+  105ca4d0 FUN_105ca4d0 <- 
+  105ca800 FUN_105ca800 <- 
+  105cabd0 FUN_105cabd0 <- 
+  105cc3b0 FUN_105cc3b0 <- 
+  105d0460 FUN_105d0460 <- 
+  105d1140 FUN_105d1140 <- 
+  105d2bf0 FUN_105d2bf0 <- 
+  105d3220 FUN_105d3220 <- 
+  105d3760 FUN_105d3760 <- 
+  105d3c30 FUN_105d3c30 <- 
+  105e2540 FUN_105e2540 <- 
+  105e3100 FUN_105e3100 <- 
+  105e3de0 FUN_105e3de0 <- 
+  105e51e0 FUN_105e51e0 <- 105e49d0(FUN_105e49d0) 
+  105e7170 FUN_105e7170 <- 105e6a90(FUN_105e6a90) 
+  105e88a0 FUN_105e88a0 <- 105e87e0(FUN_105e87e0) 
+
+######## purity of 10552f00 (FUN_10552f00, 1015 bytes) ########
+    calls FUN_1052c1b0
+    -> reaches the blackboard setter: false
+
+
+######## purity of 10552be0 (FUN_10552be0, 189 bytes) ########
+    calls _CIasin
+    -> reaches the blackboard setter: false

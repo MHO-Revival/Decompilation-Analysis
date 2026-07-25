@@ -1,0 +1,219 @@
+# Call sites of FUN_11066f90 with argument setup
+# p6 = 6th dword PUSH counting backward from the CALL (see script header)
+
+call sites: 4
+
+================ CALL at 1107823b  in FUN_110781d0 @ 110781d0
+  110781d0 [p#5 ]  PUSH EBP                                  
+  110781d1        MOV EBP,ESP                               
+  110781d3        MOV EAX,[0x1202e818]                      
+  110781d8        SUB ESP,0x18                              
+  110781db        CMP byte ptr [EAX + 0x209],0x0            
+  110781e2 [p#4 ]  PUSH ESI                                  
+  110781e3        MOV ESI,ECX                               
+  110781e5        JZ 0x11078245                             
+  110781e7        CMP byte ptr [ESI + 0x31],0x0             
+  110781eb        JZ 0x11078245                             
+  110781ed        SUB ESP,0xc                               
+  110781f0        MOV dword ptr [EBP + -0x4],0x0            
+  110781f7        MOV EAX,dword ptr [EBP + -0x4]            
+  110781fa        MOV ECX,ESP                               
+  110781fc        XORPS XMM1,XMM1                           
+  110781ff        MOV dword ptr [EBP + -0x10],0x0           
+  11078206        MOVSS XMM0,XMM1                           
+  1107820a [p#3 ]  PUSH ECX                                  
+  1107820b        UNPCKLPS XMM0,XMM1                        
+  1107820e        MOVQ qword ptr [ECX],XMM0                 
+  11078212        MOV dword ptr [ECX + 0x8],EAX             
+  11078215        MOV EAX,dword ptr [EBP + -0x10]           
+  11078218        MOV dword ptr [ESP],0x0                   
+  1107821f [p#2 ]  PUSH 0x0                                  
+  11078221        SUB ESP,0xc                               
+  11078224        UNPCKLPS XMM1,XMM1                        
+  11078227        MOV ECX,ESP                               
+  11078229 [p#1 ]  PUSH ECX                                  
+  1107822a        MOVQ qword ptr [ECX],XMM1                 
+  1107822e        MOV dword ptr [ECX + 0x8],EAX             
+  11078231        MOV ECX,dword ptr [ESI + 0x18]            
+  11078234        MOV dword ptr [ESP],0x3f800000            
+  1107823b        CALL 0x11066f90   <-- CALL
+
+================ CALL at 11077f14  in FUN_11077e10 @ 11077e10
+  11077e30        MOV byte ptr [ESI + 0x30],0x1             
+  11077e34 [p#8 ]  PUSH 0x80                                 
+  11077e39 [p#7 ]  PUSH EAX                                  
+  11077e3a        MOV dword ptr [ESI + 0x4c],0x0            
+  11077e41        MOV byte ptr [ESI + 0x48],0x0             
+  11077e45        CALL 0x100ebf60                           
+  11077e4a        LEA EAX,[EBP + 0xffffff74]                
+  11077e50 [p#6 ]  PUSH EAX                                     <<<<<< param_6 (blend window, seconds)
+  11077e51        CALL dword ptr [0x11cb96c4]               
+  11077e57        ADD ESP,0x10                              
+  11077e5a        LEA EAX,[EBP + 0xffffff74]                
+  11077e60        MOV ECX,ESI                               
+  11077e62 [p#5 ]  PUSH EAX                                  
+  11077e63        CALL 0x11079390                           
+  11077e68        CMP EAX,ESI                               
+  11077e6a        JZ 0x11077f42                             
+  11077e70        MOV EDI,dword ptr [EAX + 0x14]            
+  11077e73        TEST EDI,EDI                              
+  11077e75        JZ 0x11077f42                             
+  11077e7b        MOV EAX,dword ptr [ESI + 0x18]            
+  11077e7e        MOV dword ptr [ESI + 0x1c],EAX            
+  11077e81        MOV dword ptr [EBP + -0xc],0x0            
+  11077e88        MOV dword ptr [EBP + -0x8],0x0            
+  11077e8f        MOV dword ptr [EBP + -0x4],0x0            
+  11077e96        TEST EAX,EAX                              
+  11077e98        JZ 0x11077ed2                             
+  11077e9a        AND byte ptr [EAX + 0x117],0xfd           
+  11077ea1        MOV ECX,dword ptr [ESI + 0x1c]            
+  11077ea4        CMP EDI,ECX                               
+  11077ea6        JNZ 0x11077eb8                            
+  11077ea8        MOVQ XMM0,qword ptr [ECX + 0xdc]          
+  11077eb0        MOV EBX,dword ptr [ECX + 0xe4]            
+  11077eb6        JMP 0x11077ec0                            
+  11077eb8        MOV EBX,dword ptr [EBP + -0x4]            
+  11077ebb        MOVQ XMM0,qword ptr [EBP + -0xc]          
+  11077ec0 [p#4 ]  PUSH EDI                                  
+  11077ec1        MOVQ qword ptr [EBP + -0x8],XMM0          
+  11077ec6        CALL 0x11067920                           
+  11077ecb        MOVQ XMM0,qword ptr [EBP + -0x8]          
+  11077ed0        JMP 0x11077eda                            
+  11077ed2        MOV EBX,dword ptr [EBP + -0x4]            
+  11077ed5        MOVQ XMM0,qword ptr [EBP + -0xc]          
+  11077eda        SUB ESP,0xc                               
+  11077edd        MOV EAX,ESP                               
+  11077edf [p#3 ]  PUSH ECX                                  
+  11077ee0        MOVQ qword ptr [EAX],XMM0                 
+  11077ee4        MOVSS XMM0,dword ptr [EBP + 0x1c]         
+  11077ee9        MOV dword ptr [EAX + 0x8],EBX             
+  11077eec        MOV EAX,dword ptr [EBP + 0x18]            
+  11077eef        MOVSS dword ptr [ESP],XMM0                
+  11077ef4        MOVQ XMM0,qword ptr [EBP + 0x10]          
+  11077ef9 [p#2 ]  PUSH -0x1                                 
+  11077efb        SUB ESP,0xc                               
+  11077efe        MOV ECX,ESP                               
+  11077f00 [p#1 ]  PUSH ECX                                  
+  11077f01        MOVQ qword ptr [ECX],XMM0                 
+  11077f05        MOVSS XMM0,dword ptr [EBP + 0xc]          
+  11077f0a        MOV dword ptr [ECX + 0x8],EAX             
+  11077f0d        MOV ECX,EDI                               
+  11077f0f        MOVSS dword ptr [ESP],XMM0                
+  11077f14        CALL 0x11066f90   <-- CALL
+
+================ CALL at 10b32f6c  in FUN_10b32ec0 @ 10b32ec0
+  10b32ec0 [p#9 ]  PUSH EBP                                  
+  10b32ec1        MOV EBP,ESP                               
+  10b32ec3        SUB ESP,0xc                               
+  10b32ec6        CMP dword ptr [EBP + 0x8],0x0             
+  10b32eca [p#8 ]  PUSH EBX                                  
+  10b32ecb [p#7 ]  PUSH ESI                                  
+  10b32ecc [p#6 ]  PUSH EDI                                     <<<<<< param_6 (blend window, seconds)
+  10b32ecd        JZ 0x10b32f83                             
+  10b32ed3        MOV EBX,dword ptr [EBP + 0xc]             
+  10b32ed6        TEST EBX,EBX                              
+  10b32ed8        JZ 0x10b32f83                             
+  10b32ede        CMP dword ptr [EBX + 0x8],0x6             
+  10b32ee2        JNZ 0x10b32f83                            
+  10b32ee8        MOV EAX,[0x11cb9034]                      
+  10b32eed        MOV ECX,dword ptr [EAX]                   
+  10b32eef        MOV EAX,dword ptr [ECX]                   
+  10b32ef1        CALL dword ptr [EAX + 0x68]               
+  10b32ef4        MOV ESI,EAX                               
+  10b32ef6        MOV EAX,dword ptr [EBP + 0x8]             
+  10b32ef9        MOV ECX,EAX                               
+  10b32efb        MOV EDX,dword ptr [EAX]                   
+  10b32efd        MOV EDI,dword ptr [ESI]                   
+  10b32eff        CALL dword ptr [EDX + 0x4]                
+  10b32f02 [p#5 ]  PUSH EAX                                  
+  10b32f03        MOV ECX,ESI                               
+  10b32f05        CALL dword ptr [EDI + 0xc]                
+  10b32f08        TEST EAX,EAX                              
+  10b32f0a        JZ 0x10b32f83                             
+  10b32f0c        MOV ECX,dword ptr [EAX + 0xbc]            
+  10b32f12        TEST ECX,ECX                              
+  10b32f14        JZ 0x10b32f83                             
+  10b32f16 [p#4 ]  PUSH dword ptr [EBX + 0x10]               
+  10b32f19        CALL 0x11077cb0                           
+  10b32f1e        MOV EDX,EAX                               
+  10b32f20        TEST EDX,EDX                              
+  10b32f22        JZ 0x10b32f83                             
+  10b32f24        SUB ESP,0xc                               
+  10b32f27        MOV dword ptr [EBP + -0x4],0x0            
+  10b32f2e        MOV EAX,dword ptr [EBP + -0x4]            
+  10b32f31        MOV ECX,ESP                               
+  10b32f33        XORPS XMM0,XMM0                           
+  10b32f36        UNPCKLPS XMM0,XMM0                        
+  10b32f39 [p#3 ]  PUSH ECX                                  
+  10b32f3a        MOVQ qword ptr [ECX],XMM0                 
+  10b32f3e        MOVQ XMM0,qword ptr [EBX + 0x1c]          
+  10b32f43        MOV dword ptr [ECX + 0x8],EAX             
+  10b32f46        MOV EAX,dword ptr [EBX + 0x24]            
+  10b32f49        MOV dword ptr [ESP],0x0                   
+  10b32f50 [p#2 ]  PUSH dword ptr [EBX + 0xc]                
+  10b32f53        SUB ESP,0xc                               
+  10b32f56        MOV ECX,ESP                               
+  10b32f58 [p#1 ]  PUSH ECX                                  
+  10b32f59        MOVQ qword ptr [ECX],XMM0                 
+  10b32f5d        MOVSS XMM0,dword ptr [EBX + 0x18]         
+  10b32f62        MOV dword ptr [ECX + 0x8],EAX             
+  10b32f65        MOV ECX,EDX                               
+  10b32f67        MOVSS dword ptr [ESP],XMM0                
+  10b32f6c        CALL 0x11066f90   <-- CALL
+
+================ CALL at 10b35bbb  in FUN_10b35b20 @ 10b35b20
+  10b35b20 [p#9 ]  PUSH EBP                                  
+  10b35b21        MOV EBP,ESP                               
+  10b35b23        SUB ESP,0x10                              
+  10b35b26 [p#8 ]  PUSH EBX                                  
+  10b35b27        MOV EBX,dword ptr [EBP + 0x8]             
+  10b35b2a        MOV dword ptr [EBP + -0x4],ECX            
+  10b35b2d [p#7 ]  PUSH ESI                                  
+  10b35b2e [p#6 ]  PUSH EDI                                     <<<<<< param_6 (blend window, seconds)
+  10b35b2f        TEST EBX,EBX                              
+  10b35b31        JZ 0x10b35bc3                             
+  10b35b37        MOV EAX,[0x11cb9034]                      
+  10b35b3c        MOV ECX,dword ptr [EAX]                   
+  10b35b3e        MOV EAX,dword ptr [ECX]                   
+  10b35b40        CALL dword ptr [EAX + 0x68]               
+  10b35b43        MOV EDX,dword ptr [EBX]                   
+  10b35b45        MOV ESI,EAX                               
+  10b35b47        MOV ECX,EBX                               
+  10b35b49        MOV EDI,dword ptr [ESI]                   
+  10b35b4b        CALL dword ptr [EDX + 0x4]                
+  10b35b4e [p#5 ]  PUSH EAX                                  
+  10b35b4f        MOV ECX,ESI                               
+  10b35b51        CALL dword ptr [EDI + 0xc]                
+  10b35b54        TEST EAX,EAX                              
+  10b35b56        JZ 0x10b35bc3                             
+  10b35b58        MOV ECX,dword ptr [EAX + 0xbc]            
+  10b35b5e        TEST ECX,ECX                              
+  10b35b60        JZ 0x10b35bc3                             
+  10b35b62        MOV EBX,dword ptr [EBP + -0x4]            
+  10b35b65 [p#4 ]  PUSH dword ptr [EBX + 0x10]               
+  10b35b68        CALL 0x11077cb0                           
+  10b35b6d        MOV EDX,EAX                               
+  10b35b6f        TEST EDX,EDX                              
+  10b35b71        JZ 0x10b35bc3                             
+  10b35b73        SUB ESP,0xc                               
+  10b35b76        MOV dword ptr [EBP + -0x8],0x0            
+  10b35b7d        MOV EAX,dword ptr [EBP + -0x8]            
+  10b35b80        MOV ECX,ESP                               
+  10b35b82        XORPS XMM0,XMM0                           
+  10b35b85        UNPCKLPS XMM0,XMM0                        
+  10b35b88 [p#3 ]  PUSH ECX                                  
+  10b35b89        MOVQ qword ptr [ECX],XMM0                 
+  10b35b8d        MOVQ XMM0,qword ptr [EBX + 0x1c]          
+  10b35b92        MOV dword ptr [ECX + 0x8],EAX             
+  10b35b95        MOV EAX,dword ptr [EBX + 0x24]            
+  10b35b98        MOV dword ptr [ESP],0x0                   
+  10b35b9f [p#2 ]  PUSH dword ptr [EBX + 0xc]                
+  10b35ba2        SUB ESP,0xc                               
+  10b35ba5        MOV ECX,ESP                               
+  10b35ba7 [p#1 ]  PUSH ECX                                  
+  10b35ba8        MOVQ qword ptr [ECX],XMM0                 
+  10b35bac        MOVSS XMM0,dword ptr [EBX + 0x18]         
+  10b35bb1        MOV dword ptr [ECX + 0x8],EAX             
+  10b35bb4        MOV ECX,EDX                               
+  10b35bb6        MOVSS dword ptr [ESP],XMM0                
+  10b35bbb        CALL 0x11066f90   <-- CALL

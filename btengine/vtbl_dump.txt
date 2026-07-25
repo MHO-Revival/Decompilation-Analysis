@@ -1,0 +1,104 @@
+
+--- range 1049a270..1049a3a0 ---
+  1049a270  XOR EAX,EAX                     
+  1049a272  JMP 0x1049a279                  
+  1049a274  SBB EAX,EAX                     
+  1049a276  OR EAX,0x1                      
+  1049a279  TEST EAX,EAX                    
+  1049a27b  JNZ 0x1049a2bb                  
+  1049a27d  PUSH 0x54                       
+  1049a27f  CALL 0x10c3d580                  CALL->10c3d580 FUN_10c3d580
+  1049a2bb  MOV ECX,0x11dbb5fc               VTBL?=11dbb5fc
+  1049a2c0  MOV EAX,ESI                     
+  1049a2c2  MOV DL,byte ptr [EAX]           
+  1049a2c4  CMP DL,byte ptr [ECX]           
+  1049a2c6  JNZ 0x1049a2e2                  
+  1049a2c8  TEST DL,DL                      
+  1049a2ca  JZ 0x1049a2de                   
+  1049a2cc  MOV DL,byte ptr [EAX + 0x1]     
+  1049a2cf  CMP DL,byte ptr [ECX + 0x1]     
+  1049a2d2  JNZ 0x1049a2e2                  
+  1049a2d4  ADD EAX,0x2                     
+  1049a2d7  ADD ECX,0x2                     
+  1049a2da  TEST DL,DL                      
+  1049a2dc  JNZ 0x1049a2c2                  
+  1049a2de  XOR EAX,EAX                     
+  1049a2e0  JMP 0x1049a2e7                  
+  1049a2e2  SBB EAX,EAX                     
+  1049a2e4  OR EAX,0x1                      
+  1049a2e7  TEST EAX,EAX                    
+  1049a2e9  JNZ 0x1049abbf                  
+  1049a2ef  PUSH 0x70                       
+  1049a2f1  CALL 0x10c3d580                  CALL->10c3d580 FUN_10c3d580
+  1049a327  LEA EAX,[EBP + -0x1c]           
+  1049a32a  PUSH 0x11dbaf68                  VTBL?=11dbaf68
+  1049a32f  PUSH EAX                        
+  1049a330  CALL 0x100fd0c0                  CALL->100fd0c0 FUN_100fd0c0
+  1049a335  ADD ESP,0x8                     
+  1049a338  TEST AL,AL                      
+  1049a33a  JZ 0x1049a386                   
+  1049a33c  MOV ECX,dword ptr [EDI]         
+  1049a33e  PUSH 0x11dbb068                  VTBL?=11dbb068
+  1049a343  MOV EAX,dword ptr [ECX]         
+  1049a345  CALL dword ptr [EAX + 0x5c]     
+  1049a348  PUSH 0x54                       
+  1049a34a  CALL 0x10c3d580                  CALL->10c3d580 FUN_10c3d580
+  1049a386  LEA EAX,[EBP + -0x1c]           
+  1049a389  PUSH 0x11dbb650                  VTBL?=11dbb650
+  1049a38e  PUSH EAX                        
+  1049a38f  CALL 0x100fd0c0                  CALL->100fd0c0 FUN_100fd0c0
+  1049a394  ADD ESP,0x8                     
+  1049a397  TEST AL,AL                      
+  1049a399  JZ 0x1049a743                   
+  1049a39f  MOV ECX,dword ptr [EDI]         
+
+--- range 1049a6b8..1049a760 ---
+  1049a6b7  JNZ 0x1049a6f7                  
+  1049a6b9  PUSH 0x5c                       
+  1049a6bb  CALL 0x10c3d580                  CALL->10c3d580 FUN_10c3d580
+  1049a6f7  MOV ECX,0x11dbb75c               VTBL?=11dbb75c
+  1049a6fc  MOV EAX,ESI                     
+  1049a6fe  MOV EDI,EDI                     
+  1049a700  MOV DL,byte ptr [EAX]           
+  1049a702  CMP DL,byte ptr [ECX]           
+  1049a704  JNZ 0x1049a720                  
+  1049a706  TEST DL,DL                      
+  1049a708  JZ 0x1049a71c                   
+  1049a70a  MOV DL,byte ptr [EAX + 0x1]     
+  1049a70d  CMP DL,byte ptr [ECX + 0x1]     
+  1049a710  JNZ 0x1049a720                  
+  1049a712  ADD EAX,0x2                     
+  1049a715  ADD ECX,0x2                     
+  1049a718  TEST DL,DL                      
+  1049a71a  JNZ 0x1049a700                  
+  1049a71c  XOR EAX,EAX                     
+  1049a71e  JMP 0x1049a725                  
+  1049a720  SBB EAX,EAX                     
+  1049a722  OR EAX,0x1                      
+  1049a725  TEST EAX,EAX                    
+  1049a727  JNZ 0x1049ac38                  
+  1049a72d  MOV ESI,dword ptr [EBP + 0xffffff68]
+  1049a733  XOR EDX,EDX                     
+  1049a735  MOV ECX,ESI                     
+  1049a737  CALL 0x1049e800                  CALL->1049e800 FUN_1049e800
+  1049a73c  MOV EBX,EAX                     
+  1049a73e  JMP 0x1049a86c                  
+  1049a743  LEA EAX,[EBP + -0x1c]           
+  1049a746  PUSH 0x11dbb77c                  VTBL?=11dbb77c
+  1049a74b  PUSH EAX                        
+  1049a74c  CALL 0x100fd0c0                  CALL->100fd0c0 FUN_100fd0c0
+  1049a751  ADD ESP,0x8                     
+  1049a754  TEST AL,AL                      
+  1049a756  JNZ 0x1049a771                  
+  1049a758  LEA EAX,[EBP + -0x1c]           
+  1049a75b  PUSH 0x11dbb784                  VTBL?=11dbb784
+
+=== FILTER CREATORS (vtbl in ctor) ===
+  Logger               creator@1049e300 :
+  Timer                creator@1049e390 :
+  Counter              creator@1049e440 :
+  Loop                 creator@1049e4f0 :
+  Until_Fails_Limited  creator@1049e5a0 :
+  Until_Fails          creator@1049e650 :
+  Until_Success        creator@1049e6e0 :
+  Non                  creator@1049e800 :

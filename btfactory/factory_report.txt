@@ -1,0 +1,309 @@
+
+== CAnimSequencePlay  nameStr=11306220 ==
+    undisassembled hit @10555e81
+      + CREATED FUN_10555e80 @ 10555e80  (6 bytes) covering hit 10555e81
+    undisassembled hit @10555f11
+      + CREATED FUN_10555f10 @ 10555f10  (6 bytes) covering hit 10555f11
+
+== CAnimSequenceSetInput  nameStr=1130643c ==
+    undisassembled hit @10556f91
+      + CREATED FUN_10556f90 @ 10556f90  (6 bytes) covering hit 10556f91
+    undisassembled hit @10556ff1
+      + CREATED FUN_10556ff0 @ 10556ff0  (6 bytes) covering hit 10556ff1
+
+== CAnimSequenceIsPlaying  nameStr=113061a4 ==
+    undisassembled hit @105542d1
+      + CREATED FUN_105542d0 @ 105542d0  (6 bytes) covering hit 105542d1
+    undisassembled hit @10554331
+      + CREATED FUN_10554330 @ 10554330  (6 bytes) covering hit 10554331
+
+== CEntityMove  nameStr=11307688 ==
+    undisassembled hit @1056ccf1
+      + CREATED FUN_1056ccf0 @ 1056ccf0  (6 bytes) covering hit 1056ccf1
+    undisassembled hit @1056cd51
+      + CREATED FUN_1056cd50 @ 1056cd50  (6 bytes) covering hit 1056cd51
+
+== CEntityMoveToTarget  nameStr=11307aac ==
+    undisassembled hit @10572241
+      + CREATED FUN_10572240 @ 10572240  (6 bytes) covering hit 10572241
+    undisassembled hit @105722a1
+      + CREATED FUN_105722a0 @ 105722a0  (6 bytes) covering hit 105722a1
+
+== CEntityMoveToPos  nameStr=113078e0 ==
+    undisassembled hit @1056f751
+      + CREATED FUN_1056f750 @ 1056f750  (6 bytes) covering hit 1056f751
+    undisassembled hit @1056f761
+      + CREATED FUN_1056f760 @ 1056f760  (6 bytes) covering hit 1056f761
+
+== CEntityRotateToTarget  nameStr=11307f0c ==
+    undisassembled hit @1057a391
+      + CREATED FUN_1057a390 @ 1057a390  (6 bytes) covering hit 1057a391
+    undisassembled hit @1057a3f1
+      + CREATED FUN_1057a3f0 @ 1057a3f0  (6 bytes) covering hit 1057a3f1
+
+== CEntityRotateToPos  nameStr=11307d84 ==
+    undisassembled hit @10575c21
+      + CREATED FUN_10575c20 @ 10575c20  (6 bytes) covering hit 10575c21
+    undisassembled hit @10575c81
+      + CREATED FUN_10575c80 @ 10575c80  (6 bytes) covering hit 10575c81
+
+== CEntityRotateOrientation  nameStr=11307cec ==
+    undisassembled hit @10574361
+      + CREATED FUN_10574360 @ 10574360  (6 bytes) covering hit 10574361
+    undisassembled hit @105743c1
+      + CREATED FUN_105743c0 @ 105743c0  (6 bytes) covering hit 105743c1
+
+== CSetTargetIDOrientation  nameStr=1130bde7 ==
+
+== CSetTargetPosOrientation  nameStr=1130be00 ==
+    undisassembled hit @105d3b11
+      + CREATED FUN_105d3b10 @ 105d3b10  (6 bytes) covering hit 105d3b11
+    undisassembled hit @10622511
+      + CREATED FUN_10622510 @ 10622510  (6 bytes) covering hit 10622511
+
+== CSetTarget  nameStr=1130af5c ==
+    undisassembled hit @105c6501
+      + CREATED FUN_105c6500 @ 105c6500  (6 bytes) covering hit 105c6501
+    undisassembled hit @105d3201
+      + CREATED FUN_105d3200 @ 105d3200  (6 bytes) covering hit 105d3201
+    undisassembled hit @10622221
+      + CREATED FUN_10622220 @ 10622220  (6 bytes) covering hit 10622221
+
+== CDistanceCheck  nameStr=1130d5c0 ==
+    undisassembled hit @105f74b1
+      + CREATED FUN_105f74b0 @ 105f74b0  (6 bytes) covering hit 105f74b1
+    undisassembled hit @106217e1
+      + CREATED FUN_106217e0 @ 106217e0  (6 bytes) covering hit 106217e1
+
+== CBlackBoardCheck  nameStr=1130d4d0 ==
+    undisassembled hit @105f4e81
+      + CREATED FUN_105f4e80 @ 105f4e80  (6 bytes) covering hit 105f4e81
+    undisassembled hit @10621471
+      + CREATED FUN_10621470 @ 10621470  (6 bytes) covering hit 10621471
+
+== CSetBlackBoard  nameStr=1130b838 ==
+    undisassembled hit @105ce851
+      + CREATED FUN_105ce850 @ 105ce850  (6 bytes) covering hit 105ce851
+    undisassembled hit @10622341
+      + CREATED FUN_10622340 @ 10622340  (6 bytes) covering hit 10622341
+
+== CSetBlackBoardEqualString  nameStr=1130e508 ==
+    undisassembled hit @106212e1
+      + CREATED FUN_106212e0 @ 106212e0  (6 bytes) covering hit 106212e1
+    undisassembled hit @10628fa1
+      + CREATED FUN_10628fa0 @ 10628fa0  (6 bytes) covering hit 10628fa1
+
+== CSetBlackBoardEqualFloat  nameStr=1130e354 ==
+    undisassembled hit @106212c1
+      + CREATED FUN_106212c0 @ 106212c0  (6 bytes) covering hit 106212c1
+    undisassembled hit @10628f81
+      + CREATED FUN_10628f80 @ 10628f80  (6 bytes) covering hit 10628f81
+
+== CTimeCheck  nameStr=1130d890 ==
+    undisassembled hit @105fb981
+      + CREATED FUN_105fb980 @ 105fb980  (6 bytes) covering hit 105fb981
+    undisassembled hit @106226f1
+      + CREATED FUN_106226f0 @ 106226f0  (6 bytes) covering hit 106226f1
+
+== CSetTime  nameStr=1130be44 ==
+    undisassembled hit @105d4451
+      + CREATED FUN_105d4450 @ 105d4450  (6 bytes) covering hit 105d4451
+    undisassembled hit @10622521
+      + CREATED FUN_10622520 @ 10622520  (6 bytes) covering hit 10622521
+
+== CSetArea  nameStr=1130b814 ==
+    undisassembled hit @105cdc81
+      + CREATED FUN_105cdc80 @ 105cdc80  (6 bytes) covering hit 105cdc81
+    undisassembled hit @10622331
+      + CREATED FUN_10622330 @ 10622330  (6 bytes) covering hit 10622331
+
+== CHandleDeath  nameStr=11309128 ==
+    undisassembled hit @10597c91
+      + CREATED FUN_10597c90 @ 10597c90  (6 bytes) covering hit 10597c91
+    undisassembled hit @10621c61
+      + CREATED FUN_10621c60 @ 10621c60  (6 bytes) covering hit 10621c61
+
+== CCaculateDamagedValue  nameStr=11306ca0 ==
+    undisassembled hit @10560ab1
+      + CREATED FUN_10560ab0 @ 10560ab0  (6 bytes) covering hit 10560ab1
+    undisassembled hit @10560b11
+      + CREATED FUN_10560b10 @ 10560b10  (6 bytes) covering hit 10560b11
+
+== CCaculateDamagedState  nameStr=11306c08 ==
+    undisassembled hit @10560941
+      + CREATED FUN_10560940 @ 10560940  (6 bytes) covering hit 10560941
+    undisassembled hit @105609a1
+      + CREATED FUN_105609a0 @ 105609a0  (6 bytes) covering hit 105609a1
+
+== CSelector  nameStr=1130d0fc ==
+    undisassembled hit @105ed591
+      + CREATED FUN_105ed590 @ 105ed590  (6 bytes) covering hit 105ed591
+    undisassembled hit @105ed5f1
+      + CREATED FUN_105ed5f0 @ 105ed5f0  (6 bytes) covering hit 105ed5f1
+
+== CBTRandomSelecNode  nameStr=113bf5ac ==
+    undisassembled hit @103ecb91
+      + CREATED FUN_103ecb90 @ 103ecb90  (6 bytes) covering hit 103ecb91
+    undisassembled hit @103ecba1
+      + CREATED FUN_103ecba0 @ 103ecba0  (6 bytes) covering hit 103ecba1
+
+== CBTRandomSelectAction  nameStr=113bf5c0 ==
+    undisassembled hit @103eccb1
+      + CREATED FUN_103eccb0 @ 103eccb0  (6 bytes) covering hit 103eccb1
+    undisassembled hit @103eccc1
+      + CREATED FUN_103eccc0 @ 103eccc0  (6 bytes) covering hit 103eccc1
+
+== CLoopFilter  nameStr=113bf5d8 ==
+    undisassembled hit @103ed031
+      + CREATED FUN_103ed030 @ 103ed030  (6 bytes) covering hit 103ed031
+    undisassembled hit @103ed041
+      + CREATED FUN_103ed040 @ 103ed040  (6 bytes) covering hit 103ed041
+
+== CNodeRepeatExecuteCounter  nameStr=1130d778 ==
+    undisassembled hit @105f9a51
+      + CREATED FUN_105f9a50 @ 105f9a50  (6 bytes) covering hit 105f9a51
+    undisassembled hit @10621ef1
+      + CREATED FUN_10621ef0 @ 10621ef0  (6 bytes) covering hit 10621ef1
+
+== CConditionSuccessful  nameStr=1131449c ==
+    undisassembled hit @106216c1
+      + CREATED FUN_106216c0 @ 106216c0  (6 bytes) covering hit 106216c1
+    undisassembled hit @10629031
+      + CREATED FUN_10629030 @ 10629030  (6 bytes) covering hit 10629031
+
+== CConditionFailure  nameStr=11314434 ==
+    undisassembled hit @106216b1
+      + CREATED FUN_106216b0 @ 106216b0  (6 bytes) covering hit 106216b1
+    undisassembled hit @10629021
+      + CREATED FUN_10629020 @ 10629020  (6 bytes) covering hit 10629021
+
+== CBTOperation  nameStr=11306a50 ==
+    undisassembled hit @1055f001
+      + CREATED FUN_1055f000 @ 1055f000  (6 bytes) covering hit 1055f001
+    undisassembled hit @10621451
+      + CREATED FUN_10621450 @ 10621450  (6 bytes) covering hit 10621451
+
+
+################ NEW FUNCTIONS ################
+
+--- 10555e80 FUN_10555e80  (6 bytes)  names: [CAnimSequencePlay]
+
+--- 10555f10 FUN_10555f10  (6 bytes)  names: [CAnimSequencePlay]
+
+--- 10556f90 FUN_10556f90  (6 bytes)  names: [CAnimSequenceSetInput]
+
+--- 10556ff0 FUN_10556ff0  (6 bytes)  names: [CAnimSequenceSetInput]
+
+--- 105542d0 FUN_105542d0  (6 bytes)  names: [CAnimSequenceIsPlaying]
+
+--- 10554330 FUN_10554330  (6 bytes)  names: [CAnimSequenceIsPlaying]
+
+--- 1056ccf0 FUN_1056ccf0  (6 bytes)  names: [CEntityMove]
+
+--- 1056cd50 FUN_1056cd50  (6 bytes)  names: [CEntityMove]
+
+--- 10572240 FUN_10572240  (6 bytes)  names: [CEntityMoveToTarget]
+
+--- 105722a0 FUN_105722a0  (6 bytes)  names: [CEntityMoveToTarget]
+
+--- 1056f750 FUN_1056f750  (6 bytes)  names: [CEntityMoveToPos]
+
+--- 1056f760 FUN_1056f760  (6 bytes)  names: [CEntityMoveToPos]
+
+--- 1057a390 FUN_1057a390  (6 bytes)  names: [CEntityRotateToTarget]
+
+--- 1057a3f0 FUN_1057a3f0  (6 bytes)  names: [CEntityRotateToTarget]
+
+--- 10575c20 FUN_10575c20  (6 bytes)  names: [CEntityRotateToPos]
+
+--- 10575c80 FUN_10575c80  (6 bytes)  names: [CEntityRotateToPos]
+
+--- 10574360 FUN_10574360  (6 bytes)  names: [CEntityRotateOrientation]
+
+--- 105743c0 FUN_105743c0  (6 bytes)  names: [CEntityRotateOrientation]
+
+--- 105d3b10 FUN_105d3b10  (6 bytes)  names: [CSetTargetPosOrientation]
+
+--- 10622510 FUN_10622510  (6 bytes)  names: [CSetTargetPosOrientation]
+
+--- 105c6500 FUN_105c6500  (6 bytes)  names: [CSetTarget]
+
+--- 105d3200 FUN_105d3200  (6 bytes)  names: [CSetTarget]
+
+--- 10622220 FUN_10622220  (6 bytes)  names: [CSetTarget]
+
+--- 105f74b0 FUN_105f74b0  (6 bytes)  names: [CDistanceCheck]
+
+--- 106217e0 FUN_106217e0  (6 bytes)  names: [CDistanceCheck]
+
+--- 105f4e80 FUN_105f4e80  (6 bytes)  names: [CBlackBoardCheck]
+
+--- 10621470 FUN_10621470  (6 bytes)  names: [CBlackBoardCheck]
+
+--- 105ce850 FUN_105ce850  (6 bytes)  names: [CSetBlackBoard]
+
+--- 10622340 FUN_10622340  (6 bytes)  names: [CSetBlackBoard]
+
+--- 106212e0 FUN_106212e0  (6 bytes)  names: [CSetBlackBoardEqualString]
+
+--- 10628fa0 FUN_10628fa0  (6 bytes)  names: [CSetBlackBoardEqualString]
+
+--- 106212c0 FUN_106212c0  (6 bytes)  names: [CSetBlackBoardEqualFloat]
+
+--- 10628f80 FUN_10628f80  (6 bytes)  names: [CSetBlackBoardEqualFloat]
+
+--- 105fb980 FUN_105fb980  (6 bytes)  names: [CTimeCheck]
+
+--- 106226f0 FUN_106226f0  (6 bytes)  names: [CTimeCheck]
+
+--- 105d4450 FUN_105d4450  (6 bytes)  names: [CSetTime]
+
+--- 10622520 FUN_10622520  (6 bytes)  names: [CSetTime]
+
+--- 105cdc80 FUN_105cdc80  (6 bytes)  names: [CSetArea]
+
+--- 10622330 FUN_10622330  (6 bytes)  names: [CSetArea]
+
+--- 10597c90 FUN_10597c90  (6 bytes)  names: [CHandleDeath]
+
+--- 10621c60 FUN_10621c60  (6 bytes)  names: [CHandleDeath]
+
+--- 10560ab0 FUN_10560ab0  (6 bytes)  names: [CCaculateDamagedValue]
+
+--- 10560b10 FUN_10560b10  (6 bytes)  names: [CCaculateDamagedValue]
+
+--- 10560940 FUN_10560940  (6 bytes)  names: [CCaculateDamagedState]
+
+--- 105609a0 FUN_105609a0  (6 bytes)  names: [CCaculateDamagedState]
+
+--- 105ed590 FUN_105ed590  (6 bytes)  names: [CSelector]
+
+--- 105ed5f0 FUN_105ed5f0  (6 bytes)  names: [CSelector]
+
+--- 103ecb90 FUN_103ecb90  (6 bytes)  names: [CBTRandomSelecNode]
+
+--- 103ecba0 FUN_103ecba0  (6 bytes)  names: [CBTRandomSelecNode]
+
+--- 103eccb0 FUN_103eccb0  (6 bytes)  names: [CBTRandomSelectAction]
+
+--- 103eccc0 FUN_103eccc0  (6 bytes)  names: [CBTRandomSelectAction]
+
+--- 103ed030 FUN_103ed030  (6 bytes)  names: [CLoopFilter]
+
+--- 103ed040 FUN_103ed040  (6 bytes)  names: [CLoopFilter]
+
+--- 105f9a50 FUN_105f9a50  (6 bytes)  names: [CNodeRepeatExecuteCounter]
+
+--- 10621ef0 FUN_10621ef0  (6 bytes)  names: [CNodeRepeatExecuteCounter]
+
+--- 106216c0 FUN_106216c0  (6 bytes)  names: [CConditionSuccessful]
+
+--- 10629030 FUN_10629030  (6 bytes)  names: [CConditionSuccessful]
+
+--- 106216b0 FUN_106216b0  (6 bytes)  names: [CConditionFailure]
+
+--- 10629020 FUN_10629020  (6 bytes)  names: [CConditionFailure]
+
+--- 1055f000 FUN_1055f000  (6 bytes)  names: [CBTOperation]
+
+--- 10621450 FUN_10621450  (6 bytes)  names: [CBTOperation]

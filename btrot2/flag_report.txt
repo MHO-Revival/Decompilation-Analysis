@@ -1,0 +1,33 @@
+scanned 5966232 instructions
+BYTE stores to [reg+0xd8]: 10 distinct functions
+
+== FUN_103e0540@103e0540
+    103e0546  MOV byte ptr [ECX + 0xd8],AL
+
+== FUN_103e0e60@103e0e60
+    103e0e8c  MOV byte ptr [ESI + 0xd8],0x1
+
+== FUN_103e0ef0@103e0ef0
+    103e0f09  MOV byte ptr [ESI + 0xd8],0x1
+
+== FUN_107498b0@107498b0
+    10749a5a  MOV byte ptr [ECX + 0xd8],0x0
+
+== FUN_10a24cb0@10a24cb0
+    10a251d7  MOV byte ptr [ESI + 0xd8],0x2
+
+== FUN_10a29be0@10a29be0
+    10a29bef  MOV byte ptr [ECX + 0xd8],AL
+
+== FUN_10a56960@10a56960
+    10a56b65  MOV byte ptr [ECX + 0xd8],AL
+
+== FUN_10a571d0@10a571d0
+    10a57221  MOV byte ptr [ECX + 0xd8],0xfe
+
+== FUN_10a57250@10a57250
+    10a57a92  MOV byte ptr [ECX + 0xd8],AL
+    10a57af6  MOV byte ptr [ECX + 0xd8],AL
+
+== FUN_10a5ac30@10a5ac30
+    10a5ac9c  MOV byte ptr [ECX + 0xd8],0xff

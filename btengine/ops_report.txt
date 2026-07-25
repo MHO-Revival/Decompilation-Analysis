@@ -1,0 +1,23 @@
+== OP LITERAL XREFS ==
+  BlackBoardCheck: <not found>
+  AnimSequencePlay: <not found>
+  AnimSequenceSetInput: <not found>
+  EntityRotate: <not found>
+  EntityMove: <not found>
+  SetBlackBoard: <not found>
+  DistanceCheck: <not found>
+  TimeCheck                @11cbbb86  []
+  SetTime: <not found>
+  BTOperation: <not found>
+  SetTargetIDOrientation: <not found>
+  EntityRotateTo: <not found>
+  EntityMoveTo: <not found>
+
+== BT UPDATE/TICK SYMBOLS ==
+  CBehaviorTreeContext::BuildRuntimeNodeMaps @104a69f0
+  CBehaviorTreeProfiler::DumpNodeRuntimeStats @104bc010
+  ScriptBind_BT::ExecuteEventTree @110377d0
+  CBTNode_EffectSpawnedCollectPoint::Execute @115f6260
+  s_g_BT_OpenRunLog_11cc0d08 @11cc0d08
+  s_E_BT_Monster_Abnormal_CrazyRun_11da5924 @11da5924
+  s_E_BT_Monster_Abnormal_CrazyRun_E_11da5d68 @11da5d68

@@ -1,0 +1,4921 @@
+# readers of the 641 acceleration-ramp fields on the parsed message
+# 0x219 NeedAcc | 0x21a/0x21e/0x222 Accelerate | 0x226 AccStart | 0x22a AccEnd
+# '**' = touches BOTH 0x226 and 0x22a -> the ramp math should be in there
+
+** 10dba240  FUN_10dba240  (692 bytes)  offsets=0x217,0x218,0x21c,0x220,0x224,0x228
+       10dba47e  MOVZX EAX,byte ptr [EBX + 0x217]
+       10dba485  MOV byte ptr [EDX + 0x217],AL
+       10dba48b  MOV EAX,dword ptr [EBX + 0x218]
+       10dba491  MOV dword ptr [EDX + 0x218],EAX
+       10dba497  MOV EAX,dword ptr [EBX + 0x21c]
+       10dba49d  MOV dword ptr [EDX + 0x21c],EAX
+       10dba4a3  MOV EAX,dword ptr [EBX + 0x220]
+       10dba4a9  MOV dword ptr [EDX + 0x220],EAX
+       10dba4af  MOV EAX,dword ptr [EBX + 0x224]
+       10dba4b5  MOV dword ptr [EDX + 0x224],EAX
+       10dba4bb  MOV EAX,dword ptr [EBX + 0x228]
+       10dba4c1  MOV dword ptr [EDX + 0x228],EAX
+       -> acc_10dba240.c
+
+** 10beac30  FUN_10beac30  (746 bytes)  offsets=0x217,0x218,0x21c,0x220,0x224,0x228
+       10beae91  MOV byte ptr [EBX + 0x217],AL
+       10beae9e  MOV byte ptr [EBX + 0x218],AL
+       10beaea4  MOVZX EAX,byte ptr [EDX + 0x217]
+       10beaeb1  MOV EAX,dword ptr [EDX + 0x218]
+       10beaebd  MOV EAX,dword ptr [EDX + 0x21c]
+       10beaec9  MOV EAX,dword ptr [EDX + 0x220]
+       10beaed7  MOV ECX,dword ptr [EDX + 0x224]
+       10beaee3  MOV ECX,dword ptr [EDX + 0x228]
+       -> acc_10beac30.c
+
+** 10a672e0  FUN_10a672e0  (746 bytes)  offsets=0x217,0x218,0x21c,0x220,0x224,0x228
+       10a6753a  MOVZX EAX,byte ptr [EBX + 0x217]
+       10a67547  MOVZX EAX,byte ptr [EBX + 0x218]
+       10a6755b  MOV byte ptr [EDX + 0x217],AL
+       10a67567  MOV dword ptr [EDX + 0x218],EAX
+       10a67573  MOV dword ptr [EDX + 0x21c],EAX
+       10a6757f  MOV dword ptr [EDX + 0x220],EAX
+       10a6758b  MOV dword ptr [EDX + 0x224],EAX
+       10a67597  MOV dword ptr [EDX + 0x228],EAX
+       -> acc_10a672e0.c
+
+** 105474f0  GameLogicEvent_Dispatch_A_virtualized_  (41012 bytes)  offsets=0x217,0x218,0x21c,0x220,0x224,0x228
+       1054bda8  MOV EAX,0x217
+       1054bdc4  MOV EAX,0x218
+       1054be34  MOV EAX,0x21c
+       1054bea4  MOV EAX,0x220
+       1054bf14  MOV EAX,0x224
+       1054bf84  MOV EAX,0x228
+       10550733  MOV EAX,0x217
+       1055074c  MOV EAX,0x218
+       105507b0  MOV EAX,0x21c
+       [skipped: too large]
+
+** 10ff1e70  FUN_10ff1e70  (105 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ff1eaa  MOV dword ptr [ESI + 0x218],ECX
+       10ff1eb3  MOV dword ptr [ESI + 0x21c],ECX
+       10ff1ebc  MOV dword ptr [ESI + 0x220],ECX
+       10ff1ec5  MOV dword ptr [ESI + 0x224],EAX
+       10ff1ecb  MOV dword ptr [ESI + 0x228],0x0
+       -> acc_10ff1e70.c
+
+** 10bad820  FUN_10bad820  (310 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10bad839  MOV EAX,dword ptr [ESI + 0x228]
+       10bad83f  CMP EAX,dword ptr [ESI + 0x218]
+       10bad870  MOV EAX,dword ptr [ESI + 0x228]
+       10bad876  CMP EAX,dword ptr [ESI + 0x218]
+       10bad882  MOV EAX,dword ptr [ESI + 0x218]
+       10bad88c  MOV EAX,dword ptr [ESI + 0x220]
+       10bad8a1  MOV EAX,dword ptr [ESI + 0x21c]
+       10bad8b7  MOV EAX,dword ptr [ESI + 0x224]
+       10bad8c0  MOV dword ptr [ESI + 0x224],EAX
+       10bad8c8  MOV dword ptr [ESI + 0x21c],EAX
+       10bad8d1  MOV dword ptr [ESI + 0x220],EAX
+       10bad8d7  MOV EAX,dword ptr [ESI + 0x21c]
+       10bad8dd  MOV dword ptr [ESI + 0x218],EAX
+       -> acc_10bad820.c
+
+** 10db6960  FUN_10db6960  (412 bytes)  offsets=0x217,0x218,0x220,0x224,0x228
+       10db6a5c  MOVQ XMM0,qword ptr [EDX + 0x218]
+       10db6a6c  MOV EAX,dword ptr [EDX + 0x220]
+       10db6a78  MOV AL,byte ptr [EDX + 0x217]
+       10db6a84  MOV EAX,dword ptr [EDX + 0x224]
+       10db6a90  MOV EAX,dword ptr [EDX + 0x228]
+       -> acc_10db6960.c
+
+** 10ff1ee0  FUN_10ff1ee0  (440 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ff1f2e  MOV EAX,dword ptr [EAX + 0x228]
+       10ff1f3e  MOVSS XMM4,dword ptr [ESI + 0x21c]
+       10ff1f48  MOVSS XMM3,dword ptr [ESI + 0x218]
+       10ff1f50  MOVSS XMM7,dword ptr [ESI + 0x224]
+       10ff1f5b  MOVSS XMM2,dword ptr [ESI + 0x220]
+       10ff2051  MOVUPS XMM0,xmmword ptr [ESI + 0x218]
+       10ff207f  MOV EAX,dword ptr [EAX + 0x228]
+       -> acc_10ff1ee0.c
+
+** 10ce4910  FUN_10ce4910  (698 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ce4b55  MOV dword ptr [ESI + 0x218],0x0
+       10ce4b5f  MOV dword ptr [ESI + 0x21c],0x0
+       10ce4b69  MOV dword ptr [ESI + 0x220],0x0
+       10ce4b73  MOV dword ptr [ESI + 0x224],0x0
+       10ce4b7d  MOV dword ptr [ESI + 0x228],0x3f800000
+       -> acc_10ce4910.c
+
+** 11691370  FUN_11691370  (745 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       11691370  MOV EAX,dword ptr [ECX + 0x218]
+       1169137c  MOV EAX,dword ptr [ECX + 0x21c]
+       11691388  MOV EAX,dword ptr [ECX + 0x220]
+       11691394  MOV EAX,dword ptr [ECX + 0x224]
+       116913a0  MOV EAX,dword ptr [ECX + 0x228]
+       -> acc_11691370.c
+
+** 10f82500  FUN_10f82500  (826 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10f82608  MOVSS XMM1,dword ptr [EDI + 0x21c]
+       10f82616  MOVSS XMM2,dword ptr [EDI + 0x220]
+       10f8261e  MOVSS XMM4,dword ptr [EDI + 0x224]
+       10f82626  MOVSS XMM5,dword ptr [EDI + 0x228]
+       10f82633  MOVSS XMM0,dword ptr [EDI + 0x218]
+       -> acc_10f82500.c
+
+** 10b931b0  FUN_10b931b0  (829 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10b93261  CALL dword ptr [EDX + 0x228]
+       10b932ce  PUSH dword ptr [EDI + 0x21c]
+       10b932d4  PUSH dword ptr [EDI + 0x218]
+       10b93337  CMP dword ptr [EDI + 0x220],0x0
+       10b93363  CMP dword ptr [EDI + 0x220],EAX
+       10b9336b  LEA ESI,[EDI + 0x224]
+       10b933b5  CMP EAX,dword ptr [EDI + 0x220]
+       -> acc_10b931b0.c
+
+** 116c3ca0  FUN_116c3ca0  (874 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       116c3e9b  MOV dword ptr [ESI + 0x218],0x0
+       116c3ea5  MOV dword ptr [ESI + 0x21c],0x0
+       116c3eaf  MOV dword ptr [ESI + 0x220],0x0
+       116c3eb9  MOV dword ptr [ESI + 0x224],0x0
+       116c3ec3  MOV dword ptr [ESI + 0x228],0x0
+       -> acc_116c3ca0.c
+
+** 114a7980  FUN_114a7980  (959 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       114a799b  MOV EAX,dword ptr [ECX + 0x220]
+       114a79a4  MOV EAX,dword ptr [ECX + 0x224]
+       114a79ad  MOV EAX,dword ptr [ECX + 0x228]
+       114a7a05  MOV dword ptr [EDX + 0x218],EAX
+       114a7a11  MOV dword ptr [EDX + 0x21c],EAX
+       114a7a2b  MOV byte ptr [EDX + 0x220],AL
+       114a7a52  MOV byte ptr [EDX + 0x224],AL
+       114a7a5e  MOV dword ptr [EDX + 0x228],EAX
+       -> acc_114a7980.c
+
+** 114aa770  FUN_114aa770  (990 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       114aa7b2  MOV dword ptr [EBX + 0x220],EAX
+       114aa7bd  MOV dword ptr [EBX + 0x224],EAX
+       114aa7c6  MOV dword ptr [EBX + 0x228],EAX
+       114aa83a  MOV EAX,dword ptr [ESI + 0x218]
+       114aa846  MOV EAX,dword ptr [ESI + 0x21c]
+       114aa852  MOVZX EAX,byte ptr [ESI + 0x220]
+       114aa886  MOVZX EAX,byte ptr [ESI + 0x224]
+       114aa893  MOV EAX,dword ptr [ESI + 0x228]
+       -> acc_114aa770.c
+
+** 10f755d0  FUN_10f755d0  (1030 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10f7582c  MOVSS dword ptr [ESI + 0x218],XMM5
+       10f75839  MOVSS dword ptr [ESI + 0x224],XMM0
+       10f75845  MOVSS dword ptr [ESI + 0x21c],XMM1
+       10f75852  MOVSS dword ptr [ESI + 0x220],XMM7
+       10f759c0  MOV byte ptr [ESI + 0x228],0x0
+       -> acc_10f755d0.c
+
+** 10ff2120  FUN_10ff2120  (1185 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ff221e  MOVSS XMM0,dword ptr [ESI + 0x228]
+       10ff2233  MOVSS dword ptr [ESI + 0x228],XMM0
+       10ff237e  MOVSS XMM0,dword ptr [ESI + 0x218]
+       10ff2394  MULSS XMM1,dword ptr [ESI + 0x21c]
+       10ff23a1  MOVSS XMM7,dword ptr [ESI + 0x224]
+       10ff23b0  MOVSS XMM0,dword ptr [ESI + 0x220]
+       10ff23c9  MOVSS dword ptr [ESI + 0x224],XMM2
+       10ff23d1  MOVSS XMM4,dword ptr [ESI + 0x21c]
+       10ff23d9  MOVSS XMM5,dword ptr [ESI + 0x220]
+       10ff23f1  MOVSS XMM1,dword ptr [ESI + 0x218]
+       10ff2480  MOVQ qword ptr [ESI + 0x218],XMM7
+       10ff2490  MOV dword ptr [ESI + 0x220],EAX
+       10ff2496  MOVSS XMM3,dword ptr [ESI + 0x224]
+       10ff249e  MOVSS XMM4,dword ptr [ESI + 0x218]
+       10ff24a9  MOVSS XMM5,dword ptr [ESI + 0x21c]
+       10ff24b4  MOVSS XMM6,dword ptr [ESI + 0x220]
+       10ff2522  MOVSS dword ptr [ESI + 0x224],XMM3
+       10ff252a  MOVSS dword ptr [ESI + 0x218],XMM4
+       10ff2532  MOVSS dword ptr [ESI + 0x21c],XMM5
+       10ff253a  MOVSS dword ptr [ESI + 0x220],XMM6
+       10ff2548  MOV dword ptr [ESI + 0x224],0x3f800000
+       10ff2552  MOV dword ptr [ESI + 0x218],0x0
+       10ff255c  MOV dword ptr [ESI + 0x21c],0x0
+       10ff2566  MOV dword ptr [ESI + 0x220],0x0
+       10ff2575  MOVSS XMM1,dword ptr [ESI + 0x228]
+       10ff259c  MOVSS dword ptr [ESI + 0x228],XMM0
+       10ff25b5  FSTP float ptr [ESI + 0x228]
+       -> acc_10ff2120.c
+
+** 11ba12e0  FUN_11ba12e0  (1571 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       11ba1755  MOV dword ptr [ECX + 0x218],0x0
+       11ba175f  MOV dword ptr [ECX + 0x21c],0x0
+       11ba1769  MOV dword ptr [ECX + 0x220],EDX
+       11ba176f  MOV dword ptr [ECX + 0x224],0x0
+       11ba1779  MOV dword ptr [ECX + 0x228],0x0
+       -> acc_11ba12e0.c
+
+** 10f6e5e0  FUN_10f6e5e0  (1580 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10f6e649  MOV dword ptr [EDI + 0x218],0x0
+       10f6e653  MOV dword ptr [EDI + 0x21c],0x3f000000
+       10f6e65d  MOV byte ptr [EDI + 0x220],0x0
+       10f6e664  MOV byte ptr [EDI + 0x228],0x1
+       10f6e93a  LEA ECX,[EDI + 0x224]
+       -> acc_10f6e5e0.c
+
+** 108e4680  CPetTrainUI::BuildTrainInfoVO  (2626 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       108e491f  LEA EAX,[ESP + 0x218]
+       108e4949  LEA ECX,[ESP + 0x220]
+       108e4aa9  LEA EAX,[ESP + 0x224]
+       108e4ab0  MOV dword ptr [ESP + 0x224],0x0
+       108e4ad2  LEA EDX,[ESP + 0x21c]
+       108e4ae7  LEA EDX,[ESP + 0x224]
+       108e4afe  LEA EDX,[ESP + 0x228]
+       108e4b35  LEA ECX,[ESP + 0x218]
+       108e4c9d  MOV dword ptr [ESP + 0x21c],0x0
+       108e4cd0  LEA EAX,[ESP + 0x218]
+       108e4cd7  MOV byte ptr [ESP + 0x218],0x0
+       108e4d18  LEA ECX,[ESP + 0x220]
+       108e4d50  MOV byte ptr [ESP + 0x218],0x0
+       108e4d58  LEA EAX,[ESP + 0x218]
+       108e4d66  MOV dword ptr [ESP + 0x228],EAX
+       108e4d9b  LEA ECX,[ESP + 0x220]
+       -> acc_108e4680.c
+
+** 10cdc020  FUN_10cdc020  (2835 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10cdc0e2  MOV dword ptr [EDI + 0x218],0x3f800000
+       10cdc100  MOV dword ptr [EDI + 0x21c],0x3f800000
+       10cdc11e  MOV dword ptr [EDI + 0x220],0x3f800000
+       10cdc13c  MOV dword ptr [EDI + 0x224],0x3f800000
+       10cdc15a  MOV dword ptr [EDI + 0x228],0x3f800000
+       -> acc_10cdc020.c
+
+** 10fd61b0  FUN_10fd61b0  (4013 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10fd6341  CALL dword ptr [EAX + 0x228]
+       10fd6580  MOV EAX,dword ptr [EAX + 0x228]
+       10fd65cf  MOV EAX,dword ptr [EAX + 0x228]
+       10fd664b  MOV EAX,dword ptr [EAX + 0x228]
+       10fd68a6  MOV dword ptr [EDX + 0x218],ECX
+       10fd68af  MOV dword ptr [EDX + 0x21c],ECX
+       10fd68b8  MOV dword ptr [EDX + 0x220],ECX
+       10fd68c1  MOV dword ptr [EDX + 0x224],EAX
+       10fd695b  MOV dword ptr [EDX + 0x218],ECX
+       10fd6964  MOV dword ptr [EDX + 0x21c],ECX
+       10fd696d  MOV dword ptr [EDX + 0x220],ECX
+       10fd6976  MOV dword ptr [EDX + 0x224],EAX
+       10fd69dd  MOV EAX,dword ptr [EAX + 0x228]
+       10fd6c4b  MOVSS dword ptr [ECX + 0x218],XMM5
+       10fd6c5c  MOVSS dword ptr [ECX + 0x224],XMM0
+       10fd6c64  MOVSS dword ptr [ECX + 0x21c],XMM1
+       10fd6c6c  MOVSS dword ptr [ECX + 0x220],XMM7
+       10fd6ea6  MOVSS dword ptr [ECX + 0x218],XMM4
+       10fd6eb7  MOVSS dword ptr [ECX + 0x224],XMM0
+       10fd6ebf  MOVSS dword ptr [ECX + 0x21c],XMM1
+       10fd6ec7  MOVSS dword ptr [ECX + 0x220],XMM7
+       10fd6f48  MOV EAX,dword ptr [EAX + 0x228]
+       10fd6f8a  MOV EAX,dword ptr [EAX + 0x228]
+       10fd6fc9  MOV EAX,dword ptr [EAX + 0x228]
+       10fd70fd  MOV EAX,dword ptr [EAX + 0x228]
+       -> acc_10fd61b0.c
+
+** 10f41be0  FUN_10f41be0  (5033 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10f41c15  MOV ECX,dword ptr [ESI + 0x224]
+       10f41f22  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10f4238b  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10f4239c  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10f423ad  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10f423be  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10f4249e  MOV ECX,dword ptr [ESI + 0x224]
+       10f426d7  MOVSS XMM0,dword ptr [ECX + 0x218]
+       10f42ee5  MOV EAX,dword ptr [ECX + 0x218]
+       -> acc_10f41be0.c
+
+** 10dcf450  FUN_10dcf450  (5631 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10dcf485  MOV ECX,dword ptr [ESI + 0x224]
+       10dcf797  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10dcf7a9  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10dcf7be  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10dcfdab  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10dcfdbc  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10dcfdcd  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10dcfdde  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10dcfdef  MOVSS XMM0,dword ptr [EAX + 0x218]
+       10dcfeda  MOV ECX,dword ptr [ESI + 0x224]
+       -> acc_10dcf450.c
+
+** 10ed21d0  FUN_10ed21d0  (5631 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ed2205  MOV ECX,dword ptr [ESI + 0x224]
+       10ed2517  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10ed2529  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10ed253e  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10ed2b2b  MOVSS XMM0,dword ptr [EAX + 0x228]
+       10ed2b3c  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10ed2b4d  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10ed2b5e  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10ed2b6f  MOVSS XMM0,dword ptr [EAX + 0x218]
+       10ed2c5a  MOV ECX,dword ptr [ESI + 0x224]
+       -> acc_10ed21d0.c
+
+** 10ff5840  FUN_10ff5840  (8492 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10ff69b7  MOVQ XMM0,qword ptr [EDI + 0x218]
+       10ff69bf  MOV EAX,dword ptr [EDI + 0x220]
+       10ff6a0a  ADDSS XMM5,dword ptr [EDI + 0x21c]
+       10ff6a1e  MOVSS XMM0,dword ptr [EDI + 0x218]
+       10ff6a26  ADDSS XMM4,dword ptr [EDI + 0x220]
+       10ff6a32  MOVSS dword ptr [EDI + 0x21c],XMM5
+       10ff6a3a  MOVSS dword ptr [EDI + 0x220],XMM4
+       10ff6a42  MOVSS dword ptr [EDI + 0x218],XMM0
+       10ff6c1f  MOV dword ptr [EDI + 0x218],0x0
+       10ff6c29  MOV dword ptr [EDI + 0x21c],0x0
+       10ff6c33  MOV dword ptr [EDI + 0x220],0x0
+       10ff6c5b  MOV dword ptr [EDI + 0x224],0x0
+       10ff6c65  MOV dword ptr [EDI + 0x228],0x0
+       10ff7833  MOVSS XMM3,dword ptr [EDI + 0x218]
+       10ff7843  MOVSS XMM2,dword ptr [EDI + 0x21c]
+       10ff7850  MOVSS XMM1,dword ptr [EDI + 0x220]
+       10ff788c  MOVQ qword ptr [EDI + 0x224],XMM3
+       10ff789a  MOVSS XMM1,dword ptr [EDI + 0x228]
+       10ff78a2  MOVSS XMM2,dword ptr [EDI + 0x224]
+       10ff78ea  MULSS XMM0,dword ptr [EDI + 0x224]
+       10ff78f2  MOVSS dword ptr [EDI + 0x224],XMM0
+       10ff78fd  MULSS XMM0,dword ptr [EDI + 0x228]
+       10ff790d  MOVSS dword ptr [EDI + 0x228],XMM0
+       10ff7923  MOVQ XMM0,qword ptr [EDI + 0x224]
+       -> acc_10ff5840.c
+
+** 108f3b90  CLevelEntrustUI::BuildEntrustListVO  (9713 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       108f40c7  LEA ECX,[ESP + 0x218]
+       108f43d2  LEA ECX,[ESP + 0x218]
+       108f45cf  LEA EAX,[ESP + 0x228]
+       108f45d6  MOV byte ptr [ESP + 0x228],0x0
+       108f470c  LEA ECX,[ESP + 0x218]
+       108f4759  LEA ECX,[ESP + 0x218]
+       108f4a83  LEA EAX,[ESP + 0x218]
+       108f4a9f  MOV EAX,dword ptr [ESP + 0x224]
+       108f4ac5  LEA ECX,[ESP + 0x228]
+       108f4b2c  LEA ECX,[ESP + 0x21c]
+       108f4b74  MOV EAX,dword ptr [ESP + 0x224]
+       108f4ba3  LEA EAX,[ESP + 0x228]
+       108f4baa  MOV byte ptr [ESP + 0x228],0x0
+       108f4d8d  LEA EDX,[ESP + 0x228]
+       108f4db9  LEA EDX,[ESP + 0x228]
+       108f4ea6  LEA EDX,[ESP + 0x228]
+       108f4f0a  MOV dword ptr [ESP + 0x224],EAX
+       108f4f11  MOV dword ptr [ESP + 0x228],EAX
+       108f4f1d  PUSH dword ptr [ESP + 0x224]
+       108f4f3e  LEA ECX,[ESP + 0x218]
+       108f50b1  LEA EDX,[ESP + 0x228]
+       108f5182  LEA EDX,[ESP + 0x228]
+       108f527a  LEA ECX,[ESP + 0x21c]
+       108f52c2  MOV EAX,dword ptr [ESP + 0x224]
+       108f53bb  MOV dword ptr [ESP + 0x224],EAX
+       108f53c2  MOV dword ptr [ESP + 0x228],EAX
+       108f53ce  PUSH dword ptr [ESP + 0x224]
+       108f53f3  LEA ECX,[ESP + 0x218]
+       108f5586  LEA EDX,[ESP + 0x228]
+       108f5673  LEA EDX,[ESP + 0x228]
+       108f56c1  LEA EDX,[ESP + 0x228]
+       108f5903  MOV dword ptr [ESP + 0x224],EAX
+       108f590a  MOV dword ptr [ESP + 0x228],EAX
+       108f5916  PUSH dword ptr [ESP + 0x224]
+       108f5ba8  LEA ECX,[ESP + 0x228]
+       108f5f46  MOV dword ptr [ESP + 0x220],ECX
+       108f5f4d  MOV dword ptr [ESP + 0x224],ECX
+       108f5f5d  PUSH dword ptr [ESP + 0x224]
+       108f5f7d  LEA ECX,[ESP + 0x218]
+       -> acc_108f3b90.c
+
+** 11681860  CAbnormalStatusConfig::LoadFromNode  (10233 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       116818ea  MOV dword ptr [EDI + 0x218],ECX
+       116818f2  MOV dword ptr [EDI + 0x218],0x0
+       1168197b  MOV dword ptr [EDI + 0x21c],ECX
+       11681983  MOV dword ptr [EDI + 0x21c],0xffffffff
+       11681a0c  MOV dword ptr [EDI + 0x220],ECX
+       11681a14  MOV dword ptr [EDI + 0x220],0x0
+       11681a9f  MOV dword ptr [EDI + 0x224],ECX
+       11681aa7  MOV dword ptr [EDI + 0x224],0xffffffff
+       11681b3a  MOV dword ptr [EDI + 0x228],ECX
+       11681b42  MOV dword ptr [EDI + 0x228],0x0
+       -> acc_11681860.c
+
+** 10bb59b0  FUN_10bb59b0  (11039 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10bb7597  MOV EDX,dword ptr [ESI + 0x228]
+       10bb75ba  MOV EDX,dword ptr [ESI + 0x224]
+       10bb75dd  MOV EDX,dword ptr [ESI + 0x220]
+       10bb7600  MOV EDX,dword ptr [ESI + 0x21c]
+       10bb7623  MOV EDX,dword ptr [ESI + 0x218]
+       -> acc_10bb59b0.c
+
+** 10bc0de0  PlayerInput::BindActionHandlers  (11675 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10bc12c0  MOV dword ptr [ESI + 0x218],0x0
+       10bc12ca  MOV dword ptr [ESI + 0x21c],0x0
+       10bc12d4  MOV dword ptr [ESI + 0x220],0x0
+       10bc12de  MOV dword ptr [ESI + 0x224],0x0
+       10bc12e8  MOV dword ptr [ESI + 0x228],0x0
+       10bc2e6a  LEA ECX,[ESI + 0x218]
+       10bc2e7a  LEA ECX,[ESI + 0x21c]
+       10bc2e8a  LEA ECX,[ESI + 0x220]
+       10bc2e9a  LEA ECX,[ESI + 0x224]
+       10bc2eaa  LEA ECX,[ESI + 0x228]
+       -> acc_10bc0de0.c
+
+** 1187c460  FUN_1187c460  (13006 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       1187d76a  MOV dword ptr [ESI + 0x218],0x1239a764
+       1187d78f  MOV dword ptr [ESI + 0x21c],0x1239a76c
+       1187d7b4  MOV dword ptr [ESI + 0x220],0x1239a774
+       1187d7d9  MOV dword ptr [ESI + 0x224],0x1239a77c
+       1187d7fe  MOV dword ptr [ESI + 0x228],0x1239a784
+       [skipped: too large]
+
+** 10bd1c70  PlayerParams::RegisterCVars  (34686 bytes)  offsets=0x218,0x21c,0x220,0x224,0x228
+       10bd34c2  LEA EAX,[ESI + 0x218]
+       10bd3503  LEA EAX,[ESI + 0x21c]
+       10bd3518  LEA EAX,[ESI + 0x220]
+       10bd3543  LEA EAX,[ESI + 0x224]
+       10bd356b  LEA EAX,[ESI + 0x228]
+       [skipped: too large]
+
+** 10a6fb20  FUN_10a6fb20  (389 bytes)  offsets=0x218,0x220,0x224,0x228
+       10a6fc14  MOVQ qword ptr [ESI + 0x218],XMM1
+       10a6fc1c  MOV dword ptr [ESI + 0x220],EAX
+       10a6fc8c  MOV dword ptr [ESI + 0x224],0x0
+       10a6fc96  MOV dword ptr [ESI + 0x228],0x0
+       -> acc_10a6fb20.c
+
+** 10b94ee0  FUN_10b94ee0  (530 bytes)  offsets=0x218,0x220,0x224,0x228
+       10b95069  MOVQ qword ptr [ESI + 0x218],XMM2
+       10b950bb  MOV dword ptr [ESI + 0x220],EAX
+       10b950c1  MOV dword ptr [ESI + 0x224],0x0
+       10b950cb  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 10cca8f0  FUN_10cca8f0  (602 bytes)  offsets=0x218,0x220,0x224,0x228
+       10ccaa24  CALL dword ptr [EAX + 0x218]
+       10ccaa37  CALL dword ptr [EAX + 0x220]
+       10ccaa49  CALL dword ptr [EAX + 0x224]
+       10ccaa5b  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+** 101b08e0  FUN_101b08e0  (927 bytes)  offsets=0x21c,0x220,0x224,0x228
+       101b0c4a  MOV dword ptr [ECX + 0x21c],EAX
+       101b0c50  MOV dword ptr [ECX + 0x220],EAX
+       101b0c56  MOV dword ptr [ECX + 0x224],EAX
+       101b0c5c  MOV dword ptr [ECX + 0x228],EAX
+       [decompile cap reached]
+
+** 11ba68c0  FUN_11ba68c0  (1045 bytes)  offsets=0x218,0x21c,0x224,0x228
+       11ba6b30  MOV dword ptr [ECX + 0x218],0x0
+       11ba6b4e  MOV dword ptr [ECX + 0x21c],0x0
+       11ba6b9e  MOV dword ptr [ECX + 0x228],0x0
+       11ba6ba8  MOV dword ptr [ECX + 0x224],0x0
+       [decompile cap reached]
+
+** 10f48430  FUN_10f48430  (1211 bytes)  offsets=0x21c,0x220,0x224,0x228
+       10f485bc  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10f485cc  MOVSS XMM0,dword ptr [EAX + 0x220]
+       10f485dc  MOVSS XMM0,dword ptr [EAX + 0x224]
+       10f485e4  ADD EAX,0x228
+       [decompile cap reached]
+
+** 11ba21a0  FUN_11ba21a0  (1284 bytes)  offsets=0x218,0x21c,0x224,0x228
+       11ba2517  MOV dword ptr [ESI + 0x218],0x0
+       11ba2535  MOV dword ptr [ESI + 0x21c],0x0
+       11ba2549  MOV dword ptr [ESI + 0x228],0x0
+       11ba2553  MOV dword ptr [ESI + 0x224],0x0
+       [decompile cap reached]
+
+** 10f85a60  FUN_10f85a60  (1377 bytes)  offsets=0x21c,0x220,0x224,0x228
+       10f85aff  MOV dword ptr [EDI + 0x220],0x1
+       10f85b09  MOV dword ptr [EDI + 0x21c],0x1
+       10f85b13  MOV dword ptr [EDI + 0x224],0x3e4ccccd
+       10f85b1d  MOV dword ptr [EDI + 0x228],0x0
+       [decompile cap reached]
+
+** 10f247a0  FUN_10f247a0  (1406 bytes)  offsets=0x218,0x21c,0x224,0x228
+       10f24bd7  MOV EAX,dword ptr [EDI + 0x218]
+       10f24bdd  MOV dword ptr [ESI + 0x218],EAX
+       10f24be3  MOVQ XMM0,qword ptr [EDI + 0x21c]
+       10f24beb  MOVQ qword ptr [ESI + 0x21c],XMM0
+       10f24bf3  MOV EAX,dword ptr [EDI + 0x224]
+       10f24bf9  MOV dword ptr [ESI + 0x224],EAX
+       10f24bff  MOVQ XMM0,qword ptr [EDI + 0x228]
+       10f24c07  MOVQ qword ptr [ESI + 0x228],XMM0
+       [decompile cap reached]
+
+** 10f83ec0  FUN_10f83ec0  (2237 bytes)  offsets=0x21c,0x220,0x224,0x228
+       10f83f70  MOV EAX,dword ptr [EAX + 0x21c]
+       10f83fc1  MOVSS XMM0,dword ptr [EDI + 0x228]
+       10f83fd5  MULSS XMM0,dword ptr [EDI + 0x224]
+       10f83fed  MOVSS XMM0,dword ptr [EDI + 0x228]
+       10f84007  MULSS XMM0,dword ptr [EDI + 0x224]
+       10f84204  MOV EAX,dword ptr [EAX + 0x228]
+       10f8431a  MOV EAX,dword ptr [EAX + 0x228]
+       10f843f3  MOV EAX,dword ptr [EDI + 0x220]
+       10f84412  CMP ESI,dword ptr [EDI + 0x21c]
+       10f8455a  CMP ESI,dword ptr [EDI + 0x21c]
+       [decompile cap reached]
+
+** 1132fe90  FUN_1132fe90  (3414 bytes)  offsets=0x21c,0x220,0x224,0x228
+       11330b87  MOV dword ptr [EDI + 0x21c],EAX
+       11330b98  MOV dword ptr [EDI + 0x220],EAX
+       11330ba9  MOV dword ptr [EDI + 0x224],EAX
+       11330bba  MOV dword ptr [EDI + 0x228],EAX
+       [decompile cap reached]
+
+** 1132eec0  FUN_1132eec0  (4037 bytes)  offsets=0x21c,0x220,0x224,0x228
+       1132fdeb  MOV EAX,dword ptr [ESI + 0x21c]
+       1132fe03  MOV EAX,dword ptr [ESI + 0x220]
+       1132fe1b  MOV EAX,dword ptr [ESI + 0x224]
+       1132fe33  MOV EAX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 10f9d330  FUN_10f9d330  (5112 bytes)  offsets=0x218,0x220,0x224,0x228
+       10f9d38a  CMP byte ptr [ESI + 0x224],0x0
+       10f9e4be  MOV EAX,dword ptr [EAX + 0x228]
+       10f9e4ed  ADD ESI,0x228
+       10f9e68a  MOVQ qword ptr [ESI + 0x218],XMM0
+       10f9e698  MOV dword ptr [ESI + 0x220],EAX
+       10f9e6df  LEA EAX,[ESI + 0x218]
+       [decompile cap reached]
+
+** 11356730  CharAttrTable::SetFieldByName  (5905 bytes)  offsets=0x21c,0x220,0x224,0x228
+       11357d83  MOV dword ptr [ECX + 0x21c],EAX
+       11357da6  MOV dword ptr [ECX + 0x220],EAX
+       11357dc9  MOV dword ptr [ECX + 0x224],EAX
+       11357dec  MOV dword ptr [ECX + 0x228],EAX
+       [decompile cap reached]
+
+** 101b8940  TlvCharRoleAttributes::DebugFormat  (6261 bytes)  offsets=0x21c,0x220,0x224,0x228
+       101ba0e4  PUSH dword ptr [ESI + 0x21c]
+       101ba109  PUSH dword ptr [ESI + 0x220]
+       101ba12e  PUSH dword ptr [ESI + 0x224]
+       101ba14f  PUSH dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 101b0d80  FUN_101b0d80  (6897 bytes)  offsets=0x21c,0x220,0x224,0x228
+       101b27ad  PUSH dword ptr [EDI + 0x21c]
+       101b27d6  PUSH dword ptr [EDI + 0x220]
+       101b27fb  PUSH dword ptr [EDI + 0x224]
+       101b281c  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+** 101b2880  FUN_101b2880  (6897 bytes)  offsets=0x21c,0x220,0x224,0x228
+       101b42ad  PUSH dword ptr [EDI + 0x21c]
+       101b42d6  PUSH dword ptr [EDI + 0x220]
+       101b42fb  PUSH dword ptr [EDI + 0x224]
+       101b431c  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+** 10fe0a20  FUN_10fe0a20  (141 bytes)  offsets=0x220,0x224,0x228
+       10fe0a79  MOV dword ptr [ESI + 0x220],0x1201fc98
+       10fe0a83  MOV dword ptr [ESI + 0x224],0x1201fc98
+       10fe0a8d  MOV dword ptr [ESI + 0x228],0x1201fc98
+       [decompile cap reached]
+
+** 10f80550  FUN_10f80550  (145 bytes)  offsets=0x220,0x224,0x228
+       10f8058f  MOV dword ptr [ESI + 0x220],0xffffffff
+       10f80599  MOV dword ptr [ESI + 0x224],0xffffffff
+       10f805a3  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 10f80770  CActor::AccumulateInjuryAndSetInjuryLevel  (258 bytes)  offsets=0x220,0x224,0x228
+       10f807fa  ADD dword ptr [EDI + 0x228],EAX
+       10f80829  MOV ECX,dword ptr [EDI + 0x228]
+       10f80837  MOV dword ptr [EDI + 0x220],0x1
+       10f80847  MOV dword ptr [EDI + 0x220],0x2
+       10f80853  MOV dword ptr [EDI + 0x220],0x3
+       10f8085d  MOV EAX,dword ptr [EDI + 0x220]
+       10f80863  MOV dword ptr [EDI + 0x224],EAX
+       [decompile cap reached]
+
+** 10f85470  FUN_10f85470  (297 bytes)  offsets=0x220,0x224,0x228
+       10f85517  MOV dword ptr [EBX + 0x220],EAX
+       10f85520  MOVSS dword ptr [EBX + 0x228],XMM0
+       10f8555b  MOVSS dword ptr [EBX + 0x224],XMM0
+       [decompile cap reached]
+
+** 10bad970  FUN_10bad970  (610 bytes)  offsets=0x218,0x224,0x228
+       10bada9c  MOVDQU XMM1,xmmword ptr [EBX + 0x218]
+       10badaa4  MOVDQU XMM2,xmmword ptr [EBX + 0x228]
+       10badb6e  MOV ESI,dword ptr [EBX + 0x224]
+       10badb9a  MOV EAX,dword ptr [EBX + 0x224]
+       10badbbd  MOVDQU XMM0,xmmword ptr [EBX + 0x218]
+       10badbc5  MOVDQU xmmword ptr [EBX + 0x228],XMM0
+       [decompile cap reached]
+
+** 10340ce0  FUN_10340ce0  (620 bytes)  offsets=0x220,0x224,0x228
+       10340d07  MOV dword ptr [ECX + 0x220],0x0
+       10340d11  MOV dword ptr [ECX + 0x224],0x0
+       10340d1b  MOV dword ptr [ECX + 0x228],0x0
+       [decompile cap reached]
+
+** 10f94690  FUN_10f94690  (975 bytes)  offsets=0x220,0x224,0x228
+       10f946b3  LEA ECX,[EDI + 0x220]
+       10f946c5  LEA ECX,[EDI + 0x224]
+       10f946d7  LEA ECX,[EDI + 0x228]
+       [decompile cap reached]
+
+** 10fb7440  FUN_10fb7440  (1042 bytes)  offsets=0x220,0x224,0x228
+       10fb77bc  MOV dword ptr [ESI + 0x220],0x1201fc98
+       10fb77c6  MOV dword ptr [ESI + 0x224],0x0
+       10fb77d0  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 10f958f0  FUN_10f958f0  (1163 bytes)  offsets=0x220,0x224,0x228
+       10f9595b  LEA ECX,[EDI + 0x220]
+       10f9596d  LEA ECX,[EDI + 0x224]
+       10f9597f  LEA ECX,[EDI + 0x228]
+       [decompile cap reached]
+
+** 10340fc0  FUN_10340fc0  (1545 bytes)  offsets=0x220,0x224,0x228
+       103410d7  PUSH dword ptr [ESI + 0x220]
+       103410ec  PUSH dword ptr [ESI + 0x224]
+       10341101  PUSH dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 10341620  FUN_10341620  (1572 bytes)  offsets=0x220,0x224,0x228
+       1034176c  LEA EAX,[EDI + 0x220]
+       10341782  LEA EAX,[EDI + 0x224]
+       10341798  LEA EAX,[EDI + 0x228]
+       [decompile cap reached]
+
+** 10341cc0  TdrText_GuildFullInfo_Dump  (2295 bytes)  offsets=0x220,0x224,0x228
+       10341d52  PUSH dword ptr [EDI + 0x220]
+       10341d77  PUSH dword ptr [EDI + 0x224]
+       10341d9c  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+** 10132bf0  FUN_10132bf0  (3839 bytes)  offsets=0x220,0x224,0x228
+       10132d74  PUSH dword ptr [EDI + 0x224]
+       10132d9d  PUSH dword ptr [EDI + 0x228]
+       1013325c  PUSH 0x220
+       [decompile cap reached]
+
+** 10545990  FUN_10545990  (87 bytes)  offsets=0x224,0x228
+       105459a6  MOV byte ptr [ESI + 0x224],0x0
+       105459ad  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 10fd9450  FUN_10fd9450  (130 bytes)  offsets=0x224,0x228
+       10fd947a  MOV ECX,dword ptr [ESI + 0x228]
+       10fd94a1  ADD dword ptr [ESI + 0x228],0xc
+       10fd94be  LEA ECX,[ESI + 0x224]
+       [decompile cap reached]
+
+** 11c2ada0  FUN_11c2ada0  (147 bytes)  offsets=0x224,0x228
+       11c2adcb  MOV EBX,dword ptr [ESI + 0x228]
+       11c2add2  LEA EDI,[ESI + 0x224]
+       [decompile cap reached]
+
+** 10fb7ee0  FUN_10fb7ee0  (193 bytes)  offsets=0x224,0x228
+       10fb7f5e  MOV ESI,dword ptr [EDI + 0x224]
+       10fb7f64  CMP ESI,dword ptr [EDI + 0x228]
+       10fb7f85  LEA ECX,[EDI + 0x224]
+       10fb7f92  CMP ESI,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+** 10fd7ee0  FUN_10fd7ee0  (287 bytes)  offsets=0x224,0x228
+       10fd7ef4  MOV EAX,dword ptr [ESI + 0x228]
+       10fd7efa  LEA ECX,[ESI + 0x224]
+       [decompile cap reached]
+
+** 10f9d190  FUN_10f9d190  (372 bytes)  offsets=0x224,0x228
+       10f9d1dc  MOV byte ptr [ESI + 0x224],0x0
+       10f9d29f  MOV EAX,dword ptr [EAX + 0x228]
+       10f9d2d3  MOV EAX,dword ptr [EAX + 0x228]
+       10f9d31d  LEA ECX,[ESI + 0x228]
+       [decompile cap reached]
+
+** 116e4a10  FUN_116e4a10  (389 bytes)  offsets=0x224,0x228
+       116e4a6b  LEA EAX,[ESI + 0x228]
+       116e4a82  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10f411d0  FUN_10f411d0  (454 bytes)  offsets=0x224,0x228
+       10f41203  MOV dword ptr [EDI + 0x224],ESI
+       10f4120f  MOV dword ptr [EDI + 0x228],EAX
+       [decompile cap reached]
+
+** 10ed1780  FUN_10ed1780  (454 bytes)  offsets=0x224,0x228
+       10ed17b3  MOV dword ptr [EDI + 0x224],ESI
+       10ed17bf  MOV dword ptr [EDI + 0x228],EAX
+       [decompile cap reached]
+
+** 10dcea00  FUN_10dcea00  (454 bytes)  offsets=0x224,0x228
+       10dcea33  MOV dword ptr [EDI + 0x224],ESI
+       10dcea3f  MOV dword ptr [EDI + 0x228],EAX
+       [decompile cap reached]
+
+** 11c29e10  FUN_11c29e10  (470 bytes)  offsets=0x224,0x228
+       11c29e29  MOV EBX,dword ptr [ESI + 0x228]
+       11c29e2f  LEA EDI,[ESI + 0x224]
+       11c29e63  MOV EAX,dword ptr [ESI + 0x228]
+       11c29eec  CMP dword ptr [ESI + 0x228],EDI
+       11c29f1d  CMP EDI,dword ptr [ESI + 0x228]
+       11c29f4a  CMP dword ptr [ESI + 0x228],EBX
+       11c29f8c  CMP EBX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 10f873a0  FUN_10f873a0  (501 bytes)  offsets=0x224,0x228
+       10f87437  MOV dword ptr [ESI + 0x228],EAX
+       10f8744b  CMP dword ptr [ESI + 0x228],0x0
+       10f87462  MOV dword ptr [ESI + 0x228],0x0
+       10f874b3  PUSH dword ptr [ESI + 0x224]
+       10f874ff  PUSH dword ptr [ESI + 0x224]
+       10f87574  PUSH dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 11c29630  FUN_11c29630  (502 bytes)  offsets=0x224,0x228
+       11c29683  MOV dword ptr [ESI + 0x224],EDX
+       11c29689  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 10834ab0  FUN_10834ab0  (520 bytes)  offsets=0x224,0x228
+       10834ae5  MOV EDX,dword ptr [EDX + 0x228]
+       10834c07  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+** 10582290  FUN_10582290  (621 bytes)  offsets=0x224,0x228
+       1058237c  MOV AL,byte ptr [ECX + 0x224]
+       10582391  MOV EAX,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+** 10fd1b60  CPlayerFSM::UpdateWardrobeTimers  (646 bytes)  offsets=0x224,0x228
+       10fd1c43  MOV EAX,dword ptr [EDI + 0x224]
+       10fd1c49  CMP EAX,dword ptr [EDI + 0x228]
+       10fd1c57  CMP EBX,dword ptr [EDI + 0x228]
+       10fd1cab  CMP EBX,dword ptr [EDI + 0x228]
+       10fd1cca  LEA ECX,[EDI + 0x224]
+       [decompile cap reached]
+
+** 10dcf1c0  FUN_10dcf1c0  (653 bytes)  offsets=0x224,0x228
+       10dcf1c9  MOV ECX,dword ptr [ESI + 0x228]
+       10dcf3a2  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10ed1f40  FUN_10ed1f40  (653 bytes)  offsets=0x224,0x228
+       10ed1f49  MOV ECX,dword ptr [ESI + 0x228]
+       10ed2122  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10fb7c30  CPlayerViewState::Exit  (676 bytes)  offsets=0x224,0x228
+       10fb7e06  MOV EDI,dword ptr [ESI + 0x224]
+       10fb7e0c  CMP EDI,dword ptr [ESI + 0x228]
+       10fb7e29  LEA ECX,[ESI + 0x224]
+       10fb7e36  CMP EDI,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 101327f0  FUN_101327f0  (716 bytes)  offsets=0x224,0x228
+       1013281c  MOV dword ptr [ESI + 0x224],0x0
+       10132826  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+** 11c2a520  FUN_11c2a520  (795 bytes)  offsets=0x224,0x228
+       11c2a581  MOV EBX,dword ptr [ESI + 0x228]
+       11c2a587  LEA EDI,[ESI + 0x224]
+       11c2a6a6  MOV EAX,dword ptr [ESI + 0x228]
+       11c2a6ac  LEA ECX,[ESI + 0x224]
+       11c2a6c3  LEA ECX,[ESI + 0x224]
+       11c2a6ea  INC dword ptr [ESI + 0x228]
+       11c2a79c  MOV EAX,dword ptr [ESI + 0x228]
+       11c2a7a2  LEA EBX,[ESI + 0x224]
+       [decompile cap reached]
+
+** 11c2a840  FUN_11c2a840  (1354 bytes)  offsets=0x224,0x228
+       11c2a91d  MOV EAX,dword ptr [ESI + 0x228]
+       11c2a923  LEA EBX,[ESI + 0x224]
+       11c2aa20  MOV EAX,dword ptr [ESI + 0x228]
+       11c2aa26  LEA EBX,[ESI + 0x224]
+       11c2aada  MOV EAX,dword ptr [ESI + 0x228]
+       11c2aae0  LEA EBX,[ESI + 0x224]
+       11c2abfa  MOV EAX,dword ptr [ESI + 0x228]
+       11c2ac00  LEA EDX,[ESI + 0x224]
+       11c2ac19  LEA EDX,[ESI + 0x224]
+       11c2ac3d  INC dword ptr [ESI + 0x228]
+       11c2acf5  MOV EAX,dword ptr [ESI + 0x228]
+       11c2acfb  LEA EDX,[ESI + 0x224]
+       11c2ad14  LEA EDX,[ESI + 0x224]
+       11c2ad38  INC dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 10dd1730  FUN_10dd1730  (2745 bytes)  offsets=0x224,0x228
+       10dd1740  MOV EAX,dword ptr [ESI + 0x224]
+       10dd176c  MOV EAX,dword ptr [ESI + 0x224]
+       10dd1833  MOV EAX,dword ptr [ESI + 0x224]
+       10dd1b9c  MOV EAX,dword ptr [ESI + 0x228]
+       10dd1c33  MOV EAX,dword ptr [ESI + 0x228]
+       10dd2141  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10ed37d0  FUN_10ed37d0  (3213 bytes)  offsets=0x224,0x228
+       10ed37e0  MOV EAX,dword ptr [ESI + 0x224]
+       10ed3873  MOV ECX,dword ptr [ESI + 0x224]
+       10ed388b  MOV EAX,dword ptr [ESI + 0x224]
+       10ed3a64  MOV EAX,dword ptr [ESI + 0x228]
+       10ed3d5d  MOV ECX,dword ptr [ESI + 0x224]
+       10ed3e66  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10136e50  TlvGuildData::DebugFormat  (3244 bytes)  offsets=0x224,0x228
+       10136f12  PUSH dword ptr [EAX + 0x224]
+       10136f38  PUSH dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+** 10f42f90  FUN_10f42f90  (3266 bytes)  offsets=0x224,0x228
+       10f42fa0  MOV EAX,dword ptr [ESI + 0x224]
+       10f43033  MOV ECX,dword ptr [ESI + 0x224]
+       10f4304b  MOV EAX,dword ptr [ESI + 0x224]
+       10f43224  MOV EAX,dword ptr [ESI + 0x228]
+       10f4351d  MOV ECX,dword ptr [ESI + 0x224]
+       10f43626  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10dd0a50  FUN_10dd0a50  (3283 bytes)  offsets=0x224,0x228
+       10dd0a60  MOV EAX,dword ptr [ESI + 0x224]
+       10dd0af3  MOV ECX,dword ptr [ESI + 0x224]
+       10dd0b0b  MOV EAX,dword ptr [ESI + 0x224]
+       10dd0ce5  MOV EAX,dword ptr [ESI + 0x228]
+       10dd1000  MOV ECX,dword ptr [ESI + 0x224]
+       10dd1109  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10133af0  FUN_10133af0  (3839 bytes)  offsets=0x224,0x228
+       10133c74  PUSH dword ptr [EDI + 0x224]
+       10133c9d  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+** 10f43c60  FUN_10f43c60  (4420 bytes)  offsets=0x224,0x228
+       10f43c7a  MOV EAX,dword ptr [ESI + 0x224]
+       10f43d1e  MOV EAX,dword ptr [ESI + 0x224]
+       10f440e2  MOV EAX,dword ptr [ESI + 0x228]
+       10f442c8  MOV EAX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+** 10ed4460  FUN_10ed4460  (4498 bytes)  offsets=0x224,0x228
+       10ed447a  MOV EAX,dword ptr [ESI + 0x224]
+       10ed451e  MOV EAX,dword ptr [ESI + 0x224]
+       10ed48e0  MOV EAX,dword ptr [ESI + 0x228]
+       10ed4ac6  MOV EAX,dword ptr [ESI + 0x228]
+       10ed5553  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+** 10fd05f0  CPlayerWeaponFSM::TryRequestStateChange  (4671 bytes)  offsets=0x224,0x228
+       10fd0b4b  MOV EAX,dword ptr [EAX + 0x228]
+       10fd0b5b  MOV EAX,dword ptr [EDI + 0x224]
+       10fd0b61  LEA ECX,[EDI + 0x224]
+       10fd0b78  CMP EAX,dword ptr [EDI + 0x228]
+       10fd0c63  CMP EAX,dword ptr [EDI + 0x228]
+       10fd0c7d  MOV EAX,dword ptr [EAX + 0x228]
+       10fd0df7  MOV EAX,dword ptr [EAX + 0x228]
+       10fd1142  MOV EAX,dword ptr [EAX + 0x228]
+       10fd14d2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c23b90  FUN_10c23b90  (240 bytes)  offsets=0x218,0x21c,0x220,0x228
+       10c23be4  MOV EAX,dword ptr [EAX + 0x228]
+       10c23c2e  MOV ESI,dword ptr [EDI + 0x218]
+       10c23c36  MOV ESI,dword ptr [EDI + 0x21c]
+       10c23c47  MOV ESI,dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   10ccd690  FUN_10ccd690  (246 bytes)  offsets=0x218,0x21c,0x220,0x224
+       10ccd6dd  MOV dword ptr [EDI + 0x218],EAX
+       10ccd710  MOV dword ptr [EDI + 0x21c],EAX
+       10ccd743  MOV dword ptr [EDI + 0x220],EAX
+       10ccd777  MOV dword ptr [ESI + 0x224],EAX
+       [decompile cap reached]
+
+   114a9430  FUN_114a9430  (369 bytes)  offsets=0x218,0x21c,0x220,0x228
+       114a943b  MOV dword ptr [ESI + 0x228],EAX
+       114a944a  MOV dword ptr [ESI + 0x218],EAX
+       114a9453  MOV dword ptr [ESI + 0x21c],EDX
+       114a9459  MOV byte ptr [ESI + 0x220],AL
+       [decompile cap reached]
+
+   10a31c10  list::sort  (383 bytes)  offsets=0x218,0x21c,0x220,0x224
+       10a31c16  SUB ESP,0x21c
+       10a31c23  MOV dword ptr [ESP + 0x218],EAX
+       10a31d52  LEA EAX,[ESP + 0x220]
+       10a31d66  MOV ECX,dword ptr [ESP + 0x224]
+       [decompile cap reached]
+
+   115adb60  FUN_115adb60  (395 bytes)  offsets=0x218,0x21c,0x220,0x224
+       115adcab  MOV dword ptr [EDI + 0x218],0x0
+       115adcb5  MOV dword ptr [EDI + 0x21c],0x0
+       115adcbf  MOV dword ptr [EDI + 0x220],0x0
+       115adcc9  MOV dword ptr [EDI + 0x224],0x0
+       [decompile cap reached]
+
+   10fa5060  FUN_10fa5060  (608 bytes)  offsets=0x218,0x21c,0x220,0x228
+       10fa50d9  MOV dword ptr [ESI + 0x220],0x3f800000
+       10fa50ed  MOV dword ptr [ESI + 0x218],0x0
+       10fa50f7  MOV dword ptr [ESI + 0x21c],0x0
+       10fa5104  MOV dword ptr [ESI + 0x228],0x0
+       10fa5123  MOV EAX,dword ptr [EAX + 0x228]
+       10fa51d9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11c0c440  FUN_11c0c440  (672 bytes)  offsets=0x218,0x21c,0x220,0x224
+       11c0c55a  MOV dword ptr [ESI + 0x218],0x0
+       11c0c576  MOV dword ptr [ESI + 0x21c],0x0
+       11c0c589  MOV dword ptr [ESI + 0x220],EAX
+       11c0c58f  MOV dword ptr [ESI + 0x224],0x0
+       [decompile cap reached]
+
+   10f13950  FUN_10f13950  (824 bytes)  offsets=0x218,0x21c,0x220,0x224
+       10f13a45  MOVSS XMM6,dword ptr [EAX + 0x220]
+       10f13a4d  MOVSS XMM2,dword ptr [EAX + 0x21c]
+       10f13a58  MOVSS XMM5,dword ptr [EAX + 0x218]
+       10f13a68  MOVSS XMM4,dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10be07f0  FUN_10be07f0  (1064 bytes)  offsets=0x218,0x21c,0x220,0x228
+       10be0bd2  MOV EAX,dword ptr [EDX + 0x218]
+       10be0bd8  MOV dword ptr [ECX + 0x218],EAX
+       10be0bde  MOV EAX,dword ptr [EDX + 0x21c]
+       10be0be4  MOV dword ptr [ECX + 0x21c],EAX
+       10be0bea  MOVQ XMM0,qword ptr [EDX + 0x220]
+       10be0bf2  MOVQ qword ptr [ECX + 0x220],XMM0
+       10be0bfa  MOV EAX,dword ptr [EDX + 0x228]
+       10be0c00  MOV dword ptr [ECX + 0x228],EAX
+       [decompile cap reached]
+
+   10f6ded0  FUN_10f6ded0  (1208 bytes)  offsets=0x218,0x21c,0x220,0x228
+       10f6dfb6  MOV EAX,dword ptr [EAX + 0x228]
+       10f6e289  MOV EAX,dword ptr [EAX + 0x228]
+       10f6e2a5  CMP byte ptr [ESI + 0x220],AL
+       10f6e2b2  SUBSS XMM6,dword ptr [ESI + 0x218]
+       10f6e2ba  MOVSS XMM0,dword ptr [ESI + 0x21c]
+       10f6e303  MOV EAX,dword ptr [EAX + 0x228]
+       10f6e339  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   104db710  CNpcTalkUI::BuildNpcInteractionData  (38876 bytes)  offsets=0x218,0x21c,0x220,0x224
+       104e3a5d  LEA EDX,[ESP + 0x218]
+       104e4322  LEA EAX,[ESP + 0x224]
+       104e4329  MOV dword ptr [ESP + 0x224],0x0
+       104e434e  LEA EDX,[ESP + 0x220]
+       104e439a  LEA EDX,[ESP + 0x220]
+       104e4416  LEA EDX,[ESP + 0x218]
+       104e4429  MOV EAX,dword ptr [ESP + 0x21c]
+       104e4437  MOV ECX,dword ptr [ESP + 0x218]
+       104e443e  LEA EDX,[ESP + 0x218]
+       104e4445  PUSH dword ptr [ESP + 0x220]
+       104e4454  MOV dword ptr [ESP + 0x218],0x0
+       104e4463  MOV dword ptr [ESP + 0x21c],0x0
+       [skipped: too large]
+
+   1012c9e0  FUN_1012c9e0  (200 bytes)  offsets=0x218,0x220,0x224
+       1012ca8a  MOVQ qword ptr [ESI + 0x218],XMM0
+       1012ca92  MOV dword ptr [ESI + 0x220],0x0
+       1012ca9c  MOV dword ptr [ESI + 0x224],0x0
+       [decompile cap reached]
+
+   10f011f0  FUN_10f011f0  (294 bytes)  offsets=0x218,0x21c,0x220
+       10f0127c  MOVSS dword ptr [ECX + 0x218],XMM0
+       10f01289  MOVSS dword ptr [ECX + 0x21c],XMM0
+       10f01296  MOVSS dword ptr [ECX + 0x220],XMM0
+       [decompile cap reached]
+
+   10fa1260  FUN_10fa1260  (327 bytes)  offsets=0x218,0x21c,0x228
+       10fa12dc  MOV EAX,dword ptr [EAX + 0x228]
+       10fa1374  MOV dword ptr [ESI + 0x218],EAX
+       10fa1387  MOV dword ptr [ESI + 0x21c],EAX
+       [decompile cap reached]
+
+   10f99100  FUN_10f99100  (460 bytes)  offsets=0x218,0x220,0x228
+       10f992a2  CMP byte ptr [ECX + 0x228],AL
+       10f992b0  MOV dword ptr [ECX + 0x218],EAX
+       10f992b6  MOV byte ptr [ECX + 0x220],0x1
+       [decompile cap reached]
+
+   10ffb1e0  FUN_10ffb1e0  (588 bytes)  offsets=0x218,0x220,0x224
+       10ffb372  MOVQ XMM0,qword ptr [EDI + 0x218]
+       10ffb382  MOV EAX,dword ptr [EDI + 0x220]
+       10ffb38e  MOVQ XMM0,qword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   10f6db60  FUN_10f6db60  (717 bytes)  offsets=0x218,0x21c,0x220
+       10f6db8b  MOV dword ptr [ESI + 0x218],0x0
+       10f6db95  MOV byte ptr [ESI + 0x220],0x0
+       10f6dc15  MOVSS dword ptr [ESI + 0x21c],XMM0
+       [decompile cap reached]
+
+   10f82850  FUN_10f82850  (813 bytes)  offsets=0x218,0x220,0x224
+       10f82997  MOVQ qword ptr [EDI + 0x218],XMM0
+       10f829a2  MOV dword ptr [EDI + 0x220],EAX
+       10f829b2  MOVQ qword ptr [EDI + 0x224],XMM2
+       [decompile cap reached]
+
+   10ed8400  FUN_10ed8400  (1211 bytes)  offsets=0x218,0x21c,0x220
+       10ed859c  MOVSS XMM0,dword ptr [EAX + 0x218]
+       10ed85ac  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10ed85b4  ADD EAX,0x220
+       [decompile cap reached]
+
+   10dd4ff0  FUN_10dd4ff0  (1211 bytes)  offsets=0x218,0x21c,0x220
+       10dd518c  MOVSS XMM0,dword ptr [EAX + 0x218]
+       10dd519c  MOVSS XMM0,dword ptr [EAX + 0x21c]
+       10dd51a4  ADD EAX,0x220
+       [decompile cap reached]
+
+   10bfcc30  FUN_10bfcc30  (1234 bytes)  offsets=0x218,0x220,0x228
+       10bfce06  MOV EAX,dword ptr [EBX + 0x220]
+       10bfce1a  MOV EAX,dword ptr [EBX + 0x218]
+       10bfce2d  MOV ECX,dword ptr [EBX + 0x228]
+       10bfd00c  MOV ESI,dword ptr [EBX + 0x218]
+       [decompile cap reached]
+
+   10ece050  FUN_10ece050  (1254 bytes)  offsets=0x21c,0x220,0x228
+       10ece48b  MOV EAX,dword ptr [EDI + 0x21c]
+       10ece491  MOV dword ptr [ESI + 0x21c],EAX
+       10ece497  MOVQ XMM0,qword ptr [EDI + 0x220]
+       10ece49f  MOVQ qword ptr [ESI + 0x220],XMM0
+       10ece4a7  MOV EAX,dword ptr [EDI + 0x228]
+       10ece4ad  MOV dword ptr [ESI + 0x228],EAX
+       [decompile cap reached]
+
+   10daf870  FUN_10daf870  (1254 bytes)  offsets=0x21c,0x220,0x228
+       10dafcab  MOV EAX,dword ptr [EDI + 0x21c]
+       10dafcb1  MOV dword ptr [ESI + 0x21c],EAX
+       10dafcb7  MOVQ XMM0,qword ptr [EDI + 0x220]
+       10dafcbf  MOVQ qword ptr [ESI + 0x220],XMM0
+       10dafcc7  MOV EAX,dword ptr [EDI + 0x228]
+       10dafccd  MOV dword ptr [ESI + 0x228],EAX
+       [decompile cap reached]
+
+   10f84ce0  FUN_10f84ce0  (1703 bytes)  offsets=0x21c,0x220,0x228
+       10f84e25  MOV EAX,dword ptr [EAX + 0x228]
+       10f84ee0  MOV EAX,dword ptr [EAX + 0x228]
+       10f84ffc  MOV EAX,dword ptr [EAX + 0x228]
+       10f8500c  LEA EAX,[EDI + 0x21c]
+       10f850a1  MOV EAX,dword ptr [EAX + 0x228]
+       10f850b1  PUSH dword ptr [EDI + 0x220]
+       10f8525b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   109f3df0  EquipUpgradeView::BuildEnforceDataVO  (2502 bytes)  offsets=0x218,0x220,0x228
+       109f3e03  MOV dword ptr [ESP + 0x228],EAX
+       109f404a  LEA EAX,[ESP + 0x220]
+       109f4077  LEA ECX,[ESP + 0x220]
+       109f444e  LEA EAX,[ESP + 0x218]
+       109f4477  LEA ECX,[ESP + 0x220]
+       [decompile cap reached]
+
+   10ffa7c0  FUN_10ffa7c0  (2577 bytes)  offsets=0x218,0x220,0x224
+       10ffb062  MOVQ qword ptr [ECX + 0x218],XMM0
+       10ffb070  MOV dword ptr [ECX + 0x220],EAX
+       10ffb146  MOVQ qword ptr [ECX + 0x224],XMM0
+       [decompile cap reached]
+
+   109edfd0  LegendPearlModel::BuildUpgradeInfo  (2721 bytes)  offsets=0x218,0x220,0x224
+       109edfd6  SUB ESP,0x224
+       109edfe3  MOV dword ptr [ESP + 0x220],EAX
+       109ee259  LEA ECX,[ESP + 0x218]
+       109ee28c  LEA ECX,[ESP + 0x218]
+       109ee5dd  LEA ECX,[ESP + 0x218]
+       [decompile cap reached]
+
+   1055d7e0  FUN_1055d7e0  (3793 bytes)  offsets=0x218,0x21c,0x220
+       1055da90  MOV dword ptr [ESP + 0x220],EAX
+       1055db72  MOV dword ptr [ESP + 0x218],0x0
+       1055db7d  MOV dword ptr [ESP + 0x21c],0x3
+       [decompile cap reached]
+
+   10656c10  FUN_10656c10  (16471 bytes)  offsets=0x218,0x220,0x228
+       10656fb9  LEA ECX,[ESI + 0x218]
+       10656fc5  LEA ECX,[ESI + 0x220]
+       10656fd1  LEA ECX,[ESI + 0x228]
+       [skipped: too large]
+
+   1065ac70  FUN_1065ac70  (16694 bytes)  offsets=0x218,0x220,0x228
+       1065ead2  LEA ECX,[ESI + 0x228]
+       1065eadd  LEA ECX,[ESI + 0x220]
+       1065eae8  LEA ECX,[ESI + 0x218]
+       [skipped: too large]
+
+   116c5760  FUN_116c5760  (19810 bytes)  offsets=0x21c,0x220,0x228
+       116c870c  MOV dword ptr [EDI + 0x228],EAX
+       116c90bb  MOV EDX,dword ptr [EDI + 0x220]
+       116c90c1  LEA ECX,[EDI + 0x21c]
+       116c90d8  LEA ECX,[EDI + 0x21c]
+       [skipped: too large]
+
+   115639f0  FUN_115639f0  (47 bytes)  offsets=0x21c,0x220
+       11563a04  CALL dword ptr [EAX + 0x220]
+       11563a13  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   116c4e40  FUN_116c4e40  (51 bytes)  offsets=0x21c,0x220
+       116c4e43  MOV EAX,dword ptr [ECX + 0x21c]
+       116c4e49  MOV ECX,dword ptr [ECX + 0x220]
+       [decompile cap reached]
+
+   114aa5e0  FUN_114aa5e0  (55 bytes)  offsets=0x218,0x21c
+       114aa5f5  CMP EDX,dword ptr [ECX + 0x21c]
+       114aa5ff  CMP EAX,dword ptr [ECX + 0x218]
+       114aa607  MOV ESI,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   111eb780  FUN_111eb780  (65 bytes)  offsets=0x220,0x224
+       111eb79f  LEA ECX,[ESI + 0x220]
+       111eb7ad  MOV dword ptr [ESI + 0x224],EAX
+       [decompile cap reached]
+
+   10f80890  FUN_10f80890  (72 bytes)  offsets=0x220,0x224
+       10f808c5  MOV dword ptr [ESI + 0x220],EAX
+       10f808cb  MOV dword ptr [ESI + 0x224],EAX
+       [decompile cap reached]
+
+   11becc10  FUN_11becc10  (73 bytes)  offsets=0x218,0x21c
+       11becc40  MOV dword ptr [ESI + 0x218],0x0
+       11becc4a  MOV dword ptr [ESI + 0x21c],0x0
+       [decompile cap reached]
+
+   11c0cdc0  FUN_11c0cdc0  (87 bytes)  offsets=0x218,0x21c
+       11c0cdc3  MOV EAX,dword ptr [ESI + 0x218]
+       11c0cddc  PUSH dword ptr [ESI + 0x218]
+       11c0cde9  MOV EAX,dword ptr [ESI + 0x21c]
+       11c0ce01  MOV dword ptr [ESI + 0x218],0x0
+       11c0ce0b  MOV dword ptr [ESI + 0x21c],0x0
+       [decompile cap reached]
+
+   114a6380  FUN_114a6380  (89 bytes)  offsets=0x218,0x21c
+       114a639f  CMP EDX,dword ptr [ECX + 0x21c]
+       114a63a9  CMP EAX,dword ptr [ECX + 0x218]
+       114a63b1  MOV ESI,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   114a7070  FUN_114a7070  (91 bytes)  offsets=0x218,0x21c
+       114a708c  CMP EDX,dword ptr [ECX + 0x21c]
+       114a7096  CMP EAX,dword ptr [ECX + 0x218]
+       114a709e  MOV EDI,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   10cfaec0  FUN_10cfaec0  (91 bytes)  offsets=0x220,0x228
+       10cfaeec  LEA ECX,[ESI + 0x228]
+       10cfaef3  PUSH dword ptr [ESI + 0x220]
+       10cfaf02  MOVSS XMM0,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+   11477890  FUN_11477890  (107 bytes)  offsets=0x220,0x224
+       114778c6  MOV EAX,dword ptr [EAX + 0x220]
+       114778df  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   116337e0  FUN_116337e0  (112 bytes)  offsets=0x21c,0x220
+       11633824  CALL dword ptr [EDX + 0x21c]
+       11633842  CALL dword ptr [EDX + 0x220]
+       [decompile cap reached]
+
+   11478cf0  FUN_11478cf0  (112 bytes)  offsets=0x218,0x21c
+       11478d26  MOV EAX,dword ptr [EAX + 0x218]
+       11478d3f  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10ff9bf0  FUN_10ff9bf0  (122 bytes)  offsets=0x218,0x220
+       10ff9bf6  MOVQ XMM0,qword ptr [ECX + 0x218]
+       10ff9c06  MOV EAX,dword ptr [ECX + 0x220]
+       10ff9c2e  MOVQ XMM0,qword ptr [ECX + 0x218]
+       10ff9c3e  MOV EAX,dword ptr [ECX + 0x220]
+       [decompile cap reached]
+
+   10c345f0  FUN_10c345f0  (131 bytes)  offsets=0x21c,0x220
+       10c34615  CALL dword ptr [EAX + 0x21c]
+       10c34629  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10f823a0  FUN_10f823a0  (152 bytes)  offsets=0x218,0x220
+       10f8241c  MOVQ qword ptr [ESI + 0x218],XMM2
+       10f82424  MOV dword ptr [ESI + 0x220],EAX
+       [decompile cap reached]
+
+   1166b190  FUN_1166b190  (158 bytes)  offsets=0x218,0x21c
+       1166b1a5  CMP dword ptr [ECX + 0x218],0x0
+       1166b1b1  MOV EAX,dword ptr [EDX + 0x218]
+       1166b1df  ADD ECX,0x21c
+       [decompile cap reached]
+
+   105420d0  FUN_105420d0  (195 bytes)  offsets=0x220,0x224
+       105420dd  MOV dword ptr [ESI + 0x220],0x0
+       1054214f  MOVDQU xmmword ptr [ESI + 0x224],XMM0
+       [decompile cap reached]
+
+   1171d010  FUN_1171d010  (212 bytes)  offsets=0x218,0x228
+       1171d08d  LEA ECX,[EBX + 0x228]
+       1171d0ce  MOVDQU XMM0,xmmword ptr [EDI + 0x218]
+       [decompile cap reached]
+
+   11024980  FUN_11024980  (216 bytes)  offsets=0x21c,0x228
+       110249dd  CALL dword ptr [EAX + 0x21c]
+       11024a44  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1139c7f0  FUN_1139c7f0  (218 bytes)  offsets=0x220,0x224
+       1139c887  MOV EAX,dword ptr [EAX + 0x220]
+       1139c8c2  JMP dword ptr [EDX + 0x224]
+       [decompile cap reached]
+
+   10fabc70  FUN_10fabc70  (219 bytes)  offsets=0x218,0x228
+       10fabca1  MOV dword ptr [EDI + 0x218],EAX
+       10fabcd0  MOV EAX,dword ptr [EDI + 0x218]
+       10fabcfc  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10cfa620  FUN_10cfa620  (235 bytes)  offsets=0x220,0x228
+       10cfa6c1  MOVSS XMM0,dword ptr [EBX + 0x228]
+       10cfa6d8  MOVSS dword ptr [EBX + 0x228],XMM1
+       10cfa6f6  PUSH dword ptr [EBX + 0x220]
+       [decompile cap reached]
+
+   10d26c00  FUN_10d26c00  (253 bytes)  offsets=0x218,0x220
+       10d26c10  LEA EAX,[EDI + 0x218]
+       10d26c1a  LEA EAX,[EDI + 0x220]
+       [decompile cap reached]
+
+   10053de0  FUN_10053de0  (337 bytes)  offsets=0x21c,0x220
+       10053de9  ADD EAX,0x220
+       10053e5d  CMP dword ptr [EBP + -0x10],0x220
+       10053f20  ADD EDX,0x21c
+       [decompile cap reached]
+
+   11c0d320  FUN_11c0d320  (375 bytes)  offsets=0x220,0x224
+       11c0d328  MOV ECX,dword ptr [EDI + 0x220]
+       11c0d341  CMP dword ptr [EDI + 0x224],0x0
+       11c0d35d  MOV ECX,dword ptr [EDI + 0x224]
+       11c0d363  SUB EBX,dword ptr [EDI + 0x220]
+       11c0d37f  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   104f6420  FUN_104f6420  (384 bytes)  offsets=0x218,0x21c
+       104f6434  MOV dword ptr [ESI + 0x218],EAX
+       104f6539  MOV dword ptr [ESI + 0x21c],0x0
+       [decompile cap reached]
+
+   10fabdc0  FUN_10fabdc0  (407 bytes)  offsets=0x218,0x228
+       10fabdd6  MOV EAX,dword ptr [EAX + 0x228]
+       10fabe90  MOVSS XMM0,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   1166c240  FUN_1166c240  (431 bytes)  offsets=0x218,0x21c
+       1166c262  CMP dword ptr [EDX + 0x218],0x0
+       1166c277  MOV ECX,dword ptr [ECX + 0x218]
+       1166c2af  MOV ECX,dword ptr [EAX + 0x218]
+       1166c320  ADD ECX,0x21c
+       1166c332  ADD ECX,0x21c
+       [decompile cap reached]
+
+   11beec30  FUN_11beec30  (436 bytes)  offsets=0x21c,0x228
+       11beec33  SUB ESP,0x228
+       11beed7c  IMUL EDX,EDX,0x21c
+       [decompile cap reached]
+
+   11bec0f0  FUN_11bec0f0  (473 bytes)  offsets=0x218,0x21c
+       11bec10f  IMUL EAX,EDX,0x21c
+       11bec173  IMUL EAX,EBX,0x21c
+       11bec180  IMUL EAX,EBX,0x21c
+       11bec1cb  MOV dword ptr [EDI + 0x218],EAX
+       11bec21d  IMUL EAX,EAX,0x21c
+       11bec230  IMUL EAX,dword ptr [EAX],0x21c
+       11bec274  MOV dword ptr [EDI + 0x218],EAX
+       [decompile cap reached]
+
+   10f8c780  FUN_10f8c780  (481 bytes)  offsets=0x218,0x228
+       10f8c84f  CMP byte ptr [EBX + 0x218],0x0
+       10f8c87c  CMP byte ptr [EBX + 0x218],0x0
+       10f8c93c  MOV EAX,dword ptr [EAX + 0x228]
+       10f8c954  MOV byte ptr [EBX + 0x218],AL
+       [decompile cap reached]
+
+   1166bbd0  FUN_1166bbd0  (491 bytes)  offsets=0x218,0x21c
+       1166bd92  CMP dword ptr [EAX + 0x218],0x0
+       1166bd9e  MOV ECX,dword ptr [ECX + 0x218]
+       1166bdac  ADD ECX,0x21c
+       [decompile cap reached]
+
+   11c0d5f0  FUN_11c0d5f0  (491 bytes)  offsets=0x220,0x224
+       11c0d5fe  MOV ESI,dword ptr [EDI + 0x220]
+       11c0d618  MOV EBX,dword ptr [EDI + 0x224]
+       11c0d637  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   1088eaa0  MHUI::BuildPassiveSkillDataRows  (500 bytes)  offsets=0x21c,0x220
+       1088eb59  MOV ESI,dword ptr [EBX + 0x21c]
+       1088eb64  CMP ESI,dword ptr [EBX + 0x220]
+       1088ec42  CMP ESI,dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   11c0dd90  FUN_11c0dd90  (501 bytes)  offsets=0x220,0x224
+       11c0de35  MOV ESI,dword ptr [EDI + 0x220]
+       11c0de4d  MOV EAX,dword ptr [EDI + 0x224]
+       11c0de62  MOV ECX,dword ptr [EDI + 0x224]
+       11c0de68  SUB EAX,dword ptr [EDI + 0x220]
+       11c0de7e  MOV ECX,dword ptr [EDI + 0x224]
+       11c0de96  CMP EAX,dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   11bec2d0  FUN_11bec2d0  (512 bytes)  offsets=0x218,0x21c
+       11bec315  IMUL EAX,ECX,0x21c
+       11bec373  IMUL EAX,EBX,0x21c
+       11bec380  IMUL EAX,EBX,0x21c
+       11bec3cb  MOV dword ptr [EDI + 0x218],EAX
+       11bec41e  IMUL EAX,EAX,0x21c
+       11bec430  IMUL EAX,dword ptr [EAX],0x21c
+       11bec474  MOV dword ptr [EDI + 0x218],EAX
+       [decompile cap reached]
+
+   10bebab0  FUN_10bebab0  (530 bytes)  offsets=0x217,0x218
+       10bebc32  MOVZX EAX,byte ptr [EDX + 0x217]
+       10bebc3f  MOVZX EAX,byte ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   10cf8e70  FUN_10cf8e70  (535 bytes)  offsets=0x220,0x228
+       10cf8f8b  MOVSS XMM0,dword ptr [ESI + 0x228]
+       10cf8fad  MOV dword ptr [ESI + 0x228],0x3f800000
+       10cf8fcd  PUSH dword ptr [ESI + 0x220]
+       [decompile cap reached]
+
+   11ba6f90  FUN_11ba6f90  (537 bytes)  offsets=0x218,0x21c
+       11ba70a6  MOV EAX,dword ptr [ESI + 0x218]
+       11ba70b0  CMP dword ptr [ESI + 0x21c],0x0
+       11ba70d4  PUSH dword ptr [ESI + 0x21c]
+       11ba70e0  MOV EAX,dword ptr [ESI + 0x218]
+       11ba70eb  MOV dword ptr [ESI + 0x21c],EDI
+       11ba70f4  MOV dword ptr [ESI + 0x218],EAX
+       11ba70fe  MOV dword ptr [ESI + 0x218],0x8
+       11ba710d  MOV dword ptr [ESI + 0x21c],EAX
+       11ba7120  MOV ECX,dword ptr [ESI + 0x21c]
+       11ba712f  MOV EAX,dword ptr [ESI + 0x21c]
+       [decompile cap reached]
+
+   10f855d0  FUN_10f855d0  (601 bytes)  offsets=0x21c,0x228
+       10f8566f  LEA EAX,[EDI + 0x21c]
+       10f856a1  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166aca0  FUN_1166aca0  (649 bytes)  offsets=0x218,0x21c
+       1166ae26  MOV dword ptr [EDX + 0x218],0x0
+       1166ae33  ADD ECX,0x21c
+       [decompile cap reached]
+
+   10fb7880  FUN_10fb7880  (652 bytes)  offsets=0x220,0x224
+       10fb78c7  MOV EAX,dword ptr [EDI + 0x224]
+       10fb78da  MOV ESI,dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   110597f0  CEvpDamageChecker::UpdateAckAndTimeouts  (818 bytes)  offsets=0x220,0x228
+       110597f3  SUB ESP,0x220
+       11059823  MOV EAX,dword ptr [EDX + 0x228]
+       1105991c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f84780  FUN_10f84780  (821 bytes)  offsets=0x21c,0x228
+       10f84860  MOV EAX,dword ptr [EAX + 0x228]
+       10f8492e  LEA EAX,[EDI + 0x21c]
+       [decompile cap reached]
+
+   10555390  FUN_10555390  (829 bytes)  offsets=0x220,0x224
+       10555459  MOV EAX,dword ptr [ECX + 0x220]
+       10555463  LEA EAX,[ECX + 0x224]
+       [decompile cap reached]
+
+   114e0480  FUN_114e0480  (852 bytes)  offsets=0x218,0x21c
+       114e04c4  MOV dword ptr [EBX + 0x218],EAX
+       114e04ca  MOV dword ptr [EBX + 0x21c],0x0
+       [decompile cap reached]
+
+   105564c0  FUN_105564c0  (957 bytes)  offsets=0x21c,0x220
+       105566a1  ADD EAX,0x220
+       10556866  MOV ECX,dword ptr [ESP + 0x21c]
+       [decompile cap reached]
+
+   105a6fe0  FUN_105a6fe0  (959 bytes)  offsets=0x218,0x21c
+       105a72a0  MOV dword ptr [ESP + 0x218],0x2
+       105a72b9  MOV byte ptr [ESP + 0x21c],AL
+       [decompile cap reached]
+
+   10566480  FUN_10566480  (973 bytes)  offsets=0x218,0x228
+       10566493  MOV dword ptr [ESP + 0x228],EAX
+       10566758  MOV dword ptr [ESP + 0x218],EAX
+       105667f4  LEA EDI,[ESP + 0x228]
+       [decompile cap reached]
+
+   10bfb040  FUN_10bfb040  (1027 bytes)  offsets=0x220,0x228
+       10bfb1fe  MOV EAX,dword ptr [EDI + 0x228]
+       10bfb211  CMP dword ptr [EDI + 0x220],0x0
+       [decompile cap reached]
+
+   1055cf20  FUN_1055cf20  (1050 bytes)  offsets=0x218,0x228
+       1055cf33  MOV dword ptr [ESP + 0x228],EAX
+       1055d246  MOV byte ptr [ESP + 0x218],AL
+       1055d2df  LEA EDI,[ESP + 0x228]
+       [decompile cap reached]
+
+   11baf000  FUN_11baf000  (1105 bytes)  offsets=0x220,0x224
+       11baf15a  LEA EDI,[ESI + 0x220]
+       11baf17b  MOV dword ptr [ESI + 0x224],0x0
+       11baf190  LEA EDI,[ESI + 0x220]
+       11baf347  CMP dword ptr [ESI + 0x224],ECX
+       11baf3b9  CMP ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10b44cf0  FUN_10b44cf0  (1123 bytes)  offsets=0x220,0x228
+       10b45085  MOVQ qword ptr [ESI + 0x220],XMM0
+       10b45090  MOV dword ptr [ESI + 0x228],EAX
+       [decompile cap reached]
+
+   102ecc60  FUN_102ecc60  (1131 bytes)  offsets=0x217,0x218
+       102ed03b  LEA EAX,[EDI + 0x217]
+       102ed04d  LEA EAX,[EDI + 0x218]
+       [decompile cap reached]
+
+   102ec7a0  TdrPack_LargeRoleInfoStruct  (1132 bytes)  offsets=0x217,0x218
+       102ecb69  MOVZX EAX,byte ptr [EDI + 0x217]
+       102ecb80  MOVZX EAX,byte ptr [EDI + 0x218]
+       [decompile cap reached]
+
+   10cfbbc0  FUN_10cfbbc0  (1210 bytes)  offsets=0x220,0x228
+       10cfbca1  LEA ECX,[EDI + 0x228]
+       10cfbca8  PUSH dword ptr [EDI + 0x220]
+       10cfbcc2  MOVSS XMM1,dword ptr [EDI + 0x228]
+       10cfbd94  LEA ECX,[EDI + 0x228]
+       10cfbd9b  PUSH dword ptr [EDI + 0x220]
+       10cfbda8  MOVSS XMM0,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   10f47760  FUN_10f47760  (1211 bytes)  offsets=0x218,0x21c
+       10f477b8  MOVSS XMM6,dword ptr [EDI + 0x218]
+       10f477c0  MOVSS XMM7,dword ptr [EDI + 0x21c]
+       [decompile cap reached]
+
+   1012e4c0  FUN_1012e4c0  (1215 bytes)  offsets=0x218,0x220
+       1012e91d  LEA EAX,[ESI + 0x218]
+       1012e95b  PUSH dword ptr [ESI + 0x220]
+       [decompile cap reached]
+
+   10ef2890  FUN_10ef2890  (1238 bytes)  offsets=0x21c,0x228
+       10ef2cea  LEA EAX,[EDI + 0x21c]
+       10ef2d00  LEA EAX,[EDI + 0x228]
+       [decompile cap reached]
+
+   1085bcb0  MHUI::BuildPassiveSkillListVO  (1275 bytes)  offsets=0x21c,0x220
+       1085be9e  MOV EBX,dword ptr [ESI + 0x21c]
+       1085bea8  CMP EBX,dword ptr [ESI + 0x220]
+       1085c0d3  CMP EBX,dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10b43750  FUN_10b43750  (1279 bytes)  offsets=0x220,0x228
+       10b43768  MOV EAX,dword ptr [EDI + 0x228]
+       10b43773  MOVQ XMM0,qword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   1012d0e0  FUN_1012d0e0  (1323 bytes)  offsets=0x218,0x220
+       1012d5b2  LEA EAX,[EDI + 0x218]
+       1012d604  PUSH dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   1012cba0  FUN_1012cba0  (1323 bytes)  offsets=0x218,0x220
+       1012d072  LEA EAX,[EDI + 0x218]
+       1012d0c4  PUSH dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   1081adf0  CEquipTalentPanel::BuildAttackAndPassiveSkillVO  (1414 bytes)  offsets=0x21c,0x220
+       1081b1d0  MOV ESI,dword ptr [EAX + 0x21c]
+       1081b1d6  CMP ESI,dword ptr [EAX + 0x220]
+       1081b2f2  CMP ESI,dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10d83050  FUN_10d83050  (1487 bytes)  offsets=0x21c,0x220
+       10d83083  MOV BL,byte ptr [EAX + ESI*0x4 + 0x220]
+       10d830b3  MOV EBX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d8312b  MOV EBX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d83164  MOV EBX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d831ca  MOV EBX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d83207  MOV EBX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d83429  MOV EAX,dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10bacd70  FUN_10bacd70  (1583 bytes)  offsets=0x218,0x228
+       10bacf02  LEA EAX,[EDI + 0x218]
+       10bacf68  LEA EAX,[EDI + 0x218]
+       10bad078  LEA EAX,[EDI + 0x218]
+       10bad0b9  LEA EAX,[EDI + 0x218]
+       10bad1cf  MOVDQU XMM1,xmmword ptr [EDI + 0x218]
+       10bad1dd  MOV ESI,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   1091c730  FUN_1091c730  (1728 bytes)  offsets=0x218,0x21c
+       1091c93f  PUSH dword ptr [EDI + 0x21c]
+       1091c945  PUSH dword ptr [EDI + 0x218]
+       [decompile cap reached]
+
+   102ed140  TlvMonsterSkillSyncV2::PrintText  (1755 bytes)  offsets=0x217,0x218
+       102ed6c2  MOVZX EAX,byte ptr [EAX + 0x217]
+       102ed6ea  MOVZX EAX,byte ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10f47c20  FUN_10f47c20  (1910 bytes)  offsets=0x218,0x21c
+       10f47c49  MOVSS XMM0,dword ptr [ESI + 0x21c]
+       10f47c54  MOVSS XMM3,dword ptr [ESI + 0x218]
+       10f47cb9  MULSS XMM1,dword ptr [ESI + 0x21c]
+       [decompile cap reached]
+
+   10cfb210  FUN_10cfb210  (2335 bytes)  offsets=0x220,0x228
+       10cfb8ef  LEA ECX,[EDI + 0x228]
+       10cfb8f6  PUSH dword ptr [EDI + 0x220]
+       10cfb903  MOVSS XMM0,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   109c7b60  data::IllustrateMonsterPartMo_109c7b60  (2469 bytes)  offsets=0x218,0x21c
+       109c82ec  PUSH dword ptr [EDI + 0x21c]
+       109c8304  PUSH dword ptr [EDI + 0x218]
+       [decompile cap reached]
+
+   108350f0  FUN_108350f0  (2993 bytes)  offsets=0x220,0x224
+       108358e6  MOV byte ptr [ESP + 0x224],0x0
+       1083598d  LEA ECX,[ESP + 0x224]
+       10835a0e  LEA ECX,[ESP + 0x224]
+       10835a2f  LEA EAX,[ESP + 0x220]
+       [decompile cap reached]
+
+   10fb8630  CStateFactory::CreateStateFromXmlNode  (3409 bytes)  offsets=0x218,0x220
+       10fb8a2c  PUSH 0x220
+       10fb8d32  PUSH 0x218
+       10fb8d69  PUSH 0x220
+       10fb8da0  PUSH 0x220
+       10fb8e0e  PUSH 0x218
+       10fb8e45  PUSH 0x218
+       [decompile cap reached]
+
+   116eeb20  CDmgRangeInfo::ParseAreaDamageXml  (4416 bytes)  offsets=0x218,0x21c
+       116ef7fe  MOV dword ptr [EBX + 0x21c],EAX
+       116efad5  CMP EAX,dword ptr [EBX + 0x218]
+       [decompile cap reached]
+
+   104f4d50  FUN_104f4d50  (5565 bytes)  offsets=0x220,0x228
+       104f62f9  MOVQ qword ptr [ESI + 0x220],XMM2
+       104f6302  MOV dword ptr [ESI + 0x228],EAX
+       [decompile cap reached]
+
+   10f80880  FUN_10f80880  (7 bytes)  offsets=0x220
+       10f80880  MOV EAX,dword ptr [ECX + 0x220]
+       [decompile cap reached]
+
+   10fb47c0  FUN_10fb47c0  (16 bytes)  offsets=0x218
+       10fb47c6  MOV byte ptr [ECX + 0x218],AL
+       [decompile cap reached]
+
+   11b491e0  FUN_11b491e0  (16 bytes)  offsets=0x224
+       11b491e6  MOV dword ptr [ECX + 0x224],EAX
+       [decompile cap reached]
+
+   1171ca60  FUN_1171ca60  (16 bytes)  offsets=0x228
+       1171ca66  SUB EAX,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   1134ae00  FUN_1134ae00  (17 bytes)  offsets=0x220
+       1134ae03  PUSH 0x220
+       [decompile cap reached]
+
+   10b95110  FUN_10b95110  (18 bytes)  offsets=0x218
+       10b95117  MOVUPS xmmword ptr [ECX + 0x218],XMM0
+       [decompile cap reached]
+
+   11b4db10  FUN_11b4db10  (19 bytes)  offsets=0x218
+       11b4db19  ADD EAX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   114a9680  FUN_114a9680  (19 bytes)  offsets=0x228
+       114a9688  CMP EAX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+   10603330  FUN_10603330  (20 bytes)  offsets=0x228
+       10603338  PUSH 0x228
+       [decompile cap reached]
+
+   106032b0  FUN_106032b0  (20 bytes)  offsets=0x224
+       106032b8  PUSH 0x224
+       [decompile cap reached]
+
+   106a4400  FUN_106a4400  (20 bytes)  offsets=0x220
+       106a4405  MOV dword ptr [EBP + 0x8],0x220
+       [decompile cap reached]
+
+   10603150  FUN_10603150  (20 bytes)  offsets=0x218
+       10603158  PUSH 0x218
+       [decompile cap reached]
+
+   106031d0  FUN_106031d0  (20 bytes)  offsets=0x21c
+       106031d8  PUSH 0x21c
+       [decompile cap reached]
+
+   106a45e0  FUN_106a45e0  (20 bytes)  offsets=0x224
+       106a45e5  MOV dword ptr [EBP + 0x8],0x224
+       [decompile cap reached]
+
+   10603130  FUN_10603130  (20 bytes)  offsets=0x217
+       10603138  PUSH 0x217
+       [decompile cap reached]
+
+   10603230  FUN_10603230  (20 bytes)  offsets=0x220
+       10603238  PUSH 0x220
+       [decompile cap reached]
+
+   11bed620  FUN_11bed620  (21 bytes)  offsets=0x21c
+       11bed623  IMUL EDX,dword ptr [EBP + 0x8],0x21c
+       [decompile cap reached]
+
+   11bed640  FUN_11bed640  (21 bytes)  offsets=0x21c
+       11bed643  IMUL EDX,dword ptr [EBP + 0x8],0x21c
+       [decompile cap reached]
+
+   1240339c  FUN_1240339c  (22 bytes)  offsets=0x228
+       124033a1  CALL dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   1045d580  FUN_1045d580  (25 bytes)  offsets=0x21c
+       1045d586  MOV EAX,dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   116ca4f0  FUN_116ca4f0  (25 bytes)  offsets=0x218
+       116ca4f3  CMP dword ptr [ECX + 0x218],0x0
+       116ca4ff  MOV dword ptr [ECX + 0x218],EAX
+       [decompile cap reached]
+
+   111eb8a0  FUN_111eb8a0  (28 bytes)  offsets=0x220
+       111eb8a3  LEA ECX,[ESI + 0x220]
+       [decompile cap reached]
+
+   10f0da60  FUN_10f0da60  (31 bytes)  offsets=0x228
+       10f0da77  JMP dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   115e7a30  FUN_115e7a30  (35 bytes)  offsets=0x224
+       115e7a36  MOV dword ptr [ECX],0x224
+       [decompile cap reached]
+
+   113960b0  FUN_113960b0  (35 bytes)  offsets=0x21c
+       113960c6  MOV EAX,dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   11396470  FUN_11396470  (35 bytes)  offsets=0x220
+       11396486  MOV EAX,dword ptr [EDX + 0x220]
+       [decompile cap reached]
+
+   1171c5d0  FUN_1171c5d0  (36 bytes)  offsets=0x228
+       1171c5d9  MOV EAX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+   1061e1b0  FUN_1061e1b0  (37 bytes)  offsets=0x220
+       1061e1b8  LEA ESI,[ECX + 0x220]
+       [decompile cap reached]
+
+   1061e220  FUN_1061e220  (37 bytes)  offsets=0x228
+       1061e228  LEA ESI,[ECX + 0x228]
+       [decompile cap reached]
+
+   1061e140  FUN_1061e140  (37 bytes)  offsets=0x218
+       1061e148  LEA ESI,[ECX + 0x218]
+       [decompile cap reached]
+
+   11c0ce70  FUN_11c0ce70  (39 bytes)  offsets=0x220
+       11c0ce8b  MOV dword ptr [EDI + 0x220],EAX
+       [decompile cap reached]
+
+   1148a1e0  FUN_1148a1e0  (41 bytes)  offsets=0x218
+       1148a1e6  MOV dword ptr [ECX],0x218
+       [decompile cap reached]
+
+   114d8cf0  FUN_114d8cf0  (41 bytes)  offsets=0x217
+       114d8cf6  MOV dword ptr [ECX],0x217
+       [decompile cap reached]
+
+   10e05a00  FUN_10e05a00  (42 bytes)  offsets=0x228
+       10e05a14  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f1a760  FUN_10f1a760  (42 bytes)  offsets=0x228
+       10f1a762  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b491f0  FUN_11b491f0  (42 bytes)  offsets=0x224
+       11b49208  MOV dword ptr [ECX + 0x224],EAX
+       [decompile cap reached]
+
+   10f6cdd0  FUN_10f6cdd0  (43 bytes)  offsets=0x228
+       10f6cdde  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112ec2f0  FUN_112ec2f0  (44 bytes)  offsets=0x228
+       112ec2f4  LEA ESI,[ECX + 0x228]
+       [decompile cap reached]
+
+   1166dbb0  FUN_1166dbb0  (44 bytes)  offsets=0x218
+       1166dbba  CMP dword ptr [EAX + 0x218],0x0
+       1166dbc6  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   123fc1ab  FUN_123fc1ab  (45 bytes)  offsets=0x218
+       123fc1c1  MOV dword ptr [ESP + 0x6],0x218
+       [decompile cap reached]
+
+   112ec390  FUN_112ec390  (45 bytes)  offsets=0x228
+       112ec394  LEA ESI,[ECX + 0x228]
+       [decompile cap reached]
+
+   112ec320  FUN_112ec320  (46 bytes)  offsets=0x228
+       112ec324  LEA ESI,[ECX + 0x228]
+       [decompile cap reached]
+
+   10ef9ad0  FUN_10ef9ad0  (47 bytes)  offsets=0x228
+       10ef9ad5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f75490  FUN_10f75490  (47 bytes)  offsets=0x228
+       10f754b0  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   10c39590  FUN_10c39590  (47 bytes)  offsets=0x21c
+       10c39596  MOV dword ptr [ECX],0x21c
+       [decompile cap reached]
+
+   1166dbe0  FUN_1166dbe0  (47 bytes)  offsets=0x218
+       1166dbea  CMP dword ptr [EAX + 0x218],0x0
+       1166dbf6  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   11041490  FUN_11041490  (47 bytes)  offsets=0x224
+       110414ad  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10efd9a0  FUN_10efd9a0  (48 bytes)  offsets=0x228
+       10efd9b1  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fe7ff0  FUN_10fe7ff0  (49 bytes)  offsets=0x218
+       10fe8004  PUSH 0x218
+       [decompile cap reached]
+
+   10fe8fa0  FUN_10fe8fa0  (49 bytes)  offsets=0x220
+       10fe8fb4  PUSH 0x220
+       [decompile cap reached]
+
+   10fb3e60  FUN_10fb3e60  (49 bytes)  offsets=0x220
+       10fb3e74  PUSH 0x220
+       [decompile cap reached]
+
+   10fe97b0  FUN_10fe97b0  (49 bytes)  offsets=0x220
+       10fe97c4  PUSH 0x220
+       [decompile cap reached]
+
+   10fb36e0  FUN_10fb36e0  (49 bytes)  offsets=0x220
+       10fb36f4  PUSH 0x220
+       [decompile cap reached]
+
+   10fb3df0  FUN_10fb3df0  (49 bytes)  offsets=0x220
+       10fb3e04  PUSH 0x220
+       [decompile cap reached]
+
+   10fe8390  FUN_10fe8390  (49 bytes)  offsets=0x220
+       10fe83a4  PUSH 0x220
+       [decompile cap reached]
+
+   10fe8060  FUN_10fe8060  (49 bytes)  offsets=0x218
+       10fe8074  PUSH 0x218
+       [decompile cap reached]
+
+   10fe9730  FUN_10fe9730  (49 bytes)  offsets=0x220
+       10fe9744  PUSH 0x220
+       [decompile cap reached]
+
+   10fe7aa0  FUN_10fe7aa0  (49 bytes)  offsets=0x220
+       10fe7ab4  PUSH 0x220
+       [decompile cap reached]
+
+   10fb3d80  FUN_10fb3d80  (49 bytes)  offsets=0x220
+       10fb3d94  PUSH 0x220
+       [decompile cap reached]
+
+   10fe7e30  FUN_10fe7e30  (49 bytes)  offsets=0x220
+       10fe7e44  PUSH 0x220
+       [decompile cap reached]
+
+   10fb35f0  FUN_10fb35f0  (49 bytes)  offsets=0x218
+       10fb3604  PUSH 0x218
+       [decompile cap reached]
+
+   10fb3180  FUN_10fb3180  (49 bytes)  offsets=0x220
+       10fb3194  PUSH 0x220
+       [decompile cap reached]
+
+   10fb3670  FUN_10fb3670  (49 bytes)  offsets=0x218
+       10fb3684  PUSH 0x218
+       [decompile cap reached]
+
+   10fb31f0  FUN_10fb31f0  (49 bytes)  offsets=0x218
+       10fb3204  PUSH 0x218
+       [decompile cap reached]
+
+   10c04e30  FUN_10c04e30  (50 bytes)  offsets=0x228
+       10c04e4f  LEA EAX,[EDI + 0x228]
+       [decompile cap reached]
+
+   1122e670  FUN_1122e670  (51 bytes)  offsets=0x228
+       1122e68b  PUSH 0x228
+       [decompile cap reached]
+
+   11b00880  FUN_11b00880  (51 bytes)  offsets=0x220
+       11b00884  MOV EDX,dword ptr [ESI + 0x220]
+       11b008a0  MOV dword ptr [ESI + 0x220],EDI
+       [decompile cap reached]
+
+   1127f340  FUN_1127f340  (51 bytes)  offsets=0x217
+       1127f35b  PUSH 0x217
+       [decompile cap reached]
+
+   10c04df0  FUN_10c04df0  (51 bytes)  offsets=0x228
+       10c04e01  SUB EDX,dword ptr [ECX + 0x228]
+       10c04e0e  MOV EAX,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   112c28b0  FUN_112c28b0  (51 bytes)  offsets=0x224
+       112c28cb  PUSH 0x224
+       [decompile cap reached]
+
+   10fefd00  FUN_10fefd00  (52 bytes)  offsets=0x228
+       10fefd12  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10546c50  FUN_10546c50  (52 bytes)  offsets=0x220
+       10546c5b  MOV dword ptr [ESI + 0x220],0x0
+       [decompile cap reached]
+
+   111eb900  FUN_111eb900  (52 bytes)  offsets=0x220
+       111eb906  LEA ECX,[ESI + 0x220]
+       [decompile cap reached]
+
+   11041450  FUN_11041450  (53 bytes)  offsets=0x220
+       11041473  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   115e6cd0  FUN_115e6cd0  (53 bytes)  offsets=0x218
+       115e6ce4  LEA EDX,[EAX + 0x218]
+       [decompile cap reached]
+
+   10f2caa0  FUN_10f2caa0  (54 bytes)  offsets=0x228
+       10f2cabb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166bf90  FUN_1166bf90  (54 bytes)  offsets=0x218
+       1166bf9a  CMP dword ptr [EAX + 0x218],0x0
+       1166bfa6  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   105ea1b0  FUN_105ea1b0  (55 bytes)  offsets=0x228
+       105ea1d9  PUSH 0x228
+       [decompile cap reached]
+
+   105e9db0  FUN_105e9db0  (55 bytes)  offsets=0x217
+       105e9dd9  PUSH 0x217
+       [decompile cap reached]
+
+   105e9ef0  FUN_105e9ef0  (55 bytes)  offsets=0x21c
+       105e9f19  PUSH 0x21c
+       [decompile cap reached]
+
+   10f1a7e0  FUN_10f1a7e0  (55 bytes)  offsets=0x228
+       10f1a7e5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   105e9df0  FUN_105e9df0  (55 bytes)  offsets=0x218
+       105e9e19  PUSH 0x218
+       [decompile cap reached]
+
+   105e9fb0  FUN_105e9fb0  (55 bytes)  offsets=0x220
+       105e9fd9  PUSH 0x220
+       [decompile cap reached]
+
+   105ea0b0  FUN_105ea0b0  (55 bytes)  offsets=0x224
+       105ea0d9  PUSH 0x224
+       [decompile cap reached]
+
+   1061e1e0  FUN_1061e1e0  (56 bytes)  offsets=0x220
+       1061e1e5  MOV ESI,dword ptr [ECX + 0x220]
+       1061e1ec  LEA EDI,[ECX + 0x220]
+       [decompile cap reached]
+
+   10b96d10  FUN_10b96d10  (56 bytes)  offsets=0x228
+       10b96d2d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11041410  FUN_11041410  (56 bytes)  offsets=0x21c
+       11041436  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   108384c0  FUN_108384c0  (56 bytes)  offsets=0x21c
+       108384ee  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   1061e170  FUN_1061e170  (56 bytes)  offsets=0x218
+       1061e175  MOV ESI,dword ptr [ECX + 0x218]
+       1061e17c  LEA EDI,[ECX + 0x218]
+       [decompile cap reached]
+
+   1171c600  FUN_1171c600  (59 bytes)  offsets=0x228
+       1171c60c  MOV EAX,dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+   1061fbb0  FUN_1061fbb0  (59 bytes)  offsets=0x220
+       1061fbd7  PUSH 0x220
+       [decompile cap reached]
+
+   1061e250  FUN_1061e250  (59 bytes)  offsets=0x228
+       1061e255  MOV ESI,dword ptr [ECX + 0x228]
+       1061e25c  LEA EDI,[ECX + 0x228]
+       [decompile cap reached]
+
+   11563a20  FUN_11563a20  (59 bytes)  offsets=0x224
+       11563a3a  CALL dword ptr [EAX + 0x224]
+       11563a4f  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   11bec7a0  FUN_11bec7a0  (59 bytes)  offsets=0x218
+       11bec7cd  MOV dword ptr [EBX + 0x218],EAX
+       [decompile cap reached]
+
+   1061fd00  FUN_1061fd00  (59 bytes)  offsets=0x224
+       1061fd27  PUSH 0x224
+       [decompile cap reached]
+
+   10be8d70  FUN_10be8d70  (60 bytes)  offsets=0x21c
+       10be8da0  JMP dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   10fa07d0  FUN_10fa07d0  (61 bytes)  offsets=0x228
+       10fa07e4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9b750  FUN_10f9b750  (61 bytes)  offsets=0x228
+       10f9b764  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11bed210  FUN_11bed210  (61 bytes)  offsets=0x21c
+       11bed232  IMUL EDX,EAX,0x21c
+       [decompile cap reached]
+
+   106428a0  FUN_106428a0  (61 bytes)  offsets=0x228
+       106428b1  ADD ESI,0x228
+       [decompile cap reached]
+
+   10542090  FUN_10542090  (61 bytes)  offsets=0x228
+       105420ad  MOV word ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   10642860  FUN_10642860  (61 bytes)  offsets=0x220
+       10642871  ADD ESI,0x220
+       [decompile cap reached]
+
+   10642820  FUN_10642820  (61 bytes)  offsets=0x218
+       10642831  ADD ESI,0x218
+       [decompile cap reached]
+
+   10f89710  FUN_10f89710  (62 bytes)  offsets=0x228
+       10f89730  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efca70  FUN_10efca70  (63 bytes)  offsets=0x228
+       10efca75  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efce50  FUN_10efce50  (63 bytes)  offsets=0x228
+       10efce55  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1171ca20  FUN_1171ca20  (63 bytes)  offsets=0x228
+       1171ca2b  SUB EDX,dword ptr [EAX + 0x228]
+       1171ca3f  SUB ECX,dword ptr [EAX + 0x228]
+       1171ca4c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166dc70  FUN_1166dc70  (63 bytes)  offsets=0x218
+       1166dc90  CMP dword ptr [ECX + 0x218],0x0
+       1166dc9c  MOV ECX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   1166d8c0  FUN_1166d8c0  (63 bytes)  offsets=0x218
+       1166d8e0  CMP dword ptr [ECX + 0x218],0x0
+       1166d8ec  MOV ECX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   10efca30  FUN_10efca30  (63 bytes)  offsets=0x228
+       10efca35  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112ebea0  FUN_112ebea0  (64 bytes)  offsets=0x228
+       112ebec6  LEA ECX,[EBX + 0x228]
+       [decompile cap reached]
+
+   10f13900  FUN_10f13900  (64 bytes)  offsets=0x228
+       10f13916  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166f290  FUN_1166f290  (65 bytes)  offsets=0x218
+       1166f2b0  CMP dword ptr [ECX + 0x218],0x0
+       1166f2c0  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   1166f220  FUN_1166f220  (65 bytes)  offsets=0x218
+       1166f240  CMP dword ptr [ECX + 0x218],0x0
+       1166f250  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10838420  FUN_10838420  (66 bytes)  offsets=0x21c
+       10838458  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   108383d0  FUN_108383d0  (66 bytes)  offsets=0x21c
+       10838408  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   1166e490  FUN_1166e490  (67 bytes)  offsets=0x218
+       1166e4a9  CMP dword ptr [ECX + 0x218],0x0
+       1166e4c2  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10d4deee  FUN_10d4deee  (69 bytes)  offsets=0x228
+       10d4df1c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   104b7780  FUN_104b7780  (69 bytes)  offsets=0x228
+       104b7786  PUSH 0x228
+       [decompile cap reached]
+
+   108380a0  FUN_108380a0  (69 bytes)  offsets=0x21c
+       108380da  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10837fb0  FUN_10837fb0  (69 bytes)  offsets=0x21c
+       10837fea  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   108380f0  FUN_108380f0  (69 bytes)  offsets=0x21c
+       1083812a  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10838050  FUN_10838050  (69 bytes)  offsets=0x21c
+       1083808a  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10838000  FUN_10838000  (69 bytes)  offsets=0x21c
+       1083803a  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   115e55e0  FUN_115e55e0  (70 bytes)  offsets=0x220
+       115e5613  MOV EAX,dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   115e56d0  FUN_115e56d0  (70 bytes)  offsets=0x21c
+       115e5703  MOV EAX,dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f1aca0  FUN_10f1aca0  (71 bytes)  offsets=0x228
+       10f1aca5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f13840  FUN_10f13840  (72 bytes)  offsets=0x228
+       10f13849  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112317e0  FUN_112317e0  (72 bytes)  offsets=0x228
+       11231815  PUSH 0x228
+       [decompile cap reached]
+
+   10838470  FUN_10838470  (72 bytes)  offsets=0x21c
+       108384ae  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10d0eda0  FUN_10d0eda0  (73 bytes)  offsets=0x228
+       10d0eda3  MOVSS XMM0,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   10f15d60  QuestPresenter::OnQuestFail  (74 bytes)  offsets=0x228
+       10f15d65  MOV EAX,dword ptr [EAX + 0x228]
+       10f15d86  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   116c4180  FUN_116c4180  (74 bytes)  offsets=0x21c
+       116c419c  MOV EAX,dword ptr [ESI + 0x21c]
+       [decompile cap reached]
+
+   10bc47b0  FUN_10bc47b0  (75 bytes)  offsets=0x21c
+       10bc47ed  LEA EAX,[ESI + 0x21c]
+       [decompile cap reached]
+
+   111ebab0  FUN_111ebab0  (76 bytes)  offsets=0x220
+       111ebad5  LEA ECX,[ESI + 0x220]
+       [decompile cap reached]
+
+   11bed470  FUN_11bed470  (76 bytes)  offsets=0x21c
+       11bed4a6  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10838380  FUN_10838380  (77 bytes)  offsets=0x21c
+       108383c3  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10b91a30  FUN_10b91a30  (77 bytes)  offsets=0x228
+       10b91a46  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10838330  FUN_10838330  (77 bytes)  offsets=0x21c
+       10838373  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   11b64a60  FUN_11b64a60  (77 bytes)  offsets=0x228
+       11b64a64  LEA ESI,[ECX + 0x228]
+       [decompile cap reached]
+
+   10b919e0  FUN_10b919e0  (77 bytes)  offsets=0x228
+       10b919f6  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f1c100  FUN_10f1c100  (78 bytes)  offsets=0x228
+       10f1c10b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c04d90  FUN_10c04d90  (79 bytes)  offsets=0x228
+       10c04da7  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   10fee1e0  FUN_10fee1e0  (79 bytes)  offsets=0x228
+       10fee201  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   111ebda0  FUN_111ebda0  (79 bytes)  offsets=0x220
+       111ebdbc  LEA ECX,[ESI + 0x220]
+       111ebdce  LEA ECX,[ESI + 0x220]
+       [decompile cap reached]
+
+   10f1a790  FUN_10f1a790  (80 bytes)  offsets=0x228
+       10f1a795  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f15d00  QuestPresenter::OnQuestComplete  (81 bytes)  offsets=0x228
+       10f15d05  MOV EAX,dword ptr [EAX + 0x228]
+       10f15d26  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fb1460  FUN_10fb1460  (81 bytes)  offsets=0x224
+       10fb149b  MOV dword ptr [ESI + 0x224],0x1201fc98
+       [decompile cap reached]
+
+   10834a50  FUN_10834a50  (82 bytes)  offsets=0x228
+       10834a85  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   114d9280  FUN_114d9280  (84 bytes)  offsets=0x217
+       114d92a2  MOV dword ptr [EBP + -0x14],0x217
+       [decompile cap reached]
+
+   10ef9a30  FUN_10ef9a30  (85 bytes)  offsets=0x228
+       10ef9a4f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f917b0  FUN_10f917b0  (85 bytes)  offsets=0x228
+       10f917c9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112ebe40  FUN_112ebe40  (86 bytes)  offsets=0x228
+       112ebe5f  LEA ECX,[ESI + 0x228]
+       [decompile cap reached]
+
+   1148af60  FUN_1148af60  (86 bytes)  offsets=0x218
+       1148af84  MOV dword ptr [EBP + -0x14],0x218
+       [decompile cap reached]
+
+   115bc180  FUN_115bc180  (86 bytes)  offsets=0x218
+       115bc1a4  MOV dword ptr [EBP + -0x14],0x218
+       [decompile cap reached]
+
+   115bb2b0  FUN_115bb2b0  (86 bytes)  offsets=0x218
+       115bb2d4  MOV dword ptr [EBP + -0x14],0x218
+       [decompile cap reached]
+
+   10f17060  FUN_10f17060  (87 bytes)  offsets=0x228
+       10f17068  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1142f3f0  FUN_1142f3f0  (89 bytes)  offsets=0x220
+       1142f3f9  MOV dword ptr [ECX],0x220
+       [decompile cap reached]
+
+   10e05740  FUN_10e05740  (89 bytes)  offsets=0x228
+       10e0575b  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fb4530  FUN_10fb4530  (90 bytes)  offsets=0x228
+       10fb4556  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fb4590  FUN_10fb4590  (90 bytes)  offsets=0x228
+       10fb45b6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f170c0  FUN_10f170c0  (90 bytes)  offsets=0x228
+       10f170c8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   123ef65a  FUN_123ef65a  (93 bytes)  offsets=0x228
+       123ef6ed  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fa4600  FUN_10fa4600  (94 bytes)  offsets=0x228
+       10fa4612  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa4660  FUN_10fa4660  (94 bytes)  offsets=0x228
+       10fa4672  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112ebef0  FUN_112ebef0  (94 bytes)  offsets=0x228
+       112ebf1f  LEA ECX,[EBX + 0x228]
+       [decompile cap reached]
+
+   10e05620  FUN_10e05620  (96 bytes)  offsets=0x228
+       10e0563b  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10bf66b0  FUN_10bf66b0  (97 bytes)  offsets=0x228
+       10bf66d1  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f71c60  FUN_10f71c60  (97 bytes)  offsets=0x228
+       10f71c79  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   116c42b0  FUN_116c42b0  (98 bytes)  offsets=0x21c
+       116c42cf  MOV EAX,dword ptr [ESI + 0x21c]
+       [decompile cap reached]
+
+   1143dbe0  FUN_1143dbe0  (100 bytes)  offsets=0x21c
+       1143dc34  CALL dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   10fb14c0  FUN_10fb14c0  (101 bytes)  offsets=0x224
+       10fb14fb  MOV dword ptr [ESI + 0x224],0x1201fc98
+       [decompile cap reached]
+
+   10c05520  FUN_10c05520  (101 bytes)  offsets=0x228
+       10c05528  MOV EAX,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   1103ba90  FUN_1103ba90  (101 bytes)  offsets=0x228
+       1103bac5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fb1530  FUN_10fb1530  (101 bytes)  offsets=0x224
+       10fb156b  MOV dword ptr [ESI + 0x224],0x1201fc98
+       [decompile cap reached]
+
+   10f697e0  FUN_10f697e0  (103 bytes)  offsets=0x228
+       10f697f7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1171cf00  FUN_1171cf00  (103 bytes)  offsets=0x228
+       1171cf0c  SUB EDX,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   11c0dd20  FUN_11c0dd20  (103 bytes)  offsets=0x224
+       11c0dd28  MOV EAX,dword ptr [EDI + 0x224]
+       11c0dd71  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   10839630  FUN_10839630  (104 bytes)  offsets=0x21c
+       1083968b  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   114775c0  FUN_114775c0  (104 bytes)  offsets=0x228
+       114775f3  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166bf20  FUN_1166bf20  (104 bytes)  offsets=0x218
+       1166bf38  CMP dword ptr [EAX + 0x218],0x0
+       1166bf44  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   1166c590  FUN_1166c590  (105 bytes)  offsets=0x218
+       1166c5a6  CMP dword ptr [EAX + 0x218],0x0
+       1166c5b2  MOV ECX,dword ptr [ECX + 0x218]
+       1166c5c4  MOV ECX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   1084bec0  FUN_1084bec0  (105 bytes)  offsets=0x21c
+       1084bf15  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10d7b470  FUN_10d7b470  (107 bytes)  offsets=0x220
+       10d7b4ce  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10fad360  FUN_10fad360  (108 bytes)  offsets=0x228
+       10fad37e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1139d810  FUN_1139d810  (109 bytes)  offsets=0x228
+       1139d822  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1102fe50  FUN_1102fe50  (109 bytes)  offsets=0x228
+       1102fe92  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1152f910  FUN_1152f910  (109 bytes)  offsets=0x228
+       1152f913  SUB ESP,0x228
+       [decompile cap reached]
+
+   10e04720  FUN_10e04720  (109 bytes)  offsets=0x228
+       10e04759  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   112ec110  FUN_112ec110  (110 bytes)  offsets=0x228
+       112ec14e  LEA ECX,[EBX + 0x228]
+       112ec16a  LEA ECX,[EBX + 0x228]
+       [decompile cap reached]
+
+   112ec180  FUN_112ec180  (110 bytes)  offsets=0x228
+       112ec1ca  LEA ECX,[EDI + 0x228]
+       [decompile cap reached]
+
+   10fd8c00  FUN_10fd8c00  (110 bytes)  offsets=0x228
+       10fd8c14  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10b962e0  FUN_10b962e0  (110 bytes)  offsets=0x228
+       10b96333  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e31e90  FUN_10e31e90  (111 bytes)  offsets=0x228
+       10e31ec6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e05a90  FUN_10e05a90  (111 bytes)  offsets=0x228
+       10e05aac  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   11b4fd80  FUN_11b4fd80  (111 bytes)  offsets=0x218
+       11b4fdb2  MOV EAX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   10f11ba0  FUN_10f11ba0  (112 bytes)  offsets=0x228
+       10f11bae  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c04d20  FUN_10c04d20  (112 bytes)  offsets=0x228
+       10c04d32  LEA ESI,[EBX + 0x228]
+       [decompile cap reached]
+
+   11194c70  FUN_11194c70  (113 bytes)  offsets=0x218
+       11194cb9  MOV ECX,0x218
+       [decompile cap reached]
+
+   111c6be0  FUN_111c6be0  (113 bytes)  offsets=0x218
+       111c6c2a  MOV ECX,0x218
+       [decompile cap reached]
+
+   10fabf60  FUN_10fabf60  (113 bytes)  offsets=0x228
+       10fabf72  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10bf7dd0  FUN_10bf7dd0  (114 bytes)  offsets=0x228
+       10bf7dd8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   100dca00  FUN_100dca00  (115 bytes)  offsets=0x220
+       100dca17  CMP ESI,0x220
+       [decompile cap reached]
+
+   10efc9b0  FUN_10efc9b0  (116 bytes)  offsets=0x228
+       10efc9b5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ff20a0  FUN_10ff20a0  (116 bytes)  offsets=0x218
+       10ff20d0  LEA EAX,[ESI + 0x218]
+       [decompile cap reached]
+
+   10f677a0  FUN_10f677a0  (116 bytes)  offsets=0x228
+       10f677b7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166d800  FUN_1166d800  (116 bytes)  offsets=0x218
+       1166d818  CMP dword ptr [EAX + 0x218],0x0
+       1166d824  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   10dd4f70  FUN_10dd4f70  (117 bytes)  offsets=0x224
+       10dd4f77  MOV ECX,dword ptr [ESI + 0x224]
+       10dd4f82  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   104b6ff0  FUN_104b6ff0  (117 bytes)  offsets=0x228
+       104b6ff8  PUSH 0x228
+       [decompile cap reached]
+
+   10f483b0  FUN_10f483b0  (117 bytes)  offsets=0x224
+       10f483b7  MOV ECX,dword ptr [ESI + 0x224]
+       10f483c2  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10ed8380  FUN_10ed8380  (117 bytes)  offsets=0x224
+       10ed8387  MOV ECX,dword ptr [ESI + 0x224]
+       10ed8392  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10f1c080  FUN_10f1c080  (117 bytes)  offsets=0x228
+       10f1c0b0  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   111409d0  FUN_111409d0  (117 bytes)  offsets=0x218
+       11140a1a  MOV ECX,0x218
+       [decompile cap reached]
+
+   11190a90  FUN_11190a90  (119 bytes)  offsets=0x224
+       11190acb  MOV EAX,0x224
+       [decompile cap reached]
+
+   111c2a00  FUN_111c2a00  (119 bytes)  offsets=0x224
+       111c2a3d  MOV EAX,0x224
+       [decompile cap reached]
+
+   10838140  FUN_10838140  (120 bytes)  offsets=0x21c
+       1083817f  CALL dword ptr [EAX + 0x21c]
+       108381ac  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10c958d0  FUN_10c958d0  (120 bytes)  offsets=0x218
+       10c95934  PUSH 0x218
+       [decompile cap reached]
+
+   1171cda0  FUN_1171cda0  (120 bytes)  offsets=0x228
+       1171cdac  SUB EDX,dword ptr [ECX + 0x228]
+       1171cdc4  SUB EAX,dword ptr [ECX + 0x228]
+       1171cdd5  MOV EAX,dword ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   108394b0  Lobby_EnableCreateRoleView  (121 bytes)  offsets=0x21c
+       108394bf  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10fa0750  FUN_10fa0750  (122 bytes)  offsets=0x228
+       10fa079e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6a1e0  FUN_10f6a1e0  (122 bytes)  offsets=0x228
+       10f6a207  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1113c770  FUN_1113c770  (123 bytes)  offsets=0x224
+       1113c7b1  MOV EAX,0x224
+       [decompile cap reached]
+
+   1152f360  FUN_1152f360  (123 bytes)  offsets=0x228
+       1152f363  SUB ESP,0x228
+       [decompile cap reached]
+
+   10e008b0  FUN_10e008b0  (124 bytes)  offsets=0x228
+       10e008de  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f17120  FUN_10f17120  (124 bytes)  offsets=0x228
+       10f1714c  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10ff19d0  FUN_10ff19d0  (124 bytes)  offsets=0x228
+       10ff19f2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e00830  FUN_10e00830  (124 bytes)  offsets=0x228
+       10e0085e  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fd7160  FUN_10fd7160  (126 bytes)  offsets=0x228
+       10fd717d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11bec520  FUN_11bec520  (126 bytes)  offsets=0x21c
+       11bec52a  IMUL EDX,EBX,0x21c
+       11bec578  IMUL ECX,EDI,0x21c
+       [decompile cap reached]
+
+   10fabfe0  FUN_10fabfe0  (126 bytes)  offsets=0x228
+       10fabff2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   104a3660  FUN_104a3660  (127 bytes)  offsets=0x228
+       104a3697  PUSH 0x228
+       [decompile cap reached]
+
+   11bed510  FUN_11bed510  (127 bytes)  offsets=0x21c
+       11bed564  ADD EDI,0x21c
+       [decompile cap reached]
+
+   11becdb0  FUN_11becdb0  (127 bytes)  offsets=0x21c
+       11bece04  ADD EDI,0x21c
+       [decompile cap reached]
+
+   10f69ad0  CWardrobeViewState::OnStateEvent  (128 bytes)  offsets=0x228
+       10f69af9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c03ca0  FUN_10c03ca0  (128 bytes)  offsets=0x228
+       10c03cad  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112ec260  FUN_112ec260  (129 bytes)  offsets=0x228
+       112ec28b  LEA ECX,[EAX + 0x228]
+       112ec29d  LEA ECX,[ECX + 0x228]
+       [decompile cap reached]
+
+   10e007a0  FUN_10e007a0  (129 bytes)  offsets=0x228
+       10e007df  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e00710  FUN_10e00710  (129 bytes)  offsets=0x228
+       10e0074f  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f16a60  FUN_10f16a60  (130 bytes)  offsets=0x228
+       10f16aa7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f93be0  FUN_10f93be0  (132 bytes)  offsets=0x220
+       10f93c1b  MOV EAX,dword ptr [EDX + 0x220]
+       10f93c2a  MOV EAX,dword ptr [EDX + 0x220]
+       [decompile cap reached]
+
+   10fb0e60  FUN_10fb0e60  (132 bytes)  offsets=0x224
+       10fb0e9b  MOV dword ptr [ESI + 0x224],0x1201fc98
+       [decompile cap reached]
+
+   10f91200  FUN_10f91200  (133 bytes)  offsets=0x228
+       10f91237  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e04820  FUN_10e04820  (135 bytes)  offsets=0x228
+       10e04859  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e04790  FUN_10e04790  (135 bytes)  offsets=0x228
+       10e047c9  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   111c25a0  FUN_111c25a0  (136 bytes)  offsets=0x220
+       111c25dd  MOV EAX,0x220
+       [decompile cap reached]
+
+   10f1f960  FUN_10f1f960  (136 bytes)  offsets=0x228
+       10f1f968  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11190630  FUN_11190630  (136 bytes)  offsets=0x220
+       11190665  MOV EAX,0x220
+       [decompile cap reached]
+
+   10f6e470  FUN_10f6e470  (138 bytes)  offsets=0x224
+       10f6e47a  MOV ESI,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   10ff1b90  FUN_10ff1b90  (138 bytes)  offsets=0x228
+       10ff1bb2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa29f0  FUN_10fa29f0  (138 bytes)  offsets=0x228
+       10fa2a58  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10192490  FUN_10192490  (139 bytes)  offsets=0x228
+       1019250a  MOV dword ptr [EDI + 0x228],ESI
+       [decompile cap reached]
+
+   1113c310  FUN_1113c310  (140 bytes)  offsets=0x220
+       1113c351  MOV EAX,0x220
+       [decompile cap reached]
+
+   10f745f0  FUN_10f745f0  (140 bytes)  offsets=0x228
+       10f74616  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f09c29  FUN_10f09c29  (140 bytes)  offsets=0x228
+       10f09c6c  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c38ea0  FUN_10c38ea0  (140 bytes)  offsets=0x21c
+       10c38f04  MOV dword ptr [EBP + -0x30],0x21c
+       [decompile cap reached]
+
+   10e32060  FUN_10e32060  (141 bytes)  offsets=0x228
+       10e32096  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1012d6f0  FUN_1012d6f0  (142 bytes)  offsets=0x224
+       1012d706  MOV dword ptr [EBX + 0x224],ESI
+       [decompile cap reached]
+
+   1012dd70  FUN_1012dd70  (142 bytes)  offsets=0x224
+       1012dd86  MOV dword ptr [EBX + 0x224],ESI
+       [decompile cap reached]
+
+   10e04590  FUN_10e04590  (143 bytes)  offsets=0x228
+       10e045c9  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e005e0  FUN_10e005e0  (143 bytes)  offsets=0x228
+       10e0061f  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f1f690  FUN_10f1f690  (143 bytes)  offsets=0x228
+       10f1f6c9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10837cf0  FUN_10837cf0  (143 bytes)  offsets=0x21c
+       10837d67  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f93680  FUN_10f93680  (145 bytes)  offsets=0x228
+       10f936c3  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f74fc0  FUN_10f74fc0  (145 bytes)  offsets=0x228
+       10f75005  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10facfd0  FUN_10facfd0  (146 bytes)  offsets=0x228
+       10fad02a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6bafe  FUN_10f6bafe  (148 bytes)  offsets=0x228
+       10f6bb1b  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e00670  FUN_10e00670  (149 bytes)  offsets=0x228
+       10e006af  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10a830d0  FUN_10a830d0  (151 bytes)  offsets=0x228
+       10a830ed  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f9ae00  FUN_10f9ae00  (151 bytes)  offsets=0x218
+       10f9ae3a  CMP byte ptr [EDI + 0x218],0x0
+       [decompile cap reached]
+
+   10c05720  FUN_10c05720  (153 bytes)  offsets=0x228
+       10c057a4  PUSH dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   10fdbaf0  FUN_10fdbaf0  (153 bytes)  offsets=0x228
+       10fdbb66  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f71ad0  FUN_10f71ad0  (153 bytes)  offsets=0x228
+       10f71af7  MOV EAX,dword ptr [EAX + 0x228]
+       10f71b1f  ADD ESI,0x228
+       [decompile cap reached]
+
+   11c0dc20  FUN_11c0dc20  (154 bytes)  offsets=0x21c
+       11c0dc3b  MOV EAX,dword ptr [EDI + 0x21c]
+       11c0dc60  MOV dword ptr [EDI + 0x21c],0x0
+       11c0dc80  MOV dword ptr [EDI + 0x21c],EBX
+       [decompile cap reached]
+
+   10f2c9f0  FUN_10f2c9f0  (155 bytes)  offsets=0x228
+       10f2c9fe  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   107e6600  FUN_107e6600  (157 bytes)  offsets=0x21c
+       107e6690  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10face20  FUN_10face20  (158 bytes)  offsets=0x228
+       10face72  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   116e8ff0  FUN_116e8ff0  (158 bytes)  offsets=0x228
+       116e901b  LEA EAX,[ESI + 0x228]
+       [decompile cap reached]
+
+   123fd122  FUN_123fd122  (158 bytes)  offsets=0x228
+       123fd1ce  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10c03bb0  FUN_10c03bb0  (159 bytes)  offsets=0x220
+       10c03bb8  CMP dword ptr [EDI + 0x220],0x0
+       [decompile cap reached]
+
+   10d808b0  FUN_10d808b0  (160 bytes)  offsets=0x220
+       10d808eb  TEST dword ptr [EBX + EDX*0x4 + 0x220],EAX
+       [decompile cap reached]
+
+   10f69850  FUN_10f69850  (161 bytes)  offsets=0x228
+       10f6986e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1139cbb0  FUN_1139cbb0  (163 bytes)  offsets=0x218
+       1139cc48  JMP dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10bac480  FUN_10bac480  (163 bytes)  offsets=0x228
+       10bac4b7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ff1cd0  CPlayerRage_PL05::OnRageShootLeave  (164 bytes)  offsets=0x228
+       10ff1d2a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1127f6f0  FUN_1127f6f0  (164 bytes)  offsets=0x217
+       1127f785  PUSH 0x217
+       [decompile cap reached]
+
+   10c05670  FUN_10c05670  (164 bytes)  offsets=0x228
+       10c056ff  PUSH dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   10f9ee30  FUN_10f9ee30  (165 bytes)  offsets=0x228
+       10f9ee74  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa2050  FUN_10fa2050  (166 bytes)  offsets=0x228
+       10fa20aa  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9e730  FUN_10f9e730  (167 bytes)  offsets=0x224
+       10f9e76a  MOV byte ptr [ESI + 0x224],0x1
+       [decompile cap reached]
+
+   11bef040  FUN_11bef040  (167 bytes)  offsets=0x218
+       11bef06b  MOV EDX,dword ptr [EDI + 0x218]
+       [decompile cap reached]
+
+   10b91920  FUN_10b91920  (168 bytes)  offsets=0x228
+       10b919b3  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e3ccc0  FUN_10e3ccc0  (169 bytes)  offsets=0x228
+       10e3cd0f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ff1a50  FUN_10ff1a50  (169 bytes)  offsets=0x228
+       10ff1aa5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1103b690  FUN_1103b690  (170 bytes)  offsets=0x228
+       1103b6df  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ffbc70  FUN_10ffbc70  (170 bytes)  offsets=0x228
+       10ffbc8f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b3cce0  FUN_11b3cce0  (171 bytes)  offsets=0x218
+       11b3cce8  LEA ESI,[EDI + 0x218]
+       [decompile cap reached]
+
+   11beea70  FUN_11beea70  (171 bytes)  offsets=0x21c
+       11beeaa8  IMUL EAX,EAX,0x21c
+       [decompile cap reached]
+
+   10a60c30  FUN_10a60c30  (171 bytes)  offsets=0x228
+       10a60c53  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   108a8410  FUN_108a8410  (174 bytes)  offsets=0x21c
+       108a84a7  PUSH 0x21c
+       [decompile cap reached]
+
+   10f974f0  FUN_10f974f0  (175 bytes)  offsets=0x228
+       10f97512  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a65b80  FUN_10a65b80  (175 bytes)  offsets=0x228
+       10a65bcb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10542270  FUN_10542270  (177 bytes)  offsets=0x220
+       1054230c  LEA EAX,[ESI + 0x220]
+       [decompile cap reached]
+
+   1015b040  FUN_1015b040  (179 bytes)  offsets=0x217
+       1015b0dd  MOV dword ptr [ESI + 0x217],0x0
+       [decompile cap reached]
+
+   10f8d800  FUN_10f8d800  (179 bytes)  offsets=0x228
+       10f8d819  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ae3fa0  FUN_10ae3fa0  (179 bytes)  offsets=0x228
+       10ae402e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f8d740  FUN_10f8d740  (179 bytes)  offsets=0x228
+       10f8d759  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d65de0  FUN_10d65de0  (180 bytes)  offsets=0x21c
+       10d65e24  JMP dword ptr [EAX + 0x21c]
+       10d65e58  JMP dword ptr [EAX + 0x21c]
+       10d65e8c  JMP dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10d6c110  FUN_10d6c110  (180 bytes)  offsets=0x21c
+       10d6c154  JMP dword ptr [EAX + 0x21c]
+       10d6c188  JMP dword ptr [EAX + 0x21c]
+       10d6c1bc  JMP dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10ad38a0  FUN_10ad38a0  (180 bytes)  offsets=0x228
+       10ad38e5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fefd40  FUN_10fefd40  (181 bytes)  offsets=0x228
+       10fefd8e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10192d70  TlvLotteryBoxContainer_TextDump  (181 bytes)  offsets=0x228
+       10192dfd  PUSH dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e00930  FUN_10e00930  (181 bytes)  offsets=0x228
+       10e00987  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   11c0da60  FUN_11c0da60  (182 bytes)  offsets=0x224
+       11c0da6c  MOV ECX,dword ptr [EBX + 0x224]
+       [decompile cap reached]
+
+   10f89750  FUN_10f89750  (182 bytes)  offsets=0x228
+       10f897c4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fb0ef0  FUN_10fb0ef0  (182 bytes)  offsets=0x228
+       10fb0f36  MOV dword ptr [ESI + 0x228],0x6
+       [decompile cap reached]
+
+   111eb9d0  FUN_111eb9d0  (183 bytes)  offsets=0x220
+       111eb9e5  ADD ECX,0x220
+       [decompile cap reached]
+
+   10e05680  FUN_10e05680  (184 bytes)  offsets=0x228
+       10e056ae  MOV EAX,dword ptr [EDX + 0x228]
+       10e056f1  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fd18d0  FUN_10fd18d0  (184 bytes)  offsets=0x228
+       10fd1968  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112c3190  FUN_112c3190  (184 bytes)  offsets=0x224
+       112c3235  PUSH 0x224
+       [decompile cap reached]
+
+   10d80a20  FUN_10d80a20  (185 bytes)  offsets=0x220
+       10d80a4f  MOV EBX,dword ptr [EDI + ESI*0x4 + 0x220]
+       [decompile cap reached]
+
+   10fd5a90  FUN_10fd5a90  (186 bytes)  offsets=0x228
+       10fd5abb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11c0db20  FUN_11c0db20  (189 bytes)  offsets=0x218
+       11c0db3b  MOV EAX,dword ptr [EDI + 0x218]
+       11c0db5b  PUSH dword ptr [EDI + 0x218]
+       11c0db68  MOV dword ptr [EDI + 0x218],0x0
+       11c0db9e  MOV dword ptr [EDI + 0x218],EBX
+       [decompile cap reached]
+
+   10f2c930  FUN_10f2c930  (191 bytes)  offsets=0x228
+       10f2c93f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ef4ac0  FUN_10ef4ac0  (191 bytes)  offsets=0x228
+       10ef4aed  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa1010  FUN_10fa1010  (193 bytes)  offsets=0x228
+       10fa1056  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9fb80  FUN_10f9fb80  (195 bytes)  offsets=0x228
+       10f9fba0  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e04430  FUN_10e04430  (196 bytes)  offsets=0x228
+       10e0449c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10ff0460  FUN_10ff0460  (197 bytes)  offsets=0x228
+       10ff0472  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e05550  FUN_10e05550  (197 bytes)  offsets=0x228
+       10e055bb  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   115bbd50  FUN_115bbd50  (198 bytes)  offsets=0x218
+       115bbd89  MOV dword ptr [EBP + -0x1c],0x218
+       [decompile cap reached]
+
+   10f085c0  FUN_10f085c0  (201 bytes)  offsets=0x228
+       10f085c9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f67820  FUN_10f67820  (201 bytes)  offsets=0x228
+       10f67862  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11542430  FUN_11542430  (202 bytes)  offsets=0x228
+       1154243c  MOV dword ptr [ECX + 0x228],EAX
+       [decompile cap reached]
+
+   1139d880  FUN_1139d880  (203 bytes)  offsets=0x218
+       1139d8f9  CALL dword ptr [EAX + 0x218]
+       1139d93c  MOV EAX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10c83170  FUN_10c83170  (204 bytes)  offsets=0x228
+       10c83212  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f98700  FUN_10f98700  (204 bytes)  offsets=0x228
+       10f98796  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d80950  FUN_10d80950  (205 bytes)  offsets=0x220
+       10d80971  MOV EAX,dword ptr [EAX + ESI*0x4 + 0x220]
+       10d809c0  MOV EAX,dword ptr [EAX + ESI*0x4 + 0x220]
+       [decompile cap reached]
+
+   105424a0  FUN_105424a0  (206 bytes)  offsets=0x21c
+       10542551  MOVDQU xmmword ptr [ESI + 0x21c],XMM0
+       [decompile cap reached]
+
+   10d8d2d0  FUN_10d8d2d0  (206 bytes)  offsets=0x228
+       10d8d2f2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6fa10  FUN_10f6fa10  (206 bytes)  offsets=0x224
+       10f6fa20  LEA ECX,[ESI + 0x224]
+       [decompile cap reached]
+
+   10f6f5e0  FUN_10f6f5e0  (206 bytes)  offsets=0x224
+       10f6f5f0  LEA ECX,[ESI + 0x224]
+       [decompile cap reached]
+
+   1143d520  FUN_1143d520  (206 bytes)  offsets=0x21c
+       1143d584  CALL dword ptr [EDX + 0x21c]
+       1143d5bb  CALL dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   10ccd790  FUN_10ccd790  (207 bytes)  offsets=0x228
+       10ccd7c5  LEA ECX,[EDI + 0x228]
+       [decompile cap reached]
+
+   10f85990  FUN_10f85990  (207 bytes)  offsets=0x228
+       10f859c6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10aa6420  FUN_10aa6420  (208 bytes)  offsets=0x228
+       10aa64ab  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10ffbd20  FUN_10ffbd20  (208 bytes)  offsets=0x228
+       10ffbd59  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a65410  FUN_10a65410  (209 bytes)  offsets=0x228
+       10a654ab  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fd8620  FUN_10fd8620  (209 bytes)  offsets=0x228
+       10fd86d7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1116c920  FUN_1116c920  (210 bytes)  offsets=0x21c
+       1116c923  SUB ESP,0x21c
+       [decompile cap reached]
+
+   11114430  FUN_11114430  (210 bytes)  offsets=0x228
+       111144ef  LEA EAX,[ESI + 0x228]
+       [decompile cap reached]
+
+   10a82ab0  FUN_10a82ab0  (212 bytes)  offsets=0x228
+       10a82ac7  CALL dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10bf3d80  FUN_10bf3d80  (214 bytes)  offsets=0x228
+       10bf3db6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   123fc8fa  FUN_123fc8fa  (215 bytes)  offsets=0x228
+       123fc902  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11059bf0  FUN_11059bf0  (215 bytes)  offsets=0x228
+       11059c0b  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fa2670  FUN_10fa2670  (216 bytes)  offsets=0x228
+       10fa2698  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f91120  FUN_10f91120  (216 bytes)  offsets=0x228
+       10f91199  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a204c0  FUN_10a204c0  (217 bytes)  offsets=0x228
+       10a204c3  SUB ESP,0x228
+       [decompile cap reached]
+
+   10a49e10  FUN_10a49e10  (218 bytes)  offsets=0x218
+       10a49edb  LEA ECX,[ESI + 0x218]
+       [decompile cap reached]
+
+   111ec060  FUN_111ec060  (219 bytes)  offsets=0x220
+       111ec089  LEA ECX,[EDI + 0x220]
+       111ec09f  LEA ECX,[EDI + 0x220]
+       [decompile cap reached]
+
+   10f18240  FUN_10f18240  (219 bytes)  offsets=0x228
+       10f1827e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1004d510  FUN_1004d510  (222 bytes)  offsets=0x224
+       1004d551  MOV dword ptr [EBP + 0xfffffdd0],0x224
+       [decompile cap reached]
+
+   1171c4f0  FUN_1171c4f0  (223 bytes)  offsets=0x228
+       1171c5a3  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   10f6e500  FUN_10f6e500  (223 bytes)  offsets=0x228
+       10f6e58a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fefe00  CPlayerRageRush::OnLowHighLeave_A  (226 bytes)  offsets=0x228
+       10fefe38  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1166dac0  FUN_1166dac0  (228 bytes)  offsets=0x218
+       1166dadf  CMP dword ptr [EAX + 0x218],0x0
+       1166daeb  MOV ECX,dword ptr [ECX + 0x218]
+       1166db0e  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   112ebf50  FUN_112ebf50  (228 bytes)  offsets=0x228
+       112ebffd  LEA ECX,[EBX + 0x228]
+       112ec00c  LEA ECX,[EBX + 0x228]
+       [decompile cap reached]
+
+   10bf4a00  FUN_10bf4a00  (228 bytes)  offsets=0x228
+       10bf4a12  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11c0c930  FUN_11c0c930  (228 bytes)  offsets=0x224
+       11c0c950  MOV ECX,dword ptr [EBX + 0x224]
+       [decompile cap reached]
+
+   10f9aa60  FUN_10f9aa60  (230 bytes)  offsets=0x228
+       10f9ab1d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1105a720  FUN_1105a720  (230 bytes)  offsets=0x228
+       1105a7ca  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10e31f00  FUN_10e31f00  (230 bytes)  offsets=0x228
+       10e31f3e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f03250  FUN_10f03250  (231 bytes)  offsets=0x228
+       10f03317  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11c29930  FUN_11c29930  (233 bytes)  offsets=0x228
+       11c2994a  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   105429d0  FUN_105429d0  (234 bytes)  offsets=0x224
+       10542a52  LEA EAX,[ESI + 0x224]
+       [decompile cap reached]
+
+   10f78e00  FUN_10f78e00  (235 bytes)  offsets=0x228
+       10f78e8c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c23e90  FUN_10c23e90  (235 bytes)  offsets=0x228
+       10c23ee3  MOV EAX,dword ptr [EAX + 0x228]
+       10c23f3e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6a3f0  FUN_10f6a3f0  (236 bytes)  offsets=0x228
+       10f6a41d  MOV EAX,dword ptr [EAX + 0x228]
+       10f6a4bd  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f86c60  FUN_10f86c60  (237 bytes)  offsets=0x228
+       10f86c8e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efcd60  FUN_10efcd60  (237 bytes)  offsets=0x228
+       10efcd69  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa5670  FUN_10fa5670  (240 bytes)  offsets=0x228
+       10fa5734  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa2af0  FUN_10fa2af0  (240 bytes)  offsets=0x228
+       10fa2b3b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f2cae0  FUN_10f2cae0  (241 bytes)  offsets=0x228
+       10f2caef  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efc8b0  FUN_10efc8b0  (242 bytes)  offsets=0x228
+       10efc8b9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   105423a0  FUN_105423a0  (242 bytes)  offsets=0x220
+       1054245a  LEA EAX,[ESI + 0x220]
+       [decompile cap reached]
+
+   10b96d80  FUN_10b96d80  (248 bytes)  offsets=0x228
+       10b96dd2  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   11beeb20  FUN_11beeb20  (248 bytes)  offsets=0x220
+       11beeb23  SUB ESP,0x220
+       [decompile cap reached]
+
+   11c0df90  FUN_11c0df90  (250 bytes)  offsets=0x224
+       11c0dfe0  MOV ECX,dword ptr [EBX + 0x224]
+       [decompile cap reached]
+
+   10f15c00  FUN_10f15c00  (253 bytes)  offsets=0x228
+       10f15c29  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e31d20  FUN_10e31d20  (255 bytes)  offsets=0x228
+       10e31d85  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f8dbb0  FUN_10f8dbb0  (255 bytes)  offsets=0x228
+       10f8dbdb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c03ab0  FUN_10c03ab0  (256 bytes)  offsets=0x228
+       10c03ac0  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f975a0  FUN_10f975a0  (256 bytes)  offsets=0x228
+       10f9763d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ee5fc0  FUN_10ee5fc0  (256 bytes)  offsets=0x21c
+       10ee6006  MOV dword ptr [ESI + 0x21c],0x2000
+       [decompile cap reached]
+
+   10fefef0  CPlayerRageRush::OnLowHighLeave_B  (257 bytes)  offsets=0x228
+       10feff6e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10eedb20  FUN_10eedb20  (258 bytes)  offsets=0x228
+       10eedb9a  LEA EAX,[ESI + 0x228]
+       [decompile cap reached]
+
+   10fa0df0  FUN_10fa0df0  (259 bytes)  offsets=0x228
+       10fa0e08  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa0f00  FUN_10fa0f00  (259 bytes)  offsets=0x228
+       10fa0f18  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1171cc90  FUN_1171cc90  (259 bytes)  offsets=0x228
+       1171ccb8  SUB ECX,dword ptr [EBX + 0x228]
+       1171cccc  SUB EAX,dword ptr [EBX + 0x228]
+       1171ccd9  MOV EAX,dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   10f93cf0  FUN_10f93cf0  (260 bytes)  offsets=0x220
+       10f93da9  MOV EAX,dword ptr [ESI + ECX*0x4 + 0x220]
+       10f93dc1  MOV EAX,dword ptr [ESI + ECX*0x4 + 0x220]
+       [decompile cap reached]
+
+   10efe860  FUN_10efe860  (260 bytes)  offsets=0x228
+       10efe902  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10bab970  FUN_10bab970  (262 bytes)  offsets=0x228
+       10bab9bb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f67b30  FUN_10f67b30  (262 bytes)  offsets=0x228
+       10f67b6c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fdbe60  FUN_10fdbe60  (262 bytes)  offsets=0x228
+       10fdbf43  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c213a0  FUN_10c213a0  (263 bytes)  offsets=0x228
+       10c213ee  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10b961d0  FUN_10b961d0  (263 bytes)  offsets=0x228
+       10b961ef  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fa2100  FUN_10fa2100  (264 bytes)  offsets=0x228
+       10fa21b4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ff0780  FUN_10ff0780  (265 bytes)  offsets=0x228
+       10ff07b0  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f695f0  FUN_10f695f0  (266 bytes)  offsets=0x228
+       10f69631  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10facd10  FUN_10facd10  (267 bytes)  offsets=0x228
+       10facd75  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a7a8a0  FUN_10a7a8a0  (270 bytes)  offsets=0x228
+       10a7a96d  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   108819c0  FUN_108819c0  (271 bytes)  offsets=0x21c
+       10881aa3  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f6d020  FUN_10f6d020  (274 bytes)  offsets=0x228
+       10f6d032  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b61a50  FUN_11b61a50  (274 bytes)  offsets=0x228
+       11b61a5c  PUSH dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   1084c260  CLobbyController::SetLobbySceneState  (275 bytes)  offsets=0x21c
+       1084c348  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f8fdc0  FUN_10f8fdc0  (276 bytes)  offsets=0x228
+       10f8fe5b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b3d7b0  FUN_11b3d7b0  (277 bytes)  offsets=0x228
+       11b3d7d3  CMP dword ptr [EBX + 0x228],EAX
+       11b3d854  PUSH dword ptr [EBX + 0x228]
+       11b3d892  MOV dword ptr [EBX + 0x228],0x0
+       [decompile cap reached]
+
+   108912a0  FUN_108912a0  (284 bytes)  offsets=0x218
+       1089136e  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10f8c990  FUN_10f8c990  (287 bytes)  offsets=0x218
+       10f8c9a3  MOV byte ptr [ESI + 0x218],0x0
+       [decompile cap reached]
+
+   10c333c0  FUN_10c333c0  (287 bytes)  offsets=0x228
+       10c334a5  MOV ESI,dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   10efac50  FUN_10efac50  (287 bytes)  offsets=0x228
+       10efac5b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f70050  FUN_10f70050  (288 bytes)  offsets=0x228
+       10f70062  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f08d70  FUN_10f08d70  (290 bytes)  offsets=0x228
+       10f08d9d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa4270  FUN_10fa4270  (293 bytes)  offsets=0x228
+       10fa428a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fac2e0  FUN_10fac2e0  (295 bytes)  offsets=0x228
+       10fac2f5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1105ab90  CEvpDamageChecker::ClearExpiredFiremodes  (299 bytes)  offsets=0x228
+       1105abf2  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   123fdc7c  FUN_123fdc7c  (302 bytes)  offsets=0x228
+       123fdd2f  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f0ca80  FUN_10f0ca80  (303 bytes)  offsets=0x228
+       10f0ca92  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c67770  FUN_10c67770  (304 bytes)  offsets=0x21c
+       10c677b7  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10ffd730  FUN_10ffd730  (304 bytes)  offsets=0x220
+       10ffd7b8  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   1058bc60  FUN_1058bc60  (305 bytes)  offsets=0x224
+       1058bcd3  MOV dword ptr [ESP + 0x18],0x224
+       1058bd20  CMP dword ptr [EAX],0x224
+       [decompile cap reached]
+
+   1058b760  FUN_1058b760  (305 bytes)  offsets=0x220
+       1058b7d3  MOV dword ptr [ESP + 0x18],0x220
+       1058b820  CMP dword ptr [EAX],0x220
+       [decompile cap reached]
+
+   10f413a0  FUN_10f413a0  (306 bytes)  offsets=0x228
+       10f41459  MOV EAX,dword ptr [EAX + 0x228]
+       10f4148f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1121bf50  FUN_1121bf50  (308 bytes)  offsets=0x21c
+       1121bf53  SUB ESP,0x21c
+       [decompile cap reached]
+
+   103f0d30  FUN_103f0d30  (308 bytes)  offsets=0x224
+       103f0e39  LEA EAX,[EDI + 0x224]
+       [decompile cap reached]
+
+   10f9f1d0  FUN_10f9f1d0  (309 bytes)  offsets=0x228
+       10f9f24c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f8cd30  FUN_10f8cd30  (310 bytes)  offsets=0x218
+       10f8cdaf  CMP byte ptr [EBX + 0x218],0x0
+       [decompile cap reached]
+
+   11632f90  FUN_11632f90  (313 bytes)  offsets=0x21c
+       11632fbd  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f74e30  FUN_10f74e30  (313 bytes)  offsets=0x228
+       10f74e7e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11632700  FUN_11632700  (313 bytes)  offsets=0x220
+       1163272d  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   1148a300  FUN_1148a300  (316 bytes)  offsets=0x218
+       1148a359  MOV dword ptr [EBP + -0x18],0x218
+       [decompile cap reached]
+
+   10f9eee0  FUN_10f9eee0  (317 bytes)  offsets=0x228
+       10f9effe  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d62b50  FUN_10d62b50  (319 bytes)  offsets=0x228
+       10d62ba6  MOV EAX,dword ptr [EAX + 0x228]
+       10d62bf3  MOV EAX,dword ptr [EAX + 0x228]
+       10d62c31  MOV EAX,dword ptr [EAX + 0x228]
+       10d62c62  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1103b740  FUN_1103b740  (319 bytes)  offsets=0x228
+       1103b7a2  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ccb830  FUN_10ccb830  (319 bytes)  offsets=0x21c
+       10ccb8ba  MOV EAX,dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10b92350  CMonsterCombat::UpdateDragonheatFlameTransform  (320 bytes)  offsets=0x218
+       10b9247c  MOVUPS xmmword ptr [EAX + 0x218],XMM0
+       [decompile cap reached]
+
+   115e7c20  FUN_115e7c20  (322 bytes)  offsets=0x224
+       115e7ce5  MOV dword ptr [EBP + -0x10],0x224
+       [decompile cap reached]
+
+   10864210  FUN_10864210  (322 bytes)  offsets=0x218
+       10864288  MOV EBX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   103f0b90  FUN_103f0b90  (323 bytes)  offsets=0x224
+       103f0ca8  LEA EAX,[ESI + 0x224]
+       [decompile cap reached]
+
+   10f91660  CPetLocomotion::SelectCliffJumpOrFallAnim  (325 bytes)  offsets=0x228
+       10f91680  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   110596a0  FUN_110596a0  (325 bytes)  offsets=0x228
+       110596fb  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f15ab0  FUN_10f15ab0  (328 bytes)  offsets=0x228
+       10f15b31  MOV EDX,dword ptr [EDX + 0x228]
+       10f15b63  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c75a10  FUN_10c75a10  (331 bytes)  offsets=0x21c
+       10c75a16  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10543710  FUN_10543710  (334 bytes)  offsets=0x228
+       10543779  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   11b665d0  Scaleform::Render::HAL::beginDisplay  (335 bytes)  offsets=0x220
+       11b6661f  MOV EAX,dword ptr [EBX + 0x220]
+       11b6662d  MOV dword ptr [EBX + 0x220],ECX
+       [decompile cap reached]
+
+   10cca230  FUN_10cca230  (335 bytes)  offsets=0x218
+       10cca251  CALL dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   1151e780  FUN_1151e780  (336 bytes)  offsets=0x224
+       1151e895  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10f08ba0  FUN_10f08ba0  (337 bytes)  offsets=0x228
+       10f08ba8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f85830  FUN_10f85830  (338 bytes)  offsets=0x21c
+       10f858f8  LEA EAX,[EDI + 0x21c]
+       [decompile cap reached]
+
+   10b91eb0  FUN_10b91eb0  (339 bytes)  offsets=0x228
+       10b91ecc  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10837b90  FUN_10837b90  (340 bytes)  offsets=0x21c
+       10837bf8  CALL dword ptr [EAX + 0x21c]
+       10837c36  CALL dword ptr [EAX + 0x21c]
+       10837c74  CALL dword ptr [EAX + 0x21c]
+       10837cb2  CALL dword ptr [EAX + 0x21c]
+       10837cd7  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   112596a0  FUN_112596a0  (342 bytes)  offsets=0x228
+       112597c0  LEA EBX,[EDI + 0x228]
+       [decompile cap reached]
+
+   10b92ef0  FUN_10b92ef0  (342 bytes)  offsets=0x228
+       10b92f0c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10bf4c10  FUN_10bf4c10  (343 bytes)  offsets=0x228
+       10bf4ca5  MOV EAX,dword ptr [EAX + 0x228]
+       10bf4d41  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11bef0f0  FUN_11bef0f0  (344 bytes)  offsets=0x21c
+       11bef13a  IMUL EAX,ESI,0x21c
+       11bef173  LEA ECX,[ECX + 0x21c]
+       11bef210  ADD EDI,0x21c
+       [decompile cap reached]
+
+   100539d0  FUN_100539d0  (346 bytes)  offsets=0x21c
+       10053af7  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10c758b0  FUN_10c758b0  (348 bytes)  offsets=0x21c
+       10c758b3  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10fd7490  FUN_10fd7490  (353 bytes)  offsets=0x228
+       10fd74a8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f87670  CSkillState::ParseBoostBuffID  (356 bytes)  offsets=0x224
+       10f876fa  ADD EAX,0x224
+       [decompile cap reached]
+
+   1100f0a0  FUN_1100f0a0  (358 bytes)  offsets=0x220
+       1100f1f9  CALL dword ptr [ESI + 0x220]
+       [decompile cap reached]
+
+   10fa03a0  FUN_10fa03a0  (359 bytes)  offsets=0x228
+       10fa0408  MOV EDX,dword ptr [EDX + 0x228]
+       10fa04a8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f868e0  FUN_10f868e0  (361 bytes)  offsets=0x228
+       10f86928  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f8cab0  FUN_10f8cab0  (364 bytes)  offsets=0x228
+       10f8cadb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   101929c0  FUN_101929c0  (364 bytes)  offsets=0x228
+       10192a41  LEA EAX,[EBX + 0x228]
+       [decompile cap reached]
+
+   10192b30  FUN_10192b30  (364 bytes)  offsets=0x228
+       10192bb1  LEA EAX,[EBX + 0x228]
+       [decompile cap reached]
+
+   10192780  TlvLotteryBoxContainer_Pack_v2  (365 bytes)  offsets=0x228
+       101928cd  PUSH dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10192610  TlvLotteryBoxContainer_Pack_v1  (365 bytes)  offsets=0x228
+       1019275d  PUSH dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   108381c0  FUN_108381c0  (367 bytes)  offsets=0x21c
+       10838322  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f933e0  FUN_10f933e0  (368 bytes)  offsets=0x228
+       10f9342f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1003d890  FUN_1003d890  (368 bytes)  offsets=0x21c
+       1003d890  SUB ESP,0x21c
+       1003d9fa  ADD ESP,0x21c
+       [decompile cap reached]
+
+   10f9c990  FUN_10f9c990  (369 bytes)  offsets=0x228
+       10f9ca1c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   115bad40  FUN_115bad40  (371 bytes)  offsets=0x218
+       115bada6  MOV dword ptr [EBP + -0x1c],0x218
+       [decompile cap reached]
+
+   115baec0  FUN_115baec0  (371 bytes)  offsets=0x218
+       115baf26  MOV dword ptr [EBP + -0x1c],0x218
+       [decompile cap reached]
+
+   1058abb0  FUN_1058abb0  (376 bytes)  offsets=0x218
+       1058ac24  MOV dword ptr [ESP + 0x20],0x218
+       1058ac90  CMP dword ptr [EAX],0x218
+       [decompile cap reached]
+
+   10019f20  FUN_10019f20  (380 bytes)  offsets=0x218
+       1001a000  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10c057c0  FUN_10c057c0  (382 bytes)  offsets=0x228
+       10c05849  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   10a52e40  FUN_10a52e40  (382 bytes)  offsets=0x228
+       10a52f15  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c362a0  FUN_10c362a0  (384 bytes)  offsets=0x228
+       10c362a8  SUB ESP,0x228
+       [decompile cap reached]
+
+   114cf6b0  CLevelEnGroup::GrantGroupReward  (386 bytes)  offsets=0x228
+       114cf7e5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11234a40  FUN_11234a40  (387 bytes)  offsets=0x228
+       11234b2d  PUSH 0x228
+       [decompile cap reached]
+
+   110f9c20  FUN_110f9c20  (387 bytes)  offsets=0x228
+       110f9cfb  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   1166f7e0  FUN_1166f7e0  (387 bytes)  offsets=0x21c
+       1166f8b5  ADD ECX,0x21c
+       [decompile cap reached]
+
+   1001a7c0  FUN_1001a7c0  (389 bytes)  offsets=0x218
+       1001a8f4  MOV EAX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   108910e0  FUN_108910e0  (394 bytes)  offsets=0x218
+       10891213  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   1151e910  FUN_1151e910  (399 bytes)  offsets=0x224
+       1151e9f8  CALL dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10f97bc0  FUN_10f97bc0  (401 bytes)  offsets=0x228
+       10f97cb8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d53fe0  FUN_10d53fe0  (402 bytes)  offsets=0x228
+       10d540db  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fa1de0  FUN_10fa1de0  (402 bytes)  offsets=0x228
+       10fa1e5b  MOV EAX,dword ptr [EAX + 0x228]
+       10fa1f4b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10b95a60  FUN_10b95a60  (403 bytes)  offsets=0x228
+       10b95a97  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10bc4120  FUN_10bc4120  (405 bytes)  offsets=0x228
+       10bc42a7  LEA EAX,[ESI + 0x228]
+       [decompile cap reached]
+
+   1166ff00  FUN_1166ff00  (409 bytes)  offsets=0x21c
+       116700cd  ADD ECX,0x21c
+       [decompile cap reached]
+
+   10f93240  FUN_10f93240  (412 bytes)  offsets=0x228
+       10f932e2  MOV EAX,dword ptr [EAX + 0x228]
+       10f9337c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e3a4f0  FUN_10e3a4f0  (415 bytes)  offsets=0x228
+       10e3a589  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa2210  FUN_10fa2210  (416 bytes)  offsets=0x228
+       10fa224d  MOV EAX,dword ptr [EAX + 0x228]
+       10fa22c4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9f020  FUN_10f9f020  (416 bytes)  offsets=0x228
+       10f9f0ac  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f2aeb0  FUN_10f2aeb0  (423 bytes)  offsets=0x228
+       10f2af51  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10891950  MHUI::FormatUpgradeItemName  (431 bytes)  offsets=0x218
+       10891a68  MOV ECX,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10f15f30  FUN_10f15f30  (431 bytes)  offsets=0x228
+       10f16021  MOV EAX,dword ptr [EAX + 0x228]
+       10f160c4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f74360  FUN_10f74360  (431 bytes)  offsets=0x228
+       10f743c0  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c60c10  FUN_10c60c10  (437 bytes)  offsets=0x21c
+       10c60c18  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10bc3e90  FUN_10bc3e90  (438 bytes)  offsets=0x228
+       10bc4029  LEA EAX,[ESI + 0x228]
+       [decompile cap reached]
+
+   10fa3020  FUN_10fa3020  (439 bytes)  offsets=0x228
+       10fa306a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1084c380  CLobbyController::SetLobbyAnimation  (439 bytes)  offsets=0x21c
+       1084c473  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f7e670  FUN_10f7e670  (439 bytes)  offsets=0x218
+       10f7e6cc  MOV byte ptr [EBX + 0x218],0x0
+       [decompile cap reached]
+
+   1001a600  FUN_1001a600  (439 bytes)  offsets=0x218
+       1001a732  MOV dword ptr [ECX + 0x218],EAX
+       1001a768  MOV EDX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   10557e40  FUN_10557e40  (442 bytes)  offsets=0x228
+       10557e58  MOV ESI,dword ptr [EBX + 0x228]
+       10557e5f  LEA EDI,[EBX + 0x228]
+       10557e75  LEA EAX,[EBX + 0x228]
+       10557fd9  LEA EAX,[EBX + 0x228]
+       [decompile cap reached]
+
+   11003730  FUN_11003730  (443 bytes)  offsets=0x224
+       11003736  SUB ESP,0x224
+       [decompile cap reached]
+
+   10fa2d50  FUN_10fa2d50  (444 bytes)  offsets=0x228
+       10fa2dcb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efc6f0  FUN_10efc6f0  (444 bytes)  offsets=0x228
+       10efc6fb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10557ac0  FUN_10557ac0  (445 bytes)  offsets=0x218
+       10557adf  MOV ESI,dword ptr [EBX + 0x218]
+       10557ae6  LEA EDI,[EBX + 0x218]
+       10557afc  LEA EAX,[EBX + 0x218]
+       10557c59  LEA EAX,[EBX + 0x218]
+       [decompile cap reached]
+
+   10595160  FUN_10595160  (445 bytes)  offsets=0x220
+       10595229  MOV EAX,dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10557c80  FUN_10557c80  (445 bytes)  offsets=0x220
+       10557c9f  MOV ESI,dword ptr [EBX + 0x220]
+       10557ca6  LEA EDI,[EBX + 0x220]
+       10557cbc  LEA EAX,[EBX + 0x220]
+       10557e19  LEA EAX,[EBX + 0x220]
+       [decompile cap reached]
+
+   10bf33d0  FUN_10bf33d0  (446 bytes)  offsets=0x228
+       10bf347f  MOV EAX,dword ptr [EAX + 0x228]
+       10bf34d7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11001c80  FUN_11001c80  (446 bytes)  offsets=0x228
+       11001d29  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1159b460  FUN_1159b460  (449 bytes)  offsets=0x218
+       1159b57e  MOV ECX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   10f97320  FUN_10f97320  (449 bytes)  offsets=0x228
+       10f97374  MOV EAX,dword ptr [EAX + 0x228]
+       10f97498  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11466030  FUN_11466030  (450 bytes)  offsets=0x21c
+       1146611f  ADD EAX,0x21c
+       [decompile cap reached]
+
+   1058b190  FUN_1058b190  (451 bytes)  offsets=0x21c
+       1058b212  MOV dword ptr [ESP + 0x20],0x21c
+       1058b2b0  CMP dword ptr [EAX],0x21c
+       [decompile cap reached]
+
+   1058c2b0  FUN_1058c2b0  (451 bytes)  offsets=0x228
+       1058c332  MOV dword ptr [ESP + 0x20],0x228
+       1058c3d0  CMP dword ptr [EAX],0x228
+       [decompile cap reached]
+
+   116e46c0  FUN_116e46c0  (452 bytes)  offsets=0x228
+       116e47c4  LEA EAX,[ECX + 0x228]
+       [decompile cap reached]
+
+   10c239c0  FUN_10c239c0  (453 bytes)  offsets=0x228
+       10c239f4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fabaa0  FUN_10fabaa0  (453 bytes)  offsets=0x228
+       10fabc34  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f7e370  CChargeState::Enter  (453 bytes)  offsets=0x218
+       10f7e527  MOV byte ptr [EDI + 0x218],0x1
+       [decompile cap reached]
+
+   11092f60  FUN_11092f60  (460 bytes)  offsets=0x21c
+       110930ab  MOVSS XMM0,dword ptr [ECX + EBX*0x4 + 0x21c]
+       [decompile cap reached]
+
+   114a81e0  CGuildSkillInfo::CollectAvailableSkills  (463 bytes)  offsets=0x224
+       114a8207  MOVZX EAX,byte ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   1004a240  FUN_1004a240  (463 bytes)  offsets=0x224
+       1004a243  SUB ESP,0x224
+       [decompile cap reached]
+
+   10f8f020  FUN_10f8f020  (463 bytes)  offsets=0x228
+       10f8f046  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1001a430  FUN_1001a430  (464 bytes)  offsets=0x218
+       1001a5a9  MOV EAX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   1152f980  FUN_1152f980  (465 bytes)  offsets=0x217
+       1152f9db  MOV dword ptr [EDI + 0x217],0x0
+       [decompile cap reached]
+
+   10fee3d0  FUN_10fee3d0  (466 bytes)  offsets=0x228
+       10fee3e7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c75340  FUN_10c75340  (471 bytes)  offsets=0x224
+       10c75343  SUB ESP,0x224
+       [decompile cap reached]
+
+   10fa2750  FUN_10fa2750  (473 bytes)  offsets=0x228
+       10fa280b  MOV EAX,dword ptr [EAX + 0x228]
+       10fa28b5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1127f820  FUN_1127f820  (475 bytes)  offsets=0x217
+       1127f894  PUSH 0x217
+       1127f9d6  PUSH 0x217
+       [decompile cap reached]
+
+   10f73740  FUN_10f73740  (475 bytes)  offsets=0x228
+       10f738c4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f41a00  FUN_10f41a00  (476 bytes)  offsets=0x224
+       10f41adf  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10fac9e0  FUN_10fac9e0  (477 bytes)  offsets=0x228
+       10faca57  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11468c80  FUN_11468c80  (481 bytes)  offsets=0x21c
+       11468d4a  ADD EAX,0x21c
+       [decompile cap reached]
+
+   11004740  BehaviorTree::LoadWithParentInheritance  (485 bytes)  offsets=0x228
+       11004743  SUB ESP,0x228
+       [decompile cap reached]
+
+   10f86d60  FUN_10f86d60  (490 bytes)  offsets=0x228
+       10f86da0  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b36800  FUN_11b36800  (491 bytes)  offsets=0x218
+       11b3686c  LEA ECX,[ESI + 0x218]
+       [decompile cap reached]
+
+   114942b0  FUN_114942b0  (496 bytes)  offsets=0x224
+       114943ba  MOVZX EAX,byte ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10f979c0  FUN_10f979c0  (499 bytes)  offsets=0x228
+       10f97a49  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f83a80  FUN_10f83a80  (501 bytes)  offsets=0x220
+       10f83b26  PUSH dword ptr [EDI + 0x220]
+       [decompile cap reached]
+
+   11bee2d0  FUN_11bee2d0  (502 bytes)  offsets=0x21c
+       11bee336  ADD EAX,0x21c
+       11bee37e  IMUL EDI,EBX,0x21c
+       11bee481  IMUL EAX,EBX,0x21c
+       11bee49a  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10f2b0f0  FUN_10f2b0f0  (517 bytes)  offsets=0x228
+       10f2b103  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f86a50  FUN_10f86a50  (517 bytes)  offsets=0x228
+       10f86a80  MOV EAX,dword ptr [EAX + 0x228]
+       10f86b7c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10deaad0  FUN_10deaad0  (521 bytes)  offsets=0x228
+       10deab09  MOV EAX,dword ptr [EAX + 0x228]
+       10deab1f  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10b96e80  FUN_10b96e80  (521 bytes)  offsets=0x228
+       10b97042  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f992d0  FUN_10f992d0  (522 bytes)  offsets=0x228
+       10f992fd  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a5d1a0  FUN_10a5d1a0  (522 bytes)  offsets=0x228
+       10a5d1c0  CALL dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f97110  FUN_10f97110  (523 bytes)  offsets=0x228
+       10f9729e  MOV EAX,dword ptr [EAX + 0x228]
+       10f972d3  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1058a9a0  FUN_1058a9a0  (525 bytes)  offsets=0x217
+       1058aa27  MOV dword ptr [ESP + 0x20],0x217
+       1058ab10  CMP dword ptr [EAX],0x217
+       [decompile cap reached]
+
+   11003f90  FUN_11003f90  (528 bytes)  offsets=0x220
+       11003f93  SUB ESP,0x220
+       [decompile cap reached]
+
+   115a53d0  FUN_115a53d0  (529 bytes)  offsets=0x224
+       115a556d  MOV EAX,dword ptr [EAX + 0x224]
+       [decompile cap reached]
+
+   10f84ac0  FUN_10f84ac0  (531 bytes)  offsets=0x228
+       10f84b3c  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d72dd0  FUN_10d72dd0  (538 bytes)  offsets=0x228
+       10d72e82  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11468210  FUN_11468210  (538 bytes)  offsets=0x21c
+       114682f3  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10554dd0  FUN_10554dd0  (541 bytes)  offsets=0x228
+       10554ed9  MOV AL,byte ptr [ECX + 0x228]
+       [decompile cap reached]
+
+   1171ca70  FUN_1171ca70  (541 bytes)  offsets=0x228
+       1171ca90  SUB EAX,dword ptr [ESI + 0x228]
+       1171cbc8  MOV ESI,dword ptr [ESI + 0x228]
+       1171cc50  SUB EAX,dword ptr [EBX + 0x228]
+       [decompile cap reached]
+
+   10bc3b80  PlayerInputContext::RegisterActionFilters  (547 bytes)  offsets=0x21c
+       10bc3c6d  LEA EAX,[EBX + 0x21c]
+       [decompile cap reached]
+
+   10834820  FUN_10834820  (548 bytes)  offsets=0x21c
+       10834a38  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10834430  FUN_10834430  (552 bytes)  offsets=0x220
+       108345df  CALL dword ptr [EDX + 0x220]
+       [decompile cap reached]
+
+   1142b1a0  FUN_1142b1a0  (554 bytes)  offsets=0x218
+       1142b1a3  SUB ESP,0x218
+       [decompile cap reached]
+
+   10f877e0  FUN_10f877e0  (560 bytes)  offsets=0x224
+       10f878ba  MOV dword ptr [ESI + 0x224],0x0
+       [decompile cap reached]
+
+   110b92d0  FUN_110b92d0  (560 bytes)  offsets=0x220
+       110b92d3  SUB ESP,0x220
+       [decompile cap reached]
+
+   10053f40  FUN_10053f40  (561 bytes)  offsets=0x220
+       10053fd4  ADD EAX,0x220
+       10053ffe  LEA ECX,[EDX + EAX*0x1 + 0x220]
+       [decompile cap reached]
+
+   11542140  FUN_11542140  (562 bytes)  offsets=0x228
+       11542163  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f08960  FUN_10f08960  (563 bytes)  offsets=0x228
+       10f0896e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ddeef0  CItem::PreloadFiremodeXmlModels  (566 bytes)  offsets=0x21c
+       10ddeef3  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10efb5b0  FUN_10efb5b0  (569 bytes)  offsets=0x21c
+       10efb675  CALL dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   116ddd10  list::sort_116ddd10  (577 bytes)  offsets=0x218
+       116ddd13  SUB ESP,0x218
+       [decompile cap reached]
+
+   119850d0  list::sort_119850d0  (577 bytes)  offsets=0x218
+       119850d3  SUB ESP,0x218
+       [decompile cap reached]
+
+   116ddf60  list::sort_116ddf60  (581 bytes)  offsets=0x21c
+       116ddf63  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10e04f10  FUN_10e04f10  (590 bytes)  offsets=0x228
+       10e05079  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   116fa7e0  list::sort_116fa7e0  (590 bytes)  offsets=0x218
+       116fa7e3  SUB ESP,0x218
+       [decompile cap reached]
+
+   1143bd50  list::sort_1143bd50  (590 bytes)  offsets=0x218
+       1143bd53  SUB ESP,0x218
+       [decompile cap reached]
+
+   117c4560  list::sort_117c4560  (590 bytes)  offsets=0x218
+       117c4563  SUB ESP,0x218
+       [decompile cap reached]
+
+   10c03470  FUN_10c03470  (592 bytes)  offsets=0x228
+       10c03481  CALL dword ptr [EAX + 0x228]
+       10c0350f  CALL dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c052c0  FUN_10c052c0  (598 bytes)  offsets=0x228
+       10c05310  LEA EBX,[EDI + 0x228]
+       [decompile cap reached]
+
+   115de710  FUN_115de710  (599 bytes)  offsets=0x21c
+       115de713  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10f17580  FUN_10f17580  (604 bytes)  offsets=0x228
+       10f17588  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fd8700  FUN_10fd8700  (606 bytes)  offsets=0x228
+       10fd8711  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   116fa570  list::sort_116fa570  (614 bytes)  offsets=0x21c
+       116fa573  SUB ESP,0x21c
+       [decompile cap reached]
+
+   1188ffc0  list::sort_1188ffc0  (614 bytes)  offsets=0x21c
+       1188ffc3  SUB ESP,0x21c
+       [decompile cap reached]
+
+   1195f770  list::sort_1195f770  (617 bytes)  offsets=0x21c
+       1195f773  SUB ESP,0x21c
+       [decompile cap reached]
+
+   1166b7c0  FUN_1166b7c0  (625 bytes)  offsets=0x21c
+       1166ba1a  ADD ECX,0x21c
+       [decompile cap reached]
+
+   10f58d40  FUN_10f58d40  (632 bytes)  offsets=0x228
+       10f58f4e  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa35e0  CPetLocomotion::OnFallAnimEvent  (633 bytes)  offsets=0x228
+       10fa35f4  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10b07620  FUN_10b07620  (633 bytes)  offsets=0x218
+       10b07623  SUB ESP,0x218
+       [decompile cap reached]
+
+   10ba8b60  FUN_10ba8b60  (646 bytes)  offsets=0x228
+       10ba9128  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10aa2650  FUN_10aa2650  (655 bytes)  offsets=0x228
+       10aa27ec  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   11723a70  list::sort_11723a70  (657 bytes)  offsets=0x220
+       11723a73  SUB ESP,0x220
+       [decompile cap reached]
+
+   10011f20  FUN_10011f20  (659 bytes)  offsets=0x21c
+       10011fe0  ADD ECX,0x21c
+       10011ffe  MOV byte ptr [EDX + 0x21c],0x20
+       10012026  ADD EDX,0x21c
+       10012044  MOV byte ptr [EAX + 0x21c],0x20
+       10012077  ADD ECX,0x21c
+       10012095  MOV byte ptr [EDX + 0x21c],0x20
+       100120c9  ADD EAX,0x21c
+       100120e6  MOV byte ptr [ECX + 0x21c],0x3a
+       1001211a  ADD EDX,0x21c
+       10012138  MOV byte ptr [EAX + 0x21c],0x3a
+       1001216c  ADD ECX,0x21c
+       1001218c  ADD EAX,0x21c
+       100121a0  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10f98070  FUN_10f98070  (664 bytes)  offsets=0x228
+       10f980d5  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10aa19b0  FUN_10aa19b0  (665 bytes)  offsets=0x228
+       10aa1b56  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fef700  CPlayerRage03::OnThrowAnimEvent  (667 bytes)  offsets=0x228
+       10fef74a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ba9810  FUN_10ba9810  (671 bytes)  offsets=0x220
+       10ba992d  PUSH 0x220
+       [decompile cap reached]
+
+   10af4060  FUN_10af4060  (672 bytes)  offsets=0x224
+       10af42ab  MOVQ qword ptr [ESI + 0x224],XMM0
+       [decompile cap reached]
+
+   10efcab0  FUN_10efcab0  (675 bytes)  offsets=0x228
+       10efcabb  MOV EAX,dword ptr [EAX + 0x228]
+       10efcb97  MOV EAX,dword ptr [EAX + 0x228]
+       10efcce6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a4b6d0  FUN_10a4b6d0  (681 bytes)  offsets=0x218
+       10a4b7a6  CALL dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10059c70  FUN_10059c70  (682 bytes)  offsets=0x21c
+       10059d49  PUSH 0x21c
+       [decompile cap reached]
+
+   10a56780  Actor::LinkToVehicle  (685 bytes)  offsets=0x228
+       10a5697c  MOV EAX,dword ptr [EAX + 0x228]
+       10a569b8  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa23b0  FUN_10fa23b0  (698 bytes)  offsets=0x228
+       10fa2494  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10fa3b40  FUN_10fa3b40  (702 bytes)  offsets=0x228
+       10fa3bb9  MOV EAX,dword ptr [EAX + 0x228]
+       10fa3c6d  MOV EAX,dword ptr [EAX + 0x228]
+       10fa3cc6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6bea0  CAnimEventParser::ParseNoteTrackCommand  (715 bytes)  offsets=0x228
+       10f6c048  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9fd60  FUN_10f9fd60  (722 bytes)  offsets=0x228
+       10f9fede  MOV EAX,dword ptr [EAX + 0x228]
+       10f9ff53  MOV EAX,dword ptr [EAX + 0x228]
+       10f9ffbb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1006fa70  FUN_1006fa70  (725 bytes)  offsets=0x220
+       1006fa73  SUB ESP,0x220
+       [decompile cap reached]
+
+   10f86540  FUN_10f86540  (726 bytes)  offsets=0x228
+       10f8674d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11b603c0  FUN_11b603c0  (738 bytes)  offsets=0x228
+       11b605c2  MOV dword ptr [EDI + 0x228],0x0
+       [decompile cap reached]
+
+   103f0ee0  TdrDump_BagStoreMailItems  (743 bytes)  offsets=0x224
+       103f1198  ADD ECX,0x224
+       [decompile cap reached]
+
+   11058cc0  FUN_11058cc0  (755 bytes)  offsets=0x228
+       11058f9c  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10b74350  FUN_10b74350  (761 bytes)  offsets=0x21c
+       10b74393  CALL dword ptr [EAX + 0x21c]
+       10b74632  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   114e0ae0  FUN_114e0ae0  (765 bytes)  offsets=0x218
+       114e0b0b  MOV EAX,dword ptr [EBX + 0x218]
+       [decompile cap reached]
+
+   10f34bf0  FUN_10f34bf0  (766 bytes)  offsets=0x228
+       10f34c0a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f97d60  FUN_10f97d60  (783 bytes)  offsets=0x228
+       10f97dc5  MOV EDX,dword ptr [EDX + 0x228]
+       10f97f50  MOV EAX,dword ptr [EAX + 0x228]
+       10f97f6b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10e04bf0  FUN_10e04bf0  (792 bytes)  offsets=0x228
+       10e04da8  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10dc0470  FUN_10dc0470  (793 bytes)  offsets=0x228
+       10dc06d2  MOV EAX,dword ptr [EAX + 0x228]
+       10dc072d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10555e90  FUN_10555e90  (797 bytes)  offsets=0x220
+       10556071  ADD EAX,0x220
+       [decompile cap reached]
+
+   10fa1860  FUN_10fa1860  (809 bytes)  offsets=0x228
+       10fa190c  MOV EDX,dword ptr [EDX + 0x228]
+       10fa1d63  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112325a0  FUN_112325a0  (811 bytes)  offsets=0x228
+       11232739  PUSH 0x228
+       [decompile cap reached]
+
+   10deace0  FUN_10deace0  (819 bytes)  offsets=0x228
+       10deadc5  MOV EAX,dword ptr [EDX + 0x228]
+       10deae8c  MOV EAX,dword ptr [EAX + 0x228]
+       10deaf7d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c80840  FUN_10c80840  (824 bytes)  offsets=0x228
+       10c8097a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   100de760  FUN_100de760  (825 bytes)  offsets=0x220
+       100de7c5  SUB EAX,0x220
+       [decompile cap reached]
+
+   10ae5720  FUN_10ae5720  (827 bytes)  offsets=0x21c
+       10ae5723  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10b92bb0  FUN_10b92bb0  (830 bytes)  offsets=0x228
+       10b92c63  CALL dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fd1df0  FUN_10fd1df0  (832 bytes)  offsets=0x228
+       10fd1ec6  MOV EAX,dword ptr [EAX + 0x228]
+       10fd1f2b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10efe1b0  FUN_10efe1b0  (839 bytes)  offsets=0x228
+       10efe222  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c21050  FUN_10c21050  (840 bytes)  offsets=0x228
+       10c210c5  MOV EAX,dword ptr [EAX + 0x228]
+       10c210e3  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10d15c60  CEntityCustomRoot::LoadAIAndModelSettings  (847 bytes)  offsets=0x21c
+       10d15c63  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10a82bc0  FUN_10a82bc0  (856 bytes)  offsets=0x228
+       10a82eb0  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f5c6c0  FUN_10f5c6c0  (873 bytes)  offsets=0x228
+       10f5c6f6  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10556880  FUN_10556880  (877 bytes)  offsets=0x21c
+       10556a41  ADD EAX,0x21c
+       [decompile cap reached]
+
+   10f00910  FUN_10f00910  (881 bytes)  offsets=0x228
+       10f00c5b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ad9880  FUN_10ad9880  (886 bytes)  offsets=0x228
+       10ad9883  SUB ESP,0x228
+       [decompile cap reached]
+
+   10fd5640  FUN_10fd5640  (893 bytes)  offsets=0x228
+       10fd5656  MOV EAX,dword ptr [EAX + 0x228]
+       10fd57f0  MOV EAX,dword ptr [EAX + 0x228]
+       10fd58d1  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10faaff0  FUN_10faaff0  (905 bytes)  offsets=0x228
+       10fab1d7  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1088e550  FUN_1088e550  (906 bytes)  offsets=0x218
+       1088e7aa  MOV ECX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   10559880  FUN_10559880  (909 bytes)  offsets=0x224
+       10559955  ADD EAX,0x224
+       [decompile cap reached]
+
+   10f0d6d0  FUN_10f0d6d0  (912 bytes)  offsets=0x228
+       10f0d741  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f9b8d0  FUN_10f9b8d0  (938 bytes)  offsets=0x228
+       10f9b8e5  MOV EAX,dword ptr [EAX + 0x228]
+       10f9bc46  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   112e7f50  FUN_112e7f50  (945 bytes)  offsets=0x218
+       112e7f77  ADD EAX,0x218
+       [decompile cap reached]
+
+   1088dc50  FUN_1088dc50  (946 bytes)  offsets=0x218
+       1088de73  CMP dword ptr [EAX + 0x218],EDI
+       [decompile cap reached]
+
+   10834d00  GameSettings::ApplyDisplayPreset  (951 bytes)  offsets=0x21c
+       10835073  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   11301ed0  CSuitCfgInfo::ApplyEquippedSuitEffects  (951 bytes)  offsets=0x21c
+       11301f8c  ADD EAX,0x21c
+       [decompile cap reached]
+
+   1015c6c0  FUN_1015c6c0  (958 bytes)  offsets=0x217
+       1015ca5d  PUSH dword ptr [ESI + 0x217]
+       [decompile cap reached]
+
+   10ba58f0  FUN_10ba58f0  (959 bytes)  offsets=0x218
+       10ba5c53  LEA ECX,[ESI + 0x218]
+       [decompile cap reached]
+
+   10eff090  FUN_10eff090  (966 bytes)  offsets=0x228
+       10eff374  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10596260  FUN_10596260  (985 bytes)  offsets=0x21c
+       10596622  MOV ECX,dword ptr [ESP + 0x21c]
+       [decompile cap reached]
+
+   10af4c50  FUN_10af4c50  (988 bytes)  offsets=0x21c
+       10af4e2a  MOV EDI,dword ptr [EBX + 0x21c]
+       [decompile cap reached]
+
+   10c20c60  FUN_10c20c60  (996 bytes)  offsets=0x228
+       10c20d08  MOV EAX,dword ptr [EAX + 0x228]
+       10c20d26  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1167db60  FUN_1167db60  (997 bytes)  offsets=0x218
+       1167debe  LEA EAX,[ESI + 0x218]
+       [decompile cap reached]
+
+   10b485b0  FUN_10b485b0  (1006 bytes)  offsets=0x21c
+       10b48642  MOVSS XMM1,dword ptr [ESI + 0x21c]
+       [decompile cap reached]
+
+   1142dcd0  CBuffInfo::BuildActiveBuffSnapshot  (1009 bytes)  offsets=0x21c
+       1142dcd3  SUB ESP,0x21c
+       [decompile cap reached]
+
+   10f8c380  FUN_10f8c380  (1010 bytes)  offsets=0x228
+       10f8c59d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ad3960  FUN_10ad3960  (1033 bytes)  offsets=0x21c
+       10ad3963  SUB ESP,0x21c
+       [decompile cap reached]
+
+   1056e860  FUN_1056e860  (1037 bytes)  offsets=0x228
+       1056eb61  MOV dword ptr [ESP + 0x228],0x0
+       [decompile cap reached]
+
+   1015b620  FUN_1015b620  (1045 bytes)  offsets=0x217
+       1015ba22  PUSH dword ptr [EDI + 0x217]
+       [decompile cap reached]
+
+   1015b200  FUN_1015b200  (1045 bytes)  offsets=0x217
+       1015b602  PUSH dword ptr [EDI + 0x217]
+       [decompile cap reached]
+
+   1088f6f0  FUN_1088f6f0  (1058 bytes)  offsets=0x218
+       1088f715  MOV ESI,dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   105315a0  FUN_105315a0  (1063 bytes)  offsets=0x218
+       10531827  MOV EAX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   116ec530  FUN_116ec530  (1093 bytes)  offsets=0x220
+       116ec95b  LEA EAX,[ESI + 0x220]
+       [decompile cap reached]
+
+   10d53b90  FUN_10d53b90  (1095 bytes)  offsets=0x228
+       10d53c5d  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10dcce60  FUN_10dcce60  (1107 bytes)  offsets=0x228
+       10dccf9b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   110863e0  FUN_110863e0  (1127 bytes)  offsets=0x218
+       110863f6  SUB ESP,0x218
+       [decompile cap reached]
+
+   10fa3e00  FUN_10fa3e00  (1128 bytes)  offsets=0x228
+       10fa4118  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f588d0  FUN_10f588d0  (1135 bytes)  offsets=0x228
+       10f588f9  MOV EAX,dword ptr [EAX + 0x228]
+       10f58b54  MOV EAX,dword ptr [EAX + 0x228]
+       10f58bac  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f5bed0  FUN_10f5bed0  (1150 bytes)  offsets=0x228
+       10f5bf7a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   110553b0  CClientHitValidator::CheckVerticalMovement_Security_code_3_  (1154 bytes)  offsets=0x228
+       1105540b  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10efb800  FUN_10efb800  (1162 bytes)  offsets=0x228
+       10efb948  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   11059210  CEvpDamageChecker::HandleClientHit_monster_Boss_hit_validation_codes_9_10_11_  (1163 bytes)  offsets=0x228
+       110592a6  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   1057e570  FUN_1057e570  (1181 bytes)  offsets=0x218
+       1057e834  MOV dword ptr [ESP + 0x218],EAX
+       1057e89a  MOV dword ptr [ESP + 0x218],0x3
+       [decompile cap reached]
+
+   115961d0  FUN_115961d0  (1218 bytes)  offsets=0x218
+       11596302  MOV ECX,dword ptr [EBX + 0x218]
+       [decompile cap reached]
+
+   10a83170  FUN_10a83170  (1219 bytes)  offsets=0x228
+       10a8318f  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10cb5840  FUN_10cb5840  (1235 bytes)  offsets=0x218
+       10cb5a10  CALL dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10d92140  FUN_10d92140  (1238 bytes)  offsets=0x220
+       10d925b0  LEA EAX,[EDI + 0x220]
+       [decompile cap reached]
+
+   10ebbe10  FUN_10ebbe10  (1238 bytes)  offsets=0x220
+       10ebc280  LEA EAX,[EDI + 0x220]
+       [decompile cap reached]
+
+   10b95c00  FUN_10b95c00  (1277 bytes)  offsets=0x228
+       10b95cfd  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10561450  FUN_10561450  (1293 bytes)  offsets=0x228
+       10561724  MOV EAX,dword ptr [ECX + 0x228]
+       10561763  MOV dword ptr [ESP + 0x228],0x0
+       [decompile cap reached]
+
+   10f1e540  FUN_10f1e540  (1302 bytes)  offsets=0x228
+       10f1ea0d  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ed1a20  PlayerMovementSync::WriteRequestState_B  (1305 bytes)  offsets=0x224
+       10ed1a55  MOV EAX,dword ptr [ESI + 0x224]
+       10ed1b58  MOV EAX,dword ptr [ESI + 0x224]
+       10ed1b8e  MOV ECX,dword ptr [ESI + 0x224]
+       10ed1beb  MOV ECX,dword ptr [ESI + 0x224]
+       10ed1c09  MOV ECX,dword ptr [ESI + 0x224]
+       10ed1c27  MOV ECX,dword ptr [ESI + 0x224]
+       10ed1cbf  MOV ECX,dword ptr [ESI + 0x224]
+       10ed1d35  MOV EAX,dword ptr [ESI + 0x224]
+       10ed1d73  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10dceca0  PlayerMovementSync::WriteRequestState_A  (1305 bytes)  offsets=0x224
+       10dcecd5  MOV EAX,dword ptr [ESI + 0x224]
+       10dcedd8  MOV EAX,dword ptr [ESI + 0x224]
+       10dcee0e  MOV ECX,dword ptr [ESI + 0x224]
+       10dcee6b  MOV ECX,dword ptr [ESI + 0x224]
+       10dcee89  MOV ECX,dword ptr [ESI + 0x224]
+       10dceea7  MOV ECX,dword ptr [ESI + 0x224]
+       10dcef3f  MOV ECX,dword ptr [ESI + 0x224]
+       10dcefb5  MOV EAX,dword ptr [ESI + 0x224]
+       10dceff3  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10f414e0  PlayerMovementSync::WriteRequestState_C  (1305 bytes)  offsets=0x224
+       10f41515  MOV EAX,dword ptr [ESI + 0x224]
+       10f41618  MOV EAX,dword ptr [ESI + 0x224]
+       10f4164e  MOV ECX,dword ptr [ESI + 0x224]
+       10f416ab  MOV ECX,dword ptr [ESI + 0x224]
+       10f416c9  MOV ECX,dword ptr [ESI + 0x224]
+       10f416e7  MOV ECX,dword ptr [ESI + 0x224]
+       10f4177f  MOV ECX,dword ptr [ESI + 0x224]
+       10f417f5  MOV EAX,dword ptr [ESI + 0x224]
+       10f41833  MOV EAX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10f18af0  FUN_10f18af0  (1310 bytes)  offsets=0x228
+       10f18c33  MOV EAX,dword ptr [EAX + 0x228]
+       10f18c56  MOV EAX,dword ptr [EAX + 0x228]
+       10f18dd9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10836b50  CSettingsUI::ApplyOptionsFromVO  (1346 bytes)  offsets=0x21c
+       10836c33  CALL dword ptr [EAX + 0x21c]
+       10836c60  CALL dword ptr [EAX + 0x21c]
+       10836c8d  CALL dword ptr [EAX + 0x21c]
+       10836cbc  CALL dword ptr [EAX + 0x21c]
+       10836ceb  CALL dword ptr [EAX + 0x21c]
+       10836d1a  CALL dword ptr [EAX + 0x21c]
+       10836d49  CALL dword ptr [EAX + 0x21c]
+       10836d78  CALL dword ptr [EAX + 0x21c]
+       10836da7  CALL dword ptr [EAX + 0x21c]
+       10836dd6  CALL dword ptr [EAX + 0x21c]
+       10836e05  CALL dword ptr [EAX + 0x21c]
+       10836e3a  CALL dword ptr [EAX + 0x21c]
+       10836e6f  CALL dword ptr [EAX + 0x21c]
+       10836ea4  CALL dword ptr [EAX + 0x21c]
+       10836ed9  CALL dword ptr [EAX + 0x21c]
+       10836f08  CALL dword ptr [EAX + 0x21c]
+       10836f50  CALL dword ptr [EAX + 0x21c]
+       10836f7f  CALL dword ptr [EAX + 0x21c]
+       10836fae  CALL dword ptr [EAX + 0x21c]
+       10836fde  CALL dword ptr [EAX + 0x21c]
+       1083704a  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10bfaaf0  FUN_10bfaaf0  (1347 bytes)  offsets=0x228
+       10bfaefd  MOV dword ptr [ESI + 0x228],0x0
+       [decompile cap reached]
+
+   10f1ee10  FUN_10f1ee10  (1367 bytes)  offsets=0x21c
+       10f1f1ed  MOV EDX,dword ptr [EDX + 0x21c]
+       [decompile cap reached]
+
+   10f0da80  Player::PostPhysicalize_10f0da80  (1426 bytes)  offsets=0x228
+       10f0db1a  MOV EDX,dword ptr [EDX + 0x228]
+       10f0db86  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   116e9f00  FUN_116e9f00  (1433 bytes)  offsets=0x228
+       116ea360  LEA EDX,[EDI + 0x228]
+       116ea366  LEA EBX,[ESI + 0x228]
+       [decompile cap reached]
+
+   108b3300  CMHUI_HunterGroup::BuildGuildDetailVO  (1435 bytes)  offsets=0x228
+       108b3549  PUSH dword ptr [ESI + 0x228]
+       [decompile cap reached]
+
+   10ebf860  FUN_10ebf860  (1437 bytes)  offsets=0x218
+       10ebf863  SUB ESP,0x218
+       [decompile cap reached]
+
+   11599120  CEquipUpgrade::ApplyStepList  (1447 bytes)  offsets=0x218
+       115992de  MOV ECX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   10f1d430  FUN_10f1d430  (1464 bytes)  offsets=0x228
+       10f1d463  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10cb3c10  FUN_10cb3c10  (1509 bytes)  offsets=0x21c
+       10cb41d8  MOVDQU xmmword ptr [ESI + 0x21c],XMM0
+       [decompile cap reached]
+
+   10d96c70  FUN_10d96c70  (1512 bytes)  offsets=0x224
+       10d96c73  SUB ESP,0x224
+       [decompile cap reached]
+
+   110a6100  FUN_110a6100  (1513 bytes)  offsets=0x224
+       110a6103  SUB ESP,0x224
+       [decompile cap reached]
+
+   10837580  FUN_10837580  (1545 bytes)  offsets=0x21c
+       10837652  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   1147f3e0  FUN_1147f3e0  (1566 bytes)  offsets=0x228
+       1147f598  ADD ECX,0x228
+       [decompile cap reached]
+
+   10a65c30  FUN_10a65c30  (1594 bytes)  offsets=0x228
+       10a65e5a  MOV EAX,dword ptr [EAX + 0x228]
+       10a65f0b  MOV EAX,dword ptr [EAX + 0x228]
+       10a65f56  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1091bc50  CGuildSkillModel::BuildSkillCandidateData  (1630 bytes)  offsets=0x224
+       1091c1c3  MOVZX EAX,byte ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10bf2890  CGamePlayer::Initialize  (1646 bytes)  offsets=0x228
+       10bf2c99  MOV EAX,dword ptr [EAX + 0x228]
+       10bf2d01  MOV EAX,dword ptr [EAX + 0x228]
+       10bf2ddd  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10ba5dc0  FUN_10ba5dc0  (1666 bytes)  offsets=0x218
+       10ba6377  LEA ECX,[ESI + 0x218]
+       [decompile cap reached]
+
+   10ef4f80  CPlayer::OnGameObjectEvent  (1711 bytes)  offsets=0x228
+       10ef53dc  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10258170  FUN_10258170  (1732 bytes)  offsets=0x228
+       102586b7  PUSH dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   10bcb210  CFishInfo::SpawnFishingEffects  (1742 bytes)  offsets=0x21c
+       10bcb268  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   11b34e60  FUN_11b34e60  (1777 bytes)  offsets=0x218
+       11b3509f  LEA ECX,[ESI + 0x218]
+       [decompile cap reached]
+
+   1142d2f0  FUN_1142d2f0  (1845 bytes)  offsets=0x224
+       1142d5a7  PUSH dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10554150  FUN_10554150  (1885 bytes)  offsets=0x218
+       1055442c  MOV dword ptr [ESP + 0x218],EAX
+       10554492  MOV dword ptr [ESP + 0x218],0x3
+       [decompile cap reached]
+
+   10da7bd0  FUN_10da7bd0  (1886 bytes)  offsets=0x228
+       10da805a  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   116ed8c0  FUN_116ed8c0  (1912 bytes)  offsets=0x220
+       116eda4e  OR dword ptr [ECX + EBX*0x4 + 0x220],EAX
+       [decompile cap reached]
+
+   11c3e740  FUN_11c3e740  (1964 bytes)  offsets=0x228
+       11c3eb23  CMP EDX,dword ptr [EDI + 0x228]
+       [decompile cap reached]
+
+   10bab190  FUN_10bab190  (2006 bytes)  offsets=0x228
+       10bab5d2  MOV EAX,dword ptr [EDX + 0x228]
+       10bab7c4  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10eff910  FUN_10eff910  (2017 bytes)  offsets=0x228
+       10effa7f  MOV EAX,dword ptr [EAX + 0x228]
+       10f000cb  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10cb88b0  FUN_10cb88b0  (2044 bytes)  offsets=0x218
+       10cb8a07  CALL dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   1087b630  FUN_1087b630  (2105 bytes)  offsets=0x218
+       1087b902  MOV ECX,dword ptr [ESI + 0x218]
+       [decompile cap reached]
+
+   10ae4120  CAvatarInfo::UpdateAsyncLoadState  (2139 bytes)  offsets=0x228
+       10ae43a9  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10c214b0  FUN_10c214b0  (2140 bytes)  offsets=0x228
+       10c21629  MOVSS XMM3,dword ptr [EAX + 0x228]
+       10c21813  MOV EAX,dword ptr [EAX + 0x228]
+       10c21bd5  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a58b80  FUN_10a58b80  (2166 bytes)  offsets=0x228
+       10a58bbd  MOV EAX,dword ptr [EAX + 0x228]
+       10a592fe  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f6ed00  FUN_10f6ed00  (2209 bytes)  offsets=0x228
+       10f6ee82  LEA EAX,[EBX + 0x228]
+       [decompile cap reached]
+
+   11061560  CPveDamageChecker::HandleClientHit_player_attack_validation_codes_1_12_15_  (2236 bytes)  offsets=0x228
+       110618b9  MOV EAX,dword ptr [EDX + 0x228]
+       11061bd4  MOV EAX,dword ptr [EDX + 0x228]
+       11061cc1  MOV EAX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10fa4780  FUN_10fa4780  (2257 bytes)  offsets=0x228
+       10fa486e  MOV EAX,dword ptr [EAX + 0x228]
+       10fa487e  CMP dword ptr [EDI + 0x228],0x0
+       10fa4a38  MOV EAX,dword ptr [EAX + 0x228]
+       10fa4a54  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f596e0  CItem::PlaySelectActionAndTransition  (2317 bytes)  offsets=0x228
+       10f59884  MOV EAX,dword ptr [EAX + 0x228]
+       10f598ab  MOV EAX,dword ptr [EAX + 0x228]
+       10f59922  MOV EAX,dword ptr [EAX + 0x228]
+       10f59e18  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10aeddc0  CAvatarInfo::RebuildCharacterFromData  (2334 bytes)  offsets=0x21c
+       10aee0f8  CMP EBX,0x21c
+       [decompile cap reached]
+
+   1166e8b0  FUN_1166e8b0  (2384 bytes)  offsets=0x218
+       1166f1a1  CMP dword ptr [ECX + 0x218],0x0
+       1166f1c4  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   10dd44d0  FUN_10dd44d0  (2409 bytes)  offsets=0x224
+       10dd44fd  MOV ECX,dword ptr [ESI + 0x224]
+       10dd452e  MOV ECX,dword ptr [ESI + 0x224]
+       10dd4c7b  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10ed78e0  FUN_10ed78e0  (2409 bytes)  offsets=0x224
+       10ed790d  MOV ECX,dword ptr [ESI + 0x224]
+       10ed793e  MOV ECX,dword ptr [ESI + 0x224]
+       10ed808b  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10f46c80  FUN_10f46c80  (2409 bytes)  offsets=0x224
+       10f46cad  MOV ECX,dword ptr [ESI + 0x224]
+       10f46cde  MOV ECX,dword ptr [ESI + 0x224]
+       10f4742b  MOV ECX,dword ptr [ESI + 0x224]
+       [decompile cap reached]
+
+   10af7200  CAvatarInfo::UpdateLocalPlayerAppearance  (2502 bytes)  offsets=0x224
+       10af72b6  CMP byte ptr [EBX + EDI*0x1 + 0x224],0x0
+       10af72cc  MOV byte ptr [EBX + EDI*0x1 + 0x224],0x0
+       10af749d  MOV byte ptr [EBX + EDI*0x1 + 0x224],0x1
+       10af74b6  CMP byte ptr [EBX + EDI*0x1 + 0x224],0x0
+       10af74c6  MOV byte ptr [EBX + EDI*0x1 + 0x224],0x0
+       10af7570  CMP byte ptr [EDI + EBX*0x1 + 0x224],0x0
+       [decompile cap reached]
+
+   10ef3d10  FUN_10ef3d10  (2509 bytes)  offsets=0x228
+       10ef4141  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f759e0  FUN_10f759e0  (2647 bytes)  offsets=0x218
+       10f7612d  LEA EDI,[ESI + 0x218]
+       [decompile cap reached]
+
+   10d607a0  CMelee::ComputeHitDirectionAndEmitGameOnHit  (2657 bytes)  offsets=0x220
+       10d607a3  SUB ESP,0x220
+       [decompile cap reached]
+
+   10a523b0  Actor::HandleEvent  (2702 bytes)  offsets=0x228
+       10a52a4d  MOV EAX,dword ptr [EAX + 0x228]
+       10a52b36  MOV EAX,dword ptr [EAX + 0x228]
+       10a52b81  MOV EAX,dword ptr [EAX + 0x228]
+       10a52c15  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10f51070  FUN_10f51070  (2916 bytes)  offsets=0x228
+       10f51301  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1171d0f0  FUN_1171d0f0  (3074 bytes)  offsets=0x228
+       1171dc9d  LEA ECX,[EDI + 0x228]
+       [decompile cap reached]
+
+   10bcb9a0  CGameCollectPoint::SpawnEntity  (3109 bytes)  offsets=0x220
+       10bcc4ff  CALL dword ptr [EAX + 0x220]
+       [decompile cap reached]
+
+   10258da0  BehaviorTree::RegisterBlackboardKeys  (3261 bytes)  offsets=0x228
+       10258ddd  MOV dword ptr [EDI + 0x228],ECX
+       [decompile cap reached]
+
+   10e06bf0  NamePad::UpdateRelationColorAndStars  (3473 bytes)  offsets=0x228
+       10e072b1  MOV EAX,dword ptr [EAX + 0x228]
+       10e0733b  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10a51500  FUN_10a51500  (3481 bytes)  offsets=0x228
+       10a51a75  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   113a6f80  FUN_113a6f80  (3741 bytes)  offsets=0x218
+       113a7827  LEA ESI,[EAX + 0x218]
+       [decompile cap reached]
+
+   10cb79f0  FUN_10cb79f0  (3766 bytes)  offsets=0x218
+       10cb7d21  CALL dword ptr [EAX + 0x218]
+       [decompile cap reached]
+
+   10da3420  FUN_10da3420  (3785 bytes)  offsets=0x220
+       10da3423  SUB ESP,0x220
+       [decompile cap reached]
+
+   10cf6f50  MovementSteeringParams::ctor  (4074 bytes)  offsets=0x228
+       10cf774a  MOV dword ptr [EDI + 0x228],0x3f800000
+       [decompile cap reached]
+
+   1166c600  FUN_1166c600  (4390 bytes)  offsets=0x218
+       1166d6de  CMP dword ptr [EDX + 0x218],0x0
+       1166d6ee  MOV ECX,dword ptr [ECX + 0x218]
+       [decompile cap reached]
+
+   11006ea0  CMeleeCollision::SweepAndReportGameOnHit  (4417 bytes)  offsets=0x228
+       110079f0  MOV EDX,dword ptr [EDX + 0x228]
+       11007a05  MOV EAX,dword ptr [EAX + 0x228]
+       11007a43  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   1103bc00  CAvatarInfo::SetupPlayerEntityFromScript  (5008 bytes)  offsets=0x21c
+       1103c5e2  CALL dword ptr [EAX + 0x21c]
+       [decompile cap reached]
+
+   10f04690  Player::UpdateStats_10f04690  (5189 bytes)  offsets=0x228
+       10f04c00  MOV EAX,dword ptr [EAX + 0x228]
+       [decompile cap reached]
+
+   10825f60  FriendListModel::BuildFriendListVO  (6083 bytes)  offsets=0x218
+       1082722d  MOV dword ptr [ESP + 0x218],EAX
+       10827239  PUSH dword ptr [ESP + 0x218]
+       [decompile cap reached]
+
+   1002f510  FUN_1002f510  (6386 bytes)  offsets=0x218
+       1002f848  MOV EAX,dword ptr [EDX + 0x218]
+       1002f85f  MOV EAX,dword ptr [EDX + 0x218]
+       1002fa43  MOV ECX,dword ptr [EAX + 0x218]
+       1002fa5a  MOV ECX,dword ptr [EAX + 0x218]
+       1002fc47  MOV EDX,dword ptr [ECX + 0x218]
+       1002fc64  MOV EDX,dword ptr [ECX + 0x218]
+       10030136  MOV ECX,dword ptr [EAX + 0x218]
+       10030153  MOV ECX,dword ptr [EAX + 0x218]
+       1003087d  MOV EAX,dword ptr [EDX + 0x218]
+       1003089a  MOV EAX,dword ptr [EDX + 0x218]
+       [decompile cap reached]
+
+   10fbb060  CState::ParseTransitionSection  (6779 bytes)  offsets=0x228
+       10fbb15d  MOV EDX,dword ptr [EDX + 0x228]
+       [decompile cap reached]
+
+   10f44db0  FUN_10f44db0  (7882 bytes)  offsets=0x224
+       10f44dd8  MOV EAX,dword ptr [EDI + 0x224]
+       10f44e13  MOV ECX,dword ptr [EDI + 0x224]
+       10f44e65  MOV EAX,dword ptr [EDI + 0x224]
+       10f44ee9  MOV ECX,dword ptr [EDI + 0x224]
+       10f44f10  MOV ESI,dword ptr [EDI + 0x224]
+       10f450ff  MOV EAX,dword ptr [EDI + 0x224]
+       10f45147  MOV EAX,dword ptr [EDI + 0x224]
+       10f4516d  MOV EAX,dword ptr [EDI + 0x224]
+       10f45196  MOV ECX,dword ptr [EDI + 0x224]
+       10f451aa  MOV ECX,dword ptr [EDI + 0x224]
+       10f451b5  MOV EAX,dword ptr [EDI + 0x224]
+       10f45228  MOV ECX,dword ptr [EDI + 0x224]
+       10f454d3  MOV ECX,dword ptr [EDI + 0x224]
+       10f4553b  MOV ECX,dword ptr [EDI + 0x224]
+       10f457de  MOV ECX,dword ptr [EDI + 0x224]
+       10f458ba  MOV ECX,dword ptr [EDI + 0x224]
+       10f45be4  MOV EAX,dword ptr [EDI + 0x224]
+       10f45c98  MOV EAX,dword ptr [EDI + 0x224]
+       10f45cc0  MOV EAX,dword ptr [EDI + 0x224]
+       10f45cdf  MOV ECX,dword ptr [EDI + 0x224]
+       10f45cf3  MOV ECX,dword ptr [EDI + 0x224]
+       10f45d06  MOV EAX,dword ptr [EDI + 0x224]
+       10f4635b  MOV ECX,dword ptr [EDI + 0x224]
+       10f46703  MOV ECX,dword ptr [EDI + 0x224]
+       10f4671f  MOV ECX,dword ptr [EDI + 0x224]
+       10f4675a  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   10dd21f0  FUN_10dd21f0  (8913 bytes)  offsets=0x224
+       10dd2212  MOV EAX,dword ptr [EDI + 0x224]
+       10dd2241  MOV ECX,dword ptr [EDI + 0x224]
+       10dd22ea  MOV ECX,dword ptr [EDI + 0x224]
+       10dd231f  MOV ESI,dword ptr [EDI + 0x224]
+       10dd2443  MOV ECX,dword ptr [EDI + 0x224]
+       10dd2523  MOV EAX,dword ptr [EDI + 0x224]
+       10dd254d  MOV EAX,dword ptr [EDI + 0x224]
+       10dd276a  MOV ECX,dword ptr [EDI + 0x224]
+       10dd27f4  MOV EAX,dword ptr [EDI + 0x224]
+       10dd281e  MOV EAX,dword ptr [EDI + 0x224]
+       10dd2859  MOV EAX,dword ptr [EDI + 0x224]
+       10dd28ae  MOV EAX,dword ptr [EDI + 0x224]
+       10dd28f1  MOV ECX,dword ptr [EDI + 0x224]
+       10dd29f7  MOV EAX,dword ptr [EDI + 0x224]
+       10dd2a21  MOV ECX,dword ptr [EDI + 0x224]
+       10dd2a39  MOV ECX,dword ptr [EDI + 0x224]
+       10dd2a44  MOV EAX,dword ptr [EDI + 0x224]
+       10dd2abf  MOV ECX,dword ptr [EDI + 0x224]
+       10dd2d88  MOV ECX,dword ptr [EDI + 0x224]
+       10dd2dea  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3085  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3148  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3496  MOV EAX,dword ptr [EDI + 0x224]
+       10dd3541  MOV EAX,dword ptr [EDI + 0x224]
+       10dd3566  MOV EAX,dword ptr [EDI + 0x224]
+       10dd3585  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3599  MOV ECX,dword ptr [EDI + 0x224]
+       10dd35be  MOV EAX,dword ptr [EDI + 0x224]
+       10dd3c04  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3fa9  MOV ECX,dword ptr [EDI + 0x224]
+       10dd3fc5  MOV ECX,dword ptr [EDI + 0x224]
+       10dd4000  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   10ed5600  FUN_10ed5600  (8913 bytes)  offsets=0x224
+       10ed5622  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5651  MOV ECX,dword ptr [EDI + 0x224]
+       10ed56fa  MOV ECX,dword ptr [EDI + 0x224]
+       10ed572f  MOV ESI,dword ptr [EDI + 0x224]
+       10ed5853  MOV ECX,dword ptr [EDI + 0x224]
+       10ed5933  MOV EAX,dword ptr [EDI + 0x224]
+       10ed595d  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5b7a  MOV ECX,dword ptr [EDI + 0x224]
+       10ed5c04  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5c2e  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5c69  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5cbe  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5d01  MOV ECX,dword ptr [EDI + 0x224]
+       10ed5e07  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5e31  MOV ECX,dword ptr [EDI + 0x224]
+       10ed5e49  MOV ECX,dword ptr [EDI + 0x224]
+       10ed5e54  MOV EAX,dword ptr [EDI + 0x224]
+       10ed5ecf  MOV ECX,dword ptr [EDI + 0x224]
+       10ed6198  MOV ECX,dword ptr [EDI + 0x224]
+       10ed61fa  MOV ECX,dword ptr [EDI + 0x224]
+       10ed6495  MOV ECX,dword ptr [EDI + 0x224]
+       10ed6558  MOV ECX,dword ptr [EDI + 0x224]
+       10ed68a6  MOV EAX,dword ptr [EDI + 0x224]
+       10ed6951  MOV EAX,dword ptr [EDI + 0x224]
+       10ed6976  MOV EAX,dword ptr [EDI + 0x224]
+       10ed6995  MOV ECX,dword ptr [EDI + 0x224]
+       10ed69a9  MOV ECX,dword ptr [EDI + 0x224]
+       10ed69ce  MOV EAX,dword ptr [EDI + 0x224]
+       10ed7014  MOV ECX,dword ptr [EDI + 0x224]
+       10ed73b9  MOV ECX,dword ptr [EDI + 0x224]
+       10ed73d5  MOV ECX,dword ptr [EDI + 0x224]
+       10ed7410  MOV EAX,dword ptr [EDI + 0x224]
+       [decompile cap reached]
+
+   11b67f50  FUN_11b67f50  (9413 bytes)  offsets=0x220
+       11b67fb3  MOV dword ptr [ESI + 0x220],EAX
+       [decompile cap reached]
+
+   116e5410  CDamageInfo::ParseAttackInfoXml_DECOMPILE_FAILED_  (14846 bytes)  offsets=0x228
+       116e8773  LEA EAX,[EDI + 0x228]
+       [skipped: too large]

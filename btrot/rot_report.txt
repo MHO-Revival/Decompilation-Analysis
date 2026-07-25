@@ -1,0 +1,55 @@
+
+== CSetTargetIDOrientation  nameStr=1130bde7 actual=">CSetTargetIDOrientation"  hits=0
+
+== CSetTargetPosOrientation  nameStr=1130be00 actual="CSetTargetPosOrientation"  hits=5
+   hit 105d3a19 in FUN_105d39f0 (250 bytes)
+   hit 105d3a91 in FUN_105d39f0 (250 bytes)
+   hit 105d3b11 in FUN_105d3b10 (6 bytes)   <-- name getter
+   hit 105fc504 in FUN_105fc120 (18140 bytes)
+   hit 10622511 in FUN_10622510 (6 bytes)   <-- name getter
+
+== CEntityRotateToTarget  nameStr=11307f0c actual="CEntityRotateToTarget"  hits=10
+   hit 10579409 in FUN_105793e0 (850 bytes)
+   hit 10579481 in FUN_105793e0 (850 bytes)
+   hit 105794f9 in FUN_105793e0 (850 bytes)
+   hit 10579571 in FUN_105793e0 (850 bytes)
+   hit 105795e9 in FUN_105793e0 (850 bytes)
+   hit 10579661 in FUN_105793e0 (850 bytes)
+   hit 105796d9 in FUN_105793e0 (850 bytes)
+   hit 1057a391 in FUN_1057a390 (6 bytes)   <-- name getter
+   hit 1057a3f1 in FUN_1057a3f0 (6 bytes)   <-- name getter
+   hit 105fc7c7 in FUN_105fc120 (18140 bytes)
+
+   VTABLE 1130e734 (getter 10622510 at slot 7)
+     [ 0] 103d8a40 FUN_103d8a40 (70b)
+     [ 1] 103d8b60 FUN_103d8b60 (13b)
+     [ 2] 103dca70 FUN_103dca70 (13b)
+     [ 3] 103dc9e0 FUN_103dc9e0 (83b)
+     [ 4] 105d3760 FUN_105d3760 (654b)
+     [ 5] 103d7a00 FUN_103d7a00 (3b)
+     [ 6] 103d7a30 FUN_103d7a30 (4b)
+     [ 7] 10622510 FUN_10622510 (6b)
+     [ 8] 103dc6d0 FUN_103dc6d0 (8b)
+     [ 9] 103dc830 FUN_103dc830 (40b)
+     [10] 10628440 FUN_10628440 (74b)
+     [11] 103d9af0 FUN_103d9af0 (134b)
+     [12] 103d9b80 FUN_103d9b80 (747b)
+     [13] 105d3af0 FUN_105d3af0 (1b)
+     [14] 103dc6f0 FUN_103dc6f0 (8b)
+
+   VTABLE 11307ed0 (getter 1057a390 at slot 7)
+     [ 0] 103d8a40 FUN_103d8a40 (70b)
+     [ 1] 103d8b60 FUN_103d8b60 (13b)
+     [ 2] 103dca70 FUN_103dca70 (13b)
+     [ 3] 105789f0 FUN_105789f0 (9b)
+     [ 4] 10578a00 FUN_10578a00 (450b)
+     [ 5] 103d7a00 FUN_103d7a00 (3b)
+     [ 6] 103d7a30 FUN_103d7a30 (4b)
+     [ 7] 1057a390 FUN_1057a390 (6b)
+     [ 8] 103dc6d0 FUN_103dc6d0 (8b)
+     [ 9] 103dc830 FUN_103dc830 (40b)
+     [10] 1057a3a0 FUN_1057a3a0 (74b)
+     [11] 103d9af0 FUN_103d9af0 (134b)
+     [12] 103d9b80 FUN_103d9b80 (747b)
+     [13] 10579740 FUN_10579740 (1b)
+     [14] 103dc6f0 FUN_103dc6f0 (8b)

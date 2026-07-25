@@ -1,0 +1,89 @@
+# MoveSplineScale getter hunt — vtable slot +0x3f0
+# NORMALISING getter => the flag has real per-tick meaning; plain field return => inert.
+
+## indirect call sites through +0x3f0 (2)
+11067f1f  in FUN_11067e40 @ 11067e40   CALL dword ptr [EAX + 0x3f0]
+11067f87  in FUN_11067e40 @ 11067e40   CALL dword ptr [EAX + 0x3f0]
+
+## candidate implementations (12202, smallest first)
+== 10dfc300  FUN_10dfc300  (1 bytes)
+     -> vfn_10dfc300.c
+== 10dfc2f0  FUN_10dfc2f0  (1 bytes)
+     -> vfn_10dfc2f0.c
+== 10ff0f90  FUN_10ff0f90  (1 bytes)
+     -> vfn_10ff0f90.c
+== 110d01b0  FUN_110d01b0  (1 bytes)
+     -> vfn_110d01b0.c
+== 110d0330  FUN_110d0330  (1 bytes)
+     -> vfn_110d0330.c
+== 10a5b1f0  FUN_10a5b1f0  (3 bytes)
+     -> vfn_10a5b1f0.c
+== 10b2a6a0  FUN_10b2a6a0  (3 bytes)
+     -> vfn_10b2a6a0.c
+== 10c38b60  FUN_10c38b60  (3 bytes)
+     -> vfn_10c38b60.c
+== 10ce6850  FUN_10ce6850  (3 bytes)
+     -> vfn_10ce6850.c
+== 10dfc720  FUN_10dfc720  (3 bytes)
+     -> vfn_10dfc720.c
+== 10f58320  FUN_10f58320  (3 bytes)
+     -> vfn_10f58320.c
+== 110d1c50  FUN_110d1c50  (3 bytes)
+     -> vfn_110d1c50.c
+== 1139f140  FUN_1139f140  (3 bytes)
+     -> vfn_1139f140.c
+== 113ee370  FUN_113ee370  (3 bytes)
+     -> vfn_113ee370.c
+== 1165af90  FUN_1165af90  (3 bytes)
+     -> vfn_1165af90.c
+== 11bccfd0  FUN_11bccfd0  (3 bytes)
+     -> vfn_11bccfd0.c
+== 10be9830  FUN_10be9830  (4 bytes)
+     -> vfn_10be9830.c
+== 1146afe0  FUN_1146afe0  (4 bytes)
+     -> vfn_1146afe0.c
+== 1146b0a0  FUN_1146b0a0  (4 bytes)
+     -> vfn_1146b0a0.c
+== 10a021e0  FUN_10a021e0  (4 bytes)
+     -> vfn_10a021e0.c
+== 10497740  FUN_10497740  (5 bytes)
+     -> vfn_10497740.c
+== 11af96e0  thunk_FUN_11ada360  (5 bytes)
+     -> vfn_11af96e0.c
+== 11af9350  thunk_FUN_11ad8990  (5 bytes)
+     -> vfn_11af9350.c
+== 11a89034  _purecall  (6 bytes)
+     -> vfn_11a89034.c
+== 10a77540  FUN_10a77540  (7 bytes)
+     -> vfn_10a77540.c
+== 10a50da0  FUN_10a50da0  (7 bytes)
+     -> vfn_10a50da0.c
+== 10cb09a0  FUN_10cb09a0  (7 bytes)
+     -> vfn_10cb09a0.c
+== 11498210  FUN_11498210  (8 bytes)
+     -> vfn_11498210.c
+== 1146b2e0  FUN_1146b2e0  (8 bytes)
+     -> vfn_1146b2e0.c
+== 1146b2c0  FUN_1146b2c0  (8 bytes)
+     -> vfn_1146b2c0.c
+== 114d9130  FUN_114d9130  (8 bytes)
+     -> vfn_114d9130.c
+== 114d9390  FUN_114d9390  (8 bytes)
+     -> vfn_114d9390.c
+== 114d9fb0  FUN_114d9fb0  (8 bytes)
+     -> vfn_114d9fb0.c
+== 1150da00  FUN_1150da00  (8 bytes)
+     -> vfn_1150da00.c
+== 10b09950  FUN_10b09950  (9 bytes)
+     -> vfn_10b09950.c
+== 10be9710  FUN_10be9710  (9 bytes)
+     -> vfn_10be9710.c
+== 10dec6d0  FUN_10dec6d0  (9 bytes)
+     -> vfn_10dec6d0.c
+== 10ded110  FUN_10ded110  (9 bytes)
+     -> vfn_10ded110.c
+== 10ded700  FUN_10ded700  (9 bytes)
+     -> vfn_10ded700.c
+== 10dedd90  FUN_10dedd90  (9 bytes)
+     -> vfn_10dedd90.c
+   [decompile cap reached]

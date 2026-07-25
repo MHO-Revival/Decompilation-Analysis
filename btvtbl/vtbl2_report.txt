@@ -1,0 +1,508 @@
+
+================ CAnimSequencePlay ================
+  --- VTABLE 113061e4  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 10554fc0  FUN_10554fc0       31 bytes
+    [ 4] 10554370  FUN_10554370       3135 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10555e80  FUN_10555e80       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10555ea0  FUN_10555ea0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10554fb0  FUN_10554fb0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=696e4143 [16]=7165536d [17]=636e6575 [18]=616c5065 
+
+================ CAnimSequenceSetInput ================
+  --- VTABLE 11306400  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 10555f60  FUN_10555f60       1838 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10556f90  FUN_10556f90       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10556fa0  FUN_10556fa0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10556690  FUN_10556690       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=696e4143 [16]=7165536d [17]=636e6575 [18]=74655365 
+
+================ CAnimSequenceIsPlaying ================
+  --- VTABLE 11306168  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 10554160  FUN_10554160       148 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 105542d0  FUN_105542d0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 105542e0  FUN_105542e0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=696e4143 [16]=7165536d [17]=636e6575 [18]=50734965 
+
+================ CEntityMove ================
+  --- VTABLE 1130764c  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 1056c430  FUN_1056c430       9 bytes
+    [ 4] 1056c440  FUN_1056c440       351 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 1056ccf0  FUN_1056ccf0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 1056cd00  FUN_1056cd00       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 1056cc40  FUN_1056cc40       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=4d797469 [17]=0065766f [18]=61736944 
+
+================ CEntityMoveToTarget ================
+  --- VTABLE 11307a70  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 10570c70  FUN_10570c70       9 bytes
+    [ 4] 10570c80  FUN_10570c80       895 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10572240  FUN_10572240       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10572250  FUN_10572250       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105721f0  FUN_105721f0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=4d797469 [17]=5465766f [18]=7261546f 
+
+================ CEntityMoveToPos ================
+  --- VTABLE 113078a4  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 1056e2f0  FUN_1056e2f0       9 bytes
+    [ 4] 1056e300  FUN_1056e300       961 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 1056f750  FUN_1056f750       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10565670  FUN_10565670       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 1056f710  FUN_1056f710       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=4d797469 [17]=5465766f [18]=736f506f 
+
+================ CEntityRotateToTarget ================
+  --- VTABLE 11307ed0  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 105789f0  FUN_105789f0       9 bytes
+    [ 4] 10578a00  FUN_10578a00       450 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 1057a390  FUN_1057a390       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 1057a3a0  FUN_1057a3a0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10579740  FUN_10579740       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=52797469 [17]=7461746f [18]=546f5465 
+
+================ CEntityRotateToPos ================
+  --- VTABLE 11307d48  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 10574400  FUN_10574400       9 bytes
+    [ 4] 10574410  FUN_10574410       2803 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10575c20  FUN_10575c20       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10575c30  FUN_10575c30       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10575b30  FUN_10575b30       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=52797469 [17]=7461746f [18]=506f5465 
+
+================ CEntityRotateOrientation ================
+  --- VTABLE 11307cb0  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 10573420  FUN_10573420       9 bytes
+    [ 4] 10573430  FUN_10573430       619 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10574360  FUN_10574360       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10574370  FUN_10574370       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105741f0  FUN_105741f0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=746e4543 [16]=52797469 [17]=7461746f [18]=69724f65 
+
+================ CSetTargetPosOrientation ================
+  --- VTABLE 1130e734  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105d3760  FUN_105d3760       654 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10622510  FUN_10622510       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10628440  FUN_10628440       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105d3af0  FUN_105d3af0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061d800 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CSetTarget ================
+  --- VTABLE 1130e92c  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105c5700  FUN_105c5700       961 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10622220  FUN_10622220       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10627550  FUN_10627550       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105c64f0  FUN_105c64f0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=106203b0 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CDistanceCheck ================
+  --- VTABLE 1130ff94  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105f6ba0  FUN_105f6ba0       1100 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106217e0  FUN_106217e0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 106241e0  FUN_106241e0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105f73e0  FUN_105f73e0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=106200e0 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CBlackBoardCheck ================
+  --- VTABLE 1130fe98  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105f4960  FUN_105f4960       605 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10621470  FUN_10621470       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10623030  FUN_10623030       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105f4e50  FUN_105f4e50       44 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061d8c0 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CSetBlackBoard ================
+  --- VTABLE 1130e230  (10 slots) ---
+    [ 0] 103d7a00  FUN_103d7a00       3 bytes
+    [ 1] 103d7a30  FUN_103d7a30       4 bytes
+    [ 2] 10622340  FUN_10622340       6 bytes   <-- name getter
+    [ 3] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 4] 103dc830  FUN_103dc830       40 bytes
+    [ 5] 10627af0  FUN_10627af0       74 bytes
+    [ 6] 103d9af0  FUN_103d9af0       134 bytes
+    [ 7] 103d9b80  FUN_103d9b80       747 bytes
+    [ 8] 105ce7d0  FUN_105ce7d0       117 bytes
+    [ 9] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [10]=10620710 [11]=103dc6c0 [12]=103dc930 [13]=103d8a10 
+
+================ CSetBlackBoardEqualString ================
+  --- VTABLE 1130e4cc  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 1062b5f0  FUN_1062b5f0       143 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106212e0  FUN_106212e0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10622830  FUN_10622830       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=74655343 [16]=63616c42 [17]=616f426b [18]=71456472 
+
+================ CSetBlackBoardEqualFloat ================
+  --- VTABLE 1130e318  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 1062b4f0  FUN_1062b4f0       68 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106212c0  FUN_106212c0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10622790  FUN_10622790       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=74655343 [16]=63616c42 [17]=616f426b [18]=71456472 
+
+================ CTimeCheck ================
+  --- VTABLE 11310138  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105fb5f0  FUN_105fb5f0       370 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106226f0  FUN_106226f0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10628de0  FUN_10628de0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105fb970  FUN_105fb970       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=10621220 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CSetTime ================
+  --- VTABLE 1130e7dc  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105d42b0  FUN_105d42b0       144 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10622520  FUN_10622520       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10628490  FUN_10628490       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105d4440  FUN_105d4440       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061ea30 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CSetArea ================
+  --- VTABLE 1130f2bc  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105cdaa0  FUN_105cdaa0       237 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10622330  FUN_10622330       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10627aa0  FUN_10627aa0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105cdc20  FUN_105cdc20       85 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=10620a70 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CHandleDeath ================
+  --- VTABLE 1130f4b4  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105979b0  FUN_105979b0       326 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10621c60  FUN_10621c60       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10625860  FUN_10625860       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10597c80  FUN_10597c80       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061f1e0 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CCaculateDamagedValue ================
+  --- VTABLE 11306c64  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105609e0  FUN_105609e0       6 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10560ab0  FUN_10560ab0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10560ac0  FUN_10560ac0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105609f0  FUN_105609f0       113 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=63614343 [16]=74616c75 [17]=6d614465 [18]=64656761 
+
+================ CCaculateDamagedState ================
+  --- VTABLE 11306bcc  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 10644f35  FUN_10644f35       6 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10560940  FUN_10560940       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10560950  FUN_10560950       77 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 10560840  FUN_10560840       182 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=63614343 [16]=74616c75 [17]=6d614465 [18]=64656761 
+
+================ CSelector ================
+  --- VTABLE 1130d0c0  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105ed490  FUN_105ed490       155 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 105ed590  FUN_105ed590       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 105ed5a0  FUN_105ed5a0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105ed540  FUN_105ed540       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=6c655343 [16]=6f746365 [17]=746f5672 [18]=00007265 
+
+================ CNodeRepeatExecuteCounter ================
+  --- VTABLE 113104e8  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105f95b0  FUN_105f95b0       407 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10621ef0  FUN_10621ef0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10626530  FUN_10626530       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 105f97e0  FUN_105f97e0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061da10 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 
+
+================ CConditionSuccessful ================
+  --- VTABLE 11314460  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105fc000  FUN_105fc000       6 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106216c0  FUN_106216c0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10623c40  FUN_10623c40       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=6e6f4343 [16]=69746964 [17]=75536e6f [18]=73656363 
+
+================ CConditionFailure ================
+  --- VTABLE 113143f8  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 105f3f00  FUN_105f3f00       6 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 106216b0  FUN_106216b0       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10623bf0  FUN_10623bf0       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=6e6f4343 [16]=69746964 [17]=61466e6f [18]=72756c69 
+
+================ CBTOperation ================
+  --- VTABLE 1130e5e4  (15 slots) ---
+    [ 0] 103d8a40  FUN_103d8a40       70 bytes
+    [ 1] 103d8b60  FUN_103d8b60       13 bytes
+    [ 2] 103dca70  FUN_103dca70       13 bytes
+    [ 3] 103dc9e0  FUN_103dc9e0       83 bytes
+    [ 4] 1055eaa0  FUN_1055eaa0       279 bytes
+    [ 5] 103d7a00  FUN_103d7a00       3 bytes
+    [ 6] 103d7a30  FUN_103d7a30       4 bytes
+    [ 7] 10621450  FUN_10621450       6 bytes   <-- name getter
+    [ 8] 103dc6d0  FUN_103dc6d0       8 bytes
+    [ 9] 103dc830  FUN_103dc830       40 bytes
+    [10] 10622f90  FUN_10622f90       74 bytes
+    [11] 103d9af0  FUN_103d9af0       134 bytes
+    [12] 103d9b80  FUN_103d9b80       747 bytes
+    [13] 103d7ae0  FUN_103d7ae0       1 bytes
+    [14] 103dc6f0  FUN_103dc6f0       8 bytes
+    raw after table: [15]=1061d8f0 [16]=103dc6c0 [17]=103dc930 [18]=103d8a10 

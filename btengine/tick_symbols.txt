@@ -1,0 +1,24 @@
+== CBTActor / Context / Blackboard SYMBOLS ==
+  CBTActor::LoadBehaviorTreeFromAISetting @10258840
+  CBTActor::GetBlackboardInt @1025b730
+  CBTActor::GetBlackboardBool @1025b860
+  CBTActorDerived::Ctor @10261ce0
+  CBTActor::LoadClientBehaviorTree @10262030
+  CBTActor::LoadDefaultBehaviorTree @10262480
+  CBTActorDefaultTree::Ctor @10263ac0
+  CBTActor::DetachChildNode @102654c0
+  CBTBlackboardFact::Dtor_Deleting @10267bb0
+  CBTBlackboardFact::Dtor @10267c20
+  CBehaviorTree::BuildScriptFilePath @1046d000
+  CBTBlackboardSystem::SetOwner @1047b8a0
+  CBTBlackboardSystem::Dtor @1047bfd0
+  CBTBlackboard::Dtor @10486530
+  CBehaviorTreeContext::Ctor @104a2050
+  CBehaviorTreeContext::SerializeNodeRef @104a6720
+  CBehaviorTreeContext::BuildRuntimeNodeMaps @104a69f0
+  IdPtrNameSvr_CBTActor::GetIdPtrBaseName_Init @10a68450
+  CBTActor::Create_WithIdPtr @10a6b810
+  IdPtrNameSvr_CBTActor::RegisterType @10a6c630
+  CBTActor::InstantiateBehaviorTreeForEntity @10aa66e0
+  CBTActor::Create_WithIdPtr_dup @10aae120
+  s_IdPtrNameSvr<class_CBTActor>::Ge_11cbf004 @11cbf004

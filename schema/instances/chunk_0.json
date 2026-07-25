@@ -1,0 +1,490 @@
+{
+  "chunkIndex": 0,
+  "functions": [
+    {
+      "address": "0x101480d0",
+      "currentName": "FUN_101480d0",
+      "proposedName": "TdrText_DumpLevelModeStat",
+      "subsystem": "instances/level-mode",
+      "purpose": "TDR text/debug serializer for a Level-Mode-Stat struct. Dumps [levelMode] then [modeStatCnt], validates count, then two parallel arrays [modeStatType] (u8) and [modeStatVal] (u32).",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 levelMode (u32, printed via DAT_11d9e0b4=int fmt); +0x4 modeStatCnt (u8, printed 0x%02x)",
+        "modeStatType[]: u8 array @ +0x5, length = modeStatCnt",
+        "modeStatVal[]: u32 array @ +0xf, element i = *(u32*)((int)param_1 + i*4 + 0xf)",
+        "CAP: if modeStatCnt > 10 return -7 (max 10 entries)"
+      ],
+      "costs": ["modeStatVal entries likely reward/stat values (semantics not in this func)"],
+      "serverRelevance": "validation/schema: defines the level-mode stat block layout (max 10 type/value pairs) used in level config messages; server owns level mode definition. This is the debug-dump direction.",
+      "notes": "Value array printed with DAT_11d9f608 fmt string. TdrText_* = Tencent TDR text serializer plumbing."
+    },
+    {
+      "address": "0x1015f5a0",
+      "currentName": "FUN_1015f5a0",
+      "proposedName": "TdrText_DumpFixedTimesBlock",
+      "subsystem": "instances/level-result",
+      "purpose": "TDR text serializer for the FixedTimesBlock struct (dump direction; matches TlvFixedTimesBlock read at 0x1015F270 in schema docs). Level completion/quest block with a completeBit array plus levelId/levelResult.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 fixedTimes(i32); +0x4 blockArg1; +0x8 blockArg2; +0xc blockArg3; +0x10 blockArg4; +0x14 completeBitCount(i32)",
+        "completeBit[]: u8 array @ +0x18, element i = *(char*)((int)param_1 + 0x18 + i)",
+        "levelId: i32 @ +0x1d; levelResult: i32 @ +0x21",
+        "CAP: completeBitCount < 0 return -6; completeBitCount > 5 return -7 (max 5 complete-bits)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: cross-referenced with TLV_DOCS/TlvFixedTimesBlock.md (fields fixedTimes, blockArg1-4, completeBitCount, completeBit, levelId, levelResult). Server evaluates level completion / fixed-times gating.",
+      "notes": "Confirms schema field names 1:1. blockArg offsets 1-4 are consecutive i32 (per doc field offsets)."
+    },
+    {
+      "address": "0x1028b500",
+      "currentName": "FUN_1028b500",
+      "proposedName": "TdrText_DumpInstanceTriggerInfo",
+      "subsystem": "instances/trigger",
+      "purpose": "TDR text serializer for an instance-trigger descriptor: iTriggerId, iInstancePoint, iLevelID, iLevelDiff, iLevelMode.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iTriggerId(i32); +0x4 iInstancePoint(i32); +0x8 iLevelID(i32); +0xc iLevelDiff(i32); +0x10 iLevelMode(i32)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: instance entry trigger + level id/difficulty/mode gate. Server owns which trigger maps to which level/difficulty/mode.",
+      "notes": "Identical body to FUN_1028bbb0."
+    },
+    {
+      "address": "0x1028bbb0",
+      "currentName": "FUN_1028bbb0",
+      "proposedName": "TdrText_DumpInstanceTriggerInfo_dup",
+      "subsystem": "instances/trigger",
+      "purpose": "Byte-identical duplicate of FUN_1028b500 (same iTriggerId/iInstancePoint/iLevelID/iLevelDiff/iLevelMode dump). Likely a second TDR-generated struct sharing the same layout.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iTriggerId; +0x4 iInstancePoint; +0x8 iLevelID; +0xc iLevelDiff; +0x10 iLevelMode (all i32)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: same as FUN_1028b500.",
+      "notes": "Duplicate of 0x1028b500."
+    },
+    {
+      "address": "0x1029ab90",
+      "currentName": "FUN_1029ab90",
+      "proposedName": "TdrText_DumpInstanceDataArray",
+      "subsystem": "instances/instance-data",
+      "purpose": "TDR text serializer for an instance-data blob: a count plus two parallel u32 arrays [instanceDataType] and [instanceDataValue].",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iInstanceDataCnt(i32)",
+        "instanceDataType[]: u32 array @ +0x4 (param_1[1..]), length = cnt",
+        "instanceDataValue[]: u32 array @ +0xa4 (param_1[0x29..]), length = cnt",
+        "CAP: cnt < 0 return -6; cnt > 0x28 (40) return -7 (max 40 entries per array)"
+      ],
+      "costs": ["instanceDataValue entries are generic instance key/value payload (semantics per type)"],
+      "serverRelevance": "validation/schema: instance-scoped key/value data (up to 40 type/value pairs). Server owns instance data.",
+      "notes": "Type array stride 4 from param_1+1; value array from param_1+0x29 (offset 0xa4)."
+    },
+    {
+      "address": "0x1029cd70",
+      "currentName": "FUN_1029cd70",
+      "proposedName": "TdrText_DumpInstanceId_bufwrap",
+      "subsystem": "instances/id",
+      "purpose": "Buffer-wrapper TDR text serializer that emits a single [iInstanceID] field into a caller buffer; sets up local cursor struct and returns bytes written via out-param.",
+      "confidence": "high",
+      "formulas": [
+        "field: iInstanceID(i32) @ +0x0 of source struct",
+        "returns 0xffffffed (-19) if dest buffer ptr (param_2) is NULL"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: text-dump helper (single instance id).",
+      "notes": "FUN_10c3da30 = free/cleanup of temp buffer when local_8 flag set."
+    },
+    {
+      "address": "0x1029cdf0",
+      "currentName": "FUN_1029cdf0",
+      "proposedName": "TdrText_DumpInstanceId",
+      "subsystem": "instances/id",
+      "purpose": "Minimal TDR text serializer emitting only [iInstanceID] (i32 @ +0).",
+      "confidence": "high",
+      "formulas": ["field: iInstanceID(i32) @ +0x0"],
+      "costs": [],
+      "serverRelevance": "validation/schema: single-field iInstanceID message.",
+      "notes": ""
+    },
+    {
+      "address": "0x1029ce20",
+      "currentName": "FUN_1029ce20",
+      "proposedName": "TdrText_DumpInstanceId_bufwrap2",
+      "subsystem": "instances/id",
+      "purpose": "Buffer-wrapper variant of iInstanceID text dump; writes into fixed-size dest buffer (param_3 = size), NUL-terminates at min(written, size-1), returns dest ptr.",
+      "confidence": "high",
+      "formulas": [
+        "field: iInstanceID(i32) @ +0x0",
+        "clamp: if written >= size, term index = size-1; dest[idx]=0",
+        "returns &DAT_11d9d32b (empty string) if dest NULL or size==0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: text-dump helper.",
+      "notes": ""
+    },
+    {
+      "address": "0x1029ceb0",
+      "currentName": "FUN_1029ceb0",
+      "proposedName": "TdrText_DumpInstanceId_bufwrap3",
+      "subsystem": "instances/id",
+      "purpose": "Another iInstanceID text-dump buffer wrapper using a cursor struct {buf,pos,cap}; NUL-terminates via TdrBuf_PutNulAt, returns buf.",
+      "confidence": "high",
+      "formulas": [
+        "field: iInstanceID(i32) @ +0x0",
+        "clamp: pos=param_2[1]; cap=param_2[2]; if pos>=cap pos=cap-1; PutNulAt(cap,pos)",
+        "returns &DAT_11d9d32b if buf(param_2[0])==0 or cap(param_2[2])==0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: text-dump helper.",
+      "notes": ""
+    },
+    {
+      "address": "0x102a22d0",
+      "currentName": "FUN_102a22d0",
+      "proposedName": "TdrText_DumpBattleGroundCreateInfo",
+      "subsystem": "instances/create",
+      "purpose": "TDR text serializer for the instance/battleground creation descriptor — the parameters used to spin up an instance level: battleground id, level id, max players, game mode, time/weather, world time, rand seed, warning flag, max player level.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iBattleGroundID(i32); +0x4 iLevelID(i32); +0x8 iCreateMaxPlayerCount(i32); +0xc iGameMode(i32); +0x10 iTimeType(i32); +0x14 iWeatherType(i32)",
+        "+0x18 fTime(float, printed via DAT_11da0cf4 float fmt); +0x1c iLevelRandSeed(i32)",
+        "+0x20 bWarningFlag(u8, 0x%02x); +0x21 iCreatePlayerMaxLv(i32)"
+      ],
+      "costs": ["iCreateMaxPlayerCount = instance player capacity gate; iCreatePlayerMaxLv = max level allowed to create/join"],
+      "serverRelevance": "authoritative: these are the server-owned parameters that define an instance session (capacity, mode, difficulty inputs, deterministic rand seed for level generation, weather/time). Server must generate iLevelRandSeed and enforce iCreateMaxPlayerCount / iCreatePlayerMaxLv.",
+      "notes": "Embedded as [stInstanceInfo] inside FUN_102a2a40 (instance-allocation response)."
+    },
+    {
+      "address": "0x102a2a40",
+      "currentName": "FUN_102a2a40",
+      "proposedName": "TdrText_DumpInstanceAllocResponse",
+      "subsystem": "instances/enter",
+      "purpose": "TDR text serializer for the instance allocation / enter response: error code, role id, instance id, the battle-server address string, service id, connection key, embedded stInstanceInfo (BattleGroundCreateInfo), and same-BS/cross-region/matchroom flags. This is the reply that hands a client off to a battle server.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iErrNo(i32); +0x4 iRoleId(i32); +0x8 iInstanceID(i32)",
+        "+0xc szBattleSvr (char[], ~0x200 bytes: next scalar iServiceID at param_1[0x83]=+0x20c)",
+        "+0x20c iServiceID(i32); +0x210 szKey (char[] connection key)",
+        "[stInstanceInfo] -> nested FUN_102a22d0 (BattleGroundCreateInfo)",
+        "+0x255 bSameBS(u8); +0x256 bCrossRegion(u8); +0x257 bMatchRoom(u8) (all 0x%02x)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server assigns the battle-server (szBattleSvr), iServiceID and per-session szKey, decides bSameBS/bCrossRegion/bMatchRoom routing, and returns iErrNo. Core matchmaking->battle-server handoff message.",
+      "notes": "param_3 depth is incremented (param_3+1 when >=0) before recursing into nested struct dump."
+    },
+    {
+      "address": "0x102a3760",
+      "currentName": "FUN_102a3760",
+      "proposedName": "TdrText_DumpLevelInstanceRef_bufwrap",
+      "subsystem": "instances/ref",
+      "purpose": "Buffer-wrapper TDR text serializer for a {iLevelid, iInstanceid} pair into a caller buffer.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iLevelid(i32); +0x4 iInstanceid(i32)",
+        "returns -0x13 (-19) if dest buffer NULL"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: level+instance reference pair.",
+      "notes": ""
+    },
+    {
+      "address": "0x102a3800",
+      "currentName": "FUN_102a3800",
+      "proposedName": "TdrText_DumpLevelInstanceRef",
+      "subsystem": "instances/ref",
+      "purpose": "Minimal TDR text serializer for {iLevelid, iInstanceid}.",
+      "confidence": "high",
+      "formulas": ["struct: +0x0 iLevelid(i32); +0x4 iInstanceid(i32)"],
+      "costs": [],
+      "serverRelevance": "validation/schema: level+instance reference pair.",
+      "notes": ""
+    },
+    {
+      "address": "0x102a83b0",
+      "currentName": "FUN_102a83b0",
+      "proposedName": "TdrText_DumpWorldServerStats",
+      "subsystem": "instances/telemetry",
+      "purpose": "TDR text serializer for world/battle-server load telemetry: online player count, players in town/battle, active instance count, players in wait queue, world FPS, and per-slot town/battle FPS arrays.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 iOnlinePlayerNum(i32); +0x4 iPlayerInTown(i32); +0x8 iPlayerInBattle(i32); +0xc iActiveInstanceCount(i32); +0x10 iPlayerInWaitQueue(i32)",
+        "+0x14 fWorldFPS(float)",
+        "townFPS[10]: float array @ +0x18 (param_1+6), fixed length 10",
+        "battleFPS[10]: float array @ +0x40 (param_1+0x10), fixed length 10"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server-side monitoring/telemetry (load balancing across matchmaking). iPlayerInWaitQueue and iActiveInstanceCount inform matchmaking capacity. Fixed 10-slot FPS arrays = per-line/per-shard health.",
+      "notes": "Float arrays printed via DAT_11da064c fmt."
+    },
+    {
+      "address": "0x102fbb60",
+      "currentName": "FUN_102fbb60",
+      "proposedName": "TdrText_DumpInstanceBrowseEntry",
+      "subsystem": "instances/lobby-browse",
+      "purpose": "TDR text serializer for one instance browse/list entry: battle-server id, instance id, level name string, occupant count, and an array of occupant player names.",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 dwBattleSvrID(u32, fmt DAT_11d9f574); +0x4 dwInstanceID(u32)",
+        "+0x8 szLevelName (char[0x20], 32 bytes; nCount at +0x28)",
+        "+0x28 nCount(i16)",
+        "aszPlayerName[]: entries @ +0x2a + i*0x20 (32 bytes each), length = nCount",
+        "CAP: nCount < 0 return -6; nCount > 8 return -7 (max 8 players listed per instance)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: instance/room browse listing (server provides open instances with occupant names). Player cap surfaced here is 8 names.",
+      "notes": "Element size 0x20 = 32-byte name buffers."
+    },
+    {
+      "address": "0x102fc860",
+      "currentName": "FUN_102fc860",
+      "proposedName": "TdrText_DumpInstanceListResponse",
+      "subsystem": "instances/lobby-browse",
+      "purpose": "TDR text serializer for the instance-list response: index, error code, count, and an array of astInstanceInfo entries (each dumped via FUN_102fbb60).",
+      "confidence": "high",
+      "formulas": [
+        "struct: +0x0 dwIndex(u32); +0x4 nErrCode(i16); +0x6 nCount(i16)",
+        "astInstanceInfo[]: nested FUN_102fbb60 per element, length = nCount",
+        "CAP: nCount < 0 return -6; nCount > 10 return -7 (max 10 instances per page)"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative: server returns paginated open-instance list (max 10 per response), dwIndex = page cursor, nErrCode = query result.",
+      "notes": "Depth incremented before recursing into each entry."
+    },
+    {
+      "address": "0x103169b0",
+      "currentName": "FUN_103169b0",
+      "proposedName": "TdrText_DumpLevelQueryFilter",
+      "subsystem": "instances/level-select",
+      "purpose": "TDR text serializer for a level query/filter descriptor: level mode, map id, level group id, difficulty, cross-line flag, and a begin/end range.",
+      "confidence": "high",
+      "formulas": [
+        "struct (param_1 is short*): +0x0 nLevelMode(i16); +0x2 dwMapId(u32); +0x6 dwLevelGrpId(u32)",
+        "+0xa nDifficulty(i16); +0xc nCrossLine(i16)",
+        "+0xe dwBeginFrom(u32); +0x12 dwEndTo(u32)"
+      ],
+      "costs": [],
+      "serverRelevance": "validation/schema: level selection filter (mode/map/group/difficulty + cross-line + range). Server validates level availability and difficulty gates.",
+      "notes": "nCrossLine = cross-server-line matchmaking flag."
+    },
+    {
+      "address": "0x1047cee0",
+      "currentName": "FUN_1047cee0",
+      "proposedName": "BehaviorTree_DumpResourceStats",
+      "subsystem": "ai/behavior-tree (engine)",
+      "purpose": "Debug/stats dump walking Behavior-Tree resources: reports 'BT Res', 'Template BT Tree/Nodes', and iterates an rb-tree of 'Instanced BT Tree/Nodes' calling FUN_1047ce00 per node.",
+      "confidence": "medium",
+      "formulas": [
+        "instance tree base at param_1+0x48; rb-tree traversal via node fields +0x4(parent)/+0xc(left)/+0x8/+0x14",
+        "template node ptr at *(param_1+0x44)+0xc when type *(param_1+0x44)+4 == 1"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: stock CryEngine AI behavior-tree resource stat reporting. Not gameplay-authoritative.",
+      "notes": "param_2 vtbl is a stats/profiler sink (vtbl+0xc/0x10/0x18/0x4c)."
+    },
+    {
+      "address": "0x104fb080",
+      "currentName": "FUN_104fb080",
+      "proposedName": "Lobby_ClearNewLobbyActiveGreyImg",
+      "subsystem": "ui/lobby (client)",
+      "purpose": "Clears the 'GreyImg_Active' flag on a HUD element and fetches/refcounts the 'NewLobby' Flash movie clip, then invokes its vtbl+0x64(0).",
+      "confidence": "medium",
+      "formulas": ["refcount dec pattern on Flash clip (piVar3[1]--, then [2] on zero)"],
+      "costs": [],
+      "serverRelevance": "client-only: Flash/Scaleform UI lobby plumbing.",
+      "notes": "DAT_1202e818 = global game/UI context object referenced throughout this chunk."
+    },
+    {
+      "address": "0x10509470",
+      "currentName": "FUN_10509470",
+      "proposedName": "NewLobby_RegisterUiEventHandlers",
+      "subsystem": "ui/lobby (client)",
+      "purpose": "Registers a large set of Flash UI event->handler callbacks for the New Lobby: Dialog_LinkClick, GuideUIStepComplete, WinModelChange, EnableAction, GamepadUIFocus, QuickSpeakModeFocus, RelaySvrOk/Cancel, ReloadUIInfo, onLimitUnlockFunc, OpenSafeModeUrl/SensitiveUrl/BangBangWnd, ReqChangeLineToTeamLeader, ReqChangeTownInstance, ReqLeaveFarm, ReqLeaveCamp, OpenXianYouWnd, InitModel, (Un)LoadSwfNotify.",
+      "confidence": "medium",
+      "formulas": [],
+      "costs": [],
+      "serverRelevance": "client-only: UI event binding table. However the event names name real client->server requests (ReqChangeTownInstance, ReqChangeLineToTeamLeader, ReqLeaveFarm, ReqLeaveCamp) => hub/instance-change flows to document server-side.",
+      "notes": "FUN_100b62c0 = string-atom intern; FUN_104d0ee0/FUN_1050c7d0 = register delegate. Handlers e.g. FUN_1050c550=ReqChangeTownInstance."
+    },
+    {
+      "address": "0x1050adc0",
+      "currentName": "FUN_1050adc0",
+      "proposedName": "NewLobby_Tick",
+      "subsystem": "ui/lobby (client)",
+      "purpose": "Per-frame lobby update: expires a countdown timer at +0x24 vs current time and calls FUN_1050ba30 when elapsed; when in town game-state (FUN_10bac530()==3) resolves the NewLobby Flash clip; conditionally runs FUN_1050af30/FUN_1050b060.",
+      "confidence": "medium",
+      "formulas": [
+        "timer: if *(float*)(param_1+0x24) > 0 and now >= that value => *(param_1+0x24)=0; FUN_1050ba30()",
+        "game-state gate: FUN_10bac530() == 3 (town)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: UI tick / Flash clip management.",
+      "notes": "FUN_10bac530 returns a game-state enum (2 and 3 used here; 3=town-lobby context)."
+    },
+    {
+      "address": "0x1050b730",
+      "currentName": "FUN_1050b730",
+      "proposedName": "Lobby_SendReqChangeTownInstance",
+      "subsystem": "instances/hub-entry (client send)",
+      "purpose": "Handler for changing the town instance / hub line. Reloads UI if needed, sets pet name, and either sends a scripted 'ReqChangeTownInstance' (msg-id 0x202f) or fills a large request struct with a level name (strncpy 0x100) and dispatches it via the network layer (msg type byte 0x42).",
+      "confidence": "medium",
+      "formulas": [
+        "if FUN_1050a110(0x9e): script path FUN_1112d6b0(0x202f, \"ReqChangeTownInstance\", ...)",
+        "else: struct hdr byte = 0x42; strncpy(levelName, *(param_1+0x306c), 0x100); send via FUN_113f3640 net obj vtbl+0x14",
+        "request buffer sized 0xa6d9c (memset), level-name field 0x100 bytes"
+      ],
+      "costs": [],
+      "serverRelevance": "authoritative flow (client-side sender): 0x202f = ReqChangeTownInstance request. Server must handle town-instance/line change and validate target level name (256 bytes). Struct hdr 0x42 identifies the message.",
+      "notes": "0x9e passed to FUN_1050a110 is a feature/limit check id. mhui_reload triggers full UI reload."
+    },
+    {
+      "address": "0x1050bac0",
+      "currentName": "FUN_1050bac0",
+      "proposedName": "Lobby_EnterTownTransition",
+      "subsystem": "instances/hub-entry (client)",
+      "purpose": "Performs the town/lobby enter transition when game-state matches (FUN_10bac530()==3 with substate flag==2, or forced). Resolves Flash clips (DAT_11dbd178 movie, 'NewLobby'), fires UI events 0x33 and 0x1f, toggles lobby-active state (FUN_10b69ec0(1), FUN_10b69c40), and conditionally FUN_112e0770.",
+      "confidence": "low",
+      "formulas": [
+        "gate: (*(int*)(local_38+0x3c)==2 && FUN_10bac530()==3) || param_1!='\\0'",
+        "UI events dispatched with ids 0x33 and 0x1f",
+        "extra: if *(int*)(instObj+11000)!=0 => FUN_112e0770(0)"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: local UI/scene transition into town hub (drives Flash + local state). State value 2/3 mirror server-authoritative game state.",
+      "notes": "Heavy Flash refcount juggling; decompiler stack artifacts (_DAT_00000000)."
+    },
+    {
+      "address": "0x1052ce50",
+      "currentName": "FUN_1052ce50",
+      "proposedName": "CEquipForgeUI_RegisterHandlers",
+      "subsystem": "ui/equip-forge (client)",
+      "purpose": "Initializes the Equipment Forge / avatar-preview UI panel (WeaponUIConfig::LoadFromXml) and registers its Flash event handlers: InitModel, onBtn_Left/Right/Near/Reset/Down, OnClose, SetAvatarFrameData, Reset/ClearEquip, onCommonShowItem/onShowItem/onShowItemWithColor, C2AS_SetBodyType/SetPoseType, OnCheckPackType, OnShowPackAvatars, OnCheckAvatarWndPos, onMoveLeft/Right, onShowEquipItemInstance.",
+      "confidence": "medium",
+      "formulas": ["panel flag: *(param_1+0x424)=1; existing model released if bit6 of *(param_1+0x424) set"],
+      "costs": [],
+      "serverRelevance": "client-only: equip/avatar preview UI (CEquipForgeUI::OnPanelActivate). Not authoritative.",
+      "notes": "C2AS_* = Client-to-AvatarServer preview messages; body/pose type only affect local preview."
+    },
+    {
+      "address": "0x107ccd30",
+      "currentName": "FUN_107ccd30",
+      "proposedName": "Flash_ReadInstanceChannelNumber",
+      "subsystem": "ui/instance (client)",
+      "purpose": "Reads the 'instanceChannelNumber' variable from a Flash object into an out u64 (param_2); handles TDR-style variant tag (wire types 0x8f mask: 10=object arg, 5=number).",
+      "confidence": "medium",
+      "formulas": [
+        "presence: ((byte)param_1[1] & 0x8f)==10 flag passed to getter",
+        "if ((local_24 & 0x8f)==5) out = CONCAT44(hi,lo) else out=0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: Flash variable read (instance channel/line number for display).",
+      "notes": "Generic AS3<->C++ value marshalling."
+    },
+    {
+      "address": "0x107d8f60",
+      "currentName": "FUN_107d8f60",
+      "proposedName": "InstanceResult_ShowWinLoseWindow",
+      "subsystem": "instances/result (client)",
+      "purpose": "Builds the instance settlement/result window. Dispatches a batch of UI element enable/config events (event id 0x1e with element ids 0x34,0,2,0xc,0xd,0xe,0xf,0x10,0x13,4,0x18,0x1a,0x1b,0x1f,0x20,0x33,0x6e), configures HUD visibility, then shows 'InstanceWin' or 'InstanceLose' dialog based on the win flag at param_1+0x20.",
+      "confidence": "medium",
+      "formulas": [
+        "win/lose branch: *(char*)(param_1+0x20) != 0 => InstanceWin (menu vtbl+0x2b0) else InstanceLose (vtbl+0x2b4)",
+        "UI event id = 0x1e (30) applied to ~17 element ids"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only presentation: reflects server-decided win/lose (param_1+0x20). Server owns the actual result; this only renders it.",
+      "notes": "auStack_90 = 0x80-byte dialog descriptor; FUN_105e3410 shows it."
+    },
+    {
+      "address": "0x107db7f0",
+      "currentName": "FUN_107db7f0",
+      "proposedName": "Flash_BuildInstanceLevelCatCostData",
+      "subsystem": "instances/level-cost (client)",
+      "purpose": "On a Flash getter callback, computes an instance-level category cost (FUN_11574f20 given category id) and returns an AS3 object 'mh.model.Instance.InstanceLevelCatCostData' with CostType and CostValue.",
+      "confidence": "medium",
+      "formulas": [
+        "arg variant: (arg.tag & 0x8f)==3||4 => category value else 0xdeadbeaf sentinel",
+        "FUN_11574f20(instMgr, subObj, categoryId, &costType, &costValue) fills CostType/CostValue"
+      ],
+      "costs": ["CostType + CostValue = the currency/material cost to run/enter a level category (values computed server/config-side by FUN_11574f20)"],
+      "serverRelevance": "validation: cost lookup surfaced to UI; the authoritative cost table lives behind FUN_11574f20 (instance manager). Server should charge CostType/CostValue on entry.",
+      "notes": "0xdeadbeaf = uninitialized-arg sentinel used across this codebase."
+    },
+    {
+      "address": "0x107dcf10",
+      "currentName": "FUN_107dcf10",
+      "proposedName": "Flash_BuildInstancePlayerStateData",
+      "subsystem": "instances/settlement (client)",
+      "purpose": "Builds AS3 object 'mh.model.Instance.InstancePlayerStateData' with a StateDatas array of 'mh.model.Instance.vo.ScoreDataVo' {nScoreType, nScore}, iterating a per-player score rb-tree/list at param_3+0x50, then calls InitData.",
+      "confidence": "medium",
+      "formulas": [
+        "score list root at param_3+0x50; iterate rb-tree (node +0x4/+0xc/+0x8), each node: nScoreType @ +0x10, nScore @ +0x14",
+        "emit ScoreDataVo per node into StateDatas array"
+      ],
+      "costs": ["nScore = per-category settlement score (server-computed)"],
+      "serverRelevance": "authoritative source: the score entries (nScoreType/nScore) are computed server-side and pushed to the result screen. Server owns settlement scoring.",
+      "notes": "FUN_11a98de0 = create AS3 typed object; FUN_104d1550 = set int property."
+    },
+    {
+      "address": "0x10838500",
+      "currentName": "FUN_10838500",
+      "proposedName": "Settings_InitAudioVideoAndLobbyState",
+      "subsystem": "ui/settings (client)",
+      "purpose": "Caches CVar handles (s_SFXVolume, s_FmodMusicVolume, r_colorchart_Gamma2, g_npc_language), reads their values, pushes an audio-state UI event (id 0x62), and if in lobby state (FUN_10bac530()==2) enables the create-role view in the 'NewLobby' Flash via _root.EnableCreateRoleView.",
+      "confidence": "low",
+      "formulas": [
+        "sfxVol*DAT_11de9a30, musicVol*DAT_11de9a30; mute flags: vol<=0.0",
+        "lobby gate: FUN_10bac530()==2"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: local settings + Flash lobby setup.",
+      "notes": "Writes results into caller struct in_stack_00000014 (type tag 2)."
+    },
+    {
+      "address": "0x108394b0",
+      "currentName": "FUN_108394b0",
+      "proposedName": "Lobby_EnableCreateRoleView",
+      "subsystem": "ui/lobby (client)",
+      "purpose": "When in lobby state (FUN_10bac530()==2), sets _root.EnableCreateRoleView on the 'NewLobby' Flash clip to enable the character-creation view.",
+      "confidence": "medium",
+      "formulas": ["gate: FUN_10bac530()==2"],
+      "costs": [],
+      "serverRelevance": "client-only: Flash lobby UI toggle.",
+      "notes": ""
+    },
+    {
+      "address": "0x1083fb60",
+      "currentName": "FUN_1083fb60",
+      "proposedName": "Flash_BuildShopSaleItemDataArray",
+      "subsystem": "shop/backpack (client)",
+      "purpose": "Builds the 'shopSaleItemDataArray' of SALE_ITEM_DATA AS3 objects for a backpack/shop panel: iterates backpack item container, and per item emits ItemId, ItemNum, price, level/rank requirement, name, bind state, transmogrify id, required sex, pack tag, and current bind/unbound money.",
+      "confidence": "low",
+      "formulas": [
+        "per item: SaleItemId, ItemId(FUN_11669730), salesCount, ItemNum(vtbl+0xc), backItemIndex, backItemBind, backItemTransmogrifyItemId (item[0x7d] if FUN_116698a0), backItemRequireSex (*(base+0xfc)), factItemLevel(vtbl+0x18), factRankLevel",
+        "itemPrice via FUN_114b7130(itemDef, count) when itemDef!=0 else 0; needPlayerLevel = *(itemDef+0xc8)",
+        "currentBindMoney/currentMoney via FUN_1025b060 (two currency reads)"
+      ],
+      "costs": [
+        "itemPrice = per-item sell/buy price (from item definition FUN_114b7130)",
+        "needPlayerLevel = *(itemDef+0xc8) required player level to use",
+        "currentBindMoney + currentMoney = player's two money pools shown for affordability"
+      ],
+      "serverRelevance": "client-only display builder; the authoritative price (FUN_114b7130) and money balances (FUN_1025b060) originate server/config-side. Server must recompute price and validate funds on purchase.",
+      "notes": "instanceType constant 9 tagged on each SALE_ITEM_DATA. Large stack builder with many temp refs."
+    },
+    {
+      "address": "0x1084a130",
+      "currentName": "FUN_1084a130",
+      "proposedName": "CreateRoleUI_RegisterHandlers",
+      "subsystem": "ui/create-role (client)",
+      "purpose": "Initializes the character create/select UI panel and registers its full Flash handler table: InitModel, FaceEditing, AvatarSubId, SexSelected, Return, CreateRole(Ok/ClickOK), SelectRoleMode, DeleteRole(_OK/_No), StartGame, ColorSelected, AvatarTypeSelected, DoRefresh, SelectedRole, RoleNumError, ResetFace, ReturnRoleList, ChangeFaceMode, ReqGotoChangeFaceRole, ShowNewSimpleDialogById, LineFullMessageBoxOK, CreatRoleNameInput OK/Cancel, LobbyExit Yes/No, AutoConfigSystemPreference OK/NO, etc.; sets default panel state fields.",
+      "confidence": "medium",
+      "formulas": [
+        "init state: param_1[0x48]=1; [0x49]=1; [8]=0; [9]=1; [10]=1; [0xc]=1; [0x14]=0; [0x46]=0xffffffff; DAT_123bba2c=0xffffffff; DAT_123bba28=0"
+      ],
+      "costs": [],
+      "serverRelevance": "client-only: character creation/selection UI binding. Names like CreateRole/DeleteRole/StartGame/LineFullMessageBox map to server flows (role CRUD, line-full rejection) worth documenting server-side, but this function itself is UI wiring.",
+      "notes": "LineFullMessageBoxOK => server rejects join when a line/shard is full. FUN_10851ec0/FUN_104d0ee0 = delegate registration."
+    }
+  ]
+}

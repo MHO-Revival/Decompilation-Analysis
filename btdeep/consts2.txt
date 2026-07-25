@@ -1,0 +1,80 @@
+
+==== CEntityMove dt-scale A  DAT_113c12f8  @113c12f8 ====
+  hex   : 00 00 7a 44 00 50 c3 47 cd cc cc bd 00 00 00 00 
+  f32   : 1000.0
+  f64   : 5.134144218773682E37
+  u32   : 1148846080 (0x447a0000)
+  cstr  : ""
+
+==== CEntityMove dt-scale B  DAT_112fe81c  @112fe81c ====
+  hex   : 6f 12 83 3a 81 80 80 3b 00 00 00 3d ab aa 2a 3d 
+  f32   : 0.001
+  f64   : 4.368035584287253E-22
+  u32   : 981668463 (0x3a83126f)
+  cstr  : "o..:...;"
+
+==== CEntityMove arrive eps  DAT_113076e8  @113076e8 ====
+  hex   : 9a 99 99 99 99 99 b9 3f 80 d4 56 10 c0 c6 3d 10 
+  f32   : -1.5881868E-23
+  f64   : 0.1
+  u32   : 2576980378 (0x9999999a)
+  cstr  : ".......?..V...=.0.=...=...V..y=.@.=.`.=."
+
+==== MoveToPos duration K   _DAT_11307984  @11307984 ====
+  hex   : cd cc cc 3f 18 2d 44 54 fb 21 09 40 cd cc 4c 3e 
+  f32   : 1.6
+  f64   : 8.619199506814409E97
+  u32   : 1070386381 (0x3fcccccd)
+  cstr  : "...?.-DT.!.@..L>"
+
+==== MoveTo* arrive eps      DAT_113c12b8  @113c12b8 ====
+  hex   : 00 00 00 3f 00 00 00 00 00 00 00 00 00 00 00 3f 
+  f32   : 0.5
+  f64   : 5.222099017E-315
+  u32   : 1056964608 (0x3f000000)
+  cstr  : ""
+
+==== rotate/move stop eps    DAT_112fca80  @112fca80 ====
+  hex   : cd cc cc 3d 9a 99 19 3e ab aa aa 3e 00 00 00 00 
+  f32   : 0.1
+  f64   : 1.4901166890679552E-9
+  u32   : 1036831949 (0x3dcccccd)
+  cstr  : "...=...>...>"
+
+==== RotateByAnim K          DAT_113c12c8  @113c12c8 ====
+  hex   : 00 00 80 3f 00 00 00 00 00 00 00 00 00 00 f0 3f 
+  f32   : 1.0
+  f64   : 5.263544247E-315
+  u32   : 1065353216 (0x3f800000)
+  cstr  : ""
+
+==== fabs mask               DAT_112fcb10  @112fcb10 ====
+  hex   : ff ff ff 7f ff ff ff 7f ff ff ff 7f ff ff ff 7f 
+  f32   : NaN
+  f64   : NaN
+  u32   : 2147483647 (0x7fffffff)
+  cstr  : "................EQUALS"
+
+==== zero                    DAT_113c1280  @113c1280 ====
+  hex   : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  f32   : 0.0
+  f64   : 0.0
+  u32   : 0 (0x00000000)
+  cstr  : ""
+
+==== locomotion state str    DAT_1139eb9e  @1139eb9e ====
+  hex   : 00 00 20 09 0d 0a 00 00 00 00 20 00 09 00 0d 00 
+  f32   : 1.92593E-33
+  f64   : 5.459970807699E-311
+  u32   : 153092096 (0x09200000)
+  cstr  : ""
+
+==== gEnv-ish                DAT_113f3a18  @113f3a18 ====
+  hex   : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+  f32   : 0.0
+  f64   : 0.0
+  u32   : 0 (0x00000000)
+  cstr  : ""
+
+
+######## vtables with >= 200 consecutive function pointers ########
