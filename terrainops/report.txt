@@ -1,0 +1,75 @@
+== CheckTerrainDis mode strings ==
+  DAT_1130a4ac -> ptr 0x00007055 = <unreadable>
+  DAT_1130a4b0 -> ptr 0x6e776f44 = <unreadable>
+
+======== CIsInTheAir
+  nameStr 0x1130d738  getter 0x105f8d50
+  nameStr 0x1130d738  getter 0x10621db0
+    getter slot 0x11310250 -> Evaluate at 0x11310244
+      Evaluate = 0x105f8bd0
+
+======== CCheckTerrainDis
+  nameStr 0x1130a4b8  getter 0x105b1180
+  nameStr 0x1130a4b8  getter 0x10621670
+    getter slot 0x1130da80 -> Evaluate at 0x1130da74
+      Evaluate = 0x105b0d50
+
+======== CCheckCollideWithWall
+  nameStr 0x1130dbf0  getter 0x106215e0
+    getter slot 0x1130dbd0 -> Evaluate at 0x1130dbc4
+      Evaluate = 0x105b0560
+  nameStr 0x1130dbf0  getter 0x10628fe0
+
+======== CCheckGroundMaterial
+  nameStr 0x1130a484  getter 0x105b0bd0
+  nameStr 0x1130a484  getter 0x10621600
+    getter slot 0x1130dad4 -> Evaluate at 0x1130dac8
+      Evaluate = 0x105b0930
+
+======== CCheckInWater
+  nameStr 0x1130a49c  getter 0x105b0d30
+  nameStr 0x1130a49c  getter 0x10621630
+    getter slot 0x1130dd38 -> Evaluate at 0x1130dd2c
+      Evaluate = 0x105b0be0
+
+======== CRaycast
+  nameStr 0x1130a5d8  getter 0x105b3db0
+  nameStr 0x1130a5d8  getter 0x10622010
+    getter slot 0x1130dc90 -> Evaluate at 0x1130dc84
+      Evaluate = 0x105b3260
+
+======== CRaycastPoint
+  nameStr 0x1130a63c  getter 0x105b41b0
+  nameStr 0x1130a63c  getter 0x10622020
+    getter slot 0x1130dce4 -> Evaluate at 0x1130dcd8
+      Evaluate = 0x105b3fd0
+
+======== CIsOnVolume
+  nameStr 0x1130a29c  getter 0x105af480
+    getter slot 0x1130a27c -> Evaluate at 0x1130a270
+      Evaluate = 0x105af340
+  nameStr 0x1130a29c  getter 0x105af4e0
+
+======== CIsOnSameVolume
+  nameStr 0x1130a238  getter 0x105af2a0
+    getter slot 0x1130a218 -> Evaluate at 0x1130a20c
+      Evaluate = 0x105af120
+  nameStr 0x1130a238  getter 0x105af300
+
+======== CJumpTo
+  nameStr 0x113095e8  getter 0x1059c0b0
+  nameStr 0x113095e8  getter 0x10621e20
+    getter slot 0x113141b0 -> Evaluate at 0x113141a4
+      Evaluate = 0x1059b950
+
+======== CTeleportToTargetPos
+  nameStr 0x1130d030  getter 0x105ec8d0
+  nameStr 0x1130d030  getter 0x106226e0
+    getter slot 0x11310b40 -> Evaluate at 0x11310b34
+      Evaluate = 0x105ec2c0
+
+======== CEnableMoveCollisionInvu
+  nameStr 0x1130a4d8  getter 0x105b1370
+  nameStr 0x1130a4d8  getter 0x10621870
+    getter slot 0x1130dc3c -> Evaluate at 0x1130dc30
+      Evaluate = 0x105b11c0

@@ -1,0 +1,10 @@
+
+### pointer scan for 0x1061fb40
+
+### pointer scan for 0x1061fb10
+
+### pointer scan for 0x106436e0
+
+### pointer scan for 0x10620fd0
+
+### pointer scan for 0x10621040

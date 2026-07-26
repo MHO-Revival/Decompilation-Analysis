@@ -1,0 +1,15 @@
+== floats ==
+  DAT_113c1280 = 0x00000000 = 0.00000
+
+== inline strings ==
+  DAT_1130a4ac = "Up"
+  DAT_1130a4b0 = "Down"
+  DAT_1130a4d0 = "<="
+  DAT_113a3314 = ">"
+  DAT_1130a4d4 = ">="
+  DAT_113a33e4 = "<"
+
+== hunting the missing class-name literals ==
+  CCheckCollideWithWall  at 0x1130dbf0 in .rdata, preceding byte 0x10
+  CIsOnVolume            at 0x1130a29c in .rdata, preceding byte 0x10
+  CIsOnSameVolume        at 0x1130a238 in .rdata, preceding byte 0x10
