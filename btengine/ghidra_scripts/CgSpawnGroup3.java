@@ -36,6 +36,8 @@ public class CgSpawnGroup3 extends GhidraScript {
         0x116448e0L,   // CMonsterSpawnGroup::_CheckRespawn
         0x116440b0L,   // EnableSpawner's timer callback
         0x1184a310L, 0x1184a540L, 0x1184a650L,   // the spawn-request builder trio
+        0x11644120L,   // _CheckRespawn's timer callback — what a RESPAWN actually spawns
+        0x100ea610L,   // the timer-arming helper both delays go through
     };
 
     @Override
