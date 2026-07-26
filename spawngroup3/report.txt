@@ -1,0 +1,17 @@
+=== callers of RollSpawnForLevel (0x116fd440)
+  ref from 116fc4f0  in FUN_116fc4b0 @ 116fc4b0
+  ref from 116fc52d  in FUN_116fc4b0 @ 116fc4b0
+
+0x116fd440  CSpawnMonsterGroupInfo::RollSpawnForLevel
+0x11645210  FUN_11645210
+0x116f9600  FUN_116f9600
+0x116f9500  FUN_116f9500
+0x116f86a0  FUN_116f86a0
+0x116f9310  FUN_116f9310
+0x116fd090  CMHLevelInfo::ValidateSpawnMonsterGroups
+0x116ae000  CMonsterSpawnGroup::DoSpawnBatch
+0x116448e0  CMonsterSpawnGroup::_CheckRespawn
+0x116440b0  FUN_116440b0
+0x1184a310  FUN_1184a310
+0x1184a540  FUN_1184a540
+0x1184a650  FUN_1184a650

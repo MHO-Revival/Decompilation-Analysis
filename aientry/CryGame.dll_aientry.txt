@@ -1,0 +1,53 @@
+program: CryGame.dll
+
+================ ".AISetting.ClientBehaviorTree" ================
+  @11da6dd8
+    DATA @102620c5  in CBTActor::LoadClientBehaviorTree (586b)
+    DATA @10258a83  in CBTActor::LoadBehaviorTreeFromAISetting (919b)
+
+================ ".AISetting.BehaviorTree" ================
+  @11da6d90
+    DATA @10258901  in CBTActor::LoadBehaviorTreeFromAISetting (919b)
+
+================ "ClientBehaviorTree" ================
+  @11da6dc4
+    DATA @10262089  in CBTActor::LoadClientBehaviorTree (586b)
+    DATA @10258a6d  in CBTActor::LoadBehaviorTreeFromAISetting (919b)
+    DATA @10aacc47  in AISystem::PreloadEntityBehaviorTreeFiles (627b)
+    DATA @10d15dbd  in CEntityCustomRoot::LoadAIAndModelSettings (847b)
+    DATA @10aacc3f  in AISystem::PreloadEntityBehaviorTreeFiles (627b)
+
+================ "DefaultBehaviorTree" ================
+  @11da74f8
+    DATA @102624b4  in CBTActor::LoadDefaultBehaviorTree (169b)
+
+================ "SkillBehaviorTree" ================
+  @11da74dc
+    DATA @102622c2  in SkillBehaviorTree::LoadFromConfig (510b)
+
+================ "bHaveBehaviorTree" ================
+  @11cbedf8
+    DATA @10a63898  in CBTLevelActor::InitFromEntityProperties (642b)
+
+================ "Scripts/AI/BehaviorTree/" ================
+  @11cc0e18
+    DATA @10dde5de  in CProjectileInfo::PreloadResourcesFromDataNode (2360b)
+    DATA @10aad93b  in AISystem::ScanArchetypesAndPreloadBTs (1791b)
+
+================ "%s/%s.xml" ================
+  @11cf6410
+    DATA @10eb6b2e  in FUN_10eb6a90 (543b)
+
+================ "LoadBehaviorTree" ================
+  @11d0a450
+    DATA @11038325  in ScriptBind_MonsterBehaviorTree::Register (2890b)
+    DATA @110364a8  in ScriptBind_BehaviorTree::Register (1739b)
+
+================ "InitBehaviorTrees" ================
+  @11d0a490
+    DATA @110365a1  in ScriptBind_BehaviorTree::Register (1739b)
+
+================ "LoadEventBehaviorTree" ================
+  @11d0a438
+    DATA @110382d2  in ScriptBind_MonsterBehaviorTree::Register (2890b)
+    DATA @11036455  in ScriptBind_BehaviorTree::Register (1739b)

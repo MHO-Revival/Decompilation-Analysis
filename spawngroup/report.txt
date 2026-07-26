@@ -1,0 +1,93 @@
+program: CryGame.dll
+base:    10000000
+
+=== "SpawnMonsterGroupInfo"  2 occurrence(s)
+  @ 11cf48a5
+     no recorded references; scanning text for the immediate
+  @ 11d57b7c
+     ref from 118a4133   in SpawnMonsterGroupInfo::GetTypeDescriptor @ 118a4120
+     ref from 118a40b6   in SpawnMonsterGroupInfo::registerName @ 118a40b0
+
+=== "spawnmonstergroupinfo"  0 occurrence(s)
+
+=== "LevelMin"  4 occurrence(s)
+  @ 11dd1010
+     no recorded references; scanning text for the immediate
+  @ 11dd1032
+     no recorded references; scanning text for the immediate
+  @ 11dd188e
+     no recorded references; scanning text for the immediate
+  @ 11dd2db5
+     no recorded references; scanning text for the immediate
+
+=== "LevelMax"  6 occurrence(s)
+  @ 11d3ac0d
+     no recorded references; scanning text for the immediate
+  @ 11d43c29
+     no recorded references; scanning text for the immediate
+  @ 11d43c50
+     no recorded references; scanning text for the immediate
+  @ 11dd197e
+     no recorded references; scanning text for the immediate
+  @ 11dd2da1
+     no recorded references; scanning text for the immediate
+  @ 11dd5f9c
+     no recorded references; scanning text for the immediate
+
+=== "SpawnWeight"  1 occurrence(s)
+  @ 11d575ac
+     ref from 1189cbba   in CMonsterSpawnGroupEntry::ParseXml @ 1189ca40
+
+=== "LevelMode"  7 occurrence(s)
+  @ 11ce2758
+     ref from 10d26fac   in CMHLevelInfo::DispatchLevelModeEnterEvent @ 10d26f60
+     ref from 10d2326a   (no function — not disassembled)
+  @ 11dc7ed0
+     no recorded references; scanning text for the immediate
+  @ 11dd941a
+     no recorded references; scanning text for the immediate
+  @ 11dde595
+     no recorded references; scanning text for the immediate
+  @ 11fe1798
+     no recorded references; scanning text for the immediate
+  @ 11fe17fd
+     no recorded references; scanning text for the immediate
+  @ 11fecab2
+     no recorded references; scanning text for the immediate
+
+=== "Difficulty"  9 occurrence(s)
+  @ 11cc7cae
+     no recorded references; scanning text for the immediate
+  @ 11ccd199
+     no recorded references; scanning text for the immediate
+  @ 11cd5718
+     no recorded references; scanning text for the immediate
+  @ 11d3c41c
+     ref from 11dfb77c   (no function — not disassembled)
+  @ 11d48c3f
+     no recorded references; scanning text for the immediate
+  @ 11fec7ee
+     no recorded references; scanning text for the immediate
+  @ 11fecaf6
+     no recorded references; scanning text for the immediate
+  @ 11fecc1b
+     no recorded references; scanning text for the immediate
+  @ 11fecd5b
+     no recorded references; scanning text for the immediate
+
+=== "MonsterGroupID"  1 occurrence(s)
+  @ 11d5758d
+     no recorded references; scanning text for the immediate
+
+=== "FixedMonsterID"  1 occurrence(s)
+  @ 11d57b04
+     ref from 118a3616   in MHMonsterSpawnPoint::ParseEntity @ 118a3500
+
+=== "SpawnAmountMin"  1 occurrence(s)
+  @ 11d57520
+     ref from 1189caeb   in CMonsterSpawnGroupEntry::ParseXml @ 1189ca40
+
+=== "SpawnAmountMax"  1 occurrence(s)
+  @ 11d57510
+     ref from 1189cb01   in CMonsterSpawnGroupEntry::ParseXml @ 1189ca40
+

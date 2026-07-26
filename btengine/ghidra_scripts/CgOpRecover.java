@@ -42,6 +42,20 @@ public class CgOpRecover extends GhidraScript {
                 dumpConst(name.substring(2));
                 continue;
             }
+            // "fn:105c4b40" decompiles a function by address. The op evaluators delegate their real logic to
+            // shared helpers (the point-selection family all funnel through one), so following a call target is
+            // as necessary as finding the entry point.
+            if (name.startsWith("fn:")) {
+                decompileAt(name.substring(3));
+                continue;
+            }
+            // "str:113bef4c" prints the NUL-terminated string at an address. The selection helpers compare an
+            // entity property against a literal held in an unnamed DAT_ slot; that literal is the discriminator,
+            // so it has to be read rather than guessed at.
+            if (name.startsWith("str:")) {
+                dumpString(name.substring(4));
+                continue;
+            }
             println("");
             println("################################################################");
             println("## OPERATION: " + name);
@@ -80,6 +94,56 @@ public class CgOpRecover extends GhidraScript {
         List<Reference> out = new ArrayList<>();
         for (Reference r : getReferencesTo(a)) out.add(r);
         return out;
+    }
+
+    /** Prints the NUL-terminated ASCII string at an address, and also follows it once as a pointer — a DAT_ slot
+     *  is sometimes the literal and sometimes a pointer to it, and which one is not obvious from the decompile. */
+    private void dumpString(String hex) {
+        try {
+            Address a = currentProgram.getAddressFactory().getDefaultAddressSpace()
+                    .getAddress(Long.parseLong(hex, 16));
+            println("STRING " + a + " direct  = \"" + readCStr(a) + "\"");
+            Address deref = readPtr(a);
+            if (deref != null) println("STRING " + a + " deref-> " + deref + " = \"" + readCStr(deref) + "\"");
+        } catch (Exception e) {
+            println("STRING " + hex + " : unreadable (" + e.getMessage() + ")");
+        }
+    }
+
+    private String readCStr(Address a) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (int i = 0; i < 128; i++) {
+                byte b = currentProgram.getMemory().getByte(a.add(i));
+                if (b == 0) break;
+                sb.append((b >= 32 && b < 127) ? (char) b : '.');
+            }
+        } catch (Exception ignored) { }
+        return sb.toString();
+    }
+
+    /** Decompiles whatever is at the given hex address, disassembling and defining a function if needed. */
+    private void decompileAt(String hex) {
+        try {
+            Address a = currentProgram.getAddressFactory().getDefaultAddressSpace()
+                    .getAddress(Long.parseLong(hex, 16));
+            println("");
+            println("################################################################");
+            println("## FUNCTION @ " + a);
+            println("################################################################");
+            Function f = getFunctionAt(a);
+            if (f == null) {
+                // TenProtect leaves large stretches undisassembled; "no function here" usually means
+                // "not analysed yet", not "no code".
+                disassemble(a);
+                f = getFunctionAt(a);
+                if (f == null) { createFunction(a, null); f = getFunctionAt(a); }
+            }
+            if (f == null) { println("  could not define a function at " + a); return; }
+            decompile(f, "requested function");
+        } catch (Exception e) {
+            println("FUNCTION " + hex + " : failed (" + e.getMessage() + ")");
+        }
     }
 
     /** Prints a data address interpreted as float / int / raw bytes, so constants can be READ not guessed. */
