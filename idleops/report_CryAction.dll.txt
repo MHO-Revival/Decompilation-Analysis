@@ -1,0 +1,806 @@
+================ CGetRandomPosInCurrentRegion
+  literal at 0x1130a05c
+    ref 0x105adf19  FUN_105adef0
+      -> FUN_105adef0 @105adef0 (734 bytes)
+      ---- instructions ----
+      105adef0  PUSH EBP                            
+      105adef1  MOV EBP,ESP                         
+      105adef3  SUB ESP,0x30                        
+      105adef6  LEA EAX,[EBP + -0x30]               
+      105adef9  PUSH 0x11306cd8                     
+      105adefe  PUSH 0x11306cd0                       ; "Distance"
+      105adf03  MOV ECX,EAX                         
+      105adf05  MOV dword ptr [EBP + -0x20],EAX     
+      105adf08  MOV dword ptr [EBP + -0x1c],EAX     
+      105adf0b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105adf10  LEA EAX,[EBP + -0x18]               
+      105adf13  PUSH 0x1130a078                     
+      105adf18  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105adf1d  MOV ECX,EAX                         
+      105adf1f  MOV dword ptr [EBP + -0x8],EAX      
+      105adf22  MOV dword ptr [EBP + -0x4],EAX      
+      105adf25  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105adf2a  PUSH 0x0                            
+      105adf2c  PUSH 0x2                            
+      105adf2e  PUSH 0x0                            
+      105adf30  LEA EAX,[EBP + -0x30]               
+      105adf33  PUSH EAX                            
+      105adf34  LEA EAX,[EBP + -0x18]               
+      105adf37  PUSH EAX                            
+      105adf38  CALL 0x103cf720                       ; -> FUN_103cf720
+      105adf3d  MOV ECX,EAX                         
+      105adf3f  CALL 0x103cf810                       ; -> FUN_103cf810
+      105adf44  MOV EAX,dword ptr [EBP + -0x4]      
+      105adf47  LEA ECX,[EBP + -0x18]               
+      105adf4a  CMP EAX,ECX                         
+      105adf4c  JZ 0x105adf5b                       
+      105adf4e  TEST EAX,EAX                        
+      105adf50  JZ 0x105adf5b                       
+      105adf52  PUSH EAX                            
+      105adf53  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105adf58  ADD ESP,0x4                         
+      105adf5b  MOV EAX,dword ptr [EBP + -0x1c]     
+      105adf5e  LEA ECX,[EBP + -0x30]               
+      105adf61  CMP EAX,ECX                         
+      105adf63  JZ 0x105adf72                       
+      105adf65  TEST EAX,EAX                        
+      105adf67  JZ 0x105adf72                       
+      105adf69  PUSH EAX                            
+      105adf6a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105adf6f  ADD ESP,0x4                         
+      105adf72  LEA EAX,[EBP + -0x18]               
+      105adf75  PUSH 0x1130a089                     
+      105adf7a  PUSH 0x1130a07c                       ; "NeedTargetPos"
+      105adf7f  MOV ECX,EAX                         
+      105adf81  MOV dword ptr [EBP + -0x8],EAX      
+      105adf84  MOV dword ptr [EBP + -0x4],EAX      
+      105adf87  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105adf8c  LEA EAX,[EBP + -0x30]               
+      105adf8f  PUSH 0x1130a078                     
+      105adf94  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105adf99  MOV ECX,EAX                         
+      105adf9b  MOV dword ptr [EBP + -0x20],EAX     
+      105adf9e  MOV dword ptr [EBP + -0x1c],EAX     
+      105adfa1  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105adfa6  PUSH 0x1                            
+      105adfa8  LEA EAX,[EBP + -0x18]               
+      105adfab  PUSH EAX                            
+      105adfac  LEA EAX,[EBP + -0x30]               
+      105adfaf  PUSH EAX                            
+      105adfb0  CALL 0x103cf720                       ; -> FUN_103cf720
+      105adfb5  MOV ECX,EAX                         
+      105adfb7  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105adfbc  MOV EAX,dword ptr [EBP + -0x1c]     
+      105adfbf  LEA ECX,[EBP + -0x30]               
+      105adfc2  CMP EAX,ECX                         
+      105adfc4  JZ 0x105adfd3                       
+      105adfc6  TEST EAX,EAX                        
+      105adfc8  JZ 0x105adfd3                       
+      105adfca  PUSH EAX                            
+      105adfcb  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105adfd0  ADD ESP,0x4                         
+      105adfd3  MOV EAX,dword ptr [EBP + -0x4]      
+      105adfd6  LEA ECX,[EBP + -0x18]               
+      105adfd9  CMP EAX,ECX                         
+      105adfdb  JZ 0x105adfea                       
+      105adfdd  TEST EAX,EAX                        
+      105adfdf  JZ 0x105adfea                       
+      105adfe1  PUSH EAX                            
+      105adfe2  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105adfe7  ADD ESP,0x4                         
+      105adfea  LEA EAX,[EBP + -0x18]               
+      105adfed  PUSH 0x11305efd                     
+      105adff2  PUSH 0x11305ef4                       ; "TargetPos"
+      105adff7  MOV ECX,EAX                         
+      105adff9  MOV dword ptr [EBP + -0x8],EAX      
+      105adffc  MOV dword ptr [EBP + -0x4],EAX      
+      105adfff  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae004  LEA EAX,[EBP + -0x30]               
+      105ae007  PUSH 0x1130a078                     
+      105ae00c  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105ae011  MOV ECX,EAX                         
+      105ae013  MOV dword ptr [EBP + -0x20],EAX     
+      105ae016  MOV dword ptr [EBP + -0x1c],EAX     
+      105ae019  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae01e  PUSH 0x2                            
+      105ae020  LEA EAX,[EBP + -0x18]               
+      105ae023  PUSH EAX                            
+      105ae024  LEA EAX,[EBP + -0x30]               
+      105ae027  PUSH EAX                            
+      105ae028  CALL 0x103cf720                       ; -> FUN_103cf720
+      105ae02d  MOV ECX,EAX                         
+      105ae02f  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105ae034  MOV EAX,dword ptr [EBP + -0x1c]     
+      105ae037  LEA ECX,[EBP + -0x30]               
+      105ae03a  CMP EAX,ECX                         
+      105ae03c  JZ 0x105ae04b                       
+      105ae03e  TEST EAX,EAX                        
+      105ae040  JZ 0x105ae04b                       
+      105ae042  PUSH EAX                            
+      105ae043  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae048  ADD ESP,0x4                         
+      105ae04b  MOV EAX,dword ptr [EBP + -0x4]      
+      105ae04e  LEA ECX,[EBP + -0x18]               
+      105ae051  CMP EAX,ECX                         
+      105ae053  JZ 0x105ae062                       
+      105ae055  TEST EAX,EAX                        
+      105ae057  JZ 0x105ae062                       
+      105ae059  PUSH EAX                            
+      105ae05a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae05f  ADD ESP,0x4                         
+      105ae062  LEA EAX,[EBP + -0x18]               
+      105ae065  PUSH 0x11308186                     
+      105ae06a  PUSH 0x11308178                       ; "TargetRegionID"
+      105ae06f  MOV ECX,EAX                         
+      105ae071  MOV dword ptr [EBP + -0x8],EAX      
+      105ae074  MOV dword ptr [EBP + -0x4],EAX      
+      105ae077  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae07c  LEA EAX,[EBP + -0x30]               
+      105ae07f  PUSH 0x1130a078                     
+      105ae084  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105ae089  MOV ECX,EAX                         
+      105ae08b  MOV dword ptr [EBP + -0x20],EAX     
+      105ae08e  MOV dword ptr [EBP + -0x1c],EAX     
+      105ae091  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae096  PUSH 0x3                            
+      105ae098  LEA EAX,[EBP + -0x18]               
+      105ae09b  PUSH EAX                            
+      105ae09c  LEA EAX,[EBP + -0x30]               
+      105ae09f  PUSH EAX                            
+      105ae0a0  CALL 0x103cf720                       ; -> FUN_103cf720
+      105ae0a5  MOV ECX,EAX                         
+      105ae0a7  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105ae0ac  MOV EAX,dword ptr [EBP + -0x1c]     
+      105ae0af  LEA ECX,[EBP + -0x30]               
+      105ae0b2  CMP EAX,ECX                         
+      105ae0b4  JZ 0x105ae0c3                       
+      105ae0b6  TEST EAX,EAX                        
+      105ae0b8  JZ 0x105ae0c3                       
+      105ae0ba  PUSH EAX                            
+      105ae0bb  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae0c0  ADD ESP,0x4                         
+      105ae0c3  MOV EAX,dword ptr [EBP + -0x4]      
+      105ae0c6  LEA ECX,[EBP + -0x18]               
+      105ae0c9  CMP EAX,ECX                         
+      105ae0cb  JZ 0x105ae0da                       
+      105ae0cd  TEST EAX,EAX                        
+      105ae0cf  JZ 0x105ae0da                       
+      105ae0d1  PUSH EAX                            
+      105ae0d2  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae0d7  ADD ESP,0x4                         
+      105ae0da  LEA EAX,[EBP + -0x18]               
+      105ae0dd  PUSH 0x11309f23                     
+      105ae0e2  PUSH 0x11309f14                       ; "RandomHeightMin"
+      105ae0e7  MOV ECX,EAX                         
+      105ae0e9  MOV dword ptr [EBP + -0x8],EAX      
+      105ae0ec  MOV dword ptr [EBP + -0x4],EAX      
+      105ae0ef  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae0f4  LEA EAX,[EBP + -0x30]               
+      105ae0f7  PUSH 0x1130a078                     
+      105ae0fc  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105ae101  MOV ECX,EAX                         
+      105ae103  MOV dword ptr [EBP + -0x20],EAX     
+      105ae106  MOV dword ptr [EBP + -0x1c],EAX     
+      105ae109  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae10e  PUSH 0x4                            
+      105ae110  LEA EAX,[EBP + -0x18]               
+      105ae113  PUSH EAX                            
+      105ae114  LEA EAX,[EBP + -0x30]               
+      105ae117  PUSH EAX                            
+      105ae118  CALL 0x103cf720                       ; -> FUN_103cf720
+      105ae11d  MOV ECX,EAX                         
+      105ae11f  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105ae124  MOV EAX,dword ptr [EBP + -0x1c]     
+      105ae127  LEA ECX,[EBP + -0x30]               
+      105ae12a  CMP EAX,ECX                         
+      105ae12c  JZ 0x105ae13b                       
+      105ae12e  TEST EAX,EAX                        
+      105ae130  JZ 0x105ae13b                       
+      105ae132  PUSH EAX                            
+      105ae133  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae138  ADD ESP,0x4                         
+      105ae13b  MOV EAX,dword ptr [EBP + -0x4]      
+      105ae13e  LEA ECX,[EBP + -0x18]               
+      105ae141  CMP EAX,ECX                         
+      105ae143  JZ 0x105ae152                       
+      105ae145  TEST EAX,EAX                        
+      105ae147  JZ 0x105ae152                       
+      105ae149  PUSH EAX                            
+      105ae14a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae14f  ADD ESP,0x4                         
+      105ae152  LEA EAX,[EBP + -0x18]               
+      105ae155  PUSH 0x11309f32                     
+      105ae15a  PUSH 0x11309f24                       ; "RandomRangeVer"
+      105ae15f  MOV ECX,EAX                         
+      105ae161  MOV dword ptr [EBP + -0x8],EAX      
+      105ae164  MOV dword ptr [EBP + -0x4],EAX      
+      105ae167  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae16c  LEA EAX,[EBP + -0x30]               
+      105ae16f  PUSH 0x1130a078                     
+      105ae174  PUSH 0x1130a05c                       ; "CGetRandomPosInCurrentRegion"
+      105ae179  MOV ECX,EAX                         
+      105ae17b  MOV dword ptr [EBP + -0x20],EAX     
+      105ae17e  MOV dword ptr [EBP + -0x1c],EAX     
+      105ae181  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105ae186  PUSH 0x5                            
+      105ae188  LEA EAX,[EBP + -0x18]               
+      105ae18b  PUSH EAX                            
+      105ae18c  LEA EAX,[EBP + -0x30]               
+      105ae18f  PUSH EAX                            
+      105ae190  CALL 0x103cf720                       ; -> FUN_103cf720
+      105ae195  MOV ECX,EAX                         
+      105ae197  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105ae19c  MOV EAX,dword ptr [EBP + -0x1c]     
+      105ae19f  LEA ECX,[EBP + -0x30]               
+      105ae1a2  CMP EAX,ECX                         
+      105ae1a4  JZ 0x105ae1b3                       
+      105ae1a6  TEST EAX,EAX                        
+      105ae1a8  JZ 0x105ae1b3                       
+      105ae1aa  PUSH EAX                            
+      105ae1ab  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae1b0  ADD ESP,0x4                         
+      105ae1b3  MOV EAX,dword ptr [EBP + -0x4]      
+      105ae1b6  LEA ECX,[EBP + -0x18]               
+      105ae1b9  CMP EAX,ECX                         
+      105ae1bb  JZ 0x105ae1ca                       
+      105ae1bd  TEST EAX,EAX                        
+      105ae1bf  JZ 0x105ae1ca                       
+      105ae1c1  PUSH EAX                            
+      105ae1c2  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105ae1c7  ADD ESP,0x4                         
+      105ae1ca  MOV ESP,EBP                         
+      105ae1cc  POP EBP                             
+      105ae1cd  RET                                 
+    ref 0x105adf95  FUN_105adef0
+    ref 0x105ae00d  FUN_105adef0
+    ref 0x105ae085  FUN_105adef0
+    ref 0x105ae0fd  FUN_105adef0
+    ref 0x105ae175  FUN_105adef0
+    ref 0x105ae221  (outside any function)
+    ref 0x105ae281  (outside any function)
+    ref 0x105fccce  FUN_105fc120
+      -> FUN_105fc120 @105fc120 (18140 bytes)
+================ CRandomAnimsPlayByNum
+  literal at 0x1130a890
+    ref 0x105b7159  FUN_105b7130
+      -> FUN_105b7130 @105b7130 (1126 bytes)
+      ---- instructions ----
+      105b7130  PUSH EBP                            
+      105b7131  MOV EBP,ESP                         
+      105b7133  SUB ESP,0x30                        
+      105b7136  LEA EAX,[EBP + -0x30]               
+      105b7139  PUSH 0x1130623e                     
+      105b713e  PUSH 0x11306234                       ; "TickNumMax"
+      105b7143  MOV ECX,EAX                         
+      105b7145  MOV dword ptr [EBP + -0x20],EAX     
+      105b7148  MOV dword ptr [EBP + -0x1c],EAX     
+      105b714b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7150  LEA EAX,[EBP + -0x18]               
+      105b7153  PUSH 0x1130a8a5                     
+      105b7158  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b715d  MOV ECX,EAX                         
+      105b715f  MOV dword ptr [EBP + -0x8],EAX      
+      105b7162  MOV dword ptr [EBP + -0x4],EAX      
+      105b7165  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b716a  PUSH 0x0                            
+      105b716c  PUSH 0x5                            
+      105b716e  PUSH 0x0                            
+      105b7170  LEA EAX,[EBP + -0x30]               
+      105b7173  PUSH EAX                            
+      105b7174  LEA EAX,[EBP + -0x18]               
+      105b7177  PUSH EAX                            
+      105b7178  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b717d  MOV ECX,EAX                         
+      105b717f  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b7184  MOV EAX,dword ptr [EBP + -0x4]      
+      105b7187  LEA ECX,[EBP + -0x18]               
+      105b718a  CMP EAX,ECX                         
+      105b718c  JZ 0x105b719b                       
+      105b718e  TEST EAX,EAX                        
+      105b7190  JZ 0x105b719b                       
+      105b7192  PUSH EAX                            
+      105b7193  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7198  ADD ESP,0x4                         
+      105b719b  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b719e  LEA ECX,[EBP + -0x30]               
+      105b71a1  CMP EAX,ECX                         
+      105b71a3  JZ 0x105b71b2                       
+      105b71a5  TEST EAX,EAX                        
+      105b71a7  JZ 0x105b71b2                       
+      105b71a9  PUSH EAX                            
+      105b71aa  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b71af  ADD ESP,0x4                         
+      105b71b2  LEA EAX,[EBP + -0x18]               
+      105b71b5  PUSH 0x1130a8b2                     
+      105b71ba  PUSH 0x1130a8a8                       ; "AnimPrefix"
+      105b71bf  MOV ECX,EAX                         
+      105b71c1  MOV dword ptr [EBP + -0x8],EAX      
+      105b71c4  MOV dword ptr [EBP + -0x4],EAX      
+      105b71c7  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b71cc  LEA EAX,[EBP + -0x30]               
+      105b71cf  PUSH 0x1130a8a5                     
+      105b71d4  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b71d9  MOV ECX,EAX                         
+      105b71db  MOV dword ptr [EBP + -0x20],EAX     
+      105b71de  MOV dword ptr [EBP + -0x1c],EAX     
+      105b71e1  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b71e6  PUSH 0x0                            
+      105b71e8  PUSH 0x1                            
+      105b71ea  PUSH 0x1                            
+      105b71ec  LEA EAX,[EBP + -0x18]               
+      105b71ef  PUSH EAX                            
+      105b71f0  LEA EAX,[EBP + -0x30]               
+      105b71f3  PUSH EAX                            
+      105b71f4  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b71f9  MOV ECX,EAX                         
+      105b71fb  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b7200  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b7203  LEA ECX,[EBP + -0x30]               
+      105b7206  CMP EAX,ECX                         
+      105b7208  JZ 0x105b7217                       
+      105b720a  TEST EAX,EAX                        
+      105b720c  JZ 0x105b7217                       
+      105b720e  PUSH EAX                            
+      105b720f  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7214  ADD ESP,0x4                         
+      105b7217  MOV EAX,dword ptr [EBP + -0x4]      
+      105b721a  LEA ECX,[EBP + -0x18]               
+      105b721d  CMP EAX,ECX                         
+      105b721f  JZ 0x105b722e                       
+      105b7221  TEST EAX,EAX                        
+      105b7223  JZ 0x105b722e                       
+      105b7225  PUSH EAX                            
+      105b7226  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b722b  ADD ESP,0x4                         
+      105b722e  LEA EAX,[EBP + -0x18]               
+      105b7231  PUSH 0x11306247                     
+      105b7236  PUSH 0x11306240                       ; "SkillID"
+      105b723b  MOV ECX,EAX                         
+      105b723d  MOV dword ptr [EBP + -0x8],EAX      
+      105b7240  MOV dword ptr [EBP + -0x4],EAX      
+      105b7243  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7248  LEA EAX,[EBP + -0x30]               
+      105b724b  PUSH 0x1130a8a5                     
+      105b7250  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b7255  MOV ECX,EAX                         
+      105b7257  MOV dword ptr [EBP + -0x20],EAX     
+      105b725a  MOV dword ptr [EBP + -0x1c],EAX     
+      105b725d  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7262  PUSH 0x0                            
+      105b7264  PUSH 0x5                            
+      105b7266  PUSH 0x2                            
+      105b7268  LEA EAX,[EBP + -0x18]               
+      105b726b  PUSH EAX                            
+      105b726c  LEA EAX,[EBP + -0x30]               
+      105b726f  PUSH EAX                            
+      105b7270  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b7275  MOV ECX,EAX                         
+      105b7277  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b727c  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b727f  LEA ECX,[EBP + -0x30]               
+      105b7282  CMP EAX,ECX                         
+      105b7284  JZ 0x105b7293                       
+      105b7286  TEST EAX,EAX                        
+      105b7288  JZ 0x105b7293                       
+      105b728a  PUSH EAX                            
+      105b728b  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7290  ADD ESP,0x4                         
+      105b7293  MOV EAX,dword ptr [EBP + -0x4]      
+      105b7296  LEA ECX,[EBP + -0x18]               
+      105b7299  CMP EAX,ECX                         
+      105b729b  JZ 0x105b72aa                       
+      105b729d  TEST EAX,EAX                        
+      105b729f  JZ 0x105b72aa                       
+      105b72a1  PUSH EAX                            
+      105b72a2  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b72a7  ADD ESP,0x4                         
+      105b72aa  LEA EAX,[EBP + -0x18]               
+      105b72ad  PUSH 0x1130624f                     
+      105b72b2  PUSH 0x11306248                       ; "Restart"
+      105b72b7  MOV ECX,EAX                         
+      105b72b9  MOV dword ptr [EBP + -0x8],EAX      
+      105b72bc  MOV dword ptr [EBP + -0x4],EAX      
+      105b72bf  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b72c4  LEA EAX,[EBP + -0x30]               
+      105b72c7  PUSH 0x1130a8a5                     
+      105b72cc  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b72d1  MOV ECX,EAX                         
+      105b72d3  MOV dword ptr [EBP + -0x20],EAX     
+      105b72d6  MOV dword ptr [EBP + -0x1c],EAX     
+      105b72d9  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b72de  PUSH 0x0                            
+      105b72e0  PUSH 0x1                            
+      105b72e2  PUSH 0x3                            
+      105b72e4  LEA EAX,[EBP + -0x18]               
+      105b72e7  PUSH EAX                            
+      105b72e8  LEA EAX,[EBP + -0x30]               
+      105b72eb  PUSH EAX                            
+      105b72ec  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b72f1  MOV ECX,EAX                         
+      105b72f3  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b72f8  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b72fb  LEA ECX,[EBP + -0x30]               
+      105b72fe  CMP EAX,ECX                         
+      105b7300  JZ 0x105b730f                       
+      105b7302  TEST EAX,EAX                        
+      105b7304  JZ 0x105b730f                       
+      105b7306  PUSH EAX                            
+      105b7307  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b730c  ADD ESP,0x4                         
+      105b730f  MOV EAX,dword ptr [EBP + -0x4]      
+      105b7312  LEA ECX,[EBP + -0x18]               
+      105b7315  CMP EAX,ECX                         
+      105b7317  JZ 0x105b7326                       
+      105b7319  TEST EAX,EAX                        
+      105b731b  JZ 0x105b7326                       
+      105b731d  PUSH EAX                            
+      105b731e  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7323  ADD ESP,0x4                         
+      105b7326  LEA EAX,[EBP + -0x18]               
+      105b7329  PUSH 0x1130625a                     
+      105b732e  PUSH 0x11306250                       ; "SkillSpeed"
+      105b7333  MOV ECX,EAX                         
+      105b7335  MOV dword ptr [EBP + -0x8],EAX      
+      105b7338  MOV dword ptr [EBP + -0x4],EAX      
+      105b733b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7340  LEA EAX,[EBP + -0x30]               
+      105b7343  PUSH 0x1130a8a5                     
+      105b7348  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b734d  MOV ECX,EAX                         
+      105b734f  MOV dword ptr [EBP + -0x20],EAX     
+      105b7352  MOV dword ptr [EBP + -0x1c],EAX     
+      105b7355  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b735a  PUSH 0x0                            
+      105b735c  PUSH 0x2                            
+      105b735e  PUSH 0x4                            
+      105b7360  LEA EAX,[EBP + -0x18]               
+      105b7363  PUSH EAX                            
+      105b7364  LEA EAX,[EBP + -0x30]               
+      105b7367  PUSH EAX                            
+      105b7368  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b736d  MOV ECX,EAX                         
+      105b736f  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b7374  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b7377  LEA ECX,[EBP + -0x30]               
+      105b737a  CMP EAX,ECX                         
+      105b737c  JZ 0x105b738b                       
+      105b737e  TEST EAX,EAX                        
+      105b7380  JZ 0x105b738b                       
+      105b7382  PUSH EAX                            
+      105b7383  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7388  ADD ESP,0x4                         
+      105b738b  MOV EAX,dword ptr [EBP + -0x4]      
+      105b738e  LEA ECX,[EBP + -0x18]               
+      105b7391  CMP EAX,ECX                         
+      105b7393  JZ 0x105b73a2                       
+      105b7395  TEST EAX,EAX                        
+      105b7397  JZ 0x105b73a2                       
+      105b7399  PUSH EAX                            
+      105b739a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b739f  ADD ESP,0x4                         
+      105b73a2  LEA EAX,[EBP + -0x18]               
+      105b73a5  PUSH 0x11306265                     
+      105b73aa  PUSH 0x1130625c                       ; "CancelLCM"
+      105b73af  MOV ECX,EAX                         
+      105b73b1  MOV dword ptr [EBP + -0x8],EAX      
+      105b73b4  MOV dword ptr [EBP + -0x4],EAX      
+      105b73b7  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b73bc  LEA EAX,[EBP + -0x30]               
+      105b73bf  PUSH 0x1130a8a5                     
+      105b73c4  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b73c9  MOV ECX,EAX                         
+      105b73cb  MOV dword ptr [EBP + -0x20],EAX     
+      105b73ce  MOV dword ptr [EBP + -0x1c],EAX     
+      105b73d1  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b73d6  PUSH 0x0                            
+      105b73d8  PUSH 0x1                            
+      105b73da  PUSH 0x5                            
+      105b73dc  LEA EAX,[EBP + -0x18]               
+      105b73df  PUSH EAX                            
+      105b73e0  LEA EAX,[EBP + -0x30]               
+      105b73e3  PUSH EAX                            
+      105b73e4  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b73e9  MOV ECX,EAX                         
+      105b73eb  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b73f0  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b73f3  LEA ECX,[EBP + -0x30]               
+      105b73f6  CMP EAX,ECX                         
+      105b73f8  JZ 0x105b7407                       
+      105b73fa  TEST EAX,EAX                        
+      105b73fc  JZ 0x105b7407                       
+      105b73fe  PUSH EAX                            
+      105b73ff  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7404  ADD ESP,0x4                         
+      105b7407  MOV EAX,dword ptr [EBP + -0x4]      
+      105b740a  LEA ECX,[EBP + -0x18]               
+      105b740d  CMP EAX,ECX                         
+      105b740f  JZ 0x105b741e                       
+      105b7411  TEST EAX,EAX                        
+      105b7413  JZ 0x105b741e                       
+      105b7415  PUSH EAX                            
+      105b7416  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b741b  ADD ESP,0x4                         
+      105b741e  LEA EAX,[EBP + -0x18]               
+      105b7421  PUSH 0x1130627f                     
+      105b7426  PUSH 0x11306268                       ; "AnimSequenceSpeedBBName"
+      105b742b  MOV ECX,EAX                         
+      105b742d  MOV dword ptr [EBP + -0x8],EAX      
+      105b7430  MOV dword ptr [EBP + -0x4],EAX      
+      105b7433  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7438  LEA EAX,[EBP + -0x30]               
+      105b743b  PUSH 0x1130a8a5                     
+      105b7440  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b7445  MOV ECX,EAX                         
+      105b7447  MOV dword ptr [EBP + -0x20],EAX     
+      105b744a  MOV dword ptr [EBP + -0x1c],EAX     
+      105b744d  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7452  PUSH 0x1                            
+      105b7454  PUSH 0x1                            
+      105b7456  PUSH 0x6                            
+      105b7458  LEA EAX,[EBP + -0x18]               
+      105b745b  PUSH EAX                            
+      105b745c  LEA EAX,[EBP + -0x30]               
+      105b745f  PUSH EAX                            
+      105b7460  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b7465  MOV ECX,EAX                         
+      105b7467  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b746c  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b746f  LEA ECX,[EBP + -0x30]               
+      105b7472  CMP EAX,ECX                         
+      105b7474  JZ 0x105b7483                       
+      105b7476  TEST EAX,EAX                        
+      105b7478  JZ 0x105b7483                       
+      105b747a  PUSH EAX                            
+      105b747b  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7480  ADD ESP,0x4                         
+      105b7483  MOV EAX,dword ptr [EBP + -0x4]      
+      105b7486  LEA ECX,[EBP + -0x18]               
+      105b7489  CMP EAX,ECX                         
+      105b748b  JZ 0x105b749a                       
+      105b748d  TEST EAX,EAX                        
+      105b748f  JZ 0x105b749a                       
+      105b7491  PUSH EAX                            
+      105b7492  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7497  ADD ESP,0x4                         
+      105b749a  LEA EAX,[EBP + -0x18]               
+      105b749d  PUSH 0x1130a8bb                     
+      105b74a2  PUSH 0x1130a8b4                       ; "AnimNum"
+      105b74a7  MOV ECX,EAX                         
+      105b74a9  MOV dword ptr [EBP + -0x8],EAX      
+      105b74ac  MOV dword ptr [EBP + -0x4],EAX      
+      105b74af  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b74b4  LEA EAX,[EBP + -0x30]               
+      105b74b7  PUSH 0x1130a8a5                     
+      105b74bc  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b74c1  MOV ECX,EAX                         
+      105b74c3  MOV dword ptr [EBP + -0x20],EAX     
+      105b74c6  MOV dword ptr [EBP + -0x1c],EAX     
+      105b74c9  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b74ce  PUSH 0x0                            
+      105b74d0  PUSH 0x5                            
+      105b74d2  PUSH 0x7                            
+      105b74d4  LEA EAX,[EBP + -0x18]               
+      105b74d7  PUSH EAX                            
+      105b74d8  LEA EAX,[EBP + -0x30]               
+      105b74db  PUSH EAX                            
+      105b74dc  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b74e1  MOV ECX,EAX                         
+      105b74e3  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b74e8  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b74eb  LEA ECX,[EBP + -0x30]               
+      105b74ee  CMP EAX,ECX                         
+      105b74f0  JZ 0x105b74ff                       
+      105b74f2  TEST EAX,EAX                        
+      105b74f4  JZ 0x105b74ff                       
+      105b74f6  PUSH EAX                            
+      105b74f7  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b74fc  ADD ESP,0x4                         
+      105b74ff  MOV EAX,dword ptr [EBP + -0x4]      
+      105b7502  LEA ECX,[EBP + -0x18]               
+      105b7505  CMP EAX,ECX                         
+      105b7507  JZ 0x105b7516                       
+      105b7509  TEST EAX,EAX                        
+      105b750b  JZ 0x105b7516                       
+      105b750d  PUSH EAX                            
+      105b750e  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7513  ADD ESP,0x4                         
+      105b7516  LEA EAX,[EBP + -0x18]               
+      105b7519  PUSH 0x11306290                     
+      105b751e  PUSH 0x11306280                       ; "CanBePlayedTwice"
+      105b7523  MOV ECX,EAX                         
+      105b7525  MOV dword ptr [EBP + -0x8],EAX      
+      105b7528  MOV dword ptr [EBP + -0x4],EAX      
+      105b752b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b7530  LEA EAX,[EBP + -0x30]               
+      105b7533  PUSH 0x1130a8a5                     
+      105b7538  PUSH 0x1130a890                       ; "CRandomAnimsPlayByNum"
+      105b753d  MOV ECX,EAX                         
+      105b753f  MOV dword ptr [EBP + -0x20],EAX     
+      105b7542  MOV dword ptr [EBP + -0x1c],EAX     
+      105b7545  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105b754a  PUSH 0x0                            
+      105b754c  PUSH 0x3                            
+      105b754e  PUSH 0x8                            
+      105b7550  LEA EAX,[EBP + -0x18]               
+      105b7553  PUSH EAX                            
+      105b7554  LEA EAX,[EBP + -0x30]               
+      105b7557  PUSH EAX                            
+      105b7558  CALL 0x103cf720                       ; -> FUN_103cf720
+      105b755d  MOV ECX,EAX                         
+      105b755f  CALL 0x103cf810                       ; -> FUN_103cf810
+      105b7564  MOV EAX,dword ptr [EBP + -0x1c]     
+      105b7567  LEA ECX,[EBP + -0x30]               
+      105b756a  CMP EAX,ECX                         
+      105b756c  JZ 0x105b757b                       
+      105b756e  TEST EAX,EAX                        
+      105b7570  JZ 0x105b757b                       
+      105b7572  PUSH EAX                            
+      105b7573  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b7578  ADD ESP,0x4                         
+      105b757b  MOV EAX,dword ptr [EBP + -0x4]      
+      105b757e  LEA ECX,[EBP + -0x18]               
+      105b7581  CMP EAX,ECX                         
+      105b7583  JZ 0x105b7592                       
+      105b7585  TEST EAX,EAX                        
+      105b7587  JZ 0x105b7592                       
+      105b7589  PUSH EAX                            
+      105b758a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105b758f  ADD ESP,0x4                         
+      105b7592  MOV ESP,EBP                         
+      105b7594  POP EBP                             
+      105b7595  RET                                 
+    ref 0x105b71d5  FUN_105b7130
+    ref 0x105b7251  FUN_105b7130
+    ref 0x105b72cd  FUN_105b7130
+    ref 0x105b7349  FUN_105b7130
+    ref 0x105b73c5  FUN_105b7130
+    ref 0x105b7441  FUN_105b7130
+    ref 0x105b74bd  FUN_105b7130
+    ref 0x105b7539  FUN_105b7130
+    ref 0x105b7831  (outside any function)
+    ref 0x105b7841  (outside any function)
+    ref 0x105fc7a1  FUN_105fc120
+================ CBodyWidthToMeter
+  literal at 0x113066f4
+    ref 0x10559439  FUN_10559410
+      -> FUN_10559410 @10559410 (382 bytes)
+      ---- instructions ----
+      10559410  PUSH EBP                            
+      10559411  MOV EBP,ESP                         
+      10559413  SUB ESP,0x30                        
+      10559416  LEA EAX,[EBP + -0x30]               
+      10559419  PUSH 0x11305ef0                     
+      1055941e  PUSH 0x11305ee8                       ; "TargetID"
+      10559423  MOV ECX,EAX                         
+      10559425  MOV dword ptr [EBP + -0x20],EAX     
+      10559428  MOV dword ptr [EBP + -0x1c],EAX     
+      1055942b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      10559430  LEA EAX,[EBP + -0x18]               
+      10559433  PUSH 0x11306705                     
+      10559438  PUSH 0x113066f4                       ; "CBodyWidthToMeter"
+      1055943d  MOV ECX,EAX                         
+      1055943f  MOV dword ptr [EBP + -0x8],EAX      
+      10559442  MOV dword ptr [EBP + -0x4],EAX      
+      10559445  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      1055944a  PUSH 0x0                            
+      1055944c  PUSH 0x5                            
+      1055944e  PUSH 0x0                            
+      10559450  LEA EAX,[EBP + -0x30]               
+      10559453  PUSH EAX                            
+      10559454  LEA EAX,[EBP + -0x18]               
+      10559457  PUSH EAX                            
+      10559458  CALL 0x103cf720                       ; -> FUN_103cf720
+      1055945d  MOV ECX,EAX                         
+      1055945f  CALL 0x103cf810                       ; -> FUN_103cf810
+      10559464  MOV EAX,dword ptr [EBP + -0x4]      
+      10559467  LEA ECX,[EBP + -0x18]               
+      1055946a  CMP EAX,ECX                         
+      1055946c  JZ 0x1055947b                       
+      1055946e  TEST EAX,EAX                        
+      10559470  JZ 0x1055947b                       
+      10559472  PUSH EAX                            
+      10559473  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      10559478  ADD ESP,0x4                         
+      1055947b  MOV EAX,dword ptr [EBP + -0x1c]     
+      1055947e  LEA ECX,[EBP + -0x30]               
+      10559481  CMP EAX,ECX                         
+      10559483  JZ 0x10559492                       
+      10559485  TEST EAX,EAX                        
+      10559487  JZ 0x10559492                       
+      10559489  PUSH EAX                            
+      1055948a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      1055948f  ADD ESP,0x4                         
+      10559492  LEA EAX,[EBP + -0x18]               
+      10559495  PUSH 0x11306711                     
+      1055949a  PUSH 0x11306708                       ; "BodyWidth"
+      1055949f  MOV ECX,EAX                         
+      105594a1  MOV dword ptr [EBP + -0x8],EAX      
+      105594a4  MOV dword ptr [EBP + -0x4],EAX      
+      105594a7  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105594ac  LEA EAX,[EBP + -0x30]               
+      105594af  PUSH 0x11306705                     
+      105594b4  PUSH 0x113066f4                       ; "CBodyWidthToMeter"
+      105594b9  MOV ECX,EAX                         
+      105594bb  MOV dword ptr [EBP + -0x20],EAX     
+      105594be  MOV dword ptr [EBP + -0x1c],EAX     
+      105594c1  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105594c6  PUSH 0x0                            
+      105594c8  PUSH 0x2                            
+      105594ca  PUSH 0x1                            
+      105594cc  LEA EAX,[EBP + -0x18]               
+      105594cf  PUSH EAX                            
+      105594d0  LEA EAX,[EBP + -0x30]               
+      105594d3  PUSH EAX                            
+      105594d4  CALL 0x103cf720                       ; -> FUN_103cf720
+      105594d9  MOV ECX,EAX                         
+      105594db  CALL 0x103cf810                       ; -> FUN_103cf810
+      105594e0  MOV EAX,dword ptr [EBP + -0x1c]     
+      105594e3  LEA ECX,[EBP + -0x30]               
+      105594e6  CMP EAX,ECX                         
+      105594e8  JZ 0x105594f7                       
+      105594ea  TEST EAX,EAX                        
+      105594ec  JZ 0x105594f7                       
+      105594ee  PUSH EAX                            
+      105594ef  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105594f4  ADD ESP,0x4                         
+      105594f7  MOV EAX,dword ptr [EBP + -0x4]      
+      105594fa  LEA ECX,[EBP + -0x18]               
+      105594fd  CMP EAX,ECX                         
+      105594ff  JZ 0x1055950e                       
+      10559501  TEST EAX,EAX                        
+      10559503  JZ 0x1055950e                       
+      10559505  PUSH EAX                            
+      10559506  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      1055950b  ADD ESP,0x4                         
+      1055950e  LEA EAX,[EBP + -0x18]               
+      10559511  PUSH 0x1130671e                     
+      10559516  PUSH 0x11306714                       ; "StoreFloat"
+      1055951b  MOV ECX,EAX                         
+      1055951d  MOV dword ptr [EBP + -0x8],EAX      
+      10559520  MOV dword ptr [EBP + -0x4],EAX      
+      10559523  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      10559528  LEA EAX,[EBP + -0x30]               
+      1055952b  PUSH 0x11306705                     
+      10559530  PUSH 0x113066f4                       ; "CBodyWidthToMeter"
+      10559535  MOV ECX,EAX                         
+      10559537  MOV dword ptr [EBP + -0x20],EAX     
+      1055953a  MOV dword ptr [EBP + -0x1c],EAX     
+      1055953d  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      10559542  PUSH 0x1                            
+      10559544  PUSH 0x1                            
+      10559546  PUSH 0x2                            
+      10559548  LEA EAX,[EBP + -0x18]               
+      1055954b  PUSH EAX                            
+      1055954c  LEA EAX,[EBP + -0x30]               
+      1055954f  PUSH EAX                            
+      10559550  CALL 0x103cf720                       ; -> FUN_103cf720
+      10559555  MOV ECX,EAX                         
+      10559557  CALL 0x103cf810                       ; -> FUN_103cf810
+      1055955c  MOV EAX,dword ptr [EBP + -0x1c]     
+      1055955f  LEA ECX,[EBP + -0x30]               
+      10559562  CMP EAX,ECX                         
+      10559564  JZ 0x10559573                       
+      10559566  TEST EAX,EAX                        
+      10559568  JZ 0x10559573                       
+      1055956a  PUSH EAX                            
+      1055956b  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      10559570  ADD ESP,0x4                         
+      10559573  MOV EAX,dword ptr [EBP + -0x4]      
+      10559576  LEA ECX,[EBP + -0x18]               
+      10559579  CMP EAX,ECX                         
+      1055957b  JZ 0x1055958a                       
+      1055957d  TEST EAX,EAX                        
+      1055957f  JZ 0x1055958a                       
+      10559581  PUSH EAX                            
+      10559582  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      10559587  ADD ESP,0x4                         
+      1055958a  MOV ESP,EBP                         
+      1055958c  POP EBP                             
+      1055958d  RET                                 
+    ref 0x105594b5  FUN_10559410
+    ref 0x10559531  FUN_10559410
+    ref 0x10559661  (outside any function)
+    ref 0x10559791  (outside any function)
+    ref 0x105fdc3c  FUN_105fc120
+================ CMoveToPosition
+  (literal absent)

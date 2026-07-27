@@ -1,0 +1,25 @@
+======== CryGame.dll  "SpawnerEnable"
+  at 0x11d57b14
+     ref 0x118a363c  MHMonsterSpawnPoint::ParseEntity
+        caller CMHLevel::ParseLevelEntities @11711230
+======== CryGame.dll  "FixedMonsterID"
+  at 0x11d57b04
+     ref 0x118a3617  MHMonsterSpawnPoint::ParseEntity
+======== CryGame.dll  "MonsterGroupID"
+  at 0x11d5758d
+======== CryGame.dll  "SpawnAmountMin"
+  at 0x11d57520
+     ref 0x1189caec  CMonsterSpawnGroupEntry::ParseXml
+        caller CMHLevelSpawnConfig::ParseLevelXml @1189c230
+======== CryGame.dll  "MHMonsterSpawnPoint"
+  at 0x11d42e5c
+     ref 0x117112d1  CMHLevel::ParseLevelEntities
+======== CryGame.dll  "Spawner_DoSpawn"
+  at 0x11ce47c8
+     ref 0x10d1f4e1  CMHGameFramework::RegisterScriptBindings
+======== CryGame.dll  "EnableSpawner"
+  at 0x11ce47a8
+     ref 0x10d1f484  CMHGameFramework::RegisterScriptBindings
+  at 0x11d37268
+======== CryGame.dll  "SpawnerEnabled"
+  (literal absent)
