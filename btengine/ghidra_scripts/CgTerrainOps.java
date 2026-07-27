@@ -39,6 +39,11 @@ public class CgTerrainOps extends GhidraScript {
         "CJumpTo",
         "CTeleportToTargetPos",
         "CEnableMoveCollisionInvu",
+        // Buff ops (#85) — live for em003, unlike the physics ops above.
+        "CAddBuff",
+        "CRemoveBuff",
+        "CCheckBuff",
+        "CRemoveAllDynamicEffects",
     };
 
     // CheckTerrainDis compares against these two globals; naming them names its modes.

@@ -73,3 +73,27 @@
   nameStr 0x1130a4d8  getter 0x10621870
     getter slot 0x1130dc3c -> Evaluate at 0x1130dc30
       Evaluate = 0x105b11c0
+
+======== CAddBuff
+  nameStr 0x11305f24  getter 0x10551d20
+  nameStr 0x11305f24  getter 0x10621360
+    getter slot 0x11313610 -> Evaluate at 0x11313604
+      Evaluate = 0x10551820
+
+======== CRemoveBuff
+  nameStr 0x1130a990  getter 0x105b8780
+  nameStr 0x1130a990  getter 0x10622070
+    getter slot 0x11313808 -> Evaluate at 0x113137fc
+      Evaluate = 0x105b8660
+
+======== CCheckBuff
+  nameStr 0x11306a88  getter 0x1055f890
+  nameStr 0x11306a88  getter 0x106215b0
+    getter slot 0x113136b8 -> Evaluate at 0x113136ac
+      Evaluate = 0x1055f3e0
+
+======== CRemoveAllDynamicEffects
+  nameStr 0x11310c08  getter 0x10622060
+    getter slot 0x11310be8 -> Evaluate at 0x11310bdc
+      Evaluate = 0x105b85d0
+  nameStr 0x11310c08  getter 0x106290e0
