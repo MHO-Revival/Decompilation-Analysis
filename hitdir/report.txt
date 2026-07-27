@@ -1,0 +1,11 @@
+======== literal "HitDirSim"
+  at 0x11da6e74
+     ref 0x10258f3e  BehaviorTree::RegisterBlackboardKeys
+======== literal "HitDirSim_Back"
+======== literal "HitPos"
+  at 0x11da6e6c
+     ref 0x10258f13  BehaviorTree::RegisterBlackboardKeys
+     ref 0x10b9d744  FUN_10b9cf30
+     ref 0x10e1665f  FUN_10e16260
+     ref 0x1101b8c9  CBuffInfo::SerializeHitDamageMessage64
+  at 0x11fe80b7
