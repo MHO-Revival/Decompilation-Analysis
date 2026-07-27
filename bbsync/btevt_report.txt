@@ -1,0 +1,82 @@
+=== (A) FUNCTIONS CONTAINING IMMEDIATE 0x4FFFF (BT entity-event senders) ===
+instructions scanned: 8415092
+distinct functions: 65
+
+  FUN_10a4b570@10a4b570                                 hits=1
+  <no fn> 10a50594                                      hits=1
+  FUN_10a57480@10a57480                                 hits=3
+  Weapon::DispatchOnChgFireMode@10a5ab60                hits=1
+  FUN_10ab8710@10ab8710                                 hits=1
+  FUN_10ab8cf0@10ab8cf0                                 hits=2
+  FUN_10ab8e10@10ab8e10                                 hits=1
+  FUN_10ab8ee0@10ab8ee0                                 hits=1
+  FUN_10ab8f70@10ab8f70                                 hits=1
+  FUN_10ab9030@10ab9030                                 hits=1
+  FUN_10ab9190@10ab9190                                 hits=2
+  FUN_10b05000@10b05000                                 hits=1
+  <no fn> 10b222a3                                      hits=1
+  <no fn> 10b2235c                                      hits=1
+  <no fn> 10b22410                                      hits=1
+  CombatEntity::BuildGameOnHitEvent_Melee@10b255c0      hits=1
+  FUN_10ba4b10@10ba4b10                                 hits=2
+  BuffArea::BuildGameOnHitEvent@10bc94c0                hits=1
+  FUN_10bdd370@10bdd370                                 hits=1
+  FUN_10bdffc0@10bdffc0                                 hits=1
+  FUN_10be2090@10be2090                                 hits=1
+  FUN_10be8f40@10be8f40                                 hits=1
+  FUN_10be9010@10be9010                                 hits=1
+  FUN_10bf3110@10bf3110                                 hits=1
+  FUN_10c20ad0@10c20ad0                                 hits=1
+  FUN_10c20c60@10c20c60                                 hits=1
+  FUN_10c214b0@10c214b0                                 hits=3
+  FUN_10c25ff0@10c25ff0                                 hits=1
+  MeleeAttack::QueryTargetsAndEmitGameOnHit@10c26e50    hits=1
+  FUN_10c5d980@10c5d980                                 hits=1
+  CTrigger::NotifyBTNewComers_All@10c5dcb0              hits=1
+  CTrigger::NotifyBTNewComer_Single@10c5e3d0            hits=1
+  FUN_10c67770@10c67770                                 hits=1
+  FUN_10d52010@10d52010                                 hits=1
+  CGameRules::RegisterGameHitListeners@10d53a60         hits=2
+  FUN_10d53b90@10d53b90                                 hits=1
+  FUN_10d53fe0@10d53fe0                                 hits=1
+  CProximityTrigger::FireBTEnterEvent@10d604a0          hits=1
+  CProximityTrigger::FireBTLeaveEvent@10d60510          hits=1
+  CMelee::ComputeHitDirectionAndEmitGameOnHit@10d607a0  hits=1
+  CProjectile::DoExplosionAreaDamage@10d7d4e0           hits=1
+  FUN_10db5fb0@10db5fb0                                 hits=1
+  FUN_10db79b0@10db79b0                                 hits=1
+  <no fn> 10f0b646                                      hits=1
+  FUN_10f15e70@10f15e70                                 hits=1
+  CActor::EmitGameOnHitFromLocalHit@10f19670            hits=1
+  FUN_10f58fc0@10f58fc0                                 hits=1
+  FUN_10f5a5d0@10f5a5d0                                 hits=1
+  FUN_10f6a5c0@10f6a5c0                                 hits=1
+  FUN_10f9c810@10f9c810                                 hits=1
+  FUN_10fad240@10fad240                                 hits=1
+  CPlayerRage03::OnThrowAnimEvent@10fef700              hits=3
+  FUN_11001c80@11001c80                                 hits=1
+  CMeleeCollision::SweepAndReportGameOnHit@11006ea0     hits=3
+  MHAttackable::HandleGameOnHitAnimEvent@11008410       hits=1
+  <no fn> 1100f902                                      hits=1
+  MHCombat::BuildAndSendGameOnHit_Variant1@11014af0     hits=1
+  MHCombat::BuildAndSendGameOnHit_Variant2@11017ff0     hits=1
+  FUN_11019e00@11019e00                                 hits=1
+  FUN_11024a60@11024a60                                 hits=1
+  FUN_11024b40@11024b40                                 hits=1
+  FUN_1103d150@1103d150                                 hits=1
+  FUN_11093e50@11093e50                                 hits=1
+  FUN_11112c30@11112c30                                 hits=1
+  FUN_123eef39@123eef39                                 hits=1
+
+=== (B) APPEAR HANDLERS: BTState(+0x72) vs BBVars(+0x92) ===
+
+-- CMonsterInfo::SpawnMonstersFromList@112a2e10  (self + 13 callees)
+     CMonsterInfo::SpawnMonstersFromList@112a2e10    BTState(0x72)=-  BBVars(0x92)=YES
+     FUN_113a3720@113a3720                           BTState(0x72)=YES  BBVars(0x92)=-
+
+-- FUN_1129f8b0@1129f8b0  (self + 11 callees)
+     FUN_1129f8b0@1129f8b0                           BTState(0x72)=-  BBVars(0x92)=YES
+     FUN_113a3720@113a3720                           BTState(0x72)=YES  BBVars(0x92)=-
+
+-- FUN_113a3720@113a3720  (self + 9 callees)
+     FUN_113a3720@113a3720                           BTState(0x72)=YES  BBVars(0x92)=-

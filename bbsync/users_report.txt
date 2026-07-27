@@ -1,0 +1,44 @@
+
+===================== "BehaviorTreeBase" =====================
+  @ 11cc0a80
+      GameFactory::RegisterEntityClasses@10be3840
+      CProximityTrigger::FireBTEnterEvent@10d604a0
+      CProximityTrigger::FireBTLeaveEvent@10d60510
+      CTrigger::NotifyBTNewComer_Single@10c5e3d0
+      CTrigger::NotifyBTNewComers_All@10c5dcb0
+      ScriptBind_BT::SetBlackboardVec3@11036900
+      ScriptBind_BT::SetBlackboardBool@110369a0
+      ScriptBind_BT::SetBlackboardFloat@11036870
+      ScriptBind_BT::SetBlackboardStringString@11036b30
+      ScriptBind_BT::SetBlackboardString@11036a30
+      ScriptBind_BT::SetBlackboardUint@11036ad0
+      ScriptBind_BT::GetBlackboardEntityID@11036d60
+      ScriptBind_BT::GetBlackboardVec3@11036f30
+      ScriptBind_BT::GetBlackboardFloat@11036e50
+      ScriptBind_BT::GetComponentHelper@110367a0
+      ScriptBind_BT::SetBlackboardEntityID@110367e0
+      ScriptBind_BT::GetComponentPtr@110378a0
+      ScriptBind_BT::GetBlackboardString@11037100
+      ScriptBind_BT::LoadEventBehaviorTree@110371f0
+      ScriptBind_BT::GetBlackboardBool@11037020
+      ScriptBind_BT::LoadBehaviorTree@11037380
+      ScriptBind_BT::LoadBlackboard@11037510
+      ScriptBind_BT::ExecuteEventTree@110377d0
+      ScriptBind_BT::ClearAllTrees@110376a0
+      ScriptBind_BT::InitBehaviorTrees@110376f0
+      CBTActor::InstantiateBehaviorTreeForEntity@10aa66e0
+      CMonster::OnDamageFireBTDamageEvent@1101b290
+      (data ref from 10bc7117)
+      total referencing functions: 27
+
+===================== "BehaviorTree" =====================
+  @ 11da6d80
+      CBTActor::LoadBehaviorTreeFromAISetting@10258840
+      AISystem::PreloadEntityBehaviorTreeFiles@10aacc30
+      total referencing functions: 2
+
+===================== "CBTActor" =====================
+  <literal not found as defined string data>
+
+===================== "BTBlackBoard" =====================
+  <literal not found as defined string data>

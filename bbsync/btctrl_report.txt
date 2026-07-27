@@ -1,0 +1,90 @@
+=== (1) DAT_11cc35f8 ===
+  as C string: "BTObj"
+  referencing functions:
+    FUN_10be8430@10be8430
+    FUN_11038a20@11038a20
+    FUN_10b24130@10b24130
+    FUN_10b044b0@10b044b0
+
+=== (2) "BTCtrlObject" XREFS ===
+  literal @ 11cc0650
+      FUN_10be8380@10be8380
+      FUN_10be8430@10be8430
+      CMonsterEntity::CreateAndBindRenderProxy@10be99f0
+      GameFactory::RegisterEntityClasses@10be3840
+      FUN_1103a000@1103a000
+      FUN_1103a050@1103a050
+      FUN_1103a0a0@1103a0a0
+      FUN_1103a0f0@1103a0f0
+      FUN_1103a380@1103a380
+      FUN_1103a2b0@1103a2b0
+      FUN_1103a440@1103a440
+      FUN_11038b30@11038b30
+      FUN_11038bc0@11038bc0
+      FUN_11038af0@11038af0
+      FUN_11038d80@11038d80
+      FUN_11038c50@11038c50
+      FUN_11038cf0@11038cf0
+      FUN_11038e20@11038e20
+      FUN_110399f0@110399f0
+      FUN_11039860@11039860
+      FUN_11039b60@11039b60
+      FUN_11039bf0@11039bf0
+      FUN_11039a80@11039a80
+      FUN_11039db0@11039db0
+      FUN_11039cd0@11039cd0
+      FUN_11039f70@11039f70
+      FUN_11039e90@11039e90
+      FUN_110391a0@110391a0
+      FUN_110390b0@110390b0
+      FUN_11039370@11039370
+      FUN_11039280@11039280
+      FUN_11039540@11039540
+      FUN_11039450@11039450
+      FUN_110396d0@110396d0
+      FUN_10db6480@10db6480
+      FUN_115af020@115af020
+      CBTActor::InstantiateBehaviorTreeForEntity@10aa66e0
+      FUN_10a9fe20@10a9fe20
+      (data ref @ 10bc7100)
+      total: 38 functions
+
+=== (3/4) REFERENCES TO THE APPLY/SERIALIZE PAIR ===
+
+-- FUN_10be8430@10be8430
+     DATA 11ccfd60  (vtable slot?)
+          run starts 11ccfc4c, slot index 69 (byte off 0x114)
+          +0x104 -> FUN_10be8b60@10be8b60
+          +0x108 -> FUN_10bd10d0@10bd10d0
+          +0x10c -> FUN_10bd1110@10bd1110
+          +0x110 -> FUN_10be8380@10be8380
+          +0x114 -> FUN_10be8430@10be8430
+          +0x118 -> FUN_10be8640@10be8640
+     DATA 11cd569c  (vtable slot?)
+          run starts 11cd520c, slot index 292 (byte off 0x490)
+          +0x104 -> _purecall@11a89034
+          +0x108 -> _purecall@11a89034
+          +0x10c -> _purecall@11a89034
+          +0x110 -> _purecall@11a89034
+          +0x114 -> _purecall@11a89034
+          +0x118 -> _purecall@11a89034
+     total refs: 2
+
+-- FUN_10be8380@10be8380
+     DATA 11ccfd5c  (vtable slot?)
+          run starts 11ccfc4c, slot index 68 (byte off 0x110)
+          +0x104 -> FUN_10be8b60@10be8b60
+          +0x108 -> FUN_10bd10d0@10bd10d0
+          +0x10c -> FUN_10bd1110@10bd1110
+          +0x110 -> FUN_10be8380@10be8380
+          +0x114 -> FUN_10be8430@10be8430
+          +0x118 -> FUN_10be8640@10be8640
+     DATA 11cd5698  (vtable slot?)
+          run starts 11cd520c, slot index 291 (byte off 0x48c)
+          +0x104 -> _purecall@11a89034
+          +0x108 -> _purecall@11a89034
+          +0x10c -> _purecall@11a89034
+          +0x110 -> _purecall@11a89034
+          +0x114 -> _purecall@11a89034
+          +0x118 -> _purecall@11a89034
+     total refs: 2

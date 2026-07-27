@@ -1,0 +1,39 @@
+functions touching 0xa2/0xa22/0x10: 26041
+
+=== functions with a 0xa2 POINTER-STRIDE use ===
+  FUN_10273ab0@10273ab0                          stride=1 size0xa22=0 cap16=0
+        10273afe  ADD ECX,0xa2
+  FUN_10273ba0@10273ba0                          stride=1 size0xa22=0 cap16=1
+        10273c16  IMUL EAX,EAX,0xa2
+  FUN_10273c90@10273c90                          stride=1 size0xa22=0 cap16=1
+        10273d06  IMUL EAX,EAX,0xa2
+  TdrDebugFormat_VarsList16@10273da0             stride=1 size0xa22=0 cap16=1
+        10273e75  IMUL EAX,dword ptr [EBP + 0xc],0xa2
+  FUN_10b044b0@10b044b0                          stride=5 size0xa22=0 cap16=1
+        10b0450b  IMUL EDI,ECX,0xa2
+        10b04673  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b04714  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b04773  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b047c1  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+  FUN_10b24130@10b24130                          stride=5 size0xa22=0 cap16=1
+        10b2418b  IMUL EDI,ECX,0xa2
+        10b242f3  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b24394  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b243f3  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+        10b24441  IMUL EDI,dword ptr [EBP + -0xc],0xa2
+  FUN_10be8380@10be8380                          stride=0 size0xa22=2 cap16=0
+  FUN_10be8430@10be8430                          stride=2 size0xa22=1 cap16=1
+        10be8583  ADD EDI,0xa2
+        10be85c2  IMUL ESI,ESI,0xa2
+  FUN_10d034b0@10d034b0                          stride=1 size0xa22=0 cap16=1
+        10d03697  ADD EDI,0xa2
+  FUN_1101b060@1101b060                          stride=1 size0xa22=0 cap16=2
+        1101b0ce  IMUL ECX,EBX,0xa2
+  FUN_11289aa0@11289aa0                          stride=1 size0xa22=0 cap16=1
+        11289c55  ADD ESI,0xa2
+  FUN_1128c4e0@1128c4e0                          stride=1 size0xa22=0 cap16=0
+        1128c60f  ADD EBX,0xa2
+  FUN_1128c740@1128c740                          stride=1 size0xa22=0 cap16=0
+        1128c990  ADD EBX,0xa2
+  FUN_1129f8b0@1129f8b0                          stride=0 size0xa22=1 cap16=0
+  CMonsterInfo::SpawnMonstersFromList@112a2e10   stride=0 size0xa22=1 cap16=0

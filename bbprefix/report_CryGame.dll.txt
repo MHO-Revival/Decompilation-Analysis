@@ -1,0 +1,14 @@
+======== CryGame.dll  literal "BB:"
+  at 0x11d56db8
+     ref 0x1188e145  FUN_1188dfe0
+======== CryGame.dll  literal "InitState"
+  at 0x11ccd5ea
+  at 0x11d33de4
+     ref 0x1160c06b  CActivityDef::LoadFromDataNode
+     ref 0x11b3188f  FUN_11b31880
+     ref 0x11b318f5  FUN_11b31880
+     ref 0x11b3c707  FUN_11b3c700
+     ref 0x11bf1f77  FUN_11bf1f70
+     ref 0x11bf2773  (outside any function)
+  at 0x11fe8d8b
+  at 0x11fe8ddb
