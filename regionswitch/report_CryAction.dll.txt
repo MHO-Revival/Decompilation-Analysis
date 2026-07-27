@@ -1,0 +1,11 @@
+======== CryAction.dll  "SwitchRegionTrigger"
+  at 0x11362938
+     ref 0x10e2f07a  FUN_10e2edb0
+======== CryAction.dll  "CurrentRegionID"
+  at 0x1130b8ec
+  at 0x1130b910
+     ref 0x105cf227  FUN_105cf120
+======== CryAction.dll  "currentRegionID"
+======== CryAction.dll  "SwitchRegionDestination"
+  at 0x1137b4ac
+     ref 0x10fcf7da  FUN_10fcf6d0

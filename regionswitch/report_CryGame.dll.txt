@@ -1,0 +1,11 @@
+==== explicit 118a3270 -> FUN_118a3270
+==== explicit 118a3b90 -> FUN_118a3b90
+==== explicit 118a3820 -> FUN_118a3820
+======== CryGame.dll  "SwitchRegionTrigger"
+  at 0x11d42e84
+     ref 0x117114fa  CMHLevel::ParseLevelEntities
+======== CryGame.dll  "CurrentRegionID"
+======== CryGame.dll  "currentRegionID"
+======== CryGame.dll  "SwitchRegionDestination"
+  at 0x11d57a2c
+     ref 0x118a2f9a  FUN_118a2e90
