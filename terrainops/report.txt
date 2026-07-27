@@ -97,3 +97,15 @@
     getter slot 0x11310be8 -> Evaluate at 0x11310bdc
       Evaluate = 0x105b85d0
   nameStr 0x11310c08  getter 0x106290e0
+
+======== CCopyTargetPropertyToBB
+  nameStr 0x1130701c  getter 0x10565e20
+  nameStr 0x1130701c  getter 0x106216e0
+    getter slot 0x11310aec -> Evaluate at 0x11310ae0
+      Evaluate = 0x105656e0
+
+======== CHitFly
+  nameStr 0x11309284  getter 0x10599eb0
+  nameStr 0x11309284  getter 0x10621d00
+    getter slot 0x1130dd8c -> Evaluate at 0x1130dd80
+      Evaluate = 0x10599990

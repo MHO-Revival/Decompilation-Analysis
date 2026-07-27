@@ -44,6 +44,10 @@ public class CgTerrainOps extends GhidraScript {
         "CRemoveBuff",
         "CCheckBuff",
         "CRemoveAllDynamicEffects",
+        // The only two ops em003test authors that are still unregistered. CopyTargetPropertyToBB is the one
+        // that WRITES TargetPos, so TeleportToTargetPos cannot fire without it.
+        "CCopyTargetPropertyToBB",
+        "CHitFly",
     };
 
     // CheckTerrainDis compares against these two globals; naming them names its modes.
