@@ -1,0 +1,27 @@
+======== CryGame.dll  "ClimateSetting"
+  (literal absent)
+======== CryGame.dll  "RegionsInfo"
+  (literal absent)
+======== CryGame.dll  "RegionWeather"
+  at 0x11cd0d75
+  at 0x11fe3cc4
+  at 0x11fe3fb5
+======== CryGame.dll  "SoundEventValue"
+  (literal absent)
+======== CryGame.dll  "CIsNearSwitchRegionPoint"
+  (literal absent)
+======== CryGame.dll  "CGetRandomPosInCurrentRegion"
+  (literal absent)
+======== CryGame.dll  "CIsTargetInSameRegion"
+  (literal absent)
+======== CryGame.dll  "CGetNextRegionChangePoint"
+  (literal absent)
+======== CryGame.dll  "CSelectChangeAreaPointToCertainRegion"
+  (literal absent)
+======== CryGame.dll  "CGetRegionWeather"
+  (literal absent)
+======== CryGame.dll  "Game:AISwitchRegion"
+  (literal absent)
+======== CryGame.dll  "cl_EnableRegionWeather"
+  at 0x11cd0d6c
+     ref 0x10bd36f3  PlayerParams::RegisterCVars

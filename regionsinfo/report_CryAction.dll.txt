@@ -1,0 +1,77 @@
+======== CryAction.dll  "ClimateSetting"
+  at 0x11336c94
+     ref 0x108aa3d7  FUN_108aa350
+        caller FUN_108a4430 @108a4430
+======== CryAction.dll  "RegionsInfo"
+  at 0x11336b08
+     ref 0x108a5167  FUN_108a4430
+======== CryAction.dll  "RegionWeather"
+  at 0x1130d380
+  at 0x11327235
+  at 0x1132761e
+======== CryAction.dll  "SoundEventValue"
+  at 0x11336ca4
+     ref 0x108aa4f0  FUN_108aa350
+======== CryAction.dll  "CIsNearSwitchRegionPoint"
+  at 0x1130d75c
+     ref 0x105f93a9  FUN_105f9380
+        caller FUN_105fc120 @105fc120
+     ref 0x105f9425  FUN_105f9380
+     ref 0x105f9541  (outside any function)
+     ref 0x105fd789  FUN_105fc120
+     ref 0x10621de1  (outside any function)
+======== CryAction.dll  "CGetRandomPosInCurrentRegion"
+  at 0x1130a05c
+     ref 0x105adf19  FUN_105adef0
+        caller FUN_105fc120 @105fc120
+     ref 0x105adf95  FUN_105adef0
+     ref 0x105ae00d  FUN_105adef0
+     ref 0x105ae085  FUN_105adef0
+     ref 0x105ae0fd  FUN_105adef0
+     ref 0x105ae175  FUN_105adef0
+     ref 0x105ae221  (outside any function)
+     ref 0x105ae281  (outside any function)
+     ref 0x105fccce  FUN_105fc120
+======== CryAction.dll  "CIsTargetInSameRegion"
+  at 0x113095d0
+     ref 0x1059b8b9  FUN_1059b890
+        caller FUN_105fc120 @105fc120
+     ref 0x1059b931  (outside any function)
+     ref 0x105fd6c4  FUN_105fc120
+     ref 0x10621e01  (outside any function)
+======== CryAction.dll  "CGetNextRegionChangePoint"
+  at 0x11309d8c
+     ref 0x105ac9f1  (outside any function)
+     ref 0x105aca51  (outside any function)
+     ref 0x105fd417  FUN_105fc120
+======== CryAction.dll  "CSelectChangeAreaPointToCertainRegion"
+  at 0x1130acf4
+     ref 0x105c0ce9  FUN_105c0cc0
+        caller FUN_105fc120 @105fc120
+     ref 0x105c0d65  FUN_105c0cc0
+     ref 0x105c0de1  FUN_105c0cc0
+     ref 0x105c0e59  FUN_105c0cc0
+     ref 0x105c0ed1  FUN_105c0cc0
+     ref 0x105c0f49  FUN_105c0cc0
+     ref 0x105c0fc1  FUN_105c0cc0
+     ref 0x105c1039  FUN_105c0cc0
+     ref 0x105c10b1  FUN_105c0cc0
+     ref 0x105c1129  FUN_105c0cc0
+     ref 0x105c11a1  FUN_105c0cc0
+     ref 0x105c1231  (outside any function)
+     ref 0x105fd508  FUN_105fc120
+     ref 0x10622181  (outside any function)
+======== CryAction.dll  "CGetRegionWeather"
+  at 0x1130d37c
+     ref 0x105f3919  FUN_105f38f0
+        caller FUN_105fc120 @105fc120
+     ref 0x105f3995  FUN_105f38f0
+     ref 0x105f3a11  FUN_105f38f0
+     ref 0x105f3a81  (outside any function)
+     ref 0x105feda6  FUN_105fc120
+     ref 0x10621b91  (outside any function)
+======== CryAction.dll  "Game:AISwitchRegion"
+  at 0x11327820
+======== CryAction.dll  "cl_EnableRegionWeather"
+  at 0x1132722c
+     ref 0x1078fb46  FUN_1078fb20
