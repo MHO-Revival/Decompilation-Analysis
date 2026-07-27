@@ -437,3 +437,1525 @@
 105ec8f9  MOV ECX,dword ptr [ESI + 0x2c]    
 105ec8fc  MOV EAX,dword ptr [ECX + 0x4]     
 105ec8ff  SUB EAX,dword ptr [ECX]           
+
+=== registration block 105c0c80..105c1240 ===
+105c0c80  MOV dword ptr [EBP + -0x38],EAX   
+105c0c83  LEA EAX,[EBP + -0x40]             
+105c0c86  PUSH EAX                          
+105c0c87  PUSH 0xa                          
+105c0c89  CALL 0x10551270                     ; -> FUN_10551270
+105c0c8e  MOV ECX,dword ptr [EBP + -0x24]   
+105c0c91  MOV ESI,0x2                       
+105c0c96  JMP 0x105c0c9d                    
+105c0c98  MOV ESI,0x1                       
+105c0c9d  TEST ECX,ECX                      
+105c0c9f  JZ 0x105c0caa                     
+105c0ca1  PUSH ECX                          
+105c0ca2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0ca7  ADD ESP,0x4                       
+105c0caa  MOV EAX,ESI                       
+105c0cac  POP EDI                           
+105c0cad  POP ESI                           
+105c0cae  POP EBX                           
+105c0caf  MOV ESP,EBP                       
+105c0cb1  POP EBP                           
+105c0cb2  RET                               
+105c0cb3  POP EDI                           
+105c0cb4  POP ESI                           
+105c0cb5  MOV EAX,0x1                       
+105c0cba  POP EBX                           
+105c0cbb  MOV ESP,EBP                       
+105c0cbd  POP EBP                           
+105c0cbe  RET                               
+105c0cc0  PUSH EBP                          
+105c0cc1  MOV EBP,ESP                       
+105c0cc3  SUB ESP,0x30                      
+105c0cc6  LEA EAX,[EBP + -0x30]             
+105c0cc9  PUSH 0x1130ac8e                   
+105c0cce  PUSH 0x1130ac80                     ; "AreaChangeType"
+105c0cd3  MOV ECX,EAX                       
+105c0cd5  MOV dword ptr [EBP + -0x20],EAX   
+105c0cd8  MOV dword ptr [EBP + -0x1c],EAX   
+105c0cdb  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0ce0  LEA EAX,[EBP + -0x18]             
+105c0ce3  PUSH 0x1130ad19                   
+105c0ce8  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0ced  MOV ECX,EAX                       
+105c0cef  MOV dword ptr [EBP + -0x8],EAX    
+105c0cf2  MOV dword ptr [EBP + -0x4],EAX    
+105c0cf5  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0cfa  PUSH 0x0                          
+105c0cfc  PUSH 0x1                          
+105c0cfe  PUSH 0x0                          
+105c0d00  LEA EAX,[EBP + -0x30]             
+105c0d03  PUSH EAX                          
+105c0d04  LEA EAX,[EBP + -0x18]             
+105c0d07  PUSH EAX                          
+105c0d08  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0d0d  MOV ECX,EAX                       
+105c0d0f  CALL 0x103cf810                     ; -> FUN_103cf810
+105c0d14  MOV EAX,dword ptr [EBP + -0x4]    
+105c0d17  LEA ECX,[EBP + -0x18]             
+105c0d1a  CMP EAX,ECX                       
+105c0d1c  JZ 0x105c0d2b                     
+105c0d1e  TEST EAX,EAX                      
+105c0d20  JZ 0x105c0d2b                     
+105c0d22  PUSH EAX                          
+105c0d23  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0d28  ADD ESP,0x4                       
+105c0d2b  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0d2e  LEA ECX,[EBP + -0x30]             
+105c0d31  CMP EAX,ECX                       
+105c0d33  JZ 0x105c0d42                     
+105c0d35  TEST EAX,EAX                      
+105c0d37  JZ 0x105c0d42                     
+105c0d39  PUSH EAX                          
+105c0d3a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0d3f  ADD ESP,0x4                       
+105c0d42  LEA EAX,[EBP + -0x18]             
+105c0d45  PUSH 0x1130ad2a                   
+105c0d4a  PUSH 0x1130ad1c                     ; "IgnoreNARegion"
+105c0d4f  MOV ECX,EAX                       
+105c0d51  MOV dword ptr [EBP + -0x8],EAX    
+105c0d54  MOV dword ptr [EBP + -0x4],EAX    
+105c0d57  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0d5c  LEA EAX,[EBP + -0x30]             
+105c0d5f  PUSH 0x1130ad19                   
+105c0d64  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0d69  MOV ECX,EAX                       
+105c0d6b  MOV dword ptr [EBP + -0x20],EAX   
+105c0d6e  MOV dword ptr [EBP + -0x1c],EAX   
+105c0d71  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0d76  PUSH 0x0                          
+105c0d78  PUSH 0x3                          
+105c0d7a  PUSH 0x9                          
+105c0d7c  LEA EAX,[EBP + -0x18]             
+105c0d7f  PUSH EAX                          
+105c0d80  LEA EAX,[EBP + -0x30]             
+105c0d83  PUSH EAX                          
+105c0d84  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0d89  MOV ECX,EAX                       
+105c0d8b  CALL 0x103cf810                     ; -> FUN_103cf810
+105c0d90  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0d93  LEA ECX,[EBP + -0x30]             
+105c0d96  CMP EAX,ECX                       
+105c0d98  JZ 0x105c0da7                     
+105c0d9a  TEST EAX,EAX                      
+105c0d9c  JZ 0x105c0da7                     
+105c0d9e  PUSH EAX                          
+105c0d9f  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0da4  ADD ESP,0x4                       
+105c0da7  MOV EAX,dword ptr [EBP + -0x4]    
+105c0daa  LEA ECX,[EBP + -0x18]             
+105c0dad  CMP EAX,ECX                       
+105c0daf  JZ 0x105c0dbe                     
+105c0db1  TEST EAX,EAX                      
+105c0db3  JZ 0x105c0dbe                     
+105c0db5  PUSH EAX                          
+105c0db6  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0dbb  ADD ESP,0x4                       
+105c0dbe  LEA EAX,[EBP + -0x18]             
+105c0dc1  PUSH 0x1130ad40                   
+105c0dc6  PUSH 0x1130ad2c                     ; "TargetAreaChangeType"
+105c0dcb  MOV ECX,EAX                       
+105c0dcd  MOV dword ptr [EBP + -0x8],EAX    
+105c0dd0  MOV dword ptr [EBP + -0x4],EAX    
+105c0dd3  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0dd8  LEA EAX,[EBP + -0x30]             
+105c0ddb  PUSH 0x1130ad19                   
+105c0de0  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0de5  MOV ECX,EAX                       
+105c0de7  MOV dword ptr [EBP + -0x20],EAX   
+105c0dea  MOV dword ptr [EBP + -0x1c],EAX   
+105c0ded  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0df2  PUSH 0x1                          
+105c0df4  LEA EAX,[EBP + -0x18]             
+105c0df7  PUSH EAX                          
+105c0df8  LEA EAX,[EBP + -0x30]             
+105c0dfb  PUSH EAX                          
+105c0dfc  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0e01  MOV ECX,EAX                       
+105c0e03  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c0e08  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0e0b  LEA ECX,[EBP + -0x30]             
+105c0e0e  CMP EAX,ECX                       
+105c0e10  JZ 0x105c0e1f                     
+105c0e12  TEST EAX,EAX                      
+105c0e14  JZ 0x105c0e1f                     
+105c0e16  PUSH EAX                          
+105c0e17  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0e1c  ADD ESP,0x4                       
+105c0e1f  MOV EAX,dword ptr [EBP + -0x4]    
+105c0e22  LEA ECX,[EBP + -0x18]             
+105c0e25  CMP EAX,ECX                       
+105c0e27  JZ 0x105c0e36                     
+105c0e29  TEST EAX,EAX                      
+105c0e2b  JZ 0x105c0e36                     
+105c0e2d  PUSH EAX                          
+105c0e2e  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0e33  ADD ESP,0x4                       
+105c0e36  LEA EAX,[EBP + -0x18]             
+105c0e39  PUSH 0x11308186                   
+105c0e3e  PUSH 0x11308178                     ; "TargetRegionID"
+105c0e43  MOV ECX,EAX                       
+105c0e45  MOV dword ptr [EBP + -0x8],EAX    
+105c0e48  MOV dword ptr [EBP + -0x4],EAX    
+105c0e4b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0e50  LEA EAX,[EBP + -0x30]             
+105c0e53  PUSH 0x1130ad19                   
+105c0e58  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0e5d  MOV ECX,EAX                       
+105c0e5f  MOV dword ptr [EBP + -0x20],EAX   
+105c0e62  MOV dword ptr [EBP + -0x1c],EAX   
+105c0e65  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0e6a  PUSH 0x2                          
+105c0e6c  LEA EAX,[EBP + -0x18]             
+105c0e6f  PUSH EAX                          
+105c0e70  LEA EAX,[EBP + -0x30]             
+105c0e73  PUSH EAX                          
+105c0e74  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0e79  MOV ECX,EAX                       
+105c0e7b  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c0e80  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0e83  LEA ECX,[EBP + -0x30]             
+105c0e86  CMP EAX,ECX                       
+105c0e88  JZ 0x105c0e97                     
+105c0e8a  TEST EAX,EAX                      
+105c0e8c  JZ 0x105c0e97                     
+105c0e8e  PUSH EAX                          
+105c0e8f  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0e94  ADD ESP,0x4                       
+105c0e97  MOV EAX,dword ptr [EBP + -0x4]    
+105c0e9a  LEA ECX,[EBP + -0x18]             
+105c0e9d  CMP EAX,ECX                       
+105c0e9f  JZ 0x105c0eae                     
+105c0ea1  TEST EAX,EAX                      
+105c0ea3  JZ 0x105c0eae                     
+105c0ea5  PUSH EAX                          
+105c0ea6  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0eab  ADD ESP,0x4                       
+105c0eae  LEA EAX,[EBP + -0x18]             
+105c0eb1  PUSH 0x11309eaa                   
+105c0eb6  PUSH 0x11309e94                     ; "RegionConnectPointType"
+105c0ebb  MOV ECX,EAX                       
+105c0ebd  MOV dword ptr [EBP + -0x8],EAX    
+105c0ec0  MOV dword ptr [EBP + -0x4],EAX    
+105c0ec3  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0ec8  LEA EAX,[EBP + -0x30]             
+105c0ecb  PUSH 0x1130ad19                   
+105c0ed0  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0ed5  MOV ECX,EAX                       
+105c0ed7  MOV dword ptr [EBP + -0x20],EAX   
+105c0eda  MOV dword ptr [EBP + -0x1c],EAX   
+105c0edd  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0ee2  PUSH 0x3                          
+105c0ee4  LEA EAX,[EBP + -0x18]             
+105c0ee7  PUSH EAX                          
+105c0ee8  LEA EAX,[EBP + -0x30]             
+105c0eeb  PUSH EAX                          
+105c0eec  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0ef1  MOV ECX,EAX                       
+105c0ef3  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c0ef8  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0efb  LEA ECX,[EBP + -0x30]             
+105c0efe  CMP EAX,ECX                       
+105c0f00  JZ 0x105c0f0f                     
+105c0f02  TEST EAX,EAX                      
+105c0f04  JZ 0x105c0f0f                     
+105c0f06  PUSH EAX                          
+105c0f07  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0f0c  ADD ESP,0x4                       
+105c0f0f  MOV EAX,dword ptr [EBP + -0x4]    
+105c0f12  LEA ECX,[EBP + -0x18]             
+105c0f15  CMP EAX,ECX                       
+105c0f17  JZ 0x105c0f26                     
+105c0f19  TEST EAX,EAX                      
+105c0f1b  JZ 0x105c0f26                     
+105c0f1d  PUSH EAX                          
+105c0f1e  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0f23  ADD ESP,0x4                       
+105c0f26  LEA EAX,[EBP + -0x18]             
+105c0f29  PUSH 0x1130acb0                   
+105c0f2e  PUSH 0x1130ac9c                     ; "RegionConnectFromPos"
+105c0f33  MOV ECX,EAX                       
+105c0f35  MOV dword ptr [EBP + -0x8],EAX    
+105c0f38  MOV dword ptr [EBP + -0x4],EAX    
+105c0f3b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0f40  LEA EAX,[EBP + -0x30]             
+105c0f43  PUSH 0x1130ad19                   
+105c0f48  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0f4d  MOV ECX,EAX                       
+105c0f4f  MOV dword ptr [EBP + -0x20],EAX   
+105c0f52  MOV dword ptr [EBP + -0x1c],EAX   
+105c0f55  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0f5a  PUSH 0x4                          
+105c0f5c  LEA EAX,[EBP + -0x18]             
+105c0f5f  PUSH EAX                          
+105c0f60  LEA EAX,[EBP + -0x30]             
+105c0f63  PUSH EAX                          
+105c0f64  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0f69  MOV ECX,EAX                       
+105c0f6b  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c0f70  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0f73  LEA ECX,[EBP + -0x30]             
+105c0f76  CMP EAX,ECX                       
+105c0f78  JZ 0x105c0f87                     
+105c0f7a  TEST EAX,EAX                      
+105c0f7c  JZ 0x105c0f87                     
+105c0f7e  PUSH EAX                          
+105c0f7f  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0f84  ADD ESP,0x4                       
+105c0f87  MOV EAX,dword ptr [EBP + -0x4]    
+105c0f8a  LEA ECX,[EBP + -0x18]             
+105c0f8d  CMP EAX,ECX                       
+105c0f8f  JZ 0x105c0f9e                     
+105c0f91  TEST EAX,EAX                      
+105c0f93  JZ 0x105c0f9e                     
+105c0f95  PUSH EAX                          
+105c0f96  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0f9b  ADD ESP,0x4                       
+105c0f9e  LEA EAX,[EBP + -0x18]             
+105c0fa1  PUSH 0x1130acc6                   
+105c0fa6  PUSH 0x1130acb4                     ; "RegionConnectToPos"
+105c0fab  MOV ECX,EAX                       
+105c0fad  MOV dword ptr [EBP + -0x8],EAX    
+105c0fb0  MOV dword ptr [EBP + -0x4],EAX    
+105c0fb3  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0fb8  LEA EAX,[EBP + -0x30]             
+105c0fbb  PUSH 0x1130ad19                   
+105c0fc0  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c0fc5  MOV ECX,EAX                       
+105c0fc7  MOV dword ptr [EBP + -0x20],EAX   
+105c0fca  MOV dword ptr [EBP + -0x1c],EAX   
+105c0fcd  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c0fd2  PUSH 0x5                          
+105c0fd4  LEA EAX,[EBP + -0x18]             
+105c0fd7  PUSH EAX                          
+105c0fd8  LEA EAX,[EBP + -0x30]             
+105c0fdb  PUSH EAX                          
+105c0fdc  CALL 0x103cf720                     ; -> FUN_103cf720
+105c0fe1  MOV ECX,EAX                       
+105c0fe3  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c0fe8  MOV EAX,dword ptr [EBP + -0x1c]   
+105c0feb  LEA ECX,[EBP + -0x30]             
+105c0fee  CMP EAX,ECX                       
+105c0ff0  JZ 0x105c0fff                     
+105c0ff2  TEST EAX,EAX                      
+105c0ff4  JZ 0x105c0fff                     
+105c0ff6  PUSH EAX                          
+105c0ff7  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c0ffc  ADD ESP,0x4                       
+105c0fff  MOV EAX,dword ptr [EBP + -0x4]    
+105c1002  LEA ECX,[EBP + -0x18]             
+105c1005  CMP EAX,ECX                       
+105c1007  JZ 0x105c1016                     
+105c1009  TEST EAX,EAX                      
+105c100b  JZ 0x105c1016                     
+105c100d  PUSH EAX                          
+105c100e  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1013  ADD ESP,0x4                       
+105c1016  LEA EAX,[EBP + -0x18]             
+105c1019  PUSH 0x1130ad56                   
+105c101e  PUSH 0x1130ad44                     ; "RegionConnectToRot"
+105c1023  MOV ECX,EAX                       
+105c1025  MOV dword ptr [EBP + -0x8],EAX    
+105c1028  MOV dword ptr [EBP + -0x4],EAX    
+105c102b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c1030  LEA EAX,[EBP + -0x30]             
+105c1033  PUSH 0x1130ad19                   
+105c1038  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c103d  MOV ECX,EAX                       
+105c103f  MOV dword ptr [EBP + -0x20],EAX   
+105c1042  MOV dword ptr [EBP + -0x1c],EAX   
+105c1045  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c104a  PUSH 0x6                          
+105c104c  LEA EAX,[EBP + -0x18]             
+105c104f  PUSH EAX                          
+105c1050  LEA EAX,[EBP + -0x30]             
+105c1053  PUSH EAX                          
+105c1054  CALL 0x103cf720                     ; -> FUN_103cf720
+105c1059  MOV ECX,EAX                       
+105c105b  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c1060  MOV EAX,dword ptr [EBP + -0x1c]   
+105c1063  LEA ECX,[EBP + -0x30]             
+105c1066  CMP EAX,ECX                       
+105c1068  JZ 0x105c1077                     
+105c106a  TEST EAX,EAX                      
+105c106c  JZ 0x105c1077                     
+105c106e  PUSH EAX                          
+105c106f  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1074  ADD ESP,0x4                       
+105c1077  MOV EAX,dword ptr [EBP + -0x4]    
+105c107a  LEA ECX,[EBP + -0x18]             
+105c107d  CMP EAX,ECX                       
+105c107f  JZ 0x105c108e                     
+105c1081  TEST EAX,EAX                      
+105c1083  JZ 0x105c108e                     
+105c1085  PUSH EAX                          
+105c1086  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c108b  ADD ESP,0x4                       
+105c108e  LEA EAX,[EBP + -0x18]             
+105c1091  PUSH 0x1130acec                   
+105c1096  PUSH 0x1130acd4                     ; "RegionConnectToGroundPos"
+105c109b  MOV ECX,EAX                       
+105c109d  MOV dword ptr [EBP + -0x8],EAX    
+105c10a0  MOV dword ptr [EBP + -0x4],EAX    
+105c10a3  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c10a8  LEA EAX,[EBP + -0x30]             
+105c10ab  PUSH 0x1130ad19                   
+105c10b0  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c10b5  MOV ECX,EAX                       
+105c10b7  MOV dword ptr [EBP + -0x20],EAX   
+105c10ba  MOV dword ptr [EBP + -0x1c],EAX   
+105c10bd  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c10c2  PUSH 0x7                          
+105c10c4  LEA EAX,[EBP + -0x18]             
+105c10c7  PUSH EAX                          
+105c10c8  LEA EAX,[EBP + -0x30]             
+105c10cb  PUSH EAX                          
+105c10cc  CALL 0x103cf720                     ; -> FUN_103cf720
+105c10d1  MOV ECX,EAX                       
+105c10d3  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c10d8  MOV EAX,dword ptr [EBP + -0x1c]   
+105c10db  LEA ECX,[EBP + -0x30]             
+105c10de  CMP EAX,ECX                       
+105c10e0  JZ 0x105c10ef                     
+105c10e2  TEST EAX,EAX                      
+105c10e4  JZ 0x105c10ef                     
+105c10e6  PUSH EAX                          
+105c10e7  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c10ec  ADD ESP,0x4                       
+105c10ef  MOV EAX,dword ptr [EBP + -0x4]    
+105c10f2  LEA ECX,[EBP + -0x18]             
+105c10f5  CMP EAX,ECX                       
+105c10f7  JZ 0x105c1106                     
+105c10f9  TEST EAX,EAX                      
+105c10fb  JZ 0x105c1106                     
+105c10fd  PUSH EAX                          
+105c10fe  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1103  ADD ESP,0x4                       
+105c1106  LEA EAX,[EBP + -0x18]             
+105c1109  PUSH 0x11305efd                   
+105c110e  PUSH 0x11305ef4                     ; "TargetPos"
+105c1113  MOV ECX,EAX                       
+105c1115  MOV dword ptr [EBP + -0x8],EAX    
+105c1118  MOV dword ptr [EBP + -0x4],EAX    
+105c111b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c1120  LEA EAX,[EBP + -0x30]             
+105c1123  PUSH 0x1130ad19                   
+105c1128  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c112d  MOV ECX,EAX                       
+105c112f  MOV dword ptr [EBP + -0x20],EAX   
+105c1132  MOV dword ptr [EBP + -0x1c],EAX   
+105c1135  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c113a  PUSH 0x8                          
+105c113c  LEA EAX,[EBP + -0x18]             
+105c113f  PUSH EAX                          
+105c1140  LEA EAX,[EBP + -0x30]             
+105c1143  PUSH EAX                          
+105c1144  CALL 0x103cf720                     ; -> FUN_103cf720
+105c1149  MOV ECX,EAX                       
+105c114b  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c1150  MOV EAX,dword ptr [EBP + -0x1c]   
+105c1153  LEA ECX,[EBP + -0x30]             
+105c1156  CMP EAX,ECX                       
+105c1158  JZ 0x105c1167                     
+105c115a  TEST EAX,EAX                      
+105c115c  JZ 0x105c1167                     
+105c115e  PUSH EAX                          
+105c115f  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1164  ADD ESP,0x4                       
+105c1167  MOV EAX,dword ptr [EBP + -0x4]    
+105c116a  LEA ECX,[EBP + -0x18]             
+105c116d  CMP EAX,ECX                       
+105c116f  JZ 0x105c117e                     
+105c1171  TEST EAX,EAX                      
+105c1173  JZ 0x105c117e                     
+105c1175  PUSH EAX                          
+105c1176  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c117b  ADD ESP,0x4                       
+105c117e  LEA EAX,[EBP + -0x18]             
+105c1181  PUSH 0x11309627                   
+105c1186  PUSH 0x11309610                     ; "RegionConnectTowardsPos"
+105c118b  MOV ECX,EAX                       
+105c118d  MOV dword ptr [EBP + -0x8],EAX    
+105c1190  MOV dword ptr [EBP + -0x4],EAX    
+105c1193  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c1198  LEA EAX,[EBP + -0x30]             
+105c119b  PUSH 0x1130ad19                   
+105c11a0  PUSH 0x1130acf4                     ; "CSelectChangeAreaPointToCertainRegion"
+105c11a5  MOV ECX,EAX                       
+105c11a7  MOV dword ptr [EBP + -0x20],EAX   
+105c11aa  MOV dword ptr [EBP + -0x1c],EAX   
+105c11ad  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c11b2  PUSH 0xa                          
+105c11b4  LEA EAX,[EBP + -0x18]             
+105c11b7  PUSH EAX                          
+105c11b8  LEA EAX,[EBP + -0x30]             
+105c11bb  PUSH EAX                          
+105c11bc  CALL 0x103cf720                     ; -> FUN_103cf720
+105c11c1  MOV ECX,EAX                       
+105c11c3  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c11c8  MOV EAX,dword ptr [EBP + -0x1c]   
+105c11cb  LEA ECX,[EBP + -0x30]             
+105c11ce  CMP EAX,ECX                       
+105c11d0  JZ 0x105c11df                     
+105c11d2  TEST EAX,EAX                      
+105c11d4  JZ 0x105c11df                     
+105c11d6  PUSH EAX                          
+105c11d7  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c11dc  ADD ESP,0x4                       
+105c11df  MOV EAX,dword ptr [EBP + -0x4]    
+105c11e2  LEA ECX,[EBP + -0x18]             
+105c11e5  CMP EAX,ECX                       
+105c11e7  JZ 0x105c11f6                     
+105c11e9  TEST EAX,EAX                      
+105c11eb  JZ 0x105c11f6                     
+105c11ed  PUSH EAX                          
+105c11ee  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c11f3  ADD ESP,0x4                       
+105c11f6  MOV ESP,EBP                       
+105c11f8  POP EBP                           
+105c11f9  RET                               
+105c1200  RET                               
+
+=== registration block 105c1470..105c1660 ===
+105c1471  JMP 0x105c1478                    
+105c1473  MOV ESI,0x1                       
+105c1478  MOV EAX,dword ptr [EBP + -0x1c]   
+105c147b  TEST EAX,EAX                      
+105c147d  JZ 0x105c1488                     
+105c147f  PUSH EAX                          
+105c1480  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1485  ADD ESP,0x4                       
+105c1488  MOV EAX,ESI                       
+105c148a  POP EDI                           
+105c148b  POP ESI                           
+105c148c  MOV ESP,EBP                       
+105c148e  POP EBP                           
+105c148f  MOV ESP,EBX                       
+105c1491  POP EBX                           
+105c1492  RET                               
+105c1493  POP EDI                           
+105c1494  MOV EAX,0x1                       
+105c1499  POP ESI                           
+105c149a  MOV ESP,EBP                       
+105c149c  POP EBP                           
+105c149d  MOV ESP,EBX                       
+105c149f  POP EBX                           
+105c14a0  RET                               
+105c14b0  PUSH EBP                          
+105c14b1  MOV EBP,ESP                       
+105c14b3  SUB ESP,0x30                      
+105c14b6  LEA EAX,[EBP + -0x30]             
+105c14b9  PUSH 0x1130ad73                   
+105c14be  PUSH 0x1130ad6c                     ; "OnlyFly"
+105c14c3  MOV ECX,EAX                       
+105c14c5  MOV dword ptr [EBP + -0x20],EAX   
+105c14c8  MOV dword ptr [EBP + -0x1c],EAX   
+105c14cb  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c14d0  LEA EAX,[EBP + -0x18]             
+105c14d3  PUSH 0x1130ad6a                   
+105c14d8  PUSH 0x1130ad58                     ; "CSelectEscapePoint"
+105c14dd  MOV ECX,EAX                       
+105c14df  MOV dword ptr [EBP + -0x8],EAX    
+105c14e2  MOV dword ptr [EBP + -0x4],EAX    
+105c14e5  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c14ea  PUSH 0x0                          
+105c14ec  PUSH 0x3                          
+105c14ee  PUSH 0x0                          
+105c14f0  LEA EAX,[EBP + -0x30]             
+105c14f3  PUSH EAX                          
+105c14f4  LEA EAX,[EBP + -0x18]             
+105c14f7  PUSH EAX                          
+105c14f8  CALL 0x103cf720                     ; -> FUN_103cf720
+105c14fd  MOV ECX,EAX                       
+105c14ff  CALL 0x103cf810                     ; -> FUN_103cf810
+105c1504  MOV EAX,dword ptr [EBP + -0x4]    
+105c1507  LEA ECX,[EBP + -0x18]             
+105c150a  CMP EAX,ECX                       
+105c150c  JZ 0x105c151b                     
+105c150e  TEST EAX,EAX                      
+105c1510  JZ 0x105c151b                     
+105c1512  PUSH EAX                          
+105c1513  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1518  ADD ESP,0x4                       
+105c151b  MOV EAX,dword ptr [EBP + -0x1c]   
+105c151e  LEA ECX,[EBP + -0x30]             
+105c1521  CMP EAX,ECX                       
+105c1523  JZ 0x105c1532                     
+105c1525  TEST EAX,EAX                      
+105c1527  JZ 0x105c1532                     
+105c1529  PUSH EAX                          
+105c152a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c152f  ADD ESP,0x4                       
+105c1532  LEA EAX,[EBP + -0x18]             
+105c1535  PUSH 0x11308186                   
+105c153a  PUSH 0x11308178                     ; "TargetRegionID"
+105c153f  MOV ECX,EAX                       
+105c1541  MOV dword ptr [EBP + -0x8],EAX    
+105c1544  MOV dword ptr [EBP + -0x4],EAX    
+105c1547  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c154c  LEA EAX,[EBP + -0x30]             
+105c154f  PUSH 0x1130ad6a                   
+105c1554  PUSH 0x1130ad58                     ; "CSelectEscapePoint"
+105c1559  MOV ECX,EAX                       
+105c155b  MOV dword ptr [EBP + -0x20],EAX   
+105c155e  MOV dword ptr [EBP + -0x1c],EAX   
+105c1561  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c1566  PUSH 0x1                          
+105c1568  LEA EAX,[EBP + -0x18]             
+105c156b  PUSH EAX                          
+105c156c  LEA EAX,[EBP + -0x30]             
+105c156f  PUSH EAX                          
+105c1570  CALL 0x103cf720                     ; -> FUN_103cf720
+105c1575  MOV ECX,EAX                       
+105c1577  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c157c  MOV EAX,dword ptr [EBP + -0x1c]   
+105c157f  LEA ECX,[EBP + -0x30]             
+105c1582  CMP EAX,ECX                       
+105c1584  JZ 0x105c1593                     
+105c1586  TEST EAX,EAX                      
+105c1588  JZ 0x105c1593                     
+105c158a  PUSH EAX                          
+105c158b  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1590  ADD ESP,0x4                       
+105c1593  MOV EAX,dword ptr [EBP + -0x4]    
+105c1596  LEA ECX,[EBP + -0x18]             
+105c1599  CMP EAX,ECX                       
+105c159b  JZ 0x105c15aa                     
+105c159d  TEST EAX,EAX                      
+105c159f  JZ 0x105c15aa                     
+105c15a1  PUSH EAX                          
+105c15a2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c15a7  ADD ESP,0x4                       
+105c15aa  LEA EAX,[EBP + -0x18]             
+105c15ad  PUSH 0x11305efd                   
+105c15b2  PUSH 0x11305ef4                     ; "TargetPos"
+105c15b7  MOV ECX,EAX                       
+105c15b9  MOV dword ptr [EBP + -0x8],EAX    
+105c15bc  MOV dword ptr [EBP + -0x4],EAX    
+105c15bf  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c15c4  LEA EAX,[EBP + -0x30]             
+105c15c7  PUSH 0x1130ad6a                   
+105c15cc  PUSH 0x1130ad58                     ; "CSelectEscapePoint"
+105c15d1  MOV ECX,EAX                       
+105c15d3  MOV dword ptr [EBP + -0x20],EAX   
+105c15d6  MOV dword ptr [EBP + -0x1c],EAX   
+105c15d9  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c15de  PUSH 0x2                          
+105c15e0  LEA EAX,[EBP + -0x18]             
+105c15e3  PUSH EAX                          
+105c15e4  LEA EAX,[EBP + -0x30]             
+105c15e7  PUSH EAX                          
+105c15e8  CALL 0x103cf720                     ; -> FUN_103cf720
+105c15ed  MOV ECX,EAX                       
+105c15ef  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c15f4  MOV EAX,dword ptr [EBP + -0x1c]   
+105c15f7  LEA ECX,[EBP + -0x30]             
+105c15fa  CMP EAX,ECX                       
+105c15fc  JZ 0x105c160b                     
+105c15fe  TEST EAX,EAX                      
+105c1600  JZ 0x105c160b                     
+105c1602  PUSH EAX                          
+105c1603  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c1608  ADD ESP,0x4                       
+105c160b  MOV EAX,dword ptr [EBP + -0x4]    
+105c160e  LEA ECX,[EBP + -0x18]             
+105c1611  CMP EAX,ECX                       
+105c1613  JZ 0x105c1622                     
+105c1615  TEST EAX,EAX                      
+105c1617  JZ 0x105c1622                     
+105c1619  PUSH EAX                          
+105c161a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c161f  ADD ESP,0x4                       
+105c1622  MOV ESP,EBP                       
+105c1624  POP EBP                           
+105c1625  RET                               
+105c1630  RET                               
+
+=== registration block 105c3ed0..105c4400 ===
+105c3ed0  PUSH EAX                          
+105c3ed1  PUSH 0x8                          
+105c3ed3  CALL 0x10551270                     ; -> FUN_10551270
+105c3ed8  MOV EAX,dword ptr [EBP + -0x1c]   
+105c3edb  MOV ESI,0x2                       
+105c3ee0  JMP 0x105c3ee7                    
+105c3ee2  MOV ESI,0x1                       
+105c3ee7  TEST EAX,EAX                      
+105c3ee9  JZ 0x105c3ef4                     
+105c3eeb  PUSH EAX                          
+105c3eec  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c3ef1  ADD ESP,0x4                       
+105c3ef4  MOV EAX,ESI                       
+105c3ef6  POP EDI                           
+105c3ef7  POP ESI                           
+105c3ef8  POP EBX                           
+105c3ef9  MOV ESP,EBP                       
+105c3efb  POP EBP                           
+105c3efc  RET                               
+105c3efd  POP EDI                           
+105c3efe  POP ESI                           
+105c3eff  MOV EAX,0x1                       
+105c3f04  POP EBX                           
+105c3f05  MOV ESP,EBP                       
+105c3f07  POP EBP                           
+105c3f08  RET                               
+105c3f10  PUSH EBP                          
+105c3f11  MOV EBP,ESP                       
+105c3f13  SUB ESP,0x30                      
+105c3f16  LEA EAX,[EBP + -0x30]             
+105c3f19  PUSH 0x1130ac8e                   
+105c3f1e  PUSH 0x1130ac80                     ; "AreaChangeType"
+105c3f23  MOV ECX,EAX                       
+105c3f25  MOV dword ptr [EBP + -0x20],EAX   
+105c3f28  MOV dword ptr [EBP + -0x1c],EAX   
+105c3f2b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c3f30  LEA EAX,[EBP + -0x18]             
+105c3f33  PUSH 0x1130aebc                   
+105c3f38  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c3f3d  MOV ECX,EAX                       
+105c3f3f  MOV dword ptr [EBP + -0x8],EAX    
+105c3f42  MOV dword ptr [EBP + -0x4],EAX    
+105c3f45  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c3f4a  PUSH 0x0                          
+105c3f4c  PUSH 0x1                          
+105c3f4e  PUSH 0x0                          
+105c3f50  LEA EAX,[EBP + -0x30]             
+105c3f53  PUSH EAX                          
+105c3f54  LEA EAX,[EBP + -0x18]             
+105c3f57  PUSH EAX                          
+105c3f58  CALL 0x103cf720                     ; -> FUN_103cf720
+105c3f5d  MOV ECX,EAX                       
+105c3f5f  CALL 0x103cf810                     ; -> FUN_103cf810
+105c3f64  MOV EAX,dword ptr [EBP + -0x4]    
+105c3f67  LEA ECX,[EBP + -0x18]             
+105c3f6a  CMP EAX,ECX                       
+105c3f6c  JZ 0x105c3f7b                     
+105c3f6e  TEST EAX,EAX                      
+105c3f70  JZ 0x105c3f7b                     
+105c3f72  PUSH EAX                          
+105c3f73  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c3f78  ADD ESP,0x4                       
+105c3f7b  MOV EAX,dword ptr [EBP + -0x1c]   
+105c3f7e  LEA ECX,[EBP + -0x30]             
+105c3f81  CMP EAX,ECX                       
+105c3f83  JZ 0x105c3f92                     
+105c3f85  TEST EAX,EAX                      
+105c3f87  JZ 0x105c3f92                     
+105c3f89  PUSH EAX                          
+105c3f8a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c3f8f  ADD ESP,0x4                       
+105c3f92  LEA EAX,[EBP + -0x18]             
+105c3f95  PUSH 0x11308186                   
+105c3f9a  PUSH 0x11308178                     ; "TargetRegionID"
+105c3f9f  MOV ECX,EAX                       
+105c3fa1  MOV dword ptr [EBP + -0x8],EAX    
+105c3fa4  MOV dword ptr [EBP + -0x4],EAX    
+105c3fa7  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c3fac  LEA EAX,[EBP + -0x30]             
+105c3faf  PUSH 0x1130aebc                   
+105c3fb4  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c3fb9  MOV ECX,EAX                       
+105c3fbb  MOV dword ptr [EBP + -0x20],EAX   
+105c3fbe  MOV dword ptr [EBP + -0x1c],EAX   
+105c3fc1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c3fc6  PUSH 0x1                          
+105c3fc8  LEA EAX,[EBP + -0x18]             
+105c3fcb  PUSH EAX                          
+105c3fcc  LEA EAX,[EBP + -0x30]             
+105c3fcf  PUSH EAX                          
+105c3fd0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c3fd5  MOV ECX,EAX                       
+105c3fd7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c3fdc  MOV EAX,dword ptr [EBP + -0x1c]   
+105c3fdf  LEA ECX,[EBP + -0x30]             
+105c3fe2  CMP EAX,ECX                       
+105c3fe4  JZ 0x105c3ff3                     
+105c3fe6  TEST EAX,EAX                      
+105c3fe8  JZ 0x105c3ff3                     
+105c3fea  PUSH EAX                          
+105c3feb  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c3ff0  ADD ESP,0x4                       
+105c3ff3  MOV EAX,dword ptr [EBP + -0x4]    
+105c3ff6  LEA ECX,[EBP + -0x18]             
+105c3ff9  CMP EAX,ECX                       
+105c3ffb  JZ 0x105c400a                     
+105c3ffd  TEST EAX,EAX                      
+105c3fff  JZ 0x105c400a                     
+105c4001  PUSH EAX                          
+105c4002  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4007  ADD ESP,0x4                       
+105c400a  LEA EAX,[EBP + -0x18]             
+105c400d  PUSH 0x11309eaa                   
+105c4012  PUSH 0x11309e94                     ; "RegionConnectPointType"
+105c4017  MOV ECX,EAX                       
+105c4019  MOV dword ptr [EBP + -0x8],EAX    
+105c401c  MOV dword ptr [EBP + -0x4],EAX    
+105c401f  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4024  LEA EAX,[EBP + -0x30]             
+105c4027  PUSH 0x1130aebc                   
+105c402c  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4031  MOV ECX,EAX                       
+105c4033  MOV dword ptr [EBP + -0x20],EAX   
+105c4036  MOV dword ptr [EBP + -0x1c],EAX   
+105c4039  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c403e  PUSH 0x2                          
+105c4040  LEA EAX,[EBP + -0x18]             
+105c4043  PUSH EAX                          
+105c4044  LEA EAX,[EBP + -0x30]             
+105c4047  PUSH EAX                          
+105c4048  CALL 0x103cf720                     ; -> FUN_103cf720
+105c404d  MOV ECX,EAX                       
+105c404f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4054  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4057  LEA ECX,[EBP + -0x30]             
+105c405a  CMP EAX,ECX                       
+105c405c  JZ 0x105c406b                     
+105c405e  TEST EAX,EAX                      
+105c4060  JZ 0x105c406b                     
+105c4062  PUSH EAX                          
+105c4063  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4068  ADD ESP,0x4                       
+105c406b  MOV EAX,dword ptr [EBP + -0x4]    
+105c406e  LEA ECX,[EBP + -0x18]             
+105c4071  CMP EAX,ECX                       
+105c4073  JZ 0x105c4082                     
+105c4075  TEST EAX,EAX                      
+105c4077  JZ 0x105c4082                     
+105c4079  PUSH EAX                          
+105c407a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c407f  ADD ESP,0x4                       
+105c4082  LEA EAX,[EBP + -0x18]             
+105c4085  PUSH 0x1130acb0                   
+105c408a  PUSH 0x1130ac9c                     ; "RegionConnectFromPos"
+105c408f  MOV ECX,EAX                       
+105c4091  MOV dword ptr [EBP + -0x8],EAX    
+105c4094  MOV dword ptr [EBP + -0x4],EAX    
+105c4097  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c409c  LEA EAX,[EBP + -0x30]             
+105c409f  PUSH 0x1130aebc                   
+105c40a4  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c40a9  MOV ECX,EAX                       
+105c40ab  MOV dword ptr [EBP + -0x20],EAX   
+105c40ae  MOV dword ptr [EBP + -0x1c],EAX   
+105c40b1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c40b6  PUSH 0x3                          
+105c40b8  LEA EAX,[EBP + -0x18]             
+105c40bb  PUSH EAX                          
+105c40bc  LEA EAX,[EBP + -0x30]             
+105c40bf  PUSH EAX                          
+105c40c0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c40c5  MOV ECX,EAX                       
+105c40c7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c40cc  MOV EAX,dword ptr [EBP + -0x1c]   
+105c40cf  LEA ECX,[EBP + -0x30]             
+105c40d2  CMP EAX,ECX                       
+105c40d4  JZ 0x105c40e3                     
+105c40d6  TEST EAX,EAX                      
+105c40d8  JZ 0x105c40e3                     
+105c40da  PUSH EAX                          
+105c40db  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c40e0  ADD ESP,0x4                       
+105c40e3  MOV EAX,dword ptr [EBP + -0x4]    
+105c40e6  LEA ECX,[EBP + -0x18]             
+105c40e9  CMP EAX,ECX                       
+105c40eb  JZ 0x105c40fa                     
+105c40ed  TEST EAX,EAX                      
+105c40ef  JZ 0x105c40fa                     
+105c40f1  PUSH EAX                          
+105c40f2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c40f7  ADD ESP,0x4                       
+105c40fa  LEA EAX,[EBP + -0x18]             
+105c40fd  PUSH 0x1130acc6                   
+105c4102  PUSH 0x1130acb4                     ; "RegionConnectToPos"
+105c4107  MOV ECX,EAX                       
+105c4109  MOV dword ptr [EBP + -0x8],EAX    
+105c410c  MOV dword ptr [EBP + -0x4],EAX    
+105c410f  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4114  LEA EAX,[EBP + -0x30]             
+105c4117  PUSH 0x1130aebc                   
+105c411c  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4121  MOV ECX,EAX                       
+105c4123  MOV dword ptr [EBP + -0x20],EAX   
+105c4126  MOV dword ptr [EBP + -0x1c],EAX   
+105c4129  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c412e  PUSH 0x4                          
+105c4130  LEA EAX,[EBP + -0x18]             
+105c4133  PUSH EAX                          
+105c4134  LEA EAX,[EBP + -0x30]             
+105c4137  PUSH EAX                          
+105c4138  CALL 0x103cf720                     ; -> FUN_103cf720
+105c413d  MOV ECX,EAX                       
+105c413f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4144  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4147  LEA ECX,[EBP + -0x30]             
+105c414a  CMP EAX,ECX                       
+105c414c  JZ 0x105c415b                     
+105c414e  TEST EAX,EAX                      
+105c4150  JZ 0x105c415b                     
+105c4152  PUSH EAX                          
+105c4153  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4158  ADD ESP,0x4                       
+105c415b  MOV EAX,dword ptr [EBP + -0x4]    
+105c415e  LEA ECX,[EBP + -0x18]             
+105c4161  CMP EAX,ECX                       
+105c4163  JZ 0x105c4172                     
+105c4165  TEST EAX,EAX                      
+105c4167  JZ 0x105c4172                     
+105c4169  PUSH EAX                          
+105c416a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c416f  ADD ESP,0x4                       
+105c4172  LEA EAX,[EBP + -0x18]             
+105c4175  PUSH 0x1130acd1                   
+105c417a  PUSH 0x1130acc8                     ; "TargetRot"
+105c417f  MOV ECX,EAX                       
+105c4181  MOV dword ptr [EBP + -0x8],EAX    
+105c4184  MOV dword ptr [EBP + -0x4],EAX    
+105c4187  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c418c  LEA EAX,[EBP + -0x30]             
+105c418f  PUSH 0x1130aebc                   
+105c4194  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4199  MOV ECX,EAX                       
+105c419b  MOV dword ptr [EBP + -0x20],EAX   
+105c419e  MOV dword ptr [EBP + -0x1c],EAX   
+105c41a1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c41a6  PUSH 0x5                          
+105c41a8  LEA EAX,[EBP + -0x18]             
+105c41ab  PUSH EAX                          
+105c41ac  LEA EAX,[EBP + -0x30]             
+105c41af  PUSH EAX                          
+105c41b0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c41b5  MOV ECX,EAX                       
+105c41b7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c41bc  MOV EAX,dword ptr [EBP + -0x1c]   
+105c41bf  LEA ECX,[EBP + -0x30]             
+105c41c2  CMP EAX,ECX                       
+105c41c4  JZ 0x105c41d3                     
+105c41c6  TEST EAX,EAX                      
+105c41c8  JZ 0x105c41d3                     
+105c41ca  PUSH EAX                          
+105c41cb  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c41d0  ADD ESP,0x4                       
+105c41d3  MOV EAX,dword ptr [EBP + -0x4]    
+105c41d6  LEA ECX,[EBP + -0x18]             
+105c41d9  CMP EAX,ECX                       
+105c41db  JZ 0x105c41ea                     
+105c41dd  TEST EAX,EAX                      
+105c41df  JZ 0x105c41ea                     
+105c41e1  PUSH EAX                          
+105c41e2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c41e7  ADD ESP,0x4                       
+105c41ea  LEA EAX,[EBP + -0x18]             
+105c41ed  PUSH 0x1130acec                   
+105c41f2  PUSH 0x1130acd4                     ; "RegionConnectToGroundPos"
+105c41f7  MOV ECX,EAX                       
+105c41f9  MOV dword ptr [EBP + -0x8],EAX    
+105c41fc  MOV dword ptr [EBP + -0x4],EAX    
+105c41ff  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4204  LEA EAX,[EBP + -0x30]             
+105c4207  PUSH 0x1130aebc                   
+105c420c  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4211  MOV ECX,EAX                       
+105c4213  MOV dword ptr [EBP + -0x20],EAX   
+105c4216  MOV dword ptr [EBP + -0x1c],EAX   
+105c4219  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c421e  PUSH 0x6                          
+105c4220  LEA EAX,[EBP + -0x18]             
+105c4223  PUSH EAX                          
+105c4224  LEA EAX,[EBP + -0x30]             
+105c4227  PUSH EAX                          
+105c4228  CALL 0x103cf720                     ; -> FUN_103cf720
+105c422d  MOV ECX,EAX                       
+105c422f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4234  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4237  LEA ECX,[EBP + -0x30]             
+105c423a  CMP EAX,ECX                       
+105c423c  JZ 0x105c424b                     
+105c423e  TEST EAX,EAX                      
+105c4240  JZ 0x105c424b                     
+105c4242  PUSH EAX                          
+105c4243  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4248  ADD ESP,0x4                       
+105c424b  MOV EAX,dword ptr [EBP + -0x4]    
+105c424e  LEA ECX,[EBP + -0x18]             
+105c4251  CMP EAX,ECX                       
+105c4253  JZ 0x105c4262                     
+105c4255  TEST EAX,EAX                      
+105c4257  JZ 0x105c4262                     
+105c4259  PUSH EAX                          
+105c425a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c425f  ADD ESP,0x4                       
+105c4262  LEA EAX,[EBP + -0x18]             
+105c4265  PUSH 0x11305efd                   
+105c426a  PUSH 0x11305ef4                     ; "TargetPos"
+105c426f  MOV ECX,EAX                       
+105c4271  MOV dword ptr [EBP + -0x8],EAX    
+105c4274  MOV dword ptr [EBP + -0x4],EAX    
+105c4277  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c427c  LEA EAX,[EBP + -0x30]             
+105c427f  PUSH 0x1130aebc                   
+105c4284  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4289  MOV ECX,EAX                       
+105c428b  MOV dword ptr [EBP + -0x20],EAX   
+105c428e  MOV dword ptr [EBP + -0x1c],EAX   
+105c4291  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4296  PUSH 0x7                          
+105c4298  LEA EAX,[EBP + -0x18]             
+105c429b  PUSH EAX                          
+105c429c  LEA EAX,[EBP + -0x30]             
+105c429f  PUSH EAX                          
+105c42a0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c42a5  MOV ECX,EAX                       
+105c42a7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c42ac  MOV EAX,dword ptr [EBP + -0x1c]   
+105c42af  LEA ECX,[EBP + -0x30]             
+105c42b2  CMP EAX,ECX                       
+105c42b4  JZ 0x105c42c3                     
+105c42b6  TEST EAX,EAX                      
+105c42b8  JZ 0x105c42c3                     
+105c42ba  PUSH EAX                          
+105c42bb  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c42c0  ADD ESP,0x4                       
+105c42c3  MOV EAX,dword ptr [EBP + -0x4]    
+105c42c6  LEA ECX,[EBP + -0x18]             
+105c42c9  CMP EAX,ECX                       
+105c42cb  JZ 0x105c42da                     
+105c42cd  TEST EAX,EAX                      
+105c42cf  JZ 0x105c42da                     
+105c42d1  PUSH EAX                          
+105c42d2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c42d7  ADD ESP,0x4                       
+105c42da  LEA EAX,[EBP + -0x18]             
+105c42dd  PUSH 0x11309627                   
+105c42e2  PUSH 0x11309610                     ; "RegionConnectTowardsPos"
+105c42e7  MOV ECX,EAX                       
+105c42e9  MOV dword ptr [EBP + -0x8],EAX    
+105c42ec  MOV dword ptr [EBP + -0x4],EAX    
+105c42ef  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c42f4  LEA EAX,[EBP + -0x30]             
+105c42f7  PUSH 0x1130aebc                   
+105c42fc  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4301  MOV ECX,EAX                       
+105c4303  MOV dword ptr [EBP + -0x20],EAX   
+105c4306  MOV dword ptr [EBP + -0x1c],EAX   
+105c4309  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c430e  PUSH 0x8                          
+105c4310  LEA EAX,[EBP + -0x18]             
+105c4313  PUSH EAX                          
+105c4314  LEA EAX,[EBP + -0x30]             
+105c4317  PUSH EAX                          
+105c4318  CALL 0x103cf720                     ; -> FUN_103cf720
+105c431d  MOV ECX,EAX                       
+105c431f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4324  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4327  LEA ECX,[EBP + -0x30]             
+105c432a  CMP EAX,ECX                       
+105c432c  JZ 0x105c433b                     
+105c432e  TEST EAX,EAX                      
+105c4330  JZ 0x105c433b                     
+105c4332  PUSH EAX                          
+105c4333  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4338  ADD ESP,0x4                       
+105c433b  MOV EAX,dword ptr [EBP + -0x4]    
+105c433e  LEA ECX,[EBP + -0x18]             
+105c4341  CMP EAX,ECX                       
+105c4343  JZ 0x105c4352                     
+105c4345  TEST EAX,EAX                      
+105c4347  JZ 0x105c4352                     
+105c4349  PUSH EAX                          
+105c434a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c434f  ADD ESP,0x4                       
+105c4352  LEA EAX,[EBP + -0x18]             
+105c4355  PUSH 0x1130aecc                   
+105c435a  PUSH 0x1130aec0                     ; "DirectGoDown"
+105c435f  MOV ECX,EAX                       
+105c4361  MOV dword ptr [EBP + -0x8],EAX    
+105c4364  MOV dword ptr [EBP + -0x4],EAX    
+105c4367  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c436c  LEA EAX,[EBP + -0x30]             
+105c436f  PUSH 0x1130aebc                   
+105c4374  PUSH 0x1130aea0                     ; "CSelectRandomChangeAreaPoint"
+105c4379  MOV ECX,EAX                       
+105c437b  MOV dword ptr [EBP + -0x20],EAX   
+105c437e  MOV dword ptr [EBP + -0x1c],EAX   
+105c4381  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4386  PUSH 0x9                          
+105c4388  LEA EAX,[EBP + -0x18]             
+105c438b  PUSH EAX                          
+105c438c  LEA EAX,[EBP + -0x30]             
+105c438f  PUSH EAX                          
+105c4390  CALL 0x103cf720                     ; -> FUN_103cf720
+105c4395  MOV ECX,EAX                       
+105c4397  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c439c  MOV EAX,dword ptr [EBP + -0x1c]   
+105c439f  LEA ECX,[EBP + -0x30]             
+105c43a2  CMP EAX,ECX                       
+105c43a4  JZ 0x105c43b3                     
+105c43a6  TEST EAX,EAX                      
+105c43a8  JZ 0x105c43b3                     
+105c43aa  PUSH EAX                          
+105c43ab  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c43b0  ADD ESP,0x4                       
+105c43b3  MOV EAX,dword ptr [EBP + -0x4]    
+105c43b6  LEA ECX,[EBP + -0x18]             
+105c43b9  CMP EAX,ECX                       
+105c43bb  JZ 0x105c43ca                     
+105c43bd  TEST EAX,EAX                      
+105c43bf  JZ 0x105c43ca                     
+105c43c1  PUSH EAX                          
+105c43c2  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c43c7  ADD ESP,0x4                       
+105c43ca  MOV ESP,EBP                       
+105c43cc  POP EBP                           
+105c43cd  RET                               
+105c43d0  RET                               
+105c43f0  JMP 0x103dc9d0                      ; -> FUN_103dc9d0
+
+=== registration block 105c45f0..105c4940 ===
+105c45f1  LEA EAX,[EBP + -0x30]             
+105c45f4  PUSH EAX                          
+105c45f5  PUSH 0x1                          
+105c45f7  CALL 0x10551270                     ; -> FUN_10551270
+105c45fc  LEA EAX,[EBP + -0x10]             
+105c45ff  MOV ECX,EBX                       
+105c4601  PUSH EAX                          
+105c4602  PUSH 0x2                          
+105c4604  CALL 0x105572f0                     ; -> FUN_105572f0
+105c4609  LEA EAX,[EBP + -0x30]             
+105c460c  MOV ECX,EBX                       
+105c460e  PUSH EAX                          
+105c460f  PUSH 0x3                          
+105c4611  CALL 0x10551270                     ; -> FUN_10551270
+105c4616  LEA EAX,[EBP + -0x10]             
+105c4619  JMP 0x105c455d                    
+105c461e  POP EDI                           
+105c461f  POP ESI                           
+105c4620  MOV EAX,0x1                       
+105c4625  POP EBX                           
+105c4626  MOV ESP,EBP                       
+105c4628  POP EBP                           
+105c4629  RET                               
+105c4630  PUSH EBP                          
+105c4631  MOV EBP,ESP                       
+105c4633  SUB ESP,0x30                      
+105c4636  LEA EAX,[EBP + -0x30]             
+105c4639  PUSH 0x1130aef2                   
+105c463e  PUSH 0x1130aee4                     ; "SleepPointType"
+105c4643  MOV ECX,EAX                       
+105c4645  MOV dword ptr [EBP + -0x20],EAX   
+105c4648  MOV dword ptr [EBP + -0x1c],EAX   
+105c464b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4650  LEA EAX,[EBP + -0x18]             
+105c4653  PUSH 0x1130aee1                   
+105c4658  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c465d  MOV ECX,EAX                       
+105c465f  MOV dword ptr [EBP + -0x8],EAX    
+105c4662  MOV dword ptr [EBP + -0x4],EAX    
+105c4665  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c466a  PUSH 0x0                          
+105c466c  PUSH 0x1                          
+105c466e  PUSH 0x0                          
+105c4670  LEA EAX,[EBP + -0x30]             
+105c4673  PUSH EAX                          
+105c4674  LEA EAX,[EBP + -0x18]             
+105c4677  PUSH EAX                          
+105c4678  CALL 0x103cf720                     ; -> FUN_103cf720
+105c467d  MOV ECX,EAX                       
+105c467f  CALL 0x103cf810                     ; -> FUN_103cf810
+105c4684  MOV EAX,dword ptr [EBP + -0x4]    
+105c4687  LEA ECX,[EBP + -0x18]             
+105c468a  CMP EAX,ECX                       
+105c468c  JZ 0x105c469b                     
+105c468e  TEST EAX,EAX                      
+105c4690  JZ 0x105c469b                     
+105c4692  PUSH EAX                          
+105c4693  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4698  ADD ESP,0x4                       
+105c469b  MOV EAX,dword ptr [EBP + -0x1c]   
+105c469e  LEA ECX,[EBP + -0x30]             
+105c46a1  CMP EAX,ECX                       
+105c46a3  JZ 0x105c46b2                     
+105c46a5  TEST EAX,EAX                      
+105c46a7  JZ 0x105c46b2                     
+105c46a9  PUSH EAX                          
+105c46aa  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c46af  ADD ESP,0x4                       
+105c46b2  LEA EAX,[EBP + -0x18]             
+105c46b5  PUSH 0x11305efd                   
+105c46ba  PUSH 0x11305ef4                     ; "TargetPos"
+105c46bf  MOV ECX,EAX                       
+105c46c1  MOV dword ptr [EBP + -0x8],EAX    
+105c46c4  MOV dword ptr [EBP + -0x4],EAX    
+105c46c7  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c46cc  LEA EAX,[EBP + -0x30]             
+105c46cf  PUSH 0x1130aee1                   
+105c46d4  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c46d9  MOV ECX,EAX                       
+105c46db  MOV dword ptr [EBP + -0x20],EAX   
+105c46de  MOV dword ptr [EBP + -0x1c],EAX   
+105c46e1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c46e6  PUSH 0x1                          
+105c46e8  LEA EAX,[EBP + -0x18]             
+105c46eb  PUSH EAX                          
+105c46ec  LEA EAX,[EBP + -0x30]             
+105c46ef  PUSH EAX                          
+105c46f0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c46f5  MOV ECX,EAX                       
+105c46f7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c46fc  MOV EAX,dword ptr [EBP + -0x1c]   
+105c46ff  LEA ECX,[EBP + -0x30]             
+105c4702  CMP EAX,ECX                       
+105c4704  JZ 0x105c4713                     
+105c4706  TEST EAX,EAX                      
+105c4708  JZ 0x105c4713                     
+105c470a  PUSH EAX                          
+105c470b  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4710  ADD ESP,0x4                       
+105c4713  MOV EAX,dword ptr [EBP + -0x4]    
+105c4716  LEA ECX,[EBP + -0x18]             
+105c4719  CMP EAX,ECX                       
+105c471b  JZ 0x105c472a                     
+105c471d  TEST EAX,EAX                      
+105c471f  JZ 0x105c472a                     
+105c4721  PUSH EAX                          
+105c4722  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4727  ADD ESP,0x4                       
+105c472a  LEA EAX,[EBP + -0x18]             
+105c472d  PUSH 0x11308186                   
+105c4732  PUSH 0x11308178                     ; "TargetRegionID"
+105c4737  MOV ECX,EAX                       
+105c4739  MOV dword ptr [EBP + -0x8],EAX    
+105c473c  MOV dword ptr [EBP + -0x4],EAX    
+105c473f  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4744  LEA EAX,[EBP + -0x30]             
+105c4747  PUSH 0x1130aee1                   
+105c474c  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c4751  MOV ECX,EAX                       
+105c4753  MOV dword ptr [EBP + -0x20],EAX   
+105c4756  MOV dword ptr [EBP + -0x1c],EAX   
+105c4759  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c475e  PUSH 0x2                          
+105c4760  LEA EAX,[EBP + -0x18]             
+105c4763  PUSH EAX                          
+105c4764  LEA EAX,[EBP + -0x30]             
+105c4767  PUSH EAX                          
+105c4768  CALL 0x103cf720                     ; -> FUN_103cf720
+105c476d  MOV ECX,EAX                       
+105c476f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4774  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4777  LEA ECX,[EBP + -0x30]             
+105c477a  CMP EAX,ECX                       
+105c477c  JZ 0x105c478b                     
+105c477e  TEST EAX,EAX                      
+105c4780  JZ 0x105c478b                     
+105c4782  PUSH EAX                          
+105c4783  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4788  ADD ESP,0x4                       
+105c478b  MOV EAX,dword ptr [EBP + -0x4]    
+105c478e  LEA ECX,[EBP + -0x18]             
+105c4791  CMP EAX,ECX                       
+105c4793  JZ 0x105c47a2                     
+105c4795  TEST EAX,EAX                      
+105c4797  JZ 0x105c47a2                     
+105c4799  PUSH EAX                          
+105c479a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c479f  ADD ESP,0x4                       
+105c47a2  LEA EAX,[EBP + -0x18]             
+105c47a5  PUSH 0x1130af02                   
+105c47aa  PUSH 0x1130aef4                     ; "SleepTargetPos"
+105c47af  MOV ECX,EAX                       
+105c47b1  MOV dword ptr [EBP + -0x8],EAX    
+105c47b4  MOV dword ptr [EBP + -0x4],EAX    
+105c47b7  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c47bc  LEA EAX,[EBP + -0x30]             
+105c47bf  PUSH 0x1130aee1                   
+105c47c4  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c47c9  MOV ECX,EAX                       
+105c47cb  MOV dword ptr [EBP + -0x20],EAX   
+105c47ce  MOV dword ptr [EBP + -0x1c],EAX   
+105c47d1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c47d6  PUSH 0x3                          
+105c47d8  LEA EAX,[EBP + -0x18]             
+105c47db  PUSH EAX                          
+105c47dc  LEA EAX,[EBP + -0x30]             
+105c47df  PUSH EAX                          
+105c47e0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c47e5  MOV ECX,EAX                       
+105c47e7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c47ec  MOV EAX,dword ptr [EBP + -0x1c]   
+105c47ef  LEA ECX,[EBP + -0x30]             
+105c47f2  CMP EAX,ECX                       
+105c47f4  JZ 0x105c4803                     
+105c47f6  TEST EAX,EAX                      
+105c47f8  JZ 0x105c4803                     
+105c47fa  PUSH EAX                          
+105c47fb  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4800  ADD ESP,0x4                       
+105c4803  MOV EAX,dword ptr [EBP + -0x4]    
+105c4806  LEA ECX,[EBP + -0x18]             
+105c4809  CMP EAX,ECX                       
+105c480b  JZ 0x105c481a                     
+105c480d  TEST EAX,EAX                      
+105c480f  JZ 0x105c481a                     
+105c4811  PUSH EAX                          
+105c4812  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4817  ADD ESP,0x4                       
+105c481a  LEA EAX,[EBP + -0x18]             
+105c481d  PUSH 0x1130af17                   
+105c4822  PUSH 0x1130af04                     ; "SleepTargetRegionID"
+105c4827  MOV ECX,EAX                       
+105c4829  MOV dword ptr [EBP + -0x8],EAX    
+105c482c  MOV dword ptr [EBP + -0x4],EAX    
+105c482f  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c4834  LEA EAX,[EBP + -0x30]             
+105c4837  PUSH 0x1130aee1                   
+105c483c  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c4841  MOV ECX,EAX                       
+105c4843  MOV dword ptr [EBP + -0x20],EAX   
+105c4846  MOV dword ptr [EBP + -0x1c],EAX   
+105c4849  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c484e  PUSH 0x4                          
+105c4850  LEA EAX,[EBP + -0x18]             
+105c4853  PUSH EAX                          
+105c4854  LEA EAX,[EBP + -0x30]             
+105c4857  PUSH EAX                          
+105c4858  CALL 0x103cf720                     ; -> FUN_103cf720
+105c485d  MOV ECX,EAX                       
+105c485f  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c4864  MOV EAX,dword ptr [EBP + -0x1c]   
+105c4867  LEA ECX,[EBP + -0x30]             
+105c486a  CMP EAX,ECX                       
+105c486c  JZ 0x105c487b                     
+105c486e  TEST EAX,EAX                      
+105c4870  JZ 0x105c487b                     
+105c4872  PUSH EAX                          
+105c4873  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4878  ADD ESP,0x4                       
+105c487b  MOV EAX,dword ptr [EBP + -0x4]    
+105c487e  LEA ECX,[EBP + -0x18]             
+105c4881  CMP EAX,ECX                       
+105c4883  JZ 0x105c4892                     
+105c4885  TEST EAX,EAX                      
+105c4887  JZ 0x105c4892                     
+105c4889  PUSH EAX                          
+105c488a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c488f  ADD ESP,0x4                       
+105c4892  LEA EAX,[EBP + -0x18]             
+105c4895  PUSH 0x1130af24                   
+105c489a  PUSH 0x1130af18                     ; "SleepPointID"
+105c489f  MOV ECX,EAX                       
+105c48a1  MOV dword ptr [EBP + -0x8],EAX    
+105c48a4  MOV dword ptr [EBP + -0x4],EAX    
+105c48a7  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c48ac  LEA EAX,[EBP + -0x30]             
+105c48af  PUSH 0x1130aee1                   
+105c48b4  PUSH 0x1130aed0                     ; "CSelectSleepPoint"
+105c48b9  MOV ECX,EAX                       
+105c48bb  MOV dword ptr [EBP + -0x20],EAX   
+105c48be  MOV dword ptr [EBP + -0x1c],EAX   
+105c48c1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105c48c6  PUSH 0x5                          
+105c48c8  LEA EAX,[EBP + -0x18]             
+105c48cb  PUSH EAX                          
+105c48cc  LEA EAX,[EBP + -0x30]             
+105c48cf  PUSH EAX                          
+105c48d0  CALL 0x103cf720                     ; -> FUN_103cf720
+105c48d5  MOV ECX,EAX                       
+105c48d7  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105c48dc  MOV EAX,dword ptr [EBP + -0x1c]   
+105c48df  LEA ECX,[EBP + -0x30]             
+105c48e2  CMP EAX,ECX                       
+105c48e4  JZ 0x105c48f3                     
+105c48e6  TEST EAX,EAX                      
+105c48e8  JZ 0x105c48f3                     
+105c48ea  PUSH EAX                          
+105c48eb  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c48f0  ADD ESP,0x4                       
+105c48f3  MOV EAX,dword ptr [EBP + -0x4]    
+105c48f6  LEA ECX,[EBP + -0x18]             
+105c48f9  CMP EAX,ECX                       
+105c48fb  JZ 0x105c490a                     
+105c48fd  TEST EAX,EAX                      
+105c48ff  JZ 0x105c490a                     
+105c4901  PUSH EAX                          
+105c4902  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105c4907  ADD ESP,0x4                       
+105c490a  MOV ESP,EBP                       
+105c490c  POP EBP                           
+105c490d  RET                               
+105c4910  RET                               
+105c4920  PUSH EBP                          
+105c4921  MOV EBP,ESP                       
+105c4923  SUB ESP,0x20                      
+105c4926  PUSH ESI                          
+105c4927  MOV ESI,dword ptr [EBP + 0x8]     
+105c492a  MOV dword ptr [EBP + -0x4],ECX    
+105c492d  LEA ECX,[EBP + -0x20]             
+105c4930  PUSH EDI                          
+105c4931  PUSH ECX                          
+105c4932  MOV EAX,dword ptr [ESI]           
+105c4934  MOV ECX,ESI                       
+105c4936  MOV EAX,dword ptr [EAX + 0x30]    
+105c4939  CALL EAX                          
+105c493b  MOV ECX,dword ptr [EBP + 0x10]    
+105c493e  XOR EDI,EDI                       
+
+=== registration block 105cf0e0..105cf2d0 ===
+105cf0e1  TEST AL,AL                        
+105cf0e3  MOV ECX,EBX                       
+105cf0e5  LEA EAX,[EBP + -0x8]              
+105cf0e8  PUSH EAX                          
+105cf0e9  JZ 0x105cf100                     
+105cf0eb  PUSH 0x1                          
+105cf0ed  CALL 0x105572f0                     ; -> FUN_105572f0
+105cf0f2  TEST AL,AL                        
+105cf0f4  JNZ 0x105cf107                    
+105cf0f6  MOV EAX,0x1                       
+105cf0fb  POP EBX                           
+105cf0fc  MOV ESP,EBP                       
+105cf0fe  POP EBP                           
+105cf0ff  RET                               
+105cf100  PUSH 0x2                          
+105cf102  CALL 0x105572f0                     ; -> FUN_105572f0
+105cf107  MOV EAX,0x2                       
+105cf10c  POP EBX                           
+105cf10d  MOV ESP,EBP                       
+105cf10f  POP EBP                           
+105cf110  RET                               
+105cf120  PUSH EBP                          
+105cf121  MOV EBP,ESP                       
+105cf123  SUB ESP,0x30                      
+105cf126  LEA EAX,[EBP + -0x30]             
+105cf129  PUSH 0x1130b90f                   
+105cf12e  PUSH 0x1130b8fc                     ; "TargetLogicEntityID"
+105cf133  MOV ECX,EAX                       
+105cf135  MOV dword ptr [EBP + -0x20],EAX   
+105cf138  MOV dword ptr [EBP + -0x1c],EAX   
+105cf13b  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf140  LEA EAX,[EBP + -0x18]             
+105cf143  PUSH 0x1130b8fb                   
+105cf148  PUSH 0x1130b8e8                     ; "CSetCurrentRegionID"
+105cf14d  MOV ECX,EAX                       
+105cf14f  MOV dword ptr [EBP + -0x8],EAX    
+105cf152  MOV dword ptr [EBP + -0x4],EAX    
+105cf155  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf15a  PUSH 0x1                          
+105cf15c  PUSH 0x1                          
+105cf15e  PUSH 0x0                          
+105cf160  LEA EAX,[EBP + -0x30]             
+105cf163  PUSH EAX                          
+105cf164  LEA EAX,[EBP + -0x18]             
+105cf167  PUSH EAX                          
+105cf168  CALL 0x103cf720                     ; -> FUN_103cf720
+105cf16d  MOV ECX,EAX                       
+105cf16f  CALL 0x103cf810                     ; -> FUN_103cf810
+105cf174  MOV EAX,dword ptr [EBP + -0x4]    
+105cf177  LEA ECX,[EBP + -0x18]             
+105cf17a  CMP EAX,ECX                       
+105cf17c  JZ 0x105cf18b                     
+105cf17e  TEST EAX,EAX                      
+105cf180  JZ 0x105cf18b                     
+105cf182  PUSH EAX                          
+105cf183  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf188  ADD ESP,0x4                       
+105cf18b  MOV EAX,dword ptr [EBP + -0x1c]   
+105cf18e  LEA ECX,[EBP + -0x30]             
+105cf191  CMP EAX,ECX                       
+105cf193  JZ 0x105cf1a2                     
+105cf195  TEST EAX,EAX                      
+105cf197  JZ 0x105cf1a2                     
+105cf199  PUSH EAX                          
+105cf19a  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf19f  ADD ESP,0x4                       
+105cf1a2  LEA EAX,[EBP + -0x18]             
+105cf1a5  PUSH 0x11306aa0                   
+105cf1aa  PUSH 0x11306a94                     ; "TargetBBName"
+105cf1af  MOV ECX,EAX                       
+105cf1b1  MOV dword ptr [EBP + -0x8],EAX    
+105cf1b4  MOV dword ptr [EBP + -0x4],EAX    
+105cf1b7  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf1bc  LEA EAX,[EBP + -0x30]             
+105cf1bf  PUSH 0x1130b8fb                   
+105cf1c4  PUSH 0x1130b8e8                     ; "CSetCurrentRegionID"
+105cf1c9  MOV ECX,EAX                       
+105cf1cb  MOV dword ptr [EBP + -0x20],EAX   
+105cf1ce  MOV dword ptr [EBP + -0x1c],EAX   
+105cf1d1  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf1d6  PUSH 0x1                          
+105cf1d8  PUSH 0x1                          
+105cf1da  PUSH 0x1                          
+105cf1dc  LEA EAX,[EBP + -0x18]             
+105cf1df  PUSH EAX                          
+105cf1e0  LEA EAX,[EBP + -0x30]             
+105cf1e3  PUSH EAX                          
+105cf1e4  CALL 0x103cf720                     ; -> FUN_103cf720
+105cf1e9  MOV ECX,EAX                       
+105cf1eb  CALL 0x103cf810                     ; -> FUN_103cf810
+105cf1f0  MOV EAX,dword ptr [EBP + -0x1c]   
+105cf1f3  LEA ECX,[EBP + -0x30]             
+105cf1f6  CMP EAX,ECX                       
+105cf1f8  JZ 0x105cf207                     
+105cf1fa  TEST EAX,EAX                      
+105cf1fc  JZ 0x105cf207                     
+105cf1fe  PUSH EAX                          
+105cf1ff  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf204  ADD ESP,0x4                       
+105cf207  MOV EAX,dword ptr [EBP + -0x4]    
+105cf20a  LEA ECX,[EBP + -0x18]             
+105cf20d  CMP EAX,ECX                       
+105cf20f  JZ 0x105cf21e                     
+105cf211  TEST EAX,EAX                      
+105cf213  JZ 0x105cf21e                     
+105cf215  PUSH EAX                          
+105cf216  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf21b  ADD ESP,0x4                       
+105cf21e  LEA EAX,[EBP + -0x18]             
+105cf221  PUSH 0x1130b91f                   
+105cf226  PUSH 0x1130b910                     ; "CurrentRegionID"
+105cf22b  MOV ECX,EAX                       
+105cf22d  MOV dword ptr [EBP + -0x8],EAX    
+105cf230  MOV dword ptr [EBP + -0x4],EAX    
+105cf233  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf238  LEA EAX,[EBP + -0x30]             
+105cf23b  PUSH 0x1130b8fb                   
+105cf240  PUSH 0x1130b8e8                     ; "CSetCurrentRegionID"
+105cf245  MOV ECX,EAX                       
+105cf247  MOV dword ptr [EBP + -0x20],EAX   
+105cf24a  MOV dword ptr [EBP + -0x1c],EAX   
+105cf24d  CALL 0x1001ea30                     ; -> FUN_1001ea30
+105cf252  PUSH 0x2                          
+105cf254  LEA EAX,[EBP + -0x18]             
+105cf257  PUSH EAX                          
+105cf258  LEA EAX,[EBP + -0x30]             
+105cf25b  PUSH EAX                          
+105cf25c  CALL 0x103cf720                     ; -> FUN_103cf720
+105cf261  MOV ECX,EAX                       
+105cf263  CALL 0x103cf8f0                     ; -> FUN_103cf8f0
+105cf268  MOV EAX,dword ptr [EBP + -0x1c]   
+105cf26b  LEA ECX,[EBP + -0x30]             
+105cf26e  CMP EAX,ECX                       
+105cf270  JZ 0x105cf27f                     
+105cf272  TEST EAX,EAX                      
+105cf274  JZ 0x105cf27f                     
+105cf276  PUSH EAX                          
+105cf277  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf27c  ADD ESP,0x4                       
+105cf27f  MOV EAX,dword ptr [EBP + -0x4]    
+105cf282  LEA ECX,[EBP + -0x18]             
+105cf285  CMP EAX,ECX                       
+105cf287  JZ 0x105cf296                     
+105cf289  TEST EAX,EAX                      
+105cf28b  JZ 0x105cf296                     
+105cf28d  PUSH EAX                          
+105cf28e  CALL 0x10653dc0                     ; -> FUN_10653dc0
+105cf293  ADD ESP,0x4                       
+105cf296  MOV ESP,EBP                       
+105cf298  POP EBP                           
+105cf299  RET                               
+105cf2a0  RET                               
+105cf2c0  PUSH ESI                          
+105cf2c1  MOV ESI,ECX                       
+105cf2c3  CALL 0x103dc860                     ; -> FUN_103dc860  ; "Vj"
+105cf2c8  MOV dword ptr [ESI],0x1130b920    
+105cf2ce  MOV EAX,ESI                       

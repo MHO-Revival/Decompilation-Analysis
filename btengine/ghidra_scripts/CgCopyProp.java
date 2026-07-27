@@ -29,8 +29,15 @@ public class CgCopyProp extends GhidraScript {
     //   CTeleportToTargetPos     0x105ec694 .. 0x105ec784+   (its Evaluate reads slots 0,1,2,3,4, so the
     //                            block runs past the last call site CgParamReg happened to print)
     static final long[][] BLOCKS = {
-        { 0x10565a40L, 0x10565c60L },
-        { 0x105ec600L, 0x105ec900L },
+        { 0x10565a40L, 0x10565c60L },   // CCopyTargetPropertyToBB
+        { 0x105ec600L, 0x105ec900L },   // CTeleportToTargetPos
+        // The region ops of task #86. Ranges bracket the registrar call sites CgParamReg reported, padded to
+        // catch the std::string(begin,end) constructions that carry the parameter names.
+        { 0x105c0c80L, 0x105c1240L },   // CSelectChangeAreaPointToCertainRegion
+        { 0x105c1470L, 0x105c1660L },   // CSelectEscapePoint
+        { 0x105c3ed0L, 0x105c4400L },   // CSelectRandomChangeAreaPoint
+        { 0x105c45f0L, 0x105c4940L },   // CSelectSleepPoint
+        { 0x105cf0e0L, 0x105cf2d0L },   // CSetCurrentRegionID
     };
 
     // Type-name globals referenced by CCopyTargetPropertyToBB::Evaluate (FUN_105656e0).
