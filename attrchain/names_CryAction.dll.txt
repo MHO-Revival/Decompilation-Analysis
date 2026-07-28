@@ -1,0 +1,12 @@
+==== Evaluate 105abd50
+   slot 1131462c -> name getter slot 11314638 -> 10621ea0
+      *** CMVMGetPower   (string at 11309c2c)
+
+==== Evaluate 105cc6c0
+   slot 1130f080 -> name getter slot 1130f08c -> 10622380
+      *** CSetDeltaPower   (string at 1130b7d8)
+
+==== Evaluate 105f6ba0
+   slot 1130ffa4 -> name getter slot 1130ffb0 -> 106217e0
+      *** CDistanceCheck   (string at 1130d5c0)
+

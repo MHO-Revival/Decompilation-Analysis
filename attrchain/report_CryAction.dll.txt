@@ -1,0 +1,1952 @@
+================================ callers of 105f73f0
+  call at 105f6eb6  in FUN_105f6ba0
+  call at 10b07dd5  in FUN_10b07dc0
+  call at 10b0b9c1  in FUN_10b0b9b0
+  call at 10b0bd2b  in FUN_10b0bd20
+  call at 10b0d855  in FUN_10b0d840
+  call at 10b1130d  in FUN_10b11280
+  -> 6 distinct calling functions
+
+-------- FUN_105f6ba0 @105f6ba0 (1100 bytes)
+
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+undefined4 __fastcall FUN_105f6ba0(float param_1)
+
+{
+  byte bVar1;
+  char cVar2;
+  undefined4 uVar3;
+  int *piVar4;
+  byte *pbVar5;
+  uint uVar6;
+  float *pfVar7;
+  int *piVar8;
+  int iVar9;
+  byte *pbVar10;
+  bool bVar11;
+  float10 fVar12;
+  float local_40;
+  undefined4 uStack_3c;
+  undefined4 uStack_38;
+  undefined4 uStack_34;
+  float local_2c;
+  float local_28;
+  float local_24;
+  float local_20;
+  int local_1c;
+  int *local_18;
+  char local_12;
+  char local_11;
+  
+  local_20 = param_1;
+  if ((DAT_113f395c & 1) == 0) {
+    DAT_113f395c = DAT_113f395c | 1;
+    FUN_10a5d660();
+  }
+  local_1c = 0;
+  cVar2 = FUN_103dba30(0,&local_1c);
+  if (cVar2 == '\0') {
+    return 1;
+  }
+  cVar2 = FUN_103dbbb0(3,&DAT_113f3958);
+  if (cVar2 == '\0') {
+    return 1;
+  }
+  iVar9 = **(int **)(DAT_113f3a18 + 0x50);
+  uVar3 = (**(code **)(**(int **)((int)param_1 + 0x54) + 0xc))();
+  piVar4 = (int *)(**(code **)(iVar9 + 0x2c))(uVar3);
+  local_18 = piVar4;
+  if ((DAT_113f395c & 2) == 0) {
+    DAT_113f395c = DAT_113f395c | 2;
+    FUN_10a5d660();
+  }
+  cVar2 = FUN_103dbbb0(1,&DAT_113f3960);
+  if (cVar2 != '\0') {
+    pbVar10 = &DAT_113069fc;
+    pbVar5 = (byte *)FUN_10a5ec80();
+    do {
+      bVar1 = *pbVar5;
+      bVar11 = bVar1 < *pbVar10;
+      if (bVar1 != *pbVar10) {
+LAB_105f6c91:
+        uVar6 = -(uint)bVar11 | 1;
+        goto LAB_105f6c96;
+      }
+      if (bVar1 == 0) break;
+      bVar1 = pbVar5[1];
+      bVar11 = bVar1 < pbVar10[1];
+      if (bVar1 != pbVar10[1]) goto LAB_105f6c91;
+      pbVar5 = pbVar5 + 2;
+      pbVar10 = pbVar10 + 2;
+    } while (bVar1 != 0);
+    uVar6 = 0;
+LAB_105f6c96:
+    piVar4 = local_18;
+    if (uVar6 == 0) {
+      cVar2 = FUN_10552e20(6,&local_2c);
+      piVar4 = local_18;
+      if (cVar2 == '\0') {
+        return 1;
+      }
+      pfVar7 = (float *)(**(code **)(*local_18 + 0x98))(&uStack_3c,&local_2c);
+      goto LAB_105f6d44;
+    }
+  }
+  piVar8 = *(int **)((int)param_1 + 0x2c);
+  if ((uint)(piVar8[1] - *piVar8 >> 2) < 6) {
+    return 1;
+  }
+  if ((int)(piVar8[4] - piVar8[3] & 0xfffffffcU) < 0x15) {
+    return 1;
+  }
+  if (*(int *)(piVar8[3] + 0x14) < 0) {
+    return 1;
+  }
+  FUN_103d8940(*(int *)(piVar8[3] + 0x14),&local_18);
+  cVar2 = FUN_101c3720();
+  if (cVar2 == '\0') {
+    return 1;
+  }
+  piVar8 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 0x50) + 0x2c))(local_18);
+  if (piVar8 == (int *)0x0) {
+    return 1;
+  }
+  pfVar7 = (float *)(**(code **)(*piVar8 + 200))(&uStack_3c);
+LAB_105f6d44:
+  local_2c = *pfVar7;
+  local_28 = pfVar7[1];
+  local_24 = pfVar7[2];
+  if (piVar4 != (int *)0x0) {
+    local_11 = '\0';
+    cVar2 = FUN_103db9b0(8,&local_11);
+    if ((cVar2 == '\0') || (local_11 == '\0')) {
+      if (*(char *)((int)param_1 + 0x60) == '\0') {
+        pfVar7 = (float *)(**(code **)(*piVar4 + 200))(&uStack_3c);
+        local_40 = SQRT((pfVar7[1] - local_28) * (pfVar7[1] - local_28) +
+                        (*pfVar7 - local_2c) * (*pfVar7 - local_2c) +
+                        (pfVar7[2] - local_24) * (pfVar7[2] - local_24));
+      }
+      else {
+        pfVar7 = (float *)(**(code **)(*piVar4 + 200))(&uStack_3c);
+        local_40 = SQRT((pfVar7[1] - local_28) * (pfVar7[1] - local_28) +
+                        (*pfVar7 - local_2c) * (*pfVar7 - local_2c));
+        uStack_3c = 0;
+        uStack_38 = 0;
+        uStack_34 = 0;
+      }
+    }
+    else {
+      iVar9 = (**(code **)(*piVar4 + 200))(&uStack_3c);
+      local_40 = (float)((uint)(*(float *)(iVar9 + 8) - local_24) & DAT_112fcb10);
+      uStack_3c = 0;
+      uStack_38 = 0;
+      uStack_34 = 0;
+    }
+    local_18 = (int *)(float)local_1c;
+    local_12 = '\0';
+    cVar2 = FUN_103db9b0(7,&local_12);
+    if ((cVar2 != '\0') && (local_12 != '\0')) {
+      piVar4 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+      piVar4 = (int *)(**(code **)(*piVar4 + 0x68))();
+      iVar9 = *piVar4;
+      uVar3 = (**(code **)(**(int **)((int)local_20 + 0x54) + 0xc))();
+      piVar4 = (int *)(**(code **)(iVar9 + 0xc))(uVar3);
+      if ((piVar4 != (int *)0x0) &&
+         ((piVar4 = (int *)(**(code **)(*piVar4 + 800))(), piVar4 != (int *)0x0 &&
+          (iVar9 = (**(code **)(*piVar4 + 0xa8))(), iVar9 == 1)))) {
+        fVar12 = (float10)FUN_105f73f0();
+        local_20 = (float)fVar12;
+        if ((float10)_DAT_1130d5f0 < ABS(fVar12)) {
+          local_40 = local_40 / local_20;
+        }
+      }
+    }
+    local_40 = local_40 - (float)local_18;
+    if (local_40 < DAT_113c1280) {
+      pbVar10 = &DAT_113a33e4;
+      pbVar5 = (byte *)FUN_10a5ec80();
+      do {
+        bVar1 = *pbVar5;
+        bVar11 = bVar1 < *pbVar10;
+        if (bVar1 != *pbVar10) {
+LAB_105f6f22:
+          uVar6 = -(uint)bVar11 | 1;
+          goto LAB_105f6f27;
+        }
+        if (bVar1 == 0) break;
+        bVar1 = pbVar5[1];
+        bVar11 = bVar1 < pbVar10[1];
+        if (bVar1 != pbVar10[1]) goto LAB_105f6f22;
+        pbVar5 = pbVar5 + 2;
+        pbVar10 = pbVar10 + 2;
+      } while (bVar1 != 0);
+      uVar6 = 0;
+LAB_105f6f27:
+      if (uVar6 == 0) {
+        return 2;
+      }
+    }
+    if (local_40 == DAT_113c1280) {
+      pbVar10 = &DAT_113bed9c;
+      pbVar5 = (byte *)FUN_10a5ec80();
+      do {
+        bVar1 = *pbVar5;
+        bVar11 = bVar1 < *pbVar10;
+        if (bVar1 != *pbVar10) {
+LAB_105f6f80:
+          uVar6 = -(uint)bVar11 | 1;
+          goto LAB_105f6f85;
+        }
+        if (bVar1 == 0) break;
+        bVar1 = pbVar5[1];
+        bVar11 = bVar1 < pbVar10[1];
+        if (bVar1 != pbVar10[1]) goto LAB_105f6f80;
+        pbVar5 = pbVar5 + 2;
+        pbVar10 = pbVar10 + 2;
+      } while (bVar1 != 0);
+      uVar6 = 0;
+LAB_105f6f85:
+      if (uVar6 == 0) {
+        return 2;
+      }
+    }
+    if (DAT_113c1280 < local_40) {
+      pbVar10 = &DAT_113a3314;
+      pbVar5 = (byte *)FUN_10a5ec80();
+      do {
+        bVar1 = *pbVar5;
+        bVar11 = bVar1 < *pbVar10;
+        if (bVar1 != *pbVar10) {
+LAB_105f6fd0:
+          uVar6 = -(uint)bVar11 | 1;
+          goto LAB_105f6fd5;
+        }
+        if (bVar1 == 0) break;
+        bVar1 = pbVar5[1];
+        bVar11 = bVar1 < pbVar10[1];
+        if (bVar1 != pbVar10[1]) goto LAB_105f6fd0;
+        pbVar5 = pbVar5 + 2;
+        pbVar10 = pbVar10 + 2;
+      } while (bVar1 != 0);
+      uVar6 = 0;
+LAB_105f6fd5:
+      if (uVar6 == 0) {
+        return 2;
+      }
+    }
+  }
+  return 1;
+}
+
+
+-------- FUN_10b07dc0 @10b07dc0 (89 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10b07dc0(float *param_1,float param_2,undefined4 param_3)
+
+{
+  int iVar1;
+  float10 fVar2;
+  
+  iVar1 = (int)param_2;
+  if (param_2 == 9.80909e-45) {
+    fVar2 = (float10)FUN_105f73f0();
+  }
+  else {
+    fVar2 = (float10)FUN_101d15e0();
+  }
+  param_2 = *param_1 + (float)fVar2;
+  FUN_10b11280(&param_2,iVar1,param_3);
+  return;
+}
+
+
+-------- FUN_10b0b9b0 @10b0b9b0 (55 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 FUN_10b0b9b0(int param_1)
+
+{
+  float10 fVar1;
+  
+  if (param_1 == 7) {
+    fVar1 = (float10)FUN_105f73f0();
+    return (float10)(float)fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_10b0bd20 @10b0bd20 (43 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 FUN_10b0bd20(int param_1)
+
+{
+  float10 fVar1;
+  
+  if (param_1 == 7) {
+    fVar1 = (float10)FUN_105f73f0();
+    return fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_10b0d840 @10b0d840 (96 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10b0d840(int param_1)
+
+{
+  float10 fVar1;
+  undefined1 auStack_2c [16];
+  undefined1 *puStack_1c;
+  undefined1 *puStack_18;
+  undefined4 uStack_14;
+  undefined4 uStack_10;
+  
+  if (param_1 == 7) {
+    uStack_10 = 0x10b0d85a;
+    fVar1 = (float10)FUN_105f73f0();
+  }
+  else {
+    uStack_10 = 0x10b0d869;
+    fVar1 = (float10)FUN_101d15e0();
+  }
+  puStack_1c = auStack_2c;
+  auStack_2c[0] = 0;
+  uStack_14 = 2;
+  puStack_18 = puStack_1c;
+  FUN_10b0d510(0x58,param_1,(float)fVar1);
+  return;
+}
+
+
+-------- FUN_10b11280 @10b11280 (254 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10b11280(float *param_1,int param_2,char param_3)
+
+{
+  int iVar1;
+  float10 fVar2;
+  undefined1 auStack_68 [16];
+  undefined1 *puStack_58;
+  undefined1 *puStack_54;
+  int iStack_50;
+  undefined1 *puStack_4c;
+  float *pfStack_48;
+  int iStack_44;
+  float local_34;
+  float local_30;
+  undefined1 local_28 [16];
+  undefined1 *local_18;
+  undefined1 *local_14;
+  undefined4 local_10;
+  uint local_8;
+  
+  local_8 = DAT_113dd8c0 ^ (uint)&stack0xfffffffc;
+  local_18 = local_28;
+  local_28[0] = 0;
+  local_30 = *param_1;
+  local_10 = 2;
+  local_14 = local_18;
+  if (param_2 == 0) {
+    iStack_44 = 0x58;
+    pfStack_48 = (float *)0x10b112c6;
+    iVar1 = FUN_10baaf10();
+    pfStack_48 = (float *)(iVar1 + 0xf8);
+    puStack_4c = (undefined1 *)0x58;
+    iStack_50 = 0x10b112d6;
+    iStack_50 = FUN_10baaf10();
+    iStack_50 = iStack_50 + 0xd0;
+    puStack_54 = (undefined1 *)0x10b112e4;
+    FUN_10a895b0();
+  }
+  iStack_44 = param_2;
+  pfStack_48 = &local_34;
+  puStack_4c = (undefined1 *)0x10b11300;
+  local_34 = local_30;
+  FUN_10b11fe0();
+  if (param_3 == '\0') {
+    if (param_2 == 7) {
+      puStack_4c = (undefined1 *)0x10b11312;
+      fVar2 = (float10)FUN_105f73f0();
+    }
+    else {
+      puStack_4c = (undefined1 *)0x10b11323;
+      fVar2 = (float10)FUN_101d15e0();
+    }
+    local_34 = (float)fVar2;
+    puStack_58 = auStack_68;
+    auStack_68[0] = 0;
+    iStack_50 = 2;
+    puStack_54 = puStack_58;
+    FUN_10b0d510(0x58,param_2,local_34);
+  }
+  if ((local_14 != local_28) && (local_14 != (undefined1 *)0x0)) {
+    puStack_4c = local_14;
+    iStack_50 = 0x10b11368;
+    FUN_10653dc0();
+  }
+  FUN_112bed8e();
+  return;
+}
+
+
+================================ callers of 101d15e0
+  call at 101d12ba  in FUN_101d12b0
+  call at 101d1386  in FUN_101d1370
+  call at 101d1504  in FUN_101d1500
+  call at 101d1524  in FUN_101d1520
+  call at 105abdab  in FUN_105abd50
+  call at 105cc767  in FUN_105cc6c0
+  call at 105cc8d1  in FUN_105cc890
+  call at 105cc8de  in FUN_105cc890
+  call at 105cc8e9  in FUN_105cc890
+  call at 105cc8f4  in FUN_105cc890
+  call at 105cc8ff  in FUN_105cc890
+  call at 105cc90a  in FUN_105cc890
+  call at 105cc915  in FUN_105cc890
+  call at 105f7431  in FUN_105f73f0
+  call at 105f743e  in FUN_105f73f0
+  call at 105f7449  in FUN_105f73f0
+  call at 105f7454  in FUN_105f73f0
+  call at 105f745f  in FUN_105f73f0
+  call at 105f746a  in FUN_105f73f0
+  call at 105f7475  in FUN_105f73f0
+  call at 10a66104  in FUN_10a66100
+  call at 10a67241  in FUN_10a67200
+  call at 10a67254  in FUN_10a67200
+  call at 10a6725f  in FUN_10a67200
+  call at 10a6726a  in FUN_10a67200
+  call at 10a67275  in FUN_10a67200
+  call at 10a67280  in FUN_10a67200
+  call at 10a6728b  in FUN_10a67200
+  call at 10a6749a  in FUN_10a67490
+  call at 10a68104  in FUN_10a680b0
+  call at 10a75906  in FUN_10a75900
+  call at 10a7dda6  in FUN_10a7dda0
+  call at 10a7ddc6  in FUN_10a7ddc0
+  call at 10a7dde6  in FUN_10a7dde0
+  call at 10a7de06  in FUN_10a7de00
+  call at 10a7de26  in FUN_10a7de20
+  call at 10a7de46  in FUN_10a7de40
+  call at 10a7de66  in FUN_10a7de60
+  call at 10a7de86  in FUN_10a7de80
+  call at 10a7dea6  in FUN_10a7dea0
+  call at 10a7dec6  in FUN_10a7dec0
+  call at 10a8048a  in FUN_10a80480
+  call at 10a80497  in FUN_10a80480
+  call at 10a804ac  in FUN_10a80480
+  call at 10a804c1  in FUN_10a80480
+  call at 10a804d6  in FUN_10a80480
+  call at 10a804eb  in FUN_10a80480
+  call at 10a80500  in FUN_10a80480
+  call at 10a8052a  in FUN_10a80520
+  call at 10a80537  in FUN_10a80520
+  call at 10a8054c  in FUN_10a80520
+  call at 10a80561  in FUN_10a80520
+  call at 10a80576  in FUN_10a80520
+  call at 10a8058b  in FUN_10a80520
+  call at 10a805a0  in FUN_10a80520
+  call at 10a805ca  in FUN_10a805c0
+  call at 10a805d7  in FUN_10a805c0
+  call at 10a805ec  in FUN_10a805c0
+  call at 10a80601  in FUN_10a805c0
+  call at 10a80616  in FUN_10a805c0
+  call at 10a8062b  in FUN_10a805c0
+  call at 10a80640  in FUN_10a805c0
+  call at 10a8066a  in FUN_10a80660
+  call at 10a80677  in FUN_10a80660
+  call at 10a8068c  in FUN_10a80660
+  call at 10a806a1  in FUN_10a80660
+  call at 10a806b6  in FUN_10a80660
+  call at 10a806cb  in FUN_10a80660
+  call at 10a806e0  in FUN_10a80660
+  call at 10a8070a  in FUN_10a80700
+  call at 10a80717  in FUN_10a80700
+  call at 10a8072c  in FUN_10a80700
+  call at 10a80741  in FUN_10a80700
+  call at 10a80756  in FUN_10a80700
+  call at 10a8076b  in FUN_10a80700
+  call at 10a80780  in FUN_10a80700
+  call at 10a807aa  in FUN_10a807a0
+  call at 10a807b7  in FUN_10a807a0
+  call at 10a807cc  in FUN_10a807a0
+  call at 10a807e1  in FUN_10a807a0
+  call at 10a807f6  in FUN_10a807a0
+  call at 10a8080b  in FUN_10a807a0
+  call at 10a80820  in FUN_10a807a0
+  call at 10a8084a  in FUN_10a80840
+  call at 10a80857  in FUN_10a80840
+  call at 10a8086c  in FUN_10a80840
+  call at 10a80881  in FUN_10a80840
+  call at 10a80896  in FUN_10a80840
+  call at 10a808ab  in FUN_10a80840
+  call at 10a808c0  in FUN_10a80840
+  call at 10a808ea  in FUN_10a808e0
+  call at 10a808f7  in FUN_10a808e0
+  call at 10a8090c  in FUN_10a808e0
+  call at 10a80921  in FUN_10a808e0
+  call at 10a80936  in FUN_10a808e0
+  call at 10a8094b  in FUN_10a808e0
+  call at 10a80960  in FUN_10a808e0
+  call at 10a8098a  in FUN_10a80980
+  call at 10a80997  in FUN_10a80980
+  call at 10a809ac  in FUN_10a80980
+  call at 10a809c1  in FUN_10a80980
+  call at 10a809d6  in FUN_10a80980
+  call at 10a809eb  in FUN_10a80980
+  call at 10a80a00  in FUN_10a80980
+  call at 10a80a2a  in FUN_10a80a20
+  call at 10a80a37  in FUN_10a80a20
+  call at 10a80a4c  in FUN_10a80a20
+  call at 10a80a61  in FUN_10a80a20
+  call at 10a80a76  in FUN_10a80a20
+  call at 10a80a8b  in FUN_10a80a20
+  call at 10a80aa0  in FUN_10a80a20
+  call at 10a80aca  in FUN_10a80ac0
+  call at 10a80ad7  in FUN_10a80ac0
+  call at 10a80aec  in FUN_10a80ac0
+  call at 10a80b01  in FUN_10a80ac0
+  call at 10a80b16  in FUN_10a80ac0
+  call at 10a80b2b  in FUN_10a80ac0
+  call at 10a80b40  in FUN_10a80ac0
+  call at 10a80b6a  in FUN_10a80b60
+  call at 10a80b77  in FUN_10a80b60
+  call at 10a80b8c  in FUN_10a80b60
+  call at 10a80ba1  in FUN_10a80b60
+  call at 10a80bb6  in FUN_10a80b60
+  call at 10a80bcb  in FUN_10a80b60
+  call at 10a80be0  in FUN_10a80b60
+  call at 10a80c0a  in FUN_10a80c00
+  call at 10a80c17  in FUN_10a80c00
+  call at 10a80c2c  in FUN_10a80c00
+  call at 10a80c41  in FUN_10a80c00
+  call at 10a80c56  in FUN_10a80c00
+  call at 10a80c6b  in FUN_10a80c00
+  call at 10a80c80  in FUN_10a80c00
+  call at 10a80caa  in FUN_10a80ca0
+  call at 10a80cb7  in FUN_10a80ca0
+  call at 10a80ccc  in FUN_10a80ca0
+  call at 10a80ce1  in FUN_10a80ca0
+  call at 10a80cf6  in FUN_10a80ca0
+  call at 10a80d0b  in FUN_10a80ca0
+  call at 10a80d20  in FUN_10a80ca0
+  call at 10a80d4a  in FUN_10a80d40
+  call at 10a80d57  in FUN_10a80d40
+  call at 10a80d6c  in FUN_10a80d40
+  call at 10a80d81  in FUN_10a80d40
+  call at 10a80d96  in FUN_10a80d40
+  call at 10a80dab  in FUN_10a80d40
+  call at 10a80dc0  in FUN_10a80d40
+  call at 10a80dea  in FUN_10a80de0
+  call at 10a80df7  in FUN_10a80de0
+  call at 10a80e0c  in FUN_10a80de0
+  call at 10a80e21  in FUN_10a80de0
+  call at 10a80e36  in FUN_10a80de0
+  call at 10a80e4b  in FUN_10a80de0
+  call at 10a80e60  in FUN_10a80de0
+  call at 10a80e8a  in FUN_10a80e80
+  call at 10a80e97  in FUN_10a80e80
+  call at 10a80eac  in FUN_10a80e80
+  call at 10a80ec1  in FUN_10a80e80
+  call at 10a80ed6  in FUN_10a80e80
+  call at 10a80eeb  in FUN_10a80e80
+  call at 10a80f00  in FUN_10a80e80
+  call at 10a80f2a  in FUN_10a80f20
+  call at 10a80f37  in FUN_10a80f20
+  call at 10a80f4c  in FUN_10a80f20
+  call at 10a80f61  in FUN_10a80f20
+  call at 10a80f76  in FUN_10a80f20
+  call at 10a80f8b  in FUN_10a80f20
+  call at 10a80fa0  in FUN_10a80f20
+  call at 10a80fca  in FUN_10a80fc0
+  call at 10a80fd7  in FUN_10a80fc0
+  call at 10a80fec  in FUN_10a80fc0
+  call at 10a81001  in FUN_10a80fc0
+  call at 10a81016  in FUN_10a80fc0
+  call at 10a8102b  in FUN_10a80fc0
+  call at 10a81040  in FUN_10a80fc0
+  call at 10a8c485  in FUN_10a8b950
+  call at 10a8e1d8  in FUN_10a8e040
+  call at 10a8ee60  in FUN_10a8e040
+  call at 10a8ee7b  in FUN_10a8e040
+  call at 10a8f360  in FUN_10a8e040
+  call at 10a93744  in FUN_10a93720
+  call at 10a93a39  in FUN_10a93a20
+  call at 10a93b14  in FUN_10a93af0
+  call at 10a93b69  in FUN_10a93b50
+  call at 10a93c39  in FUN_10a93c20
+  call at 10a93d09  in FUN_10a93cf0
+  call at 10a93dd9  in FUN_10a93dc0
+  call at 10a94e74  in FUN_10a94e50
+  call at 10a95094  in FUN_10a95070
+  call at 10a953bd  in FUN_10a953b0
+  call at 10a95424  in FUN_10a95400
+  call at 10a954e4  in FUN_10a954c0
+  call at 10a95b04  in FUN_10a95ae0
+  call at 10a95b64  in FUN_10a95b40
+  call at 10a95c04  in FUN_10a95be0
+  call at 10a95c64  in FUN_10a95c40
+  call at 10a97104  in FUN_10a970e0
+  call at 10a971a4  in FUN_10a97180
+  call at 10a97424  in FUN_10a97400
+  call at 10a97484  in FUN_10a97460
+  call at 10a97544  in FUN_10a97520
+  call at 10a9758d  in FUN_10a97580
+  call at 10a97f9d  in FUN_10a97f90
+  call at 10a99204  in FUN_10a991e0
+  call at 10a99564  in FUN_10a99540
+  call at 10a995c4  in FUN_10a995a0
+  call at 10a99e6d  in FUN_10a99e60
+  call at 10a9a654  in FUN_10a9a630
+  call at 10a9b2e9  in FUN_10a9b2d0
+  call at 10a9ccc4  in FUN_10a9ccc0
+  call at 10a9cce4  in FUN_10a9cce0
+  call at 10a9cd04  in FUN_10a9cd00
+  call at 10a9cd24  in FUN_10a9cd20
+  call at 10a9cd44  in FUN_10a9cd40
+  call at 10a9cd64  in FUN_10a9cd60
+  call at 10a9cd84  in FUN_10a9cd80
+  call at 10a9cda4  in FUN_10a9cda0
+  call at 10a9cdc4  in FUN_10a9cdc0
+  call at 10aa2e11  in FUN_10aa2dd0
+  call at 10aa2e24  in FUN_10aa2dd0
+  call at 10aa2e2f  in FUN_10aa2dd0
+  call at 10aa2e3a  in FUN_10aa2dd0
+  call at 10aa2e45  in FUN_10aa2dd0
+  call at 10aa2e50  in FUN_10aa2dd0
+  call at 10aa2e5b  in FUN_10aa2dd0
+  call at 10aa2f01  in FUN_10aa2ec0
+  call at 10aa2f14  in FUN_10aa2ec0
+  call at 10aa2f1f  in FUN_10aa2ec0
+  call at 10aa2f2a  in FUN_10aa2ec0
+  call at 10aa2f35  in FUN_10aa2ec0
+  call at 10aa2f40  in FUN_10aa2ec0
+  call at 10aa2f4b  in FUN_10aa2ec0
+  call at 10aa2ff1  in FUN_10aa2fb0
+  call at 10aa3004  in FUN_10aa2fb0
+  call at 10aa300f  in FUN_10aa2fb0
+  call at 10aa301a  in FUN_10aa2fb0
+  call at 10aa3025  in FUN_10aa2fb0
+  call at 10aa3030  in FUN_10aa2fb0
+  call at 10aa303b  in FUN_10aa2fb0
+  call at 10aa30e1  in FUN_10aa30a0
+  call at 10aa30f4  in FUN_10aa30a0
+  call at 10aa30ff  in FUN_10aa30a0
+  call at 10aa310a  in FUN_10aa30a0
+  call at 10aa3115  in FUN_10aa30a0
+  call at 10aa3120  in FUN_10aa30a0
+  call at 10aa312b  in FUN_10aa30a0
+  call at 10aa31d1  in FUN_10aa3190
+  call at 10aa31e4  in FUN_10aa3190
+  call at 10aa31ef  in FUN_10aa3190
+  call at 10aa31fa  in FUN_10aa3190
+  call at 10aa3205  in FUN_10aa3190
+  call at 10aa3210  in FUN_10aa3190
+  call at 10aa321b  in FUN_10aa3190
+  call at 10aa32c1  in FUN_10aa3280
+  call at 10aa32d4  in FUN_10aa3280
+  call at 10aa32df  in FUN_10aa3280
+  call at 10aa32ea  in FUN_10aa3280
+  call at 10aa32f5  in FUN_10aa3280
+  call at 10aa3300  in FUN_10aa3280
+  call at 10aa330b  in FUN_10aa3280
+  call at 10aa33b1  in FUN_10aa3370
+  call at 10aa33c4  in FUN_10aa3370
+  call at 10aa33cf  in FUN_10aa3370
+  call at 10aa33da  in FUN_10aa3370
+  call at 10aa33e5  in FUN_10aa3370
+  call at 10aa33f0  in FUN_10aa3370
+  call at 10aa33fb  in FUN_10aa3370
+  call at 10aa34a1  in FUN_10aa3460
+  call at 10aa34b4  in FUN_10aa3460
+  call at 10aa34bf  in FUN_10aa3460
+  call at 10aa34ca  in FUN_10aa3460
+  call at 10aa34d5  in FUN_10aa3460
+  call at 10aa34e0  in FUN_10aa3460
+  call at 10aa34eb  in FUN_10aa3460
+  call at 10aa3591  in FUN_10aa3550
+  call at 10aa35a4  in FUN_10aa3550
+  call at 10aa35af  in FUN_10aa3550
+  call at 10aa35ba  in FUN_10aa3550
+  call at 10aa35c5  in FUN_10aa3550
+  call at 10aa35d0  in FUN_10aa3550
+  call at 10aa35db  in FUN_10aa3550
+  call at 10aa3681  in FUN_10aa3640
+  call at 10aa3694  in FUN_10aa3640
+  call at 10aa369f  in FUN_10aa3640
+  call at 10aa36aa  in FUN_10aa3640
+  call at 10aa36b5  in FUN_10aa3640
+  call at 10aa36c0  in FUN_10aa3640
+  call at 10aa36cb  in FUN_10aa3640
+  call at 10aa3771  in FUN_10aa3730
+  call at 10aa3784  in FUN_10aa3730
+  call at 10aa378f  in FUN_10aa3730
+  call at 10aa379a  in FUN_10aa3730
+  call at 10aa37a5  in FUN_10aa3730
+  call at 10aa37b0  in FUN_10aa3730
+  call at 10aa37bb  in FUN_10aa3730
+  call at 10aa3861  in FUN_10aa3820
+  call at 10aa3874  in FUN_10aa3820
+  call at 10aa387f  in FUN_10aa3820
+  call at 10aa388a  in FUN_10aa3820
+  call at 10aa3895  in FUN_10aa3820
+  call at 10aa38a0  in FUN_10aa3820
+  call at 10aa38ab  in FUN_10aa3820
+  call at 10aa3951  in FUN_10aa3910
+  call at 10aa3964  in FUN_10aa3910
+  call at 10aa396f  in FUN_10aa3910
+  call at 10aa397a  in FUN_10aa3910
+  call at 10aa3985  in FUN_10aa3910
+  call at 10aa3990  in FUN_10aa3910
+  call at 10aa399b  in FUN_10aa3910
+  call at 10aa3a41  in FUN_10aa3a00
+  call at 10aa3a54  in FUN_10aa3a00
+  call at 10aa3a5f  in FUN_10aa3a00
+  call at 10aa3a6a  in FUN_10aa3a00
+  call at 10aa3a75  in FUN_10aa3a00
+  call at 10aa3a80  in FUN_10aa3a00
+  call at 10aa3a8b  in FUN_10aa3a00
+  call at 10aa3b31  in FUN_10aa3af0
+  call at 10aa3b44  in FUN_10aa3af0
+  call at 10aa3b4f  in FUN_10aa3af0
+  call at 10aa3b5a  in FUN_10aa3af0
+  call at 10aa3b65  in FUN_10aa3af0
+  call at 10aa3b70  in FUN_10aa3af0
+  call at 10aa3b7b  in FUN_10aa3af0
+  call at 10aa3c21  in FUN_10aa3be0
+  call at 10aa3c34  in FUN_10aa3be0
+  call at 10aa3c3f  in FUN_10aa3be0
+  call at 10aa3c4a  in FUN_10aa3be0
+  call at 10aa3c55  in FUN_10aa3be0
+  call at 10aa3c60  in FUN_10aa3be0
+  call at 10aa3c6b  in FUN_10aa3be0
+  call at 10aa3d11  in FUN_10aa3cd0
+  call at 10aa3d24  in FUN_10aa3cd0
+  call at 10aa3d2f  in FUN_10aa3cd0
+  call at 10aa3d3a  in FUN_10aa3cd0
+  call at 10aa3d45  in FUN_10aa3cd0
+  call at 10aa3d50  in FUN_10aa3cd0
+  call at 10aa3d5b  in FUN_10aa3cd0
+  call at 10aa3e01  in FUN_10aa3dc0
+  call at 10aa3e14  in FUN_10aa3dc0
+  call at 10aa3e1f  in FUN_10aa3dc0
+  call at 10aa3e2a  in FUN_10aa3dc0
+  call at 10aa3e35  in FUN_10aa3dc0
+  call at 10aa3e40  in FUN_10aa3dc0
+  call at 10aa3e4b  in FUN_10aa3dc0
+  call at 10aa3ef1  in FUN_10aa3eb0
+  call at 10aa3f04  in FUN_10aa3eb0
+  call at 10aa3f0f  in FUN_10aa3eb0
+  call at 10aa3f1a  in FUN_10aa3eb0
+  call at 10aa3f25  in FUN_10aa3eb0
+  call at 10aa3f30  in FUN_10aa3eb0
+  call at 10aa3f3b  in FUN_10aa3eb0
+  call at 10aa47a2  in FUN_10aa4780
+  call at 10aa5e5c  in FUN_10aa5e40
+  call at 10aa5e8c  in FUN_10aa5e70
+  call at 10aa5ebc  in FUN_10aa5ea0
+  call at 10aa5eec  in FUN_10aa5ed0
+  call at 10aa5f1c  in FUN_10aa5f00
+  call at 10aa5f4c  in FUN_10aa5f30
+  call at 10aa5f7c  in FUN_10aa5f60
+  call at 10aa5fac  in FUN_10aa5f90
+  call at 10aa5fdc  in FUN_10aa5fc0
+  call at 10aa600c  in FUN_10aa5ff0
+  call at 10aa603c  in FUN_10aa6020
+  call at 10aa606c  in FUN_10aa6050
+  call at 10aa609c  in FUN_10aa6080
+  call at 10aa60cc  in FUN_10aa60b0
+  call at 10aa60fc  in FUN_10aa60e0
+  call at 10aa612c  in FUN_10aa6110
+  call at 10aa615c  in FUN_10aa6140
+  call at 10aa618c  in FUN_10aa6170
+  call at 10aa61bc  in FUN_10aa61a0
+  call at 10aa62ba  in FUN_10aa62b0
+  call at 10aa62da  in FUN_10aa62d0
+  call at 10aa63b2  in FUN_10aa6390
+  call at 10aa63da  in FUN_10aa63d0
+  call at 10aa63fa  in FUN_10aa63f0
+  call at 10aa641a  in FUN_10aa6410
+  call at 10aa643a  in FUN_10aa6430
+  call at 10aa645a  in FUN_10aa6450
+  call at 10aa647a  in FUN_10aa6470
+  call at 10aa649a  in FUN_10aa6490
+  call at 10aa64ba  in FUN_10aa64b0
+  call at 10aa76e2  in FUN_10aa76c0
+  call at 10aa78e2  in FUN_10aa78c0
+  call at 10aa7ce2  in FUN_10aa7cc0
+  call at 10aa7dea  in FUN_10aa7de0
+  call at 10aa7ec2  in FUN_10aa7ea0
+  call at 10aa8622  in FUN_10aa8600
+  call at 10aa8702  in FUN_10aa86e0
+  call at 10aa8a02  in FUN_10aa89e0
+  call at 10aa8ae2  in FUN_10aa8ac0
+  call at 10aaa902  in FUN_10aaa8e0
+  call at 10aaaa02  in FUN_10aaa9e0
+  call at 10aaae42  in FUN_10aaae20
+  call at 10aab022  in FUN_10aab000
+  call at 10aab102  in FUN_10aab0e0
+  call at 10aab14a  in FUN_10aab140
+  call at 10aab16a  in FUN_10aab160
+  call at 10aac1da  in FUN_10aac1d0
+  call at 10aac1fa  in FUN_10aac1f0
+  call at 10aadc12  in FUN_10aadbf0
+  call at 10aae012  in FUN_10aadff0
+  call at 10aae112  in FUN_10aae0f0
+  call at 10aaf01a  in FUN_10aaf010
+  call at 10aaf03a  in FUN_10aaf030
+  call at 10aafb12  in FUN_10aafaf0
+  call at 10ab00ba  in FUN_10ab00b0
+  call at 10ab00da  in FUN_10ab00d0
+  call at 10ab4567  in FUN_10ab4540
+  call at 10ab491f  in FUN_10ab4910
+  call at 10ab49c7  in FUN_10ab49a0
+  call at 10ab4a5f  in FUN_10ab4a50
+  call at 10ab4aef  in FUN_10ab4ae0
+  call at 10ab4b7f  in FUN_10ab4b70
+  call at 10ab4c0f  in FUN_10ab4c00
+  call at 10ab6137  in FUN_10ab6110
+  call at 10ab6447  in FUN_10ab6420
+  call at 10ab692f  in FUN_10ab6920
+  call at 10ab69d7  in FUN_10ab69b0
+  call at 10ab6b17  in FUN_10ab6af0
+  call at 10ab74a7  in FUN_10ab7480
+  call at 10ab7557  in FUN_10ab7530
+  call at 10ab77e7  in FUN_10ab77c0
+  call at 10ab7897  in FUN_10ab7870
+  call at 10abb017  in FUN_10abaff0
+  call at 10abb147  in FUN_10abb120
+  call at 10abb517  in FUN_10abb4f0
+  call at 10abb5c7  in FUN_10abb5a0
+  call at 10abb717  in FUN_10abb6f0
+  call at 10abb7af  in FUN_10abb7a0
+  call at 10abc9cf  in FUN_10abc9c0
+  call at 10abe607  in FUN_10abe5e0
+  call at 10abeb77  in FUN_10abeb50
+  call at 10abec27  in FUN_10abec00
+  call at 10abfb2f  in FUN_10abfb20
+  call at 10ac07d7  in FUN_10ac07b0
+  call at 10ac167f  in FUN_10ac1670
+  call at 10afa581  in FUN_10afa570
+  call at 10afa5a0  in FUN_10afa570
+  call at 10afec47  in FUN_10afec40
+  call at 10affbe3  in FUN_10affbd0
+  call at 10affc09  in FUN_10affbd0
+  call at 10affc19  in FUN_10affbd0
+  call at 10affc43  in FUN_10affc30
+  call at 10affc69  in FUN_10affc30
+  call at 10affc79  in FUN_10affc30
+  call at 10affca3  in FUN_10affc90
+  call at 10affcc9  in FUN_10affc90
+  call at 10affcd9  in FUN_10affc90
+  call at 10affd03  in FUN_10affcf0
+  call at 10affd29  in FUN_10affcf0
+  call at 10affd39  in FUN_10affcf0
+  call at 10affd63  in FUN_10affd50
+  call at 10affd89  in FUN_10affd50
+  call at 10affd99  in FUN_10affd50
+  call at 10affdc3  in FUN_10affdb0
+  call at 10affde9  in FUN_10affdb0
+  call at 10affdf9  in FUN_10affdb0
+  call at 10affe23  in FUN_10affe10
+  call at 10affe49  in FUN_10affe10
+  call at 10affe59  in FUN_10affe10
+  call at 10affe83  in FUN_10affe70
+  call at 10affea9  in FUN_10affe70
+  call at 10affeb9  in FUN_10affe70
+  call at 10b00931  in FUN_10b008f0
+  call at 10b00944  in FUN_10b008f0
+  call at 10b0094f  in FUN_10b008f0
+  call at 10b0095a  in FUN_10b008f0
+  call at 10b00965  in FUN_10b008f0
+  call at 10b00970  in FUN_10b008f0
+  call at 10b0097b  in FUN_10b008f0
+  call at 10b00a21  in FUN_10b009e0
+  call at 10b00a34  in FUN_10b009e0
+  call at 10b00a3f  in FUN_10b009e0
+  call at 10b00a4a  in FUN_10b009e0
+  call at 10b00a55  in FUN_10b009e0
+  call at 10b00a60  in FUN_10b009e0
+  call at 10b00a6b  in FUN_10b009e0
+  call at 10b00b11  in FUN_10b00ad0
+  call at 10b00b24  in FUN_10b00ad0
+  call at 10b00b2f  in FUN_10b00ad0
+  call at 10b00b3a  in FUN_10b00ad0
+  call at 10b00b45  in FUN_10b00ad0
+  call at 10b00b50  in FUN_10b00ad0
+  call at 10b00b5b  in FUN_10b00ad0
+  call at 10b00c01  in FUN_10b00bc0
+  call at 10b00c14  in FUN_10b00bc0
+  call at 10b00c1f  in FUN_10b00bc0
+  call at 10b00c2a  in FUN_10b00bc0
+  call at 10b00c35  in FUN_10b00bc0
+  call at 10b00c40  in FUN_10b00bc0
+  call at 10b00c4b  in FUN_10b00bc0
+  call at 10b00cf1  in FUN_10b00cb0
+  call at 10b00d04  in FUN_10b00cb0
+  call at 10b00d0f  in FUN_10b00cb0
+  call at 10b00d1a  in FUN_10b00cb0
+  call at 10b00d25  in FUN_10b00cb0
+  call at 10b00d30  in FUN_10b00cb0
+  call at 10b00d3b  in FUN_10b00cb0
+  call at 10b00de1  in FUN_10b00da0
+  call at 10b00df4  in FUN_10b00da0
+  call at 10b00dff  in FUN_10b00da0
+  call at 10b00e0a  in FUN_10b00da0
+  call at 10b00e15  in FUN_10b00da0
+  call at 10b00e20  in FUN_10b00da0
+  call at 10b00e2b  in FUN_10b00da0
+  call at 10b00ed1  in FUN_10b00e90
+  call at 10b00ee4  in FUN_10b00e90
+  call at 10b00eef  in FUN_10b00e90
+  call at 10b00efa  in FUN_10b00e90
+  call at 10b00f05  in FUN_10b00e90
+  call at 10b00f10  in FUN_10b00e90
+  call at 10b00f1b  in FUN_10b00e90
+  call at 10b00fc1  in FUN_10b00f80
+  call at 10b00fd4  in FUN_10b00f80
+  call at 10b00fdf  in FUN_10b00f80
+  call at 10b00fea  in FUN_10b00f80
+  call at 10b00ff5  in FUN_10b00f80
+  call at 10b01000  in FUN_10b00f80
+  call at 10b0100b  in FUN_10b00f80
+  call at 10b07b8d  in FUN_10b07b80
+  call at 10b07d34  in FUN_10b07d10
+  call at 10b07de4  in FUN_10b07dc0
+  call at 10b07f04  in FUN_10b07ee0
+  call at 10b07f8d  in FUN_10b07f80
+  call at 10b07ff4  in FUN_10b07fd0
+  call at 10b085b4  in FUN_10b08590
+  call at 10b08614  in FUN_10b085f0
+  call at 10b08a3d  in FUN_10b08a30
+  call at 10b08aa4  in FUN_10b08a80
+  call at 10b08b04  in FUN_10b08ae0
+  call at 10b08b64  in FUN_10b08b40
+  call at 10b08bc4  in FUN_10b08ba0
+  call at 10b08cd4  in FUN_10b08cb0
+  call at 10b08d34  in FUN_10b08d10
+  call at 10b08fbd  in FUN_10b08fb0
+  call at 10b0949d  in FUN_10b09490
+  call at 10b0980d  in FUN_10b09800
+  call at 10b09874  in FUN_10b09850
+  call at 10b098bd  in FUN_10b098b0
+  call at 10b099c4  in FUN_10b099a0
+  call at 10b09a24  in FUN_10b09a00
+  call at 10b09a84  in FUN_10b09a60
+  call at 10b09b84  in FUN_10b09b60
+  call at 10b0a514  in FUN_10b0a510
+  call at 10b0a534  in FUN_10b0a530
+  call at 10b0a554  in FUN_10b0a550
+  call at 10b0a574  in FUN_10b0a570
+  call at 10b0a9b1  in FUN_10b0a970
+  call at 10b0a9c4  in FUN_10b0a970
+  call at 10b0a9cf  in FUN_10b0a970
+  call at 10b0a9da  in FUN_10b0a970
+  call at 10b0a9e5  in FUN_10b0a970
+  call at 10b0a9f0  in FUN_10b0a970
+  call at 10b0a9fb  in FUN_10b0a970
+  call at 10b0aaa1  in FUN_10b0aa60
+  call at 10b0aab4  in FUN_10b0aa60
+  call at 10b0aabf  in FUN_10b0aa60
+  call at 10b0aaca  in FUN_10b0aa60
+  call at 10b0aad5  in FUN_10b0aa60
+  call at 10b0aae0  in FUN_10b0aa60
+  call at 10b0aaeb  in FUN_10b0aa60
+  call at 10b0ab91  in FUN_10b0ab50
+  call at 10b0aba4  in FUN_10b0ab50
+  call at 10b0abaf  in FUN_10b0ab50
+  call at 10b0abba  in FUN_10b0ab50
+  call at 10b0abc5  in FUN_10b0ab50
+  call at 10b0abd0  in FUN_10b0ab50
+  call at 10b0abdb  in FUN_10b0ab50
+  call at 10b0ac81  in FUN_10b0ac40
+  call at 10b0ac94  in FUN_10b0ac40
+  call at 10b0ac9f  in FUN_10b0ac40
+  call at 10b0acaa  in FUN_10b0ac40
+  call at 10b0acb5  in FUN_10b0ac40
+  call at 10b0acc0  in FUN_10b0ac40
+  call at 10b0accb  in FUN_10b0ac40
+  call at 10b0ad71  in FUN_10b0ad30
+  call at 10b0ad84  in FUN_10b0ad30
+  call at 10b0ad8f  in FUN_10b0ad30
+  call at 10b0ad9a  in FUN_10b0ad30
+  call at 10b0ada5  in FUN_10b0ad30
+  call at 10b0adb0  in FUN_10b0ad30
+  call at 10b0adbb  in FUN_10b0ad30
+  call at 10b0ae61  in FUN_10b0ae20
+  call at 10b0ae74  in FUN_10b0ae20
+  call at 10b0ae7f  in FUN_10b0ae20
+  call at 10b0ae8a  in FUN_10b0ae20
+  call at 10b0ae95  in FUN_10b0ae20
+  call at 10b0aea0  in FUN_10b0ae20
+  call at 10b0aeab  in FUN_10b0ae20
+  call at 10b0af51  in FUN_10b0af10
+  call at 10b0af64  in FUN_10b0af10
+  call at 10b0af6f  in FUN_10b0af10
+  call at 10b0af7a  in FUN_10b0af10
+  call at 10b0af85  in FUN_10b0af10
+  call at 10b0af90  in FUN_10b0af10
+  call at 10b0af9b  in FUN_10b0af10
+  call at 10b0b041  in FUN_10b0b000
+  call at 10b0b054  in FUN_10b0b000
+  call at 10b0b05f  in FUN_10b0b000
+  call at 10b0b06a  in FUN_10b0b000
+  call at 10b0b075  in FUN_10b0b000
+  call at 10b0b080  in FUN_10b0b000
+  call at 10b0b08b  in FUN_10b0b000
+  call at 10b0b131  in FUN_10b0b0f0
+  call at 10b0b144  in FUN_10b0b0f0
+  call at 10b0b14f  in FUN_10b0b0f0
+  call at 10b0b15a  in FUN_10b0b0f0
+  call at 10b0b165  in FUN_10b0b0f0
+  call at 10b0b170  in FUN_10b0b0f0
+  call at 10b0b17b  in FUN_10b0b0f0
+  call at 10b0b221  in FUN_10b0b1e0
+  call at 10b0b234  in FUN_10b0b1e0
+  call at 10b0b23f  in FUN_10b0b1e0
+  call at 10b0b24a  in FUN_10b0b1e0
+  call at 10b0b255  in FUN_10b0b1e0
+  call at 10b0b260  in FUN_10b0b1e0
+  call at 10b0b26b  in FUN_10b0b1e0
+  call at 10b0b311  in FUN_10b0b2d0
+  call at 10b0b324  in FUN_10b0b2d0
+  call at 10b0b32f  in FUN_10b0b2d0
+  call at 10b0b33a  in FUN_10b0b2d0
+  call at 10b0b345  in FUN_10b0b2d0
+  call at 10b0b350  in FUN_10b0b2d0
+  call at 10b0b35b  in FUN_10b0b2d0
+  call at 10b0b401  in FUN_10b0b3c0
+  call at 10b0b414  in FUN_10b0b3c0
+  call at 10b0b41f  in FUN_10b0b3c0
+  call at 10b0b42a  in FUN_10b0b3c0
+  call at 10b0b435  in FUN_10b0b3c0
+  call at 10b0b440  in FUN_10b0b3c0
+  call at 10b0b44b  in FUN_10b0b3c0
+  call at 10b0b4f1  in FUN_10b0b4b0
+  call at 10b0b504  in FUN_10b0b4b0
+  call at 10b0b50f  in FUN_10b0b4b0
+  call at 10b0b51a  in FUN_10b0b4b0
+  call at 10b0b525  in FUN_10b0b4b0
+  call at 10b0b530  in FUN_10b0b4b0
+  call at 10b0b53b  in FUN_10b0b4b0
+  call at 10b0b5e1  in FUN_10b0b5a0
+  call at 10b0b5f4  in FUN_10b0b5a0
+  call at 10b0b5ff  in FUN_10b0b5a0
+  call at 10b0b60a  in FUN_10b0b5a0
+  call at 10b0b615  in FUN_10b0b5a0
+  call at 10b0b620  in FUN_10b0b5a0
+  call at 10b0b62b  in FUN_10b0b5a0
+  call at 10b0b6ba  in FUN_10b0b6b0
+  call at 10b0b778  in FUN_10b0b750
+  call at 10b0b9d8  in FUN_10b0b9b0
+  call at 10b0bcdc  in FUN_10b0bcc0
+  call at 10b0bd0c  in FUN_10b0bcf0
+  call at 10b0bd3c  in FUN_10b0bd20
+  call at 10b0bd6c  in FUN_10b0bd50
+  call at 10b0bd9c  in FUN_10b0bd80
+  call at 10b0bdcc  in FUN_10b0bdb0
+  call at 10b0bdfc  in FUN_10b0bde0
+  call at 10b0be2c  in FUN_10b0be10
+  call at 10b0be5c  in FUN_10b0be40
+  call at 10b0be8c  in FUN_10b0be70
+  call at 10b0bebc  in FUN_10b0bea0
+  call at 10b0beec  in FUN_10b0bed0
+  call at 10b0bf1c  in FUN_10b0bf00
+  call at 10b0bf4c  in FUN_10b0bf30
+  call at 10b0bf7c  in FUN_10b0bf60
+  call at 10b0bfac  in FUN_10b0bf90
+  call at 10b0bfdc  in FUN_10b0bfc0
+  call at 10b0c0b8  in FUN_10b0c090
+  call at 10b0c1ba  in FUN_10b0c1b0
+  call at 10b0c1da  in FUN_10b0c1d0
+  call at 10b0c218  in FUN_10b0c1f0
+  call at 10b0c4e8  in FUN_10b0c4c0
+  call at 10b0c528  in FUN_10b0c500
+  call at 10b0c6ea  in FUN_10b0c6e0
+  call at 10b0c728  in FUN_10b0c700
+  call at 10b0c768  in FUN_10b0c740
+  call at 10b0c7a8  in FUN_10b0c780
+  call at 10b0c7e8  in FUN_10b0c7c0
+  call at 10b0c888  in FUN_10b0c860
+  call at 10b0c8c8  in FUN_10b0c8a0
+  call at 10b0ca0a  in FUN_10b0ca00
+  call at 10b0ca2a  in FUN_10b0ca20
+  call at 10b0cc4a  in FUN_10b0cc40
+  call at 10b0cc6a  in FUN_10b0cc60
+  call at 10b0cdfa  in FUN_10b0cdf0
+  call at 10b0ce38  in FUN_10b0ce10
+  call at 10b0ce5a  in FUN_10b0ce50
+  call at 10b0ce7a  in FUN_10b0ce70
+  call at 10b0cf08  in FUN_10b0cee0
+  call at 10b0cf48  in FUN_10b0cf20
+  call at 10b0cf88  in FUN_10b0cf60
+  call at 10b0d018  in FUN_10b0cff0
+  call at 10b0d65d  in FUN_10b0d650
+  call at 10b0d804  in FUN_10b0d7e0
+  call at 10b0d864  in FUN_10b0d840
+  call at 10b0da04  in FUN_10b0d9e0
+  call at 10b0db3d  in FUN_10b0db30
+  call at 10b0dba4  in FUN_10b0db80
+  call at 10b0e164  in FUN_10b0e140
+  call at 10b0e1c4  in FUN_10b0e1a0
+  call at 10b0e5ed  in FUN_10b0e5e0
+  call at 10b0e654  in FUN_10b0e630
+  call at 10b0e6b4  in FUN_10b0e690
+  call at 10b0e714  in FUN_10b0e6f0
+  call at 10b0e774  in FUN_10b0e750
+  call at 10b0e894  in FUN_10b0e870
+  call at 10b0e8f4  in FUN_10b0e8d0
+  call at 10b0eb7d  in FUN_10b0eb70
+  call at 10b0f06d  in FUN_10b0f060
+  call at 10b0f3dd  in FUN_10b0f3d0
+  call at 10b0f444  in FUN_10b0f420
+  call at 10b0f48d  in FUN_10b0f480
+  call at 10b0f594  in FUN_10b0f570
+  call at 10b0f5f4  in FUN_10b0f5d0
+  call at 10b0f654  in FUN_10b0f630
+  call at 10b0f754  in FUN_10b0f730
+  call at 10b10d2b  in FUN_10b10ca0
+  call at 10b111ce  in FUN_10b11130
+  call at 10b1131e  in FUN_10b11280
+  call at 10b12e1e  in FUN_10b12d80
+  call at 10b130cb  in FUN_10b13040
+  call at 10b131ce  in FUN_10b13130
+  call at 10b1425e  in FUN_10b141c0
+  call at 10b1435e  in FUN_10b142c0
+  call at 10b1517b  in FUN_10b150f0
+  call at 10b1527e  in FUN_10b151e0
+  call at 10b1537e  in FUN_10b152e0
+  call at 10b1547e  in FUN_10b153e0
+  call at 10b1557e  in FUN_10b154e0
+  call at 10b1585e  in FUN_10b157c0
+  call at 10b1595e  in FUN_10b158c0
+  call at 10b1622b  in FUN_10b161a0
+  call at 10b170ab  in FUN_10b17020
+  call at 10b17aab  in FUN_10b17a20
+  call at 10b17bae  in FUN_10b17b10
+  call at 10b17c9b  in FUN_10b17c10
+  call at 10b17f6e  in FUN_10b17ed0
+  call at 10b1806e  in FUN_10b17fd0
+  call at 10b1816e  in FUN_10b180d0
+  call at 10b1843e  in FUN_10b183a0
+  call at 10b2f7c5  in FUN_10b2f7a0
+  call at 10b2f7d8  in FUN_10b2f7a0
+  call at 10b2f7eb  in FUN_10b2f7a0
+  call at 10b2f7fe  in FUN_10b2f7a0
+  call at 10b2f811  in FUN_10b2f7a0
+  call at 10b2f824  in FUN_10b2f7a0
+  call at 10b2f837  in FUN_10b2f7a0
+  call at 10b2fbf2  in FUN_10b2fbd0
+  call at 10b31031  in FUN_10b30d70
+  call at 10b327a0  in FUN_10b32740
+  call at 10b32990  in FUN_10b32960
+  call at 10b329d4  in FUN_10b32960
+  call at 10b54649  in FUN_10b54630
+  call at 10b54724  in FUN_10b54700
+  call at 10b555c4  in FUN_10b555a0
+  call at 10b559e4  in FUN_10b559c0
+  call at 10b56424  in FUN_10b56400
+  call at 10b56a24  in FUN_10b56a00
+  call at 10b56a84  in FUN_10b56a60
+  call at 10b57004  in FUN_10b56fe0
+  call at 10b57064  in FUN_10b57040
+  call at 10b570c4  in FUN_10b570a0
+  call at 10b57124  in FUN_10b57100
+  call at 10b57184  in FUN_10b57160
+  call at 10b571e4  in FUN_10b571c0
+  call at 10b57244  in FUN_10b57220
+  call at 10b572a4  in FUN_10b57280
+  call at 10b57304  in FUN_10b572e0
+  call at 10b57364  in FUN_10b57340
+  call at 10b573c4  in FUN_10b573a0
+  call at 10b57424  in FUN_10b57400
+  call at 10b57484  in FUN_10b57460
+  call at 10b574e4  in FUN_10b574c0
+  call at 10b57544  in FUN_10b57520
+  call at 10b575a4  in FUN_10b57580
+  call at 10b57604  in FUN_10b575e0
+  call at 10b57664  in FUN_10b57640
+  call at 10b576c4  in FUN_10b576a0
+  call at 10b57724  in FUN_10b57700
+  call at 10b57784  in FUN_10b57760
+  call at 10b577e4  in FUN_10b577c0
+  call at 10b57844  in FUN_10b57820
+  call at 10b578a4  in FUN_10b57880
+  call at 10b57904  in FUN_10b578e0
+  call at 10b57964  in FUN_10b57940
+  call at 10b579c4  in FUN_10b579a0
+  call at 10b57a24  in FUN_10b57a00
+  call at 10b57a84  in FUN_10b57a60
+  call at 10b57ae4  in FUN_10b57ac0
+  call at 10b57b44  in FUN_10b57b20
+  call at 10b57ba4  in FUN_10b57b80
+  call at 10b57c04  in FUN_10b57be0
+  call at 10b57c64  in FUN_10b57c40
+  call at 10b57cc4  in FUN_10b57ca0
+  call at 10b58564  in FUN_10b58560
+  call at 10b59f01  in FUN_10b59ec0
+  call at 10b59f14  in FUN_10b59ec0
+  call at 10b59f1f  in FUN_10b59ec0
+  call at 10b59f2a  in FUN_10b59ec0
+  call at 10b59f35  in FUN_10b59ec0
+  call at 10b59f40  in FUN_10b59ec0
+  call at 10b59f4b  in FUN_10b59ec0
+  call at 10b59ff1  in FUN_10b59fb0
+  call at 10b5a004  in FUN_10b59fb0
+  call at 10b5a00f  in FUN_10b59fb0
+  call at 10b5a01a  in FUN_10b59fb0
+  call at 10b5a025  in FUN_10b59fb0
+  call at 10b5a030  in FUN_10b59fb0
+  call at 10b5a03b  in FUN_10b59fb0
+  call at 10b5a0e1  in FUN_10b5a0a0
+  call at 10b5a0f4  in FUN_10b5a0a0
+  call at 10b5a0ff  in FUN_10b5a0a0
+  call at 10b5a10a  in FUN_10b5a0a0
+  call at 10b5a115  in FUN_10b5a0a0
+  call at 10b5a120  in FUN_10b5a0a0
+  call at 10b5a12b  in FUN_10b5a0a0
+  call at 10b5a1d1  in FUN_10b5a190
+  call at 10b5a1e4  in FUN_10b5a190
+  call at 10b5a1ef  in FUN_10b5a190
+  call at 10b5a1fa  in FUN_10b5a190
+  call at 10b5a205  in FUN_10b5a190
+  call at 10b5a210  in FUN_10b5a190
+  call at 10b5a21b  in FUN_10b5a190
+  call at 10b5a2c1  in FUN_10b5a280
+  call at 10b5a2d4  in FUN_10b5a280
+  call at 10b5a2df  in FUN_10b5a280
+  call at 10b5a2ea  in FUN_10b5a280
+  call at 10b5a2f5  in FUN_10b5a280
+  call at 10b5a300  in FUN_10b5a280
+  call at 10b5a30b  in FUN_10b5a280
+  call at 10b5a3b1  in FUN_10b5a370
+  call at 10b5a3c4  in FUN_10b5a370
+  call at 10b5a3cf  in FUN_10b5a370
+  call at 10b5a3da  in FUN_10b5a370
+  call at 10b5a3e5  in FUN_10b5a370
+  call at 10b5a3f0  in FUN_10b5a370
+  call at 10b5a3fb  in FUN_10b5a370
+  call at 10b5a4a1  in FUN_10b5a460
+  call at 10b5a4b4  in FUN_10b5a460
+  call at 10b5a4bf  in FUN_10b5a460
+  call at 10b5a4ca  in FUN_10b5a460
+  call at 10b5a4d5  in FUN_10b5a460
+  call at 10b5a4e0  in FUN_10b5a460
+  call at 10b5a4eb  in FUN_10b5a460
+  call at 10b5a591  in FUN_10b5a550
+  call at 10b5a5a4  in FUN_10b5a550
+  call at 10b5a5af  in FUN_10b5a550
+  call at 10b5a5ba  in FUN_10b5a550
+  call at 10b5a5c5  in FUN_10b5a550
+  call at 10b5a5d0  in FUN_10b5a550
+  call at 10b5a5db  in FUN_10b5a550
+  call at 10b5a681  in FUN_10b5a640
+  call at 10b5a694  in FUN_10b5a640
+  call at 10b5a69f  in FUN_10b5a640
+  call at 10b5a6aa  in FUN_10b5a640
+  call at 10b5a6b5  in FUN_10b5a640
+  call at 10b5a6c0  in FUN_10b5a640
+  call at 10b5a6cb  in FUN_10b5a640
+  call at 10b5a771  in FUN_10b5a730
+  call at 10b5a784  in FUN_10b5a730
+  call at 10b5a78f  in FUN_10b5a730
+  call at 10b5a79a  in FUN_10b5a730
+  call at 10b5a7a5  in FUN_10b5a730
+  call at 10b5a7b0  in FUN_10b5a730
+  call at 10b5a7bb  in FUN_10b5a730
+  call at 10b5a861  in FUN_10b5a820
+  call at 10b5a874  in FUN_10b5a820
+  call at 10b5a87f  in FUN_10b5a820
+  call at 10b5a88a  in FUN_10b5a820
+  call at 10b5a895  in FUN_10b5a820
+  call at 10b5a8a0  in FUN_10b5a820
+  call at 10b5a8ab  in FUN_10b5a820
+  call at 10b5a951  in FUN_10b5a910
+  call at 10b5a964  in FUN_10b5a910
+  call at 10b5a96f  in FUN_10b5a910
+  call at 10b5a97a  in FUN_10b5a910
+  call at 10b5a985  in FUN_10b5a910
+  call at 10b5a990  in FUN_10b5a910
+  call at 10b5a99b  in FUN_10b5a910
+  call at 10b5aa41  in FUN_10b5aa00
+  call at 10b5aa54  in FUN_10b5aa00
+  call at 10b5aa5f  in FUN_10b5aa00
+  call at 10b5aa6a  in FUN_10b5aa00
+  call at 10b5aa75  in FUN_10b5aa00
+  call at 10b5aa80  in FUN_10b5aa00
+  call at 10b5aa8b  in FUN_10b5aa00
+  call at 10b5ab31  in FUN_10b5aaf0
+  call at 10b5ab44  in FUN_10b5aaf0
+  call at 10b5ab4f  in FUN_10b5aaf0
+  call at 10b5ab5a  in FUN_10b5aaf0
+  call at 10b5ab65  in FUN_10b5aaf0
+  call at 10b5ab70  in FUN_10b5aaf0
+  call at 10b5ab7b  in FUN_10b5aaf0
+  call at 10b5ac21  in FUN_10b5abe0
+  call at 10b5ac34  in FUN_10b5abe0
+  call at 10b5ac3f  in FUN_10b5abe0
+  call at 10b5ac4a  in FUN_10b5abe0
+  call at 10b5ac55  in FUN_10b5abe0
+  call at 10b5ac60  in FUN_10b5abe0
+  call at 10b5ac6b  in FUN_10b5abe0
+  call at 10b5ad11  in FUN_10b5acd0
+  call at 10b5ad24  in FUN_10b5acd0
+  call at 10b5ad2f  in FUN_10b5acd0
+  call at 10b5ad3a  in FUN_10b5acd0
+  call at 10b5ad45  in FUN_10b5acd0
+  call at 10b5ad50  in FUN_10b5acd0
+  call at 10b5ad5b  in FUN_10b5acd0
+  call at 10b5ae01  in FUN_10b5adc0
+  call at 10b5ae14  in FUN_10b5adc0
+  call at 10b5ae1f  in FUN_10b5adc0
+  call at 10b5ae2a  in FUN_10b5adc0
+  call at 10b5ae35  in FUN_10b5adc0
+  call at 10b5ae40  in FUN_10b5adc0
+  call at 10b5ae4b  in FUN_10b5adc0
+  call at 10b5aef1  in FUN_10b5aeb0
+  call at 10b5af04  in FUN_10b5aeb0
+  call at 10b5af0f  in FUN_10b5aeb0
+  call at 10b5af1a  in FUN_10b5aeb0
+  call at 10b5af25  in FUN_10b5aeb0
+  call at 10b5af30  in FUN_10b5aeb0
+  call at 10b5af3b  in FUN_10b5aeb0
+  call at 10b5afe1  in FUN_10b5afa0
+  call at 10b5aff4  in FUN_10b5afa0
+  call at 10b5afff  in FUN_10b5afa0
+  call at 10b5b00a  in FUN_10b5afa0
+  call at 10b5b015  in FUN_10b5afa0
+  call at 10b5b020  in FUN_10b5afa0
+  call at 10b5b02b  in FUN_10b5afa0
+  call at 10b5b0d1  in FUN_10b5b090
+  call at 10b5b0e4  in FUN_10b5b090
+  call at 10b5b0ef  in FUN_10b5b090
+  call at 10b5b0fa  in FUN_10b5b090
+  call at 10b5b105  in FUN_10b5b090
+  call at 10b5b110  in FUN_10b5b090
+  call at 10b5b11b  in FUN_10b5b090
+  call at 10b5b1c1  in FUN_10b5b180
+  call at 10b5b1d4  in FUN_10b5b180
+  call at 10b5b1df  in FUN_10b5b180
+  call at 10b5b1ea  in FUN_10b5b180
+  call at 10b5b1f5  in FUN_10b5b180
+  call at 10b5b200  in FUN_10b5b180
+  call at 10b5b20b  in FUN_10b5b180
+  call at 10b5b2b1  in FUN_10b5b270
+  call at 10b5b2c4  in FUN_10b5b270
+  call at 10b5b2cf  in FUN_10b5b270
+  call at 10b5b2da  in FUN_10b5b270
+  call at 10b5b2e5  in FUN_10b5b270
+  call at 10b5b2f0  in FUN_10b5b270
+  call at 10b5b2fb  in FUN_10b5b270
+  call at 10b5b3a1  in FUN_10b5b360
+  call at 10b5b3b4  in FUN_10b5b360
+  call at 10b5b3bf  in FUN_10b5b360
+  call at 10b5b3ca  in FUN_10b5b360
+  call at 10b5b3d5  in FUN_10b5b360
+  call at 10b5b3e0  in FUN_10b5b360
+  call at 10b5b3eb  in FUN_10b5b360
+  call at 10b5b491  in FUN_10b5b450
+  call at 10b5b4a4  in FUN_10b5b450
+  call at 10b5b4af  in FUN_10b5b450
+  call at 10b5b4ba  in FUN_10b5b450
+  call at 10b5b4c5  in FUN_10b5b450
+  call at 10b5b4d0  in FUN_10b5b450
+  call at 10b5b4db  in FUN_10b5b450
+  call at 10b5b581  in FUN_10b5b540
+  call at 10b5b594  in FUN_10b5b540
+  call at 10b5b59f  in FUN_10b5b540
+  call at 10b5b5aa  in FUN_10b5b540
+  call at 10b5b5b5  in FUN_10b5b540
+  call at 10b5b5c0  in FUN_10b5b540
+  call at 10b5b5cb  in FUN_10b5b540
+  call at 10b5b671  in FUN_10b5b630
+  call at 10b5b684  in FUN_10b5b630
+  call at 10b5b68f  in FUN_10b5b630
+  call at 10b5b69a  in FUN_10b5b630
+  call at 10b5b6a5  in FUN_10b5b630
+  call at 10b5b6b0  in FUN_10b5b630
+  call at 10b5b6bb  in FUN_10b5b630
+  call at 10b5b761  in FUN_10b5b720
+  call at 10b5b774  in FUN_10b5b720
+  call at 10b5b77f  in FUN_10b5b720
+  call at 10b5b78a  in FUN_10b5b720
+  call at 10b5b795  in FUN_10b5b720
+  call at 10b5b7a0  in FUN_10b5b720
+  call at 10b5b7ab  in FUN_10b5b720
+  call at 10b5b851  in FUN_10b5b810
+  call at 10b5b864  in FUN_10b5b810
+  call at 10b5b86f  in FUN_10b5b810
+  call at 10b5b87a  in FUN_10b5b810
+  call at 10b5b885  in FUN_10b5b810
+  call at 10b5b890  in FUN_10b5b810
+  call at 10b5b89b  in FUN_10b5b810
+  call at 10b5c16c  in FUN_10b5c150
+  call at 10b5c19c  in FUN_10b5c180
+  call at 10b5c1cc  in FUN_10b5c1b0
+  call at 10b5c1fc  in FUN_10b5c1e0
+  call at 10b5c22c  in FUN_10b5c210
+  call at 10b5c25c  in FUN_10b5c240
+  call at 10b5c28c  in FUN_10b5c270
+  call at 10b5c2bc  in FUN_10b5c2a0
+  call at 10b5c2ec  in FUN_10b5c2d0
+  call at 10b5c31c  in FUN_10b5c300
+  call at 10b5c34c  in FUN_10b5c330
+  call at 10b5c37c  in FUN_10b5c360
+  call at 10b5c3ac  in FUN_10b5c390
+  call at 10b5c3dc  in FUN_10b5c3c0
+  call at 10b5c40c  in FUN_10b5c3f0
+  call at 10b5c43c  in FUN_10b5c420
+  call at 10b5c46c  in FUN_10b5c450
+  call at 10b5c49c  in FUN_10b5c480
+  call at 10b5c4cc  in FUN_10b5c4b0
+  call at 10b5c4fc  in FUN_10b5c4e0
+  call at 10b5c52c  in FUN_10b5c510
+  call at 10b5c55c  in FUN_10b5c540
+  call at 10b5c58c  in FUN_10b5c570
+  call at 10b5c5bc  in FUN_10b5c5a0
+  call at 10b5c5ec  in FUN_10b5c5d0
+  call at 10b5c61c  in FUN_10b5c600
+  call at 10b5c64c  in FUN_10b5c630
+  call at 10b5c67c  in FUN_10b5c660
+  call at 10b5c7ea  in FUN_10b5c7e0
+  call at 10b5c80a  in FUN_10b5c800
+  call at 10b5c848  in FUN_10b5c820
+  call at 10b5ce08  in FUN_10b5cde0
+  call at 10b5cf98  in FUN_10b5cf70
+  call at 10b5d308  in FUN_10b5d2e0
+  call at 10b5d4e8  in FUN_10b5d4c0
+  call at 10b5d528  in FUN_10b5d500
+  call at 10b5d738  in FUN_10b5d710
+  call at 10b5d778  in FUN_10b5d750
+  call at 10b5d7b8  in FUN_10b5d790
+  call at 10b5d7f8  in FUN_10b5d7d0
+  call at 10b5d838  in FUN_10b5d810
+  call at 10b5d878  in FUN_10b5d850
+  call at 10b5d8b8  in FUN_10b5d890
+  call at 10b5d8f8  in FUN_10b5d8d0
+  call at 10b5d938  in FUN_10b5d910
+  call at 10b5d978  in FUN_10b5d950
+  call at 10b5d9b8  in FUN_10b5d990
+  call at 10b5d9f8  in FUN_10b5d9d0
+  call at 10b5da38  in FUN_10b5da10
+  call at 10b5da78  in FUN_10b5da50
+  call at 10b5dab8  in FUN_10b5da90
+  call at 10b5daf8  in FUN_10b5dad0
+  call at 10b5db38  in FUN_10b5db10
+  call at 10b5db78  in FUN_10b5db50
+  call at 10b5dbb8  in FUN_10b5db90
+  call at 10b5dbf8  in FUN_10b5dbd0
+  call at 10b5dc38  in FUN_10b5dc10
+  call at 10b5dc78  in FUN_10b5dc50
+  call at 10b5dcb8  in FUN_10b5dc90
+  call at 10b5dcf8  in FUN_10b5dcd0
+  call at 10b5dd38  in FUN_10b5dd10
+  call at 10b5dd78  in FUN_10b5dd50
+  call at 10b5ddb8  in FUN_10b5dd90
+  call at 10b5ddf8  in FUN_10b5ddd0
+  call at 10b5de38  in FUN_10b5de10
+  call at 10b5de78  in FUN_10b5de50
+  call at 10b5deb8  in FUN_10b5de90
+  call at 10b5def8  in FUN_10b5ded0
+  call at 10b5df38  in FUN_10b5df10
+  call at 10b5df78  in FUN_10b5df50
+  call at 10b5dfb8  in FUN_10b5df90
+  call at 10b5ee3f  in FUN_10b5ee30
+  call at 10b5eee7  in FUN_10b5eec0
+  call at 10b600b7  in FUN_10b60090
+  call at 10b605b7  in FUN_10b60590
+  call at 10b61117  in FUN_10b610f0
+  call at 10b61667  in FUN_10b61640
+  call at 10b61707  in FUN_10b616e0
+  call at 10b61d97  in FUN_10b61d70
+  call at 10b61e37  in FUN_10b61e10
+  call at 10b61ed7  in FUN_10b61eb0
+  call at 10b61f77  in FUN_10b61f50
+  call at 10b62017  in FUN_10b61ff0
+  call at 10b620b7  in FUN_10b62090
+  call at 10b62157  in FUN_10b62130
+  call at 10b621f7  in FUN_10b621d0
+  call at 10b62297  in FUN_10b62270
+  call at 10b62337  in FUN_10b62310
+  call at 10b623d7  in FUN_10b623b0
+  call at 10b62477  in FUN_10b62450
+  call at 10b62517  in FUN_10b624f0
+  call at 10b625b7  in FUN_10b62590
+  call at 10b62657  in FUN_10b62630
+  call at 10b626f7  in FUN_10b626d0
+  call at 10b62797  in FUN_10b62770
+  call at 10b62837  in FUN_10b62810
+  call at 10b628d7  in FUN_10b628b0
+  call at 10b62977  in FUN_10b62950
+  call at 10b62a17  in FUN_10b629f0
+  call at 10b62ab7  in FUN_10b62a90
+  call at 10b62b57  in FUN_10b62b30
+  call at 10b62bf7  in FUN_10b62bd0
+  call at 10b62c97  in FUN_10b62c70
+  call at 10b62d37  in FUN_10b62d10
+  call at 10b62dd7  in FUN_10b62db0
+  call at 10b62e77  in FUN_10b62e50
+  call at 10b62f17  in FUN_10b62ef0
+  call at 10b62fb7  in FUN_10b62f90
+  call at 10b63057  in FUN_10b63030
+  call at 10b630f7  in FUN_10b630d0
+  call at 10b63197  in FUN_10b63170
+  call at 10b63237  in FUN_10b63210
+  call at 10b632d7  in FUN_10b632b0
+  call at 10b77f4c  in FUN_10b77f00
+  call at 10b79235  in FUN_10b791e0
+  call at 10b7933f  in FUN_10b79310
+  call at 10b794e9  in FUN_10b794c0
+  call at 10b8386e  in FUN_10b83820
+  call at 10b83ee0  in FUN_10b83eb0
+  call at 10c365a0  in FUN_10c36590
+  call at 10c368c0  in FUN_10c36870
+  call at 10c368dc  in FUN_10c36870
+  call at 10c36993  in FUN_10c36920
+  call at 10c36d83  in FUN_10c36d30
+  call at 10c6b74e  in FUN_10c6b6c0
+  call at 10c6c5ff  in FUN_10c6c5f0
+  call at 10c6c728  in FUN_10c6c6f0
+  call at 10c6d3c1  in FUN_10c6d380
+  call at 10c6d479  in FUN_10c6d380
+  call at 10c6d4ae  in FUN_10c6d380
+  call at 10c6d541  in FUN_10c6d500
+  call at 10c6d5f9  in FUN_10c6d500
+  call at 10c6d62e  in FUN_10c6d500
+  call at 10c6d710  in FUN_10c6d680
+  call at 10c6d727  in FUN_10c6d680
+  call at 10c6d868  in FUN_10c6d820
+  call at 10c6dcc4  in FUN_10c6dcb0
+  call at 10c6dd14  in FUN_10c6dd00
+  call at 10c6dd64  in FUN_10c6dd50
+  call at 10c6dd99  in FUN_10c6dd50
+  call at 10c6dde4  in FUN_10c6ddd0
+  call at 10c6de19  in FUN_10c6ddd0
+  call at 10c6fb64  in FUN_10c6fb50
+  call at 10c6fcba  in FUN_10c6fc20
+  call at 10d0e4b3  in FUN_10d0e460
+  call at 10d71ffa  in FUN_10d71f20
+  call at 10d72232  in FUN_10d72210
+  call at 10d72712  in FUN_10d726f0
+  call at 10d874b5  in FUN_10d87490
+  call at 10dc2af8  in FUN_10dc2ae0
+  call at 10dc4420  in FUN_10dc43f0
+  call at 10dc47d3  in FUN_10dc47a0
+  call at 10dc47e1  in FUN_10dc47a0
+  call at 10dc4b01  in FUN_10dc4ad0
+  call at 10dcbc57  in FUN_10dcbbd0
+  call at 10dcbc85  in FUN_10dcbbd0
+  call at 10dcbca4  in FUN_10dcbbd0
+  -> 562 distinct calling functions
+
+-------- FUN_101d12b0 @101d12b0 (25 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_101d12b0(undefined4 param_1)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0(param_1);
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_101d1370 @101d1370 (49 bytes)
+
+/* [RE-AUTO c0] */
+
+bool FUN_101d1370(int param_1)
+
+{
+  float10 fVar1;
+  
+  if (param_1 == 0) {
+    return false;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  return (float)fVar1 < DAT_113c12f0;
+}
+
+
+-------- FUN_101d1500 @101d1500 (19 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_101d1500(undefined4 param_1)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0(param_1);
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_101d1520 @101d1520 (19 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_101d1520(undefined4 param_1)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0(param_1);
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_105abd50 @105abd50 (208 bytes)
+
+/* [RE-AUTO c0] */
+
+undefined4 __fastcall FUN_105abd50(int param_1)
+
+{
+  char cVar1;
+  int *piVar2;
+  undefined4 uVar3;
+  int iVar4;
+  float10 fVar5;
+  int local_10;
+  float local_c;
+  float local_8;
+  
+  piVar2 = (int *)(**(code **)(*(int *)CCryAction::m_pThis + 0x68))();
+  iVar4 = *piVar2;
+  uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  piVar2 = (int *)(**(code **)(iVar4 + 0xc))(uVar3);
+  if (((piVar2 != (int *)0x0) && (iVar4 = (**(code **)(*piVar2 + 800))(), iVar4 != 0)) &&
+     (cVar1 = FUN_103f8050(0,&local_c), cVar1 != '\0')) {
+    fVar5 = (float10)FUN_101d15e0();
+    local_8 = (float)fVar5;
+    cVar1 = FUN_103dba30(1,&local_10);
+    if (cVar1 != '\0') {
+      if (local_10 == 0) {
+        if (local_c < local_8) {
+          return 2;
+        }
+      }
+      else if (local_10 == 1) {
+        if (local_8 < local_c) {
+          return 2;
+        }
+      }
+      else if ((local_10 == 2) && (local_8 == local_c)) {
+        return 2;
+      }
+    }
+  }
+  return 1;
+}
+
+
+-------- FUN_105cc6c0 @105cc6c0 (285 bytes)
+
+/* [RE-AUTO c0] */
+
+undefined4 __fastcall FUN_105cc6c0(int param_1)
+
+{
+  char cVar1;
+  undefined4 uVar2;
+  int *piVar3;
+  int iVar4;
+  int *piVar5;
+  float10 fVar6;
+  float10 fVar7;
+  float fVar8;
+  float local_c;
+  float local_8;
+  
+  cVar1 = FUN_103f8050(0,&local_c);
+  if (cVar1 == '\0') {
+    return 1;
+  }
+  iVar4 = **(int **)(DAT_113f3a18 + 0x50);
+  uVar2 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  piVar3 = (int *)(**(code **)(iVar4 + 0x2c))(uVar2);
+  if (piVar3 != (int *)0x0) {
+    iVar4 = (**(code **)(*piVar3 + 0x288))();
+    if (iVar4 != 0) {
+      piVar5 = (int *)(**(code **)(*piVar3 + 0x288))();
+      iVar4 = (**(code **)(*piVar5 + 0xa8))();
+      if (iVar4 == 1) {
+        (**(code **)(*piVar3 + 0x288))();
+        fVar6 = (float10)FUN_105cc890();
+        fVar7 = (float10)FUN_101d15e0();
+        fVar8 = (((float)fVar7 + local_c + (float)fVar6) -
+                (float)((uint)(((float)fVar7 + local_c) - (float)fVar6) & DAT_112fcb10)) *
+                DAT_113c12b8;
+        local_8 = ((float)((uint)fVar8 & DAT_112fcb10) + fVar8) * DAT_113c12b8;
+        FUN_10b17a20(&local_8,0,0);
+        return 2;
+      }
+    }
+  }
+  return 1;
+}
+
+
+-------- FUN_105cc890 @105cc890 (175 bytes)
+
+/* WARNING: Heritage AFTER dead removal. Example location: s0xfffffffb : 0x105cc8b1 */
+/* WARNING: Removing unreachable block (ram,0x105cc8ad) */
+/* WARNING: Restarted to delay deadcode elimination for space: stack */
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_105cc890(int param_1)
+
+{
+  float10 fVar1;
+  float10 fVar2;
+  float10 fVar3;
+  float10 fVar4;
+  float10 fVar5;
+  float10 fVar6;
+  
+  if (*(char *)(param_1 + 0x38) != *(char *)(param_1 + 0x39)) {
+    fVar1 = (float10)FUN_101d15e0();
+    return fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  fVar2 = (float10)FUN_101d15e0();
+  fVar3 = (float10)FUN_101d15e0();
+  fVar4 = (float10)FUN_101d15e0();
+  fVar5 = (float10)FUN_101d15e0();
+  fVar6 = (float10)FUN_101d15e0();
+  return ((float10)(float)fVar5 * (float10)DAT_113063e0 + (float10)DAT_113c12d0) *
+         ((float10)(float)fVar2 + (float10)(float)fVar1 + (float10)(float)fVar3 +
+         (float10)(float)fVar4) + fVar6;
+}
+
+
+-------- FUN_105f73f0 @105f73f0 (175 bytes)
+
+/* WARNING: Heritage AFTER dead removal. Example location: s0xfffffffb : 0x105f7411 */
+/* WARNING: Removing unreachable block (ram,0x105f740d) */
+/* WARNING: Restarted to delay deadcode elimination for space: stack */
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_105f73f0(int param_1)
+
+{
+  float10 fVar1;
+  float10 fVar2;
+  float10 fVar3;
+  float10 fVar4;
+  float10 fVar5;
+  float10 fVar6;
+  
+  if (*(char *)(param_1 + 0x38) != *(char *)(param_1 + 0x39)) {
+    fVar1 = (float10)FUN_101d15e0();
+    return fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  fVar2 = (float10)FUN_101d15e0();
+  fVar3 = (float10)FUN_101d15e0();
+  fVar4 = (float10)FUN_101d15e0();
+  fVar5 = (float10)FUN_101d15e0();
+  fVar6 = (float10)FUN_101d15e0();
+  return ((float10)(float)fVar5 * (float10)DAT_113063e0 + (float10)DAT_113c12d0) *
+         ((float10)(float)fVar2 + (float10)(float)fVar1 + (float10)(float)fVar3 +
+         (float10)(float)fVar4) + fVar6;
+}
+
+
+-------- FUN_10a66100 @10a66100 (19 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_10a66100(undefined4 param_1)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0(param_1);
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_10a67200 @10a67200 (228 bytes)
+
+/* WARNING: Heritage AFTER dead removal. Example location: s0xfffffffb : 0x10a67221 */
+/* WARNING: Removing unreachable block (ram,0x10a6721d) */
+/* WARNING: Restarted to delay deadcode elimination for space: stack */
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_10a67200(int param_1)
+
+{
+  float10 fVar1;
+  float10 fVar2;
+  float10 fVar3;
+  float10 fVar4;
+  float10 fVar5;
+  float10 fVar6;
+  
+  if (*(char *)(param_1 + 0x38) != *(char *)(param_1 + 0x39)) {
+    fVar1 = (float10)FUN_101d15e0();
+    return (float10)(float)fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  fVar2 = (float10)FUN_101d15e0();
+  fVar3 = (float10)FUN_101d15e0();
+  fVar4 = (float10)FUN_101d15e0();
+  fVar5 = (float10)FUN_101d15e0();
+  fVar6 = (float10)FUN_101d15e0();
+  return (float10)(float)((double)((float)fVar2 + (float)fVar1 + (float)fVar3 + (float)fVar4) *
+                          ((double)(float)fVar5 / DAT_113c12d8 + DAT_113c12d0) +
+                         (double)(float)fVar6);
+}
+
+
+-------- FUN_10a67490 @10a67490 (25 bytes)
+
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_10a67490(undefined4 param_1)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0(param_1);
+  return (float10)(float)fVar1;
+}
+
+
+-------- FUN_10a680b0 @10a680b0 (125 bytes)
+
+/* [RE-AUTO c0] */
+
+int FUN_10a680b0(int param_1,int param_2)
+
+{
+  int iVar1;
+  float10 fVar2;
+  
+  iVar1 = FUN_101cb830();
+  if (iVar1 != 0) {
+    if (iVar1 == 1) {
+      return param_1 + -1;
+    }
+    if (iVar1 == 2) {
+      fVar2 = (float10)FUN_101d15e0();
+      return (int)((float)param_2 * (float)fVar2);
+    }
+    iVar1 = FUN_101cb830();
+    if (iVar1 != 0) {
+      param_2 = 0;
+      FUN_10b10bc0(&param_2,0,0);
+    }
+  }
+  return 0;
+}
+
+
+-------- FUN_10a75900 @10a75900 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a75900(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+-------- FUN_10a7dda0 @10a7dda0 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a7dda0(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+-------- FUN_10a7ddc0 @10a7ddc0 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a7ddc0(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+-------- FUN_10a7dde0 @10a7dde0 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a7dde0(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+-------- FUN_10a7de00 @10a7de00 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a7de00(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+-------- FUN_10a7de20 @10a7de20 (18 bytes)
+
+/* [RE-AUTO c0] */
+
+void FUN_10a7de20(undefined4 param_1,float *param_2)
+
+{
+  float10 fVar1;
+  
+  fVar1 = (float10)FUN_101d15e0();
+  *param_2 = (float)fVar1;
+  return;
+}
+
+
+  (more callers not dumped)
