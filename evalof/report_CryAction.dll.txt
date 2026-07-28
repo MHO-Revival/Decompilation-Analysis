@@ -1,0 +1,394 @@
+================================ CRegionPathFindRequest
+  step 1: name string at 1130a364
+  step 2: getter at 105afc10
+  step 3: vtable slot at 1130a344
+  step 4: [1130a338] -> Evaluate 105af810
+          FUN_105af810 (566 bytes)
+            105af810  PUSH EBP
+            105af811  MOV EBP,ESP
+            105af813  SUB ESP,0x30
+            105af816  MOV EAX,[0x113f3a18]
+            105af81b  PUSH EBX
+            105af81c  MOV EBX,ECX
+            105af81e  PUSH ESI
+            105af81f  MOV EAX,dword ptr [EAX + 0x50]
+            105af822  PUSH EDI
+            105af823  MOV ECX,dword ptr [EBX + 0x54]
+            105af826  MOV ESI,dword ptr [EAX]
+            105af828  MOV EAX,dword ptr [ECX]
+            105af82a  CALL dword ptr [EAX + 0xc]
+            105af82d  MOV ECX,dword ptr [0x113f3a18]
+            105af833  PUSH EAX
+            105af834  MOV ECX,dword ptr [ECX + 0x50]
+            105af837  CALL dword ptr [ESI + 0x2c]
+            105af83a  MOV dword ptr [EBP + -0x8],EAX
+            105af83d  TEST EAX,EAX
+            105af83f  JZ 0x105afa3a
+            105af845  MOV EAX,[0x113f3a18]
+            105af84a  MOV ECX,dword ptr [EAX + 0x4]
+            105af84d  MOV EAX,dword ptr [ECX]
+            105af84f  CALL dword ptr [EAX + 0x3c]
+            105af852  MOV ECX,EAX
+            105af854  MOV EDX,dword ptr [EAX]
+            105af856  CALL dword ptr [EDX + 0x68]
+            105af859  MOV ECX,dword ptr [EBX + 0x54]
+            105af85c  MOV ESI,EAX
+            105af85e  MOV EDX,dword ptr [ECX]
+            105af860  MOV EDI,dword ptr [ESI]
+            105af862  CALL dword ptr [EDX + 0xc]
+            105af865  PUSH EAX
+            105af866  MOV ECX,ESI
+            105af868  CALL dword ptr [EDI + 0xc]
+            105af86b  TEST EAX,EAX
+            105af86d  JZ 0x105afa3a
+            105af873  MOV EDX,dword ptr [EAX]
+            105af875  MOV ECX,EAX
+            105af877  CALL dword ptr [EDX + 0x320]
+            105af87d  MOV dword ptr [EBP + -0xc],EAX
+            105af880  TEST EAX,EAX
+            105af882  JZ 0x105afa3a
+            105af888  MOV EDX,dword ptr [EBX + 0x2c]
+            105af88b  MOV ECX,dword ptr [EDX + 0x4]
+            105af88e  SUB ECX,dword ptr [EDX]
+            105af890  SAR ECX,0x2
+            105af893  TEST ECX,ECX
+            105af895  JZ 0x105af8c0
+            105af897  MOV EAX,dword ptr [EDX + 0x10]
+            105af89a  SUB EAX,dword ptr [EDX + 0xc]
+            105af89d  TEST EAX,0xfffffffc
+            105af8a2  JLE 0x105af8c0
+            105af8a4  MOV EAX,dword ptr [EDX + 0xc]
+            105af8a7  MOV EAX,dword ptr [EAX]
+            105af8a9  TEST EAX,EAX
+            105af8ab  JS 0x105af8c0
+            105af8ad  LEA ECX,[EBP + -0x24]
+            105af8b0  PUSH ECX
+            105af8b1  PUSH EAX
+            105af8b2  MOV ECX,EBX
+            105af8b4  CALL 0x103d8940
+            105af8b9  MOV ECX,EAX
+            105af8bb  CALL 0x10552d10
+            105af8c0  MOV ECX,dword ptr [EBX + 0x2c]
+            105af8c3  MOV dword ptr [EBP + -0x4],0x0
+            105af8ca  MOV EAX,dword ptr [ECX + 0x4]
+            105af8cd  SUB EAX,dword ptr [ECX]
+            105af8cf  SAR EAX,0x2
+            105af8d2  CMP EAX,0x1
+            105af8d5  JBE 0x105af902
+            105af8d7  MOV EAX,dword ptr [ECX + 0x10]
+            105af8da  SUB EAX,dword ptr [ECX + 0xc]
+            105af8dd  AND EAX,0xfffffffc
+            105af8e0  CMP EAX,0x4
+            105af8e3  JLE 0x105af902
+            105af8e5  MOV EAX,dword ptr [ECX + 0xc]
+            105af8e8  MOV EAX,dword ptr [EAX + 0x4]
+            105af8eb  TEST EAX,EAX
+            105af8ed  JS 0x105af902
+            105af8ef  LEA ECX,[EBP + -0x4]
+            105af8f2  PUSH ECX
+            105af8f3  PUSH EAX
+            105af8f4  MOV ECX,EBX
+            105af8f6  CALL 0x103d8940
+            105af8fb  MOV ECX,EAX
+            105af8fd  CALL 0x101c3620
+            105af902  MOV ECX,dword ptr [EBX + 0x2c]
+            105af905  MOV EAX,dword ptr [ECX + 0x4]
+            105af908  SUB EAX,dword ptr [ECX]
+            105af90a  SAR EAX,0x2
+            105af90d  CMP EAX,0x2
+            105af910  JBE 0x105af93d
+            105af912  MOV EAX,dword ptr [ECX + 0x10]
+            105af915  SUB EAX,dword ptr [ECX + 0xc]
+            105af918  AND EAX,0xfffffffc
+            105af91b  CMP EAX,0x8
+            105af91e  JLE 0x105af93d
+            105af920  MOV EAX,dword ptr [ECX + 0xc]
+            105af923  MOV EAX,dword ptr [EAX + 0x8]
+            105af926  TEST EAX,EAX
+            105af928  JS 0x105af93d
+            105af92a  LEA ECX,[EBP + -0x30]
+            105af92d  PUSH ECX
+            105af92e  PUSH EAX
+            105af92f  MOV ECX,EBX
+            105af931  CALL 0x103d8940
+            105af936  MOV ECX,EAX
+            105af938  CALL 0x10552d10
+            105af93d  LEA EAX,[EBP + -0x18]
+            105af940  MOV dword ptr [EBP + -0x18],0x0
+            105af947  PUSH EAX
+            105af948  PUSH 0x2
+            105af94a  MOV ECX,EBX
+            105af94c  MOV dword ptr [EBP + -0x14],0x0
+            105af953  MOV dword ptr [EBP + -0x10],0x0
+            105af95a  CALL 0x10551270
+            105af95f  CMP dword ptr [EBP + -0x4],0x0
+            105af963  JL 0x105afa3a
+            105af969  MOV EAX,[0x113f3a18]
+            105af96e  MOV ECX,dword ptr [EAX + 0x4]
+            105af971  MOV EAX,dword ptr [ECX]
+            105af973  CALL dword ptr [EAX + 0x3c]
+            105af976  MOV ECX,EAX
+            105af978  MOV EDX,dword ptr [EAX]
+            105af97a  CALL dword ptr [EDX + 0x68]
+            105af97d  MOV ECX,dword ptr [EBX + 0x54]
+            105af980  MOV ESI,EAX
+            105af982  MOV EDX,dword ptr [ECX]
+            105af984  MOV EDI,dword ptr [ESI]
+            105af986  CALL dword ptr [EDX + 0xc]
+            105af989  PUSH EAX
+            105af98a  MOV ECX,ESI
+            105af98c  CALL dword ptr [EDI + 0xc]
+            105af98f  TEST EAX,EAX
+            105af991  JZ 0x105afa3a
+            105af997  MOV EDX,dword ptr [EAX]
+            105af999  MOV ECX,EAX
+            105af99b  CALL dword ptr [EDX + 0x364]
+            105af9a1  MOV ECX,dword ptr [EBP + -0x8]
+            105af9a4  MOV dword ptr [EBX + 0x68],EAX
+            105af9a7  MOV EAX,dword ptr [ECX]
+            105af9a9  CALL dword ptr [EAX + 0x94]
+            105af9af  CMP dword ptr [EBX + 0x68],0x0
+            105af9b3  MOV ECX,dword ptr [EAX]
+            105af9b5  MOV dword ptr [EBP + -0x18],ECX
+            105af9b8  MOV ECX,dword ptr [EAX + 0x4]
+            105af9bb  MOV EAX,dword ptr [EAX + 0x8]
+            105af9be  MOV dword ptr [EBP + -0x14],ECX
+            105af9c1  MOV dword ptr [EBP + -0x10],EAX
+            105af9c4  JZ 0x105afa3a
+            105af9c6  MOV ECX,dword ptr [EBP + -0xc]
+            105af9c9  MOV EAX,dword ptr [ECX]
+            105af9cb  CALL dword ptr [EAX + 0x88]
+            105af9d1  MOVSS XMM0,dword ptr [EBP + -0x24]
+            105af9d6  MOV ESI,EAX
+            105af9d8  MOVSS XMM1,dword ptr [EBP + -0x20]
+            105af9dd  LEA EAX,[EBP + -0x30]
+            105af9e0  MOVSS XMM2,dword ptr [EBP + -0x1c]
+            105af9e5  MOV EDX,dword ptr [EBP + -0x4]
+            105af9e8  PUSH EAX
+            105af9e9  SUB ESP,0x10
+            105af9ec  MOV ECX,ESP
+            105af9ee  SUB ESP,0x10
+            105af9f1  MOV EAX,ESP
+            105af9f3  MOVSS dword ptr [ECX],XMM0
+            105af9f7  MOVSS XMM0,dword ptr [EBP + -0x18]
+            105af9fc  MOVSS dword ptr [ECX + 0x4],XMM1
+            105afa01  MOVSS dword ptr [ECX + 0x8],XMM2
+            105afa06  MOV dword ptr [ECX + 0xc],EDX
+            105afa09  MOVSS dword ptr [EAX],XMM0
+            105afa0d  MOVSS XMM0,dword ptr [EBP + -0x14]
+            105afa12  MOVSS dword ptr [EAX + 0x4],XMM0
+            105afa17  MOVSS XMM0,dword ptr [EBP + -0x10]
+            105afa1c  MOVSS dword ptr [EAX + 0x8],XMM0
+            105afa21  MOV dword ptr [EAX + 0xc],ESI
+            105afa24  MOV ECX,dword ptr [EBX + 0x68]
+            105afa27  MOV EAX,dword ptr [ECX]
+            105afa29  MOV EAX,dword ptr [EAX + 0x90]
+            105afa2f  CALL EAX
+            105afa31  TEST AL,AL
+            105afa33  MOV EAX,0x2
+            105afa38  JNZ 0x105afa3f
+            105afa3a  MOV EAX,0x1
+            105afa3f  POP EDI
+            105afa40  POP ESI
+            105afa41  POP EBX
+            105afa42  MOV ESP,EBP
+            105afa44  POP EBP
+            105afa45  RET
+          ---- decompiled ----
+
+/* [RE-AUTO c0] */
+
+undefined4 __fastcall FUN_105af810(int param_1)
+
+{
+  int iVar1;
+  char cVar2;
+  undefined4 uVar3;
+  int *piVar4;
+  undefined4 *puVar5;
+  undefined1 local_34 [12];
+  undefined4 local_28;
+  undefined4 local_24;
+  undefined4 local_20;
+  undefined4 local_1c;
+  undefined4 local_18;
+  undefined4 local_14;
+  int *local_10;
+  int *local_c;
+  int local_8;
+  
+  iVar1 = **(int **)(DAT_113f3a18 + 0x50);
+  uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  local_c = (int *)(**(code **)(iVar1 + 0x2c))(uVar3);
+  if (local_c != (int *)0x0) {
+    piVar4 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+    piVar4 = (int *)(**(code **)(*piVar4 + 0x68))();
+    iVar1 = *piVar4;
+    uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+    piVar4 = (int *)(**(code **)(iVar1 + 0xc))(uVar3);
+    if ((piVar4 != (int *)0x0) &&
+       (local_10 = (int *)(**(code **)(*piVar4 + 800))(), local_10 != (int *)0x0)) {
+      piVar4 = *(int **)(param_1 + 0x2c);
+      if ((piVar4[1] - *piVar4 >> 2 != 0) &&
+         ((0 < (int)(piVar4[4] - piVar4[3] & 0xfffffffcU) && (-1 < *(int *)piVar4[3])))) {
+        FUN_103d8940(*(int *)piVar4[3],&local_28);
+        FUN_10552d10();
+      }
+      piVar4 = *(int **)(param_1 + 0x2c);
+      local_8 = 0;
+      if (((1 < (uint)(piVar4[1] - *piVar4 >> 2)) &&
+          (4 < (int)(piVar4[4] - piVar4[3] & 0xfffffffcU))) && (-1 < *(int *)(piVar4[3] + 4))) {
+        FUN_103d8940(*(int *)(piVar4[3] + 4),&local_8);
+        FUN_101c3620();
+      }
+      piVar4 = *(int **)(param_1 + 0x2c);
+      if (((2 < (uint)(piVar4[1] - *piVar4 >> 2)) &&
+          (8 < (int)(piVar4[4] - piVar4[3] & 0xfffffffcU))) && (-1 < *(int *)(piVar4[3] + 8))) {
+        FUN_103d8940(*(int *)(piVar4[3] + 8),local_34);
+        FUN_10552d10();
+      }
+      local_1c = 0;
+      local_18 = 0;
+      local_14 = 0;
+      FUN_10551270(2,&local_1c);
+      if (-1 < local_8) {
+        piVar4 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+        piVar4 = (int *)(**(code **)(*piVar4 + 0x68))();
+        iVar1 = *piVar4;
+        uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+        piVar4 = (int *)(**(code **)(iVar1 + 0xc))(uVar3);
+        if (piVar4 != (int *)0x0) {
+          uVar3 = (**(code **)(*piVar4 + 0x364))();
+          *(undefined4 *)(param_1 + 0x68) = uVar3;
+          puVar5 = (undefined4 *)(**(code **)(*local_c + 0x94))();
+          local_1c = *puVar5;
+          local_18 = puVar5[1];
+          local_14 = puVar5[2];
+          if (*(int *)(param_1 + 0x68) != 0) {
+            uVar3 = (**(code **)(*local_10 + 0x88))();
+            cVar2 = (**(code **)(**(int **)(param_1 + 0x68) + 0x90))
+                              (local_1c,local_18,local_14,uVar3,local_28,local_24,local_20,local_8,
+                               local_34);
+            if (cVar2 != '\0') {
+              return 2;
+            }
+          }
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+
+  step 2: getter at 105afc70
+  step 3 FAILED: getter not in any table
+================================ CGetNextTraversePath
+  step 1: name string at 11309dfc
+  step 2: getter at 105acc00
+  step 3: vtable slot at 11309ddc
+  step 4: [11309dd0] -> Evaluate 105aca90
+          FUN_105aca90 (137 bytes)
+            105aca90  PUSH EBP
+            105aca91  MOV EBP,ESP
+            105aca93  PUSH ECX
+            105aca94  MOV EAX,[0x113f3a18]
+            105aca99  PUSH EBX
+            105aca9a  MOV EBX,ECX
+            105aca9c  PUSH ESI
+            105aca9d  MOV ECX,dword ptr [EAX + 0x4]
+            105acaa0  PUSH EDI
+            105acaa1  MOV EAX,dword ptr [ECX]
+            105acaa3  CALL dword ptr [EAX + 0x3c]
+            105acaa6  MOV ECX,EAX
+            105acaa8  MOV EDX,dword ptr [EAX]
+            105acaaa  CALL dword ptr [EDX + 0x68]
+            105acaad  MOV ECX,dword ptr [EBX + 0x54]
+            105acab0  MOV ESI,EAX
+            105acab2  MOV EDX,dword ptr [ECX]
+            105acab4  MOV EDI,dword ptr [ESI]
+            105acab6  CALL dword ptr [EDX + 0xc]
+            105acab9  PUSH EAX
+            105acaba  MOV ECX,ESI
+            105acabc  CALL dword ptr [EDI + 0xc]
+            105acabf  TEST EAX,EAX
+            105acac1  JZ 0x105acb0d
+            105acac3  MOV EDX,dword ptr [EAX]
+            105acac5  MOV ECX,EAX
+            105acac7  CALL dword ptr [EDX + 0x364]
+            105acacd  MOV ESI,EAX
+            105acacf  MOV ECX,ESI
+            105acad1  MOV EDX,dword ptr [ESI]
+            105acad3  CALL dword ptr [EDX + 0x68]
+            105acad6  MOV EDX,dword ptr [ESI]
+            105acad8  MOV ECX,ESI
+            105acada  CALL dword ptr [EDX + 0x70]
+            105acadd  CMP EAX,0x6
+            105acae0  JZ 0x105acafd
+            105acae2  CMP EAX,0x7
+            105acae5  JZ 0x105acafd
+            105acae7  CMP EAX,0x3
+            105acaea  JZ 0x105acafd
+            105acaec  CMP EAX,0x5
+            105acaef  JZ 0x105acafd
+            105acaf1  POP EDI
+            105acaf2  POP ESI
+            105acaf3  MOV EAX,0x3
+            105acaf8  POP EBX
+            105acaf9  MOV ESP,EBP
+            105acafb  POP EBP
+            105acafc  RET
+            105acafd  MOV dword ptr [EBP + -0x4],EAX
+            105acb00  MOV ECX,EBX
+            105acb02  LEA EAX,[EBP + -0x4]
+            105acb05  PUSH EAX
+            105acb06  PUSH 0x0
+            105acb08  CALL 0x105572f0
+            105acb0d  POP EDI
+            105acb0e  POP ESI
+            105acb0f  MOV EAX,0x1
+            105acb14  POP EBX
+            105acb15  MOV ESP,EBP
+            105acb17  POP EBP
+            105acb18  RET
+          ---- decompiled ----
+
+/* [RE-AUTO c0] */
+
+undefined4 __fastcall FUN_105aca90(int param_1)
+
+{
+  int iVar1;
+  int *piVar2;
+  undefined4 uVar3;
+  int local_8;
+  
+  local_8 = param_1;
+  piVar2 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+  piVar2 = (int *)(**(code **)(*piVar2 + 0x68))();
+  iVar1 = *piVar2;
+  uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  piVar2 = (int *)(**(code **)(iVar1 + 0xc))(uVar3);
+  if (piVar2 != (int *)0x0) {
+    piVar2 = (int *)(**(code **)(*piVar2 + 0x364))();
+    (**(code **)(*piVar2 + 0x68))();
+    local_8 = (**(code **)(*piVar2 + 0x70))();
+    if ((((local_8 != 6) && (local_8 != 7)) && (local_8 != 3)) && (local_8 != 5)) {
+      return 3;
+    }
+    FUN_105572f0(0,&local_8);
+  }
+  return 1;
+}
+
+
+  step 2: getter at 105acc60
+  step 3 FAILED: getter not in any table
+================================ CIsLastEdgeInPath
+  step 1: name string at 1130a1d0
+  step 2: getter at 105af080
+  step 3: vtable slot at 1130a1b0
+  step 4: [1130a1a4] -> Evaluate 105aefc0
+          (not disassembled — `no fn` means not decoded, not absent)
+  step 2: getter at 105af0e0
+  step 3 FAILED: getter not in any table
