@@ -1,0 +1,156 @@
+== FUN_105592d0 @105592d0
+  105592d0  PUSH EBP
+  105592d1  MOV EBP,ESP
+  105592d3  SUB ESP,0x24
+  105592d6  LEA EAX,[EBP + -0x4]
+  105592d9  PUSH ESI
+  105592da  PUSH EDI
+  105592db  PUSH EAX
+  105592dc  PUSH 0x0
+  105592de  MOV ESI,ECX
+  105592e0  CALL 0x103dbab0
+  105592e5  TEST AL,AL
+  105592e7  JNZ 0x105592fa
+  105592e9  MOV ECX,dword ptr [ESI + 0x54]
+  105592ec  MOV EAX,dword ptr [ECX]
+  105592ee  MOV EAX,dword ptr [EAX + 0xc]
+  105592f1  CALL EAX
+  105592f3  MOV EDX,EAX
+  105592f5  MOV dword ptr [EBP + -0x4],EDX
+  105592f8  JMP 0x105592fd
+  105592fa  MOV EDX,dword ptr [EBP + -0x4]
+  105592fd  MOV EAX,[0x113f3a18]
+  10559302  PUSH EDX
+  10559303  MOV ECX,dword ptr [EAX + 0x50]
+  10559306  MOV EAX,dword ptr [ECX]
+  10559308  MOV EAX,dword ptr [EAX + 0x2c]
+  1055930b  CALL EAX
+  1055930d  MOV EDI,EAX
+  1055930f  TEST EDI,EDI
+  10559311  JNZ 0x1055931e
+  10559313  POP EDI
+  10559314  MOV EAX,0x1
+  10559319  POP ESI
+  1055931a  MOV ESP,EBP
+  1055931c  POP EBP
+  1055931d  RET
+  1055931e  MOV EAX,dword ptr [EDI]
+  10559320  MOV ECX,EDI
+  10559322  MOV EAX,dword ptr [EAX + 0x16c]
+  10559328  CALL EAX
+  1055932a  TEST EAX,EAX
+  1055932c  JZ 0x10559313
+  1055932e  MOV EAX,dword ptr [EDI]
+  10559330  LEA ECX,[EBP + -0x24]
+  10559333  PUSH 0x1
+  10559335  PUSH ECX
+  10559336  MOV ECX,EDI
+  10559338  CALL dword ptr [EAX + 0x7c]
+  1055933b  MOVSS XMM3,dword ptr [EBP + -0x18]
+  10559340  SUBSS XMM3,dword ptr [EBP + -0x24]
+  10559345  MOVSS XMM1,dword ptr [EBP + -0x14]
+  1055934a  SUBSS XMM1,dword ptr [EBP + -0x20]
+  1055934f  MOVSS XMM2,dword ptr [EBP + -0x10]
+  10559354  SUBSS XMM2,dword ptr [EBP + -0x1c]
+  10559359  MOVAPS XMM0,XMM3
+  1055935c  MULSS XMM0,XMM3
+  10559360  MULSS XMM1,XMM1
+  10559364  MULSS XMM2,XMM2
+  10559368  ADDSS XMM0,XMM1
+  1055936c  XORPS XMM1,XMM1
+  1055936f  ADDSS XMM0,XMM2
+  10559373  MOVSS XMM1,XMM0
+  10559377  MOVSS XMM0,dword ptr [0x113c1280]
+  1055937f  COMISS XMM0,XMM3
+  10559382  SQRTSS XMM1,XMM1
+  10559386  MOVSS dword ptr [EBP + -0x8],XMM0
+  1055938b  JA 0x1055939d
+  1055938d  MOVAPS XMM0,XMM1
+  10559390  MULSS XMM0,dword ptr [0x113c12b8]
+  10559398  MOVSS dword ptr [EBP + -0x8],XMM0
+  1055939d  LEA EAX,[EBP + -0xc]
+  105593a0  MOV dword ptr [EBP + -0xc],0x3f800000
+  105593a7  PUSH EAX
+  105593a8  PUSH 0x1
+  105593aa  MOV ECX,ESI
+  105593ac  CALL 0x103f8050
+  105593b1  MOVSS XMM0,dword ptr [EBP + -0x8]
+  105593b6  MOV ECX,dword ptr [ESI + 0x2c]
+  105593b9  MULSS XMM0,dword ptr [0x112fcab0]
+  105593c1  MOV EAX,dword ptr [ECX + 0x4]
+  105593c4  SUB EAX,dword ptr [ECX]
+  105593c6  MULSS XMM0,dword ptr [EBP + -0xc]
+  105593cb  SAR EAX,0x2
+  105593ce  MOVSS dword ptr [EBP + -0x8],XMM0
+  105593d3  CMP EAX,0x2
+  105593d6  JBE 0x10559403
+  105593d8  MOV EAX,dword ptr [ECX + 0x10]
+  105593db  SUB EAX,dword ptr [ECX + 0xc]
+  105593de  AND EAX,0xfffffffc
+  105593e1  CMP EAX,0x8
+  105593e4  JLE 0x10559403
+  105593e6  MOV EAX,dword ptr [ECX + 0xc]
+  105593e9  MOV EAX,dword ptr [EAX + 0x8]
+  105593ec  TEST EAX,EAX
+  105593ee  JS 0x10559403
+  105593f0  LEA ECX,[EBP + -0x8]
+  105593f3  PUSH ECX
+  105593f4  PUSH EAX
+  105593f5  MOV ECX,ESI
+  105593f7  CALL 0x103d8940
+  105593fc  MOV ECX,EAX
+  105593fe  CALL 0x101c3510
+  10559403  POP EDI
+  10559404  MOV EAX,0x2
+  10559409  POP ESI
+  1055940a  MOV ESP,EBP
+  1055940c  POP EBP
+  1055940d  RET
+
+== decompiled ==
+
+/* [RE-AUTO c0] */
+
+undefined4 __fastcall FUN_105592d0(int param_1)
+
+{
+  char cVar1;
+  int *piVar2;
+  int iVar3;
+  float local_28;
+  float local_24;
+  float local_20;
+  float local_1c;
+  float local_18;
+  float local_14;
+  float local_10;
+  float local_c;
+  undefined4 local_8;
+  
+  cVar1 = FUN_103dbab0(0,&local_8);
+  if (cVar1 == '\0') {
+    local_8 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  }
+  piVar2 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 0x50) + 0x2c))(local_8);
+  if ((piVar2 != (int *)0x0) && (iVar3 = (**(code **)(*piVar2 + 0x16c))(), iVar3 != 0)) {
+    (**(code **)(*piVar2 + 0x7c))(&local_28,1);
+    local_1c = local_1c - local_28;
+    local_c = DAT_113c1280;
+    if (DAT_113c1280 <= local_1c) {
+      local_c = SQRT(local_1c * local_1c + (local_18 - local_24) * (local_18 - local_24) +
+                     (local_14 - local_20) * (local_14 - local_20)) * DAT_113c12b8;
+    }
+    local_10 = 1.0;
+    FUN_103f8050(1,&local_10);
+    piVar2 = *(int **)(param_1 + 0x2c);
+    local_c = local_c * DAT_112fcab0 * local_10;
+    if (((2 < (uint)(piVar2[1] - *piVar2 >> 2)) && (8 < (int)(piVar2[4] - piVar2[3] & 0xfffffffcU)))
+       && (-1 < *(int *)(piVar2[3] + 8))) {
+      FUN_103d8940(*(int *)(piVar2[3] + 8),&local_c);
+      FUN_101c3510();
+    }
+    return 2;
+  }
+  return 1;
+}
+
