@@ -1,0 +1,97 @@
+================ 105f73f0
+  already a function: FUN_105f73f0
+  FUN_105f73f0 @105f73f0 (175 bytes)
+    105f73f0  PUSH EBP
+    105f73f1  MOV EBP,ESP
+    105f73f3  SUB ESP,0x18
+    105f73f6  PUSH ESI
+    105f73f7  PUSH EDI
+    105f73f8  MOV EDI,ECX
+    105f73fa  OR EDX,0xffffffff
+    105f73fd  MOV AL,byte ptr [EDI + 0x38]
+    105f7400  XOR AL,byte ptr [EDI + 0x39]
+    105f7403  XOR ESI,ESI
+    105f7405  MOV byte ptr [EBP + -0x1],AL
+    105f7408  CMP EDX,0x1
+    105f740b  JNC 0x105f7428
+    105f740d  MOV AL,byte ptr [EBP + EDX*0x1 + -0x1]
+    105f7411  MOV CL,byte ptr [EBP + ESI*0x1 + -0x1]
+    105f7415  MOV byte ptr [EBP + ESI*0x1 + -0x1],AL
+    105f7419  ADD ESI,0x2
+    105f741c  MOV byte ptr [EBP + EDX*0x1 + -0x1],CL
+    105f7420  SUB EDX,0x2
+    105f7423  CMP ESI,0x1
+    105f7426  JC 0x105f7408
+    105f7428  CMP byte ptr [EBP + -0x1],0x0
+    105f742c  JZ 0x105f743c
+    105f742e  LEA ECX,[EDI + 0x30]
+    105f7431  CALL 0x101d15e0
+    105f7436  POP EDI
+    105f7437  POP ESI
+    105f7438  MOV ESP,EBP
+    105f743a  POP EBP
+    105f743b  RET
+    105f743c  MOV ECX,EDI
+    105f743e  CALL 0x101d15e0
+    105f7443  FSTP float ptr [EBP + -0xc]
+    105f7446  LEA ECX,[EDI + 0x8]
+    105f7449  CALL 0x101d15e0
+    105f744e  FSTP float ptr [EBP + -0x8]
+    105f7451  LEA ECX,[EDI + 0x10]
+    105f7454  CALL 0x101d15e0
+    105f7459  FSTP float ptr [EBP + -0x10]
+    105f745c  LEA ECX,[EDI + 0x18]
+    105f745f  CALL 0x101d15e0
+    105f7464  FSTP float ptr [EBP + -0x14]
+    105f7467  LEA ECX,[EDI + 0x28]
+    105f746a  CALL 0x101d15e0
+    105f746f  FSTP float ptr [EBP + -0x18]
+    105f7472  LEA ECX,[EDI + 0x20]
+    105f7475  CALL 0x101d15e0
+    105f747a  FLD float ptr [EBP + -0x8]
+    105f747d  FADD float ptr [EBP + -0xc]
+    105f7480  POP EDI
+    105f7481  POP ESI
+    105f7482  FADD float ptr [EBP + -0x10]
+    105f7485  FADD float ptr [EBP + -0x14]
+    105f7488  FLD float ptr [EBP + -0x18]
+    105f748b  FMUL double ptr [0x113063e0]
+    105f7491  FADD double ptr [0x113c12d0]
+    105f7497  FMULP
+    105f7499  FADDP
+    105f749b  MOV ESP,EBP
+    105f749d  POP EBP
+    105f749e  RET
+  ---- decompiled ----
+
+/* WARNING: Heritage AFTER dead removal. Example location: s0xfffffffb : 0x105f7411 */
+/* WARNING: Removing unreachable block (ram,0x105f740d) */
+/* WARNING: Restarted to delay deadcode elimination for space: stack */
+/* [RE-AUTO c0] */
+
+float10 __fastcall FUN_105f73f0(int param_1)
+
+{
+  float10 fVar1;
+  float10 fVar2;
+  float10 fVar3;
+  float10 fVar4;
+  float10 fVar5;
+  float10 fVar6;
+  
+  if (*(char *)(param_1 + 0x38) != *(char *)(param_1 + 0x39)) {
+    fVar1 = (float10)FUN_101d15e0();
+    return fVar1;
+  }
+  fVar1 = (float10)FUN_101d15e0();
+  fVar2 = (float10)FUN_101d15e0();
+  fVar3 = (float10)FUN_101d15e0();
+  fVar4 = (float10)FUN_101d15e0();
+  fVar5 = (float10)FUN_101d15e0();
+  fVar6 = (float10)FUN_101d15e0();
+  return ((float10)(float)fVar5 * (float10)DAT_113063e0 + (float10)DAT_113c12d0) *
+         ((float10)(float)fVar2 + (float10)(float)fVar1 + (float10)(float)fVar3 +
+         (float10)(float)fVar4) + fVar6;
+}
+
+
