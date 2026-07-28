@@ -1,0 +1,541 @@
+================ CRegionPathFindRequest
+  literal at 0x1130a364
+    ref 0x105afa79  FUN_105afa50
+      -> FUN_105afa50 @105afa50 (370 bytes)
+      ---- instructions ----
+      105afa50  PUSH EBP                            
+      105afa51  MOV EBP,ESP                         
+      105afa53  SUB ESP,0x30                        
+      105afa56  LEA EAX,[EBP + -0x30]               
+      105afa59  PUSH 0x11305efd                     
+      105afa5e  PUSH 0x11305ef4                       ; "TargetPos"
+      105afa63  MOV ECX,EAX                         
+      105afa65  MOV dword ptr [EBP + -0x20],EAX     
+      105afa68  MOV dword ptr [EBP + -0x1c],EAX     
+      105afa6b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afa70  LEA EAX,[EBP + -0x18]               
+      105afa73  PUSH 0x1130a37a                     
+      105afa78  PUSH 0x1130a364                       ; "CRegionPathFindRequest"
+      105afa7d  MOV ECX,EAX                         
+      105afa7f  MOV dword ptr [EBP + -0x8],EAX      
+      105afa82  MOV dword ptr [EBP + -0x4],EAX      
+      105afa85  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afa8a  PUSH 0x0                            
+      105afa8c  LEA EAX,[EBP + -0x30]               
+      105afa8f  PUSH EAX                            
+      105afa90  LEA EAX,[EBP + -0x18]               
+      105afa93  PUSH EAX                            
+      105afa94  CALL 0x103cf720                       ; -> FUN_103cf720
+      105afa99  MOV ECX,EAX                         
+      105afa9b  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105afaa0  MOV EAX,dword ptr [EBP + -0x4]      
+      105afaa3  LEA ECX,[EBP + -0x18]               
+      105afaa6  CMP EAX,ECX                         
+      105afaa8  JZ 0x105afab7                       
+      105afaaa  TEST EAX,EAX                        
+      105afaac  JZ 0x105afab7                       
+      105afaae  PUSH EAX                            
+      105afaaf  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afab4  ADD ESP,0x4                         
+      105afab7  MOV EAX,dword ptr [EBP + -0x1c]     
+      105afaba  LEA ECX,[EBP + -0x30]               
+      105afabd  CMP EAX,ECX                         
+      105afabf  JZ 0x105aface                       
+      105afac1  TEST EAX,EAX                        
+      105afac3  JZ 0x105aface                       
+      105afac5  PUSH EAX                            
+      105afac6  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afacb  ADD ESP,0x4                         
+      105aface  LEA EAX,[EBP + -0x18]               
+      105afad1  PUSH 0x11308186                     
+      105afad6  PUSH 0x11308178                       ; "TargetRegionID"
+      105afadb  MOV ECX,EAX                         
+      105afadd  MOV dword ptr [EBP + -0x8],EAX      
+      105afae0  MOV dword ptr [EBP + -0x4],EAX      
+      105afae3  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afae8  LEA EAX,[EBP + -0x30]               
+      105afaeb  PUSH 0x1130a37a                     
+      105afaf0  PUSH 0x1130a364                       ; "CRegionPathFindRequest"
+      105afaf5  MOV ECX,EAX                         
+      105afaf7  MOV dword ptr [EBP + -0x20],EAX     
+      105afafa  MOV dword ptr [EBP + -0x1c],EAX     
+      105afafd  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afb02  PUSH 0x1                            
+      105afb04  LEA EAX,[EBP + -0x18]               
+      105afb07  PUSH EAX                            
+      105afb08  LEA EAX,[EBP + -0x30]               
+      105afb0b  PUSH EAX                            
+      105afb0c  CALL 0x103cf720                       ; -> FUN_103cf720
+      105afb11  MOV ECX,EAX                         
+      105afb13  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105afb18  MOV EAX,dword ptr [EBP + -0x1c]     
+      105afb1b  LEA ECX,[EBP + -0x30]               
+      105afb1e  CMP EAX,ECX                         
+      105afb20  JZ 0x105afb2f                       
+      105afb22  TEST EAX,EAX                        
+      105afb24  JZ 0x105afb2f                       
+      105afb26  PUSH EAX                            
+      105afb27  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afb2c  ADD ESP,0x4                         
+      105afb2f  MOV EAX,dword ptr [EBP + -0x4]      
+      105afb32  LEA ECX,[EBP + -0x18]               
+      105afb35  CMP EAX,ECX                         
+      105afb37  JZ 0x105afb46                       
+      105afb39  TEST EAX,EAX                        
+      105afb3b  JZ 0x105afb46                       
+      105afb3d  PUSH EAX                            
+      105afb3e  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afb43  ADD ESP,0x4                         
+      105afb46  LEA EAX,[EBP + -0x18]               
+      105afb49  PUSH 0x1130a388                     
+      105afb4e  PUSH 0x1130a37c                       ; "TargetEndDir"
+      105afb53  MOV ECX,EAX                         
+      105afb55  MOV dword ptr [EBP + -0x8],EAX      
+      105afb58  MOV dword ptr [EBP + -0x4],EAX      
+      105afb5b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afb60  LEA EAX,[EBP + -0x30]               
+      105afb63  PUSH 0x1130a37a                     
+      105afb68  PUSH 0x1130a364                       ; "CRegionPathFindRequest"
+      105afb6d  MOV ECX,EAX                         
+      105afb6f  MOV dword ptr [EBP + -0x20],EAX     
+      105afb72  MOV dword ptr [EBP + -0x1c],EAX     
+      105afb75  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105afb7a  PUSH 0x2                            
+      105afb7c  LEA EAX,[EBP + -0x18]               
+      105afb7f  PUSH EAX                            
+      105afb80  LEA EAX,[EBP + -0x30]               
+      105afb83  PUSH EAX                            
+      105afb84  CALL 0x103cf720                       ; -> FUN_103cf720
+      105afb89  MOV ECX,EAX                         
+      105afb8b  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105afb90  MOV EAX,dword ptr [EBP + -0x1c]     
+      105afb93  LEA ECX,[EBP + -0x30]               
+      105afb96  CMP EAX,ECX                         
+      105afb98  JZ 0x105afba7                       
+      105afb9a  TEST EAX,EAX                        
+      105afb9c  JZ 0x105afba7                       
+      105afb9e  PUSH EAX                            
+      105afb9f  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afba4  ADD ESP,0x4                         
+      105afba7  MOV EAX,dword ptr [EBP + -0x4]      
+      105afbaa  LEA ECX,[EBP + -0x18]               
+      105afbad  CMP EAX,ECX                         
+      105afbaf  JZ 0x105afbbe                       
+      105afbb1  TEST EAX,EAX                        
+      105afbb3  JZ 0x105afbbe                       
+      105afbb5  PUSH EAX                            
+      105afbb6  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105afbbb  ADD ESP,0x4                         
+      105afbbe  MOV ESP,EBP                         
+      105afbc0  POP EBP                             
+      105afbc1  RET                                 
+    ref 0x105afaf1  FUN_105afa50
+    ref 0x105afb69  FUN_105afa50
+    ref 0x105afc11  (outside any function)
+    ref 0x105afc71  (outside any function)
+    ref 0x105fd3d0  FUN_105fc120
+      -> FUN_105fc120 @105fc120 (18140 bytes)
+================ CCurrentRegionPathFindRequest
+  literal at 0x11309cac
+    ref 0x105ac561  (outside any function)
+    ref 0x105ac5c1  (outside any function)
+    ref 0x105fd3f6  FUN_105fc120
+================ CGetPathNextPos
+  literal at 0x11309e80
+    ref 0x105acea9  FUN_105ace80
+      -> FUN_105ace80 @105ace80 (250 bytes)
+      ---- instructions ----
+      105ace80  PUSH EBP                            
+      105ace81  MOV EBP,ESP                         
+      105ace83  SUB ESP,0x30                        
+      105ace86  LEA EAX,[EBP + -0x30]               
+      105ace89  PUSH 0x11309e2a                     
+      105ace8e  PUSH 0x11309e14                       ; "RegionPathFollowResult"
+      105ace93  MOV ECX,EAX                         
+      105ace95  MOV dword ptr [EBP + -0x20],EAX     
+      105ace98  MOV dword ptr [EBP + -0x1c],EAX     
+      105ace9b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105acea0  LEA EAX,[EBP + -0x18]               
+      105acea3  PUSH 0x11309e8f                     
+      105acea8  PUSH 0x11309e80                       ; "CGetPathNextPos"
+      105acead  MOV ECX,EAX                         
+      105aceaf  MOV dword ptr [EBP + -0x8],EAX      
+      105aceb2  MOV dword ptr [EBP + -0x4],EAX      
+      105aceb5  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105aceba  PUSH 0x0                            
+      105acebc  LEA EAX,[EBP + -0x30]               
+      105acebf  PUSH EAX                            
+      105acec0  LEA EAX,[EBP + -0x18]               
+      105acec3  PUSH EAX                            
+      105acec4  CALL 0x103cf720                       ; -> FUN_103cf720
+      105acec9  MOV ECX,EAX                         
+      105acecb  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105aced0  MOV EAX,dword ptr [EBP + -0x4]      
+      105aced3  LEA ECX,[EBP + -0x18]               
+      105aced6  CMP EAX,ECX                         
+      105aced8  JZ 0x105acee7                       
+      105aceda  TEST EAX,EAX                        
+      105acedc  JZ 0x105acee7                       
+      105acede  PUSH EAX                            
+      105acedf  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acee4  ADD ESP,0x4                         
+      105acee7  MOV EAX,dword ptr [EBP + -0x1c]     
+      105aceea  LEA ECX,[EBP + -0x30]               
+      105aceed  CMP EAX,ECX                         
+      105aceef  JZ 0x105acefe                       
+      105acef1  TEST EAX,EAX                        
+      105acef3  JZ 0x105acefe                       
+      105acef5  PUSH EAX                            
+      105acef6  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acefb  ADD ESP,0x4                         
+      105acefe  LEA EAX,[EBP + -0x18]               
+      105acf01  PUSH 0x11309eaa                     
+      105acf06  PUSH 0x11309e94                       ; "RegionConnectPointType"
+      105acf0b  MOV ECX,EAX                         
+      105acf0d  MOV dword ptr [EBP + -0x8],EAX      
+      105acf10  MOV dword ptr [EBP + -0x4],EAX      
+      105acf13  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105acf18  LEA EAX,[EBP + -0x30]               
+      105acf1b  PUSH 0x11309e8f                     
+      105acf20  PUSH 0x11309e80                       ; "CGetPathNextPos"
+      105acf25  MOV ECX,EAX                         
+      105acf27  MOV dword ptr [EBP + -0x20],EAX     
+      105acf2a  MOV dword ptr [EBP + -0x1c],EAX     
+      105acf2d  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105acf32  PUSH 0x1                            
+      105acf34  LEA EAX,[EBP + -0x18]               
+      105acf37  PUSH EAX                            
+      105acf38  LEA EAX,[EBP + -0x30]               
+      105acf3b  PUSH EAX                            
+      105acf3c  CALL 0x103cf720                       ; -> FUN_103cf720
+      105acf41  MOV ECX,EAX                         
+      105acf43  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105acf48  MOV EAX,dword ptr [EBP + -0x1c]     
+      105acf4b  LEA ECX,[EBP + -0x30]               
+      105acf4e  CMP EAX,ECX                         
+      105acf50  JZ 0x105acf5f                       
+      105acf52  TEST EAX,EAX                        
+      105acf54  JZ 0x105acf5f                       
+      105acf56  PUSH EAX                            
+      105acf57  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acf5c  ADD ESP,0x4                         
+      105acf5f  MOV EAX,dword ptr [EBP + -0x4]      
+      105acf62  LEA ECX,[EBP + -0x18]               
+      105acf65  CMP EAX,ECX                         
+      105acf67  JZ 0x105acf76                       
+      105acf69  TEST EAX,EAX                        
+      105acf6b  JZ 0x105acf76                       
+      105acf6d  PUSH EAX                            
+      105acf6e  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acf73  ADD ESP,0x4                         
+      105acf76  MOV ESP,EBP                         
+      105acf78  POP EBP                             
+      105acf79  RET                                 
+    ref 0x105acf21  FUN_105ace80
+    ref 0x105acfd1  (outside any function)
+    ref 0x105ad031  (outside any function)
+    ref 0x105fd338  FUN_105fc120
+================ CIsLastEdgeInPath
+  literal at 0x1130a1d0
+    ref 0x105af081  (outside any function)
+    ref 0x105af0e1  (outside any function)
+    ref 0x105fd384  FUN_105fc120
+================ CSetPathPointByIndex
+  literal at 0x1130bbb0
+    ref 0x105d19e9  FUN_105d19c0
+      -> FUN_105d19c0 @105d19c0 (382 bytes)
+      ---- instructions ----
+      105d19c0  PUSH EBP                            
+      105d19c1  MOV EBP,ESP                         
+      105d19c3  SUB ESP,0x30                        
+      105d19c6  LEA EAX,[EBP + -0x30]               
+      105d19c9  PUSH 0x1130bb86                     
+      105d19ce  PUSH 0x1130bb7c                       ; "PathBBName"
+      105d19d3  MOV ECX,EAX                         
+      105d19d5  MOV dword ptr [EBP + -0x20],EAX     
+      105d19d8  MOV dword ptr [EBP + -0x1c],EAX     
+      105d19db  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d19e0  LEA EAX,[EBP + -0x18]               
+      105d19e3  PUSH 0x1130bbc4                     
+      105d19e8  PUSH 0x1130bbb0                       ; "CSetPathPointByIndex"
+      105d19ed  MOV ECX,EAX                         
+      105d19ef  MOV dword ptr [EBP + -0x8],EAX      
+      105d19f2  MOV dword ptr [EBP + -0x4],EAX      
+      105d19f5  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d19fa  PUSH 0x0                            
+      105d19fc  PUSH 0x1                            
+      105d19fe  PUSH 0x0                            
+      105d1a00  LEA EAX,[EBP + -0x30]               
+      105d1a03  PUSH EAX                            
+      105d1a04  LEA EAX,[EBP + -0x18]               
+      105d1a07  PUSH EAX                            
+      105d1a08  CALL 0x103cf720                       ; -> FUN_103cf720
+      105d1a0d  MOV ECX,EAX                         
+      105d1a0f  CALL 0x103cf810                       ; -> FUN_103cf810
+      105d1a14  MOV EAX,dword ptr [EBP + -0x4]      
+      105d1a17  LEA ECX,[EBP + -0x18]               
+      105d1a1a  CMP EAX,ECX                         
+      105d1a1c  JZ 0x105d1a2b                       
+      105d1a1e  TEST EAX,EAX                        
+      105d1a20  JZ 0x105d1a2b                       
+      105d1a22  PUSH EAX                            
+      105d1a23  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1a28  ADD ESP,0x4                         
+      105d1a2b  MOV EAX,dword ptr [EBP + -0x1c]     
+      105d1a2e  LEA ECX,[EBP + -0x30]               
+      105d1a31  CMP EAX,ECX                         
+      105d1a33  JZ 0x105d1a42                       
+      105d1a35  TEST EAX,EAX                        
+      105d1a37  JZ 0x105d1a42                       
+      105d1a39  PUSH EAX                            
+      105d1a3a  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1a3f  ADD ESP,0x4                         
+      105d1a42  LEA EAX,[EBP + -0x18]               
+      105d1a45  PUSH 0x11308205                     
+      105d1a4a  PUSH 0x113081fc                       ; "PosBBName"
+      105d1a4f  MOV ECX,EAX                         
+      105d1a51  MOV dword ptr [EBP + -0x8],EAX      
+      105d1a54  MOV dword ptr [EBP + -0x4],EAX      
+      105d1a57  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d1a5c  LEA EAX,[EBP + -0x30]               
+      105d1a5f  PUSH 0x1130bbc4                     
+      105d1a64  PUSH 0x1130bbb0                       ; "CSetPathPointByIndex"
+      105d1a69  MOV ECX,EAX                         
+      105d1a6b  MOV dword ptr [EBP + -0x20],EAX     
+      105d1a6e  MOV dword ptr [EBP + -0x1c],EAX     
+      105d1a71  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d1a76  PUSH 0x0                            
+      105d1a78  PUSH 0x1                            
+      105d1a7a  PUSH 0x1                            
+      105d1a7c  LEA EAX,[EBP + -0x18]               
+      105d1a7f  PUSH EAX                            
+      105d1a80  LEA EAX,[EBP + -0x30]               
+      105d1a83  PUSH EAX                            
+      105d1a84  CALL 0x103cf720                       ; -> FUN_103cf720
+      105d1a89  MOV ECX,EAX                         
+      105d1a8b  CALL 0x103cf810                       ; -> FUN_103cf810
+      105d1a90  MOV EAX,dword ptr [EBP + -0x1c]     
+      105d1a93  LEA ECX,[EBP + -0x30]               
+      105d1a96  CMP EAX,ECX                         
+      105d1a98  JZ 0x105d1aa7                       
+      105d1a9a  TEST EAX,EAX                        
+      105d1a9c  JZ 0x105d1aa7                       
+      105d1a9e  PUSH EAX                            
+      105d1a9f  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1aa4  ADD ESP,0x4                         
+      105d1aa7  MOV EAX,dword ptr [EBP + -0x4]      
+      105d1aaa  LEA ECX,[EBP + -0x18]               
+      105d1aad  CMP EAX,ECX                         
+      105d1aaf  JZ 0x105d1abe                       
+      105d1ab1  TEST EAX,EAX                        
+      105d1ab3  JZ 0x105d1abe                       
+      105d1ab5  PUSH EAX                            
+      105d1ab6  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1abb  ADD ESP,0x4                         
+      105d1abe  LEA EAX,[EBP + -0x18]               
+      105d1ac1  PUSH 0x1130bbd3                     
+      105d1ac6  PUSH 0x1130bbc8                       ; "IndexBBName"
+      105d1acb  MOV ECX,EAX                         
+      105d1acd  MOV dword ptr [EBP + -0x8],EAX      
+      105d1ad0  MOV dword ptr [EBP + -0x4],EAX      
+      105d1ad3  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d1ad8  LEA EAX,[EBP + -0x30]               
+      105d1adb  PUSH 0x1130bbc4                     
+      105d1ae0  PUSH 0x1130bbb0                       ; "CSetPathPointByIndex"
+      105d1ae5  MOV ECX,EAX                         
+      105d1ae7  MOV dword ptr [EBP + -0x20],EAX     
+      105d1aea  MOV dword ptr [EBP + -0x1c],EAX     
+      105d1aed  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d1af2  PUSH 0x0                            
+      105d1af4  PUSH 0x1                            
+      105d1af6  PUSH 0x2                            
+      105d1af8  LEA EAX,[EBP + -0x18]               
+      105d1afb  PUSH EAX                            
+      105d1afc  LEA EAX,[EBP + -0x30]               
+      105d1aff  PUSH EAX                            
+      105d1b00  CALL 0x103cf720                       ; -> FUN_103cf720
+      105d1b05  MOV ECX,EAX                         
+      105d1b07  CALL 0x103cf810                       ; -> FUN_103cf810
+      105d1b0c  MOV EAX,dword ptr [EBP + -0x1c]     
+      105d1b0f  LEA ECX,[EBP + -0x30]               
+      105d1b12  CMP EAX,ECX                         
+      105d1b14  JZ 0x105d1b23                       
+      105d1b16  TEST EAX,EAX                        
+      105d1b18  JZ 0x105d1b23                       
+      105d1b1a  PUSH EAX                            
+      105d1b1b  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1b20  ADD ESP,0x4                         
+      105d1b23  MOV EAX,dword ptr [EBP + -0x4]      
+      105d1b26  LEA ECX,[EBP + -0x18]               
+      105d1b29  CMP EAX,ECX                         
+      105d1b2b  JZ 0x105d1b3a                       
+      105d1b2d  TEST EAX,EAX                        
+      105d1b2f  JZ 0x105d1b3a                       
+      105d1b31  PUSH EAX                            
+      105d1b32  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1b37  ADD ESP,0x4                         
+      105d1b3a  MOV ESP,EBP                         
+      105d1b3c  POP EBP                             
+      105d1b3d  RET                                 
+    ref 0x105d1a65  FUN_105d19c0
+    ref 0x105d1ae1  FUN_105d19c0
+    ref 0x105d1c11  (outside any function)
+    ref 0x105fcfa0  FUN_105fc120
+    ref 0x10622481  (outside any function)
+================ CSetPathLength
+  literal at 0x1130bb6c
+    ref 0x105d16a9  FUN_105d1680
+      -> FUN_105d1680 @105d1680 (258 bytes)
+      ---- instructions ----
+      105d1680  PUSH EBP                            
+      105d1681  MOV EBP,ESP                         
+      105d1683  SUB ESP,0x30                        
+      105d1686  LEA EAX,[EBP + -0x30]               
+      105d1689  PUSH 0x1130bb86                     
+      105d168e  PUSH 0x1130bb7c                       ; "PathBBName"
+      105d1693  MOV ECX,EAX                         
+      105d1695  MOV dword ptr [EBP + -0x20],EAX     
+      105d1698  MOV dword ptr [EBP + -0x1c],EAX     
+      105d169b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d16a0  LEA EAX,[EBP + -0x18]               
+      105d16a3  PUSH 0x1130bb7a                     
+      105d16a8  PUSH 0x1130bb6c                       ; "CSetPathLength"
+      105d16ad  MOV ECX,EAX                         
+      105d16af  MOV dword ptr [EBP + -0x8],EAX      
+      105d16b2  MOV dword ptr [EBP + -0x4],EAX      
+      105d16b5  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d16ba  PUSH 0x0                            
+      105d16bc  PUSH 0x1                            
+      105d16be  PUSH 0x0                            
+      105d16c0  LEA EAX,[EBP + -0x30]               
+      105d16c3  PUSH EAX                            
+      105d16c4  LEA EAX,[EBP + -0x18]               
+      105d16c7  PUSH EAX                            
+      105d16c8  CALL 0x103cf720                       ; -> FUN_103cf720
+      105d16cd  MOV ECX,EAX                         
+      105d16cf  CALL 0x103cf810                       ; -> FUN_103cf810
+      105d16d4  MOV EAX,dword ptr [EBP + -0x4]      
+      105d16d7  LEA ECX,[EBP + -0x18]               
+      105d16da  CMP EAX,ECX                         
+      105d16dc  JZ 0x105d16eb                       
+      105d16de  TEST EAX,EAX                        
+      105d16e0  JZ 0x105d16eb                       
+      105d16e2  PUSH EAX                            
+      105d16e3  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d16e8  ADD ESP,0x4                         
+      105d16eb  MOV EAX,dword ptr [EBP + -0x1c]     
+      105d16ee  LEA ECX,[EBP + -0x30]               
+      105d16f1  CMP EAX,ECX                         
+      105d16f3  JZ 0x105d1702                       
+      105d16f5  TEST EAX,EAX                        
+      105d16f7  JZ 0x105d1702                       
+      105d16f9  PUSH EAX                            
+      105d16fa  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d16ff  ADD ESP,0x4                         
+      105d1702  LEA EAX,[EBP + -0x18]               
+      105d1705  PUSH 0x1130bb98                     
+      105d170a  PUSH 0x1130bb88                       ; "PathLengthBBName"
+      105d170f  MOV ECX,EAX                         
+      105d1711  MOV dword ptr [EBP + -0x8],EAX      
+      105d1714  MOV dword ptr [EBP + -0x4],EAX      
+      105d1717  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d171c  LEA EAX,[EBP + -0x30]               
+      105d171f  PUSH 0x1130bb7a                     
+      105d1724  PUSH 0x1130bb6c                       ; "CSetPathLength"
+      105d1729  MOV ECX,EAX                         
+      105d172b  MOV dword ptr [EBP + -0x20],EAX     
+      105d172e  MOV dword ptr [EBP + -0x1c],EAX     
+      105d1731  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105d1736  PUSH 0x0                            
+      105d1738  PUSH 0x1                            
+      105d173a  PUSH 0x1                            
+      105d173c  LEA EAX,[EBP + -0x18]               
+      105d173f  PUSH EAX                            
+      105d1740  LEA EAX,[EBP + -0x30]               
+      105d1743  PUSH EAX                            
+      105d1744  CALL 0x103cf720                       ; -> FUN_103cf720
+      105d1749  MOV ECX,EAX                         
+      105d174b  CALL 0x103cf810                       ; -> FUN_103cf810
+      105d1750  MOV EAX,dword ptr [EBP + -0x1c]     
+      105d1753  LEA ECX,[EBP + -0x30]               
+      105d1756  CMP EAX,ECX                         
+      105d1758  JZ 0x105d1767                       
+      105d175a  TEST EAX,EAX                        
+      105d175c  JZ 0x105d1767                       
+      105d175e  PUSH EAX                            
+      105d175f  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d1764  ADD ESP,0x4                         
+      105d1767  MOV EAX,dword ptr [EBP + -0x4]      
+      105d176a  LEA ECX,[EBP + -0x18]               
+      105d176d  CMP EAX,ECX                         
+      105d176f  JZ 0x105d177e                       
+      105d1771  TEST EAX,EAX                        
+      105d1773  JZ 0x105d177e                       
+      105d1775  PUSH EAX                            
+      105d1776  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105d177b  ADD ESP,0x4                         
+      105d177e  MOV ESP,EBP                         
+      105d1780  POP EBP                             
+      105d1781  RET                                 
+    ref 0x105d1725  FUN_105d1680
+    ref 0x105d1831  (outside any function)
+    ref 0x105fcfc6  FUN_105fc120
+    ref 0x105fdab0  FUN_105fc120
+    ref 0x10622471  (outside any function)
+================ CGetNextRegionChangePoint
+  literal at 0x11309d8c
+    ref 0x105ac9f1  (outside any function)
+    ref 0x105aca51  (outside any function)
+    ref 0x105fd417  FUN_105fc120
+================ RegionPathFollowResult
+  literal at 0x11309e14
+    ref 0x105acb2f  FUN_105acb20
+      -> FUN_105acb20 @105acb20 (130 bytes)
+      ---- instructions ----
+      105acb20  PUSH EBP                            
+      105acb21  MOV EBP,ESP                         
+      105acb23  SUB ESP,0x30                        
+      105acb26  LEA EAX,[EBP + -0x30]               
+      105acb29  PUSH 0x11309e2a                     
+      105acb2e  PUSH 0x11309e14                       ; "RegionPathFollowResult"
+      105acb33  MOV ECX,EAX                         
+      105acb35  MOV dword ptr [EBP + -0x20],EAX     
+      105acb38  MOV dword ptr [EBP + -0x1c],EAX     
+      105acb3b  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105acb40  LEA EAX,[EBP + -0x18]               
+      105acb43  PUSH 0x11309e10                     
+      105acb48  PUSH 0x11309dfc                       ; "CGetNextTraversePath"
+      105acb4d  MOV ECX,EAX                         
+      105acb4f  MOV dword ptr [EBP + -0x8],EAX      
+      105acb52  MOV dword ptr [EBP + -0x4],EAX      
+      105acb55  CALL 0x1001ea30                       ; -> FUN_1001ea30
+      105acb5a  PUSH 0x0                            
+      105acb5c  LEA EAX,[EBP + -0x30]               
+      105acb5f  PUSH EAX                            
+      105acb60  LEA EAX,[EBP + -0x18]               
+      105acb63  PUSH EAX                            
+      105acb64  CALL 0x103cf720                       ; -> FUN_103cf720
+      105acb69  MOV ECX,EAX                         
+      105acb6b  CALL 0x103cf8f0                       ; -> FUN_103cf8f0
+      105acb70  MOV EAX,dword ptr [EBP + -0x4]      
+      105acb73  LEA ECX,[EBP + -0x18]               
+      105acb76  CMP EAX,ECX                         
+      105acb78  JZ 0x105acb87                       
+      105acb7a  TEST EAX,EAX                        
+      105acb7c  JZ 0x105acb87                       
+      105acb7e  PUSH EAX                            
+      105acb7f  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acb84  ADD ESP,0x4                         
+      105acb87  MOV EAX,dword ptr [EBP + -0x1c]     
+      105acb8a  LEA ECX,[EBP + -0x30]               
+      105acb8d  CMP EAX,ECX                         
+      105acb8f  JZ 0x105acb9e                       
+      105acb91  TEST EAX,EAX                        
+      105acb93  JZ 0x105acb9e                       
+      105acb95  PUSH EAX                            
+      105acb96  CALL 0x10653dc0                       ; -> FUN_10653dc0
+      105acb9b  ADD ESP,0x4                         
+      105acb9e  MOV ESP,EBP                         
+      105acba0  POP EBP                             
+      105acba1  RET                                 
+    ref 0x105ace8f  FUN_105ace80
