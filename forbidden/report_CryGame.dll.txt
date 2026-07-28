@@ -1,0 +1,13 @@
+======== CryGame.dll  "ForbiddenArea"
+  (no NUL-terminated hit)
+======== CryGame.dll  "Forbidden"
+  at 0x11ce19cf  -> "Forbidden"
+     (no code reference — data/annotation only)
+======== CryGame.dll  "AIShape"
+  (no NUL-terminated hit)
+======== CryGame.dll  "NavmeshShape"
+  (no NUL-terminated hit)
+======== CryGame.dll  "areasmission"
+  (no NUL-terminated hit)
+======== CryGame.dll  ".bai"
+  (no NUL-terminated hit)
