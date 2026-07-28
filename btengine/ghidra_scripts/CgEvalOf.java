@@ -29,10 +29,12 @@ import ghidra.program.model.mem.MemoryBlock;
 public class CgEvalOf extends GhidraScript {
     static final String OUT = "/home/fallen/Projets/MHO/decompiled/evalof";
 
+    // Edit this list per run; the chain is generic. Kept as a record of what has been through it.
+    //   round 1: CRegionPathFindRequest, CGetNextTraversePath (op name GetPathNextPos), CIsLastEdgeInPath
     static final String[] CLASSES = {
-        "CRegionPathFindRequest",
-        "CGetNextTraversePath",     // registered under the operation name GetPathNextPos
-        "CIsLastEdgeInPath",
+        "CSendEventToFG",
+        "CSetGeneralState",
+        "CSeekToPosition",
     };
 
     Memory mem;
