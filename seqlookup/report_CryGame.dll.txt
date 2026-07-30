@@ -1,0 +1,33 @@
+=== symbols matching (?i).*(sequence|animseq|skillseq).* ===
+  109eaa90  CLevelSuperSequence::GetManagers (115 bytes)
+  11059b30  CEvpDamageChecker::ValidateSequence_Security_code_5_ (182 bytes)
+  11065d70  CSkillSequence::LoadFromXmlNode (2019 bytes)
+  110717d0  CSkillSequenceGroup::LoadFromXml_variantA (412 bytes)
+  110720a0  CSkillSequenceGroup::LoadFromRecord_variantB (444 bytes)
+  110722e0  CSkillSequenceGroup::LoadFromRecord_variantC (475 bytes)
+  11077b00  CSkillSequenceGroup::LoadEntries (244 bytes)
+  114d28a0  CMonsterInfo::CollectSuperSequenceMonsters (408 bytes)
+  114d2aa0  CLevelSuperSequence::GetRemainingCount_Idx54 (256 bytes)
+
+=== "SkillSequenceGroup": 5 code sites ===
+
+=== "CatchUpDist": 1 code sites ===
+
+=== "IsRepeatLastKey": 1 code sites ===
+
+=== "EnableMoveSplineScale": 1 code sites ===
+
+=== "NextSequences": 1 code sites ===
+
+=== candidates, most anchors first ===
+  11065d70  CSkillSequence::LoadFromXmlNode                anchors=[CatchUpDist, EnableMoveSplineScale, NextSequences] bytes=2019
+  11077b00  CSkillSequenceGroup::LoadEntries               anchors=[SkillSequenceGroup] bytes=244
+  110722e0  CSkillSequenceGroup::LoadFromRecord_variantC   anchors=[SkillSequenceGroup] bytes=475
+  110720a0  CSkillSequenceGroup::LoadFromRecord_variantB   anchors=[SkillSequenceGroup] bytes=444
+  110717d0  CSkillSequenceGroup::LoadFromXml_variantA      anchors=[SkillSequenceGroup] bytes=412
+  10ab6e30  FUN_10ab6e30                                   anchors=[IsRepeatLastKey] bytes=420
+  wrote /home/fallen/Projets/MHO/decompiled/seqlookup/CLevelSuperSequence__GetManagers_109eaa90.c
+  wrote /home/fallen/Projets/MHO/decompiled/seqlookup/CEvpDamageChecker__ValidateSequence_Security_code_5__11059b30.c
+  wrote /home/fallen/Projets/MHO/decompiled/seqlookup/CSkillSequence__LoadFromXmlNode_11065d70.c
+  wrote /home/fallen/Projets/MHO/decompiled/seqlookup/CSkillSequenceGroup__LoadFromXml_variantA_110717d0.c
+  wrote /home/fallen/Projets/MHO/decompiled/seqlookup/CSkillSequence__LoadFromXmlNode_11065d70.c

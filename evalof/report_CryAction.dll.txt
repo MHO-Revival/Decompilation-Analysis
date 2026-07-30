@@ -1,467 +1,540 @@
-================================ CSendEventToFG
-  step 1: name string at 1130b298
-  step 2: getter at 105c82c0
-  step 3: vtable slot at 1130b278
-  step 4: [1130b26c] -> Evaluate 105c8030
-          FUN_105c8030 (397 bytes)
-            105c8030  PUSH EBP
-            105c8031  MOV EBP,ESP
-            105c8033  SUB ESP,0x28
-            105c8036  PUSH EDI
-            105c8037  MOV EDI,ECX
-            105c8039  LEA ECX,[EBP + -0x4]
-            105c803c  CALL 0x10a5d660
-            105c8041  LEA EAX,[EBP + -0x4]
-            105c8044  MOV ECX,EDI
-            105c8046  PUSH EAX
-            105c8047  PUSH 0x0
-            105c8049  CALL 0x103dbbb0
-            105c804e  TEST AL,AL
-            105c8050  JZ 0x105c81b3
-            105c8056  LEA ECX,[EBP + -0x4]
-            105c8059  CALL 0x10a5ec80
-            105c805e  LEA ECX,[EBP + -0x4]
-            105c8061  CALL 0x10a5d940
-            105c8066  TEST EAX,EAX
-            105c8068  JZ 0x105c81b3
-            105c806e  PUSH 0x0
-            105c8070  LEA ECX,[EBP + -0x4]
-            105c8073  CALL 0x10a5d920
-            105c8078  TEST AL,AL
-            105c807a  JZ 0x105c81b3
-            105c8080  MOV EAX,[0x113f3a18]
-            105c8085  MOV ECX,dword ptr [EDI + 0x54]
-            105c8088  PUSH ESI
-            105c8089  MOV EAX,dword ptr [EAX + 0x50]
-            105c808c  MOV ESI,dword ptr [EAX]
-            105c808e  MOV EAX,dword ptr [ECX]
-            105c8090  CALL dword ptr [EAX + 0xc]
-            105c8093  MOV ECX,dword ptr [0x113f3a18]
-            105c8099  PUSH EAX
-            105c809a  MOV ECX,dword ptr [ECX + 0x50]
-            105c809d  CALL dword ptr [ESI + 0x2c]
-            105c80a0  MOV ECX,dword ptr [0x113f3a18]
-            105c80a6  MOV ESI,EAX
-            105c80a8  CMP dword ptr [ECX + 0xd0],0x0
-            105c80af  JZ 0x105c81a8
-            105c80b5  TEST ESI,ESI
-            105c80b7  JZ 0x105c8130
-            105c80b9  MOV EDX,dword ptr [ESI]
-            105c80bb  MOV ECX,ESI
-            105c80bd  CALL dword ptr [EDX + 0x288]
-            105c80c3  TEST EAX,EAX
-            105c80c5  JZ 0x105c8130
-            105c80c7  MOV EAX,dword ptr [ESI]
-            105c80c9  MOV ECX,ESI
-            105c80cb  CALL dword ptr [EAX + 0x288]
-            105c80d1  LEA ECX,[EBP + -0x4]
-            105c80d4  MOV EAX,dword ptr [EAX + 0x4]
-            105c80d7  MOV dword ptr [EBP + -0x24],EAX
-            105c80da  LEA EAX,[EBP + -0x1c]
-            105c80dd  MOV dword ptr [EBP + -0x28],0x192
-            105c80e4  MOV dword ptr [EBP + -0x20],0xffffffff
-            105c80eb  MOV dword ptr [EBP + -0xc],EAX
-            105c80ee  MOV dword ptr [EBP + -0x8],EAX
-            105c80f1  MOV byte ptr [EBP + -0x1c],0x0
-            105c80f5  CALL 0x10a5d940
-            105c80fa  PUSH EAX
-            105c80fb  LEA ECX,[EBP + -0x1c]
-            105c80fe  CALL 0x10027e50
-            105c8103  MOV EAX,[0x113f3a18]
-            105c8108  LEA EDX,[EBP + -0x28]
-            105c810b  PUSH EDX
-            105c810c  MOV EAX,dword ptr [EAX + 0xd0]
-            105c8112  MOV ECX,dword ptr [EAX + 0x98]
-            105c8118  MOV EAX,dword ptr [ECX]
-            105c811a  CALL dword ptr [EAX + 0x14]
-            105c811d  LEA ECX,[EBP + -0x28]
-            105c8120  CALL 0x101d5230
-            105c8125  POP ESI
-            105c8126  MOV EAX,0x2
-            105c812b  POP EDI
-            105c812c  MOV ESP,EBP
-            105c812e  POP EBP
-            105c812f  RET
-            105c8130  LEA EAX,[EBP + -0x1c]
-            105c8133  MOV dword ptr [EBP + -0x28],0x192
-            105c813a  LEA ECX,[EBP + -0x4]
-            105c813d  MOV dword ptr [EBP + -0x24],0xffffffff
-            105c8144  MOV dword ptr [EBP + -0x20],0xffffffff
-            105c814b  MOV dword ptr [EBP + -0xc],EAX
-            105c814e  MOV dword ptr [EBP + -0x8],EAX
-            105c8151  MOV byte ptr [EBP + -0x1c],0x0
-            105c8155  CALL 0x10a5d940
-            105c815a  MOV ESI,EAX
-            105c815c  MOV EDX,ESI
-            105c815e  LEA EAX,[EDX + 0x1]
-            105c8161  MOV CL,byte ptr [EDX]
-            105c8163  INC EDX
-            105c8164  TEST CL,CL
-            105c8166  JNZ 0x105c8161
-            105c8168  SUB EDX,EAX
-            105c816a  LEA ECX,[EBP + -0x1c]
-            105c816d  LEA EAX,[EDX + ESI*0x1]
-            105c8170  PUSH EAX
-            105c8171  PUSH ESI
-            105c8172  CALL 0x100282d0
-            105c8177  MOV EAX,[0x113f3a18]
-            105c817c  LEA EDX,[EBP + -0x28]
-            105c817f  PUSH EDX
-            105c8180  MOV EAX,dword ptr [EAX + 0xd0]
-            105c8186  MOV ECX,dword ptr [EAX + 0x98]
-            105c818c  MOV EAX,dword ptr [ECX]
-            105c818e  CALL dword ptr [EAX + 0x14]
-            105c8191  MOV EAX,dword ptr [EBP + -0x8]
-            105c8194  LEA ECX,[EBP + -0x1c]
-            105c8197  CMP EAX,ECX
-            105c8199  JZ 0x105c81a8
-            105c819b  TEST EAX,EAX
-            105c819d  JZ 0x105c81a8
-            105c819f  PUSH EAX
-            105c81a0  CALL 0x10653dc0
-            105c81a5  ADD ESP,0x4
-            105c81a8  POP ESI
-            105c81a9  MOV EAX,0x2
-            105c81ae  POP EDI
-            105c81af  MOV ESP,EBP
-            105c81b1  POP EBP
-            105c81b2  RET
-            105c81b3  MOV EAX,0x1
-            105c81b8  POP EDI
-            105c81b9  MOV ESP,EBP
-            105c81bb  POP EBP
-            105c81bc  RET
-          ---- decompiled ----
-
-/* [RE-AUTO c0] */
-
-undefined4 __fastcall FUN_105c8030(int param_1)
-
-{
-  char *pcVar1;
-  char cVar2;
-  int iVar3;
-  undefined4 uVar4;
-  int *piVar5;
-  char *pcVar6;
-  char *pcVar7;
-  undefined4 local_2c;
-  undefined4 local_28;
-  undefined4 local_24;
-  undefined1 local_20 [16];
-  undefined1 *local_10;
-  undefined1 *local_c;
-  undefined1 local_8 [4];
-  
-  FUN_10a5d660();
-  cVar2 = FUN_103dbbb0(0,local_8);
-  if (cVar2 != '\0') {
-    FUN_10a5ec80();
-    iVar3 = FUN_10a5d940();
-    if (iVar3 != 0) {
-      cVar2 = FUN_10a5d920(0);
-      if (cVar2 != '\0') {
-        iVar3 = **(int **)(DAT_113f3a18 + 0x50);
-        uVar4 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
-        piVar5 = (int *)(**(code **)(iVar3 + 0x2c))(uVar4);
-        if (*(int *)(DAT_113f3a18 + 0xd0) != 0) {
-          if (piVar5 != (int *)0x0) {
-            iVar3 = (**(code **)(*piVar5 + 0x288))();
-            if (iVar3 != 0) {
-              iVar3 = (**(code **)(*piVar5 + 0x288))();
-              local_28 = *(undefined4 *)(iVar3 + 4);
-              local_10 = local_20;
-              local_2c = 0x192;
-              local_24 = 0xffffffff;
-              local_20[0] = 0;
-              local_c = local_10;
-              uVar4 = FUN_10a5d940();
-              FUN_10027e50(uVar4);
-              (**(code **)(**(int **)(*(int *)(DAT_113f3a18 + 0xd0) + 0x98) + 0x14))(&local_2c);
-              FUN_101d5230();
-              return 2;
-            }
-          }
-          local_10 = local_20;
-          local_2c = 0x192;
-          local_28 = 0xffffffff;
-          local_24 = 0xffffffff;
-          local_20[0] = 0;
-          local_c = local_10;
-          pcVar6 = (char *)FUN_10a5d940();
-          pcVar1 = pcVar6;
-          do {
-            pcVar7 = pcVar1;
-            pcVar1 = pcVar7 + 1;
-          } while (*pcVar7 != '\0');
-          FUN_100282d0(pcVar6,pcVar7);
-          (**(code **)(**(int **)(*(int *)(DAT_113f3a18 + 0xd0) + 0x98) + 0x14))(&local_2c);
-          if ((local_c != local_20) && (local_c != (undefined1 *)0x0)) {
-            FUN_10653dc0(local_c);
-          }
-        }
-        return 2;
-      }
-    }
-  }
-  return 1;
-}
-
-
-  step 2: getter at 105c8320
+================================ CSelectRandomChangeAreaPoint
+  step 1: name string at 1130aea0
+  step 2: getter at 105c43e0
   step 3 FAILED: getter not in any table
-================================ CSetGeneralState
-  step 1: name string at 1130b9ec
-  step 2: getter at 105cf8c0
-  step 3: vtable slot at 1130b9cc
-  step 4: [1130b9c0] -> Evaluate 105cf600
-          FUN_105cf600 (239 bytes)
-            105cf600  PUSH EBP
-            105cf601  MOV EBP,ESP
-            105cf603  SUB ESP,0x8
-            105cf606  PUSH ESI
-            105cf607  MOV ESI,ECX
-            105cf609  LEA ECX,[EBP + -0x8]
-            105cf60c  CALL 0x10a5d660
-            105cf611  LEA EAX,[EBP + -0x8]
-            105cf614  MOV ECX,ESI
-            105cf616  PUSH EAX
-            105cf617  PUSH 0x0
-            105cf619  CALL 0x103dbbb0
-            105cf61e  TEST AL,AL
-            105cf620  JNZ 0x105cf62c
-            105cf622  MOV EAX,0x1
-            105cf627  POP ESI
-            105cf628  MOV ESP,EBP
-            105cf62a  POP EBP
-            105cf62b  RET
-            105cf62c  LEA ECX,[EBP + -0x4]
-            105cf62f  CALL 0x10a5d660
-            105cf634  MOV ECX,dword ptr [ESI + 0x2c]
-            105cf637  MOV EAX,dword ptr [ECX + 0x4]
-            105cf63a  SUB EAX,dword ptr [ECX]
-            105cf63c  SAR EAX,0x2
-            105cf63f  CMP EAX,0x1
-            105cf642  JBE 0x105cf66f
-            105cf644  MOV EAX,dword ptr [ECX + 0x10]
-            105cf647  SUB EAX,dword ptr [ECX + 0xc]
-            105cf64a  AND EAX,0xfffffffc
-            105cf64d  CMP EAX,0x4
-            105cf650  JLE 0x105cf66f
-            105cf652  MOV EAX,dword ptr [ECX + 0xc]
-            105cf655  MOV EAX,dword ptr [EAX + 0x4]
-            105cf658  TEST EAX,EAX
-            105cf65a  JS 0x105cf66f
-            105cf65c  LEA ECX,[EBP + -0x4]
-            105cf65f  PUSH ECX
-            105cf660  PUSH EAX
-            105cf661  MOV ECX,ESI
-            105cf663  CALL 0x103d8940
-            105cf668  MOV ECX,EAX
-            105cf66a  CALL 0x103dc170
-            105cf66f  MOV ECX,dword ptr [ESI + 0x2c]
-            105cf672  MOV EAX,dword ptr [ECX + 0x4]
-            105cf675  SUB EAX,dword ptr [ECX]
-            105cf677  SAR EAX,0x2
-            105cf67a  CMP EAX,0x2
-            105cf67d  JBE 0x105cf6aa
-            105cf67f  MOV EAX,dword ptr [ECX + 0x10]
-            105cf682  SUB EAX,dword ptr [ECX + 0xc]
-            105cf685  AND EAX,0xfffffffc
-            105cf688  CMP EAX,0x8
-            105cf68b  JLE 0x105cf6aa
-            105cf68d  MOV EAX,dword ptr [ECX + 0xc]
-            105cf690  MOV EAX,dword ptr [EAX + 0x8]
-            105cf693  TEST EAX,EAX
-            105cf695  JS 0x105cf6aa
-            105cf697  LEA ECX,[EBP + -0x4]
-            105cf69a  PUSH ECX
-            105cf69b  PUSH EAX
-            105cf69c  MOV ECX,ESI
-            105cf69e  CALL 0x103d8940
-            105cf6a3  MOV ECX,EAX
-            105cf6a5  CALL 0x101cbef0
-            105cf6aa  MOV ECX,dword ptr [ESI + 0x2c]
-            105cf6ad  MOV EAX,dword ptr [ECX + 0x4]
-            105cf6b0  SUB EAX,dword ptr [ECX]
-            105cf6b2  SAR EAX,0x2
-            105cf6b5  CMP EAX,0x1
-            105cf6b8  JBE 0x105cf6e5
-            105cf6ba  MOV EAX,dword ptr [ECX + 0x10]
-            105cf6bd  SUB EAX,dword ptr [ECX + 0xc]
-            105cf6c0  AND EAX,0xfffffffc
-            105cf6c3  CMP EAX,0x4
-            105cf6c6  JLE 0x105cf6e5
-            105cf6c8  MOV EAX,dword ptr [ECX + 0xc]
-            105cf6cb  MOV EAX,dword ptr [EAX + 0x4]
-            105cf6ce  TEST EAX,EAX
-            105cf6d0  JS 0x105cf6e5
-            105cf6d2  LEA ECX,[EBP + -0x8]
-            105cf6d5  PUSH ECX
-            105cf6d6  PUSH EAX
-            105cf6d7  MOV ECX,ESI
-            105cf6d9  CALL 0x103d8940
-            105cf6de  MOV ECX,EAX
-            105cf6e0  CALL 0x101cbef0
-            105cf6e5  MOV EAX,0x2
-            105cf6ea  POP ESI
-            105cf6eb  MOV ESP,EBP
-            105cf6ed  POP EBP
-            105cf6ee  RET
-          ---- decompiled ----
-
-/* [RE-AUTO c0] */
-
-undefined4 __fastcall FUN_105cf600(int param_1)
-
-{
-  int *piVar1;
-  char cVar2;
-  undefined1 local_c [4];
-  undefined1 local_8 [4];
-  
-  FUN_10a5d660();
-  cVar2 = FUN_103dbbb0(0,local_c);
-  if (cVar2 == '\0') {
-    return 1;
-  }
-  FUN_10a5d660();
-  piVar1 = *(int **)(param_1 + 0x2c);
-  if (((1 < (uint)(piVar1[1] - *piVar1 >> 2)) && (4 < (int)(piVar1[4] - piVar1[3] & 0xfffffffcU)))
-     && (-1 < *(int *)(piVar1[3] + 4))) {
-    FUN_103d8940(*(int *)(piVar1[3] + 4),local_8);
-    FUN_103dc170();
-  }
-  piVar1 = *(int **)(param_1 + 0x2c);
-  if (((2 < (uint)(piVar1[1] - *piVar1 >> 2)) && (8 < (int)(piVar1[4] - piVar1[3] & 0xfffffffcU)))
-     && (-1 < *(int *)(piVar1[3] + 8))) {
-    FUN_103d8940(*(int *)(piVar1[3] + 8),local_8);
-    FUN_101cbef0();
-  }
-  piVar1 = *(int **)(param_1 + 0x2c);
-  if (((1 < (uint)(piVar1[1] - *piVar1 >> 2)) && (4 < (int)(piVar1[4] - piVar1[3] & 0xfffffffcU)))
-     && (-1 < *(int *)(piVar1[3] + 4))) {
-    FUN_103d8940(*(int *)(piVar1[3] + 4),local_c);
-    FUN_101cbef0();
-  }
-  return 2;
-}
-
-
-  step 2: getter at 105cf920
-  step 3 FAILED: getter not in any table
-================================ CSeekToPosition
-  step 1: name string at 1130cc9c
-  step 2: getter at 105e86e0
-  step 3: vtable slot at 1130cc7c
-  step 4: [1130cc70] -> Evaluate 105e8340
-          FUN_105e8340 (174 bytes)
-            105e8340  PUSH EBP
-            105e8341  MOV EBP,ESP
-            105e8343  SUB ESP,0x8
-            105e8346  PUSH EBX
-            105e8347  MOV EBX,ECX
-            105e8349  MOV EAX,dword ptr [EBX + 0x20]
-            105e834c  CMP byte ptr [EAX + 0xd8],0x0
-            105e8353  JZ 0x105e83e4
-            105e8359  MOV EAX,[0x113f3a18]
-            105e835e  PUSH ESI
-            105e835f  PUSH EDI
-            105e8360  MOV ECX,dword ptr [EAX + 0x4]
-            105e8363  MOV EAX,dword ptr [ECX]
-            105e8365  CALL dword ptr [EAX + 0x3c]
-            105e8368  MOV ECX,EAX
-            105e836a  MOV EDX,dword ptr [EAX]
-            105e836c  CALL dword ptr [EDX + 0x68]
-            105e836f  MOV ECX,dword ptr [EBX + 0x54]
-            105e8372  MOV ESI,EAX
-            105e8374  MOV EDX,dword ptr [ECX]
-            105e8376  MOV EDI,dword ptr [ESI]
-            105e8378  CALL dword ptr [EDX + 0xc]
-            105e837b  PUSH EAX
-            105e837c  MOV ECX,ESI
-            105e837e  CALL dword ptr [EDI + 0xc]
-            105e8381  POP EDI
-            105e8382  POP ESI
-            105e8383  TEST EAX,EAX
-            105e8385  JZ 0x105e83da
-            105e8387  MOV EDX,dword ptr [EAX]
-            105e8389  MOV ECX,EAX
-            105e838b  CALL dword ptr [EDX + 0x320]
-            105e8391  TEST EAX,EAX
-            105e8393  JZ 0x105e83da
-            105e8395  PUSH 0x11307bf8
-            105e839a  LEA ECX,[EBP + -0x8]
-            105e839d  MOV byte ptr [EBP + -0x1],0x1
-            105e83a1  CALL 0x10a5d620
-            105e83a6  LEA EAX,[EBP + -0x8]
-            105e83a9  MOV ECX,EBX
-            105e83ab  PUSH EAX
-            105e83ac  PUSH 0x3
-            105e83ae  CALL 0x1055ace0
-            105e83b3  LEA EAX,[EBP + -0x1]
-            105e83b6  MOV ECX,EBX
-            105e83b8  PUSH EAX
-            105e83b9  PUSH 0x1
-            105e83bb  CALL 0x10562100
-            105e83c0  LEA EAX,[EBP + -0x1]
-            105e83c3  MOV ECX,EBX
-            105e83c5  PUSH EAX
-            105e83c6  PUSH 0x2
-            105e83c8  CALL 0x10562100
-            105e83cd  LEA EAX,[EBP + -0x1]
-            105e83d0  MOV ECX,EBX
-            105e83d2  PUSH EAX
-            105e83d3  PUSH 0x0
-            105e83d5  CALL 0x10562100
-            105e83da  MOV EAX,0x3
-            105e83df  POP EBX
-            105e83e0  MOV ESP,EBP
-            105e83e2  POP EBP
-            105e83e3  RET
-            105e83e4  CALL 0x105e83f0
-            105e83e9  POP EBX
-            105e83ea  MOV ESP,EBP
-            105e83ec  POP EBP
-            105e83ed  RET
+  step 2: getter at 10622200
+  step 3: vtable slot at 1130f9ac
+  step 4: [1130f9a0] -> Evaluate 105c3ac0
+          FUN_105c3ac0 (1097 bytes)
+            105c3ac0  PUSH EBP
+            105c3ac1  MOV EBP,ESP
+            105c3ac3  SUB ESP,0x54
+            105c3ac6  MOV EAX,[0x113f3a18]
+            105c3acb  PUSH EBX
+            105c3acc  MOV EBX,ECX
+            105c3ace  PUSH ESI
+            105c3acf  MOV ECX,dword ptr [EAX + 0x4]
+            105c3ad2  PUSH EDI
+            105c3ad3  MOV dword ptr [EBP + -0xc],EBX
+            105c3ad6  MOV EAX,dword ptr [ECX]
+            105c3ad8  CALL dword ptr [EAX + 0x3c]
+            105c3adb  MOV ECX,EAX
+            105c3add  MOV EDX,dword ptr [EAX]
+            105c3adf  CALL dword ptr [EDX + 0x68]
+            105c3ae2  MOV ECX,dword ptr [EBX + 0x54]
+            105c3ae5  MOV ESI,EAX
+            105c3ae7  MOV EDX,dword ptr [ECX]
+            105c3ae9  MOV EDI,dword ptr [ESI]
+            105c3aeb  CALL dword ptr [EDX + 0xc]
+            105c3aee  PUSH EAX
+            105c3aef  MOV ECX,ESI
+            105c3af1  CALL dword ptr [EDI + 0xc]
+            105c3af4  MOV EBX,EAX
+            105c3af6  TEST EBX,EBX
+            105c3af8  JZ 0x105c3efd
+            105c3afe  MOV EDX,dword ptr [EBX]
+            105c3b00  MOV ECX,EBX
+            105c3b02  CALL dword ptr [EDX + 0x320]
+            105c3b08  MOV ESI,EAX
+            105c3b0a  TEST ESI,ESI
+            105c3b0c  JZ 0x105c3efd
+            105c3b12  MOV ECX,dword ptr [0x113f3a18]
+            105c3b18  MOV ECX,dword ptr [ECX + 0xd0]
+            105c3b1e  MOV EDX,dword ptr [ECX]
+            105c3b20  CALL dword ptr [EDX + 0xcc]
+            105c3b26  MOV ECX,EAX
+            105c3b28  TEST ECX,ECX
+            105c3b2a  JZ 0x105c3efd
+            105c3b30  MOV EAX,dword ptr [ECX]
+            105c3b32  CALL dword ptr [EAX + 0x4]
+            105c3b35  MOV ECX,EAX
+            105c3b37  TEST ECX,ECX
+            105c3b39  JZ 0x105c3efd
+            105c3b3f  MOV EAX,dword ptr [ECX]
+            105c3b41  PUSH dword ptr [ESI + 0x4]
+            105c3b44  CALL dword ptr [EAX + 0xc]
+            105c3b47  MOV EDI,EAX
+            105c3b49  TEST EDI,EDI
+            105c3b4b  JZ 0x105c3efd
+            105c3b51  LEA ECX,[EBP + -0x1c]
+            105c3b54  MOV dword ptr [EBP + -0x1c],0x0
+            105c3b5b  MOV dword ptr [EBP + -0x18],0x0
+            105c3b62  MOV dword ptr [EBP + -0x14],0x0
+            105c3b69  CALL 0x105c0740
+            105c3b6e  LEA ECX,[EBP + -0x8]
+            105c3b71  CALL 0x10a5d660
+            105c3b76  MOV ECX,dword ptr [EBP + -0xc]
+            105c3b79  LEA EAX,[EBP + -0x8]
+            105c3b7c  PUSH EAX
+            105c3b7d  PUSH 0x0
+            105c3b7f  CALL 0x103dbbb0
+            105c3b84  TEST AL,AL
+            105c3b86  JZ 0x105c3c53
+            105c3b8c  PUSH 0x1130acf0
+            105c3b91  LEA ECX,[EBP + -0x8]
+            105c3b94  XOR ESI,ESI
+            105c3b96  CALL 0x10a5d8d0
+            105c3b9b  TEST AL,AL
+            105c3b9d  JZ 0x105c3bb7
+            105c3b9f  MOV EAX,dword ptr [EDI]
+            105c3ba1  LEA ECX,[EBP + -0x1c]
+            105c3ba4  PUSH -0x1
+            105c3ba6  MOV ESI,0x1
+            105c3bab  PUSH ESI
+            105c3bac  PUSH ECX
+            105c3bad  MOV ECX,EDI
+            105c3baf  CALL dword ptr [EAX + 0x40]
+            105c3bb2  JMP 0x105c3c60
+            105c3bb7  PUSH 0x11309e90
+            105c3bbc  LEA ECX,[EBP + -0x8]
+            105c3bbf  CALL 0x10a5d8d0
+            105c3bc4  TEST AL,AL
+            105c3bc6  JZ 0x105c3be0
+            105c3bc8  MOV EAX,dword ptr [EDI]
+            105c3bca  LEA ECX,[EBP + -0x1c]
+            105c3bcd  PUSH -0x1
+            105c3bcf  MOV ESI,0x3
+            105c3bd4  PUSH ESI
+            105c3bd5  PUSH ECX
+            105c3bd6  MOV ECX,EDI
+            105c3bd8  CALL dword ptr [EAX + 0x40]
+            105c3bdb  JMP 0x105c3c60
+            105c3be0  PUSH 0x1130ac4c
+            105c3be5  LEA ECX,[EBP + -0x8]
+            105c3be8  CALL 0x10a5d8d0
+            105c3bed  TEST AL,AL
+            105c3bef  JZ 0x105c3c06
+            105c3bf1  MOV EAX,dword ptr [EDI]
+            105c3bf3  LEA ECX,[EBP + -0x1c]
+            105c3bf6  PUSH -0x1
+            105c3bf8  MOV ESI,0x2
+            105c3bfd  PUSH ESI
+            105c3bfe  PUSH ECX
+            105c3bff  MOV ECX,EDI
+            105c3c01  CALL dword ptr [EAX + 0x40]
+            105c3c04  JMP 0x105c3c60
+            105c3c06  PUSH 0x1130ac6c
+            105c3c0b  LEA ECX,[EBP + -0x8]
+            105c3c0e  CALL 0x10a5d8d0
+            105c3c13  TEST AL,AL
+            105c3c15  JZ 0x105c3c2c
+            105c3c17  MOV EAX,dword ptr [EDI]
+            105c3c19  LEA ECX,[EBP + -0x1c]
+            105c3c1c  PUSH -0x1
+            105c3c1e  MOV ESI,0x4
+            105c3c23  PUSH ESI
+            105c3c24  PUSH ECX
+            105c3c25  MOV ECX,EDI
+            105c3c27  CALL dword ptr [EAX + 0x40]
+            105c3c2a  JMP 0x105c3c60
+            105c3c2c  PUSH 0x1130ac74
+            105c3c31  LEA ECX,[EBP + -0x8]
+            105c3c34  CALL 0x10a5d8d0
+            105c3c39  TEST AL,AL
+            105c3c3b  MOV ECX,0x5
+            105c3c40  MOV EAX,dword ptr [EDI]
+            105c3c42  CMOVNZ ESI,ECX
+            105c3c45  LEA ECX,[EBP + -0x1c]
+            105c3c48  PUSH -0x1
+            105c3c4a  PUSH ESI
+            105c3c4b  PUSH ECX
+            105c3c4c  MOV ECX,EDI
+            105c3c4e  CALL dword ptr [EAX + 0x40]
+            105c3c51  JMP 0x105c3c60
+            105c3c53  MOV EAX,dword ptr [EDI]
+            105c3c55  LEA ECX,[EBP + -0x1c]
+            105c3c58  PUSH -0x1
+            105c3c5a  PUSH ECX
+            105c3c5b  MOV ECX,EDI
+            105c3c5d  CALL dword ptr [EAX + 0x44]
+            105c3c60  MOV ESI,dword ptr [EBP + -0x18]
+            105c3c63  MOV EAX,dword ptr [EBP + -0x1c]
+            105c3c66  SUB ESI,EAX
+            105c3c68  SAR ESI,0x2
+            105c3c6b  MOV dword ptr [EBP + -0x10],ESI
+            105c3c6e  TEST ESI,ESI
+            105c3c70  JLE 0x105c3ee2
+            105c3c76  CALL 0x10655dd0
+            105c3c7b  FIMUL dword ptr [EBP + -0x10]
+            105c3c7e  CALL 0x112be700
+            105c3c83  MOV EDI,EAX
+            105c3c85  MOV EAX,dword ptr [EBP + -0x1c]
+            105c3c88  CMP EDI,ESI
+            105c3c8a  JGE 0x105c3ee2
+            105c3c90  MOV EDI,dword ptr [EAX + EDI*0x4]
+            105c3c93  TEST EDI,EDI
+            105c3c95  JZ 0x105c3ee2
+            105c3c9b  MOV EAX,dword ptr [EBX]
+            105c3c9d  MOV ECX,EBX
+            105c3c9f  CALL dword ptr [EAX + 0x364]
+            105c3ca5  PUSH EDI
+            105c3ca6  MOV ECX,EAX
+            105c3ca8  MOV EDX,dword ptr [EAX]
+            105c3caa  CALL dword ptr [EDX + 0xa8]
+            105c3cb0  MOV EBX,dword ptr [EBP + -0xc]
+            105c3cb3  LEA EAX,[EBP + -0x1]
+            105c3cb6  PUSH EAX
+            105c3cb7  PUSH 0x9
+            105c3cb9  MOV ECX,EBX
+            105c3cbb  MOV byte ptr [EBP + -0x1],0x0
+            105c3cbf  CALL 0x103db9b0
+            105c3cc4  CMP byte ptr [EBP + -0x1],0x0
+            105c3cc8  JZ 0x105c3ccf
+            105c3cca  MOV EAX,dword ptr [EDI + 0x14]
+            105c3ccd  JMP 0x105c3cd2
+            105c3ccf  MOV EAX,dword ptr [EDI + 0x4]
+            105c3cd2  MOV dword ptr [EBP + -0xc],EAX
+            105c3cd5  MOV ECX,EBX
+            105c3cd7  LEA EAX,[EBP + -0xc]
+            105c3cda  PUSH EAX
+            105c3cdb  PUSH 0x1
+            105c3cdd  CALL 0x105572f0
+            105c3ce2  MOV ESI,dword ptr [EDI + 0x5c]
+            105c3ce5  LEA ECX,[EBP + -0x54]
+            105c3ce8  PUSH 0x113bf04c
+            105c3ced  CALL 0x10a5d620
+            105c3cf2  PUSH 0x11307a10
+            105c3cf7  LEA ECX,[EBP + -0x50]
+            105c3cfa  CALL 0x10a5d620
+            105c3cff  PUSH 0x1130ac4c
+            105c3d04  LEA ECX,[EBP + -0x4c]
+            105c3d07  CALL 0x10a5d620
+            105c3d0c  PUSH 0x11309e90
+            105c3d11  LEA ECX,[EBP + -0x48]
+            105c3d14  CALL 0x10a5d620
+            105c3d19  PUSH 0x1130ac6c
+            105c3d1e  LEA ECX,[EBP + -0x44]
+            105c3d21  CALL 0x10a5d620
+            105c3d26  PUSH 0x1130ac74
+            105c3d2b  LEA ECX,[EBP + -0x40]
+            105c3d2e  CALL 0x10a5d620
+            105c3d33  LEA EAX,[EBP + -0x54]
+            105c3d36  MOV ECX,EBX
+            105c3d38  LEA EAX,[EAX + ESI*0x4]
+            105c3d3b  PUSH EAX
+            105c3d3c  PUSH 0x2
+            105c3d3e  CALL 0x1055ace0
+            105c3d43  MOVSS XMM0,dword ptr [EDI + 0x8]
+            105c3d48  MOV ECX,EBX
+            105c3d4a  MOVSS XMM1,dword ptr [EDI + 0xc]
+            105c3d4f  MOVSS XMM2,dword ptr [EDI + 0x10]
+            105c3d54  MOVSS dword ptr [EBP + -0x28],XMM0
+            105c3d59  MOV EAX,dword ptr [EBP + -0x28]
+            105c3d5c  MOV dword ptr [EBP + -0x38],EAX
+            105c3d5f  MOVSS dword ptr [EBP + -0x24],XMM1
+            105c3d64  MOV EAX,dword ptr [EBP + -0x24]
+            105c3d67  MOV dword ptr [EBP + -0x34],EAX
+            105c3d6a  MOVSS dword ptr [EBP + -0x20],XMM2
+            105c3d6f  MOV EAX,dword ptr [EBP + -0x20]
+            105c3d72  MOV dword ptr [EBP + -0x30],EAX
+            105c3d75  LEA EAX,[EBP + -0x38]
+            105c3d78  PUSH EAX
+            105c3d79  PUSH 0x3
+            105c3d7b  CALL 0x10551270
+            105c3d80  MOVSS XMM0,dword ptr [EDI + 0x18]
+            105c3d85  MOV ECX,EBX
+            105c3d87  MOVSS XMM1,dword ptr [EDI + 0x1c]
+            105c3d8c  MOVSS XMM2,dword ptr [EDI + 0x20]
+            105c3d91  MOVSS dword ptr [EBP + -0x28],XMM0
+            105c3d96  MOV EAX,dword ptr [EBP + -0x28]
+            105c3d99  MOV dword ptr [EBP + -0x38],EAX
+            105c3d9c  MOVSS dword ptr [EBP + -0x24],XMM1
+            105c3da1  MOV EAX,dword ptr [EBP + -0x24]
+            105c3da4  MOV dword ptr [EBP + -0x34],EAX
+            105c3da7  MOVSS dword ptr [EBP + -0x20],XMM2
+            105c3dac  MOV EAX,dword ptr [EBP + -0x20]
+            105c3daf  MOV dword ptr [EBP + -0x30],EAX
+            105c3db2  LEA EAX,[EBP + -0x38]
+            105c3db5  PUSH EAX
+            105c3db6  PUSH 0x4
+            105c3db8  CALL 0x10551270
+            105c3dbd  MOVSS XMM0,dword ptr [EDI + 0x40]
+            105c3dc2  MOV ECX,EBX
+            105c3dc4  MOVSS XMM1,dword ptr [EDI + 0x44]
+            105c3dc9  MOVSS XMM2,dword ptr [EDI + 0x48]
+            105c3dce  MOVSS dword ptr [EBP + -0x28],XMM0
+            105c3dd3  MOV EAX,dword ptr [EBP + -0x28]
+            105c3dd6  MOV dword ptr [EBP + -0x38],EAX
+            105c3dd9  MOVSS dword ptr [EBP + -0x24],XMM1
+            105c3dde  MOV EAX,dword ptr [EBP + -0x24]
+            105c3de1  MOV dword ptr [EBP + -0x34],EAX
+            105c3de4  MOVSS dword ptr [EBP + -0x20],XMM2
+            105c3de9  MOV EAX,dword ptr [EBP + -0x20]
+            105c3dec  MOV dword ptr [EBP + -0x30],EAX
+            105c3def  LEA EAX,[EBP + -0x38]
+            105c3df2  PUSH EAX
+            105c3df3  PUSH 0x6
+            105c3df5  CALL 0x10551270
+            105c3dfa  MOVSS XMM0,dword ptr [EDI + 0x24]
+            105c3dff  MOV ECX,EBX
+            105c3e01  MOVSS XMM1,dword ptr [EDI + 0x28]
+            105c3e06  MOVSS XMM2,dword ptr [EDI + 0x2c]
+            105c3e0b  MOVSS XMM3,dword ptr [EDI + 0x30]
+            105c3e10  MOVSS dword ptr [EBP + -0x3c],XMM0
+            105c3e15  MOV EAX,dword ptr [EBP + -0x3c]
+            105c3e18  MOV dword ptr [EBP + -0x2c],EAX
+            105c3e1b  MOVSS dword ptr [EBP + -0x38],XMM1
+            105c3e20  MOV EAX,dword ptr [EBP + -0x38]
+            105c3e23  MOV dword ptr [EBP + -0x28],EAX
+            105c3e26  MOVSS dword ptr [EBP + -0x34],XMM2
+            105c3e2b  MOV EAX,dword ptr [EBP + -0x34]
+            105c3e2e  MOV dword ptr [EBP + -0x24],EAX
+            105c3e31  MOVSS dword ptr [EBP + -0x30],XMM3
+            105c3e36  MOV EAX,dword ptr [EBP + -0x30]
+            105c3e39  MOV dword ptr [EBP + -0x20],EAX
+            105c3e3c  LEA EAX,[EBP + -0x2c]
+            105c3e3f  PUSH EAX
+            105c3e40  PUSH 0x5
+            105c3e42  CALL 0x105bff60
+            105c3e47  CMP byte ptr [EBP + -0x1],0x0
+            105c3e4b  JZ 0x105c3e5e
+            105c3e4d  MOVSS XMM0,dword ptr [EDI + 0x40]
+            105c3e52  MOVSS XMM1,dword ptr [EDI + 0x44]
+            105c3e57  MOVSS XMM2,dword ptr [EDI + 0x48]
+            105c3e5c  JMP 0x105c3e6d
+            105c3e5e  MOVSS XMM0,dword ptr [EDI + 0x34]
+            105c3e63  MOVSS XMM1,dword ptr [EDI + 0x38]
+            105c3e68  MOVSS XMM2,dword ptr [EDI + 0x3c]
+            105c3e6d  MOVSS dword ptr [EBP + -0x38],XMM0
+            105c3e72  MOV ECX,EBX
+            105c3e74  MOV EAX,dword ptr [EBP + -0x38]
+            105c3e77  MOV dword ptr [EBP + -0x28],EAX
+            105c3e7a  MOVSS dword ptr [EBP + -0x34],XMM1
+            105c3e7f  MOV EAX,dword ptr [EBP + -0x34]
+            105c3e82  MOV dword ptr [EBP + -0x24],EAX
+            105c3e85  MOVSS dword ptr [EBP + -0x30],XMM2
+            105c3e8a  MOV EAX,dword ptr [EBP + -0x30]
+            105c3e8d  MOV dword ptr [EBP + -0x20],EAX
+            105c3e90  LEA EAX,[EBP + -0x28]
+            105c3e93  PUSH EAX
+            105c3e94  PUSH 0x7
+            105c3e96  CALL 0x10551270
+            105c3e9b  MOVSS XMM0,dword ptr [EDI + 0x50]
+            105c3ea0  MOV ECX,EBX
+            105c3ea2  MOVSS XMM1,dword ptr [EDI + 0x54]
+            105c3ea7  MOVSS XMM2,dword ptr [EDI + 0x58]
+            105c3eac  MOVSS dword ptr [EBP + -0x38],XMM0
+            105c3eb1  MOV EAX,dword ptr [EBP + -0x38]
+            105c3eb4  MOV dword ptr [EBP + -0x28],EAX
+            105c3eb7  MOVSS dword ptr [EBP + -0x34],XMM1
+            105c3ebc  MOV EAX,dword ptr [EBP + -0x34]
+            105c3ebf  MOV dword ptr [EBP + -0x24],EAX
+            105c3ec2  MOVSS dword ptr [EBP + -0x30],XMM2
+            105c3ec7  MOV EAX,dword ptr [EBP + -0x30]
+            105c3eca  MOV dword ptr [EBP + -0x20],EAX
+            105c3ecd  LEA EAX,[EBP + -0x28]
+            105c3ed0  PUSH EAX
+            105c3ed1  PUSH 0x8
+            105c3ed3  CALL 0x10551270
+            105c3ed8  MOV EAX,dword ptr [EBP + -0x1c]
+            105c3edb  MOV ESI,0x2
+            105c3ee0  JMP 0x105c3ee7
+            105c3ee2  MOV ESI,0x1
+            105c3ee7  TEST EAX,EAX
+            105c3ee9  JZ 0x105c3ef4
+            105c3eeb  PUSH EAX
+            105c3eec  CALL 0x10653dc0
+            105c3ef1  ADD ESP,0x4
+            105c3ef4  MOV EAX,ESI
+            105c3ef6  POP EDI
+            105c3ef7  POP ESI
+            105c3ef8  POP EBX
+            105c3ef9  MOV ESP,EBP
+            105c3efb  POP EBP
+            105c3efc  RET
+            105c3efd  POP EDI
+            105c3efe  POP ESI
+            105c3eff  MOV EAX,0x1
+            105c3f04  POP EBX
+            105c3f05  MOV ESP,EBP
+            105c3f07  POP EBP
+            105c3f08  RET
           ---- decompiled ----
 
 /* [RE-AUTO c0]
    strings:
-     ""Position"" */
+     ""GoDown""
+     ""SmallSize""
+     ""Normal"" */
 
-undefined4 __fastcall FUN_105e8340(int param_1)
+undefined4 __fastcall FUN_105c3ac0(int param_1)
 
 {
-  int *piVar1;
-  undefined4 uVar2;
-  int iVar3;
+  char cVar1;
+  int *piVar2;
+  undefined4 uVar3;
+  int iVar4;
+  int *piVar5;
+  int iVar6;
+  undefined1 local_58 [24];
+  undefined4 local_40;
+  undefined4 local_3c;
+  undefined4 local_38;
+  undefined4 local_34;
+  undefined4 local_30;
+  undefined4 local_2c;
+  undefined4 local_28;
+  undefined4 local_24;
+  int local_20;
+  int local_1c;
+  undefined4 local_18;
+  int local_14;
+  int local_10;
   undefined1 local_c [7];
-  undefined1 local_5;
+  char local_5;
   
-  if (*(char *)(*(int *)(param_1 + 0x20) + 0xd8) != '\0') {
-    piVar1 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
-    piVar1 = (int *)(**(code **)(*piVar1 + 0x68))();
-    iVar3 = *piVar1;
-    uVar2 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
-    piVar1 = (int *)(**(code **)(iVar3 + 0xc))(uVar2);
-    if (piVar1 != (int *)0x0) {
-      iVar3 = (**(code **)(*piVar1 + 800))();
-      if (iVar3 != 0) {
-        local_5 = 1;
-        FUN_10a5d620("Position");
-        FUN_1055ace0(3,local_c);
-        FUN_10562100(1,&local_5);
-        FUN_10562100(2,&local_5);
-        FUN_10562100(0,&local_5);
+  local_10 = param_1;
+  piVar2 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+  piVar2 = (int *)(**(code **)(*piVar2 + 0x68))();
+  iVar4 = *piVar2;
+  uVar3 = (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  piVar2 = (int *)(**(code **)(iVar4 + 0xc))(uVar3);
+  if (piVar2 == (int *)0x0) {
+    return 1;
+  }
+  iVar4 = (**(code **)(*piVar2 + 800))();
+  if (iVar4 == 0) {
+    return 1;
+  }
+  piVar5 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 0xd0) + 0xcc))();
+  if (piVar5 == (int *)0x0) {
+    return 1;
+  }
+  piVar5 = (int *)(**(code **)(*piVar5 + 4))();
+  if (piVar5 == (int *)0x0) {
+    return 1;
+  }
+  piVar5 = (int *)(**(code **)(*piVar5 + 0xc))(*(undefined4 *)(iVar4 + 4));
+  if (piVar5 == (int *)0x0) {
+    return 1;
+  }
+  local_20 = 0;
+  local_1c = 0;
+  local_18 = 0;
+  FUN_105c0740();
+  FUN_10a5d660();
+  cVar1 = FUN_103dbbb0(0,local_c);
+  if (cVar1 == '\0') {
+    (**(code **)(*piVar5 + 0x44))(&local_20,0xffffffff);
+  }
+  else {
+    uVar3 = 0;
+    cVar1 = FUN_10a5d8d0(&DAT_1130acf0);
+    if (cVar1 == '\0') {
+      cVar1 = FUN_10a5d8d0(&DAT_11309e90);
+      if (cVar1 == '\0') {
+        cVar1 = FUN_10a5d8d0(&DAT_1130ac4c);
+        if (cVar1 == '\0') {
+          cVar1 = FUN_10a5d8d0("GoDown");
+          if (cVar1 == '\0') {
+            cVar1 = FUN_10a5d8d0("SmallSize");
+            if (cVar1 != '\0') {
+              uVar3 = 5;
+            }
+            (**(code **)(*piVar5 + 0x40))(&local_20,uVar3,0xffffffff);
+          }
+          else {
+            (**(code **)(*piVar5 + 0x40))(&local_20,4,0xffffffff);
+          }
+        }
+        else {
+          (**(code **)(*piVar5 + 0x40))(&local_20,2,0xffffffff);
+        }
+      }
+      else {
+        (**(code **)(*piVar5 + 0x40))(&local_20,3,0xffffffff);
       }
     }
-    return 3;
+    else {
+      (**(code **)(*piVar5 + 0x40))(&local_20,1,0xffffffff);
+    }
   }
-  uVar2 = FUN_105e83f0();
-  return uVar2;
+  iVar4 = local_1c - local_20 >> 2;
+  local_14 = iVar4;
+  if (0 < iVar4) {
+    FUN_10655dd0();
+    iVar6 = FUN_112be700();
+    if ((iVar6 < iVar4) && (iVar4 = *(int *)(local_20 + iVar6 * 4), iVar4 != 0)) {
+      piVar2 = (int *)(**(code **)(*piVar2 + 0x364))();
+      (**(code **)(*piVar2 + 0xa8))(iVar4);
+      local_5 = '\0';
+      FUN_103db9b0(9,&local_5);
+      if (local_5 == '\0') {
+        local_10 = *(int *)(iVar4 + 4);
+      }
+      else {
+        local_10 = *(int *)(iVar4 + 0x14);
+      }
+      FUN_105572f0(1,&local_10);
+      iVar6 = *(int *)(iVar4 + 0x5c);
+      FUN_10a5d620(&DAT_113bf04c);
+      FUN_10a5d620("Normal");
+      FUN_10a5d620(&DAT_1130ac4c);
+      FUN_10a5d620(&DAT_11309e90);
+      FUN_10a5d620("GoDown");
+      FUN_10a5d620("SmallSize");
+      FUN_1055ace0(2,local_58 + iVar6 * 4);
+      local_3c = *(undefined4 *)(iVar4 + 8);
+      local_38 = *(undefined4 *)(iVar4 + 0xc);
+      local_34 = *(undefined4 *)(iVar4 + 0x10);
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_10551270(3,&local_3c);
+      local_3c = *(undefined4 *)(iVar4 + 0x18);
+      local_38 = *(undefined4 *)(iVar4 + 0x1c);
+      local_34 = *(undefined4 *)(iVar4 + 0x20);
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_10551270(4,&local_3c);
+      local_3c = *(undefined4 *)(iVar4 + 0x40);
+      local_38 = *(undefined4 *)(iVar4 + 0x44);
+      local_34 = *(undefined4 *)(iVar4 + 0x48);
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_10551270(6,&local_3c);
+      local_40 = *(undefined4 *)(iVar4 + 0x24);
+      local_3c = *(undefined4 *)(iVar4 + 0x28);
+      local_38 = *(undefined4 *)(iVar4 + 0x2c);
+      local_34 = *(undefined4 *)(iVar4 + 0x30);
+      local_30 = local_40;
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_105bff60(5,&local_30);
+      if (local_5 == '\0') {
+        local_3c = *(undefined4 *)(iVar4 + 0x34);
+        local_38 = *(undefined4 *)(iVar4 + 0x38);
+        local_34 = *(undefined4 *)(iVar4 + 0x3c);
+      }
+      else {
+        local_3c = *(undefined4 *)(iVar4 + 0x40);
+        local_38 = *(undefined4 *)(iVar4 + 0x44);
+        local_34 = *(undefined4 *)(iVar4 + 0x48);
+      }
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_10551270(7,&local_2c);
+      local_3c = *(undefined4 *)(iVar4 + 0x50);
+      local_38 = *(undefined4 *)(iVar4 + 0x54);
+      local_34 = *(undefined4 *)(iVar4 + 0x58);
+      local_2c = local_3c;
+      local_28 = local_38;
+      local_24 = local_34;
+      FUN_10551270(8,&local_2c);
+      uVar3 = 2;
+      goto LAB_105c3ee7;
+    }
+  }
+  uVar3 = 1;
+LAB_105c3ee7:
+  if (local_20 != 0) {
+    FUN_10653dc0(local_20);
+  }
+  return uVar3;
 }
 
 
-  step 2: getter at 105e8740
-  step 3 FAILED: getter not in any table

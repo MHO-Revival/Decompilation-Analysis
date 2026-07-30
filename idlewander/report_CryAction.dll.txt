@@ -1,0 +1,148 @@
+================================ CRandomAnimsPlayByNum
+  step 1: name string at 1130a890
+  step 2: getter at 105b7830
+  step 3: vtable slot at 1130a870
+  step 4: [1130a864] -> Evaluate 105b6cf0
+          FUN_105b6cf0 @ 105b6cf0 (1057 bytes)
+          ---- decompiled ----
+
+/* WARNING: Removing unreachable block (ram,0x105b6df8) */
+/* WARNING: Removing unreachable block (ram,0x105b6e19) */
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+/* [RE-AUTO c0]
+   strings:
+     ""False""
+     ""_Lemon"" */
+
+undefined4 __fastcall FUN_105b6cf0(int param_1)
+
+{
+  bool bVar1;
+  char cVar2;
+  int *piVar3;
+  int iVar4;
+  int *piVar5;
+  undefined4 *puVar6;
+  bool bVar7;
+  float fVar8;
+  int local_24;
+  float local_20;
+  
+  bVar1 = false;
+  if (*(int *)(param_1 + 0x6c) < 1) {
+    return 1;
+  }
+  piVar3 = (int *)(**(code **)(**(int **)(DAT_113f3a18 + 4) + 0x3c))();
+  piVar3 = (int *)(**(code **)(*piVar3 + 0x68))();
+  iVar4 = *piVar3;
+  (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  piVar3 = (int *)(**(code **)(iVar4 + 0xc))();
+  if (*(char *)(*(int *)(param_1 + 0x20) + 0xd8) == '\0') {
+    FUN_10a5d940();
+    FUN_10423fd0();
+    cVar2 = (**(code **)(*piVar3 + 0xb8))();
+    if ((-1 < _DAT_fffffff4) && (iVar4 = FUN_106542c0(), iVar4 < 1)) {
+      DAT_113f26c0 = DAT_113f26c0 + (-0xd - iRamfffffffc);
+      FUN_106540f0();
+    }
+    if (cVar2 == '\0') {
+      return 1;
+    }
+    iVar4 = *piVar3;
+    FUN_10a5ec80();
+    cVar2 = (**(code **)(iVar4 + 0xb8))();
+    if (cVar2 == '\0') {
+      return 2;
+    }
+    iVar4 = *(int *)(param_1 + 100) + 1;
+    *(int *)(param_1 + 100) = iVar4;
+    if (*(int *)(param_1 + 0x68) < 1) {
+      return 3;
+    }
+    if (iVar4 <= *(int *)(param_1 + 0x68)) {
+      return 3;
+    }
+    return 2;
+  }
+  FUN_103dba30();
+  cVar2 = FUN_105b75a0();
+  if (cVar2 == '\0') {
+    return 1;
+  }
+  iVar4 = **(int **)(DAT_113f3a18 + 0x50);
+  (**(code **)(**(int **)(param_1 + 0x54) + 0xc))();
+  iVar4 = (**(code **)(iVar4 + 0x2c))();
+  if (iVar4 == 0) {
+    return 1;
+  }
+  if (piVar3 == (int *)0x0) {
+    return 1;
+  }
+  iVar4 = FUN_10a5f050();
+  if (iVar4 == 0) {
+    return 1;
+  }
+  iVar4 = (**(code **)(*piVar3 + 800))();
+  if (iVar4 != 0) {
+    FUN_103dba30();
+  }
+  FUN_10a5d660();
+  bVar7 = true;
+  cVar2 = FUN_103dbbb0();
+  if ((cVar2 != '\0') && (piVar5 = (int *)FUN_10a5d620(), local_24 == *piVar5)) {
+    FUN_10a5d940();
+    FUN_10423fd0();
+    cVar2 = (**(code **)(*piVar3 + 0xb8))();
+    FUN_10424220();
+    if (cVar2 != '\0') {
+      iVar4 = *piVar3;
+      FUN_10a5ec80();
+      cVar2 = (**(code **)(iVar4 + 0xb8))();
+      bVar7 = cVar2 == '\0';
+    }
+  }
+  local_20 = 1.0;
+  cVar2 = FUN_103f8050();
+  if (cVar2 != '\0') {
+    fVar8 = ((DAT_112fcac4 + 1.0) - (float)((uint)(1.0 - DAT_112fcac4) & DAT_112fcb10)) *
+            DAT_113c12b8;
+    local_20 = ((float)((uint)(fVar8 - DAT_112fca80) & DAT_112fcb10) + fVar8 + DAT_112fca80) *
+               DAT_113c12b8;
+  }
+  cVar2 = FUN_10552dd0();
+  if (cVar2 != '\0') {
+    fVar8 = ((DAT_112fcac4 + 1.0) - (float)((uint)(1.0 - DAT_112fcac4) & DAT_112fcb10)) *
+            DAT_113c12b8;
+    local_20 = ((float)((uint)(fVar8 - DAT_112fca80) & DAT_112fcb10) + fVar8 + DAT_112fca80) *
+               DAT_113c12b8;
+  }
+  piVar5 = (int *)(**(code **)(*piVar3 + 800))();
+  if ((piVar5 != (int *)0x0) && (iVar4 = (**(code **)(*piVar5 + 0xa8))(), iVar4 == 1)) {
+    FUN_10a5d940();
+    cVar2 = FUN_10a68b30();
+    if (cVar2 != '\0') {
+      FUN_10a5dbf0();
+    }
+  }
+  if (bVar7) {
+    bVar1 = true;
+    FUN_10a5d940();
+    puVar6 = (undefined4 *)FUN_10423fd0();
+    iVar4 = (**(code **)(*piVar3 + 0x88))(*puVar6,local_20);
+    bVar7 = false;
+    if (iVar4 == 0) goto LAB_105b7047;
+  }
+  bVar7 = true;
+LAB_105b7047:
+  if (bVar1) {
+    FUN_10424220();
+  }
+  if (bVar7) {
+    return 3;
+  }
+  return 1;
+}
+
+
+  step 2: getter at 105b7840
+  step 3 FAILED: getter not in any table
