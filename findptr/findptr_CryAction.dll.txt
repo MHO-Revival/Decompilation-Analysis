@@ -1,0 +1,60 @@
+=== CryAction.dll ===
+
+#### occurrences of the dword 0x101d4d60 (FUN_101d4d60)
+  at 113ad048  block=.rdata
+    -> vtable base 0x113acf80, slot 50 (byte +0xc8), run length 55
+       [ 0] +0x00  101d30a0  FUN_101d30a0
+       [ 1] +0x04  101d3070  <undisassembled code>
+       [ 2] +0x08  101d3060  FUN_101d3060
+       [ 3] +0x0c  101d1e00  FUN_101d1e00
+       [ 4] +0x10  101d2120  FUN_101d2120
+       [ 5] +0x14  101d21b0  FUN_101d21b0
+       [ 6] +0x18  101d2200  FUN_101d2200
+       [ 7] +0x1c  101d2490  <undisassembled code>
+       [ 8] +0x20  101d24a0  FUN_101d24a0
+       [ 9] +0x24  101d2500  FUN_101d2500
+       [10] +0x28  101d1f10  <undisassembled code>
+       [11] +0x2c  101d1f20  <undisassembled code>
+       [12] +0x30  101d1f80  FUN_101d1f80
+       [13] +0x34  101d1fb0  FUN_101d1fb0
+       [14] +0x38  101d2040  FUN_101d2040
+       [15] +0x3c  101d20d0  <undisassembled code>
+       [16] +0x40  101d20e0  FUN_101d20e0
+       [17] +0x44  101d2260  FUN_101d2260
+       [18] +0x48  101d22c0  FUN_101d22c0
+       [19] +0x4c  101d2350  FUN_101d2350
+       [20] +0x50  101d23d0  FUN_101d23d0
+       [21] +0x54  101d1d10  FUN_101d1d10
+       [22] +0x58  112be466  <undisassembled code>
+       [23] +0x5c  112be466  <undisassembled code>
+       [24] +0x60  112be466  <undisassembled code>
+       [25] +0x64  112be466  <undisassembled code>
+       [26] +0x68  112be466  <undisassembled code>
+       [27] +0x6c  112be466  <undisassembled code>
+       [28] +0x70  101d44f0  FUN_101d44f0
+       [29] +0x74  101d44c0  <undisassembled code>
+       [30] +0x78  101d44b0  FUN_101d44b0
+       [31] +0x7c  101d3990  FUN_101d3990
+       [32] +0x80  101d3ca0  FUN_101d3ca0
+       [33] +0x84  101d3bc0  FUN_101d3bc0
+       [34] +0x88  101d3c50  FUN_101d3c50
+       [35] +0x8c  101d3a90  <undisassembled code>
+       [36] +0x90  101d3aa0  <undisassembled code>
+       [37] +0x94  101d3b00  FUN_101d3b00
+       [38] +0x98  101d3b80  FUN_101d3b80
+       [39] +0x9c  101d3d00  FUN_101d3d00
+       [40] +0xa0  101d38e0  FUN_101d38e0
+       [41] +0xa4  112be466  <undisassembled code>
+       [42] +0xa8  112be466  <undisassembled code>
+       [43] +0xac  112be466  <undisassembled code>
+       [44] +0xb0  101d5360  FUN_101d5360
+       [45] +0xb4  101d5330  <undisassembled code>
+       [46] +0xb8  101d5320  FUN_101d5320
+       [47] +0xbc  101d4cb0  FUN_101d4cb0
+       [48] +0xc0  101d4d40  <undisassembled code>
+       [49] +0xc4  101d4d50  <undisassembled code>
+       [50] +0xc8  101d4d60  FUN_101d4d60   <== ANCHOR
+       [51] +0xcc  101d4ff0  FUN_101d4ff0
+       [52] +0xd0  101d5040  FUN_101d5040
+       [53] +0xd4  101d5070  FUN_101d5070
+       [54] +0xd8  101d5250  FUN_101d5250

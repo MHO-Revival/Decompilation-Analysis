@@ -1,0 +1,7 @@
+=== CryAction.dll: FUNCTIONS CONTAINING IMMEDIATE 0x8af (2223) ===
+instructions scanned: 5970079
+distinct functions: 3
+
+  FUN_101c6a80@101c6a80                                 hits=1
+  FUN_101d91c0@101d91c0                                 hits=1
+  FUN_101d9760@101d9760                                 hits=1

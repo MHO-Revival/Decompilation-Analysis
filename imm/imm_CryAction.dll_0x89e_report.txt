@@ -1,0 +1,10 @@
+=== CryAction.dll: FUNCTIONS CONTAINING IMMEDIATE 0x89e (2206) ===
+instructions scanned: 5970079
+distinct functions: 6
+
+  <no fn> 100baa22                                      hits=1
+  <no fn> 100c0a52                                      hits=1
+  FUN_101c6a80@101c6a80                                 hits=1
+  FUN_101d1f80@101d1f80                                 hits=1
+  FUN_101d3b00@101d3b00                                 hits=1
+  FUN_101d4240@101d4240                                 hits=1

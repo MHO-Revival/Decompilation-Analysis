@@ -1,0 +1,7 @@
+=== CryAction.dll: FUNCTIONS CONTAINING IMMEDIATE 0x113ad3c0 (289067968) ===
+instructions scanned: 5970079
+distinct functions: 3
+
+  FUN_101d8fe0@101d8fe0                                 hits=1
+  FUN_101d9040@101d9040                                 hits=1
+  FUN_101d90a0@101d90a0                                 hits=1
