@@ -5,7 +5,9 @@
 //   -postScript CgFns.java 101d9520 101d9b40 d:113c12a4 c:101d91c0
 //
 // A bare address is a FUNCTION to decompile; `d:` prefixes a DATA address, printed as float / int32 / hex so
-// a threshold can be read without guessing its type; `c:` lists (and decompiles) the CALLERS of a function,
+// a threshold can be read without guessing its type; `a:` dumps the RAW DISASSEMBLY of the containing
+// function, for when the decompiler drops a thiscall's ECX and "which `this` was this sub-init called with"
+// is exactly the question; `c:` lists (and decompiles) the CALLERS of a function,
 // which is how you get from a leaf you found by sweeping to the class that owns it. Functions Ghidra never
 // disassembled are CREATED first — "no fn at <addr>" means not disassembled, not absent, and that distinction
 // has cost this project a day before (FUN_105f4960 was called fabricated because of it).
@@ -50,9 +52,24 @@ public class CgFns extends GhidraScript {
             String a = raw.trim();
             boolean data = a.toLowerCase().startsWith("d:");
             boolean callers = a.toLowerCase().startsWith("c:");
-            if (data || callers) a = a.substring(2);
+            boolean asm = a.toLowerCase().startsWith("a:");
+            if (data || callers || asm) a = a.substring(2);
             if (a.toLowerCase().startsWith("0x")) a = a.substring(2);
             Address addr = toAddr(Long.parseLong(a, 16));
+
+            if (asm) {
+                Function f = fm.getFunctionContaining(addr);
+                if (f == null) { disassemble(addr); f = createFunction(addr, null); }
+                if (f == null) { rep.append("ASM ").append(addr).append(": no function\n"); continue; }
+                bodies.append("\n// ===== ASM ").append(f.getName()).append("@")
+                      .append(f.getEntryPoint()).append(" =====\n");
+                for (ghidra.program.model.listing.Instruction ins :
+                        currentProgram.getListing().getInstructions(f.getBody(), true))
+                    bodies.append(String.format("// %s  %-42s %s%n",
+                            ins.getAddress(), ins.toString(), ins.getMnemonicString()));
+                rep.append("ASM ").append(f.getName()).append(" dumped\n");
+                continue;
+            }
 
             if (callers) {
                 Function target = fm.getFunctionAt(addr);
